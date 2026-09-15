@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgendaRouteImport } from './routes/agenda'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
+import { Route as DashboardTurmasIndexRouteImport } from './routes/dashboard/turmas/index'
+import { Route as DashboardTurmasTurmaIdRouteImport } from './routes/dashboard/turmas/$turmaId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgendaRoute = AgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
+  id: '/dashboard/configuracoes',
+  path: '/dashboard/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardTurmasIndexRoute = DashboardTurmasIndexRouteImport.update({
+  id: '/dashboard/turmas/',
+  path: '/dashboard/turmas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardTurmasTurmaIdRoute = DashboardTurmasTurmaIdRouteImport.update({
+  id: '/dashboard/turmas/$turmaId',
+  path: '/dashboard/turmas/$turmaId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
+  '/login': typeof LoginRoute
+  '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
+  '/login': typeof LoginRoute
+  '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/dashboard/turmas': typeof DashboardTurmasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/agenda': typeof AgendaRoute
+  '/login': typeof LoginRoute
+  '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/agenda'
+    | '/login'
+    | '/dashboard/configuracoes'
+    | '/dashboard/'
+    | '/dashboard/turmas/$turmaId'
+    | '/dashboard/turmas/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/agenda'
+    | '/login'
+    | '/dashboard/configuracoes'
+    | '/dashboard'
+    | '/dashboard/turmas/$turmaId'
+    | '/dashboard/turmas'
+  id:
+    | '__root__'
+    | '/'
+    | '/agenda'
+    | '/login'
+    | '/dashboard/configuracoes'
+    | '/dashboard/'
+    | '/dashboard/turmas/$turmaId'
+    | '/dashboard/turmas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AgendaRoute: typeof AgendaRoute
+  LoginRoute: typeof LoginRoute
+  DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardTurmasTurmaIdRoute: typeof DashboardTurmasTurmaIdRoute
+  DashboardTurmasIndexRoute: typeof DashboardTurmasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +130,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agenda': {
+      id: '/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/configuracoes': {
+      id: '/dashboard/configuracoes'
+      path: '/dashboard/configuracoes'
+      fullPath: '/dashboard/configuracoes'
+      preLoaderRoute: typeof DashboardConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/turmas/': {
+      id: '/dashboard/turmas/'
+      path: '/dashboard/turmas'
+      fullPath: '/dashboard/turmas/'
+      preLoaderRoute: typeof DashboardTurmasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/turmas/$turmaId': {
+      id: '/dashboard/turmas/$turmaId'
+      path: '/dashboard/turmas/$turmaId'
+      fullPath: '/dashboard/turmas/$turmaId'
+      preLoaderRoute: typeof DashboardTurmasTurmaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AgendaRoute: AgendaRoute,
+  LoginRoute: LoginRoute,
+  DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardTurmasTurmaIdRoute: DashboardTurmasTurmaIdRoute,
+  DashboardTurmasIndexRoute: DashboardTurmasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

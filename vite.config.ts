@@ -12,4 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Ignored inside the Lovable sandbox (it forces host "::" itself); outside
+  // of it this avoids EAFNOSUPPORT on hosts/containers without IPv6.
+  vite: { server: { host: "127.0.0.1" } },
 });
