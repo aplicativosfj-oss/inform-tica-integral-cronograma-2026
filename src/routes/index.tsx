@@ -16,9 +16,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { useAppStore } from "@/lib/app-store";
+import heroImg from "@/assets/hero-education.jpg";
+import scheduleImg from "@/assets/feature-schedule.jpg";
+import networkImg from "@/assets/feature-network.jpg";
+import workspaceImg from "@/assets/feature-workspace.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      {
+        title: "Agenda de Informática · Dr. Eiraldo Carneiro de França",
+      },
+      {
+        name: "description",
+        content:
+          "Agenda profissional das aulas de informática: cronograma automático, revezamento por grupos e cronômetro ao vivo.",
+      },
+      { property: "og:title", content: "Agenda de Informática · Dr. Eiraldo Carneiro de França" },
+      {
+        property: "og:description",
+        content:
+          "Agenda profissional das aulas de informática: cronograma automático, revezamento por grupos e cronômetro ao vivo.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
 });
 
 function Index() {
@@ -79,8 +103,23 @@ function Index() {
             </dl>
           </div>
 
-          <LiveSessionPanel />
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" aria-hidden />
+            <img
+              src={heroImg}
+              alt="Ilustração abstrata de tecnologia educacional com laptop, calendário e símbolos de aprendizagem"
+              width={1344}
+              height={1024}
+              className="relative rounded-2xl border border-border/60 bg-card shadow-2xl"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <LiveSessionPanel />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
@@ -118,6 +157,38 @@ function Index() {
         </div>
       </section>
 
+      <section className="border-y border-border/60 bg-muted/30">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="mb-10 max-w-2xl">
+            <h2 className="text-2xl font-semibold text-foreground">
+              Tecnologia a serviço da rotina escolar
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Uma experiência visual clara e moderna para organizar horários, acompanhar o tempo e
+              conectar alunos ao laboratório de informática.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            <VisualCard
+              image={scheduleImg}
+              title="Organização semanal"
+              description="Visualize de imediato quais turmas usam o laboratório em cada dia e horário."
+            />
+            <VisualCard
+              image={networkImg}
+              title="Conexão e colaboração"
+              description="Cada aluno tem seu momento no computador, de forma justa e previsível."
+            />
+            <VisualCard
+              image={workspaceImg}
+              title="Ambiente preparado"
+              description="A agenda ajuda o professor a chegar com tudo planejado para a aula de informática."
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="border-t border-border/60 bg-muted/30">
         <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6">
           <GraduationCap className="mx-auto size-8 text-primary" />
@@ -152,5 +223,35 @@ function FeatureCard({
         <p className="text-sm text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
+  );
+}
+
+function VisualCard({
+  image,
+  title,
+  description,
+}: {
+  image: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="group overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md">
+      <div className="aspect-[16/10] overflow-hidden">
+        <img
+          src={image}
+          alt={title}
+          width={1344}
+          height={768}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div className="p-5">
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+    </div>
   );
 }
