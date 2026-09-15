@@ -39,8 +39,16 @@ export function buildDailySlots(config: ScheduleConfig): Slot[] {
 export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): Assignment[] {
   if (turmas.length === 0) return [];
   const slots = buildDailySlots(config);
-  const assignments: Assignment[] = [];
   const occurrenceCount = new Map<string, number>();
+
+  interface Pending {
+    dia: string;
+    diaIndex: number;
+    slot: Slot;
+    turma: Turma;
+    ocorrenciaIndex: number;
+  }
+  const pending: Pending[] = [];
 
   let cursor = 0;
   config.diasSemana.forEach((dia, diaIndex) => {
@@ -50,11 +58,15 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
       if (!turma) return;
       const ocorrenciaIndex = occurrenceCount.get(turma.id) ?? 0;
       occurrenceCount.set(turma.id, ocorrenciaIndex + 1);
-      assignments.push({ dia, diaIndex, slot, turma, ocorrenciaIndex });
+      pending.push({ dia, diaIndex, slot, turma, ocorrenciaIndex });
     });
   });
 
-  return assignments;
+  // occurrenceCount now holds the final weekly session count per turma.
+  return pending.map((p) => ({
+    ...p,
+    sessoesPorSemana: occurrenceCount.get(p.turma.id) ?? 1,
+  }));
 }
 
 export interface GrupoRevezamento {
@@ -80,8 +92,35 @@ export interface SubBloco {
   grupo: GrupoRevezamento;
 }
 
-/** Splits one hour-long slot into rotating sub-blocks (e.g. two 30min turns). */
-export function buildSubBlocos(assignment: Assignment, config: ScheduleConfig): SubBloco[] {
+/**
+ * Monotonically increasing week number, stable across every day of the same
+ * school week (Monday-Sunday), used as the seed for cross-week rotation.
+ */
+export function getWeekIndex(date: Date): number {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = d.getDay(); // 0 Sun .. 6 Sat
+  const diffToMonday = (day === 0 ? -6 : 1) - day;
+  d.setDate(d.getDate() + diffToMonday);
+  return Math.floor(d.getTime() / (7 * 24 * 60 * 60 * 1000));
+}
+
+/**
+ * Splits one hour-long slot into rotating sub-blocks (e.g. two 30min turns).
+ *
+ * The starting group is offset both by how many sub-blocks this turma has
+ * already used earlier in the same week (`ocorrenciaIndex`) and by the
+ * current week number, advanced by exactly the number of sub-blocks the
+ * turma consumes per week (`sessoesPorSemana * totalSubBlocos`). That keeps
+ * the rotation continuous week over week — the group that starts a new week
+ * is exactly the one that would come next, so every group (and therefore
+ * every student) gets an equal share of turns over time instead of the same
+ * groups always going first.
+ */
+export function buildSubBlocos(
+  assignment: Assignment,
+  config: ScheduleConfig,
+  weekIndex = 0,
+): SubBloco[] {
   const grupos = buildGrupos(assignment.turma, config);
   const inicio = toMinutes(assignment.slot.inicio);
   const fim = toMinutes(assignment.slot.fim);
@@ -89,7 +128,9 @@ export function buildSubBlocos(assignment: Assignment, config: ScheduleConfig): 
   const totalSubBlocos = Math.max(1, Math.round((fim - inicio) / passo));
   const subBlocos: SubBloco[] = [];
 
-  const startGrupo = (assignment.ocorrenciaIndex * totalSubBlocos) % grupos.length;
+  const consumoPorSemana = assignment.sessoesPorSemana * totalSubBlocos;
+  const startGrupo =
+    (weekIndex * consumoPorSemana + assignment.ocorrenciaIndex * totalSubBlocos) % grupos.length;
   for (let i = 0; i < totalSubBlocos; i += 1) {
     const grupo = grupos[(startGrupo + i) % grupos.length];
     if (!grupo) continue;
@@ -134,7 +175,7 @@ export function findSessaoAtual(
   });
   if (!assignment) return null;
 
-  const subBlocos = buildSubBlocos(assignment, config);
+  const subBlocos = buildSubBlocos(assignment, config, getWeekIndex(now));
   const subBlocoIndex = subBlocos.findIndex((sb) => {
     const start = toMinutes(sb.inicio) * 60;
     const end = toMinutes(sb.fim) * 60;

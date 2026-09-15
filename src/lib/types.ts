@@ -39,4 +39,5 @@ export interface Assignment {
   slot: Slot;
   turma: Turma;
   ocorrenciaIndex: number;
+  sessoesPorSemana: number;
 }
