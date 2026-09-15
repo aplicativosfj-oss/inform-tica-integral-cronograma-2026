@@ -16,29 +16,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { useAppStore } from "@/lib/app-store";
-import alunoComputador from "@/assets/aluno-computador.jpg";
-import laboratorioHero from "@/assets/laboratorio-hero.jpg";
-import professorLaboratorio from "@/assets/professor-laboratorio.jpg";
+import heroImg from "@/assets/hero-education.jpg";
+import scheduleImg from "@/assets/feature-schedule.jpg";
+import networkImg from "@/assets/feature-network.jpg";
+import workspaceImg from "@/assets/feature-workspace.jpg";
 
 export const Route = createFileRoute("/")({
+  component: Index,
   head: () => ({
     meta: [
-      { title: "Agenda Educativa | Aulas de Informática" },
+      {
+        title: "Agenda de Informática · Dr. Eiraldo Carneiro de França",
+      },
       {
         name: "description",
         content:
-          "Acompanhe a agenda das aulas de informática, horários das turmas e revezamento dos alunos no laboratório escolar.",
+          "Agenda profissional das aulas de informática: cronograma automático, revezamento por grupos e cronômetro ao vivo.",
       },
-      { property: "og:title", content: "Agenda Educativa | Aulas de Informática" },
+      { property: "og:title", content: "Agenda de Informática · Dr. Eiraldo Carneiro de França" },
       {
         property: "og:description",
-        content: "Agenda semanal e organização das aulas no laboratório de informática.",
+        content:
+          "Agenda profissional das aulas de informática: cronograma automático, revezamento por grupos e cronômetro ao vivo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Index,
 });
 
 function Index() {
@@ -49,73 +53,74 @@ function Index() {
     <div className="min-h-screen bg-background">
       <NavBar />
 
-      <section className="relative min-h-[34rem] overflow-hidden border-b border-border/60 lg:min-h-[42rem]">
-        <img
-          src={laboratorioHero}
-          alt="Professora orientando alunos no laboratório de informática"
-          width={1920}
-          height={1088}
-          fetchPriority="high"
-          className="absolute inset-0 size-full object-cover object-[67%_center]"
+      <section className="relative overflow-hidden border-b border-border/60">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_10%,color-mix(in_oklch,var(--primary)_10%,transparent),transparent_50%)]"
         />
-        <div aria-hidden className="absolute inset-0 bg-foreground/65" />
-        <div className="relative mx-auto flex min-h-[34rem] max-w-6xl items-center px-4 py-14 sm:px-6 lg:min-h-[42rem] lg:py-20">
-          <div className="max-w-2xl">
-            <Badge variant="secondary" className="mb-5 gap-1.5 border-border/40 bg-background/90">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24">
+          <div>
+            <Badge variant="secondary" className="mb-4 gap-1.5">
               <MonitorSmartphone className="size-3.5" /> Laboratório de Informática
             </Badge>
-            <h1 className="max-w-2xl text-4xl font-bold text-primary-foreground sm:text-5xl lg:text-6xl">
-              Tecnologia que organiza e transforma a aprendizagem
+            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              A agenda profissional das aulas de informática
             </h1>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-primary-foreground/85 sm:text-lg">
+            <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
               Cronograma automático por turma, revezamento entre alunos nos{" "}
               {config.numeroComputadores} computadores e cronômetro ao vivo — para que professores,
               alunos e famílias saibam exatamente quando cada turma vai ao laboratório com o
               professor {config.professorInformatica}.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" variant="secondary">
+              <Button asChild size="lg">
                 <Link to="/agenda">
                   <CalendarClock /> Ver agenda da semana
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-primary-foreground/40 bg-background/10 text-primary-foreground hover:bg-background/20 hover:text-primary-foreground">
+              <Button asChild size="lg" variant="outline">
                 <Link to="/dashboard">
                   <LayoutDashboard /> Painel de gestão
                 </Link>
               </Button>
             </div>
 
-            <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-primary-foreground/25 pt-6">
+            <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-border/60 pt-6">
               <div>
-                <dt className="text-xs text-primary-foreground/70">Turmas</dt>
-                <dd className="text-2xl font-semibold text-primary-foreground">{turmas.length}</dd>
+                <dt className="text-xs text-muted-foreground">Turmas</dt>
+                <dd className="text-2xl font-semibold text-foreground">{turmas.length}</dd>
               </div>
               <div>
-                <dt className="text-xs text-primary-foreground/70">Alunos cadastrados</dt>
-                <dd className="text-2xl font-semibold text-primary-foreground">{totalAlunos}</dd>
+                <dt className="text-xs text-muted-foreground">Alunos cadastrados</dt>
+                <dd className="text-2xl font-semibold text-foreground">{totalAlunos}</dd>
               </div>
               <div>
-                <dt className="text-xs text-primary-foreground/70">Computadores</dt>
-                <dd className="text-2xl font-semibold text-primary-foreground">
+                <dt className="text-xs text-muted-foreground">Computadores</dt>
+                <dd className="text-2xl font-semibold text-foreground">
                   {config.numeroComputadores}
                 </dd>
               </div>
             </dl>
           </div>
+
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" aria-hidden />
+            <img
+              src={heroImg}
+              alt="Ilustração abstrata de tecnologia educacional com laptop, calendário e símbolos de aprendizagem"
+              width={1344}
+              height={1024}
+              className="relative rounded-2xl border border-border/60 bg-card shadow-2xl"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
         </div>
       </section>
 
-      <section className="border-b border-border/60 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <LiveSessionPanel />
-        </div>
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <LiveSessionPanel />
       </section>
-
-      <EducationGallery
-        alunoImage={alunoComputador}
-        professorImage={professorLaboratorio}
-      />
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="mb-10 max-w-2xl">
@@ -152,6 +157,38 @@ function Index() {
         </div>
       </section>
 
+      <section className="border-y border-border/60 bg-muted/30">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="mb-10 max-w-2xl">
+            <h2 className="text-2xl font-semibold text-foreground">
+              Tecnologia a serviço da rotina escolar
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Uma experiência visual clara e moderna para organizar horários, acompanhar o tempo e
+              conectar alunos ao laboratório de informática.
+            </p>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            <VisualCard
+              image={scheduleImg}
+              title="Organização semanal"
+              description="Visualize de imediato quais turmas usam o laboratório em cada dia e horário."
+            />
+            <VisualCard
+              image={networkImg}
+              title="Conexão e colaboração"
+              description="Cada aluno tem seu momento no computador, de forma justa e previsível."
+            />
+            <VisualCard
+              image={workspaceImg}
+              title="Ambiente preparado"
+              description="A agenda ajuda o professor a chegar com tudo planejado para a aula de informática."
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="border-t border-border/60 bg-muted/30">
         <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6">
           <GraduationCap className="mx-auto size-8 text-primary" />
@@ -162,46 +199,6 @@ function Index() {
         </div>
       </section>
     </div>
-  );
-}
-
-interface EducationGalleryProps {
-  alunoImage: string;
-  professorImage: string;
-}
-
-function EducationGallery({ alunoImage, professorImage }: EducationGalleryProps) {
-  return (
-    <section className="border-b border-border/60">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-        <div className="max-w-lg">
-          <Badge variant="secondary" className="mb-4">Aprendizagem digital</Badge>
-          <h2 className="text-3xl font-semibold text-foreground">Cada aluno participa. Cada minuto conta.</h2>
-          <p className="mt-4 leading-relaxed text-muted-foreground">
-            A agenda aproxima a comunidade escolar da rotina do laboratório e ajuda a garantir um
-            uso organizado, inclusivo e produtivo dos computadores.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <img
-            src={alunoImage}
-            alt="Aluna realizando atividade educativa no computador"
-            width={1200}
-            height={912}
-            loading="lazy"
-            className="aspect-[4/5] size-full rounded-md object-cover"
-          />
-          <img
-            src={professorImage}
-            alt="Professora acompanhando alunos em atividade digital"
-            width={1200}
-            height={912}
-            loading="lazy"
-            className="mt-8 aspect-[4/5] size-full rounded-md object-cover"
-          />
-        </div>
-      </div>
-    </section>
   );
 }
 
@@ -226,5 +223,35 @@ function FeatureCard({
         <p className="text-sm text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
+  );
+}
+
+function VisualCard({
+  image,
+  title,
+  description,
+}: {
+  image: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="group overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md">
+      <div className="aspect-[16/10] overflow-hidden">
+        <img
+          src={image}
+          alt={title}
+          width={1344}
+          height={768}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div className="p-5">
+        <h3 className="text-base font-semibold text-foreground">{title}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+    </div>
   );
 }
