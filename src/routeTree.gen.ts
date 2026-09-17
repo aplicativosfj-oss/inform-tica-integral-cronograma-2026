@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
+import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardTurmasIndexRouteImport } from './routes/dashboard/turmas/index'
 import { Route as DashboardTurmasTurmaIdRouteImport } from './routes/dashboard/turmas/$turmaId'
 
@@ -37,9 +39,19 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardAlunosRoute = DashboardAlunosRouteImport.update({
+  id: '/dashboard/alunos',
+  path: '/dashboard/alunos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
   id: '/dashboard/configuracoes',
   path: '/dashboard/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardGruposRoute = DashboardGruposRouteImport.update({
+  id: '/dashboard/grupos',
+  path: '/dashboard/grupos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardTurmasIndexRoute = DashboardTurmasIndexRouteImport.update({
@@ -57,7 +69,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/login': typeof LoginRoute
+  '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
@@ -66,7 +80,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/login': typeof LoginRoute
+  '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/dashboard/turmas': typeof DashboardTurmasIndexRoute
@@ -76,7 +92,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/login': typeof LoginRoute
+  '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
@@ -87,7 +105,9 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/login'
+    | '/dashboard/alunos'
     | '/dashboard/configuracoes'
+    | '/dashboard/grupos'
     | '/dashboard/'
     | '/dashboard/turmas/$turmaId'
     | '/dashboard/turmas/'
@@ -96,7 +116,9 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/login'
+    | '/dashboard/alunos'
     | '/dashboard/configuracoes'
+    | '/dashboard/grupos'
     | '/dashboard'
     | '/dashboard/turmas/$turmaId'
     | '/dashboard/turmas'
@@ -105,7 +127,9 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/login'
+    | '/dashboard/alunos'
     | '/dashboard/configuracoes'
+    | '/dashboard/grupos'
     | '/dashboard/'
     | '/dashboard/turmas/$turmaId'
     | '/dashboard/turmas/'
@@ -115,7 +139,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
   LoginRoute: typeof LoginRoute
+  DashboardAlunosRoute: typeof DashboardAlunosRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
+  DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardTurmasTurmaIdRoute: typeof DashboardTurmasTurmaIdRoute
   DashboardTurmasIndexRoute: typeof DashboardTurmasIndexRoute
@@ -151,11 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/alunos': {
+      id: '/dashboard/alunos'
+      path: '/dashboard/alunos'
+      fullPath: '/dashboard/alunos'
+      preLoaderRoute: typeof DashboardAlunosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/configuracoes': {
       id: '/dashboard/configuracoes'
       path: '/dashboard/configuracoes'
       fullPath: '/dashboard/configuracoes'
       preLoaderRoute: typeof DashboardConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/grupos': {
+      id: '/dashboard/grupos'
+      path: '/dashboard/grupos'
+      fullPath: '/dashboard/grupos'
+      preLoaderRoute: typeof DashboardGruposRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/turmas/': {
@@ -179,7 +219,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
   LoginRoute: LoginRoute,
+  DashboardAlunosRoute: DashboardAlunosRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
+  DashboardGruposRoute: DashboardGruposRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardTurmasTurmaIdRoute: DashboardTurmasTurmaIdRoute,
   DashboardTurmasIndexRoute: DashboardTurmasIndexRoute,
