@@ -345,3 +345,24 @@ export function nextAssignmentsForDay(assignments: Assignment[], dia: string): A
     .filter((a) => a.dia === dia)
     .sort((a, b) => toMinutes(a.slot.inicio) - toMinutes(b.slot.inicio));
 }
+
+export interface ProximoDiaLetivo {
+  data: Date;
+  dia: string;
+}
+
+/**
+ * Finds the next day (starting tomorrow, looking up to two weeks ahead) that
+ * is one of the school's configured weekdays — so the homepage can show
+ * professors which turmas are coming up, even across a weekend.
+ */
+export function proximoDiaLetivo(config: ScheduleConfig, from: Date): ProximoDiaLetivo | null {
+  if (config.diasSemana.length === 0) return null;
+  for (let i = 1; i <= 14; i += 1) {
+    const data = new Date(from);
+    data.setDate(data.getDate() + i);
+    const dia = currentWeekdayLabel(data);
+    if (config.diasSemana.includes(dia)) return { data, dia };
+  }
+  return null;
+}

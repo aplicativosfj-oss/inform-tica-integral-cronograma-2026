@@ -1,7 +1,9 @@
+import { useNavigate } from "@tanstack/react-router";
 import {
   BookOpen,
   Clock3,
   HeartHandshake,
+  Lock,
   MonitorPlay,
   Square,
   UserX,
@@ -29,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TimerRing } from "@/components/school/timer-ring";
 import { playAlertaTroca, unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
+import { useAuth } from "@/lib/auth-store";
 import {
   fetchPresencasDoDia,
   fetchUltimaParticipacao,
@@ -47,7 +50,6 @@ import {
   type SubBloco,
 } from "@/lib/schedule-engine";
 import type { Aluno, Presenca, ScheduleConfig, Turma } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 /**
  * Plays the rotation alert whenever the active turn (`chave`) changes.
@@ -121,6 +123,89 @@ function gruposFromPresencas(turma: Turma, presencas: Presenca[]): GrupoRevezame
 }
 
 /**
+ * The "mark absent" control shown next to every student in the live roster.
+ * Visible to everyone (so the school's public schedule is transparent about
+ * who's up next), but only a logged-in professor/admin can actually confirm
+ * it — an anonymous click is redirected to the login page instead.
+ */
+function AusenciaButton({
+  nome,
+  autenticado,
+  onExigirLogin,
+  onConfirmar,
+}: {
+  nome: string;
+  autenticado: boolean;
+  onExigirLogin: () => void;
+  onConfirmar: (motivo: "ausente" | "nao_quis_participar") => Promise<void> | void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+
+  if (!autenticado) {
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="shrink-0 gap-1.5 border-border/60 text-muted-foreground"
+        onClick={onExigirLogin}
+      >
+        <Lock className="size-3.5" /> Ausente
+      </Button>
+    );
+  }
+
+  async function confirmar(motivo: "ausente" | "nao_quis_participar") {
+    setEnviando(true);
+    try {
+      await onConfirmar(motivo);
+      setOpen(false);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="shrink-0 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          <UserX className="size-3.5" /> Ausente
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Registrar ausência de {nome}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Escolha o motivo abaixo. O sistema chama automaticamente, no lugar dele(a), o aluno que
+            está há mais tempo sem participar — sem repetir e sem pular ninguém.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+          <AlertDialogCancel disabled={enviando}>Cancelar</AlertDialogCancel>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={enviando}
+            onClick={() => confirmar("nao_quis_participar")}
+          >
+            Não quis participar
+          </Button>
+          <AlertDialogAction disabled={enviando} onClick={() => confirmar("ausente")}>
+            Confirmar ausência
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+/**
  * Ensures today's roll call exists for the turma currently live (auto-picking
  * the fairest 14 students on first load of the day) and exposes a way to
  * mark a student absent, which immediately substitutes the fairest
@@ -131,6 +216,7 @@ function useChamadaDoDia(
   config: ScheduleConfig,
   dateKey: string,
   ativo: boolean,
+  podeRegistrar: boolean,
 ) {
   const [presencas, setPresencas] = useState<Presenca[] | null>(null);
   const [ultimaParticipacao, setUltimaParticipacao] = useState<Map<string, string> | null>(null);
@@ -148,7 +234,10 @@ function useChamadaDoDia(
       if (!turma) return;
       try {
         let registradas = await fetchPresencasDoDia(turma.id, dateKey);
-        if (registradas.length === 0) {
+        // Only an authenticated session may create today's roll call — an
+        // anonymous visitor on the public homepage just reads whatever the
+        // admin/professor has already registered.
+        if (registradas.length === 0 && podeRegistrar) {
           const ultima = await fetchUltimaParticipacao(turma.id);
           const selecao = selecionarAlunosDoDia(turma, ultima, config.numeroComputadores);
           await registrarPresencasIniciais(turma.id, dateKey, selecao.grupos);
@@ -170,9 +259,13 @@ function useChamadaDoDia(
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ativo, turmaId, dateKey, config.numeroComputadores]);
+  }, [ativo, turmaId, dateKey, config.numeroComputadores, podeRegistrar]);
 
-  async function marcarFaltaDoAluno(aluno: Aluno, grupoIndice: number) {
+  async function marcarFaltaDoAluno(
+    aluno: Aluno,
+    grupoIndice: number,
+    motivo: "ausente" | "nao_quis_participar",
+  ) {
     if (!turma || !presencas || !ultimaParticipacao) return;
     const jaChamadosHojeIds = new Set(
       presencas.filter((p) => p.status !== "faltou").map((p) => p.alunoId),
@@ -184,6 +277,7 @@ function useChamadaDoDia(
       { id: aluno.id, nome: aluno.nome },
       grupoIndice,
       substituto ? { id: substituto.id, nome: substituto.nome } : null,
+      motivo,
     );
     const atualizadas = await fetchPresencasDoDia(turma.id, dateKey);
     setPresencas(atualizadas);
@@ -195,6 +289,8 @@ function useChamadaDoDia(
 
 export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const { turmas, config, setSessaoSuspensa, isReady } = useAppStore();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const now = useNow(true);
 
   const diaAtual = now ? currentWeekdayLabel(now) : "";
@@ -207,7 +303,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     sessao?.assignment.turma,
     config,
     dateKey,
-    editable && isReady && Boolean(sessao) && !sessao?.suspensa,
+    isReady && Boolean(sessao) && !sessao?.suspensa,
+    isAuthenticated,
   );
 
   if (!now) {
@@ -276,9 +373,10 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     );
   }
 
-  const gruposChamada = chamada.presencas
-    ? gruposFromPresencas(assignment.turma, chamada.presencas)
-    : null;
+  const gruposChamada =
+    chamada.presencas && chamada.presencas.length > 0
+      ? gruposFromPresencas(assignment.turma, chamada.presencas)
+      : null;
   const subBlocosEfetivos: SubBloco[] | null = gruposChamada
     ? buildSubBlocosComGrupos(assignment, config, gruposChamada)
     : null;
@@ -366,56 +464,61 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
             <div>
               <p className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
                 <Users className="size-3" /> Alunos nesta rodada ({subBloco.grupo.alunos.length})
-                {editable && gruposChamada ? (
+                {gruposChamada ? (
                   <span className="font-normal normal-case text-muted-foreground/70">
                     · chamada de hoje
                   </span>
                 ) : null}
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-col divide-y divide-border/60 overflow-hidden rounded-lg border border-border/60 bg-background/60">
                 {subBloco.grupo.alunos.map((aluno) => {
                   const destacar = editable && aluno.necessidadeEspecial;
                   return (
-                    <span
+                    <div
                       key={aluno.id}
-                      title={destacar ? aluno.observacoesNecessidade : undefined}
-                      className={cn(
-                        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-foreground",
-                        destacar
-                          ? "border-primary/50 bg-primary/10"
-                          : "border-border/60 bg-background",
-                      )}
+                      className="flex items-center justify-between gap-3 px-3 py-2"
                     >
-                      <span className="flex size-5 items-center justify-center overflow-hidden rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">
-                        {aluno.foto ? (
-                          <img src={aluno.foto} alt="" className="size-full object-cover" />
-                        ) : (
-                          aluno.nome.charAt(0)
-                        )}
-                      </span>
-                      {aluno.nome}
-                      {destacar ? <HeartHandshake className="size-3 text-primary" /> : null}
-                      {editable && gruposChamada ? (
-                        <button
-                          type="button"
-                          title="Marcar falta e chamar substituto"
-                          className="ml-0.5 flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                          onClick={async () => {
+                      <div
+                        className="flex min-w-0 items-center gap-2.5"
+                        title={destacar ? aluno.observacoesNecessidade : undefined}
+                      >
+                        <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
+                          {aluno.foto ? (
+                            <img src={aluno.foto} alt="" className="size-full object-cover" />
+                          ) : (
+                            aluno.nome.charAt(0)
+                          )}
+                        </span>
+                        <span className="truncate text-sm font-medium text-foreground">
+                          {aluno.nome}
+                        </span>
+                        {destacar ? (
+                          <HeartHandshake className="size-3.5 shrink-0 text-primary" />
+                        ) : null}
+                      </div>
+                      {gruposChamada ? (
+                        <AusenciaButton
+                          nome={aluno.nome}
+                          autenticado={isAuthenticated}
+                          onExigirLogin={() => {
+                            toast.info("Faça login para registrar a ausência de um aluno.");
+                            navigate({ to: "/login" });
+                          }}
+                          onConfirmar={async (motivo) => {
                             const substituto = await chamada.marcarFaltaDoAluno(
                               aluno,
                               subBloco.grupo.indice,
+                              motivo,
                             );
                             toast.success(
                               substituto
-                                ? `${aluno.nome} marcado(a) como falta. ${substituto.nome} foi chamado(a) no lugar.`
-                                : `${aluno.nome} marcado(a) como falta.`,
+                                ? `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}. ${substituto.nome} foi chamado(a) no lugar.`
+                                : `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}.`,
                             );
                           }}
-                        >
-                          <UserX className="size-3" />
-                        </button>
+                        />
                       ) : null}
-                    </span>
+                    </div>
                   );
                 })}
               </div>
@@ -423,12 +526,6 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                 <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                   <HeartHandshake className="size-3 text-primary" /> Alunos destacados precisam de
                   atendimento especializado — passe o mouse sobre o nome para ver as orientações.
-                </p>
-              ) : null}
-              {editable && gruposChamada ? (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Clique no ✕ ao lado do nome se o aluno faltou — o sistema chama automaticamente
-                  quem está há mais tempo sem participar.
                 </p>
               ) : null}
             </div>

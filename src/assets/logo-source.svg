@@ -1,0 +1,38 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#1e40af" />
+    </linearGradient>
+    <linearGradient id="screen" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+
+  <!-- Monitor -->
+  <rect x="120" y="140" width="272" height="188" rx="18" fill="#0f172a" />
+  <rect x="138" y="158" width="236" height="152" rx="6" fill="url(#screen)" />
+
+  <!-- Graduation cap on screen -->
+  <path
+    d="M256 196 L322 222 L256 248 L190 222 Z"
+    fill="#ffffff"
+  />
+  <path
+    d="M222 234 L222 260 C222 270 237 278 256 278 C275 278 290 270 290 260 L290 234 L256 248 Z"
+    fill="#ffffff"
+    opacity="0.92"
+  />
+  <line x1="322" y1="222" x2="322" y2="256" stroke="#facc15" stroke-width="6" stroke-linecap="round" />
+  <circle cx="322" cy="260" r="7" fill="#facc15" />
+
+  <!-- Stand -->
+  <rect x="240" y="328" width="32" height="26" fill="#0f172a" />
+  <rect x="196" y="354" width="120" height="16" rx="8" fill="#0f172a" />
+
+  <!-- Yellow accent stripe -->
+  <path d="M392 108 L440 108 L360 404 L312 404 Z" fill="#facc15" opacity="0.9" />
+</svg>

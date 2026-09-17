@@ -10,6 +10,7 @@ interface PresencaRow {
   grupo_indice: number;
   status: "presente" | "faltou" | "substituido";
   substituto_de_aluno_id: string | null;
+  motivo: string | null;
   criado_em: string;
 }
 
@@ -23,6 +24,7 @@ function rowToPresenca(row: PresencaRow): Presenca {
     grupoIndice: row.grupo_indice,
     status: row.status,
     substitutoDeAlunoId: row.substituto_de_aluno_id ?? undefined,
+    motivo: row.motivo ?? undefined,
     criadoEm: row.criado_em,
   };
 }
@@ -80,17 +82,18 @@ export async function registrarPresencasIniciais(
   if (error) throw error;
 }
 
-/** Marca um aluno como faltoso no dia e, se houver substituto, registra a substituição. */
+/** Marca um aluno como ausente no dia e, se houver substituto, registra a substituição. */
 export async function marcarFalta(
   turmaId: string,
   data: string,
   aluno: { id: string; nome: string },
   grupoIndice: number,
   substituto: { id: string; nome: string } | null,
+  motivo: "ausente" | "nao_quis_participar",
 ): Promise<void> {
   const { error: updateError } = await supabase
     .from("presencas")
-    .update({ status: "faltou" })
+    .update({ status: "faltou", motivo })
     .eq("turma_id", turmaId)
     .eq("data", data)
     .eq("aluno_id", aluno.id);

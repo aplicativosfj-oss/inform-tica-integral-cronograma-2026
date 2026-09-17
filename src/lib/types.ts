@@ -91,5 +91,7 @@ export interface Presenca {
   status: "presente" | "faltou" | "substituido";
   /** Preenchido quando `status` é "substituido": id do aluno que faltou e foi substituído. */
   substitutoDeAlunoId?: string | undefined;
+  /** Preenchido quando `status` é "faltou": "ausente" ou "nao_quis_participar". */
+  motivo?: string | undefined;
   criadoEm: string;
 }

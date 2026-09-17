@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import {
   CalendarClock,
+  CalendarDays,
   Gamepad2,
   GraduationCap,
   LayoutDashboard,
@@ -17,7 +18,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { useAppStore } from "@/lib/app-store";
+import {
+  buildWeeklySchedule,
+  nextAssignmentsForDay,
+  proximoDiaLetivo,
+  suspensaoKey,
+  toDateKey,
+} from "@/lib/schedule-engine";
 import heroImg from "@/assets/hero-lab-photo.jpg";
+import backgroundImg from "@/assets/feature-classroom-tech.jpg";
 import scheduleImg from "@/assets/feature-classroom-tech.jpg";
 import networkImg from "@/assets/feature-tools.jpg";
 import workspaceImg from "@/assets/feature-kids-learning.jpg";
@@ -55,6 +64,12 @@ function Index() {
       <NavBar />
 
       <section className="relative overflow-hidden border-b border-border/60">
+        {/* Sophisticated backdrop: a dimmed photo of the lab behind the content, for depth without hurting legibility. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-20 bg-cover bg-center opacity-[0.06]"
+          style={{ backgroundImage: `url(${backgroundImg})` }}
+        />
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_10%,color-mix(in_oklch,var(--primary)_10%,transparent),transparent_50%)]"
@@ -123,8 +138,9 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <section className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
         <LiveSessionPanel />
+        <ProximasTurmasPanel />
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
@@ -215,6 +231,81 @@ function Index() {
         </div>
       </section>
     </div>
+  );
+}
+
+/**
+ * Shows which turmas are scheduled for the next school day, so professors
+ * can plan ahead — displayed right below the live session on the homepage.
+ */
+function ProximasTurmasPanel() {
+  const { turmas, config } = useAppStore();
+
+  const proximo = useMemo(() => proximoDiaLetivo(config, new Date()), [config]);
+  const assignmentsDoProximoDia = useMemo(() => {
+    if (!proximo) return [];
+    const assignments = buildWeeklySchedule(turmas, config);
+    const dataKey = toDateKey(proximo.data);
+    return nextAssignmentsForDay(assignments, proximo.dia).filter(
+      (a) => !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)],
+    );
+  }, [turmas, config, proximo]);
+
+  if (!proximo || assignmentsDoProximoDia.length === 0) return null;
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <CalendarDays className="size-4 text-primary" />
+          Próximas turmas ·{" "}
+          {proximo.data.toLocaleDateString("pt-BR", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+          })}
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Para os(as) professores(as) se programarem com antecedência.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col divide-y divide-border/60">
+          {assignmentsDoProximoDia.map((assignment) => (
+            <div
+              key={`${assignment.dia}-${assignment.slot.inicio}`}
+              className="flex items-center justify-between gap-3 py-2.5"
+            >
+              <div className="flex items-center gap-3">
+                {assignment.turma.imagem ? (
+                  <img
+                    src={assignment.turma.imagem}
+                    alt=""
+                    className="size-9 rounded-lg object-cover"
+                  />
+                ) : (
+                  <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-xs font-semibold text-secondary-foreground">
+                    {assignment.turma.letra}
+                  </span>
+                )}
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {assignment.turma.serie} "{assignment.turma.letra}"
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Prof(a). {assignment.turma.professorRegente} · {assignment.turma.alunos.length}{" "}
+                    alunos
+                  </p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="font-mono">
+                {assignment.slot.inicio} – {assignment.slot.fim}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
