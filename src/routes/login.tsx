@@ -25,15 +25,23 @@ function LoginPage() {
     if (isAuthenticated) navigate({ to: "/dashboard" });
   }, [isAuthenticated, navigate]);
 
-  function handleSubmit(event: FormEvent) {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    const success = login(email, password);
-    if (success) {
+    setSubmitting(true);
+    const errorMessage = await login(email, password);
+    setSubmitting(false);
+    if (!errorMessage) {
       toast.success("Login realizado com sucesso.");
       navigate({ to: "/dashboard" });
     } else {
-      setError("E-mail ou senha inválidos.");
+      setError(
+        errorMessage.toLowerCase().includes("confirm")
+          ? "Confirme seu e-mail antes de entrar (verifique sua caixa de entrada)."
+          : "E-mail ou senha inválidos.",
+      );
     }
   }
 
@@ -78,8 +86,8 @@ function LoginPage() {
                 />
               </div>
               {error ? <p className="text-sm text-destructive">{error}</p> : null}
-              <Button type="submit" className="mt-2">
-                <LogIn /> Entrar
+              <Button type="submit" className="mt-2" disabled={submitting}>
+                <LogIn /> {submitting ? "Entrando..." : "Entrar"}
               </Button>
               <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                 <LockKeyhole className="size-3.5" /> Acesso restrito à gestão da escola

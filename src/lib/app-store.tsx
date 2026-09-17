@@ -1,13 +1,27 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { toast } from "sonner";
 
+import { useAuth } from "@/lib/auth-store";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
-import { usePersistentState } from "@/lib/use-persistent-state";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
+import { supabase } from "@/lib/supabase-client";
 import type { Aluno, Grupo, ScheduleConfig, Turma } from "@/lib/types";
+
+const ROW_ID = "default";
 
 interface AppState {
   turmas: Turma[];
   config: ScheduleConfig;
+  /** False while the initial data is still being loaded from Supabase. */
+  isReady: boolean;
   addTurma: (turma: Omit<Turma, "id" | "alunos">) => void;
   updateTurma: (id: string, patch: Partial<Omit<Turma, "id" | "alunos">>) => void;
   removeTurma: (id: string) => void;
@@ -32,24 +46,90 @@ function generateId(prefix: string) {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [turmas, setTurmas] = usePersistentState<Turma[]>("informatica:turmas", SEED_TURMAS);
-  const [config, setConfig] = usePersistentState<ScheduleConfig>("informatica:config", SEED_CONFIG);
+  const { isAuthenticated } = useAuth();
+  const [turmas, setTurmas] = useState<Turma[]>(SEED_TURMAS);
+  const [config, setConfig] = useState<ScheduleConfig>(SEED_CONFIG);
+  const [isReady, setIsReady] = useState(false);
+
+  // Kept in refs so every mutation can persist the *latest* full row to
+  // Supabase without depending on stale closures over `turmas`/`config`.
+  const turmasRef = useRef(turmas);
+  const configRef = useRef(config);
+  turmasRef.current = turmas;
+  configRef.current = config;
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from("app_state")
+      .select("turmas, config")
+      .eq("id", ROW_ID)
+      .maybeSingle()
+      .then(async ({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          toast.error(`Não foi possível carregar os dados: ${error.message}`);
+        } else if (data) {
+          setTurmas((data.turmas as Turma[] | null) ?? SEED_TURMAS);
+          setConfig((data.config as ScheduleConfig | null) ?? SEED_CONFIG);
+        } else if (isAuthenticated) {
+          // First run: seed the row (requires an authenticated admin session,
+          // per the write RLS policy) so future reads — including the public
+          // agenda page, before any admin login — find real data.
+          const { error: seedError } = await supabase
+            .from("app_state")
+            .upsert({ id: ROW_ID, turmas: SEED_TURMAS, config: SEED_CONFIG });
+          if (seedError) toast.error(`Não foi possível preparar os dados: ${seedError.message}`);
+        }
+        if (!cancelled) setIsReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
+
+  function persist(nextTurmas: Turma[], nextConfig: ScheduleConfig) {
+    supabase
+      .from("app_state")
+      .upsert({
+        id: ROW_ID,
+        turmas: nextTurmas,
+        config: nextConfig,
+        updated_at: new Date().toISOString(),
+      })
+      .then(({ error }) => {
+        if (error) toast.error(`Não foi possível salvar: ${error.message}`);
+      });
+  }
+
+  function applyTurmas(updater: (prev: Turma[]) => Turma[]) {
+    const next = updater(turmasRef.current);
+    setTurmas(next);
+    persist(next, configRef.current);
+  }
+
+  function applyConfig(updater: (prev: ScheduleConfig) => ScheduleConfig) {
+    const next = updater(configRef.current);
+    setConfig(next);
+    persist(turmasRef.current, next);
+  }
 
   const value = useMemo<AppState>(
     () => ({
       turmas,
       config,
+      isReady,
       addTurma: (turma) => {
-        setTurmas((prev) => [...prev, { ...turma, id: generateId("turma"), alunos: [] }]);
+        applyTurmas((prev) => [...prev, { ...turma, id: generateId("turma"), alunos: [] }]);
       },
       updateTurma: (id, patch) => {
-        setTurmas((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+        applyTurmas((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
       },
       removeTurma: (id) => {
-        setTurmas((prev) => prev.filter((t) => t.id !== id));
+        applyTurmas((prev) => prev.filter((t) => t.id !== id));
       },
       addAluno: (turmaId, aluno) => {
-        setTurmas((prev) =>
+        applyTurmas((prev) =>
           prev.map((t) =>
             t.id === turmaId
               ? { ...t, alunos: [...t.alunos, { ...aluno, id: generateId("aluno") }] }
@@ -58,7 +138,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       },
       updateAluno: (turmaId, alunoId, patch) => {
-        setTurmas((prev) =>
+        applyTurmas((prev) =>
           prev.map((t) =>
             t.id === turmaId
               ? {
@@ -70,14 +150,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       },
       removeAluno: (turmaId, alunoId) => {
-        setTurmas((prev) =>
+        applyTurmas((prev) =>
           prev.map((t) =>
             t.id === turmaId ? { ...t, alunos: t.alunos.filter((a) => a.id !== alunoId) } : t,
           ),
         );
       },
       addGrupo: (turmaId, grupo) => {
-        setTurmas((prev) =>
+        applyTurmas((prev) =>
           prev.map((t) =>
             t.id === turmaId
               ? { ...t, grupos: [...(t.grupos ?? []), { ...grupo, id: generateId("grupo") }] }
@@ -86,7 +166,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       },
       updateGrupo: (turmaId, grupoId, patch) => {
-        setTurmas((prev) =>
+        applyTurmas((prev) =>
           prev.map((t) =>
             t.id === turmaId
               ? {
@@ -98,7 +178,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       },
       removeGrupo: (turmaId, grupoId) => {
-        setTurmas((prev) =>
+        applyTurmas((prev) =>
           prev.map((t) =>
             t.id === turmaId
               ? {
@@ -113,10 +193,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       },
       updateConfig: (patch) => {
-        setConfig((prev) => ({ ...prev, ...patch }));
+        applyConfig((prev) => ({ ...prev, ...patch }));
       },
       setSlotOverride: (dia, slotInicio, turmaId) => {
-        setConfig((prev) => {
+        applyConfig((prev) => {
           const key = slotKey(dia, slotInicio);
           const next = { ...(prev.slotOverrides ?? {}) };
           if (turmaId) {
@@ -128,7 +208,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
       },
       setSessaoSuspensa: (dateISO, dia, slotInicio, suspensa) => {
-        setConfig((prev) => {
+        applyConfig((prev) => {
           const key = suspensaoKey(dateISO, dia, slotInicio);
           const next = { ...(prev.suspensoes ?? {}) };
           if (suspensa) {
@@ -142,9 +222,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       resetToSeed: () => {
         setTurmas(SEED_TURMAS);
         setConfig(SEED_CONFIG);
+        persist(SEED_TURMAS, SEED_CONFIG);
       },
     }),
-    [turmas, config, setTurmas, setConfig],
+    [turmas, config, isReady],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
