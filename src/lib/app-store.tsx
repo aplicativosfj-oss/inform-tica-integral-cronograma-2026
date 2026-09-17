@@ -71,6 +71,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ),
         );
       },
+      addGrupo: (turmaId, grupo) => {
+        setTurmas((prev) =>
+          prev.map((t) =>
+            t.id === turmaId
+              ? { ...t, grupos: [...(t.grupos ?? []), { ...grupo, id: generateId("grupo") }] }
+              : t,
+          ),
+        );
+      },
+      updateGrupo: (turmaId, grupoId, patch) => {
+        setTurmas((prev) =>
+          prev.map((t) =>
+            t.id === turmaId
+              ? {
+                  ...t,
+                  grupos: (t.grupos ?? []).map((g) => (g.id === grupoId ? { ...g, ...patch } : g)),
+                }
+              : t,
+          ),
+        );
+      },
+      removeGrupo: (turmaId, grupoId) => {
+        setTurmas((prev) =>
+          prev.map((t) =>
+            t.id === turmaId
+              ? {
+                  ...t,
+                  grupos: (t.grupos ?? []).filter((g) => g.id !== grupoId),
+                  alunos: t.alunos.map((a) =>
+                    a.grupoId === grupoId ? { ...a, grupoId: undefined } : a,
+                  ),
+                }
+              : t,
+          ),
+        );
+      },
       updateConfig: (patch) => {
         setConfig((prev) => ({ ...prev, ...patch }));
       },
