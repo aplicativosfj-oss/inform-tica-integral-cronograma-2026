@@ -1,13 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   CalendarClock,
   CalendarDays,
+  Clock3,
   Gamepad2,
   GraduationCap,
   LayoutDashboard,
   MonitorSmartphone,
   ShieldCheck,
+  Sparkles,
   Timer,
   Users2,
 } from "lucide-react";
@@ -20,6 +22,7 @@ import { NavBar } from "@/components/school/nav-bar";
 import { useAppStore } from "@/lib/app-store";
 import {
   buildWeeklySchedule,
+  currentWeekdayLabel,
   nextAssignmentsForDay,
   proximoDiaLetivo,
   suspensaoKey,
@@ -189,6 +192,8 @@ function Index() {
         </div>
       </section>
 
+      <ProgramacaoSemanalDestaque />
+
       <section className="border-y border-border/60 bg-muted/30">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <div className="mb-10 max-w-2xl">
@@ -306,6 +311,130 @@ function ProximasTurmasPanel() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * A prominent, glassmorphism-styled weekly schedule so anyone on the
+ * homepage can see at a glance which turma uses the lab on any given day —
+ * with today visually called out.
+ */
+function ProgramacaoSemanalDestaque() {
+  const { turmas, config } = useAppStore();
+  const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
+  const [diaSelecionado, setDiaSelecionado] = useState(
+    config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),
+  );
+
+  const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
+  const assignmentsDoDia = useMemo(
+    () => nextAssignmentsForDay(assignments, diaSelecionado),
+    [assignments, diaSelecionado],
+  );
+
+  if (turmas.length === 0) return null;
+
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-16 sm:py-20">
+      {/* Soft glowing orbs behind the glass panels, for depth. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-24 -top-24 size-96 rounded-full bg-blue-400/30 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-24 bottom-0 size-96 rounded-full bg-amber-400/20 blur-3xl"
+      />
+
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mb-10 max-w-2xl">
+          <Badge className="mb-4 gap-1.5 border-white/20 bg-white/10 text-white backdrop-blur">
+            <Sparkles className="size-3.5" /> Programação da semana
+          </Badge>
+          <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+            Veja quem usa o laboratório em cada dia
+          </h2>
+          <p className="mt-2 text-sm text-blue-100/80">
+            Toda a semana organizada num só lugar — clique num dia para ver as turmas e horários.
+          </p>
+        </div>
+
+        <div className="mb-6 flex flex-wrap gap-2">
+          {config.diasSemana.map((dia) => {
+            const ativo = dia === diaSelecionado;
+            const hoje = dia === todayLabel;
+            return (
+              <button
+                key={dia}
+                type="button"
+                onClick={() => setDiaSelecionado(dia)}
+                className={`relative rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-all ${
+                  ativo
+                    ? "border-white bg-white text-primary shadow-lg"
+                    : "border-white/25 bg-white/10 text-white hover:bg-white/20"
+                }`}
+              >
+                {dia}
+                {hoje ? (
+                  <span
+                    className={`ml-1.5 inline-block size-1.5 rounded-full ${ativo ? "bg-primary" : "bg-amber-300"}`}
+                  />
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+
+        {assignmentsDoDia.length === 0 ? (
+          <div className="rounded-2xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-md">
+            <p className="text-sm text-blue-100/80">
+              Nenhuma turma programada para {diaSelecionado}.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {assignmentsDoDia.map((assignment) => (
+              <div
+                key={`${assignment.dia}-${assignment.slot.inicio}`}
+                className="group rounded-2xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/15"
+              >
+                <div className="flex items-center gap-3">
+                  {assignment.turma.imagem ? (
+                    <img
+                      src={assignment.turma.imagem}
+                      alt=""
+                      className="size-11 rounded-xl object-cover ring-2 ring-white/30"
+                    />
+                  ) : (
+                    <span className="flex size-11 items-center justify-center rounded-xl bg-white/20 text-sm font-bold text-white ring-2 ring-white/30">
+                      {assignment.turma.letra}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-white">
+                      {assignment.turma.serie} "{assignment.turma.letra}"
+                    </p>
+                    <p className="truncate text-xs text-blue-100/70">
+                      Prof(a). {assignment.turma.professorRegente}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between border-t border-white/15 pt-3">
+                  <span className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">
+                    <Clock3 className="size-3.5 text-amber-300" />
+                    {assignment.slot.inicio} – {assignment.slot.fim}
+                  </span>
+                  <span className="flex items-center gap-1 text-xs text-blue-100/70">
+                    <Users2 className="size-3.5" />
+                    {assignment.turma.alunos.length}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
