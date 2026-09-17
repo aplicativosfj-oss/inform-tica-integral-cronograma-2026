@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   CalendarClock,
+  Gamepad2,
   GraduationCap,
   LayoutDashboard,
   MonitorSmartphone,
@@ -58,24 +59,28 @@ function Index() {
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_10%,color-mix(in_oklch,var(--primary)_10%,transparent),transparent_50%)]"
         />
+        {/* Yellow accent stripe, echoing the school's brand colors from the printed materials. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-16 -top-16 -z-10 size-56 rotate-45 bg-amber-400/25"
+        />
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24">
           <div>
             <Badge variant="secondary" className="mb-4 gap-1.5">
-              <MonitorSmartphone className="size-3.5" /> Laboratório de Informática
+              <MonitorSmartphone className="size-3.5" /> Agenda online
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-              A agenda profissional das aulas de informática
+              Informática na <span className="text-primary">Escola</span>
             </h1>
             <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Cronograma automático por turma, revezamento entre alunos nos{" "}
-              {config.numeroComputadores} computadores e cronômetro ao vivo — para que professores,
-              alunos e famílias saibam exatamente quando cada turma vai ao laboratório com o
-              professor {config.professorInformatica}.
+              Agende seus horários de forma rápida, simples e prática! Cronograma automático por
+              turma, revezamento entre alunos nos {config.numeroComputadores} computadores e
+              cronômetro ao vivo, com o professor {config.professorInformatica}.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link to="/agenda">
-                  <CalendarClock /> Ver agenda da semana
+                  <CalendarClock /> Acessar Agenda Online
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -107,7 +112,7 @@ function Index() {
             <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" aria-hidden />
             <img
               src={heroImg}
-              alt="Ilustração abstrata de tecnologia educacional com laptop, calendário e símbolos de aprendizagem"
+              alt="Ilustração de tecnologia educacional com laptop, calendário e símbolos de aprendizagem"
               width={1344}
               height={1024}
               className="relative rounded-2xl border border-border/60 bg-card shadow-2xl"
@@ -133,17 +138,28 @@ function Index() {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-3">
           <FeatureCard
-            icon={<CalendarClock className="size-5" />}
-            title="Cronograma automático"
-            description="Segunda a sexta, cada turma recebe horários fixos gerados automaticamente pelo sistema."
+            icon={<Gamepad2 className="size-5" />}
+            iconClassName="bg-blue-500/10 text-blue-600"
+            title="Aprendizado Digital"
+            description="Tecnologia que estimula o raciocínio e a criatividade."
           />
           <FeatureCard
             icon={<Users2 className="size-5" />}
-            title="Revezamento por grupos"
-            description="Com poucos computadores, os alunos se revezam em grupos dentro do mesmo horário."
+            iconClassName="bg-emerald-500/10 text-emerald-600"
+            title="Mais Oportunidades"
+            description="A informática amplia horizontes e prepara para o futuro."
           />
+          <FeatureCard
+            icon={<CalendarClock className="size-5" />}
+            iconClassName="bg-violet-500/10 text-violet-600"
+            title="Agende seu Horário"
+            description="Escolha o melhor dia e horário para utilizar o laboratório."
+          />
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <FeatureCard
             icon={<Timer className="size-5" />}
             title="Cronômetro ao vivo"
@@ -204,17 +220,21 @@ function Index() {
 
 function FeatureCard({
   icon,
+  iconClassName,
   title,
   description,
 }: {
   icon: ReactNode;
+  iconClassName?: string;
   title: string;
   description: string;
 }) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <span
+          className={`mb-2 flex size-10 items-center justify-center rounded-lg ${iconClassName ?? "bg-primary/10 text-primary"}`}
+        >
           {icon}
         </span>
         <CardTitle className="text-base">{title}</CardTitle>
