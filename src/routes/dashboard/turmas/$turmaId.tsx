@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, HeartHandshake, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -17,6 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { ImageUploadField } from "@/components/school/image-upload-field";
 import { useAppStore } from "@/lib/app-store";
@@ -40,6 +42,8 @@ export const Route = createFileRoute("/dashboard/turmas/$turmaId")({
 interface AlunoFormValues {
   nome: string;
   foto?: string | undefined;
+  necessidadeEspecial?: boolean | undefined;
+  observacoesNecessidade?: string | undefined;
 }
 
 function AlunoFormDialog({
@@ -51,17 +55,24 @@ function AlunoFormDialog({
   onSubmit: (values: AlunoFormValues) => void;
   trigger: ReactNode;
 }) {
+  const emptyValues: AlunoFormValues = aluno
+    ? {
+        nome: aluno.nome,
+        foto: aluno.foto,
+        necessidadeEspecial: aluno.necessidadeEspecial ?? false,
+        observacoesNecessidade: aluno.observacoesNecessidade ?? "",
+      }
+    : { nome: "", foto: undefined, necessidadeEspecial: false, observacoesNecessidade: "" };
+
   const [open, setOpen] = useState(false);
-  const [values, setValues] = useState<AlunoFormValues>(
-    aluno ? { nome: aluno.nome, foto: aluno.foto } : { nome: "", foto: undefined },
-  );
+  const [values, setValues] = useState<AlunoFormValues>(emptyValues);
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) setValues(aluno ? { nome: aluno.nome, foto: aluno.foto } : { nome: "" });
+        if (next) setValues(emptyValues);
       }}
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -96,6 +107,31 @@ function AlunoFormDialog({
               autoFocus
             />
           </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="necessidadeEspecial"
+              checked={values.necessidadeEspecial ?? false}
+              onCheckedChange={(checked) =>
+                setValues((v) => ({ ...v, necessidadeEspecial: checked === true }))
+              }
+            />
+            <Label htmlFor="necessidadeEspecial" className="font-normal">
+              Necessita de atendimento especializado (mediador/cuidador)
+            </Label>
+          </div>
+          {values.necessidadeEspecial ? (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="observacoes">Orientações para atividades de informática</Label>
+              <Textarea
+                id="observacoes"
+                placeholder="Ex: TEA nível 1 — prefere atividades com menos estímulo visual e sonoro."
+                value={values.observacoesNecessidade ?? ""}
+                onChange={(e) =>
+                  setValues((v) => ({ ...v, observacoesNecessidade: e.target.value }))
+                }
+              />
+            </div>
+          ) : null}
           <DialogFooter>
             <Button type="submit">{aluno ? "Salvar alterações" : "Cadastrar aluno"}</Button>
           </DialogFooter>
@@ -160,6 +196,26 @@ function TurmaAlunosPage() {
         />
       </div>
 
+      {turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (
+        <Card className="mb-6 border-primary/30 bg-primary/5">
+          <CardContent className="flex flex-col gap-2 py-4">
+            <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+              <HeartHandshake className="size-4 text-primary" /> Apoio especializado desta turma
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {turma.apoioEspecial.map((apoio, index) => (
+                <Badge key={index} variant="outline" className="font-normal">
+                  {apoio.funcao} {apoio.nome}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Marque abaixo o(s) aluno(s) atendido(s) para orientar as atividades de informática.
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <div className="flex flex-col gap-3">
         {grupos.map((grupo) => (
           <Card key={grupo.indice}>
@@ -181,7 +237,17 @@ function TurmaAlunosPage() {
                             aluno.nome.charAt(0)
                           )}
                         </span>
-                        <span className="text-sm font-medium text-foreground">{aluno.nome}</span>
+                        <div>
+                          <span className="text-sm font-medium text-foreground">{aluno.nome}</span>
+                          {aluno.necessidadeEspecial ? (
+                            <span className="flex items-center gap-1 text-xs text-primary">
+                              <HeartHandshake className="size-3" /> Atendimento especializado
+                              {aluno.observacoesNecessidade
+                                ? ` — ${aluno.observacoesNecessidade}`
+                                : ""}
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
                       <div className="flex gap-1.5">
                         <AlunoFormDialog

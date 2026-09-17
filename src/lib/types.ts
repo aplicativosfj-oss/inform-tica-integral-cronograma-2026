@@ -4,6 +4,16 @@ export interface Aluno {
   foto?: string | undefined;
   /** Grupo de revezamento ao qual o aluno pertence (opcional). */
   grupoId?: string | undefined;
+  /** Marca o aluno como necessitando de atendimento especializado (mediador/cuidador). */
+  necessidadeEspecial?: boolean | undefined;
+  /** Orientações para adaptar as atividades de informática a esse aluno. */
+  observacoesNecessidade?: string | undefined;
+}
+
+/** Profissional de apoio (mediador/cuidador) designado oficialmente para a turma. */
+export interface ApoioEspecial {
+  nome: string;
+  funcao: "Mediador(a)" | "Cuidador(a)";
 }
 
 /** Grupo de revezamento cadastrado manualmente pelo administrador. */
@@ -22,6 +32,8 @@ export interface Turma {
   imagem?: string | undefined;
   alunos: Aluno[];
   grupos?: Grupo[] | undefined;
+  /** Mediadores/cuidadores oficialmente designados para essa turma. */
+  apoioEspecial?: ApoioEspecial[] | undefined;
 }
 
 export interface ScheduleConfig {

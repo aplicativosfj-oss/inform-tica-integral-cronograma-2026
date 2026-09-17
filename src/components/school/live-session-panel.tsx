@@ -1,4 +1,13 @@
-import { BookOpen, Clock3, MonitorPlay, Square, Users, Volume2, VolumeX } from "lucide-react";
+import {
+  BookOpen,
+  Clock3,
+  HeartHandshake,
+  MonitorPlay,
+  Square,
+  Users,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -25,6 +34,7 @@ import {
   findSessaoAtual,
   toDateKey,
 } from "@/lib/schedule-engine";
+import { cn } from "@/lib/utils";
 
 /**
  * Plays the rotation alert whenever the active turn (`chave`) changes.
@@ -229,14 +239,19 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           {subBloco.grupo.alunos.length > 0 ? (
             <div>
               <p className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
-                <Users className="size-3" /> Alunos nesta rodada (
-                {subBloco.grupo.alunos.length})
+                <Users className="size-3" /> Alunos nesta rodada ({subBloco.grupo.alunos.length})
               </p>
               <div className="flex flex-wrap gap-2">
                 {subBloco.grupo.alunos.map((aluno) => (
                   <span
                     key={aluno.id}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
+                    title={aluno.necessidadeEspecial ? aluno.observacoesNecessidade : undefined}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-foreground",
+                      aluno.necessidadeEspecial
+                        ? "border-primary/50 bg-primary/10"
+                        : "border-border/60 bg-background",
+                    )}
                   >
                     <span className="flex size-5 items-center justify-center overflow-hidden rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">
                       {aluno.foto ? (
@@ -246,9 +261,18 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                       )}
                     </span>
                     {aluno.nome}
+                    {aluno.necessidadeEspecial ? (
+                      <HeartHandshake className="size-3 text-primary" />
+                    ) : null}
                   </span>
                 ))}
               </div>
+              {subBloco.grupo.alunos.some((a) => a.necessidadeEspecial) ? (
+                <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                  <HeartHandshake className="size-3 text-primary" /> Alunos destacados precisam de
+                  atendimento especializado — passe o mouse sobre o nome para ver as orientações.
+                </p>
+              ) : null}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">

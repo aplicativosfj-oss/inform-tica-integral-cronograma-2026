@@ -59,6 +59,11 @@ export const SEED_TURMAS: Turma[] = [
       "Maria Hanna de Freitas Lima",
       "Josué Dias dos Santos",
     ]),
+    apoioEspecial: [
+      { nome: "Francisca Conceição de Sousa Freitas", funcao: "Mediador(a)" },
+      { nome: "Vitória Kertelen Gomes Aguiar", funcao: "Mediador(a)" },
+      { nome: "Carlos da Silva Alves", funcao: "Cuidador(a)" },
+    ],
   },
   {
     id: "t-1b",
@@ -93,6 +98,10 @@ export const SEED_TURMAS: Turma[] = [
       "Levi da Silva Albuquerque Kaxinawá",
       "Moisés Gomes do Carmo",
     ]),
+    apoioEspecial: [
+      { nome: "Rute Rocha de Assis Sousa", funcao: "Mediador(a)" },
+      { nome: "Magda Marta Lima do Nascimento", funcao: "Mediador(a)" },
+    ],
   },
   {
     id: "t-2a",
@@ -185,6 +194,7 @@ export const SEED_TURMAS: Turma[] = [
       "Regiely Lima do Nascimento",
       "Lorenzo Freitas de Lima",
     ]),
+    apoioEspecial: [{ nome: "Pliciam Rodrigues Costa", funcao: "Cuidador(a)" }],
   },
   {
     id: "t-3b",
@@ -215,6 +225,11 @@ export const SEED_TURMAS: Turma[] = [
       "João Pedro Nogueira Silva",
       "Isabela Gomes do Carmo",
     ]),
+    apoioEspecial: [
+      { nome: "Nonata Rodrigues Mota de Castro", funcao: "Mediador(a)" },
+      { nome: "Maria Janigleuba Sousa de Sousa Deus", funcao: "Mediador(a)" },
+      { nome: "Maria Sousa da Silva", funcao: "Mediador(a)" },
+    ],
   },
   {
     id: "t-4a",
@@ -249,6 +264,11 @@ export const SEED_TURMAS: Turma[] = [
       "Dhemilly Lorana Simão da Silva",
       "Gabriel Tavares Lourenço",
     ]),
+    apoioEspecial: [
+      { nome: "José Lucas de Sousa Silva", funcao: "Mediador(a)" },
+      { nome: "Maria Vilma dos Santos da Silva", funcao: "Mediador(a)" },
+      { nome: "Roberlanjo Araujo Santos", funcao: "Mediador(a)" },
+    ],
   },
   {
     id: "t-4b",
@@ -283,6 +303,12 @@ export const SEED_TURMAS: Turma[] = [
       "Melrick Angelo da Silva Inácio",
       "Rian Pontes dos Santos",
     ]),
+    apoioEspecial: [
+      { nome: "Francisca Samia Sousa Menezes", funcao: "Mediador(a)" },
+      { nome: "Antonia Maria de Freitas Martins", funcao: "Mediador(a)" },
+      { nome: "Maria Erinalda de Sousa e Sousa", funcao: "Mediador(a)" },
+      { nome: "Antonio Aldeir Gomes de Paiva", funcao: "Mediador(a)" },
+    ],
   },
   {
     id: "t-5a",
@@ -318,6 +344,7 @@ export const SEED_TURMAS: Turma[] = [
       "Luiz Gustavo Tavares Lourenço",
       "Mary Jane Gomes do Carmo",
     ]),
+    apoioEspecial: [{ nome: "Christian do Nascimento Sousa", funcao: "Cuidador(a)" }],
   },
   {
     id: "t-5b",
@@ -354,5 +381,6 @@ export const SEED_TURMAS: Turma[] = [
       "Davi Luiz Souza Neves",
       "Izaquel Pedrosa do Nascimento Lima",
     ]),
+    apoioEspecial: [{ nome: "Kalebe Meireles Ribeiro", funcao: "Cuidador(a)" }],
   },
 ];
