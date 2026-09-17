@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { usePersistentState } from "@/lib/use-persistent-state";
-import type { Aluno, ScheduleConfig, Turma } from "@/lib/types";
+import type { Aluno, Grupo, ScheduleConfig, Turma } from "@/lib/types";
 
 interface AppState {
   turmas: Turma[];
@@ -13,6 +13,9 @@ interface AppState {
   addAluno: (turmaId: string, aluno: Omit<Aluno, "id">) => void;
   updateAluno: (turmaId: string, alunoId: string, patch: Partial<Omit<Aluno, "id">>) => void;
   removeAluno: (turmaId: string, alunoId: string) => void;
+  addGrupo: (turmaId: string, grupo: Omit<Grupo, "id">) => void;
+  updateGrupo: (turmaId: string, grupoId: string, patch: Partial<Omit<Grupo, "id">>) => void;
+  removeGrupo: (turmaId: string, grupoId: string) => void;
   updateConfig: (patch: Partial<ScheduleConfig>) => void;
   resetToSeed: () => void;
 }
