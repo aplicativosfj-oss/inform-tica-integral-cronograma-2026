@@ -385,3 +385,13 @@ export function proximoDiaLetivo(config: ScheduleConfig, from: Date): ProximoDia
   }
   return null;
 }
+
+/** Nearest calendar date (today or the next 6 days) matching a given weekday label. */
+export function proximaDataDoDia(dia: string, from: Date): Date {
+  for (let i = 0; i < 7; i += 1) {
+    const data = new Date(from);
+    data.setDate(data.getDate() + i);
+    if (currentWeekdayLabel(data) === dia) return data;
+  }
+  return from;
+}

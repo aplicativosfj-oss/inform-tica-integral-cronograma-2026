@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   CalendarClock,
   CalendarDays,
   Clock3,
   Gamepad2,
   GraduationCap,
+  HeartHandshake,
   LayoutDashboard,
   MonitorSmartphone,
   ShieldCheck,
@@ -17,17 +18,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { useAppStore } from "@/lib/app-store";
+import { fetchUltimaParticipacao } from "@/lib/presencas";
 import {
   buildWeeklySchedule,
   currentWeekdayLabel,
   nextAssignmentsForDay,
+  proximaDataDoDia,
   proximoDiaLetivo,
+  selecionarAlunosDoDia,
   suspensaoKey,
   toDateKey,
 } from "@/lib/schedule-engine";
+import type { Assignment } from "@/lib/types";
 import heroImg from "@/assets/hero-lab-photo.jpg";
 import backgroundImg from "@/assets/feature-classroom-tech.jpg";
 import scheduleImg from "@/assets/feature-classroom-tech.jpg";
@@ -325,12 +331,18 @@ function ProgramacaoSemanalDestaque() {
   const [diaSelecionado, setDiaSelecionado] = useState(
     config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),
   );
+  const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
   const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
   const assignmentsDoDia = useMemo(
     () => nextAssignmentsForDay(assignments, diaSelecionado),
     [assignments, diaSelecionado],
   );
+  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
+  const dataFormatada = dataDoDia.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+  });
 
   if (turmas.length === 0) return null;
 
@@ -355,11 +367,11 @@ function ProgramacaoSemanalDestaque() {
             Veja quem usa o laboratório em cada dia
           </h2>
           <p className="mt-2 text-sm text-blue-100/80">
-            Toda a semana organizada num só lugar — clique num dia para ver as turmas e horários.
+            Clique num dia para ver as turmas, e num card para ver os alunos previstos.
           </p>
         </div>
 
-        <div className="mb-6 flex flex-wrap gap-2">
+        <div className="mb-3 flex flex-wrap gap-2">
           {config.diasSemana.map((dia) => {
             const ativo = dia === diaSelecionado;
             const hoje = dia === todayLabel;
@@ -385,6 +397,16 @@ function ProgramacaoSemanalDestaque() {
           })}
         </div>
 
+        <p className="mb-6 flex items-center gap-1.5 text-sm text-blue-100/80">
+          <CalendarDays className="size-4" />
+          {diaSelecionado}, {dataFormatada}
+          {diaSelecionado === todayLabel ? (
+            <span className="ml-1 rounded-full bg-amber-400/20 px-2 py-0.5 text-xs font-medium text-amber-200">
+              hoje
+            </span>
+          ) : null}
+        </p>
+
         {assignmentsDoDia.length === 0 ? (
           <div className="rounded-2xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-md">
             <p className="text-sm text-blue-100/80">
@@ -394,9 +416,11 @@ function ProgramacaoSemanalDestaque() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {assignmentsDoDia.map((assignment) => (
-              <div
+              <button
                 key={`${assignment.dia}-${assignment.slot.inicio}`}
-                className="group rounded-2xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/15"
+                type="button"
+                onClick={() => setAssignmentSelecionado(assignment)}
+                className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/15"
               >
                 <div className="flex items-center gap-3">
                   {assignment.turma.imagem ? (
@@ -429,12 +453,123 @@ function ProgramacaoSemanalDestaque() {
                     {assignment.turma.alunos.length}
                   </span>
                 </div>
-              </div>
+                <p className="mt-2 text-[11px] text-blue-100/60 opacity-0 transition-opacity group-hover:opacity-100">
+                  Clique para ver os alunos previstos →
+                </p>
+              </button>
             ))}
           </div>
         )}
       </div>
+
+      <PreviaAlunosDialog
+        assignment={assignmentSelecionado}
+        data={dataDoDia}
+        onOpenChange={(open) => {
+          if (!open) setAssignmentSelecionado(null);
+        }}
+      />
     </section>
+  );
+}
+
+/**
+ * Preview of which students are expected on a given (usually future) date —
+ * computed live from the same fairness queue used for the real daily roll
+ * call, but not written anywhere. It's a forecast, not a commitment: the
+ * actual list on the day can shift with absences or schedule changes.
+ */
+function PreviaAlunosDialog({
+  assignment,
+  data,
+  onOpenChange,
+}: {
+  assignment: Assignment | null;
+  data: Date;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { config } = useAppStore();
+  const [grupos, setGrupos] = useState<ReturnType<typeof selecionarAlunosDoDia>["grupos"] | null>(
+    null,
+  );
+  const [carregando, setCarregando] = useState(false);
+
+  useEffect(() => {
+    if (!assignment) {
+      setGrupos(null);
+      return;
+    }
+    let cancelled = false;
+    setCarregando(true);
+    fetchUltimaParticipacao(assignment.turma.id)
+      .then((ultima) => {
+        if (cancelled) return;
+        const selecao = selecionarAlunosDoDia(assignment.turma, ultima, config.numeroComputadores);
+        setGrupos(selecao.grupos);
+      })
+      .catch(() => {
+        if (!cancelled) setGrupos(null);
+      })
+      .finally(() => {
+        if (!cancelled) setCarregando(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [assignment, config.numeroComputadores]);
+
+  return (
+    <Dialog open={assignment !== null} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {assignment
+              ? `${assignment.turma.serie} "${assignment.turma.letra}" · ${data.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}`
+              : ""}
+          </DialogTitle>
+        </DialogHeader>
+        {assignment ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              Horário: {assignment.slot.inicio} – {assignment.slot.fim} · Prof(a).{" "}
+              {assignment.turma.professorRegente}
+            </p>
+            {carregando ? (
+              <p className="text-sm text-muted-foreground">Calculando quem vai participar...</p>
+            ) : grupos && grupos.some((g) => g.alunos.length > 0) ? (
+              <div className="flex flex-col gap-3">
+                {grupos.map((grupo) => (
+                  <div key={grupo.indice}>
+                    <Badge variant="secondary" className="mb-1.5">
+                      Grupo {grupo.indice + 1}
+                    </Badge>
+                    <div className="flex flex-wrap gap-1.5">
+                      {grupo.alunos.map((aluno) => (
+                        <span
+                          key={aluno.id}
+                          className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
+                        >
+                          {aluno.nome}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <p className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">
+                  <HeartHandshake className="mt-0.5 size-3.5 shrink-0" />
+                  Prévia calculada pela fila de prioridade atual — pode mudar até o dia se houver
+                  faltas ou ajustes na programação.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Esta turma ainda não tem alunos cadastrados.
+              </p>
+            )}
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
   );
 }
 
