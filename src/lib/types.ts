@@ -78,3 +78,18 @@ export interface Assignment {
   ocorrenciaIndex: number;
   sessoesPorSemana: number;
 }
+
+/** Registro de frequência de um aluno em uma data específica (tabela `presencas` no Supabase). */
+export interface Presenca {
+  id: string;
+  /** Data no formato YYYY-MM-DD. */
+  data: string;
+  turmaId: string;
+  alunoId: string;
+  alunoNome: string;
+  grupoIndice: number;
+  status: "presente" | "faltou" | "substituido";
+  /** Preenchido quando `status` é "substituido": id do aluno que faltou e foi substituído. */
+  substitutoDeAlunoId?: string | undefined;
+  criadoEm: string;
+}

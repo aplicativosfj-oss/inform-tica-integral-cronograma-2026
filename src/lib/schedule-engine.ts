@@ -189,6 +189,90 @@ export function buildSubBlocos(
   return subBlocos;
 }
 
+export interface SelecaoDoDia {
+  grupos: GrupoRevezamento[];
+  totalSelecionado: number;
+}
+
+/**
+ * Escolhe quem vai ao laboratório hoje com base em frequência real: os
+ * alunos que estão há mais tempo sem participar (ou nunca participaram) vêm
+ * primeiro. Retorna até `tamanhoGrupo * 2` alunos, divididos em dois grupos
+ * (uma turma que caiba em menos de 2 grupos ainda funciona, com grupos
+ * menores). Isso substitui o rodízio puramente matemático de `buildGrupos`
+ * quando o histórico de presença (tabela `presencas`) está disponível — ele
+ * se autoajusta a faltas, feriados e substituições sem precisar de reset.
+ */
+export function selecionarAlunosDoDia(
+  turma: Turma,
+  ultimaParticipacao: Map<string, string>,
+  tamanhoGrupo: number,
+): SelecaoDoDia {
+  const tamanho = Math.max(1, tamanhoGrupo);
+  const ordenados = [...turma.alunos].sort((a, b) => {
+    const da = ultimaParticipacao.get(a.id) ?? "";
+    const db = ultimaParticipacao.get(b.id) ?? "";
+    return da.localeCompare(db);
+  });
+  const selecionados = ordenados.slice(0, tamanho * 2);
+  const grupos: GrupoRevezamento[] = [];
+  for (let i = 0; i < selecionados.length; i += tamanho) {
+    grupos.push({ indice: grupos.length, alunos: selecionados.slice(i, i + tamanho) });
+  }
+  if (grupos.length === 0) grupos.push({ indice: 0, alunos: [] });
+  return { grupos, totalSelecionado: selecionados.length };
+}
+
+/**
+ * Escolhe o próximo aluno mais justo para substituir um faltoso: entre os
+ * que ainda não foram chamados hoje, o que está há mais tempo sem
+ * participar. O aluno que faltou mantém sua prioridade antiga (não é
+ * marcado como tendo participado), então volta a ser chamado antes dos
+ * demais na próxima aula.
+ */
+export function escolherSubstituto(
+  turma: Turma,
+  ultimaParticipacao: Map<string, string>,
+  jaChamadosHojeIds: ReadonlySet<string>,
+): Aluno | null {
+  const candidatos = turma.alunos
+    .filter((aluno) => !jaChamadosHojeIds.has(aluno.id))
+    .sort((a, b) => {
+      const da = ultimaParticipacao.get(a.id) ?? "";
+      const db = ultimaParticipacao.get(b.id) ?? "";
+      return da.localeCompare(db);
+    });
+  return candidatos[0] ?? null;
+}
+
+/**
+ * Como `buildSubBlocos`, mas usa os grupos já definidos pela chamada do dia
+ * (seleção justa + eventuais substituições) em vez de recalculá-los pelo
+ * rodízio semanal.
+ */
+export function buildSubBlocosComGrupos(
+  assignment: Assignment,
+  config: ScheduleConfig,
+  grupos: GrupoRevezamento[],
+): SubBloco[] {
+  const inicio = toMinutes(assignment.slot.inicio);
+  const fim = toMinutes(assignment.slot.fim);
+  const passo = Math.max(1, config.duracaoGrupoMinutos);
+  const totalSubBlocos = Math.max(1, Math.round((fim - inicio) / passo));
+  const subBlocos: SubBloco[] = [];
+  for (let i = 0; i < totalSubBlocos; i += 1) {
+    const grupo = grupos[i % grupos.length];
+    if (!grupo) continue;
+    subBlocos.push({
+      indice: i,
+      inicio: toHHMM(inicio + i * passo),
+      fim: toHHMM(Math.min(fim, inicio + (i + 1) * passo)),
+      grupo,
+    });
+  }
+  return subBlocos;
+}
+
 const WEEKDAY_LABELS = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
 export function currentWeekdayLabel(date: Date): string {

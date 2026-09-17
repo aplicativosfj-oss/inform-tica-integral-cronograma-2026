@@ -1,0 +1,132 @@
+import { supabase } from "@/lib/supabase-client";
+import type { Presenca } from "@/lib/types";
+
+interface PresencaRow {
+  id: string;
+  data: string;
+  turma_id: string;
+  aluno_id: string;
+  aluno_nome: string;
+  grupo_indice: number;
+  status: "presente" | "faltou" | "substituido";
+  substituto_de_aluno_id: string | null;
+  criado_em: string;
+}
+
+function rowToPresenca(row: PresencaRow): Presenca {
+  return {
+    id: row.id,
+    data: row.data,
+    turmaId: row.turma_id,
+    alunoId: row.aluno_id,
+    alunoNome: row.aluno_nome,
+    grupoIndice: row.grupo_indice,
+    status: row.status,
+    substitutoDeAlunoId: row.substituto_de_aluno_id ?? undefined,
+    criadoEm: row.criado_em,
+  };
+}
+
+/**
+ * Última data (YYYY-MM-DD) em que cada aluno participou de fato (presente ou
+ * substituindo alguém) nesta turma. Alunos ausentes do mapa nunca
+ * participaram — prioridade máxima na próxima seleção.
+ */
+export async function fetchUltimaParticipacao(turmaId: string): Promise<Map<string, string>> {
+  const { data, error } = await supabase
+    .from("presencas")
+    .select("aluno_id, data")
+    .eq("turma_id", turmaId)
+    .in("status", ["presente", "substituido"])
+    .order("data", { ascending: false });
+  if (error) throw error;
+  const mapa = new Map<string, string>();
+  for (const row of data ?? []) {
+    if (!mapa.has(row.aluno_id)) mapa.set(row.aluno_id, row.data);
+  }
+  return mapa;
+}
+
+export async function fetchPresencasDoDia(turmaId: string, data: string): Promise<Presenca[]> {
+  const { data: rows, error } = await supabase
+    .from("presencas")
+    .select("*")
+    .eq("turma_id", turmaId)
+    .eq("data", data);
+  if (error) throw error;
+  return (rows ?? []).map(rowToPresenca);
+}
+
+/** Grava a chamada inicial do dia (status "presente") para os grupos selecionados. Idempotente. */
+export async function registrarPresencasIniciais(
+  turmaId: string,
+  data: string,
+  grupos: { indice: number; alunos: { id: string; nome: string }[] }[],
+): Promise<void> {
+  const rows = grupos.flatMap((grupo) =>
+    grupo.alunos.map((aluno) => ({
+      data,
+      turma_id: turmaId,
+      aluno_id: aluno.id,
+      aluno_nome: aluno.nome,
+      grupo_indice: grupo.indice,
+      status: "presente" as const,
+    })),
+  );
+  if (rows.length === 0) return;
+  const { error } = await supabase
+    .from("presencas")
+    .upsert(rows, { onConflict: "data,turma_id,aluno_id", ignoreDuplicates: true });
+  if (error) throw error;
+}
+
+/** Marca um aluno como faltoso no dia e, se houver substituto, registra a substituição. */
+export async function marcarFalta(
+  turmaId: string,
+  data: string,
+  aluno: { id: string; nome: string },
+  grupoIndice: number,
+  substituto: { id: string; nome: string } | null,
+): Promise<void> {
+  const { error: updateError } = await supabase
+    .from("presencas")
+    .update({ status: "faltou" })
+    .eq("turma_id", turmaId)
+    .eq("data", data)
+    .eq("aluno_id", aluno.id);
+  if (updateError) throw updateError;
+
+  if (substituto) {
+    const { error: insertError } = await supabase.from("presencas").upsert(
+      {
+        data,
+        turma_id: turmaId,
+        aluno_id: substituto.id,
+        aluno_nome: substituto.nome,
+        grupo_indice: grupoIndice,
+        status: "substituido" as const,
+        substituto_de_aluno_id: aluno.id,
+      },
+      { onConflict: "data,turma_id,aluno_id" },
+    );
+    if (insertError) throw insertError;
+  }
+}
+
+/** Histórico de frequência num intervalo de datas (inclusive), opcionalmente filtrado por turma. */
+export async function fetchPresencasRange(
+  inicio: string,
+  fim: string,
+  turmaId?: string,
+): Promise<Presenca[]> {
+  let query = supabase
+    .from("presencas")
+    .select("*")
+    .gte("data", inicio)
+    .lte("data", fim)
+    .order("data", { ascending: false });
+  if (turmaId) query = query.eq("turma_id", turmaId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []).map(rowToPresenca);
+}

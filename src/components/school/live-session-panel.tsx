@@ -4,6 +4,7 @@ import {
   HeartHandshake,
   MonitorPlay,
   Square,
+  UserX,
   Users,
   Volume2,
   VolumeX,
@@ -29,11 +30,23 @@ import { TimerRing } from "@/components/school/timer-ring";
 import { playAlertaTroca, unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
 import {
+  fetchPresencasDoDia,
+  fetchUltimaParticipacao,
+  marcarFalta,
+  registrarPresencasIniciais,
+} from "@/lib/presencas";
+import {
+  buildSubBlocosComGrupos,
   buildWeeklySchedule,
   currentWeekdayLabel,
+  escolherSubstituto,
   findSessaoAtual,
+  selecionarAlunosDoDia,
   toDateKey,
+  type GrupoRevezamento,
+  type SubBloco,
 } from "@/lib/schedule-engine";
+import type { Aluno, Presenca, ScheduleConfig, Turma } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -90,9 +103,112 @@ function hhmmToSeconds(hhmm: string): number {
   return (Number(h ?? 0) * 60 + Number(m ?? 0)) * 60;
 }
 
+function gruposFromPresencas(turma: Turma, presencas: Presenca[]): GrupoRevezamento[] {
+  const porGrupo = new Map<number, Aluno[]>();
+  for (const p of presencas) {
+    if (p.status === "faltou") continue;
+    const aluno: Aluno = turma.alunos.find((a) => a.id === p.alunoId) ?? {
+      id: p.alunoId,
+      nome: p.alunoNome,
+    };
+    const lista = porGrupo.get(p.grupoIndice) ?? [];
+    lista.push(aluno);
+    porGrupo.set(p.grupoIndice, lista);
+  }
+  return [...porGrupo.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([indice, alunos]) => ({ indice, alunos }));
+}
+
+/**
+ * Ensures today's roll call exists for the turma currently live (auto-picking
+ * the fairest 14 students on first load of the day) and exposes a way to
+ * mark a student absent, which immediately substitutes the fairest
+ * available replacement and logs both to the `presencas` table.
+ */
+function useChamadaDoDia(
+  turma: Turma | undefined,
+  config: ScheduleConfig,
+  dateKey: string,
+  ativo: boolean,
+) {
+  const [presencas, setPresencas] = useState<Presenca[] | null>(null);
+  const [ultimaParticipacao, setUltimaParticipacao] = useState<Map<string, string> | null>(null);
+
+  const turmaId = turma?.id;
+
+  useEffect(() => {
+    if (!ativo || !turma || !dateKey) {
+      setPresencas(null);
+      setUltimaParticipacao(null);
+      return;
+    }
+    let cancelled = false;
+    async function ensure() {
+      if (!turma) return;
+      try {
+        let registradas = await fetchPresencasDoDia(turma.id, dateKey);
+        if (registradas.length === 0) {
+          const ultima = await fetchUltimaParticipacao(turma.id);
+          const selecao = selecionarAlunosDoDia(turma, ultima, config.numeroComputadores);
+          await registrarPresencasIniciais(turma.id, dateKey, selecao.grupos);
+          registradas = await fetchPresencasDoDia(turma.id, dateKey);
+        }
+        const ultimaAtualizada = await fetchUltimaParticipacao(turma.id);
+        if (!cancelled) {
+          setPresencas(registradas);
+          setUltimaParticipacao(ultimaAtualizada);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          toast.error(`Não foi possível carregar a chamada de hoje: ${(err as Error).message}`);
+        }
+      }
+    }
+    ensure();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ativo, turmaId, dateKey, config.numeroComputadores]);
+
+  async function marcarFaltaDoAluno(aluno: Aluno, grupoIndice: number) {
+    if (!turma || !presencas || !ultimaParticipacao) return;
+    const jaChamadosHojeIds = new Set(
+      presencas.filter((p) => p.status !== "faltou").map((p) => p.alunoId),
+    );
+    const substituto = escolherSubstituto(turma, ultimaParticipacao, jaChamadosHojeIds);
+    await marcarFalta(
+      turma.id,
+      dateKey,
+      { id: aluno.id, nome: aluno.nome },
+      grupoIndice,
+      substituto ? { id: substituto.id, nome: substituto.nome } : null,
+    );
+    const atualizadas = await fetchPresencasDoDia(turma.id, dateKey);
+    setPresencas(atualizadas);
+    return substituto;
+  }
+
+  return { presencas, marcarFaltaDoAluno };
+}
+
 export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
-  const { turmas, config, setSessaoSuspensa } = useAppStore();
+  const { turmas, config, setSessaoSuspensa, isReady } = useAppStore();
   const now = useNow(true);
+
+  const diaAtual = now ? currentWeekdayLabel(now) : "";
+  const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
+  const assignments = now ? buildWeeklySchedule(turmas, config) : [];
+  const sessao = now ? findSessaoAtual(assignments, config, now) : null;
+  const dateKey = now ? toDateKey(now) : "";
+
+  const chamada = useChamadaDoDia(
+    sessao?.assignment.turma,
+    config,
+    dateKey,
+    editable && isReady && Boolean(sessao) && !sessao?.suspensa,
+  );
 
   if (!now) {
     return (
@@ -103,11 +219,6 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
       </Card>
     );
   }
-
-  const diaAtual = currentWeekdayLabel(now);
-  const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
-  const assignments = buildWeeklySchedule(turmas, config);
-  const sessao = findSessaoAtual(assignments, config, now);
 
   if (!sessao) {
     return (
@@ -130,10 +241,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     );
   }
 
-  const { assignment, subBloco, segundosRestantes, proximoSubBloco, suspensa } = sessao;
-  const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
-  const decorridos = totalSegundos - segundosRestantes;
-  const dateKey = toDateKey(now);
+  const { assignment, segundosRestantes, suspensa } = sessao;
+  const dateKeySessao = dateKey;
 
   if (suspensa) {
     return (
@@ -155,7 +264,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               variant="outline"
               className="mt-2"
               onClick={() => {
-                setSessaoSuspensa(dateKey, assignment.dia, assignment.slot.inicio, false);
+                setSessaoSuspensa(dateKeySessao, assignment.dia, assignment.slot.inicio, false);
                 toast.success("Aula retomada.");
               }}
             >
@@ -166,6 +275,18 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
       </Card>
     );
   }
+
+  const gruposChamada = chamada.presencas
+    ? gruposFromPresencas(assignment.turma, chamada.presencas)
+    : null;
+  const subBlocosEfetivos: SubBloco[] | null = gruposChamada
+    ? buildSubBlocosComGrupos(assignment, config, gruposChamada)
+    : null;
+  const subBloco = subBlocosEfetivos?.[sessao.subBloco.indice] ?? sessao.subBloco;
+  const proximoSubBloco = subBlocosEfetivos?.[sessao.subBloco.indice + 1] ?? sessao.proximoSubBloco;
+
+  const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
+  const decorridos = totalSegundos - segundosRestantes;
 
   return (
     <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card">
@@ -195,7 +316,12 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
-                      setSessaoSuspensa(dateKey, assignment.dia, assignment.slot.inicio, true);
+                      setSessaoSuspensa(
+                        dateKeySessao,
+                        assignment.dia,
+                        assignment.slot.inicio,
+                        true,
+                      );
                       toast.success("Aula parada.");
                     }}
                   >
@@ -240,6 +366,11 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
             <div>
               <p className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
                 <Users className="size-3" /> Alunos nesta rodada ({subBloco.grupo.alunos.length})
+                {editable && gruposChamada ? (
+                  <span className="font-normal normal-case text-muted-foreground/70">
+                    · chamada de hoje
+                  </span>
+                ) : null}
               </p>
               <div className="flex flex-wrap gap-2">
                 {subBloco.grupo.alunos.map((aluno) => {
@@ -264,6 +395,26 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                       </span>
                       {aluno.nome}
                       {destacar ? <HeartHandshake className="size-3 text-primary" /> : null}
+                      {editable && gruposChamada ? (
+                        <button
+                          type="button"
+                          title="Marcar falta e chamar substituto"
+                          className="ml-0.5 flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          onClick={async () => {
+                            const substituto = await chamada.marcarFaltaDoAluno(
+                              aluno,
+                              subBloco.grupo.indice,
+                            );
+                            toast.success(
+                              substituto
+                                ? `${aluno.nome} marcado(a) como falta. ${substituto.nome} foi chamado(a) no lugar.`
+                                : `${aluno.nome} marcado(a) como falta.`,
+                            );
+                          }}
+                        >
+                          <UserX className="size-3" />
+                        </button>
+                      ) : null}
                     </span>
                   );
                 })}
@@ -272,6 +423,12 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                 <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                   <HeartHandshake className="size-3 text-primary" /> Alunos destacados precisam de
                   atendimento especializado — passe o mouse sobre o nome para ver as orientações.
+                </p>
+              ) : null}
+              {editable && gruposChamada ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Clique no ✕ ao lado do nome se o aluno faltou — o sistema chama automaticamente
+                  quem está há mais tempo sem participar.
                 </p>
               ) : null}
             </div>

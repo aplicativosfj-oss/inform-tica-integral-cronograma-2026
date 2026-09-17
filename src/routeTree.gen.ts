@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
+import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
 import { Route as DashboardTurmasIndexRouteImport } from './routes/dashboard/turmas/index'
@@ -50,6 +51,11 @@ const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
   path: '/dashboard/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardFrequenciaRoute = DashboardFrequenciaRouteImport.update({
+  id: '/dashboard/frequencia',
+  path: '/dashboard/frequencia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardGruposRoute = DashboardGruposRouteImport.update({
   id: '/dashboard/grupos',
   path: '/dashboard/grupos',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/alunos'
     | '/dashboard/configuracoes'
+    | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
     | '/dashboard/'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/alunos'
     | '/dashboard/configuracoes'
+    | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
     | '/dashboard'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/alunos'
     | '/dashboard/configuracoes'
+    | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
     | '/dashboard/'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
+  DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/frequencia': {
+      id: '/dashboard/frequencia'
+      path: '/dashboard/frequencia'
+      fullPath: '/dashboard/frequencia'
+      preLoaderRoute: typeof DashboardFrequenciaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/grupos': {
       id: '/dashboard/grupos'
       path: '/dashboard/grupos'
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
+  DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
   DashboardIndexRoute: DashboardIndexRoute,
