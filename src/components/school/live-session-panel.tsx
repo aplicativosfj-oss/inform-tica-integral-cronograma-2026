@@ -242,32 +242,33 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                 <Users className="size-3" /> Alunos nesta rodada ({subBloco.grupo.alunos.length})
               </p>
               <div className="flex flex-wrap gap-2">
-                {subBloco.grupo.alunos.map((aluno) => (
-                  <span
-                    key={aluno.id}
-                    title={aluno.necessidadeEspecial ? aluno.observacoesNecessidade : undefined}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-foreground",
-                      aluno.necessidadeEspecial
-                        ? "border-primary/50 bg-primary/10"
-                        : "border-border/60 bg-background",
-                    )}
-                  >
-                    <span className="flex size-5 items-center justify-center overflow-hidden rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">
-                      {aluno.foto ? (
-                        <img src={aluno.foto} alt="" className="size-full object-cover" />
-                      ) : (
-                        aluno.nome.charAt(0)
+                {subBloco.grupo.alunos.map((aluno) => {
+                  const destacar = editable && aluno.necessidadeEspecial;
+                  return (
+                    <span
+                      key={aluno.id}
+                      title={destacar ? aluno.observacoesNecessidade : undefined}
+                      className={cn(
+                        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-foreground",
+                        destacar
+                          ? "border-primary/50 bg-primary/10"
+                          : "border-border/60 bg-background",
                       )}
+                    >
+                      <span className="flex size-5 items-center justify-center overflow-hidden rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">
+                        {aluno.foto ? (
+                          <img src={aluno.foto} alt="" className="size-full object-cover" />
+                        ) : (
+                          aluno.nome.charAt(0)
+                        )}
+                      </span>
+                      {aluno.nome}
+                      {destacar ? <HeartHandshake className="size-3 text-primary" /> : null}
                     </span>
-                    {aluno.nome}
-                    {aluno.necessidadeEspecial ? (
-                      <HeartHandshake className="size-3 text-primary" />
-                    ) : null}
-                  </span>
-                ))}
+                  );
+                })}
               </div>
-              {subBloco.grupo.alunos.some((a) => a.necessidadeEspecial) ? (
+              {editable && subBloco.grupo.alunos.some((a) => a.necessidadeEspecial) ? (
                 <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                   <HeartHandshake className="size-3 text-primary" /> Alunos destacados precisam de
                   atendimento especializado — passe o mouse sobre o nome para ver as orientações.
