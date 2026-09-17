@@ -17,6 +17,13 @@ export const SEED_CONFIG: ScheduleConfig = {
   duracaoSlotMinutos: 60,
   duracaoGrupoMinutos: 30,
   numeroComputadores: 7,
+  conteudoPorDia: {
+    Segunda: "Introdução ao computador: partes, ligar/desligar e cuidados com os equipamentos",
+    Terça: "Digitação e edição de texto: teclado, maiúsculas, acentos e formatação básica",
+    Quarta: "Pesquisa escolar na internet: navegação segura e seleção de fontes confiáveis",
+    Quinta: "Jogos educativos e raciocínio lógico: sequências, padrões e resolução de problemas",
+    Sexta: "Produção criativa: desenho digital, apresentações e apresentação dos trabalhos",
+  },
 };
 
 export const SEED_TURMAS: Turma[] = [
