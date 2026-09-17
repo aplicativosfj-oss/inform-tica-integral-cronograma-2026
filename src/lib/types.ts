@@ -2,6 +2,16 @@ export interface Aluno {
   id: string;
   nome: string;
   foto?: string | undefined;
+  /** Grupo de revezamento ao qual o aluno pertence (opcional). */
+  grupoId?: string | undefined;
+}
+
+/** Grupo de revezamento cadastrado manualmente pelo administrador. */
+export interface Grupo {
+  id: string;
+  nome: string;
+  /** Conteúdo previsto para este grupo, exibido no cronômetro ao vivo. */
+  conteudo?: string | undefined;
 }
 
 export interface Turma {
@@ -11,6 +21,7 @@ export interface Turma {
   professorRegente: string;
   imagem?: string | undefined;
   alunos: Aluno[];
+  grupos?: Grupo[] | undefined;
 }
 
 export interface ScheduleConfig {

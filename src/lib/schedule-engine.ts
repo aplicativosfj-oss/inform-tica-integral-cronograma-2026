@@ -72,10 +72,36 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
 export interface GrupoRevezamento {
   indice: number;
   alunos: Aluno[];
+  nome?: string | undefined;
+  conteudo?: string | undefined;
 }
 
-/** Splits a turma's students into rotating groups limited by computer count. */
+/**
+ * Returns the rotating groups of a turma.
+ *
+ * When the administrator registered groups manually, those are used and each
+ * student is placed in the group chosen in the admin panel. Otherwise the
+ * students are split automatically by the number of computers available.
+ */
 export function buildGrupos(turma: Turma, config: ScheduleConfig): GrupoRevezamento[] {
+  const cadastrados = turma.grupos ?? [];
+
+  if (cadastrados.length > 0) {
+    const grupos: GrupoRevezamento[] = cadastrados.map((grupo, indice) => ({
+      indice,
+      nome: grupo.nome,
+      conteudo: grupo.conteudo,
+      alunos: turma.alunos.filter((aluno) => aluno.grupoId === grupo.id),
+    }));
+    const semGrupo = turma.alunos.filter(
+      (aluno) => !aluno.grupoId || !cadastrados.some((g) => g.id === aluno.grupoId),
+    );
+    if (semGrupo.length > 0) {
+      grupos.push({ indice: grupos.length, nome: "Sem grupo definido", alunos: semGrupo });
+    }
+    return grupos;
+  }
+
   const tamanho = Math.max(1, config.numeroComputadores);
   const grupos: GrupoRevezamento[] = [];
   for (let i = 0; i < turma.alunos.length; i += tamanho) {

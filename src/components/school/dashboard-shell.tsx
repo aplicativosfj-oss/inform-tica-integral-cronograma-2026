@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Settings2, Users2 } from "lucide-react";
+import { GraduationCap, Layers, LayoutDashboard, Settings2, Users2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { NavBar } from "@/components/school/nav-bar";
@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Visão geral", icon: LayoutDashboard },
   { to: "/dashboard/turmas", label: "Turmas e alunos", icon: Users2 },
+  { to: "/dashboard/grupos", label: "Turmas e grupos", icon: Layers },
+  { to: "/dashboard/alunos", label: "Alunos", icon: GraduationCap },
   { to: "/dashboard/configuracoes", label: "Configurações", icon: Settings2 },
 ] as const;
 
