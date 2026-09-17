@@ -22,8 +22,13 @@ export const SEED_CONFIG: ScheduleConfig = {
   diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
   horaInicio: "08:00",
   horaFim: "15:00",
-  intervaloInicio: "12:00",
-  intervaloFim: "13:00",
+  // Almoço + tempo de organização: as crianças voltam às 13:00 e levam de 5
+  // a 10 min para se acomodar, então a próxima aula só começa às 13:10.
+  intervaloInicio: "11:00",
+  intervaloFim: "13:10",
+  // Recreio da manhã, entre 10 e 15 min.
+  recreioInicio: "09:00",
+  recreioFim: "09:15",
   duracaoSlotMinutos: 60,
   duracaoGrupoMinutos: 30,
   numeroComputadores: 7,

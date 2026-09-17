@@ -83,7 +83,10 @@ function ConfiguracoesPage() {
           <CardHeader>
             <CardTitle className="text-base">Regras de revezamento</CardTitle>
             <CardDescription>
-              Como a agenda calcula os horários e o revezamento dos grupos automaticamente.
+              Como a agenda calcula os horários e o revezamento dos grupos automaticamente. A
+              primeira aula depois de um intervalo só começa quando ele termina — inclua na "Fim do
+              almoço/descanso" o tempo que as crianças levam para se organizar antes de vir para o
+              laboratório.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -102,18 +105,32 @@ function ConfiguracoesPage() {
                   onChange={(e) => set("horaFim", e.target.value)}
                 />
               </Field>
-              <Field label="Início do intervalo">
+              <Field label="Início do almoço/descanso">
                 <Input
                   type="time"
                   value={form.intervaloInicio}
                   onChange={(e) => set("intervaloInicio", e.target.value)}
                 />
               </Field>
-              <Field label="Fim do intervalo">
+              <Field label="Fim do almoço/descanso">
                 <Input
                   type="time"
                   value={form.intervaloFim}
                   onChange={(e) => set("intervaloFim", e.target.value)}
+                />
+              </Field>
+              <Field label="Início do recreio (opcional)">
+                <Input
+                  type="time"
+                  value={form.recreioInicio ?? ""}
+                  onChange={(e) => set("recreioInicio", e.target.value || undefined)}
+                />
+              </Field>
+              <Field label="Fim do recreio (opcional)">
+                <Input
+                  type="time"
+                  value={form.recreioFim ?? ""}
+                  onChange={(e) => set("recreioFim", e.target.value || undefined)}
                 />
               </Field>
               <Field label="Duração da janela por turma (min)">

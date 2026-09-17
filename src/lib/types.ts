@@ -44,8 +44,12 @@ export interface ScheduleConfig {
   diasSemana: string[];
   horaInicio: string;
   horaFim: string;
+  /** Almoço/descanso (o intervalo mais longo do dia). */
   intervaloInicio: string;
   intervaloFim: string;
+  /** Recreio da manhã — curto, opcional. Sem valor, o dia só tem o intervalo do almoço. */
+  recreioInicio?: string | undefined;
+  recreioFim?: string | undefined;
   duracaoSlotMinutos: number;
   duracaoGrupoMinutos: number;
   numeroComputadores: number;

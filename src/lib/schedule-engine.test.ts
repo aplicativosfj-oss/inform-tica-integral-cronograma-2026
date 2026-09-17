@@ -49,6 +49,21 @@ describe("buildDailySlots", () => {
       { inicio: "14:00", fim: "15:00" },
     ]);
   });
+
+  test("com recreio configurado, a aula seguinte começa exatamente quando o intervalo termina", () => {
+    const config = makeConfig({
+      horaFim: "15:00",
+      intervaloInicio: "11:00",
+      intervaloFim: "13:10",
+      recreioInicio: "09:00",
+      recreioFim: "09:15",
+    });
+    expect(buildDailySlots(config)).toEqual([
+      { inicio: "08:00", fim: "09:00" },
+      { inicio: "09:15", fim: "10:15" },
+      { inicio: "13:10", fim: "14:10" },
+    ]);
+  });
 });
 
 describe("buildWeeklySchedule", () => {

@@ -13,20 +13,39 @@ function toHHMM(totalMinutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-/** Builds the daily time slots (e.g. 08:00-09:00, ... skipping lunch break). */
+/**
+ * Builds the daily time slots (e.g. 08:00-09:00), skipping the lunch break
+ * and, when configured, the morning recess too.
+ *
+ * Rather than just discarding a slot that overlaps a break and continuing
+ * the fixed grid, the cursor jumps straight to the break's end — so the
+ * first class after lunch starts exactly when the break is over (e.g.
+ * 13:10 after a break that ends at 13:10) instead of waiting idle until the
+ * next round hour. That's what keeps the day humane: no slot ever starts
+ * before kids have actually had time to eat, rest and settle back in.
+ */
 export function buildDailySlots(config: ScheduleConfig): Slot[] {
   const slots: Slot[] = [];
-  const start = toMinutes(config.horaInicio);
   const end = toMinutes(config.horaFim);
-  const breakStart = toMinutes(config.intervaloInicio);
-  const breakEnd = toMinutes(config.intervaloFim);
   const step = config.duracaoSlotMinutos;
 
-  for (let cursor = start; cursor + step <= end; cursor += step) {
+  const pausas = [
+    { inicio: toMinutes(config.intervaloInicio), fim: toMinutes(config.intervaloFim) },
+    ...(config.recreioInicio && config.recreioFim
+      ? [{ inicio: toMinutes(config.recreioInicio), fim: toMinutes(config.recreioFim) }]
+      : []),
+  ].sort((a, b) => a.inicio - b.inicio);
+
+  let cursor = toMinutes(config.horaInicio);
+  while (cursor + step <= end) {
     const slotEnd = cursor + step;
-    const overlapsBreak = cursor < breakEnd && slotEnd > breakStart;
-    if (overlapsBreak) continue;
+    const pausaSobreposta = pausas.find((p) => cursor < p.fim && slotEnd > p.inicio);
+    if (pausaSobreposta) {
+      cursor = pausaSobreposta.fim;
+      continue;
+    }
     slots.push({ inicio: toHHMM(cursor), fim: toHHMM(slotEnd) });
+    cursor = slotEnd;
   }
   return slots;
 }
