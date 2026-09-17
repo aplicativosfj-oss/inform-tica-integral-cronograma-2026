@@ -1,7 +1,18 @@
-import { BookOpen, Clock3, MonitorPlay, Users, Volume2, VolumeX } from "lucide-react";
+import { BookOpen, Clock3, MonitorPlay, Square, Users, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +23,7 @@ import {
   buildWeeklySchedule,
   currentWeekdayLabel,
   findSessaoAtual,
+  toDateKey,
 } from "@/lib/schedule-engine";
 
 /**
@@ -68,8 +80,8 @@ function hhmmToSeconds(hhmm: string): number {
   return (Number(h ?? 0) * 60 + Number(m ?? 0)) * 60;
 }
 
-export function LiveSessionPanel() {
-  const { turmas, config } = useAppStore();
+export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
+  const { turmas, config, setSessaoSuspensa } = useAppStore();
   const now = useNow(true);
 
   if (!now) {
@@ -108,9 +120,42 @@ export function LiveSessionPanel() {
     );
   }
 
-  const { assignment, subBloco, segundosRestantes, proximoSubBloco } = sessao;
+  const { assignment, subBloco, segundosRestantes, proximoSubBloco, suspensa } = sessao;
   const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = totalSegundos - segundosRestantes;
+  const dateKey = toDateKey(now);
+
+  if (suspensa) {
+    return (
+      <Card className="border-dashed bg-muted/30">
+        <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
+          <Square className="size-8 text-muted-foreground" />
+          <p className="text-sm font-medium text-foreground">
+            Aula de {assignment.turma.serie} "{assignment.turma.letra}" parada pelo(a)
+            administrador(a)
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
+            {" · "}
+            {assignment.slot.inicio} – {assignment.slot.fim}
+          </p>
+          {editable ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="mt-2"
+              onClick={() => {
+                setSessaoSuspensa(dateKey, assignment.dia, assignment.slot.inicio, false);
+                toast.success("Aula retomada.");
+              }}
+            >
+              Retomar aula
+            </Button>
+          ) : null}
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card">
@@ -119,7 +164,38 @@ export function LiveSessionPanel() {
           <MonitorPlay className="size-5 text-primary" />
           Aula em andamento
         </CardTitle>
-        <Badge className="bg-primary text-primary-foreground">AO VIVO</Badge>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-primary text-primary-foreground">AO VIVO</Badge>
+          {editable ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="outline" className="text-destructive">
+                  <Square className="size-3.5" /> Parar aula
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Parar a aula em andamento?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    A aula de {assignment.turma.serie} "{assignment.turma.letra}" de hoje será
+                    interrompida. A programação das próximas semanas não é afetada.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      setSessaoSuspensa(dateKey, assignment.dia, assignment.slot.inicio, true);
+                      toast.success("Aula parada.");
+                    }}
+                  >
+                    Parar aula
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : null}
+        </div>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-start">

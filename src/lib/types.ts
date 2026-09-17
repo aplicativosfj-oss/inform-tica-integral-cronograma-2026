@@ -39,6 +39,18 @@ export interface ScheduleConfig {
   numeroComputadores: number;
   /** Conteúdo programático exibido no cronômetro, por dia da semana. */
   conteudoPorDia?: Record<string, string> | undefined;
+  /**
+   * Troca manual de turma para um horário fixo da grade semanal, feita pelo
+   * administrador na página de Programação. Chave: `${dia}|${slot.inicio}`,
+   * valor: id da turma que deve ocupar esse horário no lugar do rodízio
+   * automático.
+   */
+  slotOverrides?: Record<string, string> | undefined;
+  /**
+   * Aulas paradas pelo administrador para uma data específica (não repete nas
+   * semanas seguintes). Chave: `${data ISO}|${dia}|${slot.inicio}`.
+   */
+  suspensoes?: Record<string, true> | undefined;
 }
 
 export interface Slot {

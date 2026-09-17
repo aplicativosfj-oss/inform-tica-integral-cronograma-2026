@@ -16,6 +16,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
+import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
 import { Route as DashboardTurmasIndexRouteImport } from './routes/dashboard/turmas/index'
 import { Route as DashboardTurmasTurmaIdRouteImport } from './routes/dashboard/turmas/$turmaId'
 
@@ -54,6 +55,11 @@ const DashboardGruposRoute = DashboardGruposRouteImport.update({
   path: '/dashboard/grupos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
+  id: '/dashboard/programacao',
+  path: '/dashboard/programacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardTurmasIndexRoute = DashboardTurmasIndexRouteImport.update({
   id: '/dashboard/turmas/',
   path: '/dashboard/turmas/',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
+  '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
+  '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/dashboard/turmas': typeof DashboardTurmasIndexRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
+  '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/dashboard/alunos'
     | '/dashboard/configuracoes'
     | '/dashboard/grupos'
+    | '/dashboard/programacao'
     | '/dashboard/'
     | '/dashboard/turmas/$turmaId'
     | '/dashboard/turmas/'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/dashboard/alunos'
     | '/dashboard/configuracoes'
     | '/dashboard/grupos'
+    | '/dashboard/programacao'
     | '/dashboard'
     | '/dashboard/turmas/$turmaId'
     | '/dashboard/turmas'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/dashboard/alunos'
     | '/dashboard/configuracoes'
     | '/dashboard/grupos'
+    | '/dashboard/programacao'
     | '/dashboard/'
     | '/dashboard/turmas/$turmaId'
     | '/dashboard/turmas/'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   DashboardAlunosRoute: typeof DashboardAlunosRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
+  DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardTurmasTurmaIdRoute: typeof DashboardTurmasTurmaIdRoute
   DashboardTurmasIndexRoute: typeof DashboardTurmasIndexRoute
@@ -198,6 +211,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardGruposRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/programacao': {
+      id: '/dashboard/programacao'
+      path: '/dashboard/programacao'
+      fullPath: '/dashboard/programacao'
+      preLoaderRoute: typeof DashboardProgramacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/turmas/': {
       id: '/dashboard/turmas/'
       path: '/dashboard/turmas'
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardAlunosRoute: DashboardAlunosRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
   DashboardGruposRoute: DashboardGruposRoute,
+  DashboardProgramacaoRoute: DashboardProgramacaoRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardTurmasTurmaIdRoute: DashboardTurmasTurmaIdRoute,
   DashboardTurmasIndexRoute: DashboardTurmasIndexRoute,

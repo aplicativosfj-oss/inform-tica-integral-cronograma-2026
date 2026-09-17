@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { usePersistentState } from "@/lib/use-persistent-state";
+import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
 import type { Aluno, Grupo, ScheduleConfig, Turma } from "@/lib/types";
 
 interface AppState {
@@ -17,6 +18,10 @@ interface AppState {
   updateGrupo: (turmaId: string, grupoId: string, patch: Partial<Omit<Grupo, "id">>) => void;
   removeGrupo: (turmaId: string, grupoId: string) => void;
   updateConfig: (patch: Partial<ScheduleConfig>) => void;
+  /** Overrides which turma occupies a fixed weekly slot (Programação page). Pass `null` to restore the automatic rotation. */
+  setSlotOverride: (dia: string, slotInicio: string, turmaId: string | null) => void;
+  /** Stops (or resumes) the class scheduled for a specific date + slot, without affecting future weeks. */
+  setSessaoSuspensa: (dateISO: string, dia: string, slotInicio: string, suspensa: boolean) => void;
   resetToSeed: () => void;
 }
 
@@ -109,6 +114,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       updateConfig: (patch) => {
         setConfig((prev) => ({ ...prev, ...patch }));
+      },
+      setSlotOverride: (dia, slotInicio, turmaId) => {
+        setConfig((prev) => {
+          const key = slotKey(dia, slotInicio);
+          const next = { ...(prev.slotOverrides ?? {}) };
+          if (turmaId) {
+            next[key] = turmaId;
+          } else {
+            delete next[key];
+          }
+          return { ...prev, slotOverrides: next };
+        });
+      },
+      setSessaoSuspensa: (dateISO, dia, slotInicio, suspensa) => {
+        setConfig((prev) => {
+          const key = suspensaoKey(dateISO, dia, slotInicio);
+          const next = { ...(prev.suspensoes ?? {}) };
+          if (suspensa) {
+            next[key] = true;
+          } else {
+            delete next[key];
+          }
+          return { ...prev, suspensoes: next };
+        });
       },
       resetToSeed: () => {
         setTurmas(SEED_TURMAS);

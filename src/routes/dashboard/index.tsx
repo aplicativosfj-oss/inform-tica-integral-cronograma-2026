@@ -43,7 +43,7 @@ function DashboardHome() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <LiveSessionPanel />
+        <LiveSessionPanel editable />
 
         <Card>
           <CardHeader>
@@ -53,6 +53,11 @@ function DashboardHome() {
             <Button asChild variant="outline" className="justify-start">
               <Link to="/dashboard/turmas">
                 <Users2 /> Cadastrar turmas e alunos
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="justify-start">
+              <Link to="/dashboard/programacao">
+                <CalendarClock /> Editar programação da semana
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start">

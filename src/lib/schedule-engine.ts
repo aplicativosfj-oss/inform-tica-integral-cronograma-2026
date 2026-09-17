@@ -31,42 +31,61 @@ export function buildDailySlots(config: ScheduleConfig): Slot[] {
   return slots;
 }
 
+/** Key used to look up a manual override or suspension for a fixed weekly slot. */
+export function slotKey(dia: string, slotInicio: string): string {
+  return `${dia}|${slotInicio}`;
+}
+
+/** Key used to look up a one-off suspension of a specific date's session. */
+export function suspensaoKey(dateISO: string, dia: string, slotInicio: string): string {
+  return `${dateISO}|${slotKey(dia, slotInicio)}`;
+}
+
 /**
- * Automatically assigns one turma to each day+slot, cycling through the
- * registered turmas in round-robin order so every turma gets computer-lab
- * time spread across the week (no repeats on the same day when possible).
+ * Assigns one turma to each day+slot, cycling through the registered turmas
+ * in round-robin order so every turma gets computer-lab time spread across
+ * the week (no repeats on the same day when possible). The administrator can
+ * override individual slots from the Programação page (`config.slotOverrides`);
+ * those take precedence over the automatic rotation.
  */
 export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): Assignment[] {
   if (turmas.length === 0) return [];
   const slots = buildDailySlots(config);
-  const occurrenceCount = new Map<string, number>();
+  const turmasById = new Map(turmas.map((t) => [t.id, t]));
 
   interface Pending {
     dia: string;
     diaIndex: number;
     slot: Slot;
     turma: Turma;
-    ocorrenciaIndex: number;
   }
   const pending: Pending[] = [];
 
   let cursor = 0;
   config.diasSemana.forEach((dia, diaIndex) => {
     slots.forEach((slot) => {
-      const turma = turmas[cursor % turmas.length];
+      const overrideId = config.slotOverrides?.[slotKey(dia, slot.inicio)];
+      const turma =
+        (overrideId ? turmasById.get(overrideId) : undefined) ?? turmas[cursor % turmas.length];
       cursor += 1;
       if (!turma) return;
-      const ocorrenciaIndex = occurrenceCount.get(turma.id) ?? 0;
-      occurrenceCount.set(turma.id, ocorrenciaIndex + 1);
-      pending.push({ dia, diaIndex, slot, turma, ocorrenciaIndex });
+      pending.push({ dia, diaIndex, slot, turma });
     });
   });
 
-  // occurrenceCount now holds the final weekly session count per turma.
-  return pending.map((p) => ({
-    ...p,
-    sessoesPorSemana: occurrenceCount.get(p.turma.id) ?? 1,
-  }));
+  // Session counts are derived from the final (post-override) assignments so
+  // the group rotation in buildSubBlocos stays consistent for every turma.
+  const occurrenceCount = new Map<string, number>();
+  return pending
+    .map((p) => {
+      const ocorrenciaIndex = occurrenceCount.get(p.turma.id) ?? 0;
+      occurrenceCount.set(p.turma.id, ocorrenciaIndex + 1);
+      return { ...p, ocorrenciaIndex, sessoesPorSemana: 0 };
+    })
+    .map((assignment, _index, all) => ({
+      ...assignment,
+      sessoesPorSemana: all.filter((a) => a.turma.id === assignment.turma.id).length,
+    }));
 }
 
 export interface GrupoRevezamento {
@@ -181,6 +200,16 @@ export interface SessaoAtual {
   subBloco: SubBloco;
   segundosRestantes: number;
   proximoSubBloco?: SubBloco | undefined;
+  /** True when the administrator stopped this specific session for today. */
+  suspensa: boolean;
+}
+
+/** Formats a Date as the `YYYY-MM-DD` key used to identify "today" for suspensions. */
+export function toDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 /** Finds the class session (if any) happening right now, and the live countdown. */
@@ -201,6 +230,10 @@ export function findSessaoAtual(
   });
   if (!assignment) return null;
 
+  const suspensa = Boolean(
+    config.suspensoes?.[suspensaoKey(toDateKey(now), dia, assignment.slot.inicio)],
+  );
+
   const subBlocos = buildSubBlocos(assignment, config, getWeekIndex(now));
   const subBlocoIndex = subBlocos.findIndex((sb) => {
     const start = toMinutes(sb.inicio) * 60;
@@ -214,7 +247,7 @@ export function findSessaoAtual(
   const segundosRestantes = Math.max(0, fimSegundos - nowSeconds);
   const proximoSubBloco = subBlocos[subBlocoIndex + 1];
 
-  return { assignment, subBloco, segundosRestantes, proximoSubBloco };
+  return { assignment, subBloco, segundosRestantes, proximoSubBloco, suspensa };
 }
 
 export function formatCountdown(totalSeconds: number): string {
