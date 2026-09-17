@@ -26,6 +26,8 @@ export interface ScheduleConfig {
   duracaoSlotMinutos: number;
   duracaoGrupoMinutos: number;
   numeroComputadores: number;
+  /** Conteúdo programático exibido no cronômetro, por dia da semana. */
+  conteudoPorDia?: Record<string, string> | undefined;
 }
 
 export interface Slot {
