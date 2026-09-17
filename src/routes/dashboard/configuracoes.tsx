@@ -146,6 +146,28 @@ function ConfiguracoesPage() {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Conteúdo programático por dia</CardTitle>
+            <CardDescription>
+              Esse texto aparece no cronômetro ao vivo enquanto a turma está no laboratório.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {form.diasSemana.map((dia) => (
+              <Field key={dia} label={dia}>
+                <Input
+                  value={form.conteudoPorDia?.[dia] ?? ""}
+                  placeholder="Ex.: Digitação e edição de texto"
+                  onChange={(e) =>
+                    set("conteudoPorDia", { ...(form.conteudoPorDia ?? {}), [dia]: e.target.value })
+                  }
+                />
+              </Field>
+            ))}
+          </CardContent>
+        </Card>
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Button type="submit">
             <Save /> Salvar configurações

@@ -1,10 +1,15 @@
-import { Clock3, MonitorPlay, Timer, Users } from "lucide-react";
+import { BookOpen, Clock3, MonitorPlay, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TimerRing } from "@/components/school/timer-ring";
 import { useAppStore } from "@/lib/app-store";
-import { buildWeeklySchedule, findSessaoAtual, formatCountdown } from "@/lib/schedule-engine";
+import {
+  buildWeeklySchedule,
+  currentWeekdayLabel,
+  findSessaoAtual,
+} from "@/lib/schedule-engine";
 
 function useNow(enabled: boolean) {
   const [now, setNow] = useState<Date | null>(null);
@@ -15,6 +20,12 @@ function useNow(enabled: boolean) {
     return () => window.clearInterval(id);
   }, [enabled]);
   return now;
+}
+
+/** "08:30" -> 30600 seconds since midnight. */
+function hhmmToSeconds(hhmm: string): number {
+  const [h, m] = hhmm.split(":");
+  return (Number(h ?? 0) * 60 + Number(m ?? 0)) * 60;
 }
 
 export function LiveSessionPanel() {
@@ -31,6 +42,8 @@ export function LiveSessionPanel() {
     );
   }
 
+  const diaAtual = currentWeekdayLabel(now);
+  const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
   const assignments = buildWeeklySchedule(turmas, config);
   const sessao = findSessaoAtual(assignments, config, now);
 
@@ -45,12 +58,19 @@ export function LiveSessionPanel() {
             {" · "}
             {now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
           </p>
+          {conteudoDoDia ? (
+            <p className="mt-2 max-w-md text-xs text-muted-foreground">
+              Conteúdo previsto para hoje: {conteudoDoDia}
+            </p>
+          ) : null}
         </CardContent>
       </Card>
     );
   }
 
-  const { assignment, subBloco, segundosRestantes } = sessao;
+  const { assignment, subBloco, segundosRestantes, proximoSubBloco } = sessao;
+  const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
+  const decorridos = totalSegundos - segundosRestantes;
 
   return (
     <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card">
@@ -61,68 +81,72 @@ export function LiveSessionPanel() {
         </CardTitle>
         <Badge className="bg-primary text-primary-foreground">AO VIVO</Badge>
       </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        <div>
-          <p className="text-2xl font-semibold text-foreground">
-            {assignment.turma.serie} "{assignment.turma.letra}"
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Prof(a). regente: {assignment.turma.professorRegente} · Informática:{" "}
-            {config.professorInformatica}
-          </p>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border border-border/60 bg-background/60 p-3">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Horário</p>
-            <p className="text-sm font-medium text-foreground">
-              {subBloco.inicio} – {subBloco.fim}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border/60 bg-background/60 p-3">
-            <p className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-              <Users className="size-3" /> Grupo na sala
-            </p>
-            <p className="text-sm font-medium text-foreground">
-              Grupo {subBloco.grupo.indice + 1} ({subBloco.grupo.alunos.length} alunos)
-            </p>
-          </div>
-          <div className="col-span-2 rounded-lg border border-primary/30 bg-primary/5 p-3 sm:col-span-1">
-            <p className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">
-              <Timer className="size-3" /> Termina em
-            </p>
-            <p className="font-mono text-2xl font-bold tabular-nums text-primary">
-              {formatCountdown(segundosRestantes)}
-            </p>
-          </div>
-        </div>
-
-        {subBloco.grupo.alunos.length > 0 ? (
-          <div>
-            <p className="mb-2 text-xs font-medium text-muted-foreground">Alunos nesta rodada</p>
-            <div className="flex flex-wrap gap-2">
-              {subBloco.grupo.alunos.map((aluno) => (
-                <span
-                  key={aluno.id}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
-                >
-                  <span className="flex size-5 items-center justify-center overflow-hidden rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">
-                    {aluno.foto ? (
-                      <img src={aluno.foto} alt="" className="size-full object-cover" />
-                    ) : (
-                      aluno.nome.charAt(0)
-                    )}
-                  </span>
-                  {aluno.nome}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : (
+      <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="flex flex-col items-center gap-2 self-center lg:self-start">
+          <TimerRing decorridos={decorridos} total={totalSegundos} />
           <p className="text-xs text-muted-foreground">
-            Esta turma ainda não tem alunos cadastrados.
+            Grupo {subBloco.grupo.indice + 1} · {subBloco.inicio} – {subBloco.fim}
           </p>
-        )}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-5">
+          <div>
+            <p className="text-2xl font-semibold text-foreground">
+              {assignment.turma.serie} "{assignment.turma.letra}"
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Prof(a). regente: {assignment.turma.professorRegente} · Informática:{" "}
+              {config.professorInformatica}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+            <p className="flex items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground">
+              <BookOpen className="size-3" /> Conteúdo de hoje ({diaAtual})
+            </p>
+            <p className="mt-1 text-sm text-foreground">
+              {conteudoDoDia || "Nenhum conteúdo cadastrado para hoje."}
+            </p>
+          </div>
+
+          {subBloco.grupo.alunos.length > 0 ? (
+            <div>
+              <p className="mb-2 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                <Users className="size-3" /> Alunos nesta rodada (
+                {subBloco.grupo.alunos.length})
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {subBloco.grupo.alunos.map((aluno) => (
+                  <span
+                    key={aluno.id}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
+                  >
+                    <span className="flex size-5 items-center justify-center overflow-hidden rounded-full bg-secondary text-[10px] font-semibold text-secondary-foreground">
+                      {aluno.foto ? (
+                        <img src={aluno.foto} alt="" className="size-full object-cover" />
+                      ) : (
+                        aluno.nome.charAt(0)
+                      )}
+                    </span>
+                    {aluno.nome}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Esta turma ainda não tem alunos cadastrados.
+            </p>
+          )}
+
+          {proximoSubBloco ? (
+            <p className="text-xs text-muted-foreground">
+              A seguir: grupo {proximoSubBloco.grupo.indice + 1} às {proximoSubBloco.inicio} (
+              {proximoSubBloco.grupo.alunos.length} alunos)
+            </p>
+          ) : null}
+        </div>
       </CardContent>
     </Card>
   );
