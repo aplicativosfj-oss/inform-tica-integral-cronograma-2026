@@ -17,10 +17,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { useAppStore } from "@/lib/app-store";
-import heroImg from "@/assets/hero-education.jpg";
-import scheduleImg from "@/assets/feature-schedule.jpg";
-import networkImg from "@/assets/feature-network.jpg";
-import workspaceImg from "@/assets/feature-workspace.jpg";
+import heroImg from "@/assets/hero-lab-photo.jpg";
+import scheduleImg from "@/assets/feature-classroom-tech.jpg";
+import networkImg from "@/assets/feature-tools.jpg";
+import workspaceImg from "@/assets/feature-kids-learning.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -112,9 +112,9 @@ function Index() {
             <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" aria-hidden />
             <img
               src={heroImg}
-              alt="Ilustração de tecnologia educacional com laptop, calendário e símbolos de aprendizagem"
-              width={1344}
-              height={1024}
+              alt="Alunos usando os computadores do laboratório de informática da escola"
+              width={1600}
+              height={900}
               className="relative rounded-2xl border border-border/60 bg-card shadow-2xl"
               loading="eager"
               decoding="async"
