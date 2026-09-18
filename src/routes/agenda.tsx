@@ -90,7 +90,7 @@ function AgendaPage() {
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
         />
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
           <div className="flex flex-col gap-1.5">
             <Badge variant="secondary" className="w-fit gap-1.5">
               <CalendarDays className="size-3.5" /> Agenda semanal
@@ -106,8 +106,8 @@ function AgendaPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="mb-6">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <div className="mb-4">
           <LiveSessionPanel />
         </div>
 
@@ -136,7 +136,7 @@ function AgendaPage() {
 
         {assignmentsDoDia.length === 0 ? (
           <Card className="border-dashed">
-            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            <CardContent className="py-6 text-center text-sm text-muted-foreground">
               Nenhuma turma programada para {diaSelecionado}.
             </CardContent>
           </Card>

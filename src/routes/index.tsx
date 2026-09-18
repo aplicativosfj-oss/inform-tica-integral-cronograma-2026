@@ -131,20 +131,20 @@ function Index() {
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-16 -z-10 size-56 rotate-45 bg-amber-400/25"
           />
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-14">
+          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
-              <Badge variant="secondary" className="mb-4 gap-1.5">
+              <Badge variant="secondary" className="mb-3 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
               </Badge>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                 Informática na <span className="text-primary">Escola</span>
               </h1>
-              <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
+              <p className="mt-3 max-w-xl text-base text-muted-foreground sm:text-lg">
                 Cronograma automático por turma, revezamento justo entre alunos nos{" "}
                 {config.numeroComputadores} computadores e cronômetro ao vivo — com o professor{" "}
                 {config.professorInformatica}.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-5 flex flex-wrap gap-3">
                 <Button asChild size="lg">
                   <Link to="/agenda">
                     <CalendarClock /> Ver agenda da semana
@@ -157,7 +157,7 @@ function Index() {
                 </Button>
               </div>
 
-              <dl className="mt-8 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
+              <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
                 <div>
                   <dt className="text-xs text-muted-foreground">Turmas</dt>
                   {isReady ? (
@@ -226,7 +226,7 @@ function Index() {
           </div>
         </section>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+        <RevealSection className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
           <div className="group overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl">
             <img
               src={laboratorioTurmaFotoImg}
@@ -243,17 +243,17 @@ function Index() {
           </p>
         </RevealSection>
 
-        <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
+        <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6">
           <NovoCronogramaBanner />
-          <div className="grid gap-4 lg:grid-cols-[1fr_1.6fr] lg:items-start">
+          <div className="grid gap-3 lg:grid-cols-[1fr_1.6fr] lg:items-start">
             <WeatherWidget />
             <LiveSessionPanel />
           </div>
           <ProximasTurmasPanel />
         </section>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-          <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
               <h2 className="text-2xl font-semibold text-foreground">
                 Como a agenda organiza tudo
@@ -309,9 +309,9 @@ function Index() {
           </div>
         </RevealSection>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-          <div className="mb-5 max-w-2xl">
-            <Badge variant="secondary" className="mb-3 gap-1.5">
+        <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <div className="mb-4 max-w-2xl">
+            <Badge variant="secondary" className="mb-2 gap-1.5">
               <CalendarDays className="size-3.5" /> Grade completa
             </Badge>
             <h2 className="text-2xl font-semibold text-foreground">
@@ -344,9 +344,9 @@ function Index() {
         <ProgramacaoSemanalDestaque />
 
         <section className="border-t border-border/60 bg-muted/30">
-          <div className="mx-auto max-w-6xl px-4 py-8 text-center sm:px-6">
-            <GraduationCap className="mx-auto size-8 text-primary" />
-            <h2 className="mt-3 text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
+          <div className="mx-auto max-w-6xl px-4 py-6 text-center sm:px-6">
+            <GraduationCap className="mx-auto size-7 text-primary" />
+            <h2 className="mt-2 text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               INEP {config.inep} · {config.endereco}
             </p>
@@ -548,7 +548,7 @@ function ProgramacaoSemanalDestaque() {
   if (turmas.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-10 sm:py-12">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-8 sm:py-10">
       {/* Ilustração de fundo, bem discreta — só textura, sem competir com os cards de vidro. */}
       <div
         aria-hidden
@@ -566,8 +566,8 @@ function ProgramacaoSemanalDestaque() {
       />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-8 max-w-2xl">
-          <Badge className="mb-4 gap-1.5 border-white/20 bg-white/10 text-white backdrop-blur">
+        <div className="mb-5 max-w-2xl">
+          <Badge className="mb-3 gap-1.5 border-white/20 bg-white/10 text-white backdrop-blur">
             <Sparkles className="size-3.5" /> Programação da semana
           </Badge>
           <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
@@ -604,7 +604,7 @@ function ProgramacaoSemanalDestaque() {
           })}
         </div>
 
-        <p className="mb-6 flex items-center gap-1.5 text-sm text-blue-100/80">
+        <p className="mb-4 flex items-center gap-1.5 text-sm text-blue-100/80">
           <CalendarDays className="size-4" />
           {diaSelecionado}, {dataFormatada}
           {diaSelecionado === todayLabel ? (

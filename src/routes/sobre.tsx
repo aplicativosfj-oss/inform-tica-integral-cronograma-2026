@@ -62,14 +62,14 @@ function SobrePage() {
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
         />
-        <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 lg:py-20">
-          <Badge variant="secondary" className="mb-4 gap-1.5">
+        <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6 lg:py-12">
+          <Badge variant="secondary" className="mb-3 gap-1.5">
             <Sparkles className="size-3.5" /> Sobre a plataforma
           </Badge>
           <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Agenda de Informática
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-balance text-base text-muted-foreground sm:text-lg">
+          <p className="mx-auto mt-3 max-w-2xl text-balance text-base text-muted-foreground sm:text-lg">
             Uma plataforma criada para organizar, com transparência e justiça, as aulas de
             informática da {config.nomeEscola}.
           </p>
@@ -77,7 +77,7 @@ function SobrePage() {
       </section>
 
       {/* Banner institucional da escola */}
-      <section className="mx-auto max-w-4xl px-4 pt-10 sm:px-6">
+      <section className="mx-auto max-w-4xl px-4 pt-6 sm:px-6">
         <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
           <img
             src={bannerEscolaImg}
@@ -92,8 +92,8 @@ function SobrePage() {
       </section>
 
       {/* Para que serve */}
-      <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        <div className="mb-8 text-center">
+      <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+        <div className="mb-5 text-center">
           <h2 className="text-2xl font-semibold text-foreground">Para que serve</h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
             O laboratório de informática tem um número limitado de computadores e várias turmas para
@@ -101,15 +101,15 @@ function SobrePage() {
             automática e justa.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2">
           <Card>
-            <CardHeader className="pb-2">
-              <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <MonitorSmartphone className="size-5" />
+            <CardHeader className="p-4 pb-1.5">
+              <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <MonitorSmartphone className="size-4" />
               </span>
               <CardTitle className="text-base">Cronograma automático</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               <p className="text-sm text-muted-foreground">
                 Distribui todas as turmas nos horários disponíveis da semana, respeitando o
                 intervalo do almoço, o recreio e o número de computadores do laboratório.
@@ -117,13 +117,13 @@ function SobrePage() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <RefreshCcw className="size-5" />
+            <CardHeader className="p-4 pb-1.5">
+              <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <RefreshCcw className="size-4" />
               </span>
               <CardTitle className="text-base">Revezamento justo</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               <p className="text-sm text-muted-foreground">
                 Divide cada turma em grupos e faz o rodízio entre eles semana a semana, priorizando
                 quem está há mais tempo sem participar — sem repetir e sem deixar ninguém de fora.
@@ -131,13 +131,13 @@ function SobrePage() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <ShieldCheck className="size-5" />
+            <CardHeader className="p-4 pb-1.5">
+              <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <ShieldCheck className="size-4" />
               </span>
               <CardTitle className="text-base">Transparência pública</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               <p className="text-sm text-muted-foreground">
                 Qualquer pessoa — pais, professores(as) regentes e a coordenação — pode consultar a
                 agenda e ver exatamente qual turma tem aula, em qual data e horário.
@@ -145,13 +145,13 @@ function SobrePage() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <span className="mb-2 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <GraduationCap className="size-5" />
+            <CardHeader className="p-4 pb-1.5">
+              <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <GraduationCap className="size-4" />
               </span>
               <CardTitle className="text-base">Frequência e reprogramação</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               <p className="text-sm text-muted-foreground">
                 Registra presenças e faltas de cada aula e permite reprogramar automaticamente uma
                 sessão perdida, sem bagunçar o rodízio das semanas seguintes.
@@ -181,8 +181,8 @@ function SobrePage() {
 
       {/* GCompris */}
       <section className="border-t border-border/60 bg-muted/30">
-        <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+          <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
             <div>
               <Badge variant="secondary" className="mb-3 gap-1.5">
                 <BookOpen className="size-3.5" /> Ferramenta pedagógica
@@ -224,8 +224,8 @@ function SobrePage() {
       </section>
 
       {/* Professor */}
-      <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        <div className="mb-6 text-center">
+      <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+        <div className="mb-4 text-center">
           <Badge variant="secondary" className="mb-3 gap-1.5">
             <UserRound className="size-3.5" /> Quem leciona
           </Badge>
@@ -234,7 +234,7 @@ function SobrePage() {
           </h2>
         </div>
         <Card>
-          <CardContent className="py-6">
+          <CardContent className="p-4">
             <p className="text-sm leading-relaxed text-muted-foreground">
               O professor <strong className="text-foreground">Franc D&apos;nis</strong> faz parte do
               quadro efetivo da {config.nomeEscola} desde{" "}
@@ -254,7 +254,7 @@ function SobrePage() {
       </section>
 
       {/* Cartaz oficial */}
-      <section className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
+      <section className="mx-auto max-w-4xl px-4 pb-8 sm:px-6">
         <div className="mx-auto max-w-sm">
           <a
             href={cartazAulasImg}
@@ -280,7 +280,7 @@ function SobrePage() {
 
       {/* Contato */}
       <section className="border-t border-border/60 bg-muted/30">
-        <div className="mx-auto max-w-4xl px-4 py-12 text-center sm:px-6">
+        <div className="mx-auto max-w-4xl px-4 py-8 text-center sm:px-6">
           <Badge variant="secondary" className="mb-3 gap-1.5">
             <Mail className="size-3.5" /> Contato
           </Badge>

@@ -139,7 +139,7 @@ function CoordenacaoPage() {
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
         />
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
           <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
             Calendário das aulas de informática, participação por turma e grupo e histórico de
@@ -148,9 +148,8 @@ function CoordenacaoPage() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-
-        <Card className="mb-6">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <Card className="mb-4">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <CalendarDays className="size-4" /> Calendário da semana
@@ -190,7 +189,7 @@ function CoordenacaoPage() {
           </CardContent>
         </Card>
 
-        <div className="mb-6 flex flex-wrap items-end gap-3">
+        <div className="mb-4 flex flex-wrap items-end gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="mes">Mês</Label>
             <Input
@@ -204,37 +203,37 @@ function CoordenacaoPage() {
         </div>
 
         {erro ? (
-          <p className="mb-6 text-sm text-destructive">
+          <p className="mb-4 text-sm text-destructive">
             Não foi possível carregar a frequência agora: {erro}
           </p>
         ) : null}
 
-        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+        <div className="mb-4 grid gap-3 sm:grid-cols-2">
           <Card>
-            <CardHeader className="flex flex-row items-center gap-2 pb-2">
+            <CardHeader className="flex flex-row items-center gap-2 p-4 pb-1.5">
               <UserCheck className="size-4 text-primary" />
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Participações no mês
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               <p className="text-2xl font-semibold text-foreground">{participacoes}</p>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="flex flex-row items-center gap-2 pb-2">
+            <CardHeader className="flex flex-row items-center gap-2 p-4 pb-1.5">
               <UserX className="size-4 text-destructive" />
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Faltas no mês
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 pt-0">
               <p className="text-2xl font-semibold text-foreground">{faltas.length}</p>
             </CardContent>
           </Card>
         </div>
 
-        <Card className="mb-6">
+        <Card className="mb-4">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <ClipboardList className="size-4" /> Presença por turma e grupo

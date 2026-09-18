@@ -66,7 +66,7 @@ function LoginPage() {
       />
       <div className="relative z-10">
         <NavBar />
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center px-4 py-12">
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center px-4 py-8">
           <Card className="w-full backdrop-blur-sm">
             <CardHeader className="items-center text-center">
               <span className="mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">

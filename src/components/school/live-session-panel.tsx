@@ -395,7 +395,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   if (!now) {
     return (
       <Card className="border-dashed" role="status" aria-label="Carregando relógio da aula">
-        <CardContent className="flex flex-col items-center gap-2 py-10">
+        <CardContent className="flex flex-col items-center gap-2 py-6">
           <div className="size-8 animate-pulse rounded-full bg-muted-foreground/15" />
           <div className="h-4 w-40 animate-pulse rounded bg-muted-foreground/15" />
         </CardContent>
@@ -406,7 +406,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   if (!sessao) {
     return (
       <Card className="border-dashed bg-muted/30">
-        <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
+        <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
           <Clock3 className="size-8 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">Nenhuma aula de informática agora</p>
           <p className="text-xs text-muted-foreground">
@@ -430,7 +430,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   if (suspensa) {
     return (
       <Card className="border-dashed bg-muted/30">
-        <CardContent className="flex flex-col items-center gap-2 py-10 text-center">
+        <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
           <Square className="size-8 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">
             Aula de {assignment.turma.serie} "{assignment.turma.letra}" parada pelo(a)
