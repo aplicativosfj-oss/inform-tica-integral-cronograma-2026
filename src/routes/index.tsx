@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
+import { SiteFooter } from "@/components/school/site-footer";
 import { WeeklyScheduleGraphic } from "@/components/school/weekly-schedule-graphic";
 import { useAppStore } from "@/lib/app-store";
 import {
@@ -236,6 +237,8 @@ function Index() {
           </p>
         </div>
       </section>
+
+      <SiteFooter />
       </div>
     </div>
   );

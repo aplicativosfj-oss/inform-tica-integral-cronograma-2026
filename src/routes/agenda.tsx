@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
+import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import {
   buildGrupos,
@@ -175,6 +176,8 @@ function AgendaPage() {
           </div>
         )}
       </div>
+
+      <SiteFooter />
 
       <PreviaAlunosDialog
         assignment={assignmentSelecionado}

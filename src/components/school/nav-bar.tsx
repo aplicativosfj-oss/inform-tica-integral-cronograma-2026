@@ -32,6 +32,9 @@ export function NavBar() {
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/coordenacao">Coordenação</Link>
           </Button>
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <Link to="/sobre">Sobre</Link>
+          </Button>
           {isReady && isAuthenticated ? (
             <>
               <Button asChild variant="ghost" size="sm">

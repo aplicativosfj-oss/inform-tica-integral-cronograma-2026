@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TvRouteImport } from './routes/tv'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
@@ -43,6 +44,11 @@ const CoordenacaoRoute = CoordenacaoRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TvRoute = TvRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AgendaRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
+  '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AgendaRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
+  '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/agenda': typeof AgendaRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
+  '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/coordenacao'
     | '/login'
+    | '/sobre'
     | '/tv'
     | '/dashboard/alunos'
     | '/dashboard/aulas'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/coordenacao'
     | '/login'
+    | '/sobre'
     | '/tv'
     | '/dashboard/alunos'
     | '/dashboard/aulas'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/coordenacao'
     | '/login'
+    | '/sobre'
     | '/tv'
     | '/dashboard/alunos'
     | '/dashboard/aulas'
@@ -212,6 +224,7 @@ export interface RootRouteChildren {
   AgendaRoute: typeof AgendaRoute
   CoordenacaoRoute: typeof CoordenacaoRoute
   LoginRoute: typeof LoginRoute
+  SobreRoute: typeof SobreRoute
   TvRoute: typeof TvRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
   DashboardAulasRoute: typeof DashboardAulasRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tv': {
@@ -340,6 +360,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgendaRoute: AgendaRoute,
   CoordenacaoRoute: CoordenacaoRoute,
   LoginRoute: LoginRoute,
+  SobreRoute: SobreRoute,
   TvRoute: TvRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
   DashboardAulasRoute: DashboardAulasRoute,

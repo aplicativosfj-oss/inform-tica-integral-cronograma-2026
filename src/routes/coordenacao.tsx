@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NavBar } from "@/components/school/nav-bar";
+import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { buildWeeklySchedule, toDateKey } from "@/lib/schedule-engine";
@@ -310,6 +311,7 @@ function CoordenacaoPage() {
           </CardContent>
         </Card>
       </main>
+      <SiteFooter />
     </div>
   );
 }
