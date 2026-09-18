@@ -46,6 +46,27 @@ interface AppState {
 
 const AppContext = createContext<AppState | null>(null);
 
+interface AppStatePayload {
+  turmas: Turma[];
+  config: ScheduleConfig;
+}
+
+/** Envia o cadastro completo (turmas, grupos, alunos, aulas) ao banco. */
+async function enviarAppState(payload: AppStatePayload): Promise<void> {
+  const { error } = await supabase.from("app_state").upsert({
+    id: ROW_ID,
+    turmas: payload.turmas,
+    config: payload.config,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+}
+
+// Reenvio automático do cadastro guardado enquanto a internet estava fora.
+registrarExecutor("app_state", async (payload) => {
+  await enviarAppState(payload as AppStatePayload);
+});
+
 function generateId(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
