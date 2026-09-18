@@ -9,6 +9,7 @@ import {
   findSessaoAtual,
   formatCountdown,
   getWeekIndex,
+  proximasDatasDoDia,
 } from "@/lib/schedule-engine";
 import type { Aluno, ScheduleConfig, Turma } from "@/lib/types";
 
@@ -204,6 +205,25 @@ describe("getWeekIndex", () => {
     const semana1 = new Date(2026, 8, 14);
     const semana2 = new Date(2026, 8, 21);
     expect(getWeekIndex(semana2)).toBe(getWeekIndex(semana1) + 1);
+  });
+});
+
+describe("proximasDatasDoDia", () => {
+  test("retorna as próximas N datas reais do dia da semana, uma por semana", () => {
+    const segunda14 = new Date(2026, 8, 14); // segunda-feira
+    const datas = proximasDatasDoDia("Segunda", segunda14, 3);
+    expect(datas.map((d) => d.getDate())).toEqual([14, 21, 28]);
+    for (const d of datas) expect(currentWeekdayLabel(d)).toBe("Segunda");
+  });
+
+  test("a partir de uma data que não é o dia pedido, começa na próxima ocorrência", () => {
+    const quarta16 = new Date(2026, 8, 16); // quarta-feira
+    const datas = proximasDatasDoDia("Sexta", quarta16, 2);
+    expect(datas.map((d) => d.getDate())).toEqual([18, 25]);
+  });
+
+  test("quantidade zero retorna lista vazia", () => {
+    expect(proximasDatasDoDia("Segunda", new Date(2026, 8, 14), 0)).toEqual([]);
   });
 });
 

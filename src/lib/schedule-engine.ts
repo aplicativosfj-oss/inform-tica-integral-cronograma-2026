@@ -101,9 +101,7 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
     if (!turma) continue;
     const diaIndex = Math.max(0, config.diasSemana.indexOf(aula.dia));
     const slot: Slot = { inicio: aula.inicio, fim: aula.fim };
-    const existente = pending.findIndex(
-      (p) => p.dia === aula.dia && p.slot.inicio === aula.inicio,
-    );
+    const existente = pending.findIndex((p) => p.dia === aula.dia && p.slot.inicio === aula.inicio);
     const item: Pending = {
       dia: aula.dia,
       diaIndex,
@@ -430,4 +428,20 @@ export function proximaDataDoDia(dia: string, from: Date): Date {
     if (currentWeekdayLabel(data) === dia) return data;
   }
   return from;
+}
+
+/**
+ * Next `quantidade` real calendar dates for a given weekday label, one per
+ * week starting from the nearest match — e.g. for "Segunda" a partir de
+ * hoje: [22/09, 29/09, 06/10, ...]. Used to show the public exactly which
+ * dates a turma's weekly slot falls on next, not just the recurring weekday
+ * name.
+ */
+export function proximasDatasDoDia(dia: string, from: Date, quantidade: number): Date[] {
+  const primeira = proximaDataDoDia(dia, from);
+  return Array.from({ length: Math.max(0, quantidade) }, (_, i) => {
+    const data = new Date(primeira);
+    data.setDate(data.getDate() + i * 7);
+    return data;
+  });
 }

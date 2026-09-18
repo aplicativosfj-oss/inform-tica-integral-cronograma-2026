@@ -14,6 +14,7 @@ import {
   buildWeeklySchedule,
   currentWeekdayLabel,
   proximaDataDoDia,
+  proximasDatasDoDia,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 
@@ -49,6 +50,15 @@ function AgendaPage() {
     .filter((a) => a.dia === diaSelecionado)
     .sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
   const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
+  const dataDoDiaFormatada = dataDoDia.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+  });
+  const dataCurta = (dia: string) =>
+    proximaDataDoDia(dia, new Date()).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+    });
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,19 +83,27 @@ function AgendaPage() {
         </div>
 
         <Tabs value={diaSelecionado} onValueChange={setDiaSelecionado}>
-          <TabsList className="mb-5 flex h-auto flex-wrap justify-start gap-1.5 bg-transparent p-0">
+          <TabsList className="mb-3 flex h-auto flex-wrap justify-start gap-1.5 bg-transparent p-0">
             {config.diasSemana.map((dia) => (
               <TabsTrigger
                 key={dia}
                 value={dia}
-                className="rounded-full border border-border/60 px-4 py-1.5 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="flex-col gap-0 rounded-xl border border-border/60 px-4 py-1.5 leading-tight data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
-                {dia}
-                {dia === todayLabel ? " · hoje" : ""}
+                <span>
+                  {dia}
+                  {dia === todayLabel ? " · hoje" : ""}
+                </span>
+                <span className="font-mono text-[10px] opacity-70">{dataCurta(dia)}</span>
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
+
+        <p className="mb-5 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <CalendarDays className="size-4" />
+          {diaSelecionado}, {dataDoDiaFormatada}
+        </p>
 
         {assignmentsDoDia.length === 0 ? (
           <Card className="border-dashed">

@@ -1,11 +1,11 @@
-import { HeartHandshake } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CalendarClock, HeartHandshake } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAppStore } from "@/lib/app-store";
 import { fetchUltimaParticipacao } from "@/lib/presencas";
-import { selecionarAlunosDoDia } from "@/lib/schedule-engine";
+import { proximasDatasDoDia, selecionarAlunosDoDia } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 
 /**
@@ -32,6 +32,16 @@ export function PreviaAlunosDialog({
   );
   const [carregando, setCarregando] = useState(false);
   const [semDadosDeFrequencia, setSemDadosDeFrequencia] = useState(false);
+
+  // Próximas datas reais (não só o nome do dia da semana) em que esta turma
+  // volta a ter aula neste mesmo horário, para o público saber exatamente
+  // quando — não só "toda Segunda", mas "dia 22/09, 29/09...".
+  const proximasDatas = useMemo(() => {
+    if (!assignment) return [];
+    const depoisDesta = new Date(data);
+    depoisDesta.setDate(depoisDesta.getDate() + 1);
+    return proximasDatasDoDia(assignment.dia, depoisDesta, 4);
+  }, [assignment, data]);
 
   useEffect(() => {
     if (!assignment) {
@@ -82,6 +92,16 @@ export function PreviaAlunosDialog({
               Horário: {assignment.slot.inicio} – {assignment.slot.fim} · Prof(a).{" "}
               {assignment.turma.professorRegente}
             </p>
+
+            {proximasDatas.length > 0 ? (
+              <p className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                <CalendarClock className="size-3.5 shrink-0 text-primary" />
+                Próximas datas desta turma nesse horário:{" "}
+                {proximasDatas
+                  .map((d) => d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }))
+                  .join(", ")}
+              </p>
+            ) : null}
             {carregando ? (
               <p className="text-sm text-muted-foreground">Calculando quem vai participar...</p>
             ) : grupos && grupos.some((g) => g.alunos.length > 0) ? (
