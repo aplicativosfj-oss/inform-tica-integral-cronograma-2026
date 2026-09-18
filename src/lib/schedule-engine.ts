@@ -1,4 +1,4 @@
-import type { Aluno, Assignment, ScheduleConfig, Slot, Turma } from "@/lib/types";
+import type { Aluno, Assignment, Presenca, ScheduleConfig, Slot, Turma } from "@/lib/types";
 
 function toMinutes(hhmm: string): number {
   const parts = hhmm.split(":");
@@ -58,6 +58,28 @@ export function slotKey(dia: string, slotInicio: string): string {
 /** Key used to look up a one-off suspension of a specific date's session. */
 export function suspensaoKey(dateISO: string, dia: string, slotInicio: string): string {
   return `${dateISO}|${slotKey(dia, slotInicio)}`;
+}
+
+/**
+ * Applies any date-specific turma exceptions (`config.excecoesPorData`) to a
+ * list of assignments, swapping in the override turma for the slots that
+ * match `dateISO` exactly — every other day/slot is left untouched, so the
+ * exception naturally only affects that one calendar date.
+ */
+export function aplicarExcecoesDeData(
+  assignments: Assignment[],
+  config: ScheduleConfig,
+  turmas: Turma[],
+  dateISO: string,
+): Assignment[] {
+  const excecoes = config.excecoesPorData;
+  if (!excecoes) return assignments;
+  const turmasById = new Map(turmas.map((t) => [t.id, t]));
+  return assignments.map((a) => {
+    const turmaId = excecoes[suspensaoKey(dateISO, a.dia, a.slot.inicio)];
+    const turma = turmaId ? turmasById.get(turmaId) : undefined;
+    return turma ? { ...a, turma } : a;
+  });
 }
 
 /**
@@ -240,6 +262,30 @@ export function selecionarAlunosDoDia(
   }
   if (grupos.length === 0) grupos.push({ indice: 0, alunos: [] });
   return { grupos, totalSelecionado: selecionados.length };
+}
+
+/**
+ * Turns a day's `presencas` rows into display groups — the same shape
+ * `selecionarAlunosDoDia` produces, but reflecting whatever was actually
+ * registered for that date (including any manual exception with fewer
+ * students, or substitutions already applied) instead of a fresh
+ * recalculation.
+ */
+export function gruposFromPresencas(turma: Turma, presencas: Presenca[]): GrupoRevezamento[] {
+  const porGrupo = new Map<number, Aluno[]>();
+  for (const p of presencas) {
+    if (p.status === "faltou") continue;
+    const aluno: Aluno = turma.alunos.find((a) => a.id === p.alunoId) ?? {
+      id: p.alunoId,
+      nome: p.alunoNome,
+    };
+    const lista = porGrupo.get(p.grupoIndice) ?? [];
+    lista.push(aluno);
+    porGrupo.set(p.grupoIndice, lista);
+  }
+  return [...porGrupo.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([indice, alunos]) => ({ indice, alunos }));
 }
 
 /**

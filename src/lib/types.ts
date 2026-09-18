@@ -67,6 +67,13 @@ export interface ScheduleConfig {
    * semanas seguintes). Chave: `${data ISO}|${dia}|${slot.inicio}`.
    */
   suspensoes?: Record<string, true> | undefined;
+  /**
+   * Troca pontual de turma válida só para UMA data específica — diferente de
+   * `slotOverrides`, que repete toda semana. Usada para exceções (ex: "só
+   * amanhã, esse horário é de outra turma"). Some sozinha depois do dia
+   * passar. Chave: `${data ISO}|${dia}|${slot.inicio}`, valor: id da turma.
+   */
+  excecoesPorData?: Record<string, string> | undefined;
 }
 
 export interface Slot {

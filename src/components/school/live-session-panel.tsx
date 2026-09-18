@@ -39,14 +39,15 @@ import {
   registrarPresencasIniciais,
 } from "@/lib/presencas";
 import {
+  aplicarExcecoesDeData,
   buildSubBlocosComGrupos,
   buildWeeklySchedule,
   currentWeekdayLabel,
   escolherSubstituto,
   findSessaoAtual,
+  gruposFromPresencas,
   selecionarAlunosDoDia,
   toDateKey,
-  type GrupoRevezamento,
   type SubBloco,
 } from "@/lib/schedule-engine";
 import type { Aluno, Presenca, ScheduleConfig, Turma } from "@/lib/types";
@@ -103,23 +104,6 @@ function useNow(enabled: boolean) {
 function hhmmToSeconds(hhmm: string): number {
   const [h, m] = hhmm.split(":");
   return (Number(h ?? 0) * 60 + Number(m ?? 0)) * 60;
-}
-
-function gruposFromPresencas(turma: Turma, presencas: Presenca[]): GrupoRevezamento[] {
-  const porGrupo = new Map<number, Aluno[]>();
-  for (const p of presencas) {
-    if (p.status === "faltou") continue;
-    const aluno: Aluno = turma.alunos.find((a) => a.id === p.alunoId) ?? {
-      id: p.alunoId,
-      nome: p.alunoNome,
-    };
-    const lista = porGrupo.get(p.grupoIndice) ?? [];
-    lista.push(aluno);
-    porGrupo.set(p.grupoIndice, lista);
-  }
-  return [...porGrupo.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([indice, alunos]) => ({ indice, alunos }));
 }
 
 /**
@@ -295,9 +279,11 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
 
   const diaAtual = now ? currentWeekdayLabel(now) : "";
   const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
-  const assignments = now ? buildWeeklySchedule(turmas, config) : [];
-  const sessao = now ? findSessaoAtual(assignments, config, now) : null;
   const dateKey = now ? toDateKey(now) : "";
+  const assignments = now
+    ? aplicarExcecoesDeData(buildWeeklySchedule(turmas, config), config, turmas, dateKey)
+    : [];
+  const sessao = now ? findSessaoAtual(assignments, config, now) : null;
 
   const chamada = useChamadaDoDia(
     sessao?.assignment.turma,

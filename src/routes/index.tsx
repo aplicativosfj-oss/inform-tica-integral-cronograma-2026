@@ -22,10 +22,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { useAppStore } from "@/lib/app-store";
-import { fetchUltimaParticipacao } from "@/lib/presencas";
+import { fetchPresencasDoDia, fetchUltimaParticipacao } from "@/lib/presencas";
 import {
+  aplicarExcecoesDeData,
   buildWeeklySchedule,
   currentWeekdayLabel,
+  gruposFromPresencas,
   nextAssignmentsForDay,
   proximaDataDoDia,
   proximoDiaLetivo,
@@ -255,8 +257,13 @@ function ProximasTurmasPanel() {
   const proximo = useMemo(() => proximoDiaLetivo(config, new Date()), [config]);
   const assignmentsDoProximoDia = useMemo(() => {
     if (!proximo) return [];
-    const assignments = buildWeeklySchedule(turmas, config);
     const dataKey = toDateKey(proximo.data);
+    const assignments = aplicarExcecoesDeData(
+      buildWeeklySchedule(turmas, config),
+      config,
+      turmas,
+      dataKey,
+    );
     return nextAssignmentsForDay(assignments, proximo.dia).filter(
       (a) => !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)],
     );
@@ -333,12 +340,21 @@ function ProgramacaoSemanalDestaque() {
   );
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
-  const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
+  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
+  const assignments = useMemo(
+    () =>
+      aplicarExcecoesDeData(
+        buildWeeklySchedule(turmas, config),
+        config,
+        turmas,
+        toDateKey(dataDoDia),
+      ),
+    [turmas, config, dataDoDia],
+  );
   const assignmentsDoDia = useMemo(
     () => nextAssignmentsForDay(assignments, diaSelecionado),
     [assignments, diaSelecionado],
   );
-  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
   const dataFormatada = dataDoDia.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
@@ -501,8 +517,17 @@ function PreviaAlunosDialog({
     }
     let cancelled = false;
     setCarregando(true);
-    fetchUltimaParticipacao(assignment.turma.id)
-      .then((ultima) => {
+    const dateKey = toDateKey(data);
+    fetchPresencasDoDia(assignment.turma.id, dateKey)
+      .then(async (registradas) => {
+        if (cancelled) return;
+        // Já existe uma chamada registrada para essa data (ex: uma exceção
+        // manual) — mostra exatamente ela, em vez de recalcular do zero.
+        if (registradas.length > 0) {
+          setGrupos(gruposFromPresencas(assignment.turma, registradas));
+          return;
+        }
+        const ultima = await fetchUltimaParticipacao(assignment.turma.id);
         if (cancelled) return;
         const selecao = selecionarAlunosDoDia(assignment.turma, ultima, config.numeroComputadores);
         setGrupos(selecao.grupos);
@@ -516,7 +541,7 @@ function PreviaAlunosDialog({
     return () => {
       cancelled = true;
     };
-  }, [assignment, config.numeroComputadores]);
+  }, [assignment, data, config.numeroComputadores]);
 
   return (
     <Dialog open={assignment !== null} onOpenChange={onOpenChange}>
