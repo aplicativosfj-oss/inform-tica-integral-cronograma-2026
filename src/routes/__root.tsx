@@ -13,7 +13,15 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppProvider } from "../lib/app-store";
 import { AuthProvider } from "../lib/auth-store";
+import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
+import { FloatingRadioPlayer } from "../components/school/floating-radio-player";
+
+/**
+ * Aplica o tema salvo (ou o do sistema) antes da primeira pintura, para
+ * nunca piscar claro->escuro ao carregar a página.
+ */
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('informatica:theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 function NotFoundComponent() {
   return (
@@ -139,6 +147,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
         {children}
@@ -160,13 +169,16 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppProvider>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          <Toaster />
-        </AppProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <Toaster />
+            <FloatingRadioPlayer />
+          </AppProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
