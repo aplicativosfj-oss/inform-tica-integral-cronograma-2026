@@ -132,7 +132,7 @@ function Index() {
               </Button>
             </div>
 
-            <dl className="mt-8 grid grid-cols-3 gap-4 border-t border-border/60 pt-5">
+            <dl className="mt-8 grid grid-cols-2 gap-4 border-t border-border/60 pt-5 sm:grid-cols-4">
               <div>
                 <dt className="text-xs text-muted-foreground">Turmas</dt>
                 <dd className="text-2xl font-semibold text-foreground">{turmas.length}</dd>
@@ -145,6 +145,12 @@ function Index() {
                 <dt className="text-xs text-muted-foreground">Computadores</dt>
                 <dd className="text-2xl font-semibold text-foreground">
                   {config.numeroComputadores}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Horário das aulas</dt>
+                <dd className="text-2xl font-semibold text-foreground">
+                  {config.horaInicio}–{config.horaFim}
                 </dd>
               </div>
             </dl>

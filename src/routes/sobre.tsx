@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   BookOpen,
-  Code2,
   ExternalLink,
   GraduationCap,
   Mail,
-  MapPin,
   MonitorSmartphone,
   RefreshCcw,
   ShieldCheck,
@@ -219,13 +217,6 @@ function SobrePage() {
               <Mail className="size-4" /> aplicativosfj@gmail.com
             </a>
           </Button>
-          <p className="mt-6 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
-            <Code2 className="size-4 text-primary" />
-            Desenvolvido por <span className="font-medium text-foreground">Franc D&apos;nis</span>
-          </p>
-          <p className="mt-1 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-            <MapPin className="size-3.5" /> Feijó, Acre · {new Date().getFullYear()}
-          </p>
         </div>
       </section>
 
