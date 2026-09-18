@@ -13,14 +13,15 @@ function Espectro({ ativo }: { ativo: boolean }) {
           key={i}
           className={cn(
             "w-[2.5px] rounded-full bg-gradient-to-t from-cyan-400 to-fuchsia-400",
-            ativo ? "" : "h-[3px] opacity-40",
+            ativo ? "animate-radio-eq" : "h-[3px] opacity-40",
           )}
           style={
             ativo
-              ? {
+              ? ({
                   height: "16px",
-                  animation: `radio-eq-bar ${0.55 + atraso}s ease-in-out ${atraso}s infinite`,
-                }
+                  "--eq-duration": `${0.55 + atraso}s`,
+                  "--eq-delay": `${atraso}s`,
+                } as React.CSSProperties)
               : undefined
           }
         />

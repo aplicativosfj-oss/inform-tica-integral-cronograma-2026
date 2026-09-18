@@ -232,6 +232,12 @@
   .group:hover .group-hover-hop {
     animation: icon-playful-hop 0.55s ease-in-out;
   }
+  /* Duração/atraso de cada barrinha via CSS custom property (ver
+     header-radio-player.tsx) — assim a regra de prefers-reduced-motion
+     abaixo consegue desligá-la sem precisar tocar no componente. */
+  .animate-radio-eq {
+    animation: radio-eq-bar var(--eq-duration, 0.6s) ease-in-out var(--eq-delay, 0s) infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -240,6 +246,7 @@
   .animate-float-slower,
   .animate-spin-slow,
   .animate-bounce-gentle,
+  .animate-radio-eq,
   .group:hover .group-hover-hop {
     animation: none !important;
   }
