@@ -271,7 +271,15 @@ function Index() {
 function ProximasTurmasPanel() {
   const { turmas, config } = useAppStore();
 
-  const proximo = useMemo(() => proximoDiaLetivo(config, new Date()), [config]);
+  // A data atual difere entre servidor e navegador; só renderizamos após montar
+  // para evitar erro de hidratação.
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
+
+  const proximo = useMemo(
+    () => (montado ? proximoDiaLetivo(config, new Date()) : null),
+    [config, montado],
+  );
   const assignmentsDoProximoDia = useMemo(() => {
     if (!proximo) return [];
     const assignments = buildWeeklySchedule(turmas, config);
@@ -281,7 +289,7 @@ function ProximasTurmasPanel() {
     );
   }, [turmas, config, proximo]);
 
-  if (!proximo || assignmentsDoProximoDia.length === 0) return null;
+  if (!montado || !proximo || assignmentsDoProximoDia.length === 0) return null;
 
   return (
     <Card className="border-border/60">
