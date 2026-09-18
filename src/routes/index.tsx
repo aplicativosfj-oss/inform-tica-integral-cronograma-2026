@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
+import { WeatherWidget } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -211,6 +212,7 @@ function Index() {
 
         <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
           <NovoCronogramaBanner />
+          <WeatherWidget />
           <LiveSessionPanel />
           <ProximasTurmasPanel />
         </section>

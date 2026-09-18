@@ -193,6 +193,26 @@
   }
 }
 
+/* Sol girando bem lentamente (ícone do widget de clima) e nuvem de chuva com
+   um balanço suave, em vez do bounce padrão (rápido/brusco demais aqui). */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes bounce-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
 @layer utilities {
   .animate-reveal-in {
     animation: reveal-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -203,6 +223,12 @@
   .animate-float-slower {
     animation: float-slower 9s ease-in-out infinite;
   }
+  .animate-spin-slow {
+    animation: spin-slow 12s linear infinite;
+  }
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s ease-in-out infinite;
+  }
   .group:hover .group-hover-hop {
     animation: icon-playful-hop 0.55s ease-in-out;
   }
@@ -212,6 +238,8 @@
   .animate-reveal-in,
   .animate-float-slow,
   .animate-float-slower,
+  .animate-spin-slow,
+  .animate-bounce-gentle,
   .group:hover .group-hover-hop {
     animation: none !important;
   }
