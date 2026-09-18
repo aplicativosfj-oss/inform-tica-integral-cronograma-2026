@@ -71,12 +71,23 @@ function CoordenacaoPage() {
     const { inicio, fim } = intervaloDoMes(mes);
     setRegistros(null);
     setErro(null);
-    fetchPresencasRange(inicio, fim)
+
+    // Se o Supabase demorar demais ou nunca responder (rede indisponível,
+    // bloqueio, etc.), evita deixar as tabelas presas em "Carregando..."
+    // para sempre — mostra uma lista vazia com o aviso do erro.
+    const timeout = new Promise<Presenca[]>((_, reject) =>
+      setTimeout(() => reject(new Error("Tempo esgotado ao buscar dados de frequência.")), 6000),
+    );
+
+    Promise.race([fetchPresencasRange(inicio, fim), timeout])
       .then((dados) => {
         if (!cancelado) setRegistros(dados);
       })
       .catch((err: Error) => {
-        if (!cancelado) setErro(err.message);
+        if (!cancelado) {
+          setErro(err.message);
+          setRegistros([]);
+        }
       });
     return () => {
       cancelado = true;
