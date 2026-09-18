@@ -1,9 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
-// Stream MP3 real (via Zeno.fm), obtido pela API oficial do TuneIn para a
-// estação "Jovem Pan FM 100.9" (tunein.com/radio/Jovem-Pan-FM-1009-s122944).
-const STREAM_URL =
-  "https://stream.zeno.fm/c45wbq2us3buv?DIST=TuneIn&TGT=TuneIn&maxServers=2&gdpr=0&partnertok=eyJhbGciOiJIUzI1NiIsImtpZCI6InR1bmVpbiIsInR5cCI6IkpXVCJ9.eyJ0cnVzdGVkX3BhcnRuZXIiOnRydWUsImlhdCI6MTc4OTc0ODE5MCwiaXNzIjoidGlzcnYifQ.9fOKGuhNfSAB0aAqA9-Jmf6nxWAXtAWkSSqRgl1ojd0";
+import { fetchRadioStreamUrl } from "@/lib/radio-stream-url";
 
 type Status = "parado" | "carregando" | "tocando" | "erro";
 
@@ -26,7 +23,6 @@ export function JovemPanRadioProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const audio = new Audio();
-    audio.src = STREAM_URL;
     audio.preload = "none";
     audio.addEventListener("waiting", () => setStatus("carregando"));
     audio.addEventListener("playing", () => setStatus("tocando"));
@@ -39,7 +35,7 @@ export function JovemPanRadioProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  function alternarReproducao() {
+  async function alternarReproducao() {
     const audio = audioRef.current;
     if (!audio) return;
     if (status === "tocando") {
@@ -47,7 +43,15 @@ export function JovemPanRadioProvider({ children }: { children: ReactNode }) {
       return;
     }
     setStatus("carregando");
-    audio.play().catch(() => setStatus("erro"));
+    try {
+      // O link do stream expira — busca um novo a cada play para nunca ficar
+      // parado com um token vencido.
+      const url = await fetchRadioStreamUrl();
+      audio.src = url;
+      await audio.play();
+    } catch {
+      setStatus("erro");
+    }
   }
 
   function parar() {
