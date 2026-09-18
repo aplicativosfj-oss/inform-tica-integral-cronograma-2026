@@ -130,7 +130,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "manifest", href: "/manifest.json" },
+      // Resource hints for performance optimization
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "dns-prefetch", href: "https://cdn.example.com" },
+      // Prefetch next likely routes
+      { rel: "prefetch", href: "/agenda", as: "fetch" },
+      { rel: "prefetch", href: "/dashboard", as: "fetch" },
       // ?v=3 força o navegador a buscar o ícone de novo — favicon é um dos
       // recursos mais cacheados que existe, mudar só o arquivo não bastava.
       { rel: "icon", href: "/favicon.ico?v=3", type: "image/x-icon" },
