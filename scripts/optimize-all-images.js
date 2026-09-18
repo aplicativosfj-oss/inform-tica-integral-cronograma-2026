@@ -10,9 +10,12 @@
  *   npm run optimize-all
  */
 
-const sharp = require('sharp');
-const fs = require('fs').promises;
-const path = require('path');
+import sharp from 'sharp';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const ASSETS_DIR = 'src/assets';
 const OPTIMIZED_DIR = 'public/images';

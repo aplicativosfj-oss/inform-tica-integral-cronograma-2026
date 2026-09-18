@@ -1,0 +1,45 @@
+<!-- Generated: 2026-09-18T22:54:06.872Z -->
+<!-- Auto-generated from optimize-all-images.js -->
+
+<!-- Hero Image Example: -->
+<picture>
+  <source srcset="/images/image0.avif" type="image/avif">
+  <source srcset="/images/image0.webp" type="image/webp">
+  <img src="/images/image0.jpg" alt="Professional hero image"
+       width="1920" height="1080" loading="eager">
+</picture>
+
+<!-- Background Image (CSS): -->
+<style>
+  .hero {
+    background-image: url('/images/image1.webp');
+    background-size: cover;
+    background-position: center;
+  }
+  /* Fallback for older browsers */
+  @supports not (background-image: url('')) {
+    .hero {
+      background-image: url('/images/image1.jpg');
+    }
+  }
+</style>
+
+<!-- Responsive Image Example: -->
+<picture>
+  <source
+    srcset="
+      /images/image2-480w.webp 480w,
+      /images/image2-768w.webp 768w,
+      /images/image2-1024w.webp 1024w,
+      /images/image2-1280w.webp 1280w
+    "
+    type="image/webp">
+  <img
+    src="/images/image2.jpg"
+    alt="Responsive image"
+    sizes="(max-width: 480px) 100vw,
+           (max-width: 768px) 90vw,
+           (max-width: 1024px) 80vw,
+           70vw"
+    loading="lazy">
+</picture>
