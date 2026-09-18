@@ -2,9 +2,9 @@ import {
   enfileirar,
   gravarCache,
   lerCache,
-  processarFila,
+  registrarExecutor,
+  sincronizarTudo,
   totalPendente,
-  type OperacaoPendente,
 } from "@/lib/offline-queue";
 import { supabase } from "@/lib/supabase-client";
 import type { Presenca } from "@/lib/types";
