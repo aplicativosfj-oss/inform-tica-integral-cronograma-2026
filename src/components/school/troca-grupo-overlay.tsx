@@ -30,7 +30,9 @@ export function TrocaGrupoOverlay({
   const chaveAnterior = useRef<string | null>(null);
 
   useEffect(() => {
-    if (chaveAnterior.current !== null && chaveAnterior.current !== chave) {
+    // Só avisa em trocas reais entre dois blocos de aula: chave vazia
+    // significa "nenhuma aula agora", e não deve disparar o aviso.
+    if (chave && chaveAnterior.current && chaveAnterior.current !== chave) {
       setVisivel(true);
       if (comSom) playAlertaTroca();
     }

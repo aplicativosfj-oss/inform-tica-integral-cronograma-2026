@@ -92,6 +92,13 @@ function TvPage() {
         </Button>
       </div>
 
+      {/* Fica fora do bloco da sessão para não ser desmontado justamente na troca. */}
+      <TrocaGrupoOverlay
+        chave={sessao && !sessao.suspensa ? `${dateKey}|${sessao.subBloco.inicio}` : ""}
+        proximoGrupo={sessao ? sessao.subBloco.grupo.indice + 1 : undefined}
+        comSom={somAtivo}
+      />
+
       {!now ? (
         <div className="flex flex-1 items-center justify-center text-2xl text-muted-foreground">
           Carregando cronômetro...
@@ -110,13 +117,7 @@ function TvPage() {
           ) : null}
         </div>
       ) : (
-        <TvSessao
-          key={`${dateKey}|${sessao.subBloco.inicio}`}
-          chave={`${dateKey}|${sessao.subBloco.inicio}`}
-          somAtivo={somAtivo}
-          conteudoDoDia={conteudoDoDia}
-          sessao={sessao}
-        />
+        <TvSessao conteudoDoDia={conteudoDoDia} sessao={sessao} />
       )}
     </main>
   );
@@ -124,17 +125,7 @@ function TvPage() {
 
 type Sessao = NonNullable<ReturnType<typeof findSessaoAtual>>;
 
-function TvSessao({
-  chave,
-  somAtivo,
-  conteudoDoDia,
-  sessao,
-}: {
-  chave: string;
-  somAtivo: boolean;
-  conteudoDoDia: string;
-  sessao: Sessao;
-}) {
+function TvSessao({ conteudoDoDia, sessao }: { conteudoDoDia: string; sessao: Sessao }) {
   const { assignment, subBloco, segundosRestantes, proximoSubBloco } = sessao;
   const total = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = total - segundosRestantes;
@@ -142,11 +133,6 @@ function TvSessao({
 
   return (
     <>
-      <TrocaGrupoOverlay
-        chave={chave}
-        proximoGrupo={subBloco.grupo.indice + 1}
-        comSom={somAtivo}
-      />
       <div className="flex flex-1 flex-col items-center justify-center gap-10 lg:flex-row lg:gap-16">
         <TimerRing decorridos={decorridos} total={total} size={380} />
 

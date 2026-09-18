@@ -340,10 +340,16 @@ function ProximasTurmasPanel() {
  */
 function ProgramacaoSemanalDestaque() {
   const { turmas, config } = useAppStore();
-  const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
-  const [diaSelecionado, setDiaSelecionado] = useState(
-    config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),
-  );
+  // A data só é lida depois da montagem: o dia da semana do servidor pode
+  // diferir do navegador (fuso), o que quebraria a hidratação.
+  const [todayLabel, setTodayLabel] = useState("");
+  const [diaSelecionado, setDiaSelecionado] = useState(config.diasSemana[0] ?? "");
+  useEffect(() => {
+    const label = currentWeekdayLabel(new Date());
+    setTodayLabel(label);
+    if (config.diasSemana.includes(label)) setDiaSelecionado(label);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
   const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
@@ -351,11 +357,13 @@ function ProgramacaoSemanalDestaque() {
     () => nextAssignmentsForDay(assignments, diaSelecionado),
     [assignments, diaSelecionado],
   );
-  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
-  const dataFormatada = dataDoDia.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-  });
+  const dataFormatada = useMemo(() => {
+    if (!todayLabel) return "";
+    return proximaDataDoDia(diaSelecionado, new Date()).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+    });
+  }, [diaSelecionado, todayLabel]);
 
   if (turmas.length === 0) return null;
 
@@ -477,7 +485,7 @@ function ProgramacaoSemanalDestaque() {
 
       <PreviaAlunosDialog
         assignment={assignmentSelecionado}
-        data={dataDoDia}
+        data={proximaDataDoDia(diaSelecionado, new Date())}
         onOpenChange={(open) => {
           if (!open) setAssignmentSelecionado(null);
         }}
