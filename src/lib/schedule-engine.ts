@@ -349,17 +349,49 @@ export function toDateKey(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Materializa, como `Assignment`s sintéticos, as reprogramações cuja nova
+ * data cai em `data` — para que o cronômetro ao vivo, a agenda pública e o
+ * modo TV enxerguem a aula movida sem precisar de nenhuma lógica própria.
+ */
+export function reprogramacoesParaData(
+  turmas: Turma[],
+  config: ScheduleConfig,
+  data: Date,
+): Assignment[] {
+  const dataKey = toDateKey(data);
+  const dia = currentWeekdayLabel(data);
+  const turmasById = new Map(turmas.map((t) => [t.id, t]));
+  const resultado: Assignment[] = [];
+  for (const r of config.reprogramacoes ?? []) {
+    if (r.dataNova !== dataKey) continue;
+    const turma = turmasById.get(r.turmaId);
+    if (!turma) continue;
+    resultado.push({
+      dia,
+      diaIndex: Math.max(0, config.diasSemana.indexOf(dia)),
+      slot: { inicio: r.inicio, fim: r.fim },
+      turma,
+      ocorrenciaIndex: 0,
+      sessoesPorSemana: 1,
+      conteudo: r.conteudo,
+    });
+  }
+  return resultado;
+}
+
 /** Finds the class session (if any) happening right now, and the live countdown. */
 export function findSessaoAtual(
   assignments: Assignment[],
   config: ScheduleConfig,
   now: Date,
+  extras: Assignment[] = [],
 ): SessaoAtual | null {
   const dia = currentWeekdayLabel(now);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const nowSeconds = nowMinutes * 60 + now.getSeconds();
 
-  const assignment = assignments.find((a) => {
+  const assignment = [...extras, ...assignments].find((a) => {
     if (a.dia !== dia) return false;
     const start = toMinutes(a.slot.inicio);
     const end = toMinutes(a.slot.fim);

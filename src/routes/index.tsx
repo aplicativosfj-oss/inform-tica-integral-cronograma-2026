@@ -81,12 +81,17 @@ function Index() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {/* Imagem de fundo em toda a página, fixa e sutil para não competir com o conteúdo. */}
+      {/*
+        Imagem de fundo em toda a página, fixa e bem discreta — opacidade baixa
+        (0.12) mais um véu na cor do fundo por cima, para nunca competir com o
+        hero, o cronômetro ao vivo ou a grade da agenda semanal.
+      */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-40"
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.12]"
         style={{ backgroundImage: `url(${backgroundImg})` }}
       />
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 bg-background/70" />
       <div className="relative z-10">
       <NavBar />
 

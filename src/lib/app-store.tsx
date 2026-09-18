@@ -15,7 +15,7 @@ import { sincronizarPresencasPendentes } from "@/lib/presencas";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
 import { supabase } from "@/lib/supabase-client";
-import type { Aluno, AulaManual, Grupo, ScheduleConfig, Turma } from "@/lib/types";
+import type { Aluno, AulaManual, Grupo, Reprogramacao, ScheduleConfig, Turma } from "@/lib/types";
 
 const ROW_ID = "default";
 
@@ -41,6 +41,13 @@ interface AppState {
   setSlotOverride: (dia: string, slotInicio: string, turmaId: string | null) => void;
   /** Stops (or resumes) the class scheduled for a specific date + slot, without affecting future weeks. */
   setSessaoSuspensa: (dateISO: string, dia: string, slotInicio: string, suspensa: boolean) => void;
+  /**
+   * Reprograma uma sessão específica para outra data/horário: marca a
+   * original como suspensa e registra a nova ocorrência, sem afetar o
+   * rodízio automático das semanas seguintes.
+   */
+  reprogramarAula: (input: Omit<Reprogramacao, "id" | "criadoEm">) => void;
+  removeReprogramacao: (id: string) => void;
   resetToSeed: () => void;
 }
 
@@ -278,6 +285,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
             delete next[key];
           }
           return { ...prev, suspensoes: next };
+        });
+      },
+      reprogramarAula: (input) => {
+        applyConfig((prev) => {
+          const key = suspensaoKey(input.dataOriginal, input.diaOriginal, input.inicioOriginal);
+          const nova: Reprogramacao = {
+            ...input,
+            id: generateId("reprog"),
+            criadoEm: new Date().toISOString(),
+          };
+          return {
+            ...prev,
+            suspensoes: { ...(prev.suspensoes ?? {}), [key]: true },
+            reprogramacoes: [...(prev.reprogramacoes ?? []), nova],
+          };
+        });
+      },
+      removeReprogramacao: (id) => {
+        applyConfig((prev) => {
+          const alvo = (prev.reprogramacoes ?? []).find((r) => r.id === id);
+          const nextSuspensoes = { ...(prev.suspensoes ?? {}) };
+          if (alvo) {
+            delete nextSuspensoes[
+              suspensaoKey(alvo.dataOriginal, alvo.diaOriginal, alvo.inicioOriginal)
+            ];
+          }
+          return {
+            ...prev,
+            suspensoes: nextSuspensoes,
+            reprogramacoes: (prev.reprogramacoes ?? []).filter((r) => r.id !== id),
+          };
         });
       },
       resetToSeed: () => {

@@ -53,6 +53,26 @@ export interface AulaManual {
   conteudo?: string | undefined;
 }
 
+/**
+ * Reagendamento de uma sessão específica (não repete nas semanas seguintes):
+ * a data/horário original é marcada como suspensa automaticamente e uma nova
+ * data/horário passa a valer só para aquela ocorrência. Criado a partir da
+ * tela "Faltas do mês" ao reprogramar uma aula.
+ */
+export interface Reprogramacao {
+  id: string;
+  turmaId: string;
+  dataOriginal: string;
+  diaOriginal: string;
+  inicioOriginal: string;
+  fimOriginal: string;
+  dataNova: string;
+  inicio: string;
+  fim: string;
+  conteudo?: string | undefined;
+  criadoEm: string;
+}
+
 export interface ScheduleConfig {
   nomeEscola: string;
   inep: string;
@@ -86,6 +106,8 @@ export interface ScheduleConfig {
    * semanas seguintes). Chave: `${data ISO}|${dia}|${slot.inicio}`.
    */
   suspensoes?: Record<string, true> | undefined;
+  /** Sessões reprogramadas a partir da tela "Faltas do mês". */
+  reprogramacoes?: Reprogramacao[] | undefined;
 }
 
 export interface Slot {

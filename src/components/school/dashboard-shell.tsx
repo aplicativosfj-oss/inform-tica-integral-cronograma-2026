@@ -7,6 +7,7 @@ import {
   Layers,
   LayoutDashboard,
   Settings2,
+  UserX,
   Users2,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { to: "/dashboard/aulas", label: "Aulas", icon: CalendarPlus },
   { to: "/dashboard/programacao", label: "Programação", icon: CalendarClock },
   { to: "/dashboard/frequencia", label: "Frequência", icon: CalendarSearch },
+  { to: "/dashboard/faltas", label: "Faltas do mês", icon: UserX },
   { to: "/dashboard/configuracoes", label: "Configurações", icon: Settings2 },
 ] as const;
 

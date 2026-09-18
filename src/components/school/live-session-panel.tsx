@@ -46,6 +46,7 @@ import {
   currentWeekdayLabel,
   escolherSubstituto,
   findSessaoAtual,
+  reprogramacoesParaData,
   selecionarAlunosDoDia,
   toDateKey,
   type GrupoRevezamento,
@@ -385,7 +386,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const diaAtual = now ? currentWeekdayLabel(now) : "";
   const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
   const assignments = now ? buildWeeklySchedule(turmas, config) : [];
-  const sessao = now ? findSessaoAtual(assignments, config, now) : null;
+  const reprogramadasHoje = now ? reprogramacoesParaData(turmas, config, now) : [];
+  const sessao = now ? findSessaoAtual(assignments, config, now, reprogramadasHoje) : null;
   const dateKey = now ? toDateKey(now) : "";
 
   const chamada = useChamadaDoDia(

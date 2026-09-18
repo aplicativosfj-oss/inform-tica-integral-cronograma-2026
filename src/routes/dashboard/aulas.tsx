@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarPlus, Trash2 } from "lucide-react";
+import { CalendarPlus, Pencil, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -44,13 +44,14 @@ const TODOS_OS_GRUPOS = "todos";
  * imediatamente pelo cronômetro ao vivo e pelo modo TV.
  */
 function AulasPage() {
-  const { turmas, config, addAula, removeAula } = useAppStore();
+  const { turmas, config, addAula, updateAula, removeAula } = useAppStore();
   const aulas = [...(config.aulas ?? [])].sort(
     (a, b) =>
       config.diasSemana.indexOf(a.dia) - config.diasSemana.indexOf(b.dia) ||
       a.inicio.localeCompare(b.inicio),
   );
 
+  const [editandoId, setEditandoId] = useState<string | null>(null);
   const [dia, setDia] = useState(config.diasSemana[0] ?? "Segunda");
   const [turmaId, setTurmaId] = useState(turmas[0]?.id ?? "");
   const [grupoId, setGrupoId] = useState(TODOS_OS_GRUPOS);
@@ -59,6 +60,28 @@ function AulasPage() {
   const [conteudo, setConteudo] = useState("");
 
   const turmaSelecionada = turmas.find((t) => t.id === turmaId);
+
+  function limparFormulario() {
+    setEditandoId(null);
+    setDia(config.diasSemana[0] ?? "Segunda");
+    setTurmaId(turmas[0]?.id ?? "");
+    setGrupoId(TODOS_OS_GRUPOS);
+    setInicio(config.horaInicio);
+    setFim("");
+    setConteudo("");
+  }
+
+  function editar(aulaId: string) {
+    const aula = (config.aulas ?? []).find((a) => a.id === aulaId);
+    if (!aula) return;
+    setEditandoId(aula.id);
+    setDia(aula.dia);
+    setTurmaId(aula.turmaId);
+    setGrupoId(aula.grupoId ?? TODOS_OS_GRUPOS);
+    setInicio(aula.inicio);
+    setFim(aula.fim);
+    setConteudo(aula.conteudo ?? "");
+  }
 
   function salvar() {
     if (!turmaId) {
@@ -69,16 +92,22 @@ function AulasPage() {
       toast.error("Informe um horário de início e de fim válidos.");
       return;
     }
-    addAula({
+    const dados = {
       dia,
       turmaId,
       inicio,
       fim,
       grupoId: grupoId === TODOS_OS_GRUPOS ? undefined : grupoId,
       conteudo: conteudo.trim() || undefined,
-    });
-    setConteudo("");
-    toast.success("Aula cadastrada. O cronômetro já está atualizado.");
+    };
+    if (editandoId) {
+      updateAula(editandoId, dados);
+      toast.success("Aula atualizada. O cronômetro já está atualizado.");
+    } else {
+      addAula(dados);
+      toast.success("Aula cadastrada. O cronômetro já está atualizado.");
+    }
+    limparFormulario();
   }
 
   return (
@@ -94,7 +123,7 @@ function AulasPage() {
       <Card className="mb-6">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <CalendarPlus className="size-4" /> Nova aula
+            <CalendarPlus className="size-4" /> {editandoId ? "Editar aula" : "Nova aula"}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -179,10 +208,15 @@ function AulasPage() {
             />
           </div>
 
-          <div className="sm:col-span-2 lg:col-span-3">
+          <div className="flex gap-2 sm:col-span-2 lg:col-span-3">
             <Button onClick={salvar}>
-              <CalendarPlus className="size-4" /> Cadastrar aula
+              <CalendarPlus className="size-4" /> {editandoId ? "Salvar alterações" : "Cadastrar aula"}
             </Button>
+            {editandoId ? (
+              <Button variant="outline" onClick={limparFormulario}>
+                <X className="size-4" /> Cancelar edição
+              </Button>
+            ) : null}
           </div>
         </CardContent>
       </Card>
@@ -201,7 +235,7 @@ function AulasPage() {
                   <TableHead>Turma</TableHead>
                   <TableHead>Grupo</TableHead>
                   <TableHead>Conteúdo</TableHead>
-                  <TableHead className="w-12" />
+                  <TableHead className="w-20" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -231,17 +265,28 @@ function AulasPage() {
                           {aula.conteudo || "—"}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            aria-label="Excluir aula"
-                            onClick={() => {
-                              removeAula(aula.id);
-                              toast.success("Aula excluída.");
-                            }}
-                          >
-                            <Trash2 className="size-4 text-destructive" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label="Editar aula"
+                              onClick={() => editar(aula.id)}
+                            >
+                              <Pencil className="size-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label="Excluir aula"
+                              onClick={() => {
+                                removeAula(aula.id);
+                                if (editandoId === aula.id) limparFormulario();
+                                toast.success("Aula excluída.");
+                              }}
+                            >
+                              <Trash2 className="size-4 text-destructive" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

@@ -15,6 +15,9 @@ import {
   currentWeekdayLabel,
   proximaDataDoDia,
   proximasDatasDoDia,
+  reprogramacoesParaData,
+  suspensaoKey,
+  toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 
@@ -46,10 +49,20 @@ function AgendaPage() {
   );
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
-  const assignmentsDoDia = assignments
-    .filter((a) => a.dia === diaSelecionado)
-    .sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
   const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
+  const dataDoDiaKey = toDateKey(dataDoDia);
+  const reprogramadasDoDia = useMemo(
+    () => reprogramacoesParaData(turmas, config, dataDoDia),
+    [turmas, config, dataDoDia],
+  );
+  const assignmentsDoDia = [
+    ...assignments.filter(
+      (a) =>
+        a.dia === diaSelecionado &&
+        !config.suspensoes?.[suspensaoKey(dataDoDiaKey, a.dia, a.slot.inicio)],
+    ),
+    ...reprogramadasDoDia,
+  ].sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
   const dataDoDiaFormatada = dataDoDia.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "long",
