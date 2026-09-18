@@ -285,6 +285,97 @@ function useChamadaDoDia(
   return { presencas, marcarFaltaDoAluno };
 }
 
+/**
+ * Painel administrativo da chamada do dia: lista TODOS os alunos chamados
+ * hoje (de todos os grupos, não só o grupo da vez) com um botão claro para
+ * registrar ausência. Quem já está marcado como ausente aparece destacado,
+ * e o substituto chamado automaticamente aparece identificado.
+ */
+function ChamadaDoDiaCard({
+  turma,
+  presencas,
+  onMarcarFalta,
+}: {
+  turma: Turma;
+  presencas: Presenca[];
+  onMarcarFalta: (
+    aluno: Aluno,
+    grupoIndice: number,
+    motivo: "ausente" | "nao_quis_participar",
+  ) => Promise<void>;
+}) {
+  const grupos = [...new Set(presencas.map((p) => p.grupoIndice))].sort((a, b) => a - b);
+  const faltas = presencas.filter((p) => p.status === "faltou").length;
+
+  return (
+    <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <UserX className="size-3" /> Chamada de hoje · registrar ausência
+        </p>
+        <Badge variant={faltas > 0 ? "destructive" : "secondary"}>
+          {faltas} {faltas === 1 ? "ausência" : "ausências"}
+        </Badge>
+      </div>
+      <div className="flex flex-col gap-3">
+        {grupos.map((indice) => (
+          <div key={indice}>
+            <p className="mb-1 text-xs font-medium text-muted-foreground">Grupo {indice + 1}</p>
+            <div className="flex flex-col divide-y divide-border/60 overflow-hidden rounded-md border border-border/60">
+              {presencas
+                .filter((p) => p.grupoIndice === indice)
+                .map((p) => {
+                  const ausente = p.status === "faltou";
+                  const aluno: Aluno = turma.alunos.find((a) => a.id === p.alunoId) ?? {
+                    id: p.alunoId,
+                    nome: p.alunoNome,
+                  };
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
+                    >
+                      <span
+                        className={
+                          ausente
+                            ? "truncate text-muted-foreground line-through"
+                            : "truncate font-medium text-foreground"
+                        }
+                      >
+                        {p.alunoNome}
+                        {p.status === "substituido" ? (
+                          <span className="ml-2 text-xs font-normal text-primary">
+                            substituto(a)
+                          </span>
+                        ) : null}
+                      </span>
+                      {ausente ? (
+                        <Badge variant="outline" className="shrink-0 text-destructive">
+                          {p.motivo === "nao_quis_participar" ? "Não participou" : "Ausente"}
+                        </Badge>
+                      ) : (
+                        <AusenciaButton
+                          nome={p.alunoNome}
+                          autenticado
+                          onExigirLogin={() => undefined}
+                          onConfirmar={(motivo) => onMarcarFalta(aluno, indice, motivo)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Ao marcar uma ausência, o sistema chama automaticamente o aluno que está há mais tempo sem
+        participar e registra a falta no relatório de frequência.
+      </p>
+    </div>
+  );
+}
+
 export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const { turmas, config, setSessaoSuspensa, isReady } = useAppStore();
   const { isAuthenticated } = useAuth();
