@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarSearch, UserCheck, UserX, Users2 } from "lucide-react";
+import { CalendarSearch, FileDown, UserCheck, UserX, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -79,6 +79,28 @@ function FrequenciaPage() {
     consultar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function exportarPdf() {
+    if (!registros) return;
+    const turmaSelecionada = turmas.find((t) => t.id === turmaId);
+    const ok = exportarFrequenciaPdf({
+      titulo: turmaSelecionada
+        ? `Frequência · ${turmaSelecionada.serie} "${turmaSelecionada.letra}"`
+        : "Frequência das aulas de informática",
+      periodo: `${new Date(`${inicio}T00:00:00`).toLocaleDateString("pt-BR")} a ${new Date(
+        `${fim}T00:00:00`,
+      ).toLocaleDateString("pt-BR")}`,
+      registros,
+      nomeTurma: (id) => {
+        const t = turmas.find((turma) => turma.id === id);
+        return t ? `${t.serie} "${t.letra}"` : id;
+      },
+      professorInformatica: config.professorInformatica,
+    });
+    if (!ok) {
+      toast.error("O navegador bloqueou a janela de impressão. Permita pop-ups e tente de novo.");
+    }
+  }
 
   const totalPresentes = registros?.filter((r) => r.status !== "faltou").length ?? 0;
   const totalFaltas = registros?.filter((r) => r.status === "faltou").length ?? 0;
