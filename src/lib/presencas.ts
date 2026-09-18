@@ -1,5 +1,50 @@
+import {
+  enfileirar,
+  gravarCache,
+  lerCache,
+  processarFila,
+  totalPendente,
+  type OperacaoPendente,
+} from "@/lib/offline-queue";
 import { supabase } from "@/lib/supabase-client";
 import type { Presenca } from "@/lib/types";
+
+interface PayloadIniciais {
+  turmaId: string;
+  data: string;
+  grupos: { indice: number; alunos: { id: string; nome: string }[] }[];
+}
+
+interface PayloadFalta {
+  turmaId: string;
+  data: string;
+  aluno: { id: string; nome: string };
+  grupoIndice: number;
+  substituto: { id: string; nome: string } | null;
+  motivo: "ausente" | "nao_quis_participar";
+}
+
+function chaveDia(turmaId: string, data: string): string {
+  return `presencas:${turmaId}:${data}`;
+}
+
+/** Quantas gravações de frequência ainda aguardam a internet voltar. */
+export function presencasPendentes(): number {
+  return totalPendente();
+}
+
+/** Reenvia ao banco tudo o que foi registrado sem internet. */
+export async function sincronizarPresencasPendentes() {
+  return processarFila(async (operacao: OperacaoPendente) => {
+    if (operacao.tipo === "presencas:iniciais") {
+      const p = operacao.payload as PayloadIniciais;
+      await enviarPresencasIniciais(p.turmaId, p.data, p.grupos);
+    } else if (operacao.tipo === "presencas:falta") {
+      const p = operacao.payload as PayloadFalta;
+      await enviarFalta(p.turmaId, p.data, p.aluno, p.grupoIndice, p.substituto, p.motivo);
+    }
+  });
+}
 
 interface PresencaRow {
   id: string;
