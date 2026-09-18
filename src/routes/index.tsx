@@ -38,7 +38,7 @@ import {
 import type { Assignment } from "@/lib/types";
 import heroImg from "@/assets/hero-pro.jpg";
 import backgroundImg from "@/assets/page-bg.jpg";
-import logoFull from "@/assets/logo-full.png";
+import logoFull from "@/assets/logo-full-transparent.png";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -114,7 +114,7 @@ function Index() {
               <img
                 src={logoFull}
                 alt="Agenda de Informática .Online"
-                className="mb-6 h-auto w-full max-w-lg rounded-xl bg-white p-3 shadow-md ring-1 ring-border/60"
+                className="mb-4 h-auto w-full max-w-[220px] sm:max-w-[260px]"
               />
               <Badge variant="secondary" className="mb-4 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
