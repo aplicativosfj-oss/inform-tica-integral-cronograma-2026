@@ -36,6 +36,23 @@ export interface Turma {
   apoioEspecial?: ApoioEspecial[] | undefined;
 }
 
+/**
+ * Aula cadastrada manualmente pelo administrador na tela "Aulas": define
+ * turma, horário, grupo fixo (opcional) e conteúdo. Tem prioridade sobre o
+ * rodízio automático e alimenta o cronômetro ao vivo.
+ */
+export interface AulaManual {
+  id: string;
+  /** Rótulo do dia da semana, ex.: "Segunda". */
+  dia: string;
+  inicio: string;
+  fim: string;
+  turmaId: string;
+  /** Quando definido, só este grupo ocupa a aula inteira. */
+  grupoId?: string | undefined;
+  conteudo?: string | undefined;
+}
+
 export interface ScheduleConfig {
   nomeEscola: string;
   inep: string;
@@ -81,6 +98,10 @@ export interface Assignment {
   turma: Turma;
   ocorrenciaIndex: number;
   sessoesPorSemana: number;
+  /** Conteúdo definido na aula cadastrada manualmente. */
+  conteudo?: string | undefined;
+  /** Grupo fixo definido na aula cadastrada manualmente. */
+  grupoIdFixo?: string | undefined;
 }
 
 /** Registro de frequência de um aluno em uma data específica (tabela `presencas` no Supabase). */
