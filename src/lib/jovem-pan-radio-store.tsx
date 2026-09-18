@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
-// TODO: troque pela URL direta do stream (termina em .aac ou .mp3), não a
-// página institucional do StreamTheWorld. Peça ao provedor (ou inspecione a
-// aba de rede do player oficial da Jovem Pan News) o endereço real.
-const STREAM_URL = "https://streamtheworld.com";
+// Stream MP3 real (via Zeno.fm), obtido pela API oficial do TuneIn para a
+// estação "Jovem Pan FM 100.9" (tunein.com/radio/Jovem-Pan-FM-1009-s122944).
+const STREAM_URL =
+  "https://stream.zeno.fm/c45wbq2us3buv?DIST=TuneIn&TGT=TuneIn&maxServers=2&gdpr=0&partnertok=eyJhbGciOiJIUzI1NiIsImtpZCI6InR1bmVpbiIsInR5cCI6IkpXVCJ9.eyJ0cnVzdGVkX3BhcnRuZXIiOnRydWUsImlhdCI6MTc4OTc0ODE5MCwiaXNzIjoidGlzcnYifQ.9fOKGuhNfSAB0aAqA9-Jmf6nxWAXtAWkSSqRgl1ojd0";
 
 type Status = "parado" | "carregando" | "tocando" | "erro";
 
