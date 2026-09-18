@@ -73,8 +73,16 @@ export function JovemPanRadioProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Fora do provider (páginas de erro/404 ou árvores isoladas) o player
+ * simplesmente fica inerte, em vez de derrubar a tela inteira.
+ */
+const FALLBACK: JovemPanRadioContextValue = {
+  status: "parado",
+  alternarReproducao: () => {},
+  parar: () => {},
+};
+
 export function useJovemPanRadio(): JovemPanRadioContextValue {
-  const ctx = useContext(JovemPanRadioContext);
-  if (!ctx) throw new Error("useJovemPanRadio deve ser usado dentro de JovemPanRadioProvider");
-  return ctx;
+  return useContext(JovemPanRadioContext) ?? FALLBACK;
 }
