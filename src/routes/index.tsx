@@ -485,7 +485,7 @@ function ProgramacaoSemanalDestaque() {
 
       <PreviaAlunosDialog
         assignment={assignmentSelecionado}
-        data={dataDoDia}
+        data={proximaDataDoDia(diaSelecionado, new Date())}
         onOpenChange={(open) => {
           if (!open) setAssignmentSelecionado(null);
         }}
