@@ -21,9 +21,14 @@ export const SEED_CONFIG: ScheduleConfig = {
   professorInformatica: "Franc D'nis",
   diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
   horaInicio: "08:00",
-  horaFim: "15:00",
+  // Só 2 aulas por dia (manhã), 5 dias x 2 = as 10 turmas, cada uma 1x por
+  // semana — tarde inteira livre pro professor, sem troca de contexto após
+  // o almoço.
+  horaFim: "10:15",
   // Almoço + tempo de organização: as crianças voltam às 13:00 e levam de 5
   // a 10 min para se acomodar, então a próxima aula só começa às 13:10.
+  // (Sem efeito hoje, já que o dia termina às 10:15 — fica pronto caso o
+  // horário volte a incluir a tarde.)
   intervaloInicio: "11:00",
   intervaloFim: "13:10",
   // Recreio da manhã, entre 10 e 15 min.
