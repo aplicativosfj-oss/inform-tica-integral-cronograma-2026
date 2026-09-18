@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
+import { WeeklyScheduleGraphic } from "@/components/school/weekly-schedule-graphic";
 import { useAppStore } from "@/lib/app-store";
 import { fetchUltimaParticipacao } from "@/lib/presencas";
 import {
@@ -195,6 +196,24 @@ function Index() {
             title="Painel de gestão"
             description="Cadastre turmas, professores, fotos e alunos com acesso restrito por login."
           />
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="mb-8 max-w-2xl">
+          <Badge variant="secondary" className="mb-3 gap-1.5">
+            <CalendarDays className="size-3.5" /> Grade completa
+          </Badge>
+          <h2 className="text-2xl font-semibold text-foreground">A semana inteira, num só olhar</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Cada cor representa uma série (do 1º ao 5º ano) — quanto mais escura, mais adiantada a
+            turma. Este quadro é gerado automaticamente a partir da agenda cadastrada no sistema.
+          </p>
+        </div>
+        <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
+          <div className="min-w-[720px]">
+            <WeeklyScheduleGraphic />
+          </div>
         </div>
       </section>
 
