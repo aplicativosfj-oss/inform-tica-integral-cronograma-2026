@@ -13,7 +13,7 @@ import { useAuth } from "@/lib/auth-store";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
 import { supabase } from "@/lib/supabase-client";
-import type { Aluno, Grupo, ScheduleConfig, Turma } from "@/lib/types";
+import type { Aluno, AulaManual, Grupo, ScheduleConfig, Turma } from "@/lib/types";
 
 const ROW_ID = "default";
 
@@ -31,6 +31,9 @@ interface AppState {
   addGrupo: (turmaId: string, grupo: Omit<Grupo, "id">) => void;
   updateGrupo: (turmaId: string, grupoId: string, patch: Partial<Omit<Grupo, "id">>) => void;
   removeGrupo: (turmaId: string, grupoId: string) => void;
+  addAula: (aula: Omit<AulaManual, "id">) => void;
+  updateAula: (id: string, patch: Partial<Omit<AulaManual, "id">>) => void;
+  removeAula: (id: string) => void;
   updateConfig: (patch: Partial<ScheduleConfig>) => void;
   /** Overrides which turma occupies a fixed weekly slot (Programação page). Pass `null` to restore the automatic rotation. */
   setSlotOverride: (dia: string, slotInicio: string, turmaId: string | null) => void;
