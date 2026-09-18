@@ -96,7 +96,7 @@ function Index() {
     <div className="relative min-h-screen bg-background">
       {/*
         Fundo do modo claro: padrão próprio (grade de agenda + trilhas de
-        circuito, no estilo da logomarca) em vez de uma foto genérica — fixo
+        circuito, no estilo da logomarca) em vez de uma foto genérica - fixo
         e bem discreto, pra nunca competir com o hero, o cronômetro ao vivo
         ou a grade da agenda semanal. Some no modo escuro, onde já existe
         contraste suficiente sem ele.
@@ -191,7 +191,7 @@ function Index() {
 
             <div className="relative">
               <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" aria-hidden />
-              {/* Elementos decorativos flutuantes — sutis, só para dar vida ao
+              {/* Elementos decorativos flutuantes - sutis, só para dar vida ao
                   hero sem distrair do conteúdo real. */}
               <span
                 aria-hidden
@@ -205,7 +205,7 @@ function Index() {
                 aria-hidden
                 className="absolute -bottom-4 left-10 z-10 hidden size-2.5 rounded-full bg-emerald-400/60 animate-float-slow sm:block"
               />
-              {/* Logo flutuante, sem ocupar espaço no fluxo — não empurra nada da hero. */}
+              {/* Logo flutuante, sem ocupar espaço no fluxo - não empurra nada da hero. */}
               <img
                 src={logoFull}
                 alt="Agenda de Informática .Online"
@@ -242,7 +242,7 @@ function Index() {
             />
           </a>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Cartaz oficial da Agenda de Informática — toque para ver em tamanho completo.
+            Cartaz oficial da Agenda de Informática - toque para ver em tamanho completo.
           </p>
         </RevealSection>
 
@@ -268,7 +268,7 @@ function Index() {
                 {config.horaFim}.
               </p>
             </div>
-            {/* Fotos reais dos alunos usando o laboratório — discreto, sem virar mosaico. */}
+            {/* Fotos reais dos alunos usando o laboratório - discreto, sem virar mosaico. */}
             <div className="flex shrink-0 items-center gap-2">
               {[alunosImg1, alunosImg2, alunosImg3].map((src, i) => (
                 <img
@@ -320,7 +320,7 @@ function Index() {
               A semana inteira, num só olhar
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Cada cor representa uma série (do 1º ao 5º ano) — quanto mais escura, mais adiantada a
+              Cada cor representa uma série (do 1º ao 5º ano) - quanto mais escura, mais adiantada a
               turma. Gerado automaticamente a partir da agenda cadastrada no sistema.
             </p>
           </div>
@@ -330,7 +330,7 @@ function Index() {
                 <WeeklyScheduleGraphic />
               </div>
             </div>
-            {/* Pista visual de que dá para arrastar o dedo para o lado — a grade
+            {/* Pista visual de que dá para arrastar o dedo para o lado - a grade
               é mais larga que a tela em celulares, mas nada nela indicava
               isso, então parecia "cortada" em vez de rolável. */}
             <div
@@ -363,7 +363,7 @@ function Index() {
 
 /**
  * Announces the new schedule (bigger blocks, more seats per turma) starting
- * fresh on the next Monday — today's sessions were suspended so the old and
+ * fresh on the next Monday - today's sessions were suspended so the old and
  * new schedules never mix mid-week. Only shows up until that Monday arrives,
  * then disappears on its own. Reads the block duration from `config` (not
  * hardcoded) so the message never goes stale if it changes again.
@@ -391,7 +391,7 @@ function NovoCronogramaBanner() {
       <p className="text-sm text-foreground">
         <span className="font-semibold">Cronograma novo a partir de {dataFormatada}:</span> aulas de{" "}
         {config.duracaoSlotMinutos} min, com mais alunos participando por turma toda semana. As
-        aulas de hoje foram pausadas para a transição — a agenda nova já está pronta e visível
+        aulas de hoje foram pausadas para a transição - a agenda nova já está pronta e visível
         abaixo.
       </p>
     </div>
@@ -400,7 +400,7 @@ function NovoCronogramaBanner() {
 
 /**
  * Shows which turmas are scheduled for the next school day, so professors
- * can plan ahead — displayed right below the live session on the homepage.
+ * can plan ahead - displayed right below the live session on the homepage.
  * Each row is clickable and opens the same "alunos previstos" preview used
  * everywhere else in the app, for a consistent experience.
  */
@@ -504,7 +504,7 @@ function ProximasTurmasPanel() {
 
 /**
  * A prominent, glassmorphism-styled weekly schedule so anyone on the
- * homepage can see at a glance which turma uses the lab on any given day —
+ * homepage can see at a glance which turma uses the lab on any given day -
  * with today visually called out.
  */
 function ProgramacaoSemanalDestaque() {

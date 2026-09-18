@@ -57,7 +57,7 @@ function intervaloDoMes(mes: string): { inicio: string; fim: string } {
 /**
  * Painel aberto (sem login) para a coordenação acompanhar o laboratório:
  * calendário das aulas da semana, participação por turma e grupo no mês e
- * o histórico de faltas. Somente leitura — nada aqui altera a agenda.
+ * o histórico de faltas. Somente leitura - nada aqui altera a agenda.
  */
 function CoordenacaoPage() {
   const { turmas, config } = useAppStore();
@@ -75,7 +75,7 @@ function CoordenacaoPage() {
 
     // Se o Supabase demorar demais ou nunca responder (rede indisponível,
     // bloqueio, etc.), evita deixar as tabelas presas em "Carregando..."
-    // para sempre — mostra uma lista vazia com o aviso do erro.
+    // para sempre - mostra uma lista vazia com o aviso do erro.
     const timeout = new Promise<Presenca[]>((_, reject) =>
       setTimeout(() => reject(new Error("Tempo esgotado ao buscar dados de frequência.")), 6000),
     );
@@ -159,7 +159,7 @@ function CoordenacaoPage() {
                           className="flex flex-col text-xs text-muted-foreground"
                         >
                           <span className="font-mono text-foreground">
-                            {a.slot.inicio} – {a.slot.fim}
+                            {a.slot.inicio} - {a.slot.fim}
                           </span>
                           <span>
                             {a.turma.serie} "{a.turma.letra}"

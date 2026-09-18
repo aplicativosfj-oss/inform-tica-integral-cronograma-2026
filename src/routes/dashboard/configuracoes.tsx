@@ -98,7 +98,7 @@ function ConfiguracoesPage() {
             <CardTitle className="text-base">Regras de revezamento</CardTitle>
             <CardDescription>
               Como a agenda calcula os horários e o revezamento dos grupos automaticamente. A
-              primeira aula depois de um intervalo só começa quando ele termina — inclua na "Fim do
+              primeira aula depois de um intervalo só começa quando ele termina - inclua na "Fim do
               almoço/descanso" o tempo que as crianças levam para se organizar antes de vir para o
               laboratório.
             </CardDescription>

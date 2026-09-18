@@ -131,7 +131,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      // ?v=3 força o navegador a buscar o ícone de novo — favicon é um dos
+      // ?v=3 força o navegador a buscar o ícone de novo - favicon é um dos
       // recursos mais cacheados que existe, mudar só o arquivo não bastava.
       { rel: "icon", href: "/favicon.ico?v=3", type: "image/x-icon" },
       { rel: "icon", href: "/favicon-32.png?v=3", type: "image/png", sizes: "32x32" },
@@ -165,7 +165,7 @@ function RootComponent() {
 
   useEffect(() => {
     // Em dev, o middleware SSR intercepta /sw.js e devolve HTML em vez do
-    // script, então o registro sempre falha — sem ganho nenhum localmente.
+    // script, então o registro sempre falha - sem ganho nenhum localmente.
     if (import.meta.env.DEV) return;
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
     navigator.serviceWorker.register("/sw.js").catch((err) => {

@@ -60,7 +60,7 @@ interface GrupoFalta {
 /**
  * Ausências do mês agrupadas por turma+data, com um botão para reprogramar
  * a sessão automaticamente: sugere a próxima data do mesmo dia da semana,
- * suspende a data original e registra a nova ocorrência — tudo em uma única
+ * suspende a data original e registra a nova ocorrência - tudo em uma única
  * atualização de configuração, então o cronômetro ao vivo já reflete a
  * mudança sem precisar recarregar a página.
  */
@@ -163,7 +163,7 @@ function FaltasPage() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Faltas do mês</h1>
           <p className="text-sm text-muted-foreground">
-            Ausências registradas por turma e data, com reprogramação automática de aula — sem
+            Ausências registradas por turma e data, com reprogramação automática de aula - sem
             recarregar o cronômetro.
           </p>
         </div>
@@ -275,7 +275,7 @@ function FaltasPage() {
                       month: "2-digit",
                     })}
                   </span>{" "}
-                  ({r.inicio} – {r.fim})
+                  ({r.inicio} - {r.fim})
                 </p>
                 <Button
                   size="icon"

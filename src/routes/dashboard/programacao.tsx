@@ -120,7 +120,7 @@ function ProgramacaoPage() {
                           className="cursor-pointer transition-colors hover:bg-muted/60"
                         >
                           <TableCell className="font-mono text-sm">
-                            {assignment.slot.inicio} – {assignment.slot.fim}
+                            {assignment.slot.inicio} - {assignment.slot.fim}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -173,8 +173,8 @@ function ProgramacaoPage() {
           const ok = await confirmar({
             titulo: turmaId ? "Trocar a turma deste horário?" : "Restaurar o rodízio automático?",
             descricao: turmaId
-              ? `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} passa a ser de ${nomeTurma?.serie} "${nomeTurma?.letra}" toda semana.`
-              : `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} volta a seguir o rodízio automático.`,
+              ? `${editando.dia} ${editando.slot.inicio}-${editando.slot.fim} passa a ser de ${nomeTurma?.serie} "${nomeTurma?.letra}" toda semana.`
+              : `${editando.dia} ${editando.slot.inicio}-${editando.slot.fim} volta a seguir o rodízio automático.`,
           });
           if (!ok) return;
           setSlotOverride(editando.dia, editando.slot.inicio, turmaId);
@@ -205,7 +205,7 @@ function SlotEditDialog({
         <DialogHeader>
           <DialogTitle>
             {assignment
-              ? `${assignment.dia} · ${assignment.slot.inicio} – ${assignment.slot.fim}`
+              ? `${assignment.dia} · ${assignment.slot.inicio} - ${assignment.slot.fim}`
               : ""}
           </DialogTitle>
         </DialogHeader>

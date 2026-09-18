@@ -108,7 +108,7 @@ function SobrePage() {
             <CardContent>
               <p className="text-sm text-muted-foreground">
                 Divide cada turma em grupos e faz o rodízio entre eles semana a semana, priorizando
-                quem está há mais tempo sem participar — sem repetir e sem deixar ninguém de fora.
+                quem está há mais tempo sem participar - sem repetir e sem deixar ninguém de fora.
               </p>
             </CardContent>
           </Card>
@@ -121,7 +121,7 @@ function SobrePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Qualquer pessoa — pais, professores(as) regentes e a coordenação — pode consultar a
+                Qualquer pessoa - pais, professores(as) regentes e a coordenação - pode consultar a
                 agenda e ver exatamente qual turma tem aula, em qual data e horário.
               </p>
             </CardContent>
@@ -175,8 +175,8 @@ function SobrePage() {
               <p className="mt-2 text-sm text-muted-foreground">
                 Nas aulas de informática da escola, os alunos utilizam o{" "}
                 <strong className="text-foreground">GCompris</strong>, um pacote educacional livre e
-                gratuito com dezenas de atividades — matemática, leitura, ciências, lógica, arte e
-                muito mais — voltado para crianças a partir dos 2 anos. É uma ferramenta
+                gratuito com dezenas de atividades - matemática, leitura, ciências, lógica, arte e
+                muito mais - voltado para crianças a partir dos 2 anos. É uma ferramenta
                 consolidada, usada em escolas de vários países, que ajuda a transformar o tempo no
                 laboratório em aprendizado de verdade, de um jeito lúdico e acessível.
               </p>
@@ -215,7 +215,7 @@ function SobrePage() {
               <strong className="text-foreground">
                 Informática e suas Tecnologias na Educação
               </strong>
-              . Essa formação une o olhar pedagógico ao uso prático da tecnologia em sala de aula —
+              . Essa formação une o olhar pedagógico ao uso prático da tecnologia em sala de aula -
               e foi o que motivou a criação desta própria plataforma, pensada para tornar a rotina
               do laboratório de informática mais organizada, justa e transparente para toda a
               comunidade escolar.

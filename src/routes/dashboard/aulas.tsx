@@ -249,7 +249,7 @@ function AulasPage() {
                 {aulas.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      Nenhuma aula cadastrada — o rodízio automático continua valendo.
+                      Nenhuma aula cadastrada - o rodízio automático continua valendo.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -260,7 +260,7 @@ function AulasPage() {
                       <TableRow key={aula.id}>
                         <TableCell className="text-sm">{aula.dia}</TableCell>
                         <TableCell className="font-mono text-sm">
-                          {aula.inicio} – {aula.fim}
+                          {aula.inicio} - {aula.fim}
                         </TableCell>
                         <TableCell className="text-sm font-medium text-foreground">
                           {turma ? `${turma.serie} "${turma.letra}"` : "Turma removida"}
@@ -269,7 +269,7 @@ function AulasPage() {
                           {grupo?.nome ?? "Todos (revezamento)"}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {aula.conteudo || "—"}
+                          {aula.conteudo || "-"}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">

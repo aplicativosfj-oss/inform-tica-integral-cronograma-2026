@@ -54,7 +54,7 @@ function useNow() {
 
 /**
  * Tela cheia do laboratório: sem menus, sem navegação, apenas cronômetro,
- * turma, grupo, alunos da vez e conteúdo do dia — pensada para ficar
+ * turma, grupo, alunos da vez e conteúdo do dia - pensada para ficar
  * projetada na TV durante a aula.
  */
 function TvPage() {
@@ -142,7 +142,7 @@ function TvSessao({ conteudoDoDia, sessao }: { conteudoDoDia: string; sessao: Se
               {assignment.turma.serie} "{assignment.turma.letra}"
             </p>
             <p className="mt-2 text-2xl text-muted-foreground">
-              {subBloco.grupo.nome || `Grupo ${subBloco.grupo.indice + 1}`} · {subBloco.inicio} –{" "}
+              {subBloco.grupo.nome || `Grupo ${subBloco.grupo.indice + 1}`} · {subBloco.inicio} -{" "}
               {subBloco.fim}
             </p>
           </div>

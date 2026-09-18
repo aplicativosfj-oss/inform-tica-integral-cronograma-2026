@@ -30,7 +30,7 @@ export const Route = createFileRoute("/agenda")({
       {
         name: "description",
         content:
-          "Veja o horário completo das aulas de informática por turma, dia da semana e professor(a) — atualizado automaticamente.",
+          "Veja o horário completo das aulas de informática por turma, dia da semana e professor(a). Atualizado automaticamente.",
       },
       { property: "og:title", content: "Agenda semanal · Agenda de Informática" },
       {
@@ -162,7 +162,7 @@ function AgendaPage() {
                   <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3 text-xs">
                     <span className="flex items-center gap-1.5 font-mono font-medium text-foreground">
                       <Clock3 className="size-3.5 text-primary" />
-                      {assignment.slot.inicio} – {assignment.slot.fim}
+                      {assignment.slot.inicio}-{assignment.slot.fim}
                     </span>
                     <span className="flex items-center gap-1 text-muted-foreground">
                       <Users2 className="size-3.5" />
