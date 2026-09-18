@@ -11,6 +11,12 @@ import { useAuth } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardHome,
+  head: () => ({
+    meta: [
+      { title: "Painel de gestão · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function DashboardHome() {

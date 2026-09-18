@@ -6,12 +6,13 @@ import {
   Lock,
   MonitorPlay,
   Square,
+  Tv,
   UserX,
   Users,
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -29,7 +30,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TimerRing } from "@/components/school/timer-ring";
-import { playAlertaTroca, unlockAlertSound } from "@/lib/alert-sound";
+import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
+import { unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
 import {
@@ -46,6 +48,7 @@ import {
   escolherSubstituto,
   findSessaoAtual,
   gruposFromPresencas,
+  reprogramacoesParaData,
   selecionarAlunosDoDia,
   toDateKey,
   type SubBloco,
@@ -53,39 +56,35 @@ import {
 import type { Aluno, Presenca, ScheduleConfig, Turma } from "@/lib/types";
 
 /**
- * Plays the rotation alert whenever the active turn (`chave`) changes.
- * Kept as a child component so its hooks never sit behind an early return.
+ * Aviso de troca de grupo: overlay visual em tela cheia sempre, mais os
+ * bipes quando o professor liga o som (o navegador exige um clique antes de
+ * permitir áudio). Componente filho para que seus hooks nunca fiquem atrás
+ * de um early return do painel.
  */
-function AlertaSonoro({ chave }: { chave: string }) {
+function AlertaTroca({ chave, proximoGrupo }: { chave: string; proximoGrupo?: number }) {
   const [ativo, setAtivo] = useState(false);
-  const chaveAnterior = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (chaveAnterior.current !== null && chaveAnterior.current !== chave && ativo) {
-      playAlertaTroca();
-      toast.info("Tempo esgotado: hora de trocar o grupo no laboratório.");
-    }
-    chaveAnterior.current = chave;
-  }, [chave, ativo]);
 
   return (
-    <Button
-      type="button"
-      size="sm"
-      variant={ativo ? "secondary" : "outline"}
-      onClick={async () => {
-        if (ativo) {
-          setAtivo(false);
-          return;
-        }
-        const ok = await unlockAlertSound();
-        setAtivo(ok);
-        if (!ok) toast.error("Não foi possível ativar o som neste navegador.");
-      }}
-    >
-      {ativo ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
-      {ativo ? "Aviso sonoro ativo" : "Ativar aviso sonoro"}
-    </Button>
+    <>
+      <TrocaGrupoOverlay chave={chave} proximoGrupo={proximoGrupo} comSom={ativo} />
+      <Button
+        type="button"
+        size="sm"
+        variant={ativo ? "secondary" : "outline"}
+        onClick={async () => {
+          if (ativo) {
+            setAtivo(false);
+            return;
+          }
+          const ok = await unlockAlertSound();
+          setAtivo(ok);
+          if (!ok) toast.error("Não foi possível ativar o som neste navegador.");
+        }}
+      >
+        {ativo ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
+        {ativo ? "Aviso sonoro ativo" : "Ativar aviso sonoro"}
+      </Button>
+    </>
   );
 }
 
@@ -271,6 +270,97 @@ function useChamadaDoDia(
   return { presencas, marcarFaltaDoAluno };
 }
 
+/**
+ * Painel administrativo da chamada do dia: lista TODOS os alunos chamados
+ * hoje (de todos os grupos, não só o grupo da vez) com um botão claro para
+ * registrar ausência. Quem já está marcado como ausente aparece destacado,
+ * e o substituto chamado automaticamente aparece identificado.
+ */
+function ChamadaDoDiaCard({
+  turma,
+  presencas,
+  onMarcarFalta,
+}: {
+  turma: Turma;
+  presencas: Presenca[];
+  onMarcarFalta: (
+    aluno: Aluno,
+    grupoIndice: number,
+    motivo: "ausente" | "nao_quis_participar",
+  ) => Promise<void>;
+}) {
+  const grupos = [...new Set(presencas.map((p) => p.grupoIndice))].sort((a, b) => a - b);
+  const faltas = presencas.filter((p) => p.status === "faltou").length;
+
+  return (
+    <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+          <UserX className="size-3" /> Chamada de hoje · registrar ausência
+        </p>
+        <Badge variant={faltas > 0 ? "destructive" : "secondary"}>
+          {faltas} {faltas === 1 ? "ausência" : "ausências"}
+        </Badge>
+      </div>
+      <div className="flex flex-col gap-3">
+        {grupos.map((indice) => (
+          <div key={indice}>
+            <p className="mb-1 text-xs font-medium text-muted-foreground">Grupo {indice + 1}</p>
+            <div className="flex flex-col divide-y divide-border/60 overflow-hidden rounded-md border border-border/60">
+              {presencas
+                .filter((p) => p.grupoIndice === indice)
+                .map((p) => {
+                  const ausente = p.status === "faltou";
+                  const aluno: Aluno = turma.alunos.find((a) => a.id === p.alunoId) ?? {
+                    id: p.alunoId,
+                    nome: p.alunoNome,
+                  };
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
+                    >
+                      <span
+                        className={
+                          ausente
+                            ? "truncate text-muted-foreground line-through"
+                            : "truncate font-medium text-foreground"
+                        }
+                      >
+                        {p.alunoNome}
+                        {p.status === "substituido" ? (
+                          <span className="ml-2 text-xs font-normal text-primary">
+                            substituto(a)
+                          </span>
+                        ) : null}
+                      </span>
+                      {ausente ? (
+                        <Badge variant="outline" className="shrink-0 text-destructive">
+                          {p.motivo === "nao_quis_participar" ? "Não participou" : "Ausente"}
+                        </Badge>
+                      ) : (
+                        <AusenciaButton
+                          nome={p.alunoNome}
+                          autenticado
+                          onExigirLogin={() => undefined}
+                          onConfirmar={(motivo) => onMarcarFalta(aluno, indice, motivo)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        Ao marcar uma ausência, o sistema chama automaticamente o aluno que está há mais tempo sem
+        participar e registra a falta no relatório de frequência.
+      </p>
+    </div>
+  );
+}
+
 export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const { turmas, config, setSessaoSuspensa, isReady } = useAppStore();
   const { isAuthenticated } = useAuth();
@@ -283,7 +373,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const assignments = now
     ? aplicarExcecoesDeData(buildWeeklySchedule(turmas, config), config, turmas, dateKey)
     : [];
-  const sessao = now ? findSessaoAtual(assignments, config, now) : null;
+  const reprogramadasHoje = now ? reprogramacoesParaData(turmas, config, now) : [];
+  const sessao = now ? findSessaoAtual(assignments, config, now, reprogramadasHoje) : null;
 
   const chamada = useChamadaDoDia(
     sessao?.assignment.turma,
@@ -379,8 +470,15 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           <MonitorPlay className="size-5 text-primary" />
           Aula em andamento
         </CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge className="bg-primary text-primary-foreground">AO VIVO</Badge>
+          <AlertaTroca
+            chave={`${dateKeySessao}|${subBloco.inicio}`}
+            proximoGrupo={subBloco.grupo.indice + 1}
+          />
+          <Button size="sm" variant="outline" onClick={() => navigate({ to: "/tv" })}>
+            <Tv className="size-3.5" /> Modo TV
+          </Button>
           {editable ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -442,7 +540,10 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               <BookOpen className="size-3" /> Conteúdo de hoje ({diaAtual})
             </p>
             <p className="mt-1 text-sm text-foreground">
-              {conteudoDoDia || "Nenhum conteúdo cadastrado para hoje."}
+              {subBloco.grupo.conteudo ||
+                assignment.conteudo ||
+                conteudoDoDia ||
+                "Nenhum conteúdo cadastrado para hoje."}
             </p>
           </div>
 
@@ -520,6 +621,21 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               Esta turma ainda não tem alunos cadastrados.
             </p>
           )}
+
+          {editable && chamada.presencas && chamada.presencas.length > 0 ? (
+            <ChamadaDoDiaCard
+              turma={assignment.turma}
+              presencas={chamada.presencas}
+              onMarcarFalta={async (aluno, grupoIndice, motivo) => {
+                const substituto = await chamada.marcarFaltaDoAluno(aluno, grupoIndice, motivo);
+                toast.success(
+                  substituto
+                    ? `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}. ${substituto.nome} foi chamado(a) no lugar.`
+                    : `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}.`,
+                );
+              }}
+            />
+          ) : null}
 
           {proximoSubBloco ? (
             <p className="text-xs text-muted-foreground">

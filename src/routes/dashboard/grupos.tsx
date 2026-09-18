@@ -13,6 +13,12 @@ import type { Turma } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/grupos")({
   component: GruposPage,
+  head: () => ({
+    meta: [
+      { title: "Turmas e grupos · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function GruposPage() {
@@ -69,7 +75,10 @@ function TurmaGruposCard({
   const grupos = turma.grupos ?? [];
 
   function criarAutomaticamente() {
-    const quantidade = Math.max(1, Math.ceil(turma.alunos.length / Math.max(1, numeroComputadores)));
+    const quantidade = Math.max(
+      1,
+      Math.ceil(turma.alunos.length / Math.max(1, numeroComputadores)),
+    );
     for (let i = grupos.length; i < quantidade; i += 1) {
       onAdd(`Grupo ${i + 1}`, "");
     }

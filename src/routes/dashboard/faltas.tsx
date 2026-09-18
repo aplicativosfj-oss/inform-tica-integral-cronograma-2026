@@ -1,0 +1,291 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { CalendarClock, RotateCcw, Trash2, UserX } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DashboardShell } from "@/components/school/dashboard-shell";
+import { useAppStore } from "@/lib/app-store";
+import { fetchPresencasRange } from "@/lib/presencas";
+import {
+  buildWeeklySchedule,
+  currentWeekdayLabel,
+  proximaDataDoDia,
+  toDateKey,
+} from "@/lib/schedule-engine";
+import type { Presenca } from "@/lib/types";
+
+export const Route = createFileRoute("/dashboard/faltas")({
+  component: FaltasPage,
+  head: () => ({
+    meta: [
+      { title: "Faltas do mês · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+});
+
+function mesAtual(): string {
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function intervaloDoMes(mes: string): { inicio: string; fim: string } {
+  const [ano, m] = mes.split("-").map(Number);
+  const primeiro = new Date(ano ?? 2026, (m ?? 1) - 1, 1);
+  const ultimo = new Date(ano ?? 2026, m ?? 1, 0);
+  return { inicio: toDateKey(primeiro), fim: toDateKey(ultimo) };
+}
+
+function addDias(dataISO: string, dias: number): Date {
+  const [ano, mes, dia] = dataISO.split("-").map(Number);
+  const data = new Date(ano ?? 2026, (mes ?? 1) - 1, dia ?? 1);
+  data.setDate(data.getDate() + dias);
+  return data;
+}
+
+interface GrupoFalta {
+  chave: string;
+  turmaId: string;
+  data: string;
+  dia: string;
+  alunos: string[];
+}
+
+/**
+ * Ausências do mês agrupadas por turma+data, com um botão para reprogramar
+ * a sessão automaticamente: sugere a próxima data do mesmo dia da semana,
+ * suspende a data original e registra a nova ocorrência — tudo em uma única
+ * atualização de configuração, então o cronômetro ao vivo já reflete a
+ * mudança sem precisar recarregar a página.
+ */
+function FaltasPage() {
+  const { turmas, config, reprogramarAula, removeReprogramacao } = useAppStore();
+  const [mes, setMes] = useState(mesAtual);
+  const [registros, setRegistros] = useState<Presenca[] | null>(null);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
+
+  useEffect(() => {
+    let cancelado = false;
+    const { inicio, fim } = intervaloDoMes(mes);
+    setRegistros(null);
+    setErro(null);
+    const timeout = new Promise<Presenca[]>((_, reject) =>
+      setTimeout(() => reject(new Error("Tempo esgotado ao buscar dados de frequência.")), 6000),
+    );
+    Promise.race([fetchPresencasRange(inicio, fim), timeout])
+      .then((dados) => {
+        if (!cancelado) setRegistros(dados);
+      })
+      .catch((err: Error) => {
+        if (!cancelado) {
+          setErro(err.message);
+          setRegistros([]);
+        }
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [mes]);
+
+  const nomeTurma = (id: string) => {
+    const t = turmas.find((turma) => turma.id === id);
+    return t ? `${t.serie} "${t.letra}"` : id;
+  };
+
+  const grupos = useMemo<GrupoFalta[]>(() => {
+    const mapa = new Map<string, GrupoFalta>();
+    for (const r of registros ?? []) {
+      if (r.status !== "faltou") continue;
+      const chave = `${r.turmaId}|${r.data}`;
+      const atual = mapa.get(chave) ?? {
+        chave,
+        turmaId: r.turmaId,
+        data: r.data,
+        dia: currentWeekdayLabel(addDias(r.data, 0)),
+        alunos: [],
+      };
+      atual.alunos.push(r.alunoNome);
+      mapa.set(chave, atual);
+    }
+    return [...mapa.values()].sort((a, b) => b.data.localeCompare(a.data));
+  }, [registros]);
+
+  const reprogramacoes = [...(config.reprogramacoes ?? [])].sort((a, b) =>
+    b.criadoEm.localeCompare(a.criadoEm),
+  );
+
+  function reprogramacaoExistente(turmaId: string, data: string) {
+    return (config.reprogramacoes ?? []).find(
+      (r) => r.turmaId === turmaId && r.dataOriginal === data,
+    );
+  }
+
+  function reprogramar(grupo: GrupoFalta) {
+    const assignment = assignments.find((a) => a.turma.id === grupo.turmaId && a.dia === grupo.dia);
+    if (!assignment) {
+      toast.error("Não foi possível encontrar o horário original dessa turma nesse dia.");
+      return;
+    }
+    const proximaData = proximaDataDoDia(grupo.dia, addDias(grupo.data, 1));
+    reprogramarAula({
+      turmaId: grupo.turmaId,
+      dataOriginal: grupo.data,
+      diaOriginal: grupo.dia,
+      inicioOriginal: assignment.slot.inicio,
+      fimOriginal: assignment.slot.fim,
+      dataNova: toDateKey(proximaData),
+      inicio: assignment.slot.inicio,
+      fim: assignment.slot.fim,
+      conteudo: undefined,
+    });
+    toast.success(
+      `Aula de ${nomeTurma(grupo.turmaId)} reprogramada para ${proximaData.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}. O cronômetro já está atualizado.`,
+    );
+  }
+
+  return (
+    <DashboardShell>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Faltas do mês</h1>
+          <p className="text-sm text-muted-foreground">
+            Ausências registradas por turma e data, com reprogramação automática de aula — sem
+            recarregar o cronômetro.
+          </p>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="mes">Mês</Label>
+          <Input
+            id="mes"
+            type="month"
+            className="w-44"
+            value={mes}
+            onChange={(e) => setMes(e.target.value || mesAtual())}
+          />
+        </div>
+      </div>
+
+      {erro ? (
+        <p className="mb-6 text-sm text-destructive">
+          Não foi possível carregar a frequência agora: {erro}
+        </p>
+      ) : null}
+
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <UserX className="size-4" /> Sessões com ausências ({grupos.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          {registros === null ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">Carregando...</p>
+          ) : grupos.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              Nenhuma ausência registrada neste mês.
+            </p>
+          ) : (
+            grupos.map((grupo) => {
+              const jaReprogramada = reprogramacaoExistente(grupo.turmaId, grupo.data);
+              return (
+                <div
+                  key={grupo.chave}
+                  className="flex flex-col gap-2 rounded-lg border border-border/60 bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">
+                      {nomeTurma(grupo.turmaId)}{" "}
+                      <span className="font-normal text-muted-foreground">
+                        · {grupo.dia},{" "}
+                        {new Date(`${grupo.data}T00:00:00`).toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                        })}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {grupo.alunos.length} {grupo.alunos.length === 1 ? "falta" : "faltas"}:{" "}
+                      {grupo.alunos.join(", ")}
+                    </p>
+                  </div>
+                  {jaReprogramada ? (
+                    <Badge variant="secondary" className="shrink-0 gap-1.5">
+                      <CalendarClock className="size-3.5" /> Reprogramada para{" "}
+                      {new Date(`${jaReprogramada.dataNova}T00:00:00`).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </Badge>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0 gap-1.5"
+                      onClick={() => reprogramar(grupo)}
+                    >
+                      <RotateCcw className="size-3.5" /> Reprogramar aula
+                    </Button>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Aulas reprogramadas ({reprogramacoes.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          {reprogramacoes.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Nenhuma aula reprogramada.
+            </p>
+          ) : (
+            reprogramacoes.map((r) => (
+              <div
+                key={r.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/60 p-3"
+              >
+                <p className="text-sm text-foreground">
+                  <span className="font-medium">{nomeTurma(r.turmaId)}</span> ·{" "}
+                  {new Date(`${r.dataOriginal}T00:00:00`).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })}{" "}
+                  →{" "}
+                  <span className="font-medium text-primary">
+                    {new Date(`${r.dataNova}T00:00:00`).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}
+                  </span>{" "}
+                  ({r.inicio} – {r.fim})
+                </p>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Cancelar reprogramação"
+                  onClick={() => {
+                    removeReprogramacao(r.id);
+                    toast.success("Reprogramação cancelada. A aula original volta a valer.");
+                  }}
+                >
+                  <Trash2 className="size-4 text-destructive" />
+                </Button>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+    </DashboardShell>
+  );
+}

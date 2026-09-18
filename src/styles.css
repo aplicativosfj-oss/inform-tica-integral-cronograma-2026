@@ -132,6 +132,19 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* Barras do equalizador do player de rádio flutuante — cada uma anima em um
+   ritmo levemente diferente para parecer um VU-meter de verdade, não um
+   piscar sincronizado. */
+@keyframes radio-eq-bar {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

@@ -99,6 +99,8 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
     diaIndex: number;
     slot: Slot;
     turma: Turma;
+    conteudo?: string | undefined;
+    grupoIdFixo?: string | undefined;
   }
   const pending: Pending[] = [];
 
@@ -113,6 +115,26 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
       pending.push({ dia, diaIndex, slot, turma });
     });
   });
+
+  // Aulas cadastradas manualmente na tela "Aulas" têm prioridade: substituem
+  // o horário equivalente do rodízio automático ou entram como horário novo.
+  for (const aula of config.aulas ?? []) {
+    const turma = turmasById.get(aula.turmaId);
+    if (!turma) continue;
+    const diaIndex = Math.max(0, config.diasSemana.indexOf(aula.dia));
+    const slot: Slot = { inicio: aula.inicio, fim: aula.fim };
+    const existente = pending.findIndex((p) => p.dia === aula.dia && p.slot.inicio === aula.inicio);
+    const item: Pending = {
+      dia: aula.dia,
+      diaIndex,
+      slot,
+      turma,
+      conteudo: aula.conteudo,
+      grupoIdFixo: aula.grupoId,
+    };
+    if (existente >= 0) pending[existente] = item;
+    else pending.push(item);
+  }
 
   // Session counts are derived from the final (post-override) assignments so
   // the group rotation in buildSubBlocos stays consistent for every turma.
@@ -193,30 +215,42 @@ export function getWeekIndex(date: Date): number {
 /**
  * Splits one hour-long slot into rotating sub-blocks (e.g. two 30min turns).
  *
- * The starting group is offset both by how many sub-blocks this turma has
- * already used earlier in the same week (`ocorrenciaIndex`) and by the
- * current week number, advanced by exactly the number of sub-blocks the
- * turma consumes per week (`sessoesPorSemana * totalSubBlocos`). That keeps
- * the rotation continuous week over week — the group that starts a new week
- * is exactly the one that would come next, so every group (and therefore
- * every student) gets an equal share of turns over time instead of the same
- * groups always going first.
+ * The starting group is offset by how many sub-blocks this turma has already
+ * used earlier in the same week (`ocorrenciaIndex`), so a single week always
+ * walks through consecutive groups without repeats until it wraps around.
+ * On top of that, the whole week's pattern shifts by exactly one group per
+ * calendar week (`weekIndex`) — deliberately *not* scaled by how many
+ * sub-blocks the turma consumes per week, because when that number is an
+ * exact multiple of the group count (e.g. 2 sessions x 2 sub-blocks = 4,
+ * matching a turma with exactly 4 groups) a scaled offset cancels out modulo
+ * the group count and the same groups get stuck in the same slot forever.
+ * Shifting by a flat 1 has no such blind spot: it cycles through every
+ * possible group-to-slot pairing over `grupos.length` weeks no matter the
+ * weekly consumption, so no group of students is ever pinned to one fixed
+ * day/time indefinitely.
  */
 export function buildSubBlocos(
   assignment: Assignment,
   config: ScheduleConfig,
   weekIndex = 0,
 ): SubBloco[] {
-  const grupos = buildGrupos(assignment.turma, config);
+  const todos = buildGrupos(assignment.turma, config);
+  // Aula cadastrada com um grupo fixo: esse grupo ocupa o horário inteiro.
+  const fixo = assignment.grupoIdFixo
+    ? todos.filter((g) =>
+        (assignment.turma.grupos ?? []).some(
+          (cad) => cad.id === assignment.grupoIdFixo && cad.nome === g.nome,
+        ),
+      )
+    : [];
+  const grupos = fixo.length > 0 ? fixo : todos;
   const inicio = toMinutes(assignment.slot.inicio);
   const fim = toMinutes(assignment.slot.fim);
   const passo = Math.max(1, config.duracaoGrupoMinutos);
   const totalSubBlocos = Math.max(1, Math.round((fim - inicio) / passo));
   const subBlocos: SubBloco[] = [];
 
-  const consumoPorSemana = assignment.sessoesPorSemana * totalSubBlocos;
-  const startGrupo =
-    (weekIndex * consumoPorSemana + assignment.ocorrenciaIndex * totalSubBlocos) % grupos.length;
+  const startGrupo = (weekIndex + assignment.ocorrenciaIndex * totalSubBlocos) % grupos.length;
   for (let i = 0; i < totalSubBlocos; i += 1) {
     const grupo = grupos[(startGrupo + i) % grupos.length];
     if (!grupo) continue;
@@ -361,17 +395,49 @@ export function toDateKey(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * Materializa, como `Assignment`s sintéticos, as reprogramações cuja nova
+ * data cai em `data` — para que o cronômetro ao vivo, a agenda pública e o
+ * modo TV enxerguem a aula movida sem precisar de nenhuma lógica própria.
+ */
+export function reprogramacoesParaData(
+  turmas: Turma[],
+  config: ScheduleConfig,
+  data: Date,
+): Assignment[] {
+  const dataKey = toDateKey(data);
+  const dia = currentWeekdayLabel(data);
+  const turmasById = new Map(turmas.map((t) => [t.id, t]));
+  const resultado: Assignment[] = [];
+  for (const r of config.reprogramacoes ?? []) {
+    if (r.dataNova !== dataKey) continue;
+    const turma = turmasById.get(r.turmaId);
+    if (!turma) continue;
+    resultado.push({
+      dia,
+      diaIndex: Math.max(0, config.diasSemana.indexOf(dia)),
+      slot: { inicio: r.inicio, fim: r.fim },
+      turma,
+      ocorrenciaIndex: 0,
+      sessoesPorSemana: 1,
+      conteudo: r.conteudo,
+    });
+  }
+  return resultado;
+}
+
 /** Finds the class session (if any) happening right now, and the live countdown. */
 export function findSessaoAtual(
   assignments: Assignment[],
   config: ScheduleConfig,
   now: Date,
+  extras: Assignment[] = [],
 ): SessaoAtual | null {
   const dia = currentWeekdayLabel(now);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const nowSeconds = nowMinutes * 60 + now.getSeconds();
 
-  const assignment = assignments.find((a) => {
+  const assignment = [...extras, ...assignments].find((a) => {
     if (a.dia !== dia) return false;
     const start = toMinutes(a.slot.inicio);
     const end = toMinutes(a.slot.fim);
@@ -440,4 +506,20 @@ export function proximaDataDoDia(dia: string, from: Date): Date {
     if (currentWeekdayLabel(data) === dia) return data;
   }
   return from;
+}
+
+/**
+ * Next `quantidade` real calendar dates for a given weekday label, one per
+ * week starting from the nearest match — e.g. for "Segunda" a partir de
+ * hoje: [22/09, 29/09, 06/10, ...]. Used to show the public exactly which
+ * dates a turma's weekly slot falls on next, not just the recurring weekday
+ * name.
+ */
+export function proximasDatasDoDia(dia: string, from: Date, quantidade: number): Date[] {
+  const primeira = proximaDataDoDia(dia, from);
+  return Array.from({ length: Math.max(0, quantidade) }, (_, i) => {
+    const data = new Date(primeira);
+    data.setDate(data.getDate() + i * 7);
+    return data;
+  });
 }

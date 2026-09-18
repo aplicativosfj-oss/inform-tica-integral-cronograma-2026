@@ -1,25 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, Clock3, User2 } from "lucide-react";
+import { CalendarDays, ChevronRight, Clock3, Users2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
+import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
+import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
-import { buildGrupos, buildWeeklySchedule, currentWeekdayLabel } from "@/lib/schedule-engine";
+import {
+  buildGrupos,
+  buildWeeklySchedule,
+  currentWeekdayLabel,
+  proximaDataDoDia,
+  proximasDatasDoDia,
+  reprogramacoesParaData,
+  suspensaoKey,
+  toDateKey,
+} from "@/lib/schedule-engine";
+import type { Assignment } from "@/lib/types";
 
 export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
+  head: () => ({
+    meta: [
+      { title: "Agenda semanal · Agenda de Informática" },
+      {
+        name: "description",
+        content:
+          "Veja o horário completo das aulas de informática por turma, dia da semana e professor(a) — atualizado automaticamente.",
+      },
+      { property: "og:title", content: "Agenda semanal · Agenda de Informática" },
+      {
+        property: "og:description",
+        content: "Horário completo das aulas de informática por turma, dia e professor(a).",
+      },
+    ],
+  }),
 });
 
 function AgendaPage() {
@@ -29,117 +48,144 @@ function AgendaPage() {
   const [diaSelecionado, setDiaSelecionado] = useState(
     config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),
   );
+  const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
-  const assignmentsDoDia = assignments
-    .filter((a) => a.dia === diaSelecionado)
-    .sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
+  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
+  const dataDoDiaKey = toDateKey(dataDoDia);
+  const reprogramadasDoDia = useMemo(
+    () => reprogramacoesParaData(turmas, config, dataDoDia),
+    [turmas, config, dataDoDia],
+  );
+  const assignmentsDoDia = [
+    ...assignments.filter(
+      (a) =>
+        a.dia === diaSelecionado &&
+        !config.suspensoes?.[suspensaoKey(dataDoDiaKey, a.dia, a.slot.inicio)],
+    ),
+    ...reprogramadasDoDia,
+  ].sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
+  const dataDoDiaFormatada = dataDoDia.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+  });
+  const dataCurta = (dia: string) =>
+    proximaDataDoDia(dia, new Date()).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+    });
 
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
 
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <div className="mb-8 flex flex-col gap-2">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="mb-6 flex flex-col gap-1.5">
           <Badge variant="secondary" className="w-fit gap-1.5">
             <CalendarDays className="size-3.5" /> Agenda semanal
           </Badge>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Cronograma de aulas de informática
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Todas as turmas revezam automaticamente ao longo da semana, de {config.horaInicio} às{" "}
-            {config.horaFim}, com o professor {config.professorInformatica}.
+            Toque numa turma para ver os alunos previstos. Revezamento automático de{" "}
+            {config.horaInicio} às {config.horaFim}, com o professor {config.professorInformatica}.
           </p>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-6">
           <LiveSessionPanel />
         </div>
 
         <Tabs value={diaSelecionado} onValueChange={setDiaSelecionado}>
-          <TabsList className="mb-4 flex h-auto flex-wrap justify-start gap-1 bg-transparent p-0">
+          <TabsList className="mb-3 flex h-auto flex-wrap justify-start gap-1.5 bg-transparent p-0">
             {config.diasSemana.map((dia) => (
               <TabsTrigger
                 key={dia}
                 value={dia}
-                className="rounded-full border border-border/60 px-4 py-1.5 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="flex-col gap-0 rounded-xl border border-border/60 px-4 py-1.5 leading-tight data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
-                {dia}
-                {dia === todayLabel ? " · hoje" : ""}
+                <span>
+                  {dia}
+                  {dia === todayLabel ? " · hoje" : ""}
+                </span>
+                <span className="font-mono text-[10px] opacity-70">{dataCurta(dia)}</span>
               </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Clock3 className="size-4" /> {diaSelecionado}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-32">Horário</TableHead>
-                    <TableHead>Turma</TableHead>
-                    <TableHead>Professor(a) regente</TableHead>
-                    <TableHead className="text-right">Alunos / grupos</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {assignmentsDoDia.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
-                        Nenhuma turma cadastrada ainda.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    assignmentsDoDia.map((assignment) => {
-                      const grupos = buildGrupos(assignment.turma, config);
-                      return (
-                        <TableRow key={`${assignment.dia}-${assignment.slot.inicio}`}>
-                          <TableCell className="font-mono text-sm">
-                            {assignment.slot.inicio} – {assignment.slot.fim}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              {assignment.turma.imagem ? (
-                                <img
-                                  src={assignment.turma.imagem}
-                                  alt=""
-                                  className="size-8 rounded-md object-cover"
-                                />
-                              ) : (
-                                <span className="flex size-8 items-center justify-center rounded-md bg-secondary text-xs font-semibold text-secondary-foreground">
-                                  {assignment.turma.letra}
-                                </span>
-                              )}
-                              <span className="font-medium text-foreground">
-                                {assignment.turma.serie} "{assignment.turma.letra}"
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            <span className="inline-flex items-center gap-1.5">
-                              <User2 className="size-3.5" /> {assignment.turma.professorRegente}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right text-sm text-muted-foreground">
-                            {assignment.turma.alunos.length} alunos · {grupos.length}{" "}
-                            {grupos.length === 1 ? "grupo" : "grupos"}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+        <p className="mb-5 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <CalendarDays className="size-4" />
+          {diaSelecionado}, {dataDoDiaFormatada}
+        </p>
+
+        {assignmentsDoDia.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+              Nenhuma turma programada para {diaSelecionado}.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {assignmentsDoDia.map((assignment) => {
+              const grupos = buildGrupos(assignment.turma, config);
+              return (
+                <button
+                  key={`${assignment.dia}-${assignment.slot.inicio}`}
+                  type="button"
+                  onClick={() => setAssignmentSelecionado(assignment)}
+                  className="group flex flex-col rounded-xl border border-border/60 bg-card p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                >
+                  <div className="flex items-center gap-3">
+                    {assignment.turma.imagem ? (
+                      <img
+                        src={assignment.turma.imagem}
+                        alt=""
+                        className="size-11 shrink-0 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
+                        {assignment.turma.letra}
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-foreground">
+                        {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        Prof(a). {assignment.turma.professorRegente}
+                      </p>
+                    </div>
+                    <ChevronRight className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3 text-xs">
+                    <span className="flex items-center gap-1.5 font-mono font-medium text-foreground">
+                      <Clock3 className="size-3.5 text-primary" />
+                      {assignment.slot.inicio} – {assignment.slot.fim}
+                    </span>
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <Users2 className="size-3.5" />
+                      {assignment.turma.alunos.length} · {grupos.length}{" "}
+                      {grupos.length === 1 ? "grupo" : "grupos"}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      <SiteFooter />
+
+      <PreviaAlunosDialog
+        assignment={assignmentSelecionado}
+        data={dataDoDia}
+        onOpenChange={(open) => {
+          if (!open) setAssignmentSelecionado(null);
+        }}
+      />
     </div>
   );
 }

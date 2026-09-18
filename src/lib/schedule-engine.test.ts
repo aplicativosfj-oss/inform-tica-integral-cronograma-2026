@@ -9,6 +9,7 @@ import {
   findSessaoAtual,
   formatCountdown,
   getWeekIndex,
+  proximasDatasDoDia,
 } from "@/lib/schedule-engine";
 import type { Aluno, ScheduleConfig, Turma } from "@/lib/types";
 
@@ -163,6 +164,34 @@ describe("rodízio eletrônico entre semanas", () => {
       }
     }
   });
+
+  test("mesmo quando o consumo semanal é múltiplo exato do nº de grupos, o mapeamento grupo->horário muda de semana em semana", () => {
+    // Caso real que travava: 2 sessões/semana x 2 sub-blocos = 4 vagas,
+    // exatamente igual ao nº de grupos de uma turma com 22-28 alunos (4
+    // grupos de 7). weekIndex * consumoPorSemana (4) módulo 4 é sempre 0,
+    // então o grupo que abre a semana nunca mudava — mesmo alunos, mesmo
+    // dia, para sempre.
+    const turmas = [makeTurma("t0", 24)]; // 4 grupos, sozinha na semana
+    const configSemanaCurta = makeConfig({
+      diasSemana: ["Segunda", "Quarta"],
+      horaInicio: "08:00",
+      horaFim: "09:00", // exatamente 1 janela de 60min por dia
+    });
+    const assignments = buildWeeklySchedule(turmas, configSemanaCurta);
+    expect(assignments).toHaveLength(2); // 1 sessão em cada um dos 2 dias -> 2 sessões/semana
+    const turma = turmas[0]!;
+    expect(buildGrupos(turma, configSemanaCurta)).toHaveLength(4);
+
+    const primeiroGrupoPorSemana = new Set<number>();
+    for (let semana = 0; semana < 4; semana++) {
+      const segunda = assignments.find((a) => a.dia === "Segunda")!;
+      const subs = buildSubBlocos(segunda, configSemanaCurta, semana);
+      primeiroGrupoPorSemana.add(subs[0]!.grupo.indice);
+    }
+    // Em 4 semanas, o grupo que abre a segunda-feira passa pelos 4 grupos —
+    // antes da correção, esse conjunto tinha sempre tamanho 1 (nunca mudava).
+    expect(primeiroGrupoPorSemana.size).toBe(4);
+  });
 });
 
 describe("getWeekIndex", () => {
@@ -176,6 +205,25 @@ describe("getWeekIndex", () => {
     const semana1 = new Date(2026, 8, 14);
     const semana2 = new Date(2026, 8, 21);
     expect(getWeekIndex(semana2)).toBe(getWeekIndex(semana1) + 1);
+  });
+});
+
+describe("proximasDatasDoDia", () => {
+  test("retorna as próximas N datas reais do dia da semana, uma por semana", () => {
+    const segunda14 = new Date(2026, 8, 14); // segunda-feira
+    const datas = proximasDatasDoDia("Segunda", segunda14, 3);
+    expect(datas.map((d) => d.getDate())).toEqual([14, 21, 28]);
+    for (const d of datas) expect(currentWeekdayLabel(d)).toBe("Segunda");
+  });
+
+  test("a partir de uma data que não é o dia pedido, começa na próxima ocorrência", () => {
+    const quarta16 = new Date(2026, 8, 16); // quarta-feira
+    const datas = proximasDatasDoDia("Sexta", quarta16, 2);
+    expect(datas.map((d) => d.getDate())).toEqual([18, 25]);
+  });
+
+  test("quantidade zero retorna lista vazia", () => {
+    expect(proximasDatasDoDia("Segunda", new Date(2026, 8, 14), 0)).toEqual([]);
   });
 });
 

@@ -37,6 +37,12 @@ import type { Aluno } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/turmas/$turmaId")({
   component: TurmaAlunosPage,
+  head: () => ({
+    meta: [
+      { title: "Alunos da turma · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 interface AlunoFormValues {

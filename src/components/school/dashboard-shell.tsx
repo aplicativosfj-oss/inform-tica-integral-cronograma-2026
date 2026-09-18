@@ -1,11 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   CalendarClock,
+  CalendarPlus,
   CalendarSearch,
   GraduationCap,
   Layers,
   LayoutDashboard,
   Settings2,
+  UserX,
   Users2,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -19,8 +21,10 @@ const NAV_ITEMS = [
   { to: "/dashboard/turmas", label: "Turmas e alunos", icon: Users2 },
   { to: "/dashboard/grupos", label: "Turmas e grupos", icon: Layers },
   { to: "/dashboard/alunos", label: "Alunos", icon: GraduationCap },
+  { to: "/dashboard/aulas", label: "Aulas", icon: CalendarPlus },
   { to: "/dashboard/programacao", label: "Programação", icon: CalendarClock },
   { to: "/dashboard/frequencia", label: "Frequência", icon: CalendarSearch },
+  { to: "/dashboard/faltas", label: "Faltas do mês", icon: UserX },
   { to: "/dashboard/configuracoes", label: "Configurações", icon: Settings2 },
 ] as const;
 

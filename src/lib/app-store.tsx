@@ -10,10 +10,12 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-store";
+import { enfileirar, gravarCache, lerCache, registrarExecutor } from "@/lib/offline-queue";
+import { sincronizarPresencasPendentes } from "@/lib/presencas";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
 import { supabase } from "@/lib/supabase-client";
-import type { Aluno, Grupo, ScheduleConfig, Turma } from "@/lib/types";
+import type { Aluno, AulaManual, Grupo, Reprogramacao, ScheduleConfig, Turma } from "@/lib/types";
 
 const ROW_ID = "default";
 
@@ -31,15 +33,46 @@ interface AppState {
   addGrupo: (turmaId: string, grupo: Omit<Grupo, "id">) => void;
   updateGrupo: (turmaId: string, grupoId: string, patch: Partial<Omit<Grupo, "id">>) => void;
   removeGrupo: (turmaId: string, grupoId: string) => void;
+  addAula: (aula: Omit<AulaManual, "id">) => void;
+  updateAula: (id: string, patch: Partial<Omit<AulaManual, "id">>) => void;
+  removeAula: (id: string) => void;
   updateConfig: (patch: Partial<ScheduleConfig>) => void;
   /** Overrides which turma occupies a fixed weekly slot (Programação page). Pass `null` to restore the automatic rotation. */
   setSlotOverride: (dia: string, slotInicio: string, turmaId: string | null) => void;
   /** Stops (or resumes) the class scheduled for a specific date + slot, without affecting future weeks. */
   setSessaoSuspensa: (dateISO: string, dia: string, slotInicio: string, suspensa: boolean) => void;
+  /**
+   * Reprograma uma sessão específica para outra data/horário: marca a
+   * original como suspensa e registra a nova ocorrência, sem afetar o
+   * rodízio automático das semanas seguintes.
+   */
+  reprogramarAula: (input: Omit<Reprogramacao, "id" | "criadoEm">) => void;
+  removeReprogramacao: (id: string) => void;
   resetToSeed: () => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
+
+interface AppStatePayload {
+  turmas: Turma[];
+  config: ScheduleConfig;
+}
+
+/** Envia o cadastro completo (turmas, grupos, alunos, aulas) ao banco. */
+async function enviarAppState(payload: AppStatePayload): Promise<void> {
+  const { error } = await supabase.from("app_state").upsert({
+    id: ROW_ID,
+    turmas: payload.turmas,
+    config: payload.config,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+}
+
+// Reenvio automático do cadastro guardado enquanto a internet estava fora.
+registrarExecutor("app_state", async (payload) => {
+  await enviarAppState(payload as AppStatePayload);
+});
 
 function generateId(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -58,8 +91,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   turmasRef.current = turmas;
   configRef.current = config;
 
+  // Sem internet, reenvia a frequência guardada assim que a conexão voltar.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    async function sincronizar() {
+      const { enviadas } = await sincronizarPresencasPendentes();
+      if (enviadas > 0) toast.success(`${enviadas} registro(s) de frequência sincronizado(s).`);
+    }
+    sincronizar();
+    window.addEventListener("online", sincronizar);
+    return () => window.removeEventListener("online", sincronizar);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
+    // Enquanto a rede não responde, a tela abre com a última cópia local.
+    const emCache = lerCache<{ turmas: Turma[]; config: ScheduleConfig }>("app_state");
+    if (emCache) {
+      setTurmas(emCache.turmas);
+      setConfig(emCache.config);
+    }
     supabase
       .from("app_state")
       .select("turmas, config")
@@ -68,10 +119,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .then(async ({ data, error }) => {
         if (cancelled) return;
         if (error) {
-          toast.error(`Não foi possível carregar os dados: ${error.message}`);
+          if (!emCache) toast.error(`Não foi possível carregar os dados: ${error.message}`);
         } else if (data) {
-          setTurmas((data.turmas as Turma[] | null) ?? SEED_TURMAS);
-          setConfig((data.config as ScheduleConfig | null) ?? SEED_CONFIG);
+          const proximasTurmas = (data.turmas as Turma[] | null) ?? SEED_TURMAS;
+          const proximaConfig = (data.config as ScheduleConfig | null) ?? SEED_CONFIG;
+          setTurmas(proximasTurmas);
+          setConfig(proximaConfig);
+          gravarCache("app_state", { turmas: proximasTurmas, config: proximaConfig });
         } else if (isAuthenticated) {
           // First run: seed the row (requires an authenticated admin session,
           // per the write RLS policy) so future reads — including the public
@@ -89,17 +143,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   function persist(nextTurmas: Turma[], nextConfig: ScheduleConfig) {
-    supabase
-      .from("app_state")
-      .upsert({
-        id: ROW_ID,
-        turmas: nextTurmas,
-        config: nextConfig,
-        updated_at: new Date().toISOString(),
-      })
-      .then(({ error }) => {
-        if (error) toast.error(`Não foi possível salvar: ${error.message}`);
-      });
+    // A cópia local é gravada primeiro: mesmo sem internet a tela continua
+    // funcionando e os dados sobrevivem a um recarregamento.
+    gravarCache("app_state", { turmas: nextTurmas, config: nextConfig });
+    enviarAppState({ turmas: nextTurmas, config: nextConfig }).catch(() => {
+      enfileirar("app_state", { turmas: nextTurmas, config: nextConfig });
+      toast.warning("Sem internet: as alterações foram guardadas e serão enviadas ao reconectar.");
+    });
   }
 
   function applyTurmas(updater: (prev: Turma[]) => Turma[]) {
@@ -192,6 +242,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ),
         );
       },
+      addAula: (aula) => {
+        applyConfig((prev) => ({
+          ...prev,
+          aulas: [...(prev.aulas ?? []), { ...aula, id: generateId("aula") }],
+        }));
+      },
+      updateAula: (id, patch) => {
+        applyConfig((prev) => ({
+          ...prev,
+          aulas: (prev.aulas ?? []).map((a) => (a.id === id ? { ...a, ...patch } : a)),
+        }));
+      },
+      removeAula: (id) => {
+        applyConfig((prev) => ({
+          ...prev,
+          aulas: (prev.aulas ?? []).filter((a) => a.id !== id),
+        }));
+      },
       updateConfig: (patch) => {
         applyConfig((prev) => ({ ...prev, ...patch }));
       },
@@ -217,6 +285,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
             delete next[key];
           }
           return { ...prev, suspensoes: next };
+        });
+      },
+      reprogramarAula: (input) => {
+        applyConfig((prev) => {
+          const key = suspensaoKey(input.dataOriginal, input.diaOriginal, input.inicioOriginal);
+          const nova: Reprogramacao = {
+            ...input,
+            id: generateId("reprog"),
+            criadoEm: new Date().toISOString(),
+          };
+          return {
+            ...prev,
+            suspensoes: { ...(prev.suspensoes ?? {}), [key]: true },
+            reprogramacoes: [...(prev.reprogramacoes ?? []), nova],
+          };
+        });
+      },
+      removeReprogramacao: (id) => {
+        applyConfig((prev) => {
+          const alvo = (prev.reprogramacoes ?? []).find((r) => r.id === id);
+          const nextSuspensoes = { ...(prev.suspensoes ?? {}) };
+          if (alvo) {
+            delete nextSuspensoes[
+              suspensaoKey(alvo.dataOriginal, alvo.diaOriginal, alvo.inicioOriginal)
+            ];
+          }
+          return {
+            ...prev,
+            suspensoes: nextSuspensoes,
+            reprogramacoes: (prev.reprogramacoes ?? []).filter((r) => r.id !== id),
+          };
         });
       },
       resetToSeed: () => {

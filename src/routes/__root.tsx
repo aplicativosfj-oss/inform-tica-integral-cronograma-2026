@@ -13,7 +13,15 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppProvider } from "../lib/app-store";
 import { AuthProvider } from "../lib/auth-store";
+import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
+import { FloatingRadioPlayer } from "../components/school/floating-radio-player";
+
+/**
+ * Aplica o tema salvo (ou o do sistema) antes da primeira pintura, para
+ * nunca piscar claro->escuro ao carregar a página.
+ */
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('informatica:theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 function NotFoundComponent() {
   return (
@@ -87,13 +95,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Agenda profissional das aulas de informática: turmas, horários, revezamento e cronômetro ao vivo.",
       },
       { name: "author", content: "Escola Dr. Eiraldo Carneiro de França" },
+      { name: "robots", content: "index, follow" },
       { property: "og:title", content: "Agenda de Informática" },
       {
         property: "og:description",
         content: "Cronograma das aulas de informática por turma, dia e horário.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro" },
+      { property: "og:locale", content: "pt_BR" },
+      { property: "og:image", content: "/og-image.jpg" },
+      { property: "og:image:width", content: "1600" },
+      { property: "og:image:height", content: "900" },
+      {
+        property: "og:image:alt",
+        content: "Alunos usando os computadores do laboratório de informática",
+      },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Agenda de Informática" },
+      {
+        name: "twitter:description",
+        content: "Cronograma das aulas de informática por turma, dia e horário.",
+      },
+      { name: "twitter:image", content: "/og-image.jpg" },
       { name: "theme-color", content: "#1e3a8a" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -120,9 +144,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
         {children}
@@ -144,13 +169,16 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppProvider>
-          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
-          <Toaster />
-        </AppProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <Toaster />
+            <FloatingRadioPlayer />
+          </AppProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

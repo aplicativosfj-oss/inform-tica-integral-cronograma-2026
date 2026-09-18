@@ -11,10 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
+import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as TvRouteImport } from './routes/tv'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
+import { Route as DashboardAulasRouteImport } from './routes/dashboard/aulas'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
+import { Route as DashboardFaltasRouteImport } from './routes/dashboard/faltas'
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
@@ -31,9 +36,24 @@ const AgendaRoute = AgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoordenacaoRoute = CoordenacaoRouteImport.update({
+  id: '/coordenacao',
+  path: '/coordenacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TvRoute = TvRouteImport.update({
+  id: '/tv',
+  path: '/tv',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
@@ -46,9 +66,19 @@ const DashboardAlunosRoute = DashboardAlunosRouteImport.update({
   path: '/dashboard/alunos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardAulasRoute = DashboardAulasRouteImport.update({
+  id: '/dashboard/aulas',
+  path: '/dashboard/aulas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
   id: '/dashboard/configuracoes',
   path: '/dashboard/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardFaltasRoute = DashboardFaltasRouteImport.update({
+  id: '/dashboard/faltas',
+  path: '/dashboard/faltas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardFrequenciaRoute = DashboardFrequenciaRouteImport.update({
@@ -80,9 +110,14 @@ const DashboardTurmasTurmaIdRoute = DashboardTurmasTurmaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
+  '/sobre': typeof SobreRoute
+  '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
@@ -93,9 +128,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
+  '/sobre': typeof SobreRoute
+  '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
@@ -107,9 +147,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
+  '/sobre': typeof SobreRoute
+  '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
@@ -122,9 +167,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
+    | '/sobre'
+    | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
+    | '/dashboard/faltas'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
@@ -135,9 +185,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
+    | '/sobre'
+    | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
+    | '/dashboard/faltas'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
@@ -148,9 +203,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
+    | '/sobre'
+    | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
+    | '/dashboard/faltas'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
@@ -162,9 +222,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
+  CoordenacaoRoute: typeof CoordenacaoRoute
   LoginRoute: typeof LoginRoute
+  SobreRoute: typeof SobreRoute
+  TvRoute: typeof TvRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
+  DashboardAulasRoute: typeof DashboardAulasRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
+  DashboardFaltasRoute: typeof DashboardFaltasRoute
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
@@ -189,11 +254,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coordenacao': {
+      id: '/coordenacao'
+      path: '/coordenacao'
+      fullPath: '/coordenacao'
+      preLoaderRoute: typeof CoordenacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tv': {
+      id: '/tv'
+      path: '/tv'
+      fullPath: '/tv'
+      preLoaderRoute: typeof TvRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/': {
@@ -210,11 +296,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAlunosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/aulas': {
+      id: '/dashboard/aulas'
+      path: '/dashboard/aulas'
+      fullPath: '/dashboard/aulas'
+      preLoaderRoute: typeof DashboardAulasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/configuracoes': {
       id: '/dashboard/configuracoes'
       path: '/dashboard/configuracoes'
       fullPath: '/dashboard/configuracoes'
       preLoaderRoute: typeof DashboardConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/faltas': {
+      id: '/dashboard/faltas'
+      path: '/dashboard/faltas'
+      fullPath: '/dashboard/faltas'
+      preLoaderRoute: typeof DashboardFaltasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/frequencia': {
@@ -258,9 +358,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
+  CoordenacaoRoute: CoordenacaoRoute,
   LoginRoute: LoginRoute,
+  SobreRoute: SobreRoute,
+  TvRoute: TvRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
+  DashboardAulasRoute: DashboardAulasRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
+  DashboardFaltasRoute: DashboardFaltasRoute,
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,

@@ -36,6 +36,43 @@ export interface Turma {
   apoioEspecial?: ApoioEspecial[] | undefined;
 }
 
+/**
+ * Aula cadastrada manualmente pelo administrador na tela "Aulas": define
+ * turma, horário, grupo fixo (opcional) e conteúdo. Tem prioridade sobre o
+ * rodízio automático e alimenta o cronômetro ao vivo.
+ */
+export interface AulaManual {
+  id: string;
+  /** Rótulo do dia da semana, ex.: "Segunda". */
+  dia: string;
+  inicio: string;
+  fim: string;
+  turmaId: string;
+  /** Quando definido, só este grupo ocupa a aula inteira. */
+  grupoId?: string | undefined;
+  conteudo?: string | undefined;
+}
+
+/**
+ * Reagendamento de uma sessão específica (não repete nas semanas seguintes):
+ * a data/horário original é marcada como suspensa automaticamente e uma nova
+ * data/horário passa a valer só para aquela ocorrência. Criado a partir da
+ * tela "Faltas do mês" ao reprogramar uma aula.
+ */
+export interface Reprogramacao {
+  id: string;
+  turmaId: string;
+  dataOriginal: string;
+  diaOriginal: string;
+  inicioOriginal: string;
+  fimOriginal: string;
+  dataNova: string;
+  inicio: string;
+  fim: string;
+  conteudo?: string | undefined;
+  criadoEm: string;
+}
+
 export interface ScheduleConfig {
   nomeEscola: string;
   inep: string;
@@ -55,6 +92,8 @@ export interface ScheduleConfig {
   numeroComputadores: number;
   /** Conteúdo programático exibido no cronômetro, por dia da semana. */
   conteudoPorDia?: Record<string, string> | undefined;
+  /** Aulas cadastradas manualmente (tela "Aulas"), com prioridade sobre o rodízio. */
+  aulas?: AulaManual[] | undefined;
   /**
    * Troca manual de turma para um horário fixo da grade semanal, feita pelo
    * administrador na página de Programação. Chave: `${dia}|${slot.inicio}`,
@@ -74,6 +113,8 @@ export interface ScheduleConfig {
    * passar. Chave: `${data ISO}|${dia}|${slot.inicio}`, valor: id da turma.
    */
   excecoesPorData?: Record<string, string> | undefined;
+  /** Sessões reprogramadas a partir da tela "Faltas do mês". */
+  reprogramacoes?: Reprogramacao[] | undefined;
 }
 
 export interface Slot {
@@ -88,6 +129,10 @@ export interface Assignment {
   turma: Turma;
   ocorrenciaIndex: number;
   sessoesPorSemana: number;
+  /** Conteúdo definido na aula cadastrada manualmente. */
+  conteudo?: string | undefined;
+  /** Grupo fixo definido na aula cadastrada manualmente. */
+  grupoIdFixo?: string | undefined;
 }
 
 /** Registro de frequência de um aluno em uma data específica (tabela `presencas` no Supabase). */

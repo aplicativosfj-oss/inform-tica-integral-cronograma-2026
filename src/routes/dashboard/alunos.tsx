@@ -27,6 +27,12 @@ import { useAppStore } from "@/lib/app-store";
 
 export const Route = createFileRoute("/dashboard/alunos")({
   component: AlunosPage,
+  head: () => ({
+    meta: [
+      { title: "Alunos · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 const SEM_GRUPO = "sem-grupo";
