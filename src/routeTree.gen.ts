@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
+import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as TvRouteImport } from './routes/tv'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
@@ -31,6 +32,11 @@ const IndexRoute = IndexRouteImport.update({
 const AgendaRoute = AgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoordenacaoRoute = CoordenacaoRouteImport.update({
+  id: '/coordenacao',
+  path: '/coordenacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -92,6 +98,7 @@ const DashboardTurmasTurmaIdRoute = DashboardTurmasTurmaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
+  CoordenacaoRoute: typeof CoordenacaoRoute
   LoginRoute: typeof LoginRoute
   TvRoute: typeof TvRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/agenda'
       preLoaderRoute: typeof AgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coordenacao': {
+      id: '/coordenacao'
+      path: '/coordenacao'
+      fullPath: '/coordenacao'
+      preLoaderRoute: typeof CoordenacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -298,6 +318,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
+  CoordenacaoRoute: CoordenacaoRoute,
   LoginRoute: LoginRoute,
   TvRoute: TvRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
