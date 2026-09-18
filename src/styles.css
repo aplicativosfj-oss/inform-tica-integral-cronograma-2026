@@ -145,6 +145,78 @@
   }
 }
 
+/* Entrada suave de seções ao rolar a página (ver use-scroll-reveal.ts). */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Flutuação decorativa (ver elementos soltos no hero) — dois ritmos
+   diferentes para não parecerem sincronizados como um metrônomo. */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(4deg);
+  }
+}
+@keyframes float-slower {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-5deg);
+  }
+}
+
+/* "Resposta" lúdica do ícone de um card ao passar o mouse — um pequeno
+   salto com giro, disparado via group-hover (ver FeatureCard). */
+@keyframes icon-playful-hop {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  30% {
+    transform: scale(1.15) rotate(-8deg);
+  }
+  60% {
+    transform: scale(1.08) rotate(6deg);
+  }
+}
+
+@layer utilities {
+  .animate-reveal-in {
+    animation: reveal-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .animate-float-slow {
+    animation: float-slow 7s ease-in-out infinite;
+  }
+  .animate-float-slower {
+    animation: float-slower 9s ease-in-out infinite;
+  }
+  .group:hover .group-hover-hop {
+    animation: icon-playful-hop 0.55s ease-in-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reveal-in,
+  .animate-float-slow,
+  .animate-float-slower,
+  .group:hover .group-hover-hop {
+    animation: none !important;
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

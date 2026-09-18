@@ -19,6 +19,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCountUp } from "@/hooks/use-count-up";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
@@ -153,17 +155,15 @@ function Index() {
               <dl className="mt-8 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
                 <div>
                   <dt className="text-xs text-muted-foreground">Turmas</dt>
-                  <dd className="text-2xl font-semibold text-foreground">{turmas.length}</dd>
+                  <StatCounter valor={turmas.length} />
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Alunos cadastrados</dt>
-                  <dd className="text-2xl font-semibold text-foreground">{totalAlunos}</dd>
+                  <StatCounter valor={totalAlunos} />
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Computadores</dt>
-                  <dd className="text-2xl font-semibold text-foreground">
-                    {config.numeroComputadores}
-                  </dd>
+                  <StatCounter valor={config.numeroComputadores} />
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Horário das aulas</dt>
@@ -176,6 +176,20 @@ function Index() {
 
             <div className="relative">
               <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" aria-hidden />
+              {/* Elementos decorativos flutuantes — sutis, só para dar vida ao
+                  hero sem distrair do conteúdo real. */}
+              <span
+                aria-hidden
+                className="absolute -right-3 top-8 z-10 hidden size-3 rounded-full bg-amber-400/70 animate-float-slow sm:block"
+              />
+              <span
+                aria-hidden
+                className="absolute -right-6 top-1/2 z-10 hidden size-2 rounded-full bg-primary/60 animate-float-slower sm:block"
+              />
+              <span
+                aria-hidden
+                className="absolute -bottom-4 left-10 z-10 hidden size-2.5 rounded-full bg-emerald-400/60 animate-float-slow sm:block"
+              />
               {/* Logo flutuante, sem ocupar espaço no fluxo — não empurra nada da hero. */}
               <img
                 src={logoFull}
@@ -201,7 +215,7 @@ function Index() {
           <ProximasTurmasPanel />
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <RevealSection className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
               <h2 className="text-2xl font-semibold text-foreground">
@@ -253,9 +267,9 @@ function Index() {
               description="Turmas, professores, fotos e alunos com acesso restrito por login."
             />
           </div>
-        </section>
+        </RevealSection>
 
-        <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <RevealSection className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <div className="mb-5 max-w-2xl">
             <Badge variant="secondary" className="mb-3 gap-1.5">
               <CalendarDays className="size-3.5" /> Grade completa
@@ -285,7 +299,7 @@ function Index() {
               <ChevronRight className="size-3.5" /> Deslize para o lado para ver a semana inteira
             </p>
           </div>
-        </section>
+        </RevealSection>
 
         <ProgramacaoSemanalDestaque />
 
@@ -617,6 +631,32 @@ function ProgramacaoSemanalDestaque() {
   );
 }
 
+/** Envolve uma seção da home para revelar suavemente ao rolar até ela. */
+function RevealSection({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  const { ref, className: revealClassName } = useScrollReveal<HTMLElement>();
+  return (
+    <section ref={ref} className={`${className ?? ""} ${revealClassName}`.trim()}>
+      {children}
+    </section>
+  );
+}
+
+/** Número de destaque do hero que conta de 0 até o valor real ao entrar na tela. */
+function StatCounter({ valor }: { valor: number }) {
+  const { ref, exibido } = useCountUp(valor);
+  return (
+    <dd ref={ref} className="text-2xl font-semibold text-foreground">
+      {exibido}
+    </dd>
+  );
+}
+
 function FeatureCard({
   icon,
   iconClassName,
@@ -629,10 +669,10 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <Card>
+    <Card className="group">
       <CardHeader className="pb-2">
         <span
-          className={`mb-2 flex size-10 items-center justify-center rounded-lg ${iconClassName ?? "bg-primary/10 text-primary"}`}
+          className={`group-hover-hop mb-2 flex size-10 items-center justify-center rounded-lg ${iconClassName ?? "bg-primary/10 text-primary"}`}
         >
           {icon}
         </span>
