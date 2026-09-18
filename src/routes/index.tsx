@@ -135,7 +135,7 @@ function Index() {
                 </Button>
               </div>
 
-              <dl className="mt-8 grid grid-cols-2 gap-4 border-t border-border/60 pt-5 sm:grid-cols-4">
+              <dl className="mt-8 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
                 <div>
                   <dt className="text-xs text-muted-foreground">Turmas</dt>
                   <dd className="text-2xl font-semibold text-foreground">{turmas.length}</dd>
@@ -297,7 +297,7 @@ function NovoCronogramaBanner() {
   if (hoje >= segundaKey) return null;
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 sm:items-center">
+    <div className="flex items-start gap-3 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 shadow-sm backdrop-blur-md dark:border-white/15 dark:bg-white/5 sm:items-center">
       <PartyPopper className="mt-0.5 size-5 shrink-0 text-primary sm:mt-0" />
       <p className="text-sm text-foreground">
         <span className="font-semibold">Cronograma novo a partir de {dataFormatada}:</span> aulas
