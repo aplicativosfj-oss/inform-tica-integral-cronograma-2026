@@ -33,8 +33,8 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
-import heroImg from "@/assets/hero-lab-photo.jpg";
-import backgroundImg from "@/assets/feature-classroom-tech.jpg";
+import heroImg from "@/assets/hero-pro.jpg";
+import backgroundImg from "@/assets/page-bg.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -80,16 +80,17 @@ function Index() {
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative min-h-screen bg-background">
+      {/* Imagem de fundo em toda a página, fixa e sutil para não competir com o conteúdo. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-40"
+        style={{ backgroundImage: `url(${backgroundImg})` }}
+      />
+      <div className="relative z-10">
       <NavBar />
 
       <section className="relative overflow-hidden border-b border-border/60">
-        {/* Photo backdrop with a color wash so the hero reads as one branded block, not a plain white card. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-20 bg-cover bg-center opacity-[0.10]"
-          style={{ backgroundImage: `url(${backgroundImg})` }}
-        />
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_14%,transparent),transparent_50%),linear-gradient(180deg,transparent_70%,var(--background)_100%)]"
@@ -99,7 +100,7 @@ function Index() {
           aria-hidden
           className="pointer-events-none absolute -right-16 -top-16 -z-10 size-56 rotate-45 bg-amber-400/25"
         />
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-20">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-14">
           <div>
             <Badge variant="secondary" className="mb-4 gap-1.5">
               <MonitorSmartphone className="size-3.5" /> Agenda online
@@ -125,7 +126,7 @@ function Index() {
               </Button>
             </div>
 
-            <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-border/60 pt-6">
+            <dl className="mt-8 grid grid-cols-3 gap-4 border-t border-border/60 pt-5">
               <div>
                 <dt className="text-xs text-muted-foreground">Turmas</dt>
                 <dd className="text-2xl font-semibold text-foreground">{turmas.length}</dd>
@@ -147,9 +148,9 @@ function Index() {
             <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" aria-hidden />
             <img
               src={heroImg}
-              alt="Alunos usando os computadores do laboratório de informática da escola"
+              alt="Tela do sistema de agenda de informática com cronograma, cronômetro e grupos de alunos"
               width={1600}
-              height={900}
+              height={912}
               className="relative rounded-2xl border border-border/60 bg-card shadow-2xl"
               loading="eager"
               decoding="async"
@@ -158,13 +159,13 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6">
+      <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
         <LiveSessionPanel />
         <ProximasTurmasPanel />
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="mb-8 max-w-2xl">
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="mb-6 max-w-2xl">
           <h2 className="text-2xl font-semibold text-foreground">Como a agenda organiza tudo</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Grupos de {config.numeroComputadores} alunos revezam a cada {config.duracaoGrupoMinutos}{" "}
@@ -201,8 +202,8 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="mb-6 max-w-2xl">
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="mb-5 max-w-2xl">
           <Badge variant="secondary" className="mb-3 gap-1.5">
             <CalendarDays className="size-3.5" /> Grade completa
           </Badge>
@@ -222,7 +223,7 @@ function Index() {
       <ProgramacaoSemanalDestaque />
 
       <section className="border-t border-border/60 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-12 text-center sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-8 text-center sm:px-6">
           <GraduationCap className="mx-auto size-8 text-primary" />
           <h2 className="mt-3 text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -230,6 +231,7 @@ function Index() {
           </p>
         </div>
       </section>
+      </div>
     </div>
   );
 }
@@ -368,7 +370,7 @@ function ProgramacaoSemanalDestaque() {
   if (turmas.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-14 sm:py-16">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-10 sm:py-12">
       {/* Soft glowing orbs behind the glass panels, for depth. */}
       <div
         aria-hidden
