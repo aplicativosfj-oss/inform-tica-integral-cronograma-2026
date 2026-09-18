@@ -95,6 +95,23 @@ function FrequenciaPage() {
       <Card className="mb-6">
         <CardContent className="flex flex-wrap items-end gap-3 py-4">
           <div className="flex flex-col gap-1.5">
+            <Label htmlFor="mes">Mês</Label>
+            <Input
+              id="mes"
+              type="month"
+              className="w-44"
+              onChange={(e) => {
+                const valor = e.target.value;
+                if (!valor) return;
+                const [ano, mes] = valor.split("-").map(Number);
+                if (!ano || !mes) return;
+                const primeiro = new Date(ano, mes - 1, 1);
+                const ultimo = new Date(ano, mes, 0);
+                setRange({ inicio: toDateKey(primeiro), fim: toDateKey(ultimo) });
+              }}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="inicio">De</Label>
             <Input
               id="inicio"
@@ -132,6 +149,9 @@ function FrequenciaPage() {
           </div>
           <Button onClick={consultar} disabled={carregando}>
             <CalendarSearch className="size-4" /> {carregando ? "Consultando..." : "Consultar"}
+          </Button>
+          <Button variant="outline" onClick={exportarPdf} disabled={!registros}>
+            <FileDown className="size-4" /> Exportar PDF
           </Button>
         </CardContent>
       </Card>
