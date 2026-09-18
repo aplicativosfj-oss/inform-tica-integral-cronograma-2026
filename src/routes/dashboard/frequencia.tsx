@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarSearch, UserCheck, UserX, Users2 } from "lucide-react";
+import { CalendarSearch, FileDown, UserCheck, UserX, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -26,6 +26,7 @@ import {
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
+import { exportarFrequenciaPdf } from "@/lib/relatorio-frequencia";
 import { toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 
@@ -53,7 +54,7 @@ function defaultRange() {
 }
 
 function FrequenciaPage() {
-  const { turmas } = useAppStore();
+  const { turmas, config } = useAppStore();
   const [{ inicio, fim }, setRange] = useState(defaultRange);
   const [turmaId, setTurmaId] = useState<string>("todas");
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
@@ -80,6 +81,28 @@ function FrequenciaPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function exportarPdf() {
+    if (!registros) return;
+    const turmaSelecionada = turmas.find((t) => t.id === turmaId);
+    const ok = exportarFrequenciaPdf({
+      titulo: turmaSelecionada
+        ? `Frequência · ${turmaSelecionada.serie} "${turmaSelecionada.letra}"`
+        : "Frequência das aulas de informática",
+      periodo: `${new Date(`${inicio}T00:00:00`).toLocaleDateString("pt-BR")} a ${new Date(
+        `${fim}T00:00:00`,
+      ).toLocaleDateString("pt-BR")}`,
+      registros,
+      nomeTurma: (id: string) => {
+        const t = turmas.find((turma) => turma.id === id);
+        return t ? `${t.serie} "${t.letra}"` : id;
+      },
+      professorInformatica: config.professorInformatica,
+    });
+    if (!ok) {
+      toast.error("O navegador bloqueou a janela de impressão. Permita pop-ups e tente de novo.");
+    }
+  }
+
   const totalPresentes = registros?.filter((r) => r.status !== "faltou").length ?? 0;
   const totalFaltas = registros?.filter((r) => r.status === "faltou").length ?? 0;
 
@@ -94,6 +117,23 @@ function FrequenciaPage() {
 
       <Card className="mb-6">
         <CardContent className="flex flex-wrap items-end gap-3 py-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="mes">Mês</Label>
+            <Input
+              id="mes"
+              type="month"
+              className="w-44"
+              onChange={(e) => {
+                const valor = e.target.value;
+                if (!valor) return;
+                const [ano, mes] = valor.split("-").map(Number);
+                if (!ano || !mes) return;
+                const primeiro = new Date(ano, mes - 1, 1);
+                const ultimo = new Date(ano, mes, 0);
+                setRange({ inicio: toDateKey(primeiro), fim: toDateKey(ultimo) });
+              }}
+            />
+          </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="inicio">De</Label>
             <Input
@@ -132,6 +172,9 @@ function FrequenciaPage() {
           </div>
           <Button onClick={consultar} disabled={carregando}>
             <CalendarSearch className="size-4" /> {carregando ? "Consultando..." : "Consultar"}
+          </Button>
+          <Button variant="outline" onClick={exportarPdf} disabled={!registros}>
+            <FileDown className="size-4" /> Exportar PDF
           </Button>
         </CardContent>
       </Card>

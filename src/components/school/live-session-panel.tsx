@@ -6,12 +6,13 @@ import {
   Lock,
   MonitorPlay,
   Square,
+  Tv,
   UserX,
   Users,
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -29,7 +30,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TimerRing } from "@/components/school/timer-ring";
-import { playAlertaTroca, unlockAlertSound } from "@/lib/alert-sound";
+import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
+import { unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
 import {
@@ -52,39 +54,35 @@ import {
 import type { Aluno, Presenca, ScheduleConfig, Turma } from "@/lib/types";
 
 /**
- * Plays the rotation alert whenever the active turn (`chave`) changes.
- * Kept as a child component so its hooks never sit behind an early return.
+ * Aviso de troca de grupo: overlay visual em tela cheia sempre, mais os
+ * bipes quando o professor liga o som (o navegador exige um clique antes de
+ * permitir áudio). Componente filho para que seus hooks nunca fiquem atrás
+ * de um early return do painel.
  */
-function AlertaSonoro({ chave }: { chave: string }) {
+function AlertaTroca({ chave, proximoGrupo }: { chave: string; proximoGrupo?: number }) {
   const [ativo, setAtivo] = useState(false);
-  const chaveAnterior = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (chaveAnterior.current !== null && chaveAnterior.current !== chave && ativo) {
-      playAlertaTroca();
-      toast.info("Tempo esgotado: hora de trocar o grupo no laboratório.");
-    }
-    chaveAnterior.current = chave;
-  }, [chave, ativo]);
 
   return (
-    <Button
-      type="button"
-      size="sm"
-      variant={ativo ? "secondary" : "outline"}
-      onClick={async () => {
-        if (ativo) {
-          setAtivo(false);
-          return;
-        }
-        const ok = await unlockAlertSound();
-        setAtivo(ok);
-        if (!ok) toast.error("Não foi possível ativar o som neste navegador.");
-      }}
-    >
-      {ativo ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
-      {ativo ? "Aviso sonoro ativo" : "Ativar aviso sonoro"}
-    </Button>
+    <>
+      <TrocaGrupoOverlay chave={chave} proximoGrupo={proximoGrupo} comSom={ativo} />
+      <Button
+        type="button"
+        size="sm"
+        variant={ativo ? "secondary" : "outline"}
+        onClick={async () => {
+          if (ativo) {
+            setAtivo(false);
+            return;
+          }
+          const ok = await unlockAlertSound();
+          setAtivo(ok);
+          if (!ok) toast.error("Não foi possível ativar o som neste navegador.");
+        }}
+      >
+        {ativo ? <Volume2 className="size-3.5" /> : <VolumeX className="size-3.5" />}
+        {ativo ? "Aviso sonoro ativo" : "Ativar aviso sonoro"}
+      </Button>
+    </>
   );
 }
 
@@ -393,8 +391,15 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           <MonitorPlay className="size-5 text-primary" />
           Aula em andamento
         </CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge className="bg-primary text-primary-foreground">AO VIVO</Badge>
+          <AlertaTroca
+            chave={`${dateKeySessao}|${subBloco.inicio}`}
+            proximoGrupo={subBloco.grupo.indice + 1}
+          />
+          <Button size="sm" variant="outline" onClick={() => navigate({ to: "/tv" })}>
+            <Tv className="size-3.5" /> Modo TV
+          </Button>
           {editable ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
