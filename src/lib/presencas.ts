@@ -80,18 +80,25 @@ function rowToPresenca(row: PresencaRow): Presenca {
  * participaram — prioridade máxima na próxima seleção.
  */
 export async function fetchUltimaParticipacao(turmaId: string): Promise<Map<string, string>> {
-  const { data, error } = await supabase
-    .from("presencas")
-    .select("aluno_id, data")
-    .eq("turma_id", turmaId)
-    .in("status", ["presente", "substituido"])
-    .order("data", { ascending: false });
-  if (error) throw error;
   const mapa = new Map<string, string>();
-  for (const row of data ?? []) {
-    if (!mapa.has(row.aluno_id)) mapa.set(row.aluno_id, row.data);
+  try {
+    const { data, error } = await supabase
+      .from("presencas")
+      .select("aluno_id, data")
+      .eq("turma_id", turmaId)
+      .in("status", ["presente", "substituido"])
+      .order("data", { ascending: false });
+    if (error) throw error;
+    for (const row of data ?? []) {
+      if (!mapa.has(row.aluno_id)) mapa.set(row.aluno_id, row.data);
+    }
+    gravarCache(`ultima:${turmaId}`, [...mapa.entries()]);
+    return mapa;
+  } catch (err) {
+    const cache = lerCache<[string, string][]>(`ultima:${turmaId}`);
+    if (cache) return new Map(cache);
+    throw err;
   }
-  return mapa;
 }
 
 export async function fetchPresencasDoDia(turmaId: string, data: string): Promise<Presenca[]> {
