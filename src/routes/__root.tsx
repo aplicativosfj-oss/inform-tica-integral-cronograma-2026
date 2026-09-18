@@ -16,7 +16,6 @@ import { AuthProvider } from "../lib/auth-store";
 import { JovemPanRadioProvider } from "../lib/jovem-pan-radio-store";
 import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
-import { FloatingRadioPlayer } from "../components/school/floating-radio-player";
 
 /**
  * Aplica o tema salvo (ou o do sistema) antes da primeira pintura, para
@@ -177,7 +176,6 @@ function RootComponent() {
               {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
               <Outlet />
               <Toaster />
-              <FloatingRadioPlayer />
             </JovemPanRadioProvider>
           </AppProvider>
         </AuthProvider>
