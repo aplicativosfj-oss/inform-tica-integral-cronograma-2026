@@ -46,8 +46,10 @@ import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
 import backgroundImg from "@/assets/page-bg.jpg";
 import logoFull from "@/assets/logo-full-transparent.png";
-import cartazAgendaImg from "@/assets/cartaz-agenda-informatica.jpg";
-import laboratorioTurmaImg from "@/assets/laboratorio-informatica-turma.jpg";
+import laboratorioTurmaFotoImg from "@/assets/image3.png";
+import alunoJogoImg from "@/assets/image2.jpeg";
+import alunoSorridenteImg from "@/assets/image10.jpeg";
+import programacaoBgImg from "@/assets/image9.png";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -225,24 +227,19 @@ function Index() {
         </section>
 
         <RevealSection className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
-          <a
-            href={cartazAgendaImg}
-            target="_blank"
-            rel="noreferrer"
-            className="group block overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl"
-          >
+          <div className="group overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl">
             <img
-              src={cartazAgendaImg}
-              alt={`Cartaz oficial da Agenda Online das aulas de Informática da ${config.nomeEscola}, com o professor ${config.professorInformatica} e os temas jogos, criatividade, aprendizado e tecnologia`}
-              width={2048}
-              height={768}
-              className="aspect-[8/3] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              src={laboratorioTurmaFotoImg}
+              alt={`Turma completa da ${config.nomeEscola} durante a aula de informática, cada aluno em seu computador`}
+              width={1280}
+              height={720}
+              className="aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
               decoding="async"
             />
-          </a>
+          </div>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Cartaz oficial da Agenda de Informática — toque para ver em tamanho completo.
+            O laboratório de informática da {config.nomeEscola} em plena aula.
           </p>
         </RevealSection>
 
@@ -270,7 +267,7 @@ function Index() {
             </div>
             {/* Fotos reais dos alunos usando o laboratório — discreto, sem virar mosaico. */}
             <div className="flex shrink-0 items-center gap-2">
-              {[alunosImg1, alunosImg2, alunosImg3].map((src, i) => (
+              {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map((src, i) => (
                 <img
                   key={i}
                   src={src}
@@ -552,6 +549,12 @@ function ProgramacaoSemanalDestaque() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-10 sm:py-12">
+      {/* Ilustração de fundo, bem discreta — só textura, sem competir com os cards de vidro. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.1] mix-blend-overlay"
+        style={{ backgroundImage: `url(${programacaoBgImg})` }}
+      />
       {/* Soft glowing orbs behind the glass panels, for depth. */}
       <div
         aria-hidden

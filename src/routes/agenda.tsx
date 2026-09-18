@@ -21,6 +21,7 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
+import agendaHeroImg from "@/assets/image6.jpeg";
 
 export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
@@ -78,20 +79,34 @@ function AgendaPage() {
     <div className="min-h-screen bg-background">
       <NavBar />
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="mb-6 flex flex-col gap-1.5">
-          <Badge variant="secondary" className="w-fit gap-1.5">
-            <CalendarDays className="size-3.5" /> Agenda semanal
-          </Badge>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Cronograma de aulas de informática
-          </h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Toque numa turma para ver os alunos previstos. Revezamento automático de{" "}
-            {config.horaInicio} às {config.horaFim}, com o professor {config.professorInformatica}.
-          </p>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-border/60">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-25"
+          style={{ backgroundImage: `url(${agendaHeroImg})` }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
+        />
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <div className="flex flex-col gap-1.5">
+            <Badge variant="secondary" className="w-fit gap-1.5">
+              <CalendarDays className="size-3.5" /> Agenda semanal
+            </Badge>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Cronograma de aulas de informática
+            </h1>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Toque numa turma para ver os alunos previstos. Revezamento automático de{" "}
+              {config.horaInicio} às {config.horaFim}, com o professor {config.professorInformatica}.
+            </p>
+          </div>
         </div>
+      </section>
 
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-6">
           <LiveSessionPanel />
         </div>

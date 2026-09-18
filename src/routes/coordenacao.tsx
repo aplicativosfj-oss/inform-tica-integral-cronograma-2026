@@ -20,6 +20,7 @@ import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { buildWeeklySchedule, toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
+import coordenacaoHeroImg from "@/assets/image7.jpeg";
 
 export const Route = createFileRoute("/coordenacao")({
   component: CoordenacaoPage,
@@ -126,14 +127,28 @@ function CoordenacaoPage() {
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="mb-6">
+
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b border-border/60">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-20"
+          style={{ backgroundImage: `url(${coordenacaoHeroImg})` }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
+        />
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="max-w-2xl text-sm text-muted-foreground">
             Calendário das aulas de informática, participação por turma e grupo e histórico de
             faltas. Acesso aberto, somente leitura.
           </p>
         </div>
+      </section>
+
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
 
         <Card className="mb-6">
           <CardHeader className="pb-3">

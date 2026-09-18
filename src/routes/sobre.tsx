@@ -19,6 +19,9 @@ import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import heroImg from "@/assets/hero-lab-photo.jpg";
 import laboratorioTurmaImg from "@/assets/laboratorio-informatica-turma.jpg";
+import bannerEscolaImg from "@/assets/image1.png";
+import gcomprisColagemImg from "@/assets/image4.png";
+import cartazAulasImg from "@/assets/image0.png";
 
 export const Route = createFileRoute("/sobre")({
   component: SobrePage,
@@ -70,6 +73,21 @@ function SobrePage() {
             Uma plataforma criada para organizar, com transparência e justiça, as aulas de
             informática da {config.nomeEscola}.
           </p>
+        </div>
+      </section>
+
+      {/* Banner institucional da escola */}
+      <section className="mx-auto max-w-4xl px-4 pt-10 sm:px-6">
+        <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
+          <img
+            src={bannerEscolaImg}
+            alt={`Turma da ${config.nomeEscola} no laboratório de informática, com a mensagem "Informática é porta para o futuro"`}
+            width={1280}
+            height={720}
+            className="aspect-[16/9] w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </section>
 
@@ -164,7 +182,7 @@ function SobrePage() {
       {/* GCompris */}
       <section className="border-t border-border/60 bg-muted/30">
         <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             <div>
               <Badge variant="secondary" className="mb-3 gap-1.5">
                 <BookOpen className="size-3.5" /> Ferramenta pedagógica
@@ -189,6 +207,17 @@ function SobrePage() {
                   Conhecer o GCompris <ExternalLink className="size-3.5" />
                 </a>
               </Button>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
+              <img
+                src={gcomprisColagemImg}
+                alt="Alunos usando atividades do GCompris no laboratório: teclado infantil, editor de texto e jogos educativos"
+                width={1280}
+                height={720}
+                className="aspect-[16/9] w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
         </div>
@@ -222,6 +251,31 @@ function SobrePage() {
             </p>
           </CardContent>
         </Card>
+      </section>
+
+      {/* Cartaz oficial */}
+      <section className="mx-auto max-w-4xl px-4 pb-12 sm:px-6">
+        <div className="mx-auto max-w-sm">
+          <a
+            href={cartazAulasImg}
+            target="_blank"
+            rel="noreferrer"
+            className="group block overflow-hidden rounded-2xl border border-border/60 shadow-md transition-shadow hover:shadow-lg"
+          >
+            <img
+              src={cartazAulasImg}
+              alt={`Cartaz oficial das aulas de informática da ${config.nomeEscola}, com o professor ${config.professorInformatica}`}
+              width={1280}
+              height={720}
+              className="aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Cartaz oficial — toque para ver em tamanho completo.
+          </p>
+        </div>
       </section>
 
       {/* Contato */}
