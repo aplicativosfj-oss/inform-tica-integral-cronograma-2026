@@ -9,6 +9,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   MonitorSmartphone,
+  PartyPopper,
   ShieldCheck,
   Sparkles,
   Timer,
@@ -173,6 +174,7 @@ function Index() {
         </section>
 
         <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
+          <NovoCronogramaBanner />
           <LiveSessionPanel />
           <ProximasTurmasPanel />
         </section>
@@ -261,6 +263,40 @@ function Index() {
 
         <SiteFooter />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Announces the new schedule (bigger 90-min blocks, more seats per turma)
+ * starting fresh on the next Monday — today's sessions were suspended so the
+ * old and new schedules never mix mid-week. Only shows up until that Monday
+ * arrives, then disappears on its own.
+ */
+function NovoCronogramaBanner() {
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
+
+  const proximaSegunda = useMemo(() => proximaDataDoDia("Segunda", new Date()), []);
+  const dataFormatada = proximaSegunda.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+  });
+
+  if (!montado) return null;
+  const hoje = toDateKey(new Date());
+  const segundaKey = toDateKey(proximaSegunda);
+  if (hoje >= segundaKey) return null;
+
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 sm:items-center">
+      <PartyPopper className="mt-0.5 size-5 shrink-0 text-primary sm:mt-0" />
+      <p className="text-sm text-foreground">
+        <span className="font-semibold">Cronograma novo a partir de {dataFormatada}:</span> aulas
+        mais longas (90 min), com mais alunos participando por turma toda semana. As aulas de hoje
+        foram pausadas para a transição — a agenda nova já está pronta e visível abaixo.
+      </p>
     </div>
   );
 }
