@@ -117,13 +117,7 @@ function TvPage() {
           ) : null}
         </div>
       ) : (
-        <TvSessao
-          key={`${dateKey}|${sessao.subBloco.inicio}`}
-          chave={`${dateKey}|${sessao.subBloco.inicio}`}
-          somAtivo={somAtivo}
-          conteudoDoDia={conteudoDoDia}
-          sessao={sessao}
-        />
+        <TvSessao conteudoDoDia={conteudoDoDia} sessao={sessao} />
       )}
     </main>
   );
