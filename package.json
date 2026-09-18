@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "test": "bun test",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "optimize-images": "node scripts/optimize-images.js",
+    "optimize-all": "node scripts/optimize-all-images.js"
   },
   "overrides": {
     "rolldown": "1.2.1"
