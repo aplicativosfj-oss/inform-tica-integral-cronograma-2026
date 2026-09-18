@@ -248,14 +248,23 @@ export async function fetchPresencasRange(
   fim: string,
   turmaId?: string,
 ): Promise<Presenca[]> {
-  let query = supabase
-    .from("presencas")
-    .select("*")
-    .gte("data", inicio)
-    .lte("data", fim)
-    .order("data", { ascending: false });
-  if (turmaId) query = query.eq("turma_id", turmaId);
-  const { data, error } = await query;
-  if (error) throw error;
-  return (data ?? []).map(rowToPresenca);
+  const chave = `range:${inicio}:${fim}:${turmaId ?? "todas"}`;
+  try {
+    let query = supabase
+      .from("presencas")
+      .select("*")
+      .gte("data", inicio)
+      .lte("data", fim)
+      .order("data", { ascending: false });
+    if (turmaId) query = query.eq("turma_id", turmaId);
+    const { data, error } = await query;
+    if (error) throw error;
+    const registros = (data ?? []).map(rowToPresenca);
+    gravarCache(chave, registros);
+    return registros;
+  } catch (err) {
+    const cache = lerCache<Presenca[]>(chave);
+    if (cache) return cache;
+    throw err;
+  }
 }
