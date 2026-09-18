@@ -72,6 +72,8 @@ export interface ScheduleConfig {
   numeroComputadores: number;
   /** Conteúdo programático exibido no cronômetro, por dia da semana. */
   conteudoPorDia?: Record<string, string> | undefined;
+  /** Aulas cadastradas manualmente (tela "Aulas"), com prioridade sobre o rodízio. */
+  aulas?: AulaManual[] | undefined;
   /**
    * Troca manual de turma para um horário fixo da grade semanal, feita pelo
    * administrador na página de Programação. Chave: `${dia}|${slot.inicio}`,

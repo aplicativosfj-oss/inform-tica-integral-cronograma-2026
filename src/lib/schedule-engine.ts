@@ -77,6 +77,8 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
     diaIndex: number;
     slot: Slot;
     turma: Turma;
+    conteudo?: string | undefined;
+    grupoIdFixo?: string | undefined;
   }
   const pending: Pending[] = [];
 
