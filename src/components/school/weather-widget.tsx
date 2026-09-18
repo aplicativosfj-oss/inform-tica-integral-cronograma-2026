@@ -42,7 +42,13 @@ function IconeClima({ codigo, className }: { codigo: number; className?: string 
 }
 
 /** Termômetro em SVG com o mercúrio subindo animado até a temperatura real. */
-function Termometro({ temperatura, carregando }: { temperatura: number | null; carregando: boolean }) {
+function Termometro({
+  temperatura,
+  carregando,
+}: {
+  temperatura: number | null;
+  carregando: boolean;
+}) {
   const alturaPct = temperatura === null ? 0 : alturaMercurio(temperatura);
   const cor = temperatura === null ? "#94a3b8" : corMercurio(temperatura);
   // Área útil do tubo (dentro das bordas), em unidades do viewBox.
@@ -66,7 +72,15 @@ function Termometro({ temperatura, carregando }: { temperatura: number | null; c
         className="text-border"
       />
       {/* Bulbo */}
-      <circle cx={22} cy={168} r={18} fill="none" stroke="currentColor" strokeWidth={2} className="text-border" />
+      <circle
+        cx={22}
+        cy={168}
+        r={18}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        className="text-border"
+      />
 
       {/* Marcações */}
       {[0.2, 0.4, 0.6, 0.8].map((f) => (
@@ -98,16 +112,26 @@ function Termometro({ temperatura, carregando }: { temperatura: number | null; c
         fill={cor}
         y={tuboBase - alturaMercurioPx}
         height={alturaMercurioPx + 20}
-        className={carregando ? "opacity-40" : "opacity-95 transition-all duration-[1400ms] ease-out"}
+        className={
+          carregando ? "opacity-40" : "opacity-95 transition-all duration-[1400ms] ease-out"
+        }
       />
     </svg>
   );
 }
 
 export function WeatherWidget() {
-  const [clima, setClima] = useState<Clima | null>(() => lerCache<Clima>(CACHE_KEY));
+  // Começa nulo nos dois lados (servidor e primeira pintura do cliente) —
+  // ler o cache aqui direto no useState fazia a 1ª renderização do cliente já
+  // sair com dados que o servidor nunca viu, gerando erro de hidratação.
+  const [clima, setClima] = useState<Clima | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    const emCache = lerCache<Clima>(CACHE_KEY);
+    if (emCache) setClima(emCache);
+  }, []);
 
   useEffect(() => {
     let cancelado = false;
@@ -136,7 +160,10 @@ export function WeatherWidget() {
   }, []);
 
   const horaAtualizada = clima
-    ? new Date(clima.atualizadoEm).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+    ? new Date(clima.atualizadoEm).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : null;
 
   return (
@@ -178,7 +205,10 @@ export function WeatherWidget() {
               Não foi possível carregar o clima agora. Tente recarregar a página.
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">Consultando o clima em Feijó...</p>
+            <div className="flex flex-col gap-2" role="status" aria-label="Consultando o clima">
+              <div className="h-8 w-24 animate-pulse rounded bg-muted-foreground/15" />
+              <div className="h-3.5 w-32 animate-pulse rounded bg-muted-foreground/15" />
+            </div>
           )}
         </div>
       </CardContent>

@@ -394,9 +394,10 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
 
   if (!now) {
     return (
-      <Card className="border-dashed">
-        <CardContent className="py-10 text-center text-sm text-muted-foreground">
-          Carregando relógio da aula...
+      <Card className="border-dashed" role="status" aria-label="Carregando relógio da aula">
+        <CardContent className="flex flex-col items-center gap-2 py-10">
+          <div className="size-8 animate-pulse rounded-full bg-muted-foreground/15" />
+          <div className="h-4 w-40 animate-pulse rounded bg-muted-foreground/15" />
         </CardContent>
       </Card>
     );

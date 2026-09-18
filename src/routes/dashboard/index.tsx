@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarClock, Monitor, Settings2, Users2 } from "lucide-react";
+import { CalendarClock, GraduationCap, Settings2, UserX, Users2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -37,12 +37,12 @@ function DashboardHome() {
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard icon={<Users2 className="size-4" />} label="Turmas" value={turmas.length} />
         <StatCard
-          icon={<Monitor className="size-4" />}
+          icon={<GraduationCap className="size-4" />}
           label="Alunos cadastrados"
           value={totalAlunos}
         />
         <StatCard
-          icon={<CalendarClock className="size-4" />}
+          icon={<UserX className="size-4" />}
           label="Turmas sem alunos"
           value={turmasSemAlunos}
         />

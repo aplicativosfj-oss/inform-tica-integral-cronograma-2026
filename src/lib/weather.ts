@@ -47,7 +47,21 @@ export async function fetchClima(): Promise<Clima> {
     `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}` +
     `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m` +
     `&timezone=America%2FRio_Branco`;
-  const resposta = await fetch(url);
+  // Sem timeout, uma rede lenta deixava o widget preso em "Consultando..."
+  // indefinidamente — 8s é o bastante pra uma API pública responder.
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+  let resposta: Response;
+  try {
+    resposta = await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    if ((err as Error).name === "AbortError") {
+      throw new Error("O serviço de clima demorou demais para responder.");
+    }
+    throw err;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
   if (!resposta.ok) throw new Error(`Falha ao buscar o clima (${resposta.status})`);
   const dados = await resposta.json();
   const atual = dados?.current;

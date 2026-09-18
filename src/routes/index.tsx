@@ -89,7 +89,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { turmas, config } = useAppStore();
+  const { turmas, config, isReady } = useAppStore();
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
 
   return (
@@ -158,15 +158,27 @@ function Index() {
               <dl className="mt-8 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
                 <div>
                   <dt className="text-xs text-muted-foreground">Turmas</dt>
-                  <StatCounter valor={turmas.length} />
+                  {isReady ? (
+                    <StatCounter valor={turmas.length} />
+                  ) : (
+                    <div className="mt-1 h-7 w-8 animate-pulse rounded bg-muted-foreground/20" />
+                  )}
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Alunos cadastrados</dt>
-                  <StatCounter valor={totalAlunos} />
+                  {isReady ? (
+                    <StatCounter valor={totalAlunos} />
+                  ) : (
+                    <div className="mt-1 h-7 w-10 animate-pulse rounded bg-muted-foreground/20" />
+                  )}
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Computadores</dt>
-                  <StatCounter valor={config.numeroComputadores} />
+                  {isReady ? (
+                    <StatCounter valor={config.numeroComputadores} />
+                  ) : (
+                    <div className="mt-1 h-7 w-8 animate-pulse rounded bg-muted-foreground/20" />
+                  )}
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Horário das aulas</dt>
@@ -197,7 +209,7 @@ function Index() {
               <img
                 src={logoFull}
                 alt="Agenda de Informática .Online"
-                className="absolute -left-3 -top-3 z-10 h-auto w-28 rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:w-32"
+                className="absolute -left-2 -top-2 z-10 h-auto w-24 max-w-[28%] rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:-left-3 sm:-top-3 sm:w-32"
               />
               <img
                 src={alunosHeroImg}
@@ -236,8 +248,10 @@ function Index() {
 
         <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
           <NovoCronogramaBanner />
-          <WeatherWidget />
-          <LiveSessionPanel />
+          <div className="grid gap-4 lg:grid-cols-[1fr_1.6fr] lg:items-start">
+            <WeatherWidget />
+            <LiveSessionPanel />
+          </div>
           <ProximasTurmasPanel />
         </section>
 
@@ -446,7 +460,7 @@ function ProximasTurmasPanel() {
                 {assignment.turma.imagem ? (
                   <img
                     src={assignment.turma.imagem}
-                    alt=""
+                    alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
                     className="size-9 rounded-lg object-cover"
                   />
                 ) : (
@@ -613,7 +627,7 @@ function ProgramacaoSemanalDestaque() {
                   {assignment.turma.imagem ? (
                     <img
                       src={assignment.turma.imagem}
-                      alt=""
+                      alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
                       className="size-11 rounded-xl object-cover ring-2 ring-white/30"
                     />
                   ) : (

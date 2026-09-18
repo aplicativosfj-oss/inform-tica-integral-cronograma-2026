@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, HeartHandshake, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, HeartHandshake, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -32,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { ImageUploadField } from "@/components/school/image-upload-field";
 import { useAppStore } from "@/lib/app-store";
-import { useConfirmar } from "@/lib/confirm-store";
 import { buildGrupos } from "@/lib/schedule-engine";
 import type { Aluno } from "@/lib/types";
 
@@ -59,7 +58,7 @@ function AlunoFormDialog({
   trigger,
 }: {
   aluno?: Aluno;
-  onSubmit: (values: AlunoFormValues) => void;
+  onSubmit: (values: AlunoFormValues) => void | Promise<void>;
   trigger: ReactNode;
 }) {
   const emptyValues: AlunoFormValues = aluno
@@ -73,6 +72,7 @@ function AlunoFormDialog({
 
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState<AlunoFormValues>(emptyValues);
+  const [enviando, setEnviando] = useState(false);
 
   return (
     <Dialog
@@ -89,14 +89,19 @@ function AlunoFormDialog({
         </DialogHeader>
         <form
           className="flex flex-col gap-4"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
             if (!values.nome.trim()) {
               toast.error("Informe o nome do aluno.");
               return;
             }
-            onSubmit(values);
-            setOpen(false);
+            setEnviando(true);
+            try {
+              await onSubmit(values);
+              setOpen(false);
+            } finally {
+              setEnviando(false);
+            }
           }}
         >
           <div className="flex justify-center">
@@ -140,7 +145,10 @@ function AlunoFormDialog({
             </div>
           ) : null}
           <DialogFooter>
-            <Button type="submit">{aluno ? "Salvar alterações" : "Cadastrar aluno"}</Button>
+            <Button type="submit" disabled={enviando}>
+              {enviando ? <Loader2 className="animate-spin" /> : null}
+              {aluno ? "Salvar alterações" : "Cadastrar aluno"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -151,7 +159,6 @@ function AlunoFormDialog({
 function TurmaAlunosPage() {
   const { turmaId } = Route.useParams();
   const { turmas, config, addAluno, updateAluno, removeAluno } = useAppStore();
-  const confirmar = useConfirmar();
   const navigate = useNavigate();
   const turma = turmas.find((t) => t.id === turmaId);
 
@@ -192,12 +199,7 @@ function TurmaAlunosPage() {
           </p>
         </div>
         <AlunoFormDialog
-          onSubmit={async (values) => {
-            const ok = await confirmar({
-              titulo: "Cadastrar novo aluno?",
-              descricao: `${values.nome} será adicionado(a) a ${turma.serie} "${turma.letra}".`,
-            });
-            if (!ok) return;
+          onSubmit={(values) => {
             addAluno(turma.id, values);
             toast.success("Aluno cadastrado.");
           }}
@@ -265,24 +267,24 @@ function TurmaAlunosPage() {
                       <div className="flex gap-1.5">
                         <AlunoFormDialog
                           aluno={aluno}
-                          onSubmit={async (values) => {
-                            const ok = await confirmar({
-                              titulo: "Salvar alterações do aluno?",
-                              descricao: `Isso atualiza os dados de ${aluno.nome} imediatamente.`,
-                            });
-                            if (!ok) return;
+                          onSubmit={(values) => {
                             updateAluno(turma.id, aluno.id, values);
                             toast.success("Aluno atualizado.");
                           }}
                           trigger={
-                            <Button size="sm" variant="ghost">
+                            <Button size="sm" variant="ghost" aria-label={`Editar ${aluno.nome}`}>
                               <Pencil className="size-3.5" />
                             </Button>
                           }
                         />
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="ghost" className="text-destructive">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive"
+                              aria-label={`Remover ${aluno.nome}`}
+                            >
                               <Trash2 className="size-3.5" />
                             </Button>
                           </AlertDialogTrigger>
