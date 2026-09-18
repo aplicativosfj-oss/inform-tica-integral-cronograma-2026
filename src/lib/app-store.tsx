@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-store";
-import { gravarCache, lerCache } from "@/lib/offline-queue";
+import { enfileirar, gravarCache, lerCache, registrarExecutor } from "@/lib/offline-queue";
 import { sincronizarPresencasPendentes } from "@/lib/presencas";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
