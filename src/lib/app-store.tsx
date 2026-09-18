@@ -10,7 +10,7 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-store";
-import { gravarCache, lerCache } from "@/lib/offline-queue";
+import { enfileirar, gravarCache, lerCache, registrarExecutor } from "@/lib/offline-queue";
 import { sincronizarPresencasPendentes } from "@/lib/presencas";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
@@ -45,6 +45,27 @@ interface AppState {
 }
 
 const AppContext = createContext<AppState | null>(null);
+
+interface AppStatePayload {
+  turmas: Turma[];
+  config: ScheduleConfig;
+}
+
+/** Envia o cadastro completo (turmas, grupos, alunos, aulas) ao banco. */
+async function enviarAppState(payload: AppStatePayload): Promise<void> {
+  const { error } = await supabase.from("app_state").upsert({
+    id: ROW_ID,
+    turmas: payload.turmas,
+    config: payload.config,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+}
+
+// Reenvio automático do cadastro guardado enquanto a internet estava fora.
+registrarExecutor("app_state", async (payload) => {
+  await enviarAppState(payload as AppStatePayload);
+});
 
 function generateId(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -115,18 +136,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   function persist(nextTurmas: Turma[], nextConfig: ScheduleConfig) {
+    // A cópia local é gravada primeiro: mesmo sem internet a tela continua
+    // funcionando e os dados sobrevivem a um recarregamento.
     gravarCache("app_state", { turmas: nextTurmas, config: nextConfig });
-    supabase
-      .from("app_state")
-      .upsert({
-        id: ROW_ID,
-        turmas: nextTurmas,
-        config: nextConfig,
-        updated_at: new Date().toISOString(),
-      })
-      .then(({ error }) => {
-        if (error) toast.error(`Não foi possível salvar: ${error.message}`);
-      });
+    enviarAppState({ turmas: nextTurmas, config: nextConfig }).catch(() => {
+      enfileirar("app_state", { turmas: nextTurmas, config: nextConfig });
+      toast.warning("Sem internet: as alterações foram guardadas e serão enviadas ao reconectar.");
+    });
   }
 
   function applyTurmas(updater: (prev: Turma[]) => Turma[]) {

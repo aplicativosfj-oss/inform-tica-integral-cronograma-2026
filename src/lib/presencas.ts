@@ -2,9 +2,9 @@ import {
   enfileirar,
   gravarCache,
   lerCache,
-  processarFila,
+  registrarExecutor,
+  sincronizarTudo,
   totalPendente,
-  type OperacaoPendente,
 } from "@/lib/offline-queue";
 import { supabase } from "@/lib/supabase-client";
 import type { Presenca } from "@/lib/types";
@@ -33,17 +33,19 @@ export function presencasPendentes(): number {
   return totalPendente();
 }
 
+registrarExecutor("presencas:iniciais", async (payload) => {
+  const p = payload as PayloadIniciais;
+  await enviarPresencasIniciais(p.turmaId, p.data, p.grupos);
+});
+
+registrarExecutor("presencas:falta", async (payload) => {
+  const p = payload as PayloadFalta;
+  await enviarFalta(p.turmaId, p.data, p.aluno, p.grupoIndice, p.substituto, p.motivo);
+});
+
 /** Reenvia ao banco tudo o que foi registrado sem internet. */
 export async function sincronizarPresencasPendentes() {
-  return processarFila(async (operacao: OperacaoPendente) => {
-    if (operacao.tipo === "presencas:iniciais") {
-      const p = operacao.payload as PayloadIniciais;
-      await enviarPresencasIniciais(p.turmaId, p.data, p.grupos);
-    } else if (operacao.tipo === "presencas:falta") {
-      const p = operacao.payload as PayloadFalta;
-      await enviarFalta(p.turmaId, p.data, p.aluno, p.grupoIndice, p.substituto, p.motivo);
-    }
-  });
+  return sincronizarTudo();
 }
 
 interface PresencaRow {
