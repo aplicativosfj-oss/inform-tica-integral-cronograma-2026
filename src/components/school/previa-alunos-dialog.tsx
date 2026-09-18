@@ -7,6 +7,7 @@ import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasDoDia, fetchUltimaParticipacao } from "@/lib/presencas";
 import {
   gruposFromPresencas,
+  gruposPorVisita,
   proximasDatasDoDia,
   selecionarAlunosDoDia,
   toDateKey,
@@ -87,6 +88,7 @@ export function PreviaAlunosDialog({
               assignment.turma,
               ultima,
               config.numeroComputadores,
+              gruposPorVisita(config),
             );
             setGrupos(selecao.grupos);
           });
@@ -97,7 +99,7 @@ export function PreviaAlunosDialog({
     return () => {
       cancelled = true;
     };
-  }, [assignment, data, config.numeroComputadores]);
+  }, [assignment, data, config]);
 
   return (
     <Dialog open={assignment !== null} onOpenChange={onOpenChange}>

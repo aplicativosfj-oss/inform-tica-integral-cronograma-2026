@@ -264,6 +264,11 @@ export function buildSubBlocos(
   return subBlocos;
 }
 
+/** How many 30-min rotation groups fit inside one turma visit, given its slot length. */
+export function gruposPorVisita(config: ScheduleConfig): number {
+  return Math.max(1, Math.round(config.duracaoSlotMinutos / config.duracaoGrupoMinutos));
+}
+
 export interface SelecaoDoDia {
   grupos: GrupoRevezamento[];
   totalSelecionado: number;
@@ -272,24 +277,29 @@ export interface SelecaoDoDia {
 /**
  * Escolhe quem vai ao laboratório hoje com base em frequência real: os
  * alunos que estão há mais tempo sem participar (ou nunca participaram) vêm
- * primeiro. Retorna até `tamanhoGrupo * 2` alunos, divididos em dois grupos
- * (uma turma que caiba em menos de 2 grupos ainda funciona, com grupos
- * menores). Isso substitui o rodízio puramente matemático de `buildGrupos`
- * quando o histórico de presença (tabela `presencas`) está disponível — ele
- * se autoajusta a faltas, feriados e substituições sem precisar de reset.
+ * primeiro. Retorna até `tamanhoGrupo * numGrupos` alunos, divididos em
+ * `numGrupos` grupos (uma turma que caiba em menos grupos ainda funciona,
+ * com grupos menores). `numGrupos` deve refletir quantos blocos de rodízio
+ * cabem no horário da turma (`duracaoSlotMinutos / duracaoGrupoMinutos`) —
+ * passar um valor fixo faria a prévia/chamada ignorar aulas mais longas.
+ * Isso substitui o rodízio puramente matemático de `buildGrupos` quando o
+ * histórico de presença (tabela `presencas`) está disponível — ele se
+ * autoajusta a faltas, feriados e substituições sem precisar de reset.
  */
 export function selecionarAlunosDoDia(
   turma: Turma,
   ultimaParticipacao: Map<string, string>,
   tamanhoGrupo: number,
+  numGrupos = 2,
 ): SelecaoDoDia {
   const tamanho = Math.max(1, tamanhoGrupo);
+  const grupos_qtd = Math.max(1, numGrupos);
   const ordenados = [...turma.alunos].sort((a, b) => {
     const da = ultimaParticipacao.get(a.id) ?? "";
     const db = ultimaParticipacao.get(b.id) ?? "";
     return da.localeCompare(db);
   });
-  const selecionados = ordenados.slice(0, tamanho * 2);
+  const selecionados = ordenados.slice(0, tamanho * grupos_qtd);
   const grupos: GrupoRevezamento[] = [];
   for (let i = 0; i < selecionados.length; i += tamanho) {
     grupos.push({ indice: grupos.length, alunos: selecionados.slice(i, i + tamanho) });

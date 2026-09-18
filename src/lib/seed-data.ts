@@ -20,21 +20,21 @@ export const SEED_CONFIG: ScheduleConfig = {
   endereco: "Rua Ernane Moreira Braga, 108, Cohab",
   professorInformatica: "Franc D'nis",
   diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
-  horaInicio: "08:00",
-  // Só 2 aulas por dia (manhã), 5 dias x 2 = as 10 turmas, cada uma 1x por
-  // semana — tarde inteira livre pro professor, sem troca de contexto após
-  // o almoço.
-  horaFim: "10:15",
-  // Almoço + tempo de organização: as crianças voltam às 13:00 e levam de 5
-  // a 10 min para se acomodar, então a próxima aula só começa às 13:10.
-  // (Sem efeito hoje, já que o dia termina às 10:15 — fica pronto caso o
-  // horário volte a incluir a tarde.)
+  // 3 blocos de 90 min por dia (manhã 1, manhã 2, tarde), cada um rendendo 3
+  // grupos de 7 alunos (21 vagas) em vez dos 2 grupos (14 vagas) de antes —
+  // quase dobra quantos alunos de cada turma participam por semana, sem
+  // esticar o expediente além das 14:45 nem cortar o almoço/descanso.
+  horaInicio: "07:30",
+  horaFim: "14:45",
+  // Almoço + descanso do professor: 2h15, incluindo o tempo de as crianças
+  // voltarem e se acomodarem antes da aula da tarde recomeçar às 13:15.
   intervaloInicio: "11:00",
-  intervaloFim: "13:10",
-  // Recreio da manhã, entre 10 e 15 min.
+  intervaloFim: "13:15",
+  // Recreio da manhã — a aula da manhã 1 já termina exatamente às 9:00 (sem
+  // pausa extra antes), e a manhã 2 recomeça exatamente às 9:15.
   recreioInicio: "09:00",
   recreioFim: "09:15",
-  duracaoSlotMinutos: 60,
+  duracaoSlotMinutos: 90,
   duracaoGrupoMinutos: 30,
   numeroComputadores: 7,
   conteudoPorDia: {

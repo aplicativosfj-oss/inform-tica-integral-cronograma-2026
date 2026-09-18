@@ -48,6 +48,7 @@ import {
   escolherSubstituto,
   findSessaoAtual,
   gruposFromPresencas,
+  gruposPorVisita,
   reprogramacoesParaData,
   selecionarAlunosDoDia,
   toDateKey,
@@ -222,7 +223,12 @@ function useChamadaDoDia(
         // admin/professor has already registered.
         if (registradas.length === 0 && podeRegistrar) {
           const ultima = await fetchUltimaParticipacao(turma.id);
-          const selecao = selecionarAlunosDoDia(turma, ultima, config.numeroComputadores);
+          const selecao = selecionarAlunosDoDia(
+            turma,
+            ultima,
+            config.numeroComputadores,
+            gruposPorVisita(config),
+          );
           await registrarPresencasIniciais(turma.id, dateKey, selecao.grupos);
           registradas = await fetchPresencasDoDia(turma.id, dateKey);
         }
