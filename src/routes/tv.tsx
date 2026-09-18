@@ -92,6 +92,13 @@ function TvPage() {
         </Button>
       </div>
 
+      {/* Fica fora do bloco da sessão para não ser desmontado justamente na troca. */}
+      <TrocaGrupoOverlay
+        chave={sessao && !sessao.suspensa ? `${dateKey}|${sessao.subBloco.inicio}` : ""}
+        proximoGrupo={sessao ? sessao.subBloco.grupo.indice + 1 : undefined}
+        comSom={somAtivo}
+      />
+
       {!now ? (
         <div className="flex flex-1 items-center justify-center text-2xl text-muted-foreground">
           Carregando cronômetro...
