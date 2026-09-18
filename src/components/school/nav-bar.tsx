@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { LayoutDashboard, LogOut, MonitorSmartphone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
 import { ThemeToggle } from "@/components/school/theme-toggle";
 import { useAuth } from "@/lib/auth-store";
 
@@ -36,6 +37,7 @@ export function NavBar() {
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/sobre">Sobre</Link>
           </Button>
+          <HeaderRadioPlayer />
           <ThemeToggle />
           {isReady && isAuthenticated ? (
             <>
