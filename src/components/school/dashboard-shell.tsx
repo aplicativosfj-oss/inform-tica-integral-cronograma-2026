@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   CalendarClock,
+  CalendarPlus,
   CalendarSearch,
   GraduationCap,
   Layers,
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
   { to: "/dashboard/turmas", label: "Turmas e alunos", icon: Users2 },
   { to: "/dashboard/grupos", label: "Turmas e grupos", icon: Layers },
   { to: "/dashboard/alunos", label: "Alunos", icon: GraduationCap },
+  { to: "/dashboard/aulas", label: "Aulas", icon: CalendarPlus },
   { to: "/dashboard/programacao", label: "Programação", icon: CalendarClock },
   { to: "/dashboard/frequencia", label: "Frequência", icon: CalendarSearch },
   { to: "/dashboard/configuracoes", label: "Configurações", icon: Settings2 },

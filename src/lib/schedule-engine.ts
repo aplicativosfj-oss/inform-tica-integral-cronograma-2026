@@ -77,6 +77,8 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
     diaIndex: number;
     slot: Slot;
     turma: Turma;
+    conteudo?: string | undefined;
+    grupoIdFixo?: string | undefined;
   }
   const pending: Pending[] = [];
 
@@ -91,6 +93,28 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
       pending.push({ dia, diaIndex, slot, turma });
     });
   });
+
+  // Aulas cadastradas manualmente na tela "Aulas" têm prioridade: substituem
+  // o horário equivalente do rodízio automático ou entram como horário novo.
+  for (const aula of config.aulas ?? []) {
+    const turma = turmasById.get(aula.turmaId);
+    if (!turma) continue;
+    const diaIndex = Math.max(0, config.diasSemana.indexOf(aula.dia));
+    const slot: Slot = { inicio: aula.inicio, fim: aula.fim };
+    const existente = pending.findIndex(
+      (p) => p.dia === aula.dia && p.slot.inicio === aula.inicio,
+    );
+    const item: Pending = {
+      dia: aula.dia,
+      diaIndex,
+      slot,
+      turma,
+      conteudo: aula.conteudo,
+      grupoIdFixo: aula.grupoId,
+    };
+    if (existente >= 0) pending[existente] = item;
+    else pending.push(item);
+  }
 
   // Session counts are derived from the final (post-override) assignments so
   // the group rotation in buildSubBlocos stays consistent for every turma.
@@ -190,7 +214,16 @@ export function buildSubBlocos(
   config: ScheduleConfig,
   weekIndex = 0,
 ): SubBloco[] {
-  const grupos = buildGrupos(assignment.turma, config);
+  const todos = buildGrupos(assignment.turma, config);
+  // Aula cadastrada com um grupo fixo: esse grupo ocupa o horário inteiro.
+  const fixo = assignment.grupoIdFixo
+    ? todos.filter((g) =>
+        (assignment.turma.grupos ?? []).some(
+          (cad) => cad.id === assignment.grupoIdFixo && cad.nome === g.nome,
+        ),
+      )
+    : [];
+  const grupos = fixo.length > 0 ? fixo : todos;
   const inicio = toMinutes(assignment.slot.inicio);
   const fim = toMinutes(assignment.slot.fim);
   const passo = Math.max(1, config.duracaoGrupoMinutos);

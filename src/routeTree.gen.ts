@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
+import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as TvRouteImport } from './routes/tv'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
+import { Route as DashboardAulasRouteImport } from './routes/dashboard/aulas'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
@@ -30,6 +32,11 @@ const IndexRoute = IndexRouteImport.update({
 const AgendaRoute = AgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoordenacaoRoute = CoordenacaoRouteImport.update({
+  id: '/coordenacao',
+  path: '/coordenacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -50,6 +57,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const DashboardAlunosRoute = DashboardAlunosRouteImport.update({
   id: '/dashboard/alunos',
   path: '/dashboard/alunos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAulasRoute = DashboardAulasRouteImport.update({
+  id: '/dashboard/aulas',
+  path: '/dashboard/aulas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
@@ -86,9 +98,11 @@ const DashboardTurmasTurmaIdRoute = DashboardTurmasTurmaIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
@@ -100,9 +114,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
@@ -115,9 +131,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/coordenacao': typeof CoordenacaoRoute
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
@@ -131,9 +149,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
@@ -145,9 +165,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
@@ -159,9 +181,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/agenda'
+    | '/coordenacao'
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
@@ -174,9 +198,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
+  CoordenacaoRoute: typeof CoordenacaoRoute
   LoginRoute: typeof LoginRoute
   TvRoute: typeof TvRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
+  DashboardAulasRoute: typeof DashboardAulasRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
@@ -200,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/agenda'
       preLoaderRoute: typeof AgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coordenacao': {
+      id: '/coordenacao'
+      path: '/coordenacao'
+      fullPath: '/coordenacao'
+      preLoaderRoute: typeof CoordenacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -228,6 +261,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/alunos'
       fullPath: '/dashboard/alunos'
       preLoaderRoute: typeof DashboardAlunosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/aulas': {
+      id: '/dashboard/aulas'
+      path: '/dashboard/aulas'
+      fullPath: '/dashboard/aulas'
+      preLoaderRoute: typeof DashboardAulasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/configuracoes': {
@@ -278,9 +318,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
+  CoordenacaoRoute: CoordenacaoRoute,
   LoginRoute: LoginRoute,
   TvRoute: TvRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
+  DashboardAulasRoute: DashboardAulasRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
