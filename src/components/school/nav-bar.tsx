@@ -16,12 +16,14 @@ export function NavBar() {
           </span>
           <span className="flex flex-col leading-tight">
             <span className="text-sm font-semibold text-foreground">Agenda de Informática</span>
-            <span className="text-[11px] text-muted-foreground">Escola Dr. Eiraldo Carneiro</span>
+            <span className="hidden text-[11px] text-muted-foreground sm:block">
+              Escola Dr. Eiraldo Carneiro
+            </span>
           </span>
         </Link>
 
         <nav className="flex items-center gap-1.5 sm:gap-2">
-          <Button asChild variant="ghost" size="sm">
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/">Início</Link>
           </Button>
           <Button asChild variant="ghost" size="sm">

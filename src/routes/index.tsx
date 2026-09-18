@@ -3,10 +3,10 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   CalendarClock,
   CalendarDays,
+  ChevronRight,
   Clock3,
   Gamepad2,
   GraduationCap,
-  HeartHandshake,
   LayoutDashboard,
   MonitorSmartphone,
   ShieldCheck,
@@ -18,28 +18,23 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
+import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
 import { WeeklyScheduleGraphic } from "@/components/school/weekly-schedule-graphic";
 import { useAppStore } from "@/lib/app-store";
-import { fetchUltimaParticipacao } from "@/lib/presencas";
 import {
   buildWeeklySchedule,
   currentWeekdayLabel,
   nextAssignmentsForDay,
   proximaDataDoDia,
   proximoDiaLetivo,
-  selecionarAlunosDoDia,
   suspensaoKey,
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import heroImg from "@/assets/hero-lab-photo.jpg";
 import backgroundImg from "@/assets/feature-classroom-tech.jpg";
-import scheduleImg from "@/assets/feature-classroom-tech.jpg";
-import networkImg from "@/assets/feature-tools.jpg";
-import workspaceImg from "@/assets/feature-kids-learning.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -89,22 +84,22 @@ function Index() {
       <NavBar />
 
       <section className="relative overflow-hidden border-b border-border/60">
-        {/* Sophisticated backdrop: a dimmed photo of the lab behind the content, for depth without hurting legibility. */}
+        {/* Photo backdrop with a color wash so the hero reads as one branded block, not a plain white card. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-20 bg-cover bg-center opacity-[0.06]"
+          className="pointer-events-none absolute inset-0 -z-20 bg-cover bg-center opacity-[0.10]"
           style={{ backgroundImage: `url(${backgroundImg})` }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_10%,color-mix(in_oklch,var(--primary)_10%,transparent),transparent_50%)]"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_14%,transparent),transparent_50%),linear-gradient(180deg,transparent_70%,var(--background)_100%)]"
         />
         {/* Yellow accent stripe, echoing the school's brand colors from the printed materials. */}
         <div
           aria-hidden
           className="pointer-events-none absolute -right-16 -top-16 -z-10 size-56 rotate-45 bg-amber-400/25"
         />
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-24">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-20">
           <div>
             <Badge variant="secondary" className="mb-4 gap-1.5">
               <MonitorSmartphone className="size-3.5" /> Agenda online
@@ -113,14 +108,14 @@ function Index() {
               Informática na <span className="text-primary">Escola</span>
             </h1>
             <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Agende seus horários de forma rápida, simples e prática! Cronograma automático por
-              turma, revezamento entre alunos nos {config.numeroComputadores} computadores e
-              cronômetro ao vivo, com o professor {config.professorInformatica}.
+              Cronograma automático por turma, revezamento justo entre alunos nos{" "}
+              {config.numeroComputadores} computadores e cronômetro ao vivo — com o professor{" "}
+              {config.professorInformatica}.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link to="/agenda">
-                  <CalendarClock /> Acessar Agenda Online
+                  <CalendarClock /> Ver agenda da semana
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -149,7 +144,7 @@ function Index() {
           </div>
 
           <div className="relative">
-            <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-2xl" aria-hidden />
+            <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" aria-hidden />
             <img
               src={heroImg}
               alt="Alunos usando os computadores do laboratório de informática da escola"
@@ -163,66 +158,58 @@ function Index() {
         </div>
       </section>
 
-      <section className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
+      <section className="mx-auto flex max-w-6xl flex-col gap-5 px-4 py-8 sm:px-6">
         <LiveSessionPanel />
         <ProximasTurmasPanel />
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="mb-10 max-w-2xl">
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mb-8 max-w-2xl">
           <h2 className="text-2xl font-semibold text-foreground">Como a agenda organiza tudo</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            O sistema aplica a mesma lógica de revezamento usada em sala: grupos de{" "}
-            {config.numeroComputadores} alunos por vez, trocando automaticamente a cada{" "}
-            {config.duracaoGrupoMinutos} minutos, dentro de janelas de {config.duracaoSlotMinutos}{" "}
-            minutos por turma, de {config.horaInicio} às {config.horaFim}.
+            Grupos de {config.numeroComputadores} alunos revezam a cada {config.duracaoGrupoMinutos}{" "}
+            minutos, dentro de janelas de {config.duracaoSlotMinutos} minutos por turma, de{" "}
+            {config.horaInicio} às {config.horaFim}.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <FeatureCard
             icon={<Gamepad2 className="size-5" />}
             iconClassName="bg-blue-500/10 text-blue-600"
-            title="Aprendizado Digital"
+            title="Aprendizado digital"
             description="Tecnologia que estimula o raciocínio e a criatividade."
-          />
-          <FeatureCard
-            icon={<Users2 className="size-5" />}
-            iconClassName="bg-emerald-500/10 text-emerald-600"
-            title="Mais Oportunidades"
-            description="A informática amplia horizontes e prepara para o futuro."
           />
           <FeatureCard
             icon={<CalendarClock className="size-5" />}
             iconClassName="bg-violet-500/10 text-violet-600"
-            title="Agende seu Horário"
-            description="Escolha o melhor dia e horário para utilizar o laboratório."
+            title="Rodízio automático"
+            description="O sistema distribui e gira os grupos sozinho, sem favorecer ninguém."
           />
-        </div>
-
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <FeatureCard
             icon={<Timer className="size-5" />}
+            iconClassName="bg-amber-500/10 text-amber-600"
             title="Cronômetro ao vivo"
-            description="Um contador regressivo mostra em tempo real quanto falta para trocar de grupo."
+            description="Contagem regressiva em tempo real de quando o grupo troca."
           />
           <FeatureCard
             icon={<ShieldCheck className="size-5" />}
+            iconClassName="bg-emerald-500/10 text-emerald-600"
             title="Painel de gestão"
-            description="Cadastre turmas, professores, fotos e alunos com acesso restrito por login."
+            description="Turmas, professores, fotos e alunos com acesso restrito por login."
           />
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="mb-8 max-w-2xl">
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mb-6 max-w-2xl">
           <Badge variant="secondary" className="mb-3 gap-1.5">
             <CalendarDays className="size-3.5" /> Grade completa
           </Badge>
           <h2 className="text-2xl font-semibold text-foreground">A semana inteira, num só olhar</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Cada cor representa uma série (do 1º ao 5º ano) — quanto mais escura, mais adiantada a
-            turma. Este quadro é gerado automaticamente a partir da agenda cadastrada no sistema.
+            turma. Gerado automaticamente a partir da agenda cadastrada no sistema.
           </p>
         </div>
         <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
@@ -234,40 +221,8 @@ function Index() {
 
       <ProgramacaoSemanalDestaque />
 
-      <section className="border-y border-border/60 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="mb-10 max-w-2xl">
-            <h2 className="text-2xl font-semibold text-foreground">
-              Tecnologia a serviço da rotina escolar
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Uma experiência visual clara e moderna para organizar horários, acompanhar o tempo e
-              conectar alunos ao laboratório de informática.
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            <VisualCard
-              image={scheduleImg}
-              title="Organização semanal"
-              description="Visualize de imediato quais turmas usam o laboratório em cada dia e horário."
-            />
-            <VisualCard
-              image={networkImg}
-              title="Conexão e colaboração"
-              description="Cada aluno tem seu momento no computador, de forma justa e previsível."
-            />
-            <VisualCard
-              image={workspaceImg}
-              title="Ambiente preparado"
-              description="A agenda ajuda o professor a chegar com tudo planejado para a aula de informática."
-            />
-          </div>
-        </div>
-      </section>
-
       <section className="border-t border-border/60 bg-muted/30">
-        <div className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6">
+        <div className="mx-auto max-w-6xl px-4 py-12 text-center sm:px-6">
           <GraduationCap className="mx-auto size-8 text-primary" />
           <h2 className="mt-3 text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -282,9 +237,12 @@ function Index() {
 /**
  * Shows which turmas are scheduled for the next school day, so professors
  * can plan ahead — displayed right below the live session on the homepage.
+ * Each row is clickable and opens the same "alunos previstos" preview used
+ * everywhere else in the app, for a consistent experience.
  */
 function ProximasTurmasPanel() {
   const { turmas, config } = useAppStore();
+  const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
   // A data atual difere entre servidor e navegador; só renderizamos após montar
   // para evitar erro de hidratação.
@@ -319,15 +277,17 @@ function ProximasTurmasPanel() {
           })}
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Para os(as) professores(as) se programarem com antecedência.
+          Toque numa turma para ver os alunos previstos.
         </p>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col divide-y divide-border/60">
           {assignmentsDoProximoDia.map((assignment) => (
-            <div
+            <button
               key={`${assignment.dia}-${assignment.slot.inicio}`}
-              className="flex items-center justify-between gap-3 py-2.5"
+              type="button"
+              onClick={() => setAssignmentSelecionado(assignment)}
+              className="group flex items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-primary"
             >
               <div className="flex items-center gap-3">
                 {assignment.turma.imagem ? (
@@ -342,8 +302,8 @@ function ProximasTurmasPanel() {
                   </span>
                 )}
                 <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {assignment.turma.serie} "{assignment.turma.letra}"
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary">
+                    {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Prof(a). {assignment.turma.professorRegente} · {assignment.turma.alunos.length}{" "}
@@ -351,13 +311,24 @@ function ProximasTurmasPanel() {
                   </p>
                 </div>
               </div>
-              <Badge variant="secondary" className="font-mono">
-                {assignment.slot.inicio} – {assignment.slot.fim}
-              </Badge>
-            </div>
+              <div className="flex items-center gap-1.5">
+                <Badge variant="secondary" className="font-mono">
+                  {assignment.slot.inicio} – {assignment.slot.fim}
+                </Badge>
+                <ChevronRight className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+              </div>
+            </button>
           ))}
         </div>
       </CardContent>
+
+      <PreviaAlunosDialog
+        assignment={assignmentSelecionado}
+        data={proximo.data}
+        onOpenChange={(open) => {
+          if (!open) setAssignmentSelecionado(null);
+        }}
+      />
     </Card>
   );
 }
@@ -389,7 +360,7 @@ function ProgramacaoSemanalDestaque() {
   if (turmas.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-16 sm:py-20">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-14 sm:py-16">
       {/* Soft glowing orbs behind the glass panels, for depth. */}
       <div
         aria-hidden
@@ -401,7 +372,7 @@ function ProgramacaoSemanalDestaque() {
       />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-10 max-w-2xl">
+        <div className="mb-8 max-w-2xl">
           <Badge className="mb-4 gap-1.5 border-white/20 bg-white/10 text-white backdrop-blur">
             <Sparkles className="size-3.5" /> Programação da semana
           </Badge>
@@ -478,7 +449,7 @@ function ProgramacaoSemanalDestaque() {
                   )}
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-white">
-                      {assignment.turma.serie} "{assignment.turma.letra}"
+                      {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
                     </p>
                     <p className="truncate text-xs text-blue-100/70">
                       Prof(a). {assignment.turma.professorRegente}
@@ -515,106 +486,6 @@ function ProgramacaoSemanalDestaque() {
   );
 }
 
-/**
- * Preview of which students are expected on a given (usually future) date —
- * computed live from the same fairness queue used for the real daily roll
- * call, but not written anywhere. It's a forecast, not a commitment: the
- * actual list on the day can shift with absences or schedule changes.
- */
-function PreviaAlunosDialog({
-  assignment,
-  data,
-  onOpenChange,
-}: {
-  assignment: Assignment | null;
-  data: Date;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const { config } = useAppStore();
-  const [grupos, setGrupos] = useState<ReturnType<typeof selecionarAlunosDoDia>["grupos"] | null>(
-    null,
-  );
-  const [carregando, setCarregando] = useState(false);
-
-  useEffect(() => {
-    if (!assignment) {
-      setGrupos(null);
-      return;
-    }
-    let cancelled = false;
-    setCarregando(true);
-    fetchUltimaParticipacao(assignment.turma.id)
-      .then((ultima) => {
-        if (cancelled) return;
-        const selecao = selecionarAlunosDoDia(assignment.turma, ultima, config.numeroComputadores);
-        setGrupos(selecao.grupos);
-      })
-      .catch(() => {
-        if (!cancelled) setGrupos(null);
-      })
-      .finally(() => {
-        if (!cancelled) setCarregando(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [assignment, config.numeroComputadores]);
-
-  return (
-    <Dialog open={assignment !== null} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {assignment
-              ? `${assignment.turma.serie} "${assignment.turma.letra}" · ${data.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}`
-              : ""}
-          </DialogTitle>
-        </DialogHeader>
-        {assignment ? (
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-muted-foreground">
-              Horário: {assignment.slot.inicio} – {assignment.slot.fim} · Prof(a).{" "}
-              {assignment.turma.professorRegente}
-            </p>
-            {carregando ? (
-              <p className="text-sm text-muted-foreground">Calculando quem vai participar...</p>
-            ) : grupos && grupos.some((g) => g.alunos.length > 0) ? (
-              <div className="flex flex-col gap-3">
-                {grupos.map((grupo) => (
-                  <div key={grupo.indice}>
-                    <Badge variant="secondary" className="mb-1.5">
-                      Grupo {grupo.indice + 1}
-                    </Badge>
-                    <div className="flex flex-wrap gap-1.5">
-                      {grupo.alunos.map((aluno) => (
-                        <span
-                          key={aluno.id}
-                          className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
-                        >
-                          {aluno.nome}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                <p className="mt-1 flex items-start gap-1.5 text-xs text-muted-foreground">
-                  <HeartHandshake className="mt-0.5 size-3.5 shrink-0" />
-                  Prévia calculada pela fila de prioridade atual — pode mudar até o dia se houver
-                  faltas ou ajustes na programação.
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Esta turma ainda não tem alunos cadastrados.
-              </p>
-            )}
-          </div>
-        ) : null}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 function FeatureCard({
   icon,
   iconClassName,
@@ -640,35 +511,5 @@ function FeatureCard({
         <p className="text-sm text-muted-foreground">{description}</p>
       </CardContent>
     </Card>
-  );
-}
-
-function VisualCard({
-  image,
-  title,
-  description,
-}: {
-  image: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="group overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-md">
-      <div className="aspect-[16/10] overflow-hidden">
-        <img
-          src={image}
-          alt={title}
-          width={1344}
-          height={768}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
-        />
-      </div>
-      <div className="p-5">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
-    </div>
   );
 }
