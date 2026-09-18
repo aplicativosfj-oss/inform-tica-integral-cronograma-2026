@@ -1,6 +1,13 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { fetchRadioStreamUrl } from "@/lib/radio-stream-url";
+// Stream direto do Zeno.fm (Jovem Pan FM 100.9) — link fixo, sem token que
+// expira. <audio> toca origem cruzada sem bloqueio de CORS (isso só afeta
+// fetch/XHR), então não precisa passar pelo servidor. Se o host principal
+// falhar, cai pro espelho.
+const STREAM_URLS = [
+  "https://stream.zeno.fm/c45wbq2us3buv",
+  "https://stream-284.zeno.fm/c45wbq2us3buv",
+];
 
 type Status = "parado" | "carregando" | "tocando" | "erro";
 
@@ -43,15 +50,16 @@ export function JovemPanRadioProvider({ children }: { children: ReactNode }) {
       return;
     }
     setStatus("carregando");
-    try {
-      // O link do stream expira — busca um novo a cada play para nunca ficar
-      // parado com um token vencido.
-      const url = await fetchRadioStreamUrl();
-      audio.src = url;
-      await audio.play();
-    } catch {
-      setStatus("erro");
+    for (const url of STREAM_URLS) {
+      try {
+        audio.src = url;
+        await audio.play();
+        return;
+      } catch {
+        // tenta o próximo espelho
+      }
     }
+    setStatus("erro");
   }
 
   function parar() {

@@ -111,11 +111,6 @@ function Index() {
           />
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-14">
             <div>
-              <img
-                src={logoFull}
-                alt="Agenda de Informática .Online"
-                className="mb-4 h-auto w-full max-w-[220px] rounded-lg dark:bg-white/95 dark:p-2 sm:max-w-[260px]"
-              />
               <Badge variant="secondary" className="mb-4 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
               </Badge>
@@ -166,6 +161,12 @@ function Index() {
 
             <div className="relative">
               <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" aria-hidden />
+              {/* Logo flutuante, sem ocupar espaço no fluxo — não empurra nada da hero. */}
+              <img
+                src={logoFull}
+                alt="Agenda de Informática .Online"
+                className="absolute -left-3 -top-3 z-10 h-auto w-28 rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:w-32"
+              />
               <img
                 src={heroImg}
                 alt="Tela do sistema de agenda de informática com cronograma, cronômetro e grupos de alunos"
