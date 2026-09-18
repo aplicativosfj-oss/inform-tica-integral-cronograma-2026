@@ -436,8 +436,11 @@ function ProgramacaoSemanalDestaque() {
     [turmas, config, dataDoDia],
   );
   const assignmentsDoDia = useMemo(
-    () => nextAssignmentsForDay(assignments, diaSelecionado),
-    [assignments, diaSelecionado],
+    () =>
+      nextAssignmentsForDay(assignments, diaSelecionado).filter(
+        (a) => !config.suspensoes?.[suspensaoKey(toDateKey(dataDoDia), a.dia, a.slot.inicio)],
+      ),
+    [assignments, diaSelecionado, config.suspensoes, dataDoDia],
   );
   const dataFormatada = useMemo(() => {
     if (!todayLabel) return "";
