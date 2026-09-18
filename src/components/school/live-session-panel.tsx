@@ -6,6 +6,7 @@ import {
   Lock,
   MonitorPlay,
   Square,
+  Tv,
   UserX,
   Users,
   Volume2,
