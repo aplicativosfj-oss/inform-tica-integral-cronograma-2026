@@ -61,8 +61,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   turmasRef.current = turmas;
   configRef.current = config;
 
+  // Sem internet, reenvia a frequência guardada assim que a conexão voltar.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    async function sincronizar() {
+      const { enviadas } = await sincronizarPresencasPendentes();
+      if (enviadas > 0) toast.success(`${enviadas} registro(s) de frequência sincronizado(s).`);
+    }
+    sincronizar();
+    window.addEventListener("online", sincronizar);
+    return () => window.removeEventListener("online", sincronizar);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
+    // Enquanto a rede não responde, a tela abre com a última cópia local.
+    const emCache = lerCache<{ turmas: Turma[]; config: ScheduleConfig }>("app_state");
+    if (emCache) {
+      setTurmas(emCache.turmas);
+      setConfig(emCache.config);
+    }
     supabase
       .from("app_state")
       .select("turmas, config")
@@ -71,10 +89,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .then(async ({ data, error }) => {
         if (cancelled) return;
         if (error) {
-          toast.error(`Não foi possível carregar os dados: ${error.message}`);
+          if (!emCache) toast.error(`Não foi possível carregar os dados: ${error.message}`);
         } else if (data) {
-          setTurmas((data.turmas as Turma[] | null) ?? SEED_TURMAS);
-          setConfig((data.config as ScheduleConfig | null) ?? SEED_CONFIG);
+          const proximasTurmas = (data.turmas as Turma[] | null) ?? SEED_TURMAS;
+          const proximaConfig = (data.config as ScheduleConfig | null) ?? SEED_CONFIG;
+          setTurmas(proximasTurmas);
+          setConfig(proximaConfig);
+          gravarCache("app_state", { turmas: proximasTurmas, config: proximaConfig });
         } else if (isAuthenticated) {
           // First run: seed the row (requires an authenticated admin session,
           // per the write RLS policy) so future reads — including the public
