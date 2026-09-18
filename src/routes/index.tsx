@@ -46,6 +46,8 @@ import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
 import backgroundImg from "@/assets/page-bg.jpg";
 import logoFull from "@/assets/logo-full-transparent.png";
+import cartazAgendaImg from "@/assets/cartaz-agenda-informatica.jpg";
+import laboratorioTurmaImg from "@/assets/laboratorio-informatica-turma.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -210,6 +212,28 @@ function Index() {
           </div>
         </section>
 
+        <RevealSection className="mx-auto max-w-6xl px-4 pt-8 sm:px-6">
+          <a
+            href={cartazAgendaImg}
+            target="_blank"
+            rel="noreferrer"
+            className="group block overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl"
+          >
+            <img
+              src={cartazAgendaImg}
+              alt={`Cartaz oficial da Agenda Online das aulas de Informática da ${config.nomeEscola}, com o professor ${config.professorInformatica} e os temas jogos, criatividade, aprendizado e tecnologia`}
+              width={2048}
+              height={768}
+              className="aspect-[8/3] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Cartaz oficial da Agenda de Informática — toque para ver em tamanho completo.
+          </p>
+        </RevealSection>
+
         <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
           <NovoCronogramaBanner />
           <WeatherWidget />
@@ -349,8 +373,8 @@ function NovoCronogramaBanner() {
     <div className="flex items-start gap-3 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 shadow-sm backdrop-blur-md dark:border-white/15 dark:bg-white/5 sm:items-center">
       <PartyPopper className="mt-0.5 size-5 shrink-0 text-primary sm:mt-0" />
       <p className="text-sm text-foreground">
-        <span className="font-semibold">Cronograma novo a partir de {dataFormatada}:</span> aulas
-        de {config.duracaoSlotMinutos} min, com mais alunos participando por turma toda semana. As
+        <span className="font-semibold">Cronograma novo a partir de {dataFormatada}:</span> aulas de{" "}
+        {config.duracaoSlotMinutos} min, com mais alunos participando por turma toda semana. As
         aulas de hoje foram pausadas para a transição — a agenda nova já está pronta e visível
         abaixo.
       </p>
@@ -637,13 +661,7 @@ function ProgramacaoSemanalDestaque() {
 }
 
 /** Envolve uma seção da home para revelar suavemente ao rolar até ela. */
-function RevealSection({
-  className,
-  children,
-}: {
-  className?: string;
-  children: ReactNode;
-}) {
+function RevealSection({ className, children }: { className?: string; children: ReactNode }) {
   const { ref, className: revealClassName } = useScrollReveal<HTMLElement>();
   return (
     <section ref={ref} className={`${className ?? ""} ${revealClassName}`.trim()}>
