@@ -114,7 +114,7 @@ function Index() {
               <img
                 src={logoFull}
                 alt="Agenda de Informática .Online"
-                className="mb-4 h-auto w-full max-w-[220px] sm:max-w-[260px]"
+                className="mb-4 h-auto w-full max-w-[220px] rounded-lg dark:bg-white/95 dark:p-2 sm:max-w-[260px]"
               />
               <Badge variant="secondary" className="mb-4 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
