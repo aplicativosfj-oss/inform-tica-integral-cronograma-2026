@@ -543,6 +543,21 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
             </p>
           )}
 
+          {editable && chamada.presencas && chamada.presencas.length > 0 ? (
+            <ChamadaDoDiaCard
+              turma={assignment.turma}
+              presencas={chamada.presencas}
+              onMarcarFalta={async (aluno, grupoIndice, motivo) => {
+                const substituto = await chamada.marcarFaltaDoAluno(aluno, grupoIndice, motivo);
+                toast.success(
+                  substituto
+                    ? `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}. ${substituto.nome} foi chamado(a) no lugar.`
+                    : `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}.`,
+                );
+              }}
+            />
+          ) : null}
+
           {proximoSubBloco ? (
             <p className="text-xs text-muted-foreground">
               A seguir: grupo {proximoSubBloco.grupo.indice + 1} às {proximoSubBloco.inicio} (
