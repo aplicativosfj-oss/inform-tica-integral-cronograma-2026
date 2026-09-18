@@ -195,6 +195,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ),
         );
       },
+      addAula: (aula) => {
+        applyConfig((prev) => ({
+          ...prev,
+          aulas: [...(prev.aulas ?? []), { ...aula, id: generateId("aula") }],
+        }));
+      },
+      updateAula: (id, patch) => {
+        applyConfig((prev) => ({
+          ...prev,
+          aulas: (prev.aulas ?? []).map((a) => (a.id === id ? { ...a, ...patch } : a)),
+        }));
+      },
+      removeAula: (id) => {
+        applyConfig((prev) => ({
+          ...prev,
+          aulas: (prev.aulas ?? []).filter((a) => a.id !== id),
+        }));
+      },
       updateConfig: (patch) => {
         applyConfig((prev) => ({ ...prev, ...patch }));
       },
