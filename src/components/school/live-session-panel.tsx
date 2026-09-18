@@ -11,7 +11,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -390,8 +390,15 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           <MonitorPlay className="size-5 text-primary" />
           Aula em andamento
         </CardTitle>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Badge className="bg-primary text-primary-foreground">AO VIVO</Badge>
+          <AlertaTroca
+            chave={`${dateKeySessao}|${subBloco.inicio}`}
+            proximoGrupo={subBloco.grupo.indice + 1}
+          />
+          <Button size="sm" variant="outline" onClick={() => navigate({ to: "/tv" })}>
+            <Tv className="size-3.5" /> Modo TV
+          </Button>
           {editable ? (
             <AlertDialog>
               <AlertDialogTrigger asChild>
