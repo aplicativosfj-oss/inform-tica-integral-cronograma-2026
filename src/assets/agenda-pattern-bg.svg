@@ -1,0 +1,50 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grade" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M 64 0 L 0 0 0 64" fill="none" stroke="#1e3a8a" stroke-width="1.25" stroke-opacity="0.55" />
+    </pattern>
+    <radialGradient id="fadeCenter" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0" />
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.5" />
+    </radialGradient>
+  </defs>
+
+  <!-- Grade de fundo, lembrando uma agenda/planilha de horários. -->
+  <rect width="1920" height="1080" fill="url(#grade)" />
+  <!-- Clareia só bem na borda, mantendo a grade visível na maior parte da tela. -->
+  <rect width="1920" height="1080" fill="url(#fadeCenter)" />
+
+  <!-- Trilhas de circuito nos quatro cantos, no mesmo estilo da logomarca. -->
+  <g fill="none" stroke="#1e3a8a" stroke-width="2" stroke-linecap="round">
+    <path d="M -20 40 H 180 L 220 80 H 420 L 460 40 H 620" opacity="0.5" />
+    <path d="M -20 110 H 100 L 140 150 H 340" opacity="0.4" />
+    <circle cx="220" cy="80" r="5" opacity="0.5" />
+    <circle cx="460" cy="40" r="5" opacity="0.5" />
+    <circle cx="140" cy="150" r="5" opacity="0.4" />
+
+    <path d="M 1940 40 H 1740 L 1700 80 H 1500 L 1460 40 H 1300" opacity="0.5" />
+    <path d="M 1940 110 H 1820 L 1780 150 H 1580" opacity="0.4" />
+    <circle cx="1700" cy="80" r="5" opacity="0.5" />
+    <circle cx="1460" cy="40" r="5" opacity="0.5" />
+    <circle cx="1780" cy="150" r="5" opacity="0.4" />
+
+    <path d="M -20 1040 H 180 L 220 1000 H 420 L 460 1040 H 620" opacity="0.45" />
+    <circle cx="220" cy="1000" r="5" opacity="0.45" />
+    <circle cx="460" cy="1040" r="5" opacity="0.45" />
+
+    <path d="M 1940 1040 H 1740 L 1700 1000 H 1500 L 1460 1040 H 1300" opacity="0.45" />
+    <circle cx="1700" cy="1000" r="5" opacity="0.45" />
+    <circle cx="1460" cy="1040" r="5" opacity="0.45" />
+  </g>
+
+  <!-- Ícones sutis de "agenda" espalhados (quadradinhos de calendário), quase imperceptíveis. -->
+  <g fill="#1e3a8a" opacity="0.06">
+    <rect x="120" y="260" width="26" height="26" rx="4" />
+    <rect x="160" y="260" width="26" height="26" rx="4" />
+    <rect x="120" y="300" width="26" height="26" rx="4" />
+    <rect x="1740" y="760" width="26" height="26" rx="4" />
+    <rect x="1780" y="760" width="26" height="26" rx="4" />
+    <rect x="1780" y="800" width="26" height="26" rx="4" />
+  </g>
+</svg>

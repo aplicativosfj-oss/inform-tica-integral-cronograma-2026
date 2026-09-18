@@ -36,6 +36,7 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
+import agendaPatternBg from "@/assets/agenda-pattern-bg.svg";
 import alunosHeroImg from "@/assets/alunos-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
@@ -89,16 +90,27 @@ function Index() {
   return (
     <div className="relative min-h-screen bg-background">
       {/*
-        Imagem de fundo em toda a página, fixa e bem discreta — opacidade baixa
-        (0.12) mais um véu na cor do fundo por cima, para nunca competir com o
-        hero, o cronômetro ao vivo ou a grade da agenda semanal.
+        Fundo do modo claro: padrão próprio (grade de agenda + trilhas de
+        circuito, no estilo da logomarca) em vez de uma foto genérica — fixo
+        e bem discreto, pra nunca competir com o hero, o cronômetro ao vivo
+        ou a grade da agenda semanal. Some no modo escuro, onde já existe
+        contraste suficiente sem ele.
       */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.12]"
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-100 dark:hidden"
+        style={{ backgroundImage: `url(${agendaPatternBg})` }}
+      />
+      {/* Imagem de fundo antiga, só no modo escuro. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 hidden bg-cover bg-center opacity-[0.12] dark:block"
         style={{ backgroundImage: `url(${backgroundImg})` }}
       />
-      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 bg-background/70" />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 bg-background/20 dark:bg-background/70"
+      />
       <div className="relative z-10">
         <NavBar />
 
