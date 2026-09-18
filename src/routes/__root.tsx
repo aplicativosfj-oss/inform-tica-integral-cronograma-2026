@@ -130,10 +130,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "icon", href: "/favicon-32.png", type: "image/png", sizes: "32x32" },
-      { rel: "icon", href: "/favicon-16.png", type: "image/png", sizes: "16x16" },
-      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
+      // ?v=3 força o navegador a buscar o ícone de novo — favicon é um dos
+      // recursos mais cacheados que existe, mudar só o arquivo não bastava.
+      { rel: "icon", href: "/favicon.ico?v=3", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon-32.png?v=3", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon-16.png?v=3", type: "image/png", sizes: "16x16" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png?v=3" },
     ],
   }),
   shellComponent: RootShell,
