@@ -26,6 +26,7 @@ import {
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
+import { exportarFrequenciaPdf } from "@/lib/relatorio-frequencia";
 import { toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 
@@ -53,7 +54,7 @@ function defaultRange() {
 }
 
 function FrequenciaPage() {
-  const { turmas } = useAppStore();
+  const { turmas, config } = useAppStore();
   const [{ inicio, fim }, setRange] = useState(defaultRange);
   const [turmaId, setTurmaId] = useState<string>("todas");
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
@@ -91,7 +92,7 @@ function FrequenciaPage() {
         `${fim}T00:00:00`,
       ).toLocaleDateString("pt-BR")}`,
       registros,
-      nomeTurma: (id) => {
+      nomeTurma: (id: string) => {
         const t = turmas.find((turma) => turma.id === id);
         return t ? `${t.serie} "${t.letra}"` : id;
       },
