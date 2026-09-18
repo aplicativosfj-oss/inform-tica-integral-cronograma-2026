@@ -581,10 +581,10 @@ function ProgramacaoSemanalDestaque() {
                 key={dia}
                 type="button"
                 onClick={() => setDiaSelecionado(dia)}
-                className={`relative rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-all ${
+                className={`relative rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-[color,background-color,border-color,box-shadow] duration-200 ease-out ${
                   ativo
                     ? "border-white bg-white text-primary shadow-lg"
-                    : "border-white/25 bg-white/10 text-white hover:bg-white/20"
+                    : "border-white/25 bg-white/10 text-white [@media(hover:hover)]:hover:bg-white/20"
                 }`}
               >
                 {dia}
@@ -621,7 +621,7 @@ function ProgramacaoSemanalDestaque() {
                 key={`${assignment.dia}-${assignment.slot.inicio}`}
                 type="button"
                 onClick={() => setAssignmentSelecionado(assignment)}
-                className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-all hover:-translate-y-0.5 hover:bg-white/15"
+                className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[transform,background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:bg-white/15"
               >
                 <div className="flex items-center gap-3">
                   {assignment.turma.imagem ? (

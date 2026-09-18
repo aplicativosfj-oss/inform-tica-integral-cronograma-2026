@@ -134,7 +134,7 @@ function AgendaPage() {
                   key={`${assignment.dia}-${assignment.slot.inicio}`}
                   type="button"
                   onClick={() => setAssignmentSelecionado(assignment)}
-                  className="group flex flex-col rounded-xl border border-border/60 bg-card p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                  className="group flex flex-col rounded-xl border border-border/60 bg-card p-4 text-left shadow-sm transition-[transform,border-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:border-primary/40 [@media(hover:hover)]:hover:shadow-md"
                 >
                   <div className="flex items-center gap-3">
                     {assignment.turma.imagem ? (
