@@ -357,11 +357,13 @@ function ProgramacaoSemanalDestaque() {
     () => nextAssignmentsForDay(assignments, diaSelecionado),
     [assignments, diaSelecionado],
   );
-  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
-  const dataFormatada = dataDoDia.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-  });
+  const dataFormatada = useMemo(() => {
+    if (!todayLabel) return "";
+    return proximaDataDoDia(diaSelecionado, new Date()).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+    });
+  }, [diaSelecionado, todayLabel]);
 
   if (turmas.length === 0) return null;
 
