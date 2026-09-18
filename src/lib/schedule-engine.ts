@@ -214,7 +214,16 @@ export function buildSubBlocos(
   config: ScheduleConfig,
   weekIndex = 0,
 ): SubBloco[] {
-  const grupos = buildGrupos(assignment.turma, config);
+  const todos = buildGrupos(assignment.turma, config);
+  // Aula cadastrada com um grupo fixo: esse grupo ocupa o horário inteiro.
+  const fixo = assignment.grupoIdFixo
+    ? todos.filter((g) =>
+        (assignment.turma.grupos ?? []).some(
+          (cad) => cad.id === assignment.grupoIdFixo && cad.nome === g.nome,
+        ),
+      )
+    : [];
+  const grupos = fixo.length > 0 ? fixo : todos;
   const inicio = toMinutes(assignment.slot.inicio);
   const fim = toMinutes(assignment.slot.fim);
   const passo = Math.max(1, config.duracaoGrupoMinutos);
