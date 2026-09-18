@@ -275,6 +275,9 @@ function Index() {
                   key={i}
                   src={src}
                   alt="Aluno usando um computador do laboratório de informática"
+                  loading="lazy"
+                  width={64}
+                  height={64}
                   className="size-14 rounded-xl border border-border/60 object-cover shadow-sm sm:size-16"
                 />
               ))}

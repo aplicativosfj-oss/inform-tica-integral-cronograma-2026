@@ -1,14 +1,34 @@
+# Agenda de Informática - Robots.txt
+# Allow search engine crawlers and provide sitemap location
+
+# All user agents
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /_*
+
+# Crawl delay to prevent overload
+Crawl-delay: 5
+
+# Allow specific search engine bots
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 2
 
-User-agent: Twitterbot
-Allow: /
+# Disallow bad bots
+User-agent: MJ12bot
+Disallow: /
 
-User-agent: facebookexternalhit
-Allow: /
+User-agent: AhrefsBot
+Disallow: /
 
-User-agent: *
-Allow: /
+User-agent: SemrushBot
+Disallow: /
+
+# Sitemap location
+Sitemap: https://agenda.exemplo.com/sitemap.xml

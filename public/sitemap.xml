@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Homepage -->
+  <url>
+    <loc>https://agenda.exemplo.com/</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://agenda.exemplo.com/og-image.jpg</image:loc>
+      <image:title>Agenda de Informática</image:title>
+    </image:image>
+  </url>
+
+  <!-- Schedule page -->
+  <url>
+    <loc>https://agenda.exemplo.com/agenda</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- About page -->
+  <url>
+    <loc>https://agenda.exemplo.com/sobre</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Dashboard (if public) -->
+  <url>
+    <loc>https://agenda.exemplo.com/dashboard</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- TV Mode (classroom display) -->
+  <url>
+    <loc>https://agenda.exemplo.com/tv</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Login page -->
+  <url>
+    <loc>https://agenda.exemplo.com/login</loc>
+    <lastmod>2026-09-18</lastmod>
+    <changefreq>never</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>
