@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, LogOut, MonitorSmartphone } from "lucide-react";
+import { LayoutDashboard, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
 import { ThemeToggle } from "@/components/school/theme-toggle";
 import { useAuth } from "@/lib/auth-store";
+import logoIcon from "@/assets/logo-icon.png";
 
 export function NavBar() {
   const { isAuthenticated, isReady, logout } = useAuth();
@@ -13,9 +14,11 @@ export function NavBar() {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <MonitorSmartphone className="size-5" />
-          </span>
+          <img
+            src={logoIcon}
+            alt="Agenda de Informática .Online"
+            className="size-10 shrink-0 rounded-lg bg-white object-contain p-1 shadow-sm ring-1 ring-border/60"
+          />
           <span className="flex flex-col leading-tight">
             <span className="text-sm font-semibold text-foreground">Agenda de Informática</span>
             <span className="hidden text-[11px] text-muted-foreground sm:block">

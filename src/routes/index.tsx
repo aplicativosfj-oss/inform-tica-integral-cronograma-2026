@@ -38,6 +38,7 @@ import {
 import type { Assignment } from "@/lib/types";
 import heroImg from "@/assets/hero-pro.jpg";
 import backgroundImg from "@/assets/page-bg.jpg";
+import logoFull from "@/assets/logo-full.png";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -110,6 +111,11 @@ function Index() {
           />
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-14">
             <div>
+              <img
+                src={logoFull}
+                alt="Agenda de Informática .Online"
+                className="mb-6 h-auto w-full max-w-lg rounded-xl bg-white p-3 shadow-md ring-1 ring-border/60"
+              />
               <Badge variant="secondary" className="mb-4 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
               </Badge>
