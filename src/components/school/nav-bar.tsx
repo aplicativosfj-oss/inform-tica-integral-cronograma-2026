@@ -29,6 +29,9 @@ export function NavBar() {
           <Button asChild variant="ghost" size="sm">
             <Link to="/agenda">Agenda</Link>
           </Button>
+          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+            <Link to="/coordenacao">Coordenação</Link>
+          </Button>
           {isReady && isAuthenticated ? (
             <>
               <Button asChild variant="ghost" size="sm">
