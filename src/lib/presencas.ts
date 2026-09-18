@@ -95,17 +95,51 @@ export async function fetchUltimaParticipacao(turmaId: string): Promise<Map<stri
 }
 
 export async function fetchPresencasDoDia(turmaId: string, data: string): Promise<Presenca[]> {
-  const { data: rows, error } = await supabase
-    .from("presencas")
-    .select("*")
-    .eq("turma_id", turmaId)
-    .eq("data", data);
-  if (error) throw error;
-  return (rows ?? []).map(rowToPresenca);
+  try {
+    const { data: rows, error } = await supabase
+      .from("presencas")
+      .select("*")
+      .eq("turma_id", turmaId)
+      .eq("data", data);
+    if (error) throw error;
+    const presencas = (rows ?? []).map(rowToPresenca);
+    gravarCache(chaveDia(turmaId, data), presencas);
+    return presencas;
+  } catch (err) {
+    // Sem internet: devolve a última chamada conhecida para a aula continuar.
+    const cache = lerCache<Presenca[]>(chaveDia(turmaId, data));
+    if (cache) return cache;
+    throw err;
+  }
 }
 
 /** Grava a chamada inicial do dia (status "presente") para os grupos selecionados. Idempotente. */
 export async function registrarPresencasIniciais(
+  turmaId: string,
+  data: string,
+  grupos: { indice: number; alunos: { id: string; nome: string }[] }[],
+): Promise<void> {
+  try {
+    await enviarPresencasIniciais(turmaId, data, grupos);
+  } catch {
+    enfileirar("presencas:iniciais", { turmaId, data, grupos } satisfies PayloadIniciais);
+    const locais: Presenca[] = grupos.flatMap((grupo) =>
+      grupo.alunos.map((aluno) => ({
+        id: `local-${turmaId}-${aluno.id}-${data}`,
+        data,
+        turmaId,
+        alunoId: aluno.id,
+        alunoNome: aluno.nome,
+        grupoIndice: grupo.indice,
+        status: "presente" as const,
+        criadoEm: new Date().toISOString(),
+      })),
+    );
+    gravarCache(chaveDia(turmaId, data), locais);
+  }
+}
+
+async function enviarPresencasIniciais(
   turmaId: string,
   data: string,
   grupos: { indice: number; alunos: { id: string; nome: string }[] }[],
@@ -129,6 +163,46 @@ export async function registrarPresencasIniciais(
 
 /** Marca um aluno como ausente no dia e, se houver substituto, registra a substituição. */
 export async function marcarFalta(
+  turmaId: string,
+  data: string,
+  aluno: { id: string; nome: string },
+  grupoIndice: number,
+  substituto: { id: string; nome: string } | null,
+  motivo: "ausente" | "nao_quis_participar",
+): Promise<void> {
+  try {
+    await enviarFalta(turmaId, data, aluno, grupoIndice, substituto, motivo);
+  } catch {
+    enfileirar("presencas:falta", {
+      turmaId,
+      data,
+      aluno,
+      grupoIndice,
+      substituto,
+      motivo,
+    } satisfies PayloadFalta);
+    const cache = lerCache<Presenca[]>(chaveDia(turmaId, data)) ?? [];
+    const atualizado: Presenca[] = cache.map((p) =>
+      p.alunoId === aluno.id ? { ...p, status: "faltou" as const, motivo } : p,
+    );
+    if (substituto) {
+      atualizado.push({
+        id: `local-${turmaId}-${substituto.id}-${data}`,
+        data,
+        turmaId,
+        alunoId: substituto.id,
+        alunoNome: substituto.nome,
+        grupoIndice,
+        status: "substituido",
+        substitutoDeAlunoId: aluno.id,
+        criadoEm: new Date().toISOString(),
+      });
+    }
+    gravarCache(chaveDia(turmaId, data), atualizado);
+  }
+}
+
+async function enviarFalta(
   turmaId: string,
   data: string,
   aluno: { id: string; nome: string },
