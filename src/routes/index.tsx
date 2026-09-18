@@ -225,10 +225,22 @@ function Index() {
             turma. Gerado automaticamente a partir da agenda cadastrada no sistema.
           </p>
         </div>
-        <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
-          <div className="min-w-[720px]">
-            <WeeklyScheduleGraphic />
+        <div className="relative">
+          <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-6">
+            <div className="min-w-[720px]">
+              <WeeklyScheduleGraphic />
+            </div>
           </div>
+          {/* Pista visual de que dá para arrastar o dedo para o lado — a grade
+              é mais larga que a tela em celulares, mas nada nela indicava
+              isso, então parecia "cortada" em vez de rolável. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-4 right-4 w-10 rounded-r-2xl bg-gradient-to-l from-card to-transparent sm:hidden"
+          />
+          <p className="mt-2 flex items-center justify-center gap-1 text-xs text-muted-foreground sm:hidden">
+            <ChevronRight className="size-3.5" /> Deslize para o lado para ver a semana inteira
+          </p>
         </div>
       </section>
 
