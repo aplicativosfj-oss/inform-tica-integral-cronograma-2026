@@ -461,7 +461,10 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               <BookOpen className="size-3" /> Conteúdo de hoje ({diaAtual})
             </p>
             <p className="mt-1 text-sm text-foreground">
-              {conteudoDoDia || "Nenhum conteúdo cadastrado para hoje."}
+              {subBloco.grupo.conteudo ||
+                assignment.conteudo ||
+                conteudoDoDia ||
+                "Nenhum conteúdo cadastrado para hoje."}
             </p>
           </div>
 

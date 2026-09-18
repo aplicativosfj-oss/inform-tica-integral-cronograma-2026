@@ -138,7 +138,7 @@ function TvSessao({
   const { assignment, subBloco, segundosRestantes, proximoSubBloco } = sessao;
   const total = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = total - segundosRestantes;
-  const conteudoGrupo = subBloco.grupo.conteudo || conteudoDoDia;
+  const conteudoGrupo = subBloco.grupo.conteudo || assignment.conteudo || conteudoDoDia;
 
   return (
     <>

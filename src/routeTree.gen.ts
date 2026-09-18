@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as TvRouteImport } from './routes/tv'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
+import { Route as DashboardAulasRouteImport } from './routes/dashboard/aulas'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
@@ -50,6 +51,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const DashboardAlunosRoute = DashboardAlunosRouteImport.update({
   id: '/dashboard/alunos',
   path: '/dashboard/alunos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAulasRoute = DashboardAulasRouteImport.update({
+  id: '/dashboard/aulas',
+  path: '/dashboard/aulas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   TvRoute: typeof TvRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
+  DashboardAulasRoute: typeof DashboardAulasRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAlunosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/aulas': {
+      id: '/dashboard/aulas'
+      path: '/dashboard/aulas'
+      fullPath: '/dashboard/aulas'
+      preLoaderRoute: typeof DashboardAulasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/configuracoes': {
       id: '/dashboard/configuracoes'
       path: '/dashboard/configuracoes'
@@ -281,6 +301,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   TvRoute: TvRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
+  DashboardAulasRoute: DashboardAulasRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
