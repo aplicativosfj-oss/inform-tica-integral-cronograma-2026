@@ -31,6 +31,12 @@ import type { Presenca } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/frequencia")({
   component: FrequenciaPage,
+  head: () => ({
+    meta: [
+      { title: "Frequência · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 const STATUS_LABEL: Record<Presenca["status"], string> = {

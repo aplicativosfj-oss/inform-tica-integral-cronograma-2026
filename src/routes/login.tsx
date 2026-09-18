@@ -12,6 +12,12 @@ import { useAuth } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
+  head: () => ({
+    meta: [
+      { title: "Entrar · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function LoginPage() {

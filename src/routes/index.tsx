@@ -62,6 +62,21 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "EducationalOrganization",
+          name: "Escola Municipal em Tempo Integral Dr. Eiraldo Carneiro de França",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "Rua Ernane Moreira Braga, 108, Cohab",
+            addressCountry: "BR",
+          },
+        }),
+      },
+    ],
   }),
 });
 

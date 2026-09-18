@@ -25,6 +25,12 @@ import type { ScheduleConfig } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/configuracoes")({
   component: ConfiguracoesPage,
+  head: () => ({
+    meta: [
+      { title: "Configurações · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function ConfiguracoesPage() {

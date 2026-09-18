@@ -30,6 +30,12 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/programacao")({
   component: ProgramacaoPage,
+  head: () => ({
+    meta: [
+      { title: "Programação · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 function ProgramacaoPage() {

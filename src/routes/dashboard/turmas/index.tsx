@@ -33,6 +33,12 @@ import type { Turma } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/turmas/")({
   component: TurmasPage,
+  head: () => ({
+    meta: [
+      { title: "Turmas e alunos · Agenda de Informática" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
 });
 
 interface TurmaFormValues {

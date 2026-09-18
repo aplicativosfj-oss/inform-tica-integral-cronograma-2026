@@ -20,6 +20,21 @@ import { buildGrupos, buildWeeklySchedule, currentWeekdayLabel } from "@/lib/sch
 
 export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
+  head: () => ({
+    meta: [
+      { title: "Agenda semanal · Agenda de Informática" },
+      {
+        name: "description",
+        content:
+          "Veja o horário completo das aulas de informática por turma, dia da semana e professor(a) — atualizado automaticamente.",
+      },
+      { property: "og:title", content: "Agenda semanal · Agenda de Informática" },
+      {
+        property: "og:description",
+        content: "Horário completo das aulas de informática por turma, dia e professor(a).",
+      },
+    ],
+  }),
 });
 
 function AgendaPage() {
