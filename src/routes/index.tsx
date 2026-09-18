@@ -36,7 +36,10 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
-import heroImg from "@/assets/hero-pro.jpg";
+import alunosHeroImg from "@/assets/alunos-hero.jpg";
+import alunosImg1 from "@/assets/alunos-1.jpg";
+import alunosImg2 from "@/assets/alunos-2.jpg";
+import alunosImg3 from "@/assets/alunos-3.jpg";
 import backgroundImg from "@/assets/page-bg.jpg";
 import logoFull from "@/assets/logo-full-transparent.png";
 
@@ -168,11 +171,11 @@ function Index() {
                 className="absolute -left-3 -top-3 z-10 h-auto w-28 rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:w-32"
               />
               <img
-                src={heroImg}
-                alt="Tela do sistema de agenda de informática com cronograma, cronômetro e grupos de alunos"
-                width={1600}
-                height={912}
-                className="relative rounded-2xl border border-border/60 bg-card shadow-2xl"
+                src={alunosHeroImg}
+                alt="Aluna usando um dos computadores do laboratório de informática da escola"
+                width={1560}
+                height={480}
+                className="relative aspect-[13/4] w-full rounded-2xl border border-border/60 bg-card object-cover shadow-2xl"
                 loading="eager"
                 decoding="async"
               />
@@ -187,13 +190,29 @@ function Index() {
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-          <div className="mb-6 max-w-2xl">
-            <h2 className="text-2xl font-semibold text-foreground">Como a agenda organiza tudo</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Grupos de {config.numeroComputadores} alunos revezam a cada{" "}
-              {config.duracaoGrupoMinutos} minutos, dentro de janelas de {config.duracaoSlotMinutos}{" "}
-              minutos por turma, de {config.horaInicio} às {config.horaFim}.
-            </p>
+          <div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <h2 className="text-2xl font-semibold text-foreground">
+                Como a agenda organiza tudo
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Grupos de {config.numeroComputadores} alunos revezam a cada{" "}
+                {config.duracaoGrupoMinutos} minutos, dentro de janelas de{" "}
+                {config.duracaoSlotMinutos} minutos por turma, de {config.horaInicio} às{" "}
+                {config.horaFim}.
+              </p>
+            </div>
+            {/* Fotos reais dos alunos usando o laboratório — discreto, sem virar mosaico. */}
+            <div className="flex shrink-0 items-center gap-2">
+              {[alunosImg1, alunosImg2, alunosImg3].map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt="Aluno usando um computador do laboratório de informática"
+                  className="size-14 rounded-xl border border-border/60 object-cover shadow-sm sm:size-16"
+                />
+              ))}
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
