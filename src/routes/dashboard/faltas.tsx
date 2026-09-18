@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
+import { useConfirmar } from "@/lib/confirm-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import {
   buildWeeklySchedule,
@@ -65,6 +66,7 @@ interface GrupoFalta {
  */
 function FaltasPage() {
   const { turmas, config, reprogramarAula, removeReprogramacao } = useAppStore();
+  const confirmar = useConfirmar();
   const [mes, setMes] = useState(mesAtual);
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -127,13 +129,18 @@ function FaltasPage() {
     );
   }
 
-  function reprogramar(grupo: GrupoFalta) {
+  async function reprogramar(grupo: GrupoFalta) {
     const assignment = assignments.find((a) => a.turma.id === grupo.turmaId && a.dia === grupo.dia);
     if (!assignment) {
       toast.error("Não foi possível encontrar o horário original dessa turma nesse dia.");
       return;
     }
     const proximaData = proximaDataDoDia(grupo.dia, addDias(grupo.data, 1));
+    const ok = await confirmar({
+      titulo: "Reprogramar esta aula?",
+      descricao: `A sessão de ${nomeTurma(grupo.turmaId)} do dia ${new Date(`${grupo.data}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} será movida para ${proximaData.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}.`,
+    });
+    if (!ok) return;
     reprogramarAula({
       turmaId: grupo.turmaId,
       dataOriginal: grupo.data,
@@ -274,7 +281,14 @@ function FaltasPage() {
                   size="icon"
                   variant="ghost"
                   aria-label="Cancelar reprogramação"
-                  onClick={() => {
+                  onClick={async () => {
+                    const ok = await confirmar({
+                      titulo: "Cancelar esta reprogramação?",
+                      descricao: `A aula de ${nomeTurma(r.turmaId)} volta a valer na data e horário originais.`,
+                      textoConfirmar: "Cancelar reprogramação",
+                      destrutivo: true,
+                    });
+                    if (!ok) return;
                     removeReprogramacao(r.id);
                     toast.success("Reprogramação cancelada. A aula original volta a valer.");
                   }}

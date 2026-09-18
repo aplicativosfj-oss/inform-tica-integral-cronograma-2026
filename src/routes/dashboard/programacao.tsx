@@ -24,6 +24,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
+import { useConfirmar } from "@/lib/confirm-store";
 import { buildWeeklySchedule, currentWeekdayLabel } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/dashboard/programacao")({
 
 function ProgramacaoPage() {
   const { turmas, config, setSlotOverride } = useAppStore();
+  const confirmar = useConfirmar();
   const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
   const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
   const [diaSelecionado, setDiaSelecionado] = useState(
@@ -165,8 +167,16 @@ function ProgramacaoPage() {
         onOpenChange={(open) => {
           if (!open) setEditando(null);
         }}
-        onSelect={(turmaId) => {
+        onSelect={async (turmaId) => {
           if (!editando) return;
+          const nomeTurma = turmas.find((t) => t.id === turmaId);
+          const ok = await confirmar({
+            titulo: turmaId ? "Trocar a turma deste horário?" : "Restaurar o rodízio automático?",
+            descricao: turmaId
+              ? `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} passa a ser de ${nomeTurma?.serie} "${nomeTurma?.letra}" toda semana.`
+              : `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} volta a seguir o rodízio automático.`,
+          });
+          if (!ok) return;
           setSlotOverride(editando.dia, editando.slot.inicio, turmaId);
           toast.success(
             turmaId ? "Horário atualizado." : "Horário restaurado ao rodízio automático.",

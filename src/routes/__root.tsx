@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppProvider } from "../lib/app-store";
 import { AuthProvider } from "../lib/auth-store";
+import { ConfirmProvider } from "../lib/confirm-store";
 import { JovemPanRadioProvider } from "../lib/jovem-pan-radio-store";
 import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
@@ -174,11 +175,13 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <AppProvider>
-            <JovemPanRadioProvider>
-              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-              <Outlet />
-              <Toaster />
-            </JovemPanRadioProvider>
+            <ConfirmProvider>
+              <JovemPanRadioProvider>
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+                <Toaster />
+              </JovemPanRadioProvider>
+            </ConfirmProvider>
           </AppProvider>
         </AuthProvider>
       </ThemeProvider>

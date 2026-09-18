@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { ImageUploadField } from "@/components/school/image-upload-field";
 import { useAppStore } from "@/lib/app-store";
+import { useConfirmar } from "@/lib/confirm-store";
 import { buildGrupos } from "@/lib/schedule-engine";
 import type { Aluno } from "@/lib/types";
 
@@ -150,6 +151,7 @@ function AlunoFormDialog({
 function TurmaAlunosPage() {
   const { turmaId } = Route.useParams();
   const { turmas, config, addAluno, updateAluno, removeAluno } = useAppStore();
+  const confirmar = useConfirmar();
   const navigate = useNavigate();
   const turma = turmas.find((t) => t.id === turmaId);
 
@@ -190,7 +192,12 @@ function TurmaAlunosPage() {
           </p>
         </div>
         <AlunoFormDialog
-          onSubmit={(values) => {
+          onSubmit={async (values) => {
+            const ok = await confirmar({
+              titulo: "Cadastrar novo aluno?",
+              descricao: `${values.nome} será adicionado(a) a ${turma.serie} "${turma.letra}".`,
+            });
+            if (!ok) return;
             addAluno(turma.id, values);
             toast.success("Aluno cadastrado.");
           }}
@@ -258,7 +265,12 @@ function TurmaAlunosPage() {
                       <div className="flex gap-1.5">
                         <AlunoFormDialog
                           aluno={aluno}
-                          onSubmit={(values) => {
+                          onSubmit={async (values) => {
+                            const ok = await confirmar({
+                              titulo: "Salvar alterações do aluno?",
+                              descricao: `Isso atualiza os dados de ${aluno.nome} imediatamente.`,
+                            });
+                            if (!ok) return;
                             updateAluno(turma.id, aluno.id, values);
                             toast.success("Aluno atualizado.");
                           }}

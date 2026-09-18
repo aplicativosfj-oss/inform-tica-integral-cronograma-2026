@@ -22,8 +22,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ConfirmedInlineInput } from "@/components/school/confirmed-inline-input";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
+import { useConfirmar } from "@/lib/confirm-store";
 
 export const Route = createFileRoute("/dashboard/alunos")({
   component: AlunosPage,
@@ -39,6 +41,7 @@ const SEM_GRUPO = "sem-grupo";
 
 function AlunosPage() {
   const { turmas, addAluno, updateAluno, removeAluno } = useAppStore();
+  const confirmar = useConfirmar();
   const [nome, setNome] = useState("");
   const [turmaId, setTurmaId] = useState<string>(turmas[0]?.id ?? "");
   const [grupoId, setGrupoId] = useState<string>(SEM_GRUPO);
@@ -74,7 +77,7 @@ function AlunosPage() {
         <CardContent>
           <form
             className="grid gap-3 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-end"
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault();
               if (!nome.trim()) {
                 toast.error("Informe o nome do aluno.");
@@ -84,6 +87,11 @@ function AlunosPage() {
                 toast.error("Cadastre uma turma antes de adicionar alunos.");
                 return;
               }
+              const ok = await confirmar({
+                titulo: "Cadastrar novo aluno?",
+                descricao: `${nome.trim()} será adicionado(a) a ${turmaSelecionada?.serie} "${turmaSelecionada?.letra}".`,
+              });
+              if (!ok) return;
               addAluno(turmaId, {
                 nome: nome.trim(),
                 grupoId: grupoId === SEM_GRUPO ? undefined : grupoId,
@@ -181,10 +189,12 @@ function AlunosPage() {
                   linhas.map(({ turma, aluno }) => (
                     <TableRow key={aluno.id}>
                       <TableCell>
-                        <Input
-                          value={aluno.nome}
-                          onChange={(e) =>
-                            updateAluno(turma.id, aluno.id, { nome: e.target.value })
+                        <ConfirmedInlineInput
+                          valor={aluno.nome}
+                          titulo="Salvar novo nome do aluno?"
+                          descricao="O cronômetro ao vivo e a chamada passam a usar esse nome imediatamente."
+                          onSalvar={(novoValor) =>
+                            updateAluno(turma.id, aluno.id, { nome: novoValor })
                           }
                         />
                       </TableCell>
@@ -194,11 +204,19 @@ function AlunosPage() {
                       <TableCell>
                         <Select
                           value={aluno.grupoId ?? SEM_GRUPO}
-                          onValueChange={(value) =>
+                          onValueChange={async (value) => {
+                            const grupo = turma.grupos?.find((g) => g.id === value);
+                            const ok = await confirmar({
+                              titulo: "Mudar o grupo deste aluno?",
+                              descricao: grupo
+                                ? `${aluno.nome} passa a fazer parte do grupo "${grupo.nome}".`
+                                : `${aluno.nome} fica sem grupo definido.`,
+                            });
+                            if (!ok) return;
                             updateAluno(turma.id, aluno.id, {
                               grupoId: value === SEM_GRUPO ? undefined : value,
-                            })
-                          }
+                            });
+                          }}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Sem grupo" />
@@ -219,7 +237,14 @@ function AlunosPage() {
                           variant="outline"
                           size="sm"
                           className="text-destructive"
-                          onClick={() => {
+                          onClick={async () => {
+                            const ok = await confirmar({
+                              titulo: "Remover este aluno?",
+                              descricao: `${aluno.nome} sai da turma e do revezamento imediatamente.`,
+                              textoConfirmar: "Remover",
+                              destrutivo: true,
+                            });
+                            if (!ok) return;
                             removeAluno(turma.id, aluno.id);
                             toast.success("Aluno removido.");
                           }}

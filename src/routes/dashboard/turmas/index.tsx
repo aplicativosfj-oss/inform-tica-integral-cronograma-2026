@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { ImageUploadField } from "@/components/school/image-upload-field";
+import { useConfirmar } from "@/lib/confirm-store";
 import { useAppStore } from "@/lib/app-store";
 import type { Turma } from "@/lib/types";
 
@@ -158,6 +159,7 @@ function TurmaFormDialog({
 
 function TurmasPage() {
   const { turmas, addTurma, updateTurma, removeTurma } = useAppStore();
+  const confirmar = useConfirmar();
 
   return (
     <DashboardShell>
@@ -169,7 +171,12 @@ function TurmasPage() {
           </p>
         </div>
         <TurmaFormDialog
-          onSubmit={(values) => {
+          onSubmit={async (values) => {
+            const ok = await confirmar({
+              titulo: "Cadastrar nova turma?",
+              descricao: `${values.serie} "${values.letra}" será adicionada à agenda.`,
+            });
+            if (!ok) return;
             addTurma(values);
             toast.success("Turma cadastrada.");
           }}
@@ -212,7 +219,12 @@ function TurmasPage() {
                 </Button>
                 <TurmaFormDialog
                   turma={turma}
-                  onSubmit={(values) => {
+                  onSubmit={async (values) => {
+                    const ok = await confirmar({
+                      titulo: "Salvar alterações da turma?",
+                      descricao: `Isso atualiza os dados de ${turma.serie} "${turma.letra}" imediatamente.`,
+                    });
+                    if (!ok) return;
                     updateTurma(turma.id, values);
                     toast.success("Turma atualizada.");
                   }}

@@ -25,6 +25,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
+import { useConfirmar } from "@/lib/confirm-store";
 
 export const Route = createFileRoute("/dashboard/aulas")({
   component: AulasPage,
@@ -45,6 +46,7 @@ const TODOS_OS_GRUPOS = "todos";
  */
 function AulasPage() {
   const { turmas, config, addAula, updateAula, removeAula } = useAppStore();
+  const confirmar = useConfirmar();
   const aulas = [...(config.aulas ?? [])].sort(
     (a, b) =>
       config.diasSemana.indexOf(a.dia) - config.diasSemana.indexOf(b.dia) ||
@@ -83,7 +85,7 @@ function AulasPage() {
     setConteudo(aula.conteudo ?? "");
   }
 
-  function salvar() {
+  async function salvar() {
     if (!turmaId) {
       toast.error("Cadastre uma turma antes de criar a aula.");
       return;
@@ -100,6 +102,11 @@ function AulasPage() {
       grupoId: grupoId === TODOS_OS_GRUPOS ? undefined : grupoId,
       conteudo: conteudo.trim() || undefined,
     };
+    const ok = await confirmar({
+      titulo: editandoId ? "Salvar alterações desta aula?" : "Cadastrar esta aula?",
+      descricao: "O cronômetro ao vivo e a agenda pública são atualizados imediatamente.",
+    });
+    if (!ok) return;
     if (editandoId) {
       updateAula(editandoId, dados);
       toast.success("Aula atualizada. O cronômetro já está atualizado.");
@@ -278,7 +285,14 @@ function AulasPage() {
                               size="icon"
                               variant="ghost"
                               aria-label="Excluir aula"
-                              onClick={() => {
+                              onClick={async () => {
+                                const ok = await confirmar({
+                                  titulo: "Excluir esta aula?",
+                                  descricao: "O horário volta a valer o rodízio automático.",
+                                  textoConfirmar: "Excluir",
+                                  destrutivo: true,
+                                });
+                                if (!ok) return;
                                 removeAula(aula.id);
                                 if (editandoId === aula.id) limparFormulario();
                                 toast.success("Aula excluída.");

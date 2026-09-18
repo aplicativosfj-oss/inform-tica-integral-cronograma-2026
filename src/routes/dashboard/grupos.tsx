@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmedInlineInput } from "@/components/school/confirmed-inline-input";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
+import { useConfirmar } from "@/lib/confirm-store";
 import type { Turma } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/grupos")({
@@ -73,12 +75,23 @@ function TurmaGruposCard({
 }) {
   const [novoNome, setNovoNome] = useState("");
   const grupos = turma.grupos ?? [];
+  const confirmar = useConfirmar();
 
-  function criarAutomaticamente() {
+  async function criarAutomaticamente() {
     const quantidade = Math.max(
       1,
       Math.ceil(turma.alunos.length / Math.max(1, numeroComputadores)),
     );
+    const faltam = quantidade - grupos.length;
+    if (faltam <= 0) {
+      toast.info("Esta turma já tem grupos suficientes.");
+      return;
+    }
+    const ok = await confirmar({
+      titulo: "Criar grupos automaticamente?",
+      descricao: `${faltam} ${faltam === 1 ? "novo grupo" : "novos grupos"} serão criados para ${turma.serie} "${turma.letra}".`,
+    });
+    if (!ok) return;
     for (let i = grupos.length; i < quantidade; i += 1) {
       onAdd(`Grupo ${i + 1}`, "");
     }
@@ -114,18 +127,22 @@ function TurmaGruposCard({
                 >
                   <div className="flex flex-col gap-1.5">
                     <Label>Nome do grupo</Label>
-                    <Input
-                      value={grupo.nome}
-                      onChange={(e) => onUpdate(grupo.id, { nome: e.target.value })}
+                    <ConfirmedInlineInput
+                      valor={grupo.nome}
+                      titulo="Salvar novo nome do grupo?"
+                      descricao="O cronômetro ao vivo passa a mostrar esse nome imediatamente."
+                      onSalvar={(novoValor) => onUpdate(grupo.id, { nome: novoValor })}
                     />
                     <span className="text-xs text-muted-foreground">{totalAlunos} alunos</span>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label>Conteúdo do grupo</Label>
-                    <Input
+                    <ConfirmedInlineInput
+                      valor={grupo.conteudo ?? ""}
                       placeholder="Ex.: Digitação e edição de texto"
-                      value={grupo.conteudo ?? ""}
-                      onChange={(e) => onUpdate(grupo.id, { conteudo: e.target.value })}
+                      titulo="Salvar novo conteúdo do grupo?"
+                      descricao="O cronômetro ao vivo passa a mostrar esse conteúdo imediatamente."
+                      onSalvar={(novoValor) => onUpdate(grupo.id, { conteudo: novoValor })}
                     />
                   </div>
                   <div className="flex items-end">
@@ -134,7 +151,14 @@ function TurmaGruposCard({
                       variant="outline"
                       size="sm"
                       className="text-destructive"
-                      onClick={() => {
+                      onClick={async () => {
+                        const ok = await confirmar({
+                          titulo: "Excluir este grupo?",
+                          descricao: `Os alunos do grupo "${grupo.nome}" ficam sem grupo definido.`,
+                          textoConfirmar: "Excluir",
+                          destrutivo: true,
+                        });
+                        if (!ok) return;
                         onRemove(grupo.id);
                         toast.success("Grupo removido.");
                       }}
@@ -150,9 +174,14 @@ function TurmaGruposCard({
 
         <form
           className="flex flex-wrap items-end gap-2"
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
             const nome = novoNome.trim() || `Grupo ${grupos.length + 1}`;
+            const ok = await confirmar({
+              titulo: "Adicionar novo grupo?",
+              descricao: `"${nome}" será adicionado a ${turma.serie} "${turma.letra}".`,
+            });
+            if (!ok) return;
             onAdd(nome, "");
             setNovoNome("");
             toast.success("Grupo adicionado.");

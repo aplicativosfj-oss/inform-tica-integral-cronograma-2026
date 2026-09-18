@@ -34,6 +34,7 @@ import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
 import { unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
+import { useConfirmar } from "@/lib/confirm-store";
 import {
   fetchPresencasDoDia,
   fetchUltimaParticipacao,
@@ -369,6 +370,7 @@ function ChamadaDoDiaCard({
 
 export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const { turmas, config, setSessaoSuspensa, isReady } = useAppStore();
+  const confirmar = useConfirmar();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const now = useNow(true);
@@ -443,7 +445,12 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               size="sm"
               variant="outline"
               className="mt-2"
-              onClick={() => {
+              onClick={async () => {
+                const ok = await confirmar({
+                  titulo: "Retomar esta aula?",
+                  descricao: `A aula de ${assignment.turma.serie} "${assignment.turma.letra}" volta a valer para hoje.`,
+                });
+                if (!ok) return;
                 setSessaoSuspensa(dateKeySessao, assignment.dia, assignment.slot.inicio, false);
                 toast.success("Aula retomada.");
               }}

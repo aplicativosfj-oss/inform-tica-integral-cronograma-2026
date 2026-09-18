@@ -322,12 +322,14 @@ function Index() {
 }
 
 /**
- * Announces the new schedule (bigger 90-min blocks, more seats per turma)
- * starting fresh on the next Monday — today's sessions were suspended so the
- * old and new schedules never mix mid-week. Only shows up until that Monday
- * arrives, then disappears on its own.
+ * Announces the new schedule (bigger blocks, more seats per turma) starting
+ * fresh on the next Monday — today's sessions were suspended so the old and
+ * new schedules never mix mid-week. Only shows up until that Monday arrives,
+ * then disappears on its own. Reads the block duration from `config` (not
+ * hardcoded) so the message never goes stale if it changes again.
  */
 function NovoCronogramaBanner() {
+  const { config } = useAppStore();
   const [montado, setMontado] = useState(false);
   useEffect(() => setMontado(true), []);
 
@@ -348,8 +350,9 @@ function NovoCronogramaBanner() {
       <PartyPopper className="mt-0.5 size-5 shrink-0 text-primary sm:mt-0" />
       <p className="text-sm text-foreground">
         <span className="font-semibold">Cronograma novo a partir de {dataFormatada}:</span> aulas
-        mais longas (90 min), com mais alunos participando por turma toda semana. As aulas de hoje
-        foram pausadas para a transição — a agenda nova já está pronta e visível abaixo.
+        de {config.duracaoSlotMinutos} min, com mais alunos participando por turma toda semana. As
+        aulas de hoje foram pausadas para a transição — a agenda nova já está pronta e visível
+        abaixo.
       </p>
     </div>
   );

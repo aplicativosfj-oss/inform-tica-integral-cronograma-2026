@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
+import { useConfirmar } from "@/lib/confirm-store";
 import { useAuth } from "@/lib/auth-store";
 import type { ScheduleConfig } from "@/lib/types";
 
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/dashboard/configuracoes")({
 
 function ConfiguracoesPage() {
   const { config, updateConfig, resetToSeed } = useAppStore();
+  const confirmar = useConfirmar();
   const { logout } = useAuth();
   const [form, setForm] = useState<ScheduleConfig>(config);
 
@@ -53,8 +55,14 @@ function ConfiguracoesPage() {
 
       <form
         className="flex max-w-2xl flex-col gap-6"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
+          const ok = await confirmar({
+            titulo: "Salvar configurações?",
+            descricao:
+              "Isso altera os horários e regras usados para gerar a agenda de todo mundo imediatamente.",
+          });
+          if (!ok) return;
           updateConfig(form);
           toast.success("Configurações salvas.");
         }}
