@@ -10,6 +10,8 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-store";
+import { gravarCache, lerCache } from "@/lib/offline-queue";
+import { sincronizarPresencasPendentes } from "@/lib/presencas";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
 import { supabase } from "@/lib/supabase-client";
@@ -113,6 +115,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   function persist(nextTurmas: Turma[], nextConfig: ScheduleConfig) {
+    gravarCache("app_state", { turmas: nextTurmas, config: nextConfig });
     supabase
       .from("app_state")
       .upsert({
