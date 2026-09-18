@@ -171,14 +171,19 @@ export function getWeekIndex(date: Date): number {
 /**
  * Splits one hour-long slot into rotating sub-blocks (e.g. two 30min turns).
  *
- * The starting group is offset both by how many sub-blocks this turma has
- * already used earlier in the same week (`ocorrenciaIndex`) and by the
- * current week number, advanced by exactly the number of sub-blocks the
- * turma consumes per week (`sessoesPorSemana * totalSubBlocos`). That keeps
- * the rotation continuous week over week — the group that starts a new week
- * is exactly the one that would come next, so every group (and therefore
- * every student) gets an equal share of turns over time instead of the same
- * groups always going first.
+ * The starting group is offset by how many sub-blocks this turma has already
+ * used earlier in the same week (`ocorrenciaIndex`), so a single week always
+ * walks through consecutive groups without repeats until it wraps around.
+ * On top of that, the whole week's pattern shifts by exactly one group per
+ * calendar week (`weekIndex`) — deliberately *not* scaled by how many
+ * sub-blocks the turma consumes per week, because when that number is an
+ * exact multiple of the group count (e.g. 2 sessions x 2 sub-blocks = 4,
+ * matching a turma with exactly 4 groups) a scaled offset cancels out modulo
+ * the group count and the same groups get stuck in the same slot forever.
+ * Shifting by a flat 1 has no such blind spot: it cycles through every
+ * possible group-to-slot pairing over `grupos.length` weeks no matter the
+ * weekly consumption, so no group of students is ever pinned to one fixed
+ * day/time indefinitely.
  */
 export function buildSubBlocos(
   assignment: Assignment,
@@ -192,9 +197,7 @@ export function buildSubBlocos(
   const totalSubBlocos = Math.max(1, Math.round((fim - inicio) / passo));
   const subBlocos: SubBloco[] = [];
 
-  const consumoPorSemana = assignment.sessoesPorSemana * totalSubBlocos;
-  const startGrupo =
-    (weekIndex * consumoPorSemana + assignment.ocorrenciaIndex * totalSubBlocos) % grupos.length;
+  const startGrupo = (weekIndex + assignment.ocorrenciaIndex * totalSubBlocos) % grupos.length;
   for (let i = 0; i < totalSubBlocos; i += 1) {
     const grupo = grupos[(startGrupo + i) % grupos.length];
     if (!grupo) continue;
