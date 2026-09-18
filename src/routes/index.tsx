@@ -370,7 +370,7 @@ function ProgramacaoSemanalDestaque() {
   if (turmas.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-14 sm:py-16">
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-10 sm:py-12">
       {/* Soft glowing orbs behind the glass panels, for depth. */}
       <div
         aria-hidden
