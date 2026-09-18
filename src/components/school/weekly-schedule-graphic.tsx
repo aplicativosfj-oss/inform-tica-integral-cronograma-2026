@@ -100,7 +100,6 @@ export function WeeklyScheduleGraphic() {
       aria-label="Agenda semanal da sala de informática, por dia e horário"
       className="h-auto w-full"
     >
-      <title>Agenda semanal — Sala de Informática</title>
       <rect x={0} y={0} width={width} height={height} rx={20} fill="#f7faff" />
 
       <g transform={`translate(${padding}, ${padding})`}>
