@@ -78,6 +78,31 @@ export async function processarFila(
   return { enviadas, restantes: restantes.length };
 }
 
+/**
+ * Registro central de reenviadores por tipo de operação. Cada módulo
+ * (frequência, cadastro de turmas/grupos/alunos) registra como reenviar o
+ * que ficou pendente, e `sincronizarTudo` cuida da fila inteira quando a
+ * internet volta — sem que um tipo desconhecido apague o trabalho de outro.
+ */
+const executores = new Map<string, (payload: unknown) => Promise<void>>();
+
+export function registrarExecutor(
+  tipo: string,
+  executor: (payload: unknown) => Promise<void>,
+): void {
+  executores.set(tipo, executor);
+}
+
+export async function sincronizarTudo(): Promise<{ enviadas: number; restantes: number }> {
+  return processarFila(async (operacao) => {
+    const executor = executores.get(operacao.tipo);
+    // Sem reenviador conhecido, a operação continua guardada (o throw a mantém
+    // na fila) em vez de ser descartada silenciosamente.
+    if (!executor) throw new Error(`Operação pendente desconhecida: ${operacao.tipo}`);
+    await executor(operacao.payload);
+  });
+}
+
 /** Cache simples de leitura, para a tela continuar mostrando dados sem rede. */
 export function lerCache<T>(chave: string): T | null {
   if (!temStorage()) return null;
