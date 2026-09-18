@@ -115,18 +115,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated]);
 
   function persist(nextTurmas: Turma[], nextConfig: ScheduleConfig) {
+    // A cópia local é gravada primeiro: mesmo sem internet a tela continua
+    // funcionando e os dados sobrevivem a um recarregamento.
     gravarCache("app_state", { turmas: nextTurmas, config: nextConfig });
-    supabase
-      .from("app_state")
-      .upsert({
-        id: ROW_ID,
-        turmas: nextTurmas,
-        config: nextConfig,
-        updated_at: new Date().toISOString(),
-      })
-      .then(({ error }) => {
-        if (error) toast.error(`Não foi possível salvar: ${error.message}`);
-      });
+    enviarAppState({ turmas: nextTurmas, config: nextConfig }).catch(() => {
+      enfileirar("app_state", { turmas: nextTurmas, config: nextConfig });
+      toast.warning("Sem internet: as alterações foram guardadas e serão enviadas ao reconectar.");
+    });
   }
 
   function applyTurmas(updater: (prev: Turma[]) => Turma[]) {
