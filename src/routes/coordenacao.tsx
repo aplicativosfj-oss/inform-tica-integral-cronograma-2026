@@ -132,19 +132,25 @@ function CoordenacaoPage() {
       <section className="relative overflow-hidden border-b border-border/60">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: `url(${coordenacaoHeroImg})` }}
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
-        />
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-          <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Calendário das aulas de informática, participação por turma e grupo e histórico de
-            faltas. Acesso aberto, somente leitura.
-          </p>
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Calendário das aulas de informática, participação por turma e grupo e histórico de
+              faltas. Acesso aberto, somente leitura.
+            </p>
+          </div>
+          <img
+            src={coordenacaoHeroImg}
+            alt="Aluno usando um computador do laboratório de informática durante a aula"
+            width={2016}
+            height={1134}
+            className="aspect-[16/10] w-full rounded-2xl border border-border/60 object-cover shadow-xl"
+            loading="eager"
+            decoding="async"
+          />
         </div>
       </section>
 

@@ -83,14 +83,9 @@ function AgendaPage() {
       <section className="relative overflow-hidden border-b border-border/60">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-25"
-          style={{ backgroundImage: `url(${agendaHeroImg})` }}
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
-        />
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
           <div className="flex flex-col gap-1.5">
             <Badge variant="secondary" className="w-fit gap-1.5">
               <CalendarDays className="size-3.5" /> Agenda semanal
@@ -103,6 +98,15 @@ function AgendaPage() {
               {config.horaInicio} às {config.horaFim}, com o professor {config.professorInformatica}.
             </p>
           </div>
+          <img
+            src={agendaHeroImg}
+            alt="Aluno participando de uma atividade educativa no laboratório de informática"
+            width={2016}
+            height={1134}
+            className="aspect-[16/10] w-full rounded-2xl border border-border/60 object-cover shadow-xl"
+            loading="eager"
+            decoding="async"
+          />
         </div>
       </section>
 

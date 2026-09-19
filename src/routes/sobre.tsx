@@ -17,7 +17,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavBar } from "@/components/school/nav-bar";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
-import heroImg from "@/assets/hero-lab-photo.jpg";
 import laboratorioTurmaImg from "@/assets/laboratorio-informatica-turma.jpg";
 import bannerEscolaImg from "@/assets/image1.png";
 import gcomprisColagemImg from "@/assets/image4.png";
@@ -55,12 +54,7 @@ function SobrePage() {
       <section className="relative overflow-hidden border-b border-border/60">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: `url(${heroImg})` }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-background via-background/95 to-primary/10"
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
         />
         <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6 lg:py-12">
           <Badge variant="secondary" className="mb-3 gap-1.5">
@@ -73,21 +67,17 @@ function SobrePage() {
             Uma plataforma criada para organizar, com transparência e justiça, as aulas de
             informática da {config.nomeEscola}.
           </p>
-        </div>
-      </section>
-
-      {/* Banner institucional da escola */}
-      <section className="mx-auto max-w-4xl px-4 pt-6 sm:px-6">
-        <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
-          <img
-            src={bannerEscolaImg}
-            alt={`Turma da ${config.nomeEscola} no laboratório de informática, com a mensagem "Informática é porta para o futuro"`}
-            width={1280}
-            height={720}
-            className="aspect-[16/9] w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
+          <div className="mx-auto mt-6 max-w-3xl overflow-hidden rounded-2xl border border-border/60 shadow-xl">
+            <img
+              src={bannerEscolaImg}
+              alt={`Turma da ${config.nomeEscola} no laboratório de informática, com a mensagem "Informática é porta para o futuro"`}
+              width={1280}
+              height={720}
+              className="aspect-[16/9] w-full object-cover"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
         </div>
       </section>
 
