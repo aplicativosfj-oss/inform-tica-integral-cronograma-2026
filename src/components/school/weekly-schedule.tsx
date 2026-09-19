@@ -1,6 +1,18 @@
+import { RotateCcw } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/app-store";
+import { useAuth } from "@/lib/auth-store";
+import { useConfirmar } from "@/lib/confirm-store";
 import {
   buildDailySlots,
   buildWeeklySchedule,
@@ -8,6 +20,7 @@ import {
   getWeekIndex,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 /**
  * Sequential, theme-aware ramp for ordinal data (grade level): darker reads
@@ -45,7 +58,10 @@ function serieClasses(index: number) {
  * be usable on a phone.
  */
 export function WeeklySchedule() {
-  const { turmas, config } = useAppStore();
+  const { turmas, config, setSlotOverride } = useAppStore();
+  const { isAuthenticated } = useAuth();
+  const confirmar = useConfirmar();
+  const [editando, setEditando] = useState<Assignment | null>(null);
 
   // "Hoje" and the week's rotation offset depend on the client's clock,
   // which can differ from the server render — only applied after mount to
@@ -100,6 +116,7 @@ export function WeeklySchedule() {
   if (turmas.length === 0 || linhas.length === 0) return null;
 
   return (
+    <>
     <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
@@ -141,13 +158,20 @@ export function WeeklySchedule() {
                     {colunas.map((dia) => {
                       const assignment = lookup.get(`${dia}|${slot.inicio}`);
                       const hoje = dia === todayLabel;
+                      const overridden = Boolean(config.slotOverrides?.[`${dia}|${slot.inicio}`]);
                       return (
                         <td
                           key={dia}
                           className={`border-b border-border/40 p-1.5 align-top ${hoje ? "bg-primary/[0.03]" : ""}`}
                         >
                           {assignment ? (
-                            <SchedulePill assignment={assignment} serieIndex={series.indexOf(assignment.turma.serie)} />
+                            <SchedulePill
+                              assignment={assignment}
+                              serieIndex={series.indexOf(assignment.turma.serie)}
+                              editavel={isAuthenticated}
+                              editado={overridden}
+                              onClick={isAuthenticated ? () => setEditando(assignment) : undefined}
+                            />
                           ) : (
                             <div className="h-14 rounded-xl border border-dashed border-border/30" />
                           )}
@@ -185,20 +209,56 @@ export function WeeklySchedule() {
         })}
       </div>
     </div>
+
+    <ScheduleEditDialog
+      assignment={editando}
+      overridden={
+        editando ? Boolean(config.slotOverrides?.[`${editando.dia}|${editando.slot.inicio}`]) : false
+      }
+      onOpenChange={(open) => {
+        if (!open) setEditando(null);
+      }}
+      onSelect={async (turmaId) => {
+        if (!editando) return;
+        const novaTurma = turmas.find((t) => t.id === turmaId);
+        const ok = await confirmar({
+          titulo: turmaId ? "Trocar a turma deste horário?" : "Restaurar o rodízio automático?",
+          descricao: turmaId
+            ? `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} passa a ser de ${novaTurma?.serie} "${novaTurma?.letra}" toda semana.`
+            : `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} volta a seguir o rodízio automático.`,
+        });
+        if (!ok) return;
+        setSlotOverride(editando.dia, editando.slot.inicio, turmaId);
+        toast.success(
+          turmaId ? "Horário atualizado." : "Horário restaurado ao rodízio automático.",
+        );
+        setEditando(null);
+      }}
+    />
+    </>
   );
 }
 
 function SchedulePill({
   assignment,
   serieIndex,
+  editavel,
+  editado,
+  onClick,
 }: {
   assignment: Assignment;
   serieIndex: number;
+  editavel?: boolean;
+  editado?: boolean;
+  onClick?: (() => void) | undefined;
 }) {
   const { bg, text, ring } = serieClasses(Math.max(0, serieIndex));
+  const Comp = editavel ? "button" : "div";
   return (
-    <div
-      className={`h-14 rounded-xl px-3 py-1.5 shadow-sm ring-1 transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md ${bg} ${text} ${ring}`}
+    <Comp
+      type={editavel ? "button" : undefined}
+      onClick={onClick}
+      className={`relative h-14 w-full rounded-xl px-3 py-1.5 text-left shadow-sm ring-1 transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md ${bg} ${text} ${ring} ${editavel ? "cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2" : ""}`}
     >
       <p className="truncate text-[13px] leading-tight font-semibold">
         {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
@@ -206,6 +266,76 @@ function SchedulePill({
       <p className="mt-0.5 truncate text-[11px] leading-tight opacity-80">
         Prof(a). {assignment.turma.professorRegente}
       </p>
-    </div>
+      {editado ? (
+        <span
+          className="absolute top-1 right-1 size-1.5 rounded-full bg-white/90 ring-1 ring-black/10"
+          aria-hidden
+        />
+      ) : null}
+    </Comp>
+  );
+}
+
+function ScheduleEditDialog({
+  assignment,
+  overridden,
+  onOpenChange,
+  onSelect,
+}: {
+  assignment: Assignment | null;
+  overridden: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelect: (turmaId: string | null) => void;
+}) {
+  const { turmas } = useAppStore();
+
+  return (
+    <Dialog open={assignment !== null} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {assignment
+              ? `${assignment.dia} · ${assignment.slot.inicio} – ${assignment.slot.fim}`
+              : ""}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-1.5">
+          {turmas.map((turma) => (
+            <button
+              key={turma.id}
+              type="button"
+              onClick={() => onSelect(turma.id)}
+              className={cn(
+                "flex items-center gap-3 rounded-md border border-border/60 px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
+                assignment?.turma.id === turma.id && "border-primary bg-primary/5",
+              )}
+            >
+              {turma.imagem ? (
+                <img src={turma.imagem} alt="" className="size-8 rounded-md object-cover" />
+              ) : (
+                <span className="flex size-8 items-center justify-center rounded-md bg-secondary text-xs font-semibold text-secondary-foreground">
+                  {turma.letra}
+                </span>
+              )}
+              <span>
+                <span className="font-medium text-foreground">
+                  {turma.serie} &quot;{turma.letra}&quot;
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  Prof(a). {turma.professorRegente}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+        <DialogFooter>
+          {overridden ? (
+            <Button variant="outline" onClick={() => onSelect(null)}>
+              <RotateCcw className="size-3.5" /> Restaurar rodízio automático
+            </Button>
+          ) : null}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
