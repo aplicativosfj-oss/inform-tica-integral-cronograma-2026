@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, ChevronLeft, ChevronRight, Clock3, Users2 } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  MonitorSmartphone,
+  Users2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -110,17 +117,27 @@ function AgendaPage() {
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
-                  <p className="text-xs text-muted-foreground">Horário</p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {config.horaInicio} – {config.horaFim}
-                  </p>
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <Clock3 className="size-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Horário</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {config.horaInicio} – {config.horaFim}
+                    </p>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
-                  <p className="text-xs text-muted-foreground">Computadores</p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {config.numeroComputadores}
-                  </p>
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <MonitorSmartphone className="size-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Computadores</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {config.numeroComputadores}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -141,19 +158,22 @@ function AgendaPage() {
           <div className="mb-6 flex items-center justify-between rounded-lg border border-border/60 bg-card/50 p-3 backdrop-blur-sm">
             <button
               type="button"
-              onClick={() => setWeekIndex(w => w - 1)}
-              className="cursor-pointer rounded-lg p-2 hover:bg-muted transition-colors"
+              onClick={() => setWeekIndex((w) => w - 1)}
+              className="cursor-pointer rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors"
               aria-label="Semana anterior"
             >
               <ChevronLeft className="size-5" />
             </button>
-            <span className="text-sm font-medium text-foreground">
-              {isCurrentWeek ? "Semana atual" : `Semana ${weekIndex > getWeekIndex(new Date()) ? `+${weekIndex - getWeekIndex(new Date())}` : weekIndex - getWeekIndex(new Date())}`}
+            <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+              <CalendarDays className="size-4 text-primary" />
+              {isCurrentWeek
+                ? "Semana atual"
+                : `Semana ${weekIndex > getWeekIndex(new Date()) ? `+${weekIndex - getWeekIndex(new Date())}` : weekIndex - getWeekIndex(new Date())}`}
             </span>
             <button
               type="button"
-              onClick={() => setWeekIndex(w => w + 1)}
-              className="cursor-pointer rounded-lg p-2 hover:bg-muted transition-colors"
+              onClick={() => setWeekIndex((w) => w + 1)}
+              className="cursor-pointer rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors"
               aria-label="Próxima semana"
             >
               <ChevronRight className="size-5" />

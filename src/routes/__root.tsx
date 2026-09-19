@@ -113,7 +113,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // O ?v= força Facebook/WhatsApp/LinkedIn a rebaixar o card em cache;
       // sem ele, a arte antiga continua aparecendo por semanas nos
       // compartilhamentos. Suba o número sempre que a arte mudar.
-      { property: "og:image", content: "/og-thumb.jpg?v=8" },
+      { property: "og:image", content: "/og-thumb.jpg?v=9" },
       { property: "og:image:type", content: "image/jpeg" },
       { property: "og:image:width", content: "600" },
       { property: "og:image:height", content: "600" },
@@ -127,7 +127,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "twitter:description",
         content: "Cronograma das aulas de informática por turma, dia e horário.",
       },
-      { name: "twitter:image", content: "/og-thumb.jpg?v=8" },
+      { name: "twitter:image", content: "/og-thumb.jpg?v=9" },
       {
         name: "twitter:image:alt",
         content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro",

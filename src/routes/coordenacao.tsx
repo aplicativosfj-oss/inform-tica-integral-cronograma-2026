@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, ClipboardList, UserCheck, UserX } from "lucide-react";
+import { CalendarDays, ClipboardList, GraduationCap, UserCheck, UserX, Users2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -154,17 +154,25 @@ function CoordenacaoPage() {
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
-                  <p className="text-xs text-muted-foreground">Total de Turmas</p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {turmas.length}
-                  </p>
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                    <Users2 className="size-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Total de Turmas</p>
+                    <p className="text-sm font-semibold text-foreground">{turmas.length}</p>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
-                  <p className="text-xs text-muted-foreground">Alunos Cadastrados</p>
-                  <p className="text-sm font-semibold text-foreground">
-                    {turmas.reduce((sum, t) => sum + t.alunos.length, 0)}
-                  </p>
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    <GraduationCap className="size-4" />
+                  </span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Alunos Cadastrados</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {turmas.reduce((sum, t) => sum + t.alunos.length, 0)}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -184,7 +192,7 @@ function CoordenacaoPage() {
           <Card className="mb-4">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <CalendarDays className="size-4" /> Calendário da semana
+                <CalendarDays className="size-4 text-primary" /> Calendário da semana
               </CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -244,13 +252,14 @@ function CoordenacaoPage() {
             <Card>
               <CardHeader className="p-4 pb-1.5">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <UserCheck className="size-4 text-primary" />
-                  ✅ Sessões com Participação
+                  <UserCheck className="size-4 text-primary" />✅ Sessões com Participação
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-2xl font-semibold text-foreground">{participacoes}</p>
-                <p className="text-xs text-muted-foreground mt-1">número de registros de presença</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  número de registros de presença
+                </p>
                 <p className="text-xs text-primary/70 mt-2 font-medium">
                   (Soma de todos os alunos que compareceram)
                 </p>
@@ -259,8 +268,7 @@ function CoordenacaoPage() {
             <Card>
               <CardHeader className="p-4 pb-1.5">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <UserX className="size-4 text-destructive" />
-                  ❌ Registros de Ausência
+                  <UserX className="size-4 text-destructive" />❌ Registros de Ausência
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">

@@ -54,6 +54,7 @@ import alunosImg3 from "@/assets/alunos-3.jpg";
 import laboratorioTurmaFotoImg from "@/assets/image3.png";
 import alunoJogoImg from "@/assets/image2.jpeg";
 import alunoSorridenteImg from "@/assets/image10.jpeg";
+import programacaoBgImg from "@/assets/image9.png";
 import homePageBgImg from "@/assets/homepage-bg.svg";
 
 export const Route = createFileRoute("/")({
@@ -581,14 +582,24 @@ function ProgramacaoSemanalDestaque() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-10">
-      {/* Soft glowing orbs behind the glass panels, for depth. */}
+      {/* Ilustração de fundo, visível mas discreta — textura com bom contraste.
+          Sem véu colorido por cima: a própria arte já tem um amarelo forte nas
+          pontas, então nenhum brilho por perto pode ser dourado/âmbar ou o
+          conjunto fica com cara de manchado. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08]"
+        style={{ backgroundImage: `url(${programacaoBgImg})` }}
+      />
+      {/* Brilhos suaves atrás dos cartões de vidro, só em tons de azul — dão
+          profundidade sem se misturar com o amarelo da ilustração acima. */}
       <div
         aria-hidden
         className="pointer-events-none absolute -left-24 -top-24 size-96 rounded-full bg-slate-700/20 blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 bottom-0 size-96 rounded-full bg-amber-400/15 blur-3xl"
+        className="pointer-events-none absolute -right-24 bottom-0 size-96 rounded-full bg-blue-500/15 blur-3xl"
       />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">

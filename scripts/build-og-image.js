@@ -102,39 +102,36 @@ await sharp({ create: { width: L, height: A, channels: 3, background: "#0f172a" 
 console.log("public/og-image.jpg gerado com sucesso.");
 
 /* ---------- miniatura quadrada (o card social de verdade) ----------
- * Já foi um retângulo azul chapado com a logo flutuando no meio, depois um
- * recorte bem fechado no rosto da aluna — mas esse recorte cortava fora o
- * texto "Informática é porta para o futuro!", que é a parte que mais
- * importa mostrar. Agora o banner inteiro entra sem cortes nenhum (fit
- * "contain"), centralizado sobre um azul que casca com o dele — discreto,
- * sem parecer uma foto gigante ocupando o card todo. */
+ * Passou por um retângulo azul chapado com a logo flutuando no meio, depois
+ * um recorte fechado no rosto da aluna (cortava o texto), depois o banner
+ * inteiro "contido" com barras azuis (sobrava vazio demais). Agora é um
+ * recorte quadrado do próprio banner que PREENCHE o quadrado inteiro (sem
+ * barras/sobra), mas deslocado para a esquerda o suficiente pra manter
+ * "Informática é porta para o futuro!" inteiro dentro do corte — a altura do
+ * banner (302px) já é o lado do quadrado, então não há perda de nitidez. */
 const Q = 600;
 
-const corFundoMiniatura = "#1a2036";
-
-/** Banner inteiro, sem cortar nada, encaixado por dentro do quadrado. */
-async function bannerContido() {
+/** Recorte quadrado do banner (altura inteira, 302px) posicionado sobre o texto. */
+async function bannerRecortado() {
   const origem = resolve(raiz, "src/assets/escola-informatica-hero.jpg");
-  return sharp(origem).resize(Q, Q, { fit: "contain", background: corFundoMiniatura }).toBuffer();
+  const { width, height } = await sharp(origem).metadata();
+  const lado = height; // 302 — a imagem já não é mais alta que isso.
+  const esquerda = Math.min(Math.max(200, 0), width - lado);
+  return sharp(origem)
+    .extract({ left: esquerda, top: 0, width: lado, height: lado })
+    .resize(Q, Q, { fit: "cover" })
+    .toBuffer();
 }
 
 const miniaturaSvg = `
 <svg width="${Q}" height="${Q}" xmlns="http://www.w3.org/2000/svg">
-  <rect x="0" y="${Q - 6}" width="${Q}" height="6" fill="#fbbf24"/>
-  <!-- Selo branco discreto no canto: some se sobrepor à foto, mas como o
-       banner fica "contido" (com faixas), sempre sobra fundo escuro aqui. -->
-  <rect x="20" y="20" width="52" height="52" rx="14" fill="#ffffff" fill-opacity="0.96"/>
+  <rect x="0" y="${Q - 8}" width="${Q}" height="8" fill="#fbbf24"/>
 </svg>`;
 
-const iconeMiniatura = await sharp(resolve(raiz, "src/assets/logo-icon.png"))
-  .resize({ width: 34 })
-  .toBuffer();
-
-await sharp({ create: { width: Q, height: Q, channels: 3, background: corFundoMiniatura } })
+await sharp({ create: { width: Q, height: Q, channels: 3, background: "#1a2036" } })
   .composite([
-    { input: await bannerContido(), left: 0, top: 0 },
+    { input: await bannerRecortado(), left: 0, top: 0 },
     { input: Buffer.from(miniaturaSvg), left: 0, top: 0 },
-    { input: iconeMiniatura, left: 29, top: 29 },
   ])
   .jpeg({ quality: 90, chromaSubsampling: "4:4:4" })
   .toFile(resolve(raiz, "public/og-thumb.jpg"));
