@@ -117,11 +117,11 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
   let restante = totalSlots - alvos.reduce((soma, a) => soma + a, 0);
   const porPrioridade = turmas
     .map((_, i) => i)
-    .sort(
-      (a, b) =>
-        brutos[b]! - alvos[b]! - (brutos[a]! - alvos[a]!) ||
-        turmas[b]!.alunos.length - turmas[a]!.alunos.length,
-    );
+    .sort((a, b) => {
+      const fracaoA = (brutos[a] ?? 0) - (alvos[a] ?? 0);
+      const fracaoB = (brutos[b] ?? 0) - (alvos[b] ?? 0);
+      return fracaoB - fracaoA || turmas[b]!.alunos.length - turmas[a]!.alunos.length;
+    });
   for (let k = 0; restante > 0 && porPrioridade.length > 0; k += 1) {
     alvos[porPrioridade[k % porPrioridade.length]!] += 1;
     restante -= 1;
