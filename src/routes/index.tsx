@@ -214,23 +214,35 @@ function Index() {
               />
               {/* A proporção acompanha a do arquivo (854x302) para o banner
                   aparecer inteiro — cortar em 13/4 comia a lâmpada e o globo
-                  das pontas.
+                  das pontas. Isso faz da imagem um retângulo bem mais baixo
+                  que a coluna de texto ao lado no desktop; a partir do lg,
+                  uma moldura com uma cópia borrada e ampliada da própria
+                  imagem preenche o espaço vazio ao redor dela, em vez de
+                  deixar só o fundo escuro por trás.
 
                   No celular ele sangra até a borda da tela (-mx-4, anulando o
                   padding do container). Como a proporção é fixa e não pode ser
                   cortada, ocupar os 32px do padding é o único jeito de crescer:
                   rende ~10% de altura. A seção tem overflow-hidden, então o
                   transbordo não vira rolagem lateral. */}
-              <SiteImage
-                src={escolaInformaticaHeroImg}
-                alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
-                width={854}
-                height={302}
-                className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:mx-0 sm:w-full sm:rounded-2xl sm:border"
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-              />
+              <div className="lg:relative lg:flex lg:min-h-[440px] lg:items-center lg:justify-center lg:overflow-hidden lg:rounded-2xl lg:border lg:border-white/30 lg:shadow-2xl dark:lg:border-white/10 xl:min-h-[480px]">
+                <div
+                  aria-hidden
+                  className="absolute inset-0 hidden scale-110 bg-cover bg-center opacity-60 blur-2xl lg:block"
+                  style={{ backgroundImage: `url(${escolaInformaticaHeroImg})` }}
+                />
+                <div aria-hidden className="absolute inset-0 hidden bg-slate-900/35 lg:block" />
+                <SiteImage
+                  src={escolaInformaticaHeroImg}
+                  alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
+                  width={854}
+                  height={302}
+                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-[88%] lg:rounded-xl"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
+                />
+              </div>
             </div>
           </div>
         </section>
