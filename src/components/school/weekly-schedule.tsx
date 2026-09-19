@@ -22,34 +22,13 @@ import {
   getWeekIndex,
   proximaDataDoDia,
 } from "@/lib/schedule-engine";
+import { serieClasses } from "@/lib/serie-colors";
 import type { Assignment, ScheduleConfig } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-/**
- * Sequential, theme-aware ramp for ordinal data (grade level): darker reads
- * as "further along", so the color itself carries meaning without forcing a
- * legend lookup. Values live in styles.css (`--serie-1..5`) with separate
- * light/dark tuning — these class names are written out literally so the
- * Tailwind scanner picks them up (it can't see dynamically built strings).
- */
-const SERIE_BG = ["bg-serie-1", "bg-serie-2", "bg-serie-3", "bg-serie-4", "bg-serie-5"];
-const SERIE_TEXT = ["text-slate-900", "text-slate-900", "text-white", "text-white", "text-white"];
-const SERIE_RING = [
-  "ring-[color:var(--serie-1)]/50",
-  "ring-[color:var(--serie-2)]/50",
-  "ring-[color:var(--serie-3)]/50",
-  "ring-[color:var(--serie-4)]/50",
-  "ring-[color:var(--serie-5)]/50",
-];
 
 function toMinutes(hhmm: string): number {
   const parts = hhmm.split(":");
   return Number(parts[0] ?? 0) * 60 + Number(parts[1] ?? 0);
-}
-
-function serieClasses(index: number) {
-  const i = index % SERIE_BG.length;
-  return { bg: SERIE_BG[i]!, text: SERIE_TEXT[i]!, ring: SERIE_RING[i]! };
 }
 
 /**

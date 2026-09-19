@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
+  BookOpen,
   CalendarClock,
   CalendarDays,
   ChevronRight,
@@ -43,7 +44,9 @@ import {
   suspensaoKey,
   toDateKey,
 } from "@/lib/schedule-engine";
+import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Assignment } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
@@ -164,7 +167,16 @@ function Index() {
 
               <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
                 <div>
-                  <dt className="text-[13px] text-muted-foreground">Total de<br />Turmas</dt>
+                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                      <BookOpen className="size-3" />
+                    </span>
+                    <span>
+                      Total de
+                      <br />
+                      Turmas
+                    </span>
+                  </dt>
                   {isReady ? (
                     <StatCounter valor={turmas.length} />
                   ) : (
@@ -172,7 +184,16 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-[13px] text-muted-foreground">Total de<br />Alunos</dt>
+                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                      <Users2 className="size-3" />
+                    </span>
+                    <span>
+                      Total de
+                      <br />
+                      Alunos
+                    </span>
+                  </dt>
                   {isReady ? (
                     <StatCounter valor={totalAlunos} />
                   ) : (
@@ -180,7 +201,16 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-[13px] text-muted-foreground">Máquinas<br />Disponíveis</dt>
+                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <MonitorSmartphone className="size-3" />
+                    </span>
+                    <span>
+                      Máquinas
+                      <br />
+                      Disponíveis
+                    </span>
+                  </dt>
                   {isReady ? (
                     <StatCounter valor={config.numeroComputadores} />
                   ) : (
@@ -188,7 +218,12 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-[13px] text-muted-foreground">Horário das aulas</dt>
+                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      <Clock3 className="size-3" />
+                    </span>
+                    Horário das aulas
+                  </dt>
                   <dd className="text-2xl font-semibold text-foreground">
                     {config.horaInicio}–{config.horaFim}
                   </dd>
@@ -225,7 +260,7 @@ function Index() {
                   cortada, ocupar os 32px do padding é o único jeito de crescer:
                   rende ~10% de altura. A seção tem overflow-hidden, então o
                   transbordo não vira rolagem lateral. */}
-              <div className="lg:relative lg:flex lg:min-h-[440px] lg:items-center lg:justify-center lg:overflow-hidden lg:rounded-2xl lg:border lg:border-white/30 lg:shadow-2xl dark:lg:border-white/10 xl:min-h-[480px]">
+              <div className="lg:relative lg:flex lg:min-h-[260px] lg:items-center lg:justify-center lg:overflow-hidden lg:rounded-2xl lg:border lg:border-white/30 lg:shadow-2xl dark:lg:border-white/10 xl:min-h-[300px]">
                 <div
                   aria-hidden
                   className="absolute inset-0 hidden scale-110 bg-cover bg-center opacity-60 blur-2xl lg:block"
@@ -237,7 +272,7 @@ function Index() {
                   alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
                   width={854}
                   height={302}
-                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-[88%] lg:rounded-xl"
+                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-full lg:rounded-2xl"
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
@@ -455,7 +490,13 @@ function ProximasTurmasPanel() {
                       className="size-9 rounded-lg object-cover"
                     />
                   ) : (
-                    <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-xs font-semibold text-secondary-foreground">
+                    <span
+                      className={cn(
+                        "flex size-9 items-center justify-center rounded-lg text-xs font-semibold",
+                        serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg,
+                        serieClasses(serieIndexPorNumero(assignment.turma.serie)).text,
+                      )}
+                    >
                       {assignment.turma.letra}
                     </span>
                   )}
