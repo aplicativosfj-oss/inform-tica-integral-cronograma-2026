@@ -22,7 +22,7 @@ import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { buildWeeklySchedule, getWeekIndex, toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
-import coordenacaoHeroImg from "@/assets/feature-classroom-tech.jpg";
+import coordenacaoHeroImg from "@/assets/laboratorio-informatica-turma.jpg";
 
 export const Route = createFileRoute("/coordenacao")({
   component: CoordenacaoPage,
@@ -146,12 +146,27 @@ function CoordenacaoPage() {
             className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
           />
           <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
-            <div>
+            <div className="flex flex-col gap-4">
               <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
                 Calendário das aulas de informática, participação por turma e grupo e histórico de
                 faltas. Acesso aberto, somente leitura.
               </p>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="rounded-lg border border-border/40 bg-card/50 p-3 backdrop-blur-sm">
+                  <p className="text-xs text-muted-foreground">Total de Turmas</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {turmas.length}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-card/50 p-3 backdrop-blur-sm">
+                  <p className="text-xs text-muted-foreground">Alunos Cadastrados</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {turmas.reduce((sum, t) => sum + t.alunos.length, 0)}
+                  </p>
+                </div>
+              </div>
             </div>
             <SiteImage
               src={coordenacaoHeroImg}
