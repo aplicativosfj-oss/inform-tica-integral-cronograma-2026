@@ -24,7 +24,7 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
-import agendaHeroImg from "@/assets/cronograma-calendario.jpg";
+import agendaHeroImg from "@/assets/laboratorio-informatica-turma.jpg";
 
 export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
@@ -110,9 +110,9 @@ function AgendaPage() {
             </div>
             <SiteImage
               src={agendaHeroImg}
-              alt="Cronograma e calendário de planejamento profissional para agendamento de aulas"
-              width={800}
-              height={500}
+              alt="Laboratório de informática da escola com turmas em cronograma semanal"
+              width={1200}
+              height={750}
               className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
               loading="eager"
               decoding="async"
