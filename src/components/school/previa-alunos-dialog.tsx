@@ -12,6 +12,15 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
+import alunosImg1 from "@/assets/alunos-1.jpg";
+import alunosImg2 from "@/assets/alunos-2.jpg";
+import alunosImg3 from "@/assets/alunos-3.jpg";
+import alunosHeroImg from "@/assets/alunos-hero.jpg";
+import alunoJogoImg from "@/assets/image2.jpeg";
+import laboratorioTurmaFotoImg from "@/assets/image3.png";
+import agendaHeroImg from "@/assets/image6.jpeg";
+import coordenacaoHeroImg from "@/assets/image7.jpeg";
+import alunoSorridenteImg from "@/assets/image10.jpeg";
 import laboratorioGenericoImg from "@/assets/laboratorio-informatica-turma.jpg";
 
 function toMinutos(hhmm: string): number {
@@ -33,6 +42,39 @@ function horarioDoGrupo(indice: number, assignment: Assignment, duracaoGrupoMinu
   const fim = Math.min(fimVisita, inicio + duracaoGrupoMinutos);
   return { inicio: toHHMM(inicio), fim: toHHMM(fim) };
 }
+
+// Fotos reais da escola (não stock) — sem turma cadastrada ainda tem foto
+// própria, então cada uma pega uma imagem diferente deste acervo, sempre a
+// mesma pra ela (hash estável do id), em vez de todas caindo na mesma.
+const FOTOS_TURMA = [
+  alunosHeroImg,
+  laboratorioTurmaFotoImg,
+  alunosImg1,
+  agendaHeroImg,
+  alunosImg2,
+  coordenacaoHeroImg,
+  alunoJogoImg,
+  alunosImg3,
+  alunoSorridenteImg,
+  laboratorioGenericoImg,
+];
+
+function fotoDaTurma(turmaId: string, imagemPropria: string | undefined): string {
+  if (imagemPropria) return imagemPropria;
+  let hash = 0;
+  for (let i = 0; i < turmaId.length; i += 1) hash = (hash * 31 + turmaId.charCodeAt(i)) >>> 0;
+  return FOTOS_TURMA[hash % FOTOS_TURMA.length]!;
+}
+
+// Cada rodada ganha uma cor própria — não é só um número, é uma faixa de
+// cor que o pai/professor reconhece de relance, igual uma linha de metrô.
+const CORES_GRUPO = [
+  { faixa: "bg-sky-600", badge: "bg-sky-600/15 text-sky-700 dark:text-sky-300" },
+  { faixa: "bg-amber-600", badge: "bg-amber-600/15 text-amber-700 dark:text-amber-300" },
+  { faixa: "bg-emerald-600", badge: "bg-emerald-600/15 text-emerald-700 dark:text-emerald-300" },
+  { faixa: "bg-violet-600", badge: "bg-violet-600/15 text-violet-700 dark:text-violet-300" },
+  { faixa: "bg-rose-600", badge: "bg-rose-600/15 text-rose-700 dark:text-rose-300" },
+];
 
 /**
  * Preview of which students are expected on a given (usually future) date —
@@ -133,7 +175,7 @@ export function PreviaAlunosDialog({
                 pra continuar legível em cima da foto. */}
             <div className="relative h-28 shrink-0 overflow-hidden sm:h-32">
               <img
-                src={assignment.turma.imagem || laboratorioGenericoImg}
+                src={fotoDaTurma(assignment.turma.id, assignment.turma.imagem)}
                 alt=""
                 aria-hidden
                 className="size-full object-cover"
@@ -185,30 +227,42 @@ export function PreviaAlunosDialog({
                       assignment,
                       config.duracaoGrupoMinutos,
                     );
+                    const cor = CORES_GRUPO[grupo.indice % CORES_GRUPO.length]!;
                     return (
                       <div
                         key={grupo.indice}
-                        className="overflow-hidden rounded-xl border border-border/60"
+                        className="flex overflow-hidden rounded-xl border border-border/60"
                       >
-                        <div className="flex items-center justify-between gap-2 bg-muted/50 px-3 py-1.5">
-                          <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                            <Users2 className="size-3.5 text-primary" />
-                            Grupo {grupo.indice + 1}
-                          </span>
-                          <span className="flex items-center gap-1 font-mono text-xs font-medium text-muted-foreground">
-                            <Clock3 className="size-3 shrink-0" />
-                            {horario.inicio} – {horario.fim}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 p-2.5">
-                          {grupo.alunos.map((aluno) => (
-                            <span
-                              key={aluno.id}
-                              className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
-                            >
-                              {aluno.nome}
+                        {/* Faixa de cor própria por grupo — reconhecível de relance,
+                            sem precisar ler o número. */}
+                        <div className={`w-1.5 shrink-0 ${cor.faixa}`} aria-hidden />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2 px-3 py-2">
+                            <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                              <span
+                                className={`flex size-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${cor.faixa}`}
+                              >
+                                {grupo.indice + 1}
+                              </span>
+                              Grupo {grupo.indice + 1}
                             </span>
-                          ))}
+                            <span
+                              className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 font-mono text-xs font-bold ${cor.badge}`}
+                            >
+                              <Clock3 className="size-3.5 shrink-0" />
+                              {horario.inicio} – {horario.fim}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 px-3 pb-2.5">
+                            {grupo.alunos.map((aluno) => (
+                              <span
+                                key={aluno.id}
+                                className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
+                              >
+                                {aluno.nome}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     );
