@@ -110,13 +110,13 @@ function AgendaPage() {
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="rounded-lg border border-border/40 bg-card/50 p-3 backdrop-blur-sm">
+                <div className="rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
                   <p className="text-xs text-muted-foreground">Horário</p>
                   <p className="text-sm font-semibold text-foreground">
                     {config.horaInicio} – {config.horaFim}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border/40 bg-card/50 p-3 backdrop-blur-sm">
+                <div className="rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
                   <p className="text-xs text-muted-foreground">Computadores</p>
                   <p className="text-sm font-semibold text-foreground">
                     {config.numeroComputadores}
@@ -129,7 +129,7 @@ function AgendaPage() {
               alt="Laboratório de informática da escola com turmas em cronograma semanal"
               width={1200}
               height={750}
-              className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
+              className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-lg bg-white/70 dark:bg-slate-900/40 sm:max-h-64"
               loading="eager"
               decoding="async"
             />

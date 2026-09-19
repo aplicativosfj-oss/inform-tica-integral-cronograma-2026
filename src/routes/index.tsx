@@ -203,7 +203,7 @@ function Index() {
                 alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
                 width={1560}
                 height={480}
-                className="relative aspect-[13/4] max-h-56 w-full rounded-2xl border border-border/60 bg-card shadow-2xl sm:max-h-64"
+                className="relative aspect-[13/4] max-h-56 w-full rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-slate-900/40 shadow-2xl backdrop-blur-xl sm:max-h-64"
                 loading="eager"
                 decoding="async"
               />

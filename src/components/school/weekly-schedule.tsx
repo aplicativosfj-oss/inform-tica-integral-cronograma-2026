@@ -123,7 +123,7 @@ export function WeeklySchedule() {
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-slate-900/50 shadow-lg backdrop-blur-xl">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
