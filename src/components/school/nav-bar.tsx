@@ -53,7 +53,7 @@ export function NavBar() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-gradient-to-r from-slate-950/90 via-blue-950/90 to-slate-950/90 text-white shadow-lg shadow-black/10 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-900/40 text-white shadow-lg shadow-black/20 backdrop-blur-2xl dark:bg-slate-950/50">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
           <img
