@@ -1,4 +1,4 @@
-import { RotateCcw } from "lucide-react";
+import { CalendarClock, RotateCcw, Users2 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
 import { useConfirmar } from "@/lib/confirm-store";
@@ -19,6 +20,7 @@ import {
   buildWeeklySchedule,
   currentWeekdayLabel,
   getWeekIndex,
+  proximaDataDoDia,
 } from "@/lib/schedule-engine";
 import type { Assignment, ScheduleConfig } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -63,6 +65,8 @@ export function WeeklySchedule() {
   const { isAuthenticated } = useAuth();
   const confirmar = useConfirmar();
   const [editando, setEditando] = useState<Assignment | null>(null);
+  const [previsto, setPrevisto] = useState<Assignment | null>(null);
+  const [mistoSelecionado, setMistoSelecionado] = useState<Assignment | null>(null);
 
   // "Hoje" and the week's rotation offset depend on the client's clock,
   // which can differ from the server render — only applied after mount to
@@ -172,15 +176,17 @@ export function WeeklySchedule() {
                                 config={config}
                                 series={series}
                                 weekIndex={weekIndex}
+                                onClick={() => setMistoSelecionado(assignment)}
                               />
                             ) : assignment ? (
                               <SchedulePill
                                 assignment={assignment}
                                 serieIndex={series.indexOf(assignment.turma.serie)}
-                                editavel={isAuthenticated}
                                 editado={overridden}
-                                onClick={
-                                  isAuthenticated ? () => setEditando(assignment) : undefined
+                                onClick={() =>
+                                  isAuthenticated
+                                    ? setEditando(assignment)
+                                    : setPrevisto(assignment)
                                 }
                               />
                             ) : (
@@ -255,6 +261,23 @@ export function WeeklySchedule() {
           setEditando(null);
         }}
       />
+
+      <PreviaAlunosDialog
+        assignment={previsto}
+        data={previsto ? proximaDataDoDia(previsto.dia, new Date()) : new Date()}
+        onOpenChange={(open) => {
+          if (!open) setPrevisto(null);
+        }}
+      />
+
+      <MistoDetalhesDialog
+        assignment={mistoSelecionado}
+        config={config}
+        weekIndex={weekIndex}
+        onOpenChange={(open) => {
+          if (!open) setMistoSelecionado(null);
+        }}
+      />
     </>
   );
 }
@@ -262,23 +285,21 @@ export function WeeklySchedule() {
 function SchedulePill({
   assignment,
   serieIndex,
-  editavel,
   editado,
   onClick,
 }: {
   assignment: Assignment;
   serieIndex: number;
-  editavel?: boolean;
   editado?: boolean;
-  onClick?: (() => void) | undefined;
+  onClick: () => void;
 }) {
   const { bg, text, ring } = serieClasses(Math.max(0, serieIndex));
-  const Comp = editavel ? "button" : "div";
   return (
-    <Comp
-      type={editavel ? "button" : undefined}
+    <button
+      type="button"
       onClick={onClick}
-      className={`relative h-14 w-full rounded-xl px-3 py-1.5 text-left shadow-sm ring-1 transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md ${bg} ${text} ${ring} ${editavel ? "cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2" : ""}`}
+      aria-label={`Ver detalhes: ${assignment.turma.serie} "${assignment.turma.letra}", ${assignment.dia} ${assignment.slot.inicio}–${assignment.slot.fim}`}
+      className={`relative h-14 w-full cursor-pointer rounded-xl px-3 py-1.5 text-left shadow-sm ring-1 transition-transform duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md ${bg} ${text} ${ring}`}
     >
       <p className="truncate text-[13px] leading-tight font-semibold">
         {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
@@ -292,7 +313,7 @@ function SchedulePill({
           aria-hidden
         />
       ) : null}
-    </Comp>
+    </button>
   );
 }
 
@@ -300,41 +321,47 @@ function SchedulePill({
  * Um horário "misto" reúne o grupo que sobrou da sessão principal de até
  * `roundsPorVisita` turmas diferentes (só 7 computadores não dão pra uma
  * turma de 20+ alunos inteira de uma vez) — 30 min cada, uma atrás da
- * outra, em vez de uma turma só ocupando o horário inteiro. Editar horário
- * misto não é suportado pelo diálogo de troca simples, então as fatias não
- * são clicáveis.
+ * outra, em vez de uma turma só ocupando o horário inteiro. Clicável, como
+ * as células normais, mas abre um resumo em vez do diálogo de troca (editar
+ * um horário misto não é suportado pelo diálogo simples de turma única).
  */
 function MixedPill({
   assignment,
   config,
   series,
   weekIndex,
+  onClick,
 }: {
   assignment: Assignment;
   config: ScheduleConfig;
   series: string[];
   weekIndex: number;
+  onClick: () => void;
 }) {
   const subBlocos = buildSubBlocos(assignment, config, weekIndex);
   return (
-    <div className="flex h-14 flex-col gap-0.5 overflow-hidden rounded-xl ring-1 ring-border/60">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Ver detalhes do horário misto: ${assignment.dia} ${assignment.slot.inicio}–${assignment.slot.fim}`}
+      className="flex h-14 w-full cursor-pointer flex-col gap-0.5 overflow-hidden rounded-xl text-left ring-1 ring-border/60 transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md"
+    >
       {subBlocos.map((sub, i) => {
         const turma = sub.turma ?? assignment.turma;
         const { bg, text } = serieClasses(Math.max(0, series.indexOf(turma.serie)));
         return (
-          <div
+          <span
             key={i}
             className={`flex flex-1 items-center justify-between gap-1 px-2 ${bg} ${text}`}
-            title={`${sub.inicio}–${sub.fim} · ${turma.serie} "${turma.letra}" (grupo restante)`}
           >
             <span className="truncate text-[10px] leading-none font-semibold">
               {turma.serie} &quot;{turma.letra}&quot;
             </span>
             <span className="shrink-0 text-[9px] leading-none opacity-80">{sub.inicio}</span>
-          </div>
+          </span>
         );
       })}
-    </div>
+    </button>
   );
 }
 
@@ -397,6 +424,82 @@ function ScheduleEditDialog({
             </Button>
           ) : null}
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Explica, em linguagem simples, o que é um horário misto: quais turmas
+ * dividem aquele período e o horário exato de cada uma — a versão em
+ * diálogo do resumo que já aparece (mais compacto) direto na célula.
+ */
+function MistoDetalhesDialog({
+  assignment,
+  config,
+  weekIndex,
+  onOpenChange,
+}: {
+  assignment: Assignment | null;
+  config: ScheduleConfig;
+  weekIndex: number;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const subBlocos = assignment ? buildSubBlocos(assignment, config, weekIndex) : [];
+
+  return (
+    <Dialog open={assignment !== null} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Users2 className="size-4 text-primary" />
+            {assignment
+              ? `Horário misto · ${assignment.dia} ${assignment.slot.inicio}–${assignment.slot.fim}`
+              : ""}
+          </DialogTitle>
+        </DialogHeader>
+        {assignment ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-muted-foreground">
+              A escola só tem {config.numeroComputadores} computadores, então uma turma de mais de{" "}
+              {config.numeroComputadores} alunos não cabe inteira numa única visita. O grupo que
+              sobra de cada turma grande usa este horário — 30 min por vez, uma turma depois da
+              outra.
+            </p>
+            <div className="flex flex-col divide-y divide-border/60 overflow-hidden rounded-lg border border-border/60">
+              {subBlocos.map((sub, i) => {
+                const turma = sub.turma ?? assignment.turma;
+                return (
+                  <div key={i} className="flex items-center gap-3 px-3 py-2.5">
+                    {turma.imagem ? (
+                      <img
+                        src={turma.imagem}
+                        alt=""
+                        className="size-9 shrink-0 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-xs font-semibold text-secondary-foreground">
+                        {turma.letra}
+                      </span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {turma.serie} &quot;{turma.letra}&quot;
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        Prof(a). {turma.professorRegente}
+                      </p>
+                    </div>
+                    <span className="flex shrink-0 items-center gap-1 font-mono text-xs text-muted-foreground">
+                      <CalendarClock className="size-3.5" />
+                      {sub.inicio}–{sub.fim}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );
