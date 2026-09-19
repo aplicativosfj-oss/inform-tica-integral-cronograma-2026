@@ -42,11 +42,9 @@ import {
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
-import heroLabFotoImg from "@/assets/hero-lab-photo.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
-import logoFull from "@/assets/logo-full-transparent.png";
 import laboratorioTurmaFotoImg from "@/assets/image3.png";
 import alunoJogoImg from "@/assets/image2.jpeg";
 import alunoSorridenteImg from "@/assets/image10.jpeg";
@@ -208,19 +206,16 @@ function Index() {
                 aria-hidden
                 className="absolute -bottom-4 left-10 z-10 hidden size-2.5 rounded-full bg-emerald-400/60 animate-float-slow sm:block"
               />
-              {/* Logo flutuante, sem ocupar espaço no fluxo — não empurra nada da hero. */}
-              <img
-                src={logoFull}
-                alt="Agenda de Informática .Online"
-                className="absolute -left-2 -top-2 z-10 h-auto w-24 max-w-[28%] rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:-left-3 sm:-top-3 sm:w-32"
-              />
+              {/* A proporção acompanha a do arquivo (854x302) para o banner
+                  aparecer inteiro — cortar em 13/4 comia a lâmpada e o globo
+                  das pontas. A logomarca já está no cabeçalho; sobreposta aqui
+                  ela tampava as crianças no celular. */}
               <SiteImage
-                src={heroLabFotoImg}
-                srcLarga={escolaInformaticaHeroImg}
+                src={escolaInformaticaHeroImg}
                 alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
-                width={1600}
-                height={900}
-                className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:aspect-[2/1] lg:aspect-[13/4] lg:max-h-64"
+                width={854}
+                height={302}
+                className="relative aspect-[854/302] w-full overflow-hidden rounded-2xl border border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40"
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
