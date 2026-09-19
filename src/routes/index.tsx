@@ -70,7 +70,8 @@ export const Route = createFileRoute("/")({
           "Agenda profissional das aulas de informática: cronograma automático, revezamento por grupos e cronômetro ao vivo.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      // twitter:card e og:image vêm do __root — um lugar só para o formato
+      // do card, senão a home volta a divergir do resto do site.
     ],
     scripts: [
       {

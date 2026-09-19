@@ -1,10 +1,13 @@
 /**
- * Gera public/og-image.jpg (1200x630), a prévia usada por WhatsApp, Facebook,
- * LinkedIn e X ao compartilhar o link.
+ * Gera as duas artes de compartilhamento:
  *
- * Layout: painel azul da marca à esquerda com logo e chamada, foto real dos
- * alunos à direita. A foto NÃO leva véu escuro por cima — o texto mora no
- * painel, então os rostos ficam nítidos e claros na miniatura.
+ * - public/og-thumb.jpg (600x600), usada como og:image. É quadrada de
+ *   propósito: com ela WhatsApp, X e LinkedIn montam o card compacto, com a
+ *   miniatura ao lado do texto, em vez do banner que ocupa a conversa
+ *   inteira. Por aparecer pequena (~100px), carrega só a marca — foto de
+ *   turma nesse tamanho vira borrão.
+ * - public/og-image.jpg (1200x630), a arte panorâmica. Não é mais o card
+ *   social; fica para o sitemap de imagens, onde tamanho grande ajuda.
  *
  * Rode com: node scripts/build-og-image.js
  */
@@ -97,3 +100,50 @@ await sharp({ create: { width: L, height: A, channels: 3, background: "#0f172a" 
   .toFile(resolve(raiz, "public/og-image.jpg"));
 
 console.log("public/og-image.jpg gerado com sucesso.");
+
+/* ---------- miniatura quadrada (o card social de verdade) ---------- */
+
+const Q = 600;
+
+const miniaturaSvg = `
+<svg width="${Q}" height="${Q}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="55%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="luz" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="${Q}" height="${Q}" fill="url(#fundo)"/>
+  <circle cx="90" cy="70" r="300" fill="url(#luz)"/>
+  <rect x="0" y="0" width="${Q}" height="12" fill="#fbbf24"/>
+
+  <!-- Cartão branco: a marca é azul-escura e sumiria sobre o fundo azul. -->
+  <rect x="70" y="186" width="460" height="228" rx="28" fill="#ffffff"/>
+
+  <text x="${Q / 2}" y="486" text-anchor="middle" font-family="${FONTE}" font-size="30"
+        font-weight="700" fill="#dbeafe">Agenda de Informática</text>
+  <text x="${Q / 2}" y="526" text-anchor="middle" font-family="${FONTE}" font-size="21"
+        font-weight="600" fill="#93c5fd">Escola Dr. Eiraldo Carneiro</text>
+</svg>`;
+
+const logoMiniatura = await sharp(resolve(raiz, "src/assets/logo-full-transparent.png"))
+  .resize({ width: 380 })
+  .toBuffer();
+
+const { height: alturaLogo } = await sharp(logoMiniatura).metadata();
+
+await sharp({ create: { width: Q, height: Q, channels: 3, background: "#1d4ed8" } })
+  .composite([
+    { input: Buffer.from(miniaturaSvg), left: 0, top: 0 },
+    { input: logoMiniatura, left: (Q - 380) / 2, top: Math.round(300 - alturaLogo / 2) },
+  ])
+  .jpeg({ quality: 90, chromaSubsampling: "4:4:4" })
+  .toFile(resolve(raiz, "public/og-thumb.jpg"));
+
+console.log("public/og-thumb.jpg gerado com sucesso.");
