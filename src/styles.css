@@ -51,6 +51,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-serie-1: var(--serie-1);
+  --color-serie-2: var(--serie-2);
+  --color-serie-3: var(--serie-3);
+  --color-serie-4: var(--serie-4);
+  --color-serie-5: var(--serie-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -87,6 +92,14 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
+  /* Sequential (one-hue, light→dark) ramp for ordinal data — e.g. grade
+     level in the weekly schedule, where a darker chip reads as "further
+     along" without needing a legend to decode. */
+  --serie-1: oklch(0.74 0.083 255);
+  --serie-2: oklch(0.655 0.115 256);
+  --serie-3: oklch(0.565 0.145 258);
+  --serie-4: oklch(0.475 0.165 260);
+  --serie-5: oklch(0.385 0.135 262);
   --sidebar: oklch(0.984 0.003 247.858);
   --sidebar-foreground: oklch(0.129 0.042 264.695);
   --sidebar-primary: oklch(0.208 0.042 265.755);
@@ -122,6 +135,11 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
+  --serie-1: oklch(0.78 0.085 255);
+  --serie-2: oklch(0.7 0.12 256);
+  --serie-3: oklch(0.615 0.155 258);
+  --serie-4: oklch(0.53 0.175 260);
+  --serie-5: oklch(0.445 0.15 262);
   --sidebar: oklch(0.208 0.042 265.755);
   --sidebar-foreground: oklch(0.984 0.003 247.858);
   --sidebar-primary: oklch(0.488 0.243 264.376);
