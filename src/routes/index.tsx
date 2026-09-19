@@ -144,7 +144,7 @@ function Index() {
 
               <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
                 <div>
-                  <dt className="text-xs text-muted-foreground">Turmas</dt>
+                  <dt className="text-xs text-muted-foreground">Total de<br />Turmas</dt>
                   {isReady ? (
                     <StatCounter valor={turmas.length} />
                   ) : (
@@ -152,7 +152,7 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Alunos cadastrados</dt>
+                  <dt className="text-xs text-muted-foreground">Total de<br />Alunos</dt>
                   {isReady ? (
                     <StatCounter valor={totalAlunos} />
                   ) : (
@@ -160,7 +160,7 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Computadores</dt>
+                  <dt className="text-xs text-muted-foreground">Máquinas<br />Disponíveis</dt>
                   {isReady ? (
                     <StatCounter valor={config.numeroComputadores} />
                   ) : (
