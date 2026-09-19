@@ -41,7 +41,7 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
-import laboratorioModernoImg from "@/assets/laboratorio-moderno.jpg";
+import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
@@ -193,8 +193,8 @@ function Index() {
                 className="absolute -left-2 -top-2 z-10 h-auto w-24 max-w-[28%] rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:-left-3 sm:-top-3 sm:w-32"
               />
               <SiteImage
-                src={laboratorioModernoImg}
-                alt="Laboratório de informática profissional com múltiplos computadores para educação"
+                src={escolaInformaticaHeroImg}
+                alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
                 width={1560}
                 height={480}
                 className="relative aspect-[13/4] max-h-56 w-full rounded-2xl border border-border/60 bg-card shadow-2xl sm:max-h-64"
