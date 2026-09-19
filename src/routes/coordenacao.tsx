@@ -22,7 +22,7 @@ import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { buildWeeklySchedule, getWeekIndex, toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
-import coordenacaoHeroImg from "@/assets/image7.jpeg";
+import coordenacaoHeroImg from "@/assets/feature-classroom-tech.jpg";
 
 export const Route = createFileRoute("/coordenacao")({
   component: CoordenacaoPage,
@@ -155,9 +155,9 @@ function CoordenacaoPage() {
             </div>
             <SiteImage
               src={coordenacaoHeroImg}
-              alt="Aluno usando um computador do laboratório de informática durante a aula"
-              width={2016}
-              height={1134}
+              alt="Sala de aula com tecnologia educacional para coordenação de aulas e gestão escolar"
+              width={1200}
+              height={750}
               className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
               loading="eager"
               decoding="async"
