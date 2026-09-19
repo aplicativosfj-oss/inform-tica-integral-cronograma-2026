@@ -407,7 +407,7 @@ function ProximasTurmasPanel() {
                 key={`${assignment.dia}-${assignment.slot.inicio}`}
                 type="button"
                 onClick={() => setAssignmentSelecionado(assignment)}
-                className="group cursor-pointer flex items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-primary"
+                className="group cursor-pointer flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-300 ease-out hover:bg-primary/5 hover:shadow-md hover:scale-105"
               >
                 <div className="flex items-center gap-3">
                   {assignment.turma.imagem ? (
@@ -435,7 +435,7 @@ function ProximasTurmasPanel() {
                   <Badge variant="secondary" className="font-mono">
                     {assignment.slot.inicio} – {assignment.slot.fim}
                   </Badge>
-                  <ChevronRight className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                  <ChevronRight className="size-4 text-muted-foreground/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
                 </div>
               </button>
             ),
