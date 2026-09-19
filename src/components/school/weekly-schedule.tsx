@@ -300,7 +300,7 @@ function SchedulePill({
       type="button"
       onClick={onClick}
       aria-label={`Ver detalhes: ${assignment.turma.serie} "${assignment.turma.letra}", ${assignment.dia} ${assignment.slot.inicio}–${assignment.slot.fim}`}
-      className={`relative h-14 w-full cursor-pointer rounded-xl px-3 py-1.5 text-left shadow-sm ring-1 transition-transform duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md ${bg} ${text} ${ring}`}
+      className={`relative h-14 w-full rounded-xl px-3 py-1.5 text-left shadow-sm ring-1 transition-[background-color,box-shadow] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 [@media(hover:hover)]:hover:shadow-md ${bg} ${text} ${ring}`}
     >
       <p className="truncate text-[13px] leading-tight font-semibold">
         {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
@@ -345,7 +345,7 @@ function MixedPill({
       type="button"
       onClick={onClick}
       aria-label={`Ver detalhes do horário misto: ${assignment.dia} ${assignment.slot.inicio}–${assignment.slot.fim}`}
-      className="flex h-14 w-full cursor-pointer flex-col gap-0.5 overflow-hidden rounded-xl text-left ring-1 ring-border/60 transition-transform duration-150 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:shadow-md"
+      className="flex h-14 w-full flex-col gap-0.5 overflow-hidden rounded-xl text-left ring-1 ring-border/60 transition-[box-shadow] duration-150 ease-out [@media(hover:hover)]:hover:shadow-md"
     >
       {subBlocos.map((sub, i) => {
         const turma = sub.turma ?? assignment.turma;

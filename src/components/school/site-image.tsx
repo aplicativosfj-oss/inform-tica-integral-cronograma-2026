@@ -45,7 +45,7 @@ export function SiteImage({
       <button
         type="button"
         onClick={() => setAberta(true)}
-        className={cn("group/img relative block cursor-pointer", className)}
+        className={cn("group/img relative block", className)}
         aria-label={`Ampliar imagem: ${alt}`}
       >
         <img

@@ -149,7 +149,7 @@ function ProgramacaoPage() {
                           onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") setEditando(assignment);
                           }}
-                          className="cursor-pointer transition-colors hover:bg-muted/60"
+                          className="transition-colors hover:bg-muted/60"
                         >
                           <TableCell className="font-mono text-sm">
                             {assignment.slot.inicio} – {assignment.slot.fim}
