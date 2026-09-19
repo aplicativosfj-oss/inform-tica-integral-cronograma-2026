@@ -716,34 +716,59 @@ function CanalYoutubeSection() {
 
       <div className="grid grid-cols-3 gap-3 sm:max-w-xl">
         {VIDEOS_DESTAQUE.map((video) => (
-          <a
-            key={video.id}
-            href={`https://www.youtube.com/shorts/${video.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative block overflow-hidden rounded-xl border border-border/60 bg-muted shadow-sm transition-shadow hover:shadow-md"
-          >
-            <img
-              src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
-              alt={video.titulo}
-              loading="lazy"
-              width={480}
-              height={360}
-              className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-            <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/30">
-              <Play
-                className="size-6 text-white opacity-90 drop-shadow transition-transform group-hover:scale-110"
-                fill="currentColor"
-              />
-            </span>
-            <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-[11px] font-medium leading-tight text-white">
-              {video.titulo}
-            </span>
-          </a>
+          <VideoThumb key={video.id} video={video} />
         ))}
       </div>
     </RevealSection>
+  );
+}
+
+/**
+ * Miniatura de um vídeo do canal. Redes de escola costumam bloquear o
+ * domínio do YouTube (inclusive o CDN de miniaturas `i.ytimg.com`) — quando a
+ * imagem falha ao carregar, mostramos um cartão simples no lugar de um ícone
+ * de imagem quebrada, sem afetar o resto da página.
+ */
+function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
+  const [imagemFalhou, setImagemFalhou] = useState(false);
+
+  return (
+    <a
+      href={`https://www.youtube.com/shorts/${video.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group relative block aspect-video overflow-hidden rounded-xl border border-border/60 bg-muted shadow-sm transition-shadow hover:shadow-md"
+    >
+      {imagemFalhou ? (
+        <div className="flex size-full flex-col items-center justify-center gap-1 bg-secondary p-1.5 text-center">
+          <Youtube className="size-4 text-muted-foreground" />
+          <span className="line-clamp-2 text-[10px] font-medium leading-tight text-muted-foreground">
+            {video.titulo}
+          </span>
+        </div>
+      ) : (
+        <>
+          <img
+            src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+            alt={video.titulo}
+            loading="lazy"
+            width={480}
+            height={360}
+            onError={() => setImagemFalhou(true)}
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/30">
+            <Play
+              className="size-6 text-white opacity-90 drop-shadow transition-transform group-hover:scale-110"
+              fill="currentColor"
+            />
+          </span>
+          <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-[11px] font-medium leading-tight text-white">
+            {video.titulo}
+          </span>
+        </>
+      )}
+    </a>
   );
 }
 
