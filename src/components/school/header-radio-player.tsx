@@ -12,7 +12,7 @@ function Espectro({ ativo }: { ativo: boolean }) {
         <span
           key={i}
           className={cn(
-            "w-[2.5px] rounded-full bg-gradient-to-t from-cyan-400 to-fuchsia-400",
+            "w-[2.5px] rounded-full bg-gradient-to-t from-blue-500 dark:from-cyan-400 to-emerald-500 dark:to-fuchsia-400",
             ativo ? "animate-radio-eq" : "h-[3px] opacity-40",
           )}
           style={
@@ -55,15 +55,15 @@ export function HeaderRadioPlayer() {
       }
       className={cn(
         "group cursor-pointer relative flex items-center gap-2 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
-        "border-transparent bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-fuchsia-500/15",
-        "before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-gradient-to-r before:from-cyan-400 before:via-blue-500 before:to-fuchsia-500 before:opacity-30 before:blur-[6px]",
-        tocando ? "shadow-[0_0_12px_-1px] shadow-cyan-400/60" : "hover:before:opacity-50",
+        "border-blue-400/30 dark:border-transparent bg-gradient-to-r from-blue-500/10 dark:from-cyan-500/15 via-emerald-500/10 dark:via-blue-500/10 to-emerald-500/10 dark:to-fuchsia-500/15",
+        "before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-gradient-to-r before:from-blue-400 dark:before:from-cyan-400 before:via-emerald-500 dark:before:via-blue-500 before:to-emerald-500 dark:before:to-fuchsia-500 before:opacity-20 dark:before:opacity-30 before:blur-[6px]",
+        tocando ? "shadow-[0_0_12px_-1px] shadow-blue-400/40 dark:shadow-cyan-400/60" : "hover:before:opacity-40 dark:hover:before:opacity-50",
       )}
     >
       <span
         className={cn(
-          "flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-cyan-300 ring-1 ring-cyan-400/40",
-          tocando && "ring-2 ring-cyan-300/80",
+          "flex size-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40",
+          tocando && "ring-2 ring-blue-400/80 dark:ring-cyan-300/80",
         )}
       >
         {status === "carregando" ? (
@@ -78,10 +78,10 @@ export function HeaderRadioPlayer() {
       </span>
 
       <span className="hidden flex-col items-start leading-none sm:flex">
-        <span className="flex items-center gap-1 font-mono text-xs font-bold uppercase tracking-widest text-cyan-400">
+        <span className="flex items-center gap-1 font-mono text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-cyan-400">
           <Radio className="size-2.5" /> JP News
         </span>
-        <span className="text-xs text-foreground/75">
+        <span className="text-xs text-blue-700/70 dark:text-foreground/75">
           {status === "erro" ? "sinal indisponível" : tocando ? "ao vivo" : "ouvir agora"}
         </span>
       </span>
