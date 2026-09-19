@@ -104,14 +104,68 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
   }
   const pending: Pending[] = [];
 
-  let cursor = 0;
+  // Distribuição proporcional ao número de alunos: cada turma recebe pelo
+  // menos 1 sessão na semana e as vagas restantes vão para as turmas maiores
+  // (maior parte fracionária primeiro; empate decide a turma com mais
+  // alunos), para que todos participem e ninguém fique de fora.
+  const totalSlots = config.diasSemana.length * slots.length;
+  const totalAlunos = turmas.reduce((soma, t) => soma + t.alunos.length, 0);
+  const brutos = turmas.map((t) =>
+    totalAlunos > 0 ? (t.alunos.length / totalAlunos) * totalSlots : 1,
+  );
+  const alvos = brutos.map((b) => Math.max(1, Math.floor(b)));
+  let restante = totalSlots - alvos.reduce((soma, a) => soma + a, 0);
+  const porPrioridade = turmas
+    .map((_, i) => i)
+    .sort((a, b) => {
+      const fracaoA = (brutos[a] ?? 0) - (alvos[a] ?? 0);
+      const fracaoB = (brutos[b] ?? 0) - (alvos[b] ?? 0);
+      return fracaoB - fracaoA || turmas[b]!.alunos.length - turmas[a]!.alunos.length;
+    });
+  for (let k = 0; restante > 0 && porPrioridade.length > 0; k += 1) {
+    const indice = porPrioridade[k % porPrioridade.length]!;
+    alvos[indice] = (alvos[indice] ?? 0) + 1;
+    restante -= 1;
+  }
+
+  // Fila em rodadas: nenhuma turma repete enquanto as outras não tiverem
+  // tido sua vez, e nunca duas sessões da mesma turma no mesmo dia.
+  const fila: Turma[] = [];
+  const maxAlvo = Math.max(...alvos);
+  for (let rodada = 0; rodada < maxAlvo; rodada += 1) {
+    turmas.forEach((turma, i) => {
+      if (alvos[i]! > rodada) fila.push(turma);
+    });
+  }
+
+  // Fila mutável: quem não cabe no dia (já teve aula nele) volta para o
+  // início da fila e é atendida no dia seguinte — ninguém se perde.
+  const filaRestante = [...fila];
+  const usadaNoDia = new Set<string>();
   config.diasSemana.forEach((dia, diaIndex) => {
+    usadaNoDia.clear();
     slots.forEach((slot) => {
       const overrideId = config.slotOverrides?.[slotKey(dia, slot.inicio)];
-      const turma =
-        (overrideId ? turmasById.get(overrideId) : undefined) ?? turmas[cursor % turmas.length];
-      cursor += 1;
+      let turma = overrideId ? turmasById.get(overrideId) : undefined;
+      if (!turma && filaRestante.length > 0) {
+        const adiadas: Turma[] = [];
+        while (filaRestante.length > 0) {
+          const candidata = filaRestante.shift()!;
+          if (!usadaNoDia.has(candidata.id)) {
+            turma = candidata;
+            break;
+          }
+          adiadas.push(candidata);
+        }
+        filaRestante.unshift(...adiadas);
+        // Dia com mais horários do que turmas disponíveis: repete a próxima
+        // da fila para o horário não ficar vazio.
+        if (!turma) {
+          turma = filaRestante.shift();
+        }
+      }
       if (!turma) return;
+      usadaNoDia.add(turma.id);
       pending.push({ dia, diaIndex, slot, turma });
     });
   });
