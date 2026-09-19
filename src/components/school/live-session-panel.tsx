@@ -551,7 +551,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
         <div className="flex min-w-0 flex-1 flex-col gap-5">
           <div>
             {assignment.misto ? (
-              <Badge variant="outline" className="mb-1 text-[10px]">
+              <Badge variant="outline" className="mb-1 text-xs">
                 horário misto
               </Badge>
             ) : null}

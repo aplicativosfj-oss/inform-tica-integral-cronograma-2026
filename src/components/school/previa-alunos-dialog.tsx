@@ -292,7 +292,7 @@ export function PreviaAlunosDialog({
                                 key={aluno.id}
                                 className="flex min-w-0 items-center gap-2 rounded-lg bg-muted/40 px-2 py-1.5"
                               >
-                                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-[10px] font-semibold text-muted-foreground ring-1 ring-border/60">
+                                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-xs font-semibold text-foreground ring-1 ring-border/60">
                                   {indiceAluno + 1}
                                 </span>
                                 <span className="truncate text-xs text-foreground">

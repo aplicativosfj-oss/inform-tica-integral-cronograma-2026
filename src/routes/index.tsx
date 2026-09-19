@@ -384,7 +384,7 @@ function ProximasTurmasPanel() {
                 className="flex flex-col gap-1.5 py-2.5"
               >
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="text-[10px]">
+                  <Badge variant="outline" className="text-xs">
                     horário misto
                   </Badge>
                   <Badge variant="secondary" className="font-mono">
@@ -577,7 +577,7 @@ function ProgramacaoSemanalDestaque() {
                   className="rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span className="rounded-full border border-white/30 px-2 py-0.5 text-[10px] font-medium text-white">
+                    <span className="rounded-full border border-white/30 px-2 py-0.5 text-xs font-medium text-white">
                       horário misto
                     </span>
                     <span className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">

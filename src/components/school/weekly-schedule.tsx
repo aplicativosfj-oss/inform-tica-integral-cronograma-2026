@@ -355,10 +355,10 @@ function MixedPill({
             key={i}
             className={`flex flex-1 items-center justify-between gap-1 px-2 ${bg} ${text}`}
           >
-            <span className="truncate text-[10px] leading-none font-semibold">
+            <span className="truncate text-xs leading-none font-semibold">
               {turma.serie} &quot;{turma.letra}&quot;
             </span>
-            <span className="shrink-0 text-[9px] leading-none opacity-80">{sub.inicio}</span>
+            <span className="shrink-0 text-xs leading-none opacity-80">{sub.inicio}</span>
           </span>
         );
       })}
@@ -511,7 +511,7 @@ function MistoDetalhesDialog({
                             key={aluno.id}
                             className="flex min-w-0 items-center gap-2 rounded-lg bg-muted/40 px-2 py-1.5"
                           >
-                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-[10px] font-semibold text-muted-foreground ring-1 ring-border/60">
+                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-xs font-semibold text-foreground ring-1 ring-border/60">
                               {indiceAluno + 1}
                             </span>
                             <span className="truncate text-xs text-foreground">{aluno.nome}</span>

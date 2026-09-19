@@ -176,7 +176,7 @@ function AgendaPage() {
                     {dia}
                     {dia === todayLabel ? " · hoje" : ""}
                   </span>
-                  <span className="font-mono text-[10px] opacity-70">{dataCurta(dia)}</span>
+                  <span className="font-mono text-xs opacity-70">{dataCurta(dia)}</span>
                 </TabsTrigger>
               ))}
             </TabsList>

@@ -117,7 +117,7 @@ function ProgramacaoPage() {
                             </TableCell>
                             <TableCell colSpan={3}>
                               <div className="flex flex-wrap items-center gap-2">
-                                <Badge variant="outline" className="text-[10px]">
+                                <Badge variant="outline" className="text-xs">
                                   horário misto
                                 </Badge>
                                 <span className="text-xs text-muted-foreground">
@@ -171,7 +171,7 @@ function ProgramacaoPage() {
                                 {assignment.turma.serie} "{assignment.turma.letra}"
                               </span>
                               {overridden ? (
-                                <Badge variant="outline" className="text-[10px]">
+                                <Badge variant="outline" className="text-xs">
                                   editado
                                 </Badge>
                               ) : null}

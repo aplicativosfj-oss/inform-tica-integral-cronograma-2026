@@ -78,10 +78,10 @@ export function HeaderRadioPlayer() {
       </span>
 
       <span className="hidden flex-col items-start leading-none sm:flex">
-        <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-widest text-cyan-300">
+        <span className="flex items-center gap-1 font-mono text-xs font-bold uppercase tracking-widest text-cyan-400">
           <Radio className="size-2.5" /> JP News
         </span>
-        <span className="text-[10px] text-muted-foreground">
+        <span className="text-xs text-foreground/75">
           {status === "erro" ? "sinal indisponível" : tocando ? "ao vivo" : "ouvir agora"}
         </span>
       </span>
