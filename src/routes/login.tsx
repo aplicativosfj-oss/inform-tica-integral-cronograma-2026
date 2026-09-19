@@ -54,15 +54,17 @@ function LoginPage() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {/* Imagem de fundo ambientada em tecnologia, com overlay para manter contraste do card de login. */}
+      {/* Imagem de fundo ambientada em tecnologia, com overlay para manter contraste do card de login.
+          O véu é bem mais leve no escuro: o fundo já é escuro por natureza, então
+          um degradê forte por cima apagava a foto quase por completo. */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.16]"
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.16] dark:opacity-30"
         style={{ backgroundImage: `url(${loginBgImg})` }}
       />
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-background/60 via-background/85 to-background"
+        className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-background/60 via-background/85 to-background dark:from-background/30 dark:via-background/60 dark:to-background"
       />
       <div className="relative z-10">
         <NavBar />

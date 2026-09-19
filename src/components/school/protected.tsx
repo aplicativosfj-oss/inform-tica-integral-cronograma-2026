@@ -40,12 +40,12 @@ export function Protected({ children }: { children: ReactNode }) {
             erro genérica. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-[0.16]"
+          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-[0.16] dark:opacity-30"
           style={{ backgroundImage: `url(${restritoBgImg})` }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-background/60 via-background/85 to-background"
+          className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-background/60 via-background/85 to-background dark:from-background/30 dark:via-background/60 dark:to-background"
         />
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md flex-col items-center justify-center gap-6 px-4 py-10 text-center">
           <span className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">

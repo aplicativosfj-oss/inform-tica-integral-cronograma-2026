@@ -10,6 +10,7 @@ import {
   Gamepad2,
   GraduationCap,
   LayoutDashboard,
+  MapPin,
   MonitorSmartphone,
   Play,
   ShieldCheck,
@@ -387,12 +388,20 @@ function Index() {
 
         <CanalYoutubeSection />
 
-        <section className="border-t border-border/60 bg-muted/30">
-          <div className="mx-auto max-w-6xl px-4 py-6 text-center sm:px-6">
-            <GraduationCap className="mx-auto size-7 text-primary" />
-            <h2 className="mt-2 text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              INEP {config.inep} · {config.endereco}
+        <section className="border-t border-border/60 bg-gradient-to-b from-muted/50 to-background">
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-10 text-center sm:px-6">
+            <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <GraduationCap className="size-6" />
+            </span>
+            <h2 className="text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
+            <p className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground/80">INEP {config.inep}</span>
+              <span aria-hidden className="text-border">
+                ·
+              </span>
+              <span className="flex items-center gap-1">
+                <MapPin className="size-3.5 shrink-0" /> {config.endereco}
+              </span>
             </p>
           </div>
         </section>
