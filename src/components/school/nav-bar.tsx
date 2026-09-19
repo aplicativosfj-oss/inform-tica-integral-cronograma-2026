@@ -27,14 +27,14 @@ function NavLink({ to, label }: { to: string; label: string }) {
       size="sm"
       className={`relative hidden transition-all duration-300 sm:inline-flex ${
         isActive
-          ? "text-white bg-white/15 font-semibold"
-          : "text-white/80 hover:text-white hover:bg-white/10"
+          ? "text-slate-900 bg-slate-200/40 font-semibold dark:text-white dark:bg-white/15"
+          : "text-slate-700 hover:text-slate-900 hover:bg-slate-100/50 dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10"
       }`}
     >
       <Link to={to}>
         {label}
         {isActive && (
-          <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 shadow-lg shadow-blue-400/50" />
+          <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50 dark:from-blue-400 dark:to-cyan-400 dark:shadow-blue-400/50" />
         )}
       </Link>
     </Button>
@@ -53,7 +53,7 @@ export function NavBar() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-900/40 text-white shadow-lg shadow-black/20 backdrop-blur-2xl dark:bg-slate-950/50">
+    <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/50 dark:text-white dark:shadow-black/20">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
           <img
@@ -82,7 +82,7 @@ export function NavBar() {
                 asChild
                 variant="ghost"
                 size="sm"
-                className="relative hidden text-white/80 transition-all duration-300 hover:text-white hover:bg-white/10 sm:inline-flex"
+                className="relative hidden text-slate-700 transition-all duration-300 hover:text-slate-900 hover:bg-slate-100/50 dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10 sm:inline-flex"
               >
                 <Link to="/dashboard">
                   <LayoutDashboard />
@@ -92,7 +92,7 @@ export function NavBar() {
               <Button
                 size="sm"
                 onClick={logout}
-                className="hidden border border-white/20 bg-white/10 text-white hover:bg-white/20 sm:inline-flex"
+                className="hidden border border-slate-300/50 bg-slate-100/60 text-slate-900 hover:bg-slate-200/60 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 sm:inline-flex"
               >
                 <LogOut />
                 Sair
@@ -102,7 +102,7 @@ export function NavBar() {
             <Button
               asChild
               size="sm"
-              className="hidden bg-primary text-primary-foreground hover:bg-primary/90 sm:inline-flex"
+              className="hidden bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg sm:inline-flex"
             >
               <Link to="/login">Entrar</Link>
             </Button>
