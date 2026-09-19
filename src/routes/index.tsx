@@ -45,7 +45,7 @@ import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
-import logoFull from "@/assets/logo-full.svg";
+import logoFull from "@/assets/logo-full-transparent.png";
 import laboratorioTurmaFotoImg from "@/assets/image3.png";
 import alunoJogoImg from "@/assets/image2.jpeg";
 import alunoSorridenteImg from "@/assets/image10.jpeg";
