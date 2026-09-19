@@ -17,6 +17,7 @@ import { ConfirmProvider } from "../lib/confirm-store";
 import { JovemPanRadioProvider } from "../lib/jovem-pan-radio-store";
 import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
+import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 
 /**
  * Aplica o tema salvo (ou o do sistema) antes da primeira pintura, para
@@ -167,6 +168,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  usePWAInstallInitializer();
 
   useEffect(() => {
     // Em dev, o middleware SSR intercepta /sw.js e devolve HTML em vez do
