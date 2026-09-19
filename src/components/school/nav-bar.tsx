@@ -52,6 +52,7 @@ const LINKS = [
 export function NavBar() {
   const { isAuthenticated, isReady, logout } = useAuth();
   const [menuAberto, setMenuAberto] = useState(false);
+  const location = useLocation();
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/50 dark:text-white dark:shadow-black/20">
@@ -133,7 +134,8 @@ export function NavBar() {
               </SheetHeader>
               <nav className="mt-4 flex flex-col gap-1">
                 {LINKS.map((link) => {
-                  const isActive = location.pathname === link.to || (link.to === "/" && location.pathname === "");
+                  const isActive =
+                    location.pathname === link.to || (link.to === "/" && location.pathname === "");
                   return (
                     <SheetClose key={link.to} asChild>
                       <Link
