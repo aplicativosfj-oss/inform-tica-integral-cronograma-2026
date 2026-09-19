@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, ChevronRight, Clock3, Users2 } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock3, Users2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -47,12 +47,13 @@ export const Route = createFileRoute("/agenda")({
 
 function AgendaPage() {
   const { turmas, config } = useAppStore();
-  const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const [weekIndex, setWeekIndex] = useState(() => getWeekIndex(new Date()));
   const assignments = useMemo(
     () => buildWeeklySchedule(turmas, config, weekIndex),
     [turmas, config, weekIndex],
   );
   const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
+  const isCurrentWeek = weekIndex === getWeekIndex(new Date());
   const [diaSelecionado, setDiaSelecionado] = useState(
     config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),
   );
@@ -136,6 +137,29 @@ function AgendaPage() {
         </section>
 
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          {/* Week navigation */}
+          <div className="mb-6 flex items-center justify-between rounded-lg border border-border/60 bg-card/50 p-3 backdrop-blur-sm">
+            <button
+              type="button"
+              onClick={() => setWeekIndex(w => w - 1)}
+              className="cursor-pointer rounded-lg p-2 hover:bg-muted transition-colors"
+              aria-label="Semana anterior"
+            >
+              <ChevronLeft className="size-5" />
+            </button>
+            <span className="text-sm font-medium text-foreground">
+              {isCurrentWeek ? "Semana atual" : `Semana ${weekIndex > getWeekIndex(new Date()) ? `+${weekIndex - getWeekIndex(new Date())}` : weekIndex - getWeekIndex(new Date())}`}
+            </span>
+            <button
+              type="button"
+              onClick={() => setWeekIndex(w => w + 1)}
+              className="cursor-pointer rounded-lg p-2 hover:bg-muted transition-colors"
+              aria-label="Próxima semana"
+            >
+              <ChevronRight className="size-5" />
+            </button>
+          </div>
+
           <div className="mb-4">
             <LiveSessionPanel />
           </div>
