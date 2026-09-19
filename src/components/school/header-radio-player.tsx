@@ -62,18 +62,18 @@ export function HeaderRadioPlayer() {
     >
       <span
         className={cn(
-          "flex size-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40",
+          "flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40",
           tocando && "ring-2 ring-blue-400/80 dark:ring-cyan-300/80",
         )}
       >
         {status === "carregando" ? (
-          <Loader2 className="size-3.5 animate-spin" />
+          <Loader2 className="size-4 animate-spin" />
         ) : status === "erro" ? (
-          <AlertTriangle className="size-3.5 text-amber-400" />
+          <AlertTriangle className="size-4 text-amber-400" />
         ) : tocando ? (
-          <Pause className="size-3.5" />
+          <Pause className="size-4" />
         ) : (
-          <Play className="size-3.5 translate-x-0.5" />
+          <Play className="size-4 translate-x-0.5" />
         )}
       </span>
 

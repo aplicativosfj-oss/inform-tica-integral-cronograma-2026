@@ -120,11 +120,11 @@ export function NavBar() {
             <SheetTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 aria-label="Abrir menu"
                 className="text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:hidden"
               >
-                <Menu />
+                <Menu className="size-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">

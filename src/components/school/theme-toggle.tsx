@@ -18,7 +18,7 @@ export function ThemeToggle() {
       suppressHydrationWarning
       className="hover:bg-amber-400/20 dark:hover:bg-amber-300/20 hover:scale-110 dark:hover:text-amber-300 hover:text-amber-600 transition-all duration-300"
     >
-      {paraClaro ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      {paraClaro ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
     </Button>
   );
 }
