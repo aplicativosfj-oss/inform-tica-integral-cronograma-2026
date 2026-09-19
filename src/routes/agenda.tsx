@@ -95,7 +95,7 @@ function AgendaPage() {
             className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
           />
           <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-4">
               <Badge variant="secondary" className="w-fit gap-1.5">
                 <CalendarDays className="size-3.5" /> Agenda semanal
               </Badge>
@@ -107,6 +107,21 @@ function AgendaPage() {
                 {config.horaInicio} às {config.horaFim}, com o professor{" "}
                 {config.professorInformatica}.
               </p>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="rounded-lg border border-border/40 bg-card/50 p-3 backdrop-blur-sm">
+                  <p className="text-xs text-muted-foreground">Horário</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {config.horaInicio} – {config.horaFim}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-card/50 p-3 backdrop-blur-sm">
+                  <p className="text-xs text-muted-foreground">Computadores</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {config.numeroComputadores}
+                  </p>
+                </div>
+              </div>
             </div>
             <SiteImage
               src={agendaHeroImg}
