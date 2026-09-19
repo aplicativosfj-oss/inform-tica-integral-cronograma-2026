@@ -128,7 +128,7 @@ export function WeeklySchedule() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 w-24 shrink-0 border-b border-border/60 bg-card p-3" />
+                <th className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 dark:bg-slate-900/60" />
                 {colunas.map((dia) => {
                   const hoje = dia === todayLabel;
                   return (
@@ -156,7 +156,7 @@ export function WeeklySchedule() {
                 return (
                   <Fragment key={slot.inicio}>
                     <tr className="group/row">
-                      <td className="sticky left-0 z-10 w-24 shrink-0 border-b border-border/40 bg-card p-3 text-right align-top text-xs font-medium whitespace-nowrap text-muted-foreground">
+                      <td className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 text-right align-top text-xs font-semibold whitespace-nowrap text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
                         {slot.inicio}
                         <br />
                         {slot.fim}

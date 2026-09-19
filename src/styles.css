@@ -163,6 +163,32 @@
   }
 }
 
+/* Ritmo de espera do player de rádio parado — uma respiração lenta nas
+   barrinhas, bem mais devagar que o "tocando", só para não parecerem três
+   pontinhos travados na tela. */
+@keyframes radio-idle-breathe {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scaleY(0.62);
+    opacity: 0.7;
+  }
+}
+
+/* Convite sutil pra tocar: um halo que respira ao redor do botão parado. */
+@keyframes radio-idle-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.28);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(59, 130, 246, 0);
+  }
+}
+
 /* Entrada suave de seções ao rolar a página (ver use-scroll-reveal.ts). */
 @keyframes reveal-in {
   from {
@@ -256,6 +282,12 @@
   .animate-radio-eq {
     animation: radio-eq-bar var(--eq-duration, 0.6s) ease-in-out var(--eq-delay, 0s) infinite;
   }
+  .animate-radio-idle {
+    animation: radio-idle-breathe var(--eq-duration, 2.4s) ease-in-out var(--eq-delay, 0s) infinite;
+  }
+  .animate-radio-idle-glow {
+    animation: radio-idle-glow 2.4s ease-in-out infinite;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -265,6 +297,8 @@
   .animate-spin-slow,
   .animate-bounce-gentle,
   .animate-radio-eq,
+  .animate-radio-idle,
+  .animate-radio-idle-glow,
   .group:hover .group-hover-hop {
     animation: none !important;
   }

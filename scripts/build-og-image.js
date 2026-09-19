@@ -101,47 +101,60 @@ await sharp({ create: { width: L, height: A, channels: 3, background: "#0f172a" 
 
 console.log("public/og-image.jpg gerado com sucesso.");
 
-/* ---------- miniatura quadrada (o card social de verdade) ---------- */
-
+/* ---------- miniatura quadrada (o card social de verdade) ----------
+ * Antes era um retângulo azul chapado com a logo flutuando no meio — sem
+ * nada que lembrasse a escola de verdade. Agora é a mesma foto do banner
+ * grande (recorte quadrado, centrado na aluna), com um degradê só na base
+ * para o texto ficar legível — compacta, mas com cara de gente de verdade,
+ * não de peça de marketing genérica. */
 const Q = 600;
+
+/** Recorte quadrado da mesma foto do banner, centrado na aluna. */
+async function fotoQuadrada() {
+  const origem = resolve(raiz, "src/assets/alunos-hero.jpg");
+  const { width, height } = await sharp(origem).metadata();
+  const lado = height;
+  const esquerda = Math.min(Math.max(Math.round(width * 0.62 - lado / 2), 0), width - lado);
+  return sharp(origem)
+    .extract({ left: esquerda, top: 0, width: lado, height: lado })
+    .resize(Q, Q, { fit: "cover" })
+    .modulate({ brightness: 1.03, saturation: 1.05 })
+    .toBuffer();
+}
 
 const miniaturaSvg = `
 <svg width="${Q}" height="${Q}" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1e3a8a"/>
-      <stop offset="55%" stop-color="#1d4ed8"/>
-      <stop offset="100%" stop-color="#2563eb"/>
-    </linearGradient>
-    <linearGradient id="luz" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+    <!-- Só a base escurece, para o texto não brigar com a foto. -->
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1e4d" stop-opacity="0"/>
+      <stop offset="46%" stop-color="#0b1e4d" stop-opacity="0"/>
+      <stop offset="78%" stop-color="#0b1e4d" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#0b1e4d" stop-opacity="0.92"/>
     </linearGradient>
   </defs>
 
-  <rect width="${Q}" height="${Q}" fill="url(#fundo)"/>
-  <circle cx="90" cy="70" r="300" fill="url(#luz)"/>
-  <rect x="0" y="0" width="${Q}" height="12" fill="#fbbf24"/>
+  <rect width="${Q}" height="${Q}" fill="url(#fade)"/>
+  <rect x="0" y="${Q - 6}" width="${Q}" height="6" fill="#fbbf24"/>
 
-  <!-- Cartão branco: a marca é azul-escura e sumiria sobre o fundo azul. -->
-  <rect x="70" y="186" width="460" height="228" rx="28" fill="#ffffff"/>
+  <!-- Selo branco discreto por trás do ícone: a marca é escura e sumiria na foto. -->
+  <rect x="28" y="28" width="64" height="64" rx="16" fill="#ffffff" fill-opacity="0.96"/>
 
-  <text x="${Q / 2}" y="486" text-anchor="middle" font-family="${FONTE}" font-size="30"
-        font-weight="700" fill="#dbeafe">Agenda de Informática</text>
-  <text x="${Q / 2}" y="526" text-anchor="middle" font-family="${FONTE}" font-size="21"
-        font-weight="600" fill="#93c5fd">Escola Dr. Eiraldo Carneiro</text>
+  <g font-family="${FONTE}">
+    <text x="32" y="486" font-size="34" font-weight="700" fill="#ffffff">Agenda de Informática</text>
+    <text x="32" y="518" font-size="19" font-weight="600" fill="#bfdbfe">Escola Dr. Eiraldo Carneiro</text>
+  </g>
 </svg>`;
 
-const logoMiniatura = await sharp(resolve(raiz, "src/assets/logo-full-transparent.png"))
-  .resize({ width: 380 })
+const iconeMiniatura = await sharp(resolve(raiz, "src/assets/logo-icon.png"))
+  .resize({ width: 44 })
   .toBuffer();
-
-const { height: alturaLogo } = await sharp(logoMiniatura).metadata();
 
 await sharp({ create: { width: Q, height: Q, channels: 3, background: "#1d4ed8" } })
   .composite([
+    { input: await fotoQuadrada(), left: 0, top: 0 },
     { input: Buffer.from(miniaturaSvg), left: 0, top: 0 },
-    { input: logoMiniatura, left: (Q - 380) / 2, top: Math.round(300 - alturaLogo / 2) },
+    { input: iconeMiniatura, left: 38, top: 38 },
   ])
   .jpeg({ quality: 90, chromaSubsampling: "4:4:4" })
   .toFile(resolve(raiz, "public/og-thumb.jpg"));

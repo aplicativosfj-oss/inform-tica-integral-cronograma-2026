@@ -5,7 +5,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useJovemPanRadio } from "@/lib/jovem-pan-radio-store";
 import { cn } from "@/lib/utils";
 
-/** Barrinhas de espectro animadas, só de verdade enquanto está tocando. */
+/**
+ * Barrinhas de espectro: um VU-meter de verdade tocando, e uma respiração
+ * bem mais lenta e discreta quando parado — em vez de ficarem três
+ * pontinhos estáticos, dão um sinal sutil de que o player está vivo e
+ * pronto pra tocar.
+ */
 function Espectro({ ativo }: { ativo: boolean }) {
   const atrasos = [0, 0.12, 0.24, 0.08, 0.18];
   return (
@@ -15,16 +20,14 @@ function Espectro({ ativo }: { ativo: boolean }) {
           key={i}
           className={cn(
             "w-[2.5px] rounded-full bg-gradient-to-t from-blue-500 dark:from-cyan-400 to-emerald-500 dark:to-fuchsia-400",
-            ativo ? "animate-radio-eq" : "h-[3px] opacity-40",
+            ativo ? "animate-radio-eq" : "animate-radio-idle",
           )}
           style={
-            ativo
-              ? ({
-                  height: "16px",
-                  "--eq-duration": `${0.55 + atraso}s`,
-                  "--eq-delay": `${atraso}s`,
-                } as React.CSSProperties)
-              : undefined
+            {
+              height: "16px",
+              "--eq-duration": ativo ? `${0.55 + atraso}s` : `${2.1 + atraso}s`,
+              "--eq-delay": `${atraso}s`,
+            } as React.CSSProperties
           }
         />
       ))}
@@ -108,6 +111,7 @@ export function HeaderRadioPlayer() {
                 className={cn(
                   "flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40",
                   tocando && "ring-2 ring-blue-400/80 dark:ring-cyan-300/80",
+                  status === "parado" && "animate-radio-idle-glow",
                 )}
               >
                 {status === "carregando" ? (
