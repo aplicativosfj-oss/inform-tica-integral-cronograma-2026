@@ -9,7 +9,6 @@ import {
   GraduationCap,
   LayoutDashboard,
   MonitorSmartphone,
-  PartyPopper,
   ShieldCheck,
   Sparkles,
   Timer,
@@ -223,7 +222,6 @@ function Index() {
         </RevealSection>
 
         <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6">
-          <NovoCronogramaBanner />
           <div className="grid gap-3 lg:grid-cols-[1fr_1.6fr] lg:items-start">
             <WeatherWidget />
             <LiveSessionPanel />
@@ -322,43 +320,6 @@ function Index() {
 
         <SiteFooter />
       </div>
-    </div>
-  );
-}
-
-/**
- * Announces the new schedule (bigger blocks, more seats per turma) starting
- * fresh on the next Monday — today's sessions were suspended so the old and
- * new schedules never mix mid-week. Only shows up until that Monday arrives,
- * then disappears on its own. Reads the block duration from `config` (not
- * hardcoded) so the message never goes stale if it changes again.
- */
-function NovoCronogramaBanner() {
-  const { config } = useAppStore();
-  const [montado, setMontado] = useState(false);
-  useEffect(() => setMontado(true), []);
-
-  const proximaSegunda = useMemo(() => proximaDataDoDia("Segunda", new Date()), []);
-  const dataFormatada = proximaSegunda.toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "2-digit",
-    month: "long",
-  });
-
-  if (!montado) return null;
-  const hoje = toDateKey(new Date());
-  const segundaKey = toDateKey(proximaSegunda);
-  if (hoje >= segundaKey) return null;
-
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-primary/25 bg-primary/10 px-4 py-3 shadow-sm backdrop-blur-md dark:border-white/15 dark:bg-white/5 sm:items-center">
-      <PartyPopper className="mt-0.5 size-5 shrink-0 text-primary sm:mt-0" />
-      <p className="text-sm text-foreground">
-        <span className="font-semibold">Cronograma novo a partir de {dataFormatada}:</span> aulas de{" "}
-        {config.duracaoSlotMinutos} min, com mais alunos participando por turma toda semana. As
-        aulas de hoje foram pausadas para a transição — a agenda nova já está pronta e visível
-        abaixo.
-      </p>
     </div>
   );
 }
