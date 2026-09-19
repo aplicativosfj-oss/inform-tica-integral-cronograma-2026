@@ -50,6 +50,7 @@ import laboratorioTurmaFotoImg from "@/assets/image3.png";
 import alunoJogoImg from "@/assets/image2.jpeg";
 import alunoSorridenteImg from "@/assets/image10.jpeg";
 import programacaoBgImg from "@/assets/image9.png";
+import homePageBgImg from "@/assets/homepage-bg.svg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -101,6 +102,11 @@ function Index() {
         <NavBar />
 
         <section className="relative overflow-hidden border-b border-border/60">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center"
+            style={{ backgroundImage: `url(${homePageBgImg})` }}
+          />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_14%,transparent),transparent_50%),linear-gradient(180deg,transparent_70%,var(--background)_100%)]"
