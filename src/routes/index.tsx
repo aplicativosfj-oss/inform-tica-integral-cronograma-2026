@@ -220,7 +220,7 @@ function Index() {
                 alt="Aluna usando um dos computadores do laboratório de informática da escola"
                 width={1560}
                 height={480}
-                className="relative aspect-[13/4] w-full rounded-2xl border border-border/60 bg-card shadow-2xl"
+                className="relative aspect-[13/4] max-h-56 w-full rounded-2xl border border-border/60 bg-card shadow-2xl sm:max-h-64"
                 loading="eager"
                 decoding="async"
               />

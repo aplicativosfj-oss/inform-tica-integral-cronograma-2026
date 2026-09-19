@@ -74,7 +74,7 @@ function SobrePage() {
               alt={`Turma da ${config.nomeEscola} no laboratório de informática, com a mensagem "Informática é porta para o futuro"`}
               width={1280}
               height={720}
-              className="aspect-[16/9] w-full"
+              className="aspect-[16/9] max-h-64 w-full"
               loading="eager"
               decoding="async"
             />

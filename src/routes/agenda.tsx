@@ -110,7 +110,7 @@ function AgendaPage() {
             alt="Aluno participando de uma atividade educativa no laboratório de informática"
             width={2016}
             height={1134}
-            className="aspect-[16/10] w-full rounded-2xl border border-border/60 shadow-xl"
+            className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
             loading="eager"
             decoding="async"
           />

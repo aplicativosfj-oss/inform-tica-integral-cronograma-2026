@@ -1,4 +1,4 @@
-import { ImageOff, ShieldAlert, ZoomIn } from "lucide-react";
+import { ImageOff, ShieldAlert } from "lucide-react";
 import { useState, type CSSProperties, type ImgHTMLAttributes } from "react";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -45,7 +45,7 @@ export function SiteImage({
       <button
         type="button"
         onClick={() => setAberta(true)}
-        className={cn("group/img relative block cursor-zoom-in", className)}
+        className={cn("group/img relative block cursor-pointer", className)}
         aria-label={`Ampliar imagem: ${alt}`}
       >
         <img
@@ -55,15 +55,9 @@ export function SiteImage({
           onContextMenu={bloquearContextoEArraste}
           onDragStart={bloquearContextoEArraste}
           style={ANTI_COPIA_STYLE}
-          className="size-full object-cover"
+          className="size-full object-cover transition-[filter] duration-200 group-hover/img:brightness-95"
           {...props}
         />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-[background-color,opacity] duration-200 group-hover/img:bg-black/30 group-hover/img:opacity-100"
-        >
-          <ZoomIn className="size-6 text-white drop-shadow" />
-        </span>
       </button>
 
       <Dialog open={aberta} onOpenChange={setAberta}>

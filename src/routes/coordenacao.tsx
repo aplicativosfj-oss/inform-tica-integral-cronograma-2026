@@ -155,7 +155,7 @@ function CoordenacaoPage() {
             alt="Aluno usando um computador do laboratório de informática durante a aula"
             width={2016}
             height={1134}
-            className="aspect-[16/10] w-full rounded-2xl border border-border/60 shadow-xl"
+            className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
             loading="eager"
             decoding="async"
           />
