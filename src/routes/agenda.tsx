@@ -24,7 +24,7 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
-import agendaHeroImg from "@/assets/image6.jpeg";
+import agendaHeroImg from "@/assets/cronograma-aulas-educacao.jpg";
 
 export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
@@ -110,9 +110,9 @@ function AgendaPage() {
             </div>
             <SiteImage
               src={agendaHeroImg}
-              alt="Aluno participando de uma atividade educativa no laboratório de informática"
-              width={2016}
-              height={1134}
+              alt="Alunos estudando e aprendendo informática com computadores em sala de aula"
+              width={800}
+              height={500}
               className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
               loading="eager"
               decoding="async"
