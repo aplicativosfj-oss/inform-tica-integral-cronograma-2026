@@ -1,31 +1,29 @@
-import { useEffect } from "react";
-import { initPWAInstallListener, usePWAInstallStore } from "./pwa-install-store";
+import { useEffect, useSyncExternalStore } from "react";
 
-/**
- * Hook to initialize PWA install prompt listener
- * Should be called once in the app root (e.g., in main layout/root component)
- */
+import {
+  getPWAInstallServerSnapshot,
+  getPWAInstallSnapshot,
+  initPWAInstallListener,
+  subscribePWAInstall,
+  triggerPWAInstall,
+} from "./pwa-install-store";
+
+/** Liga o listener do `beforeinstallprompt`. Chamar uma vez, na raiz do app. */
 export function usePWAInstallInitializer() {
-  useEffect(() => {
-    const cleanup = initPWAInstallListener();
-    return cleanup;
-  }, []);
+  useEffect(() => initPWAInstallListener(), []);
 }
 
-/**
- * Hook to access PWA install state and trigger installation
- */
 export function usePWAInstall() {
-  const promptEvent = usePWAInstallStore((state) => state.promptEvent);
-  const isInstalled = usePWAInstallStore((state) => state.isInstalled);
-  const isInstalling = usePWAInstallStore((state) => state.isInstalling);
-  const triggerInstall = usePWAInstallStore((state) => state.triggerInstall);
+  const estado = useSyncExternalStore(
+    subscribePWAInstall,
+    getPWAInstallSnapshot,
+    getPWAInstallServerSnapshot,
+  );
 
   return {
-    promptEvent,
-    isInstalled,
-    isInstalling,
-    canInstall: Boolean(promptEvent),
-    triggerInstall,
+    isInstalled: estado.isInstalled,
+    isInstalling: estado.isInstalling,
+    canInstall: Boolean(estado.promptEvent),
+    triggerInstall: triggerPWAInstall,
   };
 }

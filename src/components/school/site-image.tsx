@@ -27,12 +27,19 @@ const AVISO_DIREITOS =
  */
 export function SiteImage({
   src,
+  srcLarga,
   alt,
   legenda,
   className,
   ...props
 }: {
   src: string;
+  /**
+   * Versão para telas largas (>=1024px). Existe para direção de arte: em
+   * celular um recorte alto lê bem, em desktop um banner panorâmico. Sem ela,
+   * `src` serve as duas — e só um dos arquivos é baixado, nunca os dois.
+   */
+  srcLarga?: string;
   alt: string;
   /** Explicação maior, mostrada no visualizador ampliado. Usa `alt` se omitida. */
   legenda?: string;
@@ -48,21 +55,8 @@ export function SiteImage({
         className={cn("group/img cursor-pointer relative block", className)}
         aria-label={`Ampliar imagem: ${alt}`}
       >
-        <img
-          src={src}
-          alt={alt}
-          draggable={false}
-          onContextMenu={bloquearContextoEArraste}
-          onDragStart={bloquearContextoEArraste}
-          style={ANTI_COPIA_STYLE}
-          className="size-full object-cover transition-[filter] duration-200 group-hover/img:brightness-95"
-          {...props}
-        />
-      </button>
-
-      <Dialog open={aberta} onOpenChange={setAberta}>
-        <DialogContent className="max-w-3xl gap-0 overflow-hidden p-0 sm:rounded-2xl">
-          <DialogTitle className="sr-only">{descricao}</DialogTitle>
+        <picture>
+          {srcLarga ? <source media="(min-width: 1024px)" srcSet={srcLarga} /> : null}
           <img
             src={src}
             alt={alt}
@@ -70,8 +64,27 @@ export function SiteImage({
             onContextMenu={bloquearContextoEArraste}
             onDragStart={bloquearContextoEArraste}
             style={ANTI_COPIA_STYLE}
-            className="max-h-[70vh] w-full bg-black object-contain"
+            className="size-full object-cover transition-[filter] duration-200 group-hover/img:brightness-95"
+            {...props}
           />
+        </picture>
+      </button>
+
+      <Dialog open={aberta} onOpenChange={setAberta}>
+        <DialogContent className="max-w-3xl gap-0 overflow-hidden p-0 sm:rounded-2xl">
+          <DialogTitle className="sr-only">{descricao}</DialogTitle>
+          <picture>
+            {srcLarga ? <source media="(min-width: 1024px)" srcSet={srcLarga} /> : null}
+            <img
+              src={src}
+              alt={alt}
+              draggable={false}
+              onContextMenu={bloquearContextoEArraste}
+              onDragStart={bloquearContextoEArraste}
+              style={ANTI_COPIA_STYLE}
+              className="max-h-[70vh] w-full bg-black object-contain"
+            />
+          </picture>
           <div className="flex flex-col gap-2 p-4">
             <p className="text-sm font-medium text-foreground">{descricao}</p>
             <p className="flex items-start gap-1.5 text-xs text-muted-foreground">

@@ -106,12 +106,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro" },
       { property: "og:locale", content: "pt_BR" },
-      { property: "og:image", content: "/og-image.jpg" },
-      { property: "og:image:width", content: "1600" },
-      { property: "og:image:height", content: "900" },
+      // O ?v= força Facebook/WhatsApp/LinkedIn a rebaixar o card em cache;
+      // sem ele, a arte antiga continua aparecendo por semanas nos
+      // compartilhamentos. Suba o número sempre que a arte mudar.
+      { property: "og:image", content: "/og-image.jpg?v=5" },
+      { property: "og:image:type", content: "image/jpeg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       {
         property: "og:image:alt",
-        content: "Alunos usando os computadores do laboratório de informática",
+        content: "Aluna sorrindo ao usar o computador no laboratório de informática da escola",
       },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Agenda de Informática" },
@@ -119,7 +123,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "twitter:description",
         content: "Cronograma das aulas de informática por turma, dia e horário.",
       },
-      { name: "twitter:image", content: "/og-image.jpg" },
+      { name: "twitter:image", content: "/og-image.jpg?v=5" },
+      {
+        name: "twitter:image:alt",
+        content: "Aluna sorrindo ao usar o computador no laboratório de informática da escola",
+      },
       { name: "theme-color", content: "#1e3a8a" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },

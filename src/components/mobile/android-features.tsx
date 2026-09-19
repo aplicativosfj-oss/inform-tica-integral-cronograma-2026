@@ -2,12 +2,11 @@ import { Calendar, Bell, Share2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   shareEventToCalendar,
-  canShareToCalendar,
   requestNotificationPermission,
   sendNotification,
-  isInstalledPWA,
 } from "@/lib/device-detector";
-import { useDeviceDetector, useInstalledPWA } from "@/lib/use-device-detector";
+import { useDeviceDetector } from "@/lib/use-device-detector";
+import { usePWAInstall } from "@/lib/use-pwa-install";
 import { useState } from "react";
 
 export interface AndroidFeaturesProps {
@@ -30,10 +29,9 @@ export function AndroidFeatures({
   eventEnd,
 }: AndroidFeaturesProps) {
   const { device } = useDeviceDetector();
-  const { isInstalled } = useInstalledPWA();
+  const { canInstall, isInstalling, triggerInstall } = usePWAInstall();
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [sharingEvent, setSharingEvent] = useState(false);
-  const [installPromptVisible, setInstallPromptVisible] = useState(false);
 
   if (!device) return null;
 
@@ -73,17 +71,6 @@ export function AndroidFeatures({
     }
   };
 
-  const handleInstallPWA = () => {
-    // Typically triggered by beforeinstallprompt event
-    // This is a fallback UI
-    if (device.canInstallPWA) {
-      // Dispatch custom event that a PWA install prompt listener can catch
-      window.dispatchEvent(
-        new CustomEvent("trigger-install-prompt", { detail: { source: "android" } })
-      );
-    }
-  };
-
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:gap-1">
       {/* Share to Calendar button */}
@@ -115,12 +102,13 @@ export function AndroidFeatures({
         </Button>
       )}
 
-      {/* Install PWA button */}
-      {device.canInstallPWA && !isInstalled && (
+      {/* Install PWA button — só aparece quando o Chrome ofereceu o convite */}
+      {canInstall && (
         <Button
           variant="outline"
           size="sm"
-          onClick={handleInstallPWA}
+          onClick={triggerInstall}
+          disabled={isInstalling}
           className="gap-2 text-xs sm:text-sm cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20"
           title="Instalar aplicativo no Android"
         >

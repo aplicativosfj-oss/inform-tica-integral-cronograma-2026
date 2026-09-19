@@ -42,6 +42,7 @@ import {
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
+import heroLabFotoImg from "@/assets/hero-lab-photo.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
@@ -102,19 +103,28 @@ function Index() {
         <NavBar />
 
         <section className="relative overflow-hidden border-b border-border/60">
+          {/* O padrão de marca é a camada mais baixa. No celular a seção fica
+              alta e estreita, então o bg-cover amplia muito o SVG — por isso
+              ele entra bem apagado aqui e só ganha presença a partir do sm. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center"
+            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-30 sm:opacity-60"
             style={{ backgroundImage: `url(${homePageBgImg})` }}
+          />
+          {/* Véu que define a luz do hero: claro e arejado no modo claro,
+              azul-noite um tom acima do fundo da página no modo escuro. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-sky-50/85 via-white/55 to-background dark:from-slate-800/70 dark:via-slate-900/60 dark:to-background"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_14%,transparent),transparent_50%),linear-gradient(180deg,transparent_70%,var(--background)_100%)]"
+            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_-10%,rgba(56,130,246,0.16),transparent_55%),radial-gradient(circle_at_100%_8%,rgba(14,165,233,0.13),transparent_50%)]"
           />
           {/* Yellow accent stripe, echoing the school's brand colors from the printed materials. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 -z-10 size-56 rotate-45 bg-amber-400/25"
+            className="pointer-events-none absolute -right-12 -top-12 -z-10 size-32 rotate-45 bg-amber-400/20 sm:-right-16 sm:-top-16 sm:size-56 sm:bg-amber-400/25"
           />
           <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
@@ -176,7 +186,7 @@ function Index() {
               </dl>
             </div>
 
-            <div className="relative">
+            <div className="relative order-first lg:order-none">
               <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" aria-hidden />
               {/* Elementos decorativos flutuantes — sutis, só para dar vida ao
                   hero sem distrair do conteúdo real. */}
@@ -199,13 +209,15 @@ function Index() {
                 className="absolute -left-2 -top-2 z-10 h-auto w-24 max-w-[28%] rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:-left-3 sm:-top-3 sm:w-32"
               />
               <SiteImage
-                src={escolaInformaticaHeroImg}
+                src={heroLabFotoImg}
+                srcLarga={escolaInformaticaHeroImg}
                 alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
-                width={1560}
-                height={480}
-                className="relative aspect-[13/4] max-h-56 w-full rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-slate-900/40 shadow-2xl backdrop-blur-xl sm:max-h-64"
+                width={1600}
+                height={900}
+                className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:aspect-[2/1] lg:aspect-[13/4] lg:max-h-64"
                 loading="eager"
                 decoding="async"
+                fetchPriority="high"
               />
             </div>
           </div>
