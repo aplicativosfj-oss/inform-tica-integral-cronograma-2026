@@ -1,13 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarClock, GraduationCap, Settings2, UserX, Users2 } from "lucide-react";
+import {
+  CalendarClock,
+  GraduationCap,
+  LayoutDashboard,
+  Settings2,
+  UserX,
+  Users2,
+} from "lucide-react";
 import type { ReactNode } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
+import { SiteImage } from "@/components/school/site-image";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
+import dashboardHeroImg from "@/assets/laboratorio-informatica-turma.jpg";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardHome,
@@ -27,11 +37,31 @@ function DashboardHome() {
 
   return (
     <DashboardShell>
-      <div className="mb-6 flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">Visão geral</h1>
-        <p className="text-sm text-muted-foreground">
-          Bem-vindo(a), {email}. Gerencie turmas, alunos e horários da sala de informática.
-        </p>
+      <div className="mb-6 overflow-hidden rounded-2xl border border-border/60 shadow-sm">
+        <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%)] bg-card"
+          />
+          <div>
+            <Badge variant="secondary" className="mb-2 gap-1.5">
+              <LayoutDashboard className="size-3.5" /> Painel de gestão
+            </Badge>
+            <h1 className="text-2xl font-semibold text-foreground">Visão geral</h1>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              Bem-vindo(a), {email}. Gerencie turmas, alunos e horários da sala de informática.
+            </p>
+          </div>
+          <SiteImage
+            src={dashboardHeroImg}
+            alt="Laboratório de informática da escola, usado na gestão do painel"
+            width={480}
+            height={280}
+            className="aspect-[16/9] w-full shrink-0 rounded-xl sm:w-64"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
