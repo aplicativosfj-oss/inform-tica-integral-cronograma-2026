@@ -22,7 +22,7 @@ import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { buildWeeklySchedule, getWeekIndex, toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
-import coordenacaoHeroImg from "@/assets/feature-classroom-tech.jpg";
+import coordenacaoHeroImg from "@/assets/alunos-hero.jpg";
 
 export const Route = createFileRoute("/coordenacao")({
   component: CoordenacaoPage,
