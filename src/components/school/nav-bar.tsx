@@ -56,12 +56,12 @@ export function NavBar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/50 dark:text-white dark:shadow-black/20">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-1.5 px-3 sm:h-14 sm:gap-2 sm:px-6">
         <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
           <img
             src={logoIcon}
             alt="Agenda de Informática .Online"
-            className="size-8 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20 sm:size-9"
+            className="size-9 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20"
           />
           <span className="flex min-w-0 flex-col leading-tight">
             <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">
@@ -70,14 +70,14 @@ export function NavBar() {
             {/* O nome da escola acompanha a marca em toda tela. No celular o
                 espaço é disputado com o player e o menu, então entra a forma
                 abreviada — cabe inteira, em vez de truncar no meio. */}
-            <span className="truncate text-[10px] text-slate-600 dark:text-white/60 sm:text-[11px]">
+            <span className="truncate text-[11px] text-slate-600 dark:text-white/60">
               <span className="sm:hidden">E.M. Dr. Eiraldo Carneiro</span>
               <span className="hidden sm:inline">Escola Dr. Eiraldo Carneiro</span>
             </span>
           </span>
         </Link>
 
-        <nav className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <nav className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <NavLink to="/" label="Início" />
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
@@ -123,9 +123,9 @@ export function NavBar() {
                 variant="ghost"
                 size="icon"
                 aria-label="Abrir menu"
-                className="text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:hidden"
+                className="size-10 text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:hidden [&_svg]:size-[22px]"
               >
-                <Menu className="size-5" />
+                <Menu />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">

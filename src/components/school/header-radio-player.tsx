@@ -99,7 +99,7 @@ export function HeaderRadioPlayer() {
               onClick={alternarReproducao}
               aria-label={tocando ? "Parar Jovem Pan News" : "Ouvir Jovem Pan News ao vivo"}
               className={cn(
-                "group cursor-pointer relative flex items-center gap-2 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+                "group cursor-pointer relative flex items-center gap-1.5 overflow-hidden rounded-full border px-2.5 py-1.5 text-xs font-medium transition-all sm:gap-2 sm:px-3",
                 "border-blue-400/30 dark:border-transparent bg-gradient-to-r from-blue-500/10 dark:from-cyan-500/15 via-emerald-500/10 dark:via-blue-500/10 to-emerald-500/10 dark:to-fuchsia-500/15",
                 "before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-gradient-to-r before:from-blue-400 dark:before:from-cyan-400 before:via-emerald-500 dark:before:via-blue-500 before:to-emerald-500 dark:before:to-fuchsia-500 before:opacity-20 dark:before:opacity-30 before:blur-[6px]",
                 tocando
@@ -109,19 +109,19 @@ export function HeaderRadioPlayer() {
             >
               <span
                 className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40",
+                  "flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40 sm:size-7",
                   tocando && "ring-2 ring-blue-400/80 dark:ring-cyan-300/80",
                   status === "parado" && "animate-radio-idle-glow",
                 )}
               >
                 {status === "carregando" ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 className="size-[18px] animate-spin sm:size-4" />
                 ) : status === "erro" ? (
-                  <AlertTriangle className="size-4 text-amber-400" />
+                  <AlertTriangle className="size-[18px] text-amber-400 sm:size-4" />
                 ) : tocando ? (
-                  <Pause className="size-4" />
+                  <Pause className="size-[18px] sm:size-4" />
                 ) : (
-                  <Play className="size-4 translate-x-0.5" />
+                  <Play className="size-[18px] translate-x-0.5 sm:size-4" />
                 )}
               </span>
 

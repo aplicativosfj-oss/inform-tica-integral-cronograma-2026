@@ -49,9 +49,9 @@ export function ShareButton() {
       onClick={compartilhar}
       aria-label="Compartilhar esta página"
       title="Compartilhar"
-      className="text-slate-600 transition-all duration-300 hover:scale-110 hover:bg-blue-500/15 hover:text-blue-700 dark:text-white/70 dark:hover:bg-cyan-300/20 dark:hover:text-cyan-300"
+      className="size-10 text-slate-600 transition-all duration-300 hover:scale-110 hover:bg-blue-500/15 hover:text-blue-700 dark:text-white/70 dark:hover:bg-cyan-300/20 dark:hover:text-cyan-300 [&_svg]:size-5"
     >
-      {copiado ? <Check className="size-[18px]" /> : <Share2 className="size-[18px]" />}
+      {copiado ? <Check /> : <Share2 />}
     </Button>
   );
 }
