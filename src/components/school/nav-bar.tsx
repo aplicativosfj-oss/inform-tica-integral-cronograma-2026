@@ -27,8 +27,8 @@ function NavLink({ to, label }: { to: string; label: string }) {
       size="sm"
       className={`relative hidden transition-all duration-300 sm:inline-flex ${
         isActive
-          ? "text-slate-900 bg-slate-200/60 font-semibold dark:text-white dark:bg-white/20"
-          : "text-slate-700 hover:text-slate-900 hover:bg-slate-200/70 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-white dark:hover:bg-white/15 dark:hover:shadow-lg dark:hover:scale-105"
+          ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
+          : "text-slate-700 hover:text-white hover:bg-blue-500 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
       }`}
     >
       <Link to={to}>
