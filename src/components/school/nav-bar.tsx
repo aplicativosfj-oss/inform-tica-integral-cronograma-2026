@@ -59,11 +59,11 @@ export function NavBar() {
           <img
             src={logoIcon}
             alt="Agenda de Informática .Online"
-            className="size-9 shrink-0 rounded-lg bg-white object-contain p-1 shadow-sm ring-1 ring-white/20"
+            className="size-9 shrink-0 rounded-lg bg-slate-100 dark:bg-white object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:ring-white/20"
           />
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-sm font-semibold text-white">Agenda de Informática</span>
-            <span className="hidden text-[11px] text-white/60 sm:block">
+            <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">Agenda de Informática</span>
+            <span className="hidden text-[11px] text-slate-600 dark:text-white/60 sm:block">
               Escola Dr. Eiraldo Carneiro
             </span>
           </span>
@@ -114,7 +114,7 @@ export function NavBar() {
                 variant="ghost"
                 size="sm"
                 aria-label="Abrir menu"
-                className="text-white/80 hover:bg-white/10 hover:text-white sm:hidden"
+                className="text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:hidden"
               >
                 <Menu />
               </Button>
