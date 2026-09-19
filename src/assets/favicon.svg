@@ -1,59 +1,45 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#1e40af;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
     </linearGradient>
 
-    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
-    </linearGradient>
-
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.5"/>
     </filter>
   </defs>
 
-  <!-- Fundo gradiente profissional -->
-  <rect width="200" height="200" fill="url(#bgGrad)"/>
+  <!-- Fundo colorido destacado -->
+  <rect width="200" height="200" fill="url(#bgGradient)" rx="45"/>
 
-  <!-- Overlay de padrão sutil -->
-  <rect width="200" height="200" fill="url(#bgGrad)" opacity="0.3"/>
+  <!-- Borda/frame para mais destaque -->
+  <rect width="200" height="200" fill="none" stroke="#f59e0b" stroke-width="3" rx="45" opacity="0.8"/>
 
-  <!-- Ícone de laptop -->
-  <g transform="translate(40, 45)">
+  <!-- Ícone de laptop GRANDE e branco -->
+  <g transform="translate(50, 50)" filter="url(#shadow)">
     <!-- Tela do laptop -->
-    <rect x="0" y="0" width="120" height="80" rx="8" fill="#0f172a" stroke="url(#goldGrad)" stroke-width="5" filter="url(#glow)"/>
+    <rect x="0" y="0" width="100" height="65" rx="6" fill="none" stroke="#ffffff" stroke-width="4"/>
 
-    <!-- Brilho interno -->
-    <rect x="6" y="6" width="108" height="68" rx="6" fill="#1e3a8a" opacity="0.7"/>
+    <!-- Preenchimento da tela (azul claro) -->
+    <rect x="4" y="4" width="92" height="57" rx="4" fill="#3b82f6" opacity="0.3"/>
 
-    <!-- Pontos de circuito (dourado) -->
-    <circle cx="40" cy="28" r="4" fill="url(#goldGrad)"/>
-    <circle cx="60" cy="20" r="4" fill="url(#goldGrad)"/>
-    <circle cx="80" cy="32" r="4" fill="url(#goldGrad)"/>
+    <!-- Pontos de circuito (DOURADO) -->
+    <circle cx="30" cy="20" r="3.5" fill="#fbbf24"/>
+    <circle cx="50" cy="15" r="3.5" fill="#fbbf24"/>
+    <circle cx="70" cy="25" r="3.5" fill="#fbbf24"/>
 
-    <!-- Linhas de conexão (dourado) -->
-    <line x1="40" y1="28" x2="60" y2="20" stroke="url(#goldGrad)" stroke-width="2.5" opacity="0.9"/>
-    <line x1="60" y1="20" x2="80" y2="32" stroke="url(#goldGrad)" stroke-width="2.5" opacity="0.9"/>
+    <!-- Linhas de conexão (DOURADO) -->
+    <line x1="30" y1="20" x2="50" y2="15" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="50" y1="15" x2="70" y2="25" stroke="#fbbf24" stroke-width="2"/>
 
-    <!-- Teclado -->
-    <rect x="0" y="80" width="120" height="14" rx="2" fill="url(#goldGrad)" filter="url(#glow)"/>
+    <!-- Teclado (BRANCO) -->
+    <rect x="0" y="65" width="100" height="10" rx="2" fill="#ffffff" opacity="0.9"/>
 
-    <!-- Detalhe do teclado -->
-    <rect x="6" y="84" width="108" height="6" rx="1" fill="#1e3a8a" opacity="0.9"/>
-
-    <!-- Suporte/dobradiça -->
-    <polygon points="45,80 75,80 70,100 50,100" fill="url(#goldGrad)" opacity="0.95"/>
+    <!-- Suporte (DOURADO) -->
+    <polygon points="35,65 65,65 60,80 40,80" fill="#f59e0b"/>
   </g>
 
-  <!-- Destaque de canto (dourado) -->
-  <circle cx="165" cy="35" r="18" fill="#fbbf24" opacity="0.15"/>
-  <circle cx="165" cy="35" r="12" fill="url(#goldGrad)" opacity="0.25"/>
+  <!-- Destaque adicional no canto -->
+  <circle cx="160" cy="40" r="20" fill="#fbbf24" opacity="0.15"/>
 </svg>
