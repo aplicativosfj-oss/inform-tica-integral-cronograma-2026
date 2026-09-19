@@ -9,7 +9,15 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    // Carrega a rota ao passar o mouse (ou ao encostar, no celular). Quando o
+    // clique chega, o código já está em memória e a troca é imediata.
+    defaultPreload: "intent",
+    // Com 0 o preload era descartado na hora e o clique baixava tudo de novo.
+    defaultPreloadStaleTime: 30_000,
+    // Só mostra estado de carregando se a troca passar de 150ms — abaixo disso
+    // o respingo de "carregando" atrapalha mais do que a espera.
+    defaultPendingMs: 150,
+    defaultPendingMinMs: 300,
   });
 
   return router;

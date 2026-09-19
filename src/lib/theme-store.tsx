@@ -44,8 +44,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!sincronizado) return;
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    const raiz = document.documentElement;
+
+    // Sem isso a troca de tema fica lenta: o site tem dezenas de elementos com
+    // `transition` de 300ms, e virar a classe `dark` dispara todas de uma vez
+    // — a tela repinta em cascata em vez de trocar de um quadro para o outro.
+    // Desligamos as transições, trocamos, e devolvemos no quadro seguinte.
+    raiz.classList.add("sem-transicao");
+    raiz.classList.toggle("dark", theme === "dark");
     window.localStorage.setItem(THEME_KEY, theme);
+
+    // Leitura forçada: obriga o navegador a aplicar a troca agora, ainda com
+    // as transições desligadas.
+    void raiz.offsetHeight;
+
+    const id = window.requestAnimationFrame(() => raiz.classList.remove("sem-transicao"));
+    return () => window.cancelAnimationFrame(id);
   }, [theme, sincronizado]);
 
   return (

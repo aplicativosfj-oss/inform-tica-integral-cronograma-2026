@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
+import { ShareButton } from "@/components/school/share-button";
 import { ThemeToggle } from "@/components/school/theme-toggle";
 import { useAuth } from "@/lib/auth-store";
 import logoIcon from "@/assets/logo-icon.png";
@@ -81,6 +82,7 @@ export function NavBar() {
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/sobre" label="Sobre" />
           <HeaderRadioPlayer />
+          <ShareButton />
           <ThemeToggle />
           {isReady && isAuthenticated ? (
             <>

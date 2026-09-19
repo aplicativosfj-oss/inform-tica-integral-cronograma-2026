@@ -275,6 +275,18 @@
     border-color: var(--color-border);
   }
 
+  /* Aplicada por um quadro só, enquanto o tema vira (ver theme-store.tsx).
+     Sem ela a troca claro/escuro arrasta: cada elemento com `transition`
+     anima sua própria cor e a tela repinta em cascata. */
+  .sem-transicao,
+  .sem-transicao *,
+  .sem-transicao *::before,
+  .sem-transicao *::after {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
