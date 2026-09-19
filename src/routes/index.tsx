@@ -496,21 +496,21 @@ function ProgramacaoSemanalDestaque() {
   if (turmas.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary via-blue-800 to-indigo-950 py-8 sm:py-10">
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-10">
       {/* Ilustração de fundo, bem discreta — só textura, sem competir com os cards de vidro. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.1] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08] mix-blend-overlay"
         style={{ backgroundImage: `url(${programacaoBgImg})` }}
       />
       {/* Soft glowing orbs behind the glass panels, for depth. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-24 -top-24 size-96 rounded-full bg-blue-400/30 blur-3xl"
+        className="pointer-events-none absolute -left-24 -top-24 size-96 rounded-full bg-slate-700/20 blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 bottom-0 size-96 rounded-full bg-amber-400/20 blur-3xl"
+        className="pointer-events-none absolute -right-24 bottom-0 size-96 rounded-full bg-amber-400/15 blur-3xl"
       />
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
@@ -521,7 +521,7 @@ function ProgramacaoSemanalDestaque() {
           <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
             Veja quem usa o laboratório em cada dia
           </h2>
-          <p className="mt-2 text-sm text-blue-100/80">
+          <p className="mt-2 text-sm text-white/90">
             Clique num dia para ver as turmas, e num card para ver os alunos previstos.
           </p>
         </div>
@@ -552,7 +552,7 @@ function ProgramacaoSemanalDestaque() {
           })}
         </div>
 
-        <p className="mb-4 flex items-center gap-1.5 text-sm text-blue-100/80">
+        <p className="mb-4 flex items-center gap-1.5 text-sm text-white/90">
           <CalendarDays className="size-4" />
           {diaSelecionado}, {dataFormatada}
           {diaSelecionado === todayLabel ? (
@@ -564,7 +564,7 @@ function ProgramacaoSemanalDestaque() {
 
         {assignmentsDoDia.length === 0 ? (
           <div className="rounded-2xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-md">
-            <p className="text-sm text-blue-100/80">
+            <p className="text-sm text-white/90">
               Nenhuma turma programada para {diaSelecionado}.
             </p>
           </div>
@@ -595,7 +595,7 @@ function ProgramacaoSemanalDestaque() {
                   key={`${assignment.dia}-${assignment.slot.inicio}`}
                   type="button"
                   onClick={() => setAssignmentSelecionado(assignment)}
-                  className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[transform,background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:bg-white/15"
+                  className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:bg-white/15"
                 >
                   <div className="flex items-center gap-3">
                     {assignment.turma.imagem ? (
@@ -613,7 +613,7 @@ function ProgramacaoSemanalDestaque() {
                       <p className="truncate text-sm font-semibold text-white">
                         {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
                       </p>
-                      <p className="truncate text-xs text-blue-100/70">
+                      <p className="truncate text-xs text-white/80">
                         Prof(a). {assignment.turma.professorRegente}
                       </p>
                     </div>
@@ -623,13 +623,13 @@ function ProgramacaoSemanalDestaque() {
                       <Clock3 className="size-3.5 text-amber-300" />
                       {assignment.slot.inicio} – {assignment.slot.fim}
                     </span>
-                    <span className="flex items-center gap-1 text-xs text-blue-100/70">
+                    <span className="flex items-center gap-1 text-xs text-white/80">
                       <Users2 className="size-3.5" />
                       {assignment.turma.alunos.length}
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-blue-100/60 opacity-0 transition-opacity group-hover:opacity-100">
-                    Clique para ver os alunos previstos →
+                  <p className="mt-2 text-[11px] text-white/70 opacity-0 transition-opacity group-hover:opacity-100">
+                    Clique para ver os alunos previstos
                   </p>
                 </button>
               ),
