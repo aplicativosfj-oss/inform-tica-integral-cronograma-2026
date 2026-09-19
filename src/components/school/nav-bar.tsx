@@ -55,16 +55,22 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/50 dark:text-white dark:shadow-black/20">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-4 sm:px-6">
-        <Link to="/" className="flex min-w-0 items-center gap-2.5">
+        <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
           <img
             src={logoIcon}
             alt="Agenda de Informática .Online"
-            className="size-9 shrink-0 rounded-lg bg-slate-100 dark:bg-white object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:ring-white/20"
+            className="size-8 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20 sm:size-9"
           />
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">Agenda de Informática</span>
-            <span className="hidden text-[11px] text-slate-600 dark:text-white/60 sm:block">
-              Escola Dr. Eiraldo Carneiro
+            <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+              Agenda de Informática
+            </span>
+            {/* O nome da escola acompanha a marca em toda tela. No celular o
+                espaço é disputado com o player e o menu, então entra a forma
+                abreviada — cabe inteira, em vez de truncar no meio. */}
+            <span className="truncate text-[10px] text-slate-600 dark:text-white/60 sm:text-[11px]">
+              <span className="sm:hidden">E.M. Dr. Eiraldo Carneiro</span>
+              <span className="hidden sm:inline">Escola Dr. Eiraldo Carneiro</span>
             </span>
           </span>
         </Link>

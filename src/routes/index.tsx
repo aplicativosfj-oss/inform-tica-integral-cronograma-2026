@@ -134,6 +134,12 @@ function Index() {
               <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                 Informática na <span className="text-primary">Escola</span>
               </h1>
+              {/* Quem abre a home precisa saber de qual escola é a agenda sem
+                  ter que rolar até o rodapé. */}
+              <p className="mt-2 flex items-start gap-2 text-sm font-semibold text-primary sm:text-base">
+                <GraduationCap className="mt-0.5 size-4 shrink-0" aria-hidden />
+                {config.nomeEscola}
+              </p>
               <p className="mt-3 max-w-xl text-base text-muted-foreground sm:text-lg">
                 Cronograma automático por turma, revezamento justo entre alunos nos{" "}
                 {config.numeroComputadores} computadores e cronômetro ao vivo — com o professor{" "}
