@@ -500,7 +500,7 @@ function ProgramacaoSemanalDestaque() {
       {/* Ilustração de fundo, visível mas discreta — textura com bom contraste. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.2] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08]"
         style={{ backgroundImage: `url(${programacaoBgImg})` }}
       />
       {/* Soft glowing orbs behind the glass panels, for depth. */}
@@ -535,10 +535,10 @@ function ProgramacaoSemanalDestaque() {
                 key={dia}
                 type="button"
                 onClick={() => setDiaSelecionado(dia)}
-                className={`relative cursor-pointer rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-[color,background-color,border-color,box-shadow] duration-200 ease-out ${
+                className={`relative cursor-pointer rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-all duration-300 ease-out ${
                   ativo
-                    ? "border-white bg-white text-primary shadow-lg"
-                    : "border-white/25 bg-white/10 text-white [@media(hover:hover)]:hover:bg-white/20"
+                    ? "border-white bg-white text-primary shadow-lg scale-105"
+                    : "border-white/25 bg-white/10 text-white [@media(hover:hover)]:hover:bg-white/20 [@media(hover:hover)]:hover:border-white/50 [@media(hover:hover)]:hover:shadow-lg"
                 }`}
               >
                 {dia}
@@ -595,7 +595,7 @@ function ProgramacaoSemanalDestaque() {
                   key={`${assignment.dia}-${assignment.slot.inicio}`}
                   type="button"
                   onClick={() => setAssignmentSelecionado(assignment)}
-                  className="group cursor-pointer rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:bg-white/15"
+                  className="group cursor-pointer rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-all duration-300 ease-out [@media(hover:hover)]:hover:scale-105 [@media(hover:hover)]:hover:border-white/40 [@media(hover:hover)]:hover:bg-white/20 [@media(hover:hover)]:hover:shadow-2xl [@media(hover:hover)]:hover:shadow-white/10"
                 >
                   <div className="flex items-center gap-3">
                     {assignment.turma.imagem ? (
@@ -628,7 +628,7 @@ function ProgramacaoSemanalDestaque() {
                       {assignment.turma.alunos.length}
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-white/70 opacity-0 transition-opacity group-hover:opacity-100">
+                  <p className="mt-2 text-[11px] text-white/70 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
                     Clique para ver os alunos previstos
                   </p>
                 </button>
