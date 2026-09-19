@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { LayoutDashboard, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 
@@ -15,6 +15,31 @@ import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
 import { ThemeToggle } from "@/components/school/theme-toggle";
 import { useAuth } from "@/lib/auth-store";
 import logoIcon from "@/assets/logo-icon.png";
+
+function NavLink({ to, label }: { to: string; label: string }) {
+  const location = useLocation();
+  const isActive = location.pathname === to || (to === "/" && location.pathname === "");
+
+  return (
+    <Button
+      asChild
+      variant="ghost"
+      size="sm"
+      className={`relative hidden transition-all duration-300 sm:inline-flex ${
+        isActive
+          ? "text-white bg-white/15 font-semibold"
+          : "text-white/80 hover:text-white hover:bg-white/10"
+      }`}
+    >
+      <Link to={to}>
+        {label}
+        {isActive && (
+          <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 shadow-lg shadow-blue-400/50" />
+        )}
+      </Link>
+    </Button>
+  );
+}
 
 const LINKS = [
   { to: "/", label: "Início" },
@@ -45,38 +70,10 @@ export function NavBar() {
         </Link>
 
         <nav className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
-          >
-            <Link to="/">Início</Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
-          >
-            <Link to="/agenda">Agenda</Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
-          >
-            <Link to="/coordenacao">Coordenação</Link>
-          </Button>
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="hidden text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
-          >
-            <Link to="/sobre">Sobre</Link>
-          </Button>
+          <NavLink to="/" label="Início" />
+          <NavLink to="/agenda" label="Agenda" />
+          <NavLink to="/coordenacao" label="Coordenação" />
+          <NavLink to="/sobre" label="Sobre" />
           <HeaderRadioPlayer />
           <ThemeToggle />
           {isReady && isAuthenticated ? (
@@ -85,7 +82,7 @@ export function NavBar() {
                 asChild
                 variant="ghost"
                 size="sm"
-                className="hidden text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
+                className="relative hidden text-white/80 transition-all duration-300 hover:text-white hover:bg-white/10 sm:inline-flex"
               >
                 <Link to="/dashboard">
                   <LayoutDashboard />
@@ -127,16 +124,23 @@ export function NavBar() {
                 <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
               <nav className="mt-4 flex flex-col gap-1">
-                {LINKS.map((link) => (
-                  <SheetClose key={link.to} asChild>
-                    <Link
-                      to={link.to}
-                      className="rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
-                    >
-                      {link.label}
-                    </Link>
-                  </SheetClose>
-                ))}
+                {LINKS.map((link) => {
+                  const isActive = location.pathname === link.to || (link.to === "/" && location.pathname === "");
+                  return (
+                    <SheetClose key={link.to} asChild>
+                      <Link
+                        to={link.to}
+                        className={`rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-300 ${
+                          isActive
+                            ? "bg-primary/15 text-primary font-semibold border-l-4 border-primary"
+                            : "text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    </SheetClose>
+                  );
+                })}
                 <div className="my-2 border-t border-border/60" />
                 {isReady && isAuthenticated ? (
                   <>
