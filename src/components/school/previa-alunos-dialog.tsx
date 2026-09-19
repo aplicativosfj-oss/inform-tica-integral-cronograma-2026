@@ -76,6 +76,20 @@ const CORES_GRUPO = [
   { faixa: "bg-rose-600", badge: "bg-rose-600/15 text-rose-700 dark:text-rose-300" },
 ];
 
+interface PreviaCalculada {
+  grupos: ReturnType<typeof selecionarAlunosDoDia>["grupos"];
+  semDadosDeFrequencia: boolean;
+}
+
+// Cache em memória, só desta aba/sessão: depois de calculada uma vez, a
+// prévia de uma turma+data fica travada nesse resultado pelo resto da
+// sessão — sem isso, reabrir o mesmo diálogo buscava tudo de novo e, numa
+// rede lenta (o cálculo tem um limite de 6s antes de desistir do histórico
+// de presença), podia mostrar uma ordem diferente na segunda vez. Isso não
+// muda o cronograma real (turma/horário/grupo misto já são 100% fixos por
+// semana) — só evita que essa prévia pareça "mudar sozinha".
+const previaCache = new Map<string, PreviaCalculada>();
+
 /**
  * Preview of which students are expected on a given (usually future) date —
  * computed live from the same fairness queue used for the real daily roll
@@ -117,11 +131,23 @@ export function PreviaAlunosDialog({
       setSemDadosDeFrequencia(false);
       return;
     }
+    const dateKey = toDateKey(data);
+    const chaveCache = `${assignment.turma.id}|${dateKey}`;
+
+    // Já calculamos essa turma+data nesta sessão: usa o mesmo resultado em
+    // vez de buscar de novo, pra prévia nunca parecer mudar sozinha entre
+    // uma abertura e outra do diálogo.
+    const emCache = previaCache.get(chaveCache);
+    if (emCache) {
+      setGrupos(emCache.grupos);
+      setSemDadosDeFrequencia(emCache.semDadosDeFrequencia);
+      setCarregando(false);
+      return;
+    }
+
     let cancelled = false;
     setCarregando(true);
     setSemDadosDeFrequencia(false);
-
-    const dateKey = toDateKey(data);
 
     // Se o Supabase demorar demais ou falhar (rede indisponível, bloqueio,
     // etc.), ainda mostramos uma prévia — só sem levar em conta o histórico
@@ -138,20 +164,27 @@ export function PreviaAlunosDialog({
         // aula excepcional com número diferente de alunos): usa ela em vez
         // de recalcular pela fila de prioridade.
         if (registradas.length > 0) {
-          setGrupos(gruposFromPresencas(assignment.turma, registradas));
+          const gruposReais = gruposFromPresencas(assignment.turma, registradas);
+          previaCache.set(chaveCache, { grupos: gruposReais, semDadosDeFrequencia: false });
+          setGrupos(gruposReais);
           return;
         }
         return Promise.race([fetchUltimaParticipacao(assignment.turma.id), timeout])
           .catch(() => new Map<string, string>())
           .then((ultima) => {
             if (cancelled) return;
-            if (ultima.size === 0) setSemDadosDeFrequencia(true);
+            const semDados = ultima.size === 0;
+            setSemDadosDeFrequencia(semDados);
             const selecao = selecionarAlunosDoDia(
               assignment.turma,
               ultima,
               config.numeroComputadores,
               gruposPorVisita(config),
             );
+            previaCache.set(chaveCache, {
+              grupos: selecao.grupos,
+              semDadosDeFrequencia: semDados,
+            });
             setGrupos(selecao.grupos);
           });
       })
