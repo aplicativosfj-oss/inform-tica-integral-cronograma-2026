@@ -497,10 +497,10 @@ function ProgramacaoSemanalDestaque() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-10">
-      {/* Ilustração de fundo, bem discreta — só textura, sem competir com os cards de vidro. */}
+      {/* Ilustração de fundo, visível mas discreta — textura com bom contraste. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08] mix-blend-overlay"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.2] mix-blend-overlay"
         style={{ backgroundImage: `url(${programacaoBgImg})` }}
       />
       {/* Soft glowing orbs behind the glass panels, for depth. */}
@@ -535,7 +535,7 @@ function ProgramacaoSemanalDestaque() {
                 key={dia}
                 type="button"
                 onClick={() => setDiaSelecionado(dia)}
-                className={`relative rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-[color,background-color,border-color,box-shadow] duration-200 ease-out ${
+                className={`relative cursor-pointer rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-[color,background-color,border-color,box-shadow] duration-200 ease-out ${
                   ativo
                     ? "border-white bg-white text-primary shadow-lg"
                     : "border-white/25 bg-white/10 text-white [@media(hover:hover)]:hover:bg-white/20"
@@ -595,7 +595,7 @@ function ProgramacaoSemanalDestaque() {
                   key={`${assignment.dia}-${assignment.slot.inicio}`}
                   type="button"
                   onClick={() => setAssignmentSelecionado(assignment)}
-                  className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:bg-white/15"
+                  className="group cursor-pointer rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:bg-white/15"
                 >
                   <div className="flex items-center gap-3">
                     {assignment.turma.imagem ? (
