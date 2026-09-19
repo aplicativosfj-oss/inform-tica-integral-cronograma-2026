@@ -54,7 +54,6 @@ import alunosImg3 from "@/assets/alunos-3.jpg";
 import laboratorioTurmaFotoImg from "@/assets/image3.png";
 import alunoJogoImg from "@/assets/image2.jpeg";
 import alunoSorridenteImg from "@/assets/image10.jpeg";
-import programacaoBgImg from "@/assets/image9.png";
 import homePageBgImg from "@/assets/homepage-bg.svg";
 
 export const Route = createFileRoute("/")({
@@ -582,12 +581,6 @@ function ProgramacaoSemanalDestaque() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-10">
-      {/* Ilustração de fundo, visível mas discreta — textura com bom contraste. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08]"
-        style={{ backgroundImage: `url(${programacaoBgImg})` }}
-      />
       {/* Soft glowing orbs behind the glass panels, for depth. */}
       <div
         aria-hidden
