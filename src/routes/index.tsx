@@ -133,9 +133,11 @@ function Index() {
                 Informática na <span className="text-primary">Escola</span>
               </h1>
               {/* Quem abre a home precisa saber de qual escola é a agenda sem
-                  ter que rolar até o rodapé. */}
-              <p className="mt-2 flex items-start gap-2 text-sm font-semibold text-primary sm:text-base">
-                <GraduationCap className="mt-0.5 size-4 shrink-0" aria-hidden />
+                  ter que rolar até o rodapé. O degradê no lugar de uma cor
+                  chapada dá direção à luz — é o que faz o vidro parecer vidro,
+                  e não um retângulo translúcido. */}
+              <p className="mt-3 inline-flex max-w-xl items-start gap-2 rounded-xl border border-sky-200/80 bg-gradient-to-br from-white/70 to-sky-100/40 px-3.5 py-2 text-sm font-semibold text-primary shadow-md shadow-slate-900/5 backdrop-blur-md dark:border-white/15 dark:from-white/12 dark:to-white/5 dark:shadow-black/20 sm:text-base">
+                <GraduationCap className="mt-0.5 size-4 shrink-0 opacity-80" aria-hidden />
                 {config.nomeEscola}
               </p>
               <p className="mt-3 max-w-xl text-base text-muted-foreground sm:text-lg">
