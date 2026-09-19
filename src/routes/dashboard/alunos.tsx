@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { HeartHandshake, Search } from "lucide-react";
+import { Ban, HeartHandshake, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -124,6 +124,11 @@ function AlunosPage() {
                           {aluno.necessidadeEspecial ? (
                             <span className="ml-2 inline-flex items-center gap-1 text-xs text-primary">
                               <HeartHandshake className="size-3" /> Atendimento especializado
+                            </span>
+                          ) : null}
+                          {aluno.impedido ? (
+                            <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-600">
+                              <Ban className="size-3" /> Impedido
                             </span>
                           ) : null}
                         </TableCell>

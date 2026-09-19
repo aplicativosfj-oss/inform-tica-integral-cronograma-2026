@@ -422,11 +422,13 @@ export function selecionarAlunosDoDia(
 ): SelecaoDoDia {
   const tamanho = Math.max(1, tamanhoGrupo);
   const grupos_qtd = Math.max(1, numGrupos);
-  const ordenados = [...turma.alunos].sort((a, b) => {
-    const da = ultimaParticipacao.get(a.id) ?? "";
-    const db = ultimaParticipacao.get(b.id) ?? "";
-    return da.localeCompare(db);
-  });
+  const ordenados = turma.alunos
+    .filter((aluno) => !aluno.impedido)
+    .sort((a, b) => {
+      const da = ultimaParticipacao.get(a.id) ?? "";
+      const db = ultimaParticipacao.get(b.id) ?? "";
+      return da.localeCompare(db);
+    });
   const selecionados = ordenados.slice(0, tamanho * grupos_qtd);
   const grupos: GrupoRevezamento[] = [];
   for (let i = 0; i < selecionados.length; i += tamanho) {
@@ -473,7 +475,7 @@ export function escolherSubstituto(
   jaChamadosHojeIds: ReadonlySet<string>,
 ): Aluno | null {
   const candidatos = turma.alunos
-    .filter((aluno) => !jaChamadosHojeIds.has(aluno.id))
+    .filter((aluno) => !jaChamadosHojeIds.has(aluno.id) && !aluno.impedido)
     .sort((a, b) => {
       const da = ultimaParticipacao.get(a.id) ?? "";
       const db = ultimaParticipacao.get(b.id) ?? "";

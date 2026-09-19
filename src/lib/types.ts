@@ -8,6 +8,15 @@ export interface Aluno {
   necessidadeEspecial?: boolean | undefined;
   /** Orientações para adaptar as atividades de informática a esse aluno. */
   observacoesNecessidade?: string | undefined;
+  /**
+   * Impedido de participar do rodízio por decisão do(a) professor(a) — ex.:
+   * não cumpriu as tarefas em sala. Enquanto marcado, a chamada e a seleção
+   * do dia pulam esse aluno automaticamente e chamam o próximo da vez. Só é
+   * definido/removido por quem está logado (painel administrativo).
+   */
+  impedido?: boolean | undefined;
+  /** Motivo do impedimento, registrado por quem marcou. */
+  motivoImpedimento?: string | undefined;
 }
 
 /** Profissional de apoio (mediador/cuidador) designado oficialmente para a turma. */

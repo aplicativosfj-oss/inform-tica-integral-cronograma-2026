@@ -1,5 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, HeartHandshake, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Ban,
+  HeartHandshake,
+  Loader2,
+  Pencil,
+  Plus,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -50,6 +59,8 @@ interface AlunoFormValues {
   foto?: string | undefined;
   necessidadeEspecial?: boolean | undefined;
   observacoesNecessidade?: string | undefined;
+  impedido?: boolean | undefined;
+  motivoImpedimento?: string | undefined;
 }
 
 function AlunoFormDialog({
@@ -67,8 +78,17 @@ function AlunoFormDialog({
         foto: aluno.foto,
         necessidadeEspecial: aluno.necessidadeEspecial ?? false,
         observacoesNecessidade: aluno.observacoesNecessidade ?? "",
+        impedido: aluno.impedido ?? false,
+        motivoImpedimento: aluno.motivoImpedimento ?? "",
       }
-    : { nome: "", foto: undefined, necessidadeEspecial: false, observacoesNecessidade: "" };
+    : {
+        nome: "",
+        foto: undefined,
+        necessidadeEspecial: false,
+        observacoesNecessidade: "",
+        impedido: false,
+        motivoImpedimento: "",
+      };
 
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState<AlunoFormValues>(emptyValues);
@@ -142,6 +162,33 @@ function AlunoFormDialog({
                   setValues((v) => ({ ...v, observacoesNecessidade: e.target.value }))
                 }
               />
+            </div>
+          ) : null}
+          <div className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 p-2.5">
+            <Checkbox
+              id="impedido"
+              checked={values.impedido ?? false}
+              onCheckedChange={(checked) =>
+                setValues((v) => ({ ...v, impedido: checked === true }))
+              }
+            />
+            <Label htmlFor="impedido" className="font-normal">
+              Impedido de participar do rodízio (ex.: não fez as tarefas em sala)
+            </Label>
+          </div>
+          {values.impedido ? (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="motivoImpedimento">Motivo do impedimento</Label>
+              <Textarea
+                id="motivoImpedimento"
+                placeholder="Ex: não entregou as tarefas da semana passada."
+                value={values.motivoImpedimento ?? ""}
+                onChange={(e) => setValues((v) => ({ ...v, motivoImpedimento: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground">
+                Enquanto marcado, a chamada pula este aluno e chama automaticamente o próximo da
+                fila.
+              </p>
             </div>
           ) : null}
           <DialogFooter>
@@ -262,9 +309,32 @@ function TurmaAlunosPage() {
                                 : ""}
                             </span>
                           ) : null}
+                          {aluno.impedido ? (
+                            <span className="flex items-center gap-1 text-xs text-amber-600">
+                              <Ban className="size-3" /> Impedido de participar
+                              {aluno.motivoImpedimento ? ` — ${aluno.motivoImpedimento}` : ""}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                       <div className="flex gap-1.5">
+                        {aluno.impedido ? (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-emerald-600 hover:text-emerald-600"
+                            aria-label={`Liberar participação de ${aluno.nome}`}
+                            onClick={() => {
+                              updateAluno(turma.id, aluno.id, {
+                                impedido: false,
+                                motivoImpedimento: undefined,
+                              });
+                              toast.success(`${aluno.nome} liberado(a) para voltar ao rodízio.`);
+                            }}
+                          >
+                            <ShieldCheck className="size-3.5" /> Liberar
+                          </Button>
+                        ) : null}
                         <AlunoFormDialog
                           aluno={aluno}
                           onSubmit={(values) => {

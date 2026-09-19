@@ -21,7 +21,7 @@ interface PayloadFalta {
   aluno: { id: string; nome: string };
   grupoIndice: number;
   substituto: { id: string; nome: string } | null;
-  motivo: "ausente" | "nao_quis_participar";
+  motivo: "ausente" | "nao_quis_participar" | "limitacao";
 }
 
 function chaveDia(turmaId: string, data: string): string {
@@ -177,7 +177,7 @@ export async function marcarFalta(
   aluno: { id: string; nome: string },
   grupoIndice: number,
   substituto: { id: string; nome: string } | null,
-  motivo: "ausente" | "nao_quis_participar",
+  motivo: "ausente" | "nao_quis_participar" | "limitacao",
 ): Promise<void> {
   try {
     await enviarFalta(turmaId, data, aluno, grupoIndice, substituto, motivo);
@@ -217,7 +217,7 @@ async function enviarFalta(
   aluno: { id: string; nome: string },
   grupoIndice: number,
   substituto: { id: string; nome: string } | null,
-  motivo: "ausente" | "nao_quis_participar",
+  motivo: "ausente" | "nao_quis_participar" | "limitacao",
 ): Promise<void> {
   const { error: updateError } = await supabase
     .from("presencas")

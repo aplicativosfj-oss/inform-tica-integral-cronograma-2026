@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import {
+  Ban,
   BookOpen,
   Clock3,
   HeartHandshake,
@@ -29,6 +30,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { TimerAula } from "@/components/school/timer-aula";
 import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
 import { unlockAlertSound } from "@/lib/alert-sound";
@@ -201,6 +204,104 @@ function AusenciaButton({
 }
 
 /**
+ * Marca um aluno como impedido de participar por decisão do(a) professor(a)
+ * regente (ex.: não fez as tarefas em sala) — diferente de "Ausente", esse
+ * impedimento fica registrado no cadastro do aluno e continua valendo nos
+ * próximos dias até alguém liberar a participação dele(a) na página da
+ * turma. Visível a todos, mas só uma sessão autenticada pode confirmá-lo.
+ */
+function ImpedirButton({
+  nome,
+  autenticado,
+  onExigirLogin,
+  onConfirmar,
+}: {
+  nome: string;
+  autenticado: boolean;
+  onExigirLogin: () => void;
+  onConfirmar: (motivo: string) => Promise<void> | void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [motivo, setMotivo] = useState("");
+
+  if (!autenticado) {
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="shrink-0 gap-1.5 border-border/60 text-muted-foreground"
+        onClick={onExigirLogin}
+      >
+        <Lock className="size-3.5" /> Impedir
+      </Button>
+    );
+  }
+
+  async function confirmar() {
+    setEnviando(true);
+    try {
+      await onConfirmar(motivo.trim());
+      setMotivo("");
+      setOpen(false);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setMotivo("");
+      }}
+    >
+      <AlertDialogTrigger asChild>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="shrink-0 gap-1.5 border-amber-500/40 text-amber-600 hover:bg-amber-500/10 hover:text-amber-600"
+        >
+          <Ban className="size-3.5" /> Impedir
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Impedir {nome} de participar?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Use quando o(a) professor(a) regente indicar que o aluno não pode participar hoje (ex.:
+            não cumpriu as tarefas em sala). O sistema chama automaticamente o aluno seguinte da
+            fila e {nome} continua impedido(a) nos próximos dias até alguém liberar a participação
+            dele(a) na página da turma.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="motivo-impedimento" className="text-xs font-normal text-muted-foreground">
+            Motivo (opcional)
+          </Label>
+          <Textarea
+            id="motivo-impedimento"
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            placeholder="Ex: não entregou as tarefas da semana."
+            rows={2}
+          />
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={enviando}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction disabled={enviando} onClick={() => confirmar()}>
+            Confirmar impedimento
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+/**
  * Ensures today's roll call exists for the turma currently live (auto-picking
  * the fairest 14 students on first load of the day) and exposes a way to
  * mark a student absent, which immediately substitutes the fairest
@@ -264,7 +365,7 @@ function useChamadaDoDia(
   async function marcarFaltaDoAluno(
     aluno: Aluno,
     grupoIndice: number,
-    motivo: "ausente" | "nao_quis_participar",
+    motivo: "ausente" | "nao_quis_participar" | "limitacao",
   ) {
     if (!turma || !presencas || !ultimaParticipacao) return;
     const jaChamadosHojeIds = new Set(
@@ -297,6 +398,7 @@ function ChamadaDoDiaCard({
   turma,
   presencas,
   onMarcarFalta,
+  onImpedir,
 }: {
   turma: Turma;
   presencas: Presenca[];
@@ -305,6 +407,7 @@ function ChamadaDoDiaCard({
     grupoIndice: number,
     motivo: "ausente" | "nao_quis_participar",
   ) => Promise<void>;
+  onImpedir: (aluno: Aluno, grupoIndice: number, motivo: string) => Promise<void>;
 }) {
   const grupos = [...new Set(presencas.map((p) => p.grupoIndice))].sort((a, b) => a - b);
   const faltas = presencas.filter((p) => p.status === "faltou").length;
@@ -353,15 +456,27 @@ function ChamadaDoDiaCard({
                       </span>
                       {ausente ? (
                         <Badge variant="outline" className="shrink-0 text-destructive">
-                          {p.motivo === "nao_quis_participar" ? "Não participou" : "Ausente"}
+                          {p.motivo === "nao_quis_participar"
+                            ? "Não participou"
+                            : p.motivo === "limitacao"
+                              ? "Impedido(a)"
+                              : "Ausente"}
                         </Badge>
                       ) : (
-                        <AusenciaButton
-                          nome={p.alunoNome}
-                          autenticado
-                          onExigirLogin={() => undefined}
-                          onConfirmar={(motivo) => onMarcarFalta(aluno, indice, motivo)}
-                        />
+                        <div className="flex shrink-0 gap-1.5">
+                          <AusenciaButton
+                            nome={p.alunoNome}
+                            autenticado
+                            onExigirLogin={() => undefined}
+                            onConfirmar={(motivo) => onMarcarFalta(aluno, indice, motivo)}
+                          />
+                          <ImpedirButton
+                            nome={p.alunoNome}
+                            autenticado
+                            onExigirLogin={() => undefined}
+                            onConfirmar={(motivo) => onImpedir(aluno, indice, motivo)}
+                          />
+                        </div>
                       )}
                     </div>
                   );
@@ -371,15 +486,16 @@ function ChamadaDoDiaCard({
         ))}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        Ao marcar uma ausência, o sistema chama automaticamente o aluno que está há mais tempo sem
-        participar e registra a falta no relatório de frequência.
+        Ao marcar uma ausência ou impedimento, o sistema chama automaticamente o aluno que está há
+        mais tempo sem participar. Um aluno impedido continua fora do rodízio nos próximos dias até
+        alguém liberar a participação dele(a) na página da turma.
       </p>
     </div>
   );
 }
 
 export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
-  const { turmas, config, setSessaoSuspensa, isReady } = useAppStore();
+  const { turmas, config, setSessaoSuspensa, updateAluno, isReady } = useAppStore();
   const confirmar = useConfirmar();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -645,28 +761,60 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                         {destacar ? (
                           <HeartHandshake className="size-3.5 shrink-0 text-primary" />
                         ) : null}
+                        {aluno.impedido ? (
+                          <Ban
+                            className="size-3.5 shrink-0 text-amber-600"
+                            aria-label="Impedido de participar"
+                          />
+                        ) : null}
                       </div>
                       {gruposChamada ? (
-                        <AusenciaButton
-                          nome={aluno.nome}
-                          autenticado={isAuthenticated}
-                          onExigirLogin={() => {
-                            toast.info("Faça login para registrar a ausência de um aluno.");
-                            navigate({ to: "/login" });
-                          }}
-                          onConfirmar={async (motivo) => {
-                            const substituto = await chamada.marcarFaltaDoAluno(
-                              aluno,
-                              subBloco.grupo.indice,
-                              motivo,
-                            );
-                            toast.success(
-                              substituto
-                                ? `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}. ${substituto.nome} foi chamado(a) no lugar.`
-                                : `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}.`,
-                            );
-                          }}
-                        />
+                        <div className="flex shrink-0 gap-1.5">
+                          <AusenciaButton
+                            nome={aluno.nome}
+                            autenticado={isAuthenticated}
+                            onExigirLogin={() => {
+                              toast.info("Faça login para registrar a ausência de um aluno.");
+                              navigate({ to: "/login" });
+                            }}
+                            onConfirmar={async (motivo) => {
+                              const substituto = await chamada.marcarFaltaDoAluno(
+                                aluno,
+                                subBloco.grupo.indice,
+                                motivo,
+                              );
+                              toast.success(
+                                substituto
+                                  ? `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}. ${substituto.nome} foi chamado(a) no lugar.`
+                                  : `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}.`,
+                              );
+                            }}
+                          />
+                          <ImpedirButton
+                            nome={aluno.nome}
+                            autenticado={isAuthenticated}
+                            onExigirLogin={() => {
+                              toast.info("Faça login para impedir a participação de um aluno.");
+                              navigate({ to: "/login" });
+                            }}
+                            onConfirmar={async (motivo) => {
+                              updateAluno(turmaAtual.id, aluno.id, {
+                                impedido: true,
+                                motivoImpedimento: motivo || undefined,
+                              });
+                              const substituto = await chamada.marcarFaltaDoAluno(
+                                aluno,
+                                subBloco.grupo.indice,
+                                "limitacao",
+                              );
+                              toast.success(
+                                substituto
+                                  ? `${aluno.nome} impedido(a) de participar. ${substituto.nome} foi chamado(a) no lugar.`
+                                  : `${aluno.nome} impedido(a) de participar. Não há mais alunos disponíveis na turma hoje.`,
+                              );
+                            }}
+                          />
+                        </div>
                       ) : null}
                     </div>
                   );
@@ -695,6 +843,22 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                   substituto
                     ? `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}. ${substituto.nome} foi chamado(a) no lugar.`
                     : `${aluno.nome} registrado(a) como ${motivo === "ausente" ? "ausente" : "sem participar"}.`,
+                );
+              }}
+              onImpedir={async (aluno, grupoIndice, motivo) => {
+                updateAluno(assignment.turma.id, aluno.id, {
+                  impedido: true,
+                  motivoImpedimento: motivo || undefined,
+                });
+                const substituto = await chamada.marcarFaltaDoAluno(
+                  aluno,
+                  grupoIndice,
+                  "limitacao",
+                );
+                toast.success(
+                  substituto
+                    ? `${aluno.nome} impedido(a) de participar. ${substituto.nome} foi chamado(a) no lugar.`
+                    : `${aluno.nome} impedido(a) de participar. Não há mais alunos disponíveis na turma hoje.`,
                 );
               }}
             />
