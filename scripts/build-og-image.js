@@ -102,59 +102,39 @@ await sharp({ create: { width: L, height: A, channels: 3, background: "#0f172a" 
 console.log("public/og-image.jpg gerado com sucesso.");
 
 /* ---------- miniatura quadrada (o card social de verdade) ----------
- * Antes era um retângulo azul chapado com a logo flutuando no meio — sem
- * nada que lembrasse a escola de verdade. Agora é a mesma foto do banner
- * grande (recorte quadrado, centrado na aluna), com um degradê só na base
- * para o texto ficar legível — compacta, mas com cara de gente de verdade,
- * não de peça de marketing genérica. */
+ * Já foi um retângulo azul chapado com a logo flutuando no meio, depois um
+ * recorte bem fechado no rosto da aluna — mas esse recorte cortava fora o
+ * texto "Informática é porta para o futuro!", que é a parte que mais
+ * importa mostrar. Agora o banner inteiro entra sem cortes nenhum (fit
+ * "contain"), centralizado sobre um azul que casca com o dele — discreto,
+ * sem parecer uma foto gigante ocupando o card todo. */
 const Q = 600;
 
-/** Recorte quadrado da mesma foto do banner, centrado na aluna. */
-async function fotoQuadrada() {
-  const origem = resolve(raiz, "src/assets/alunos-hero.jpg");
-  const { width, height } = await sharp(origem).metadata();
-  const lado = height;
-  const esquerda = Math.min(Math.max(Math.round(width * 0.62 - lado / 2), 0), width - lado);
-  return sharp(origem)
-    .extract({ left: esquerda, top: 0, width: lado, height: lado })
-    .resize(Q, Q, { fit: "cover" })
-    .modulate({ brightness: 1.03, saturation: 1.05 })
-    .toBuffer();
+const corFundoMiniatura = "#1a2036";
+
+/** Banner inteiro, sem cortar nada, encaixado por dentro do quadrado. */
+async function bannerContido() {
+  const origem = resolve(raiz, "src/assets/escola-informatica-hero.jpg");
+  return sharp(origem).resize(Q, Q, { fit: "contain", background: corFundoMiniatura }).toBuffer();
 }
 
 const miniaturaSvg = `
 <svg width="${Q}" height="${Q}" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <!-- Só a base escurece, para o texto não brigar com a foto. -->
-    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0b1e4d" stop-opacity="0"/>
-      <stop offset="46%" stop-color="#0b1e4d" stop-opacity="0"/>
-      <stop offset="78%" stop-color="#0b1e4d" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#0b1e4d" stop-opacity="0.92"/>
-    </linearGradient>
-  </defs>
-
-  <rect width="${Q}" height="${Q}" fill="url(#fade)"/>
   <rect x="0" y="${Q - 6}" width="${Q}" height="6" fill="#fbbf24"/>
-
-  <!-- Selo branco discreto por trás do ícone: a marca é escura e sumiria na foto. -->
-  <rect x="28" y="28" width="64" height="64" rx="16" fill="#ffffff" fill-opacity="0.96"/>
-
-  <g font-family="${FONTE}">
-    <text x="32" y="486" font-size="34" font-weight="700" fill="#ffffff">Agenda de Informática</text>
-    <text x="32" y="518" font-size="19" font-weight="600" fill="#bfdbfe">Escola Dr. Eiraldo Carneiro</text>
-  </g>
+  <!-- Selo branco discreto no canto: some se sobrepor à foto, mas como o
+       banner fica "contido" (com faixas), sempre sobra fundo escuro aqui. -->
+  <rect x="20" y="20" width="52" height="52" rx="14" fill="#ffffff" fill-opacity="0.96"/>
 </svg>`;
 
 const iconeMiniatura = await sharp(resolve(raiz, "src/assets/logo-icon.png"))
-  .resize({ width: 44 })
+  .resize({ width: 34 })
   .toBuffer();
 
-await sharp({ create: { width: Q, height: Q, channels: 3, background: "#1d4ed8" } })
+await sharp({ create: { width: Q, height: Q, channels: 3, background: corFundoMiniatura } })
   .composite([
-    { input: await fotoQuadrada(), left: 0, top: 0 },
+    { input: await bannerContido(), left: 0, top: 0 },
     { input: Buffer.from(miniaturaSvg), left: 0, top: 0 },
-    { input: iconeMiniatura, left: 38, top: 38 },
+    { input: iconeMiniatura, left: 29, top: 29 },
   ])
   .jpeg({ quality: 90, chromaSubsampling: "4:4:4" })
   .toFile(resolve(raiz, "public/og-thumb.jpg"));
