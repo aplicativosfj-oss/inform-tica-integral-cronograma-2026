@@ -129,18 +129,18 @@ function Index() {
               <Badge variant="secondary" className="mb-3 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
               </Badge>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+              <h1 className="text-[2rem] font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                 Informática na <span className="text-primary">Escola</span>
               </h1>
               {/* Quem abre a home precisa saber de qual escola é a agenda sem
                   ter que rolar até o rodapé. O degradê no lugar de uma cor
                   chapada dá direção à luz — é o que faz o vidro parecer vidro,
                   e não um retângulo translúcido. */}
-              <p className="mt-3 inline-flex max-w-xl items-start gap-2 rounded-xl border border-sky-200/80 bg-gradient-to-br from-white/70 to-sky-100/40 px-3.5 py-2 text-sm font-semibold text-primary shadow-md shadow-slate-900/5 backdrop-blur-md dark:border-white/15 dark:from-white/12 dark:to-white/5 dark:shadow-black/20 sm:text-base">
+              <p className="mt-3 inline-flex max-w-xl items-start gap-2 rounded-xl border border-sky-200/80 bg-gradient-to-br from-white/70 to-sky-100/40 px-3.5 py-2 text-[15px] font-semibold text-primary shadow-md shadow-slate-900/5 backdrop-blur-md dark:border-white/15 dark:from-white/12 dark:to-white/5 dark:shadow-black/20 sm:text-base">
                 <GraduationCap className="mt-0.5 size-4 shrink-0 opacity-80" aria-hidden />
                 {config.nomeEscola}
               </p>
-              <p className="mt-3 max-w-xl text-base text-muted-foreground sm:text-lg">
+              <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-muted-foreground sm:text-lg">
                 Cronograma automático por turma, revezamento justo entre alunos nos{" "}
                 {config.numeroComputadores} computadores e cronômetro ao vivo — com o professor{" "}
                 {config.professorInformatica}.
@@ -160,7 +160,7 @@ function Index() {
 
               <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
                 <div>
-                  <dt className="text-xs text-muted-foreground">Total de<br />Turmas</dt>
+                  <dt className="text-[13px] text-muted-foreground">Total de<br />Turmas</dt>
                   {isReady ? (
                     <StatCounter valor={turmas.length} />
                   ) : (
@@ -168,7 +168,7 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Total de<br />Alunos</dt>
+                  <dt className="text-[13px] text-muted-foreground">Total de<br />Alunos</dt>
                   {isReady ? (
                     <StatCounter valor={totalAlunos} />
                   ) : (
@@ -176,7 +176,7 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Máquinas<br />Disponíveis</dt>
+                  <dt className="text-[13px] text-muted-foreground">Máquinas<br />Disponíveis</dt>
                   {isReady ? (
                     <StatCounter valor={config.numeroComputadores} />
                   ) : (
@@ -184,7 +184,7 @@ function Index() {
                   )}
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Horário das aulas</dt>
+                  <dt className="text-[13px] text-muted-foreground">Horário das aulas</dt>
                   <dd className="text-2xl font-semibold text-foreground">
                     {config.horaInicio}–{config.horaFim}
                   </dd>
@@ -210,14 +210,19 @@ function Index() {
               />
               {/* A proporção acompanha a do arquivo (854x302) para o banner
                   aparecer inteiro — cortar em 13/4 comia a lâmpada e o globo
-                  das pontas. A logomarca já está no cabeçalho; sobreposta aqui
-                  ela tampava as crianças no celular. */}
+                  das pontas.
+
+                  No celular ele sangra até a borda da tela (-mx-4, anulando o
+                  padding do container). Como a proporção é fixa e não pode ser
+                  cortada, ocupar os 32px do padding é o único jeito de crescer:
+                  rende ~10% de altura. A seção tem overflow-hidden, então o
+                  transbordo não vira rolagem lateral. */}
               <SiteImage
                 src={escolaInformaticaHeroImg}
                 alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
                 width={854}
                 height={302}
-                className="relative aspect-[854/302] w-full overflow-hidden rounded-2xl border border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40"
+                className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:mx-0 sm:w-full sm:rounded-2xl sm:border"
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
