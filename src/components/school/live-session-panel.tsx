@@ -29,7 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TimerRing } from "@/components/school/timer-ring";
+import { TimerAula } from "@/components/school/timer-aula";
 import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
 import { unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
@@ -64,9 +64,18 @@ import type { Aluno, Presenca, ScheduleConfig, Turma } from "@/lib/types";
  * permitir áudio). Componente filho para que seus hooks nunca fiquem atrás
  * de um early return do painel.
  */
-function AlertaTroca({ chave, proximoGrupo }: { chave: string; proximoGrupo?: number }) {
-  const [ativo, setAtivo] = useState(false);
-
+function AlertaTroca({
+  chave,
+  proximoGrupo,
+  ativo,
+  setAtivo,
+}: {
+  chave: string;
+  proximoGrupo?: number;
+  /** Mora no painel: o relógio precisa do mesmo estado para o sinal de fim. */
+  ativo: boolean;
+  setAtivo: (v: boolean) => void;
+}) {
   return (
     <>
       <TrocaGrupoOverlay chave={chave} proximoGrupo={proximoGrupo} comSom={ativo} />
@@ -375,6 +384,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const now = useNow(true);
+  // Antes dos early returns abaixo: hook não pode ficar atrás de um return.
+  const [somAtivo, setSomAtivo] = useState(false);
 
   const diaAtual = now ? currentWeekdayLabel(now) : "";
   const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
@@ -487,6 +498,18 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = totalSegundos - segundosRestantes;
 
+  // A turma inteira, não só o grupo da vez: é o que diz se o fim que se
+  // aproxima é do revezamento ou da aula.
+  const totalTurma = Math.max(
+    1,
+    hhmmToSeconds(assignment.slot.fim) - hhmmToSeconds(assignment.slot.inicio),
+  );
+  const decorridosTurma = Math.min(
+    totalTurma,
+    hhmmToSeconds(subBloco.inicio) - hhmmToSeconds(assignment.slot.inicio) + decorridos,
+  );
+  const totalGrupos = Math.max(1, Math.round(totalTurma / totalSegundos));
+
   return (
     <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card">
       <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
@@ -499,6 +522,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           <AlertaTroca
             chave={`${dateKeySessao}|${subBloco.inicio}`}
             proximoGrupo={subBloco.grupo.indice + 1}
+            ativo={somAtivo}
+            setAtivo={setSomAtivo}
           />
           <Button size="sm" variant="outline" onClick={() => navigate({ to: "/tv" })}>
             <Tv className="size-3.5" /> Modo TV
@@ -541,12 +566,21 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="flex flex-col items-center gap-2 self-center lg:self-start">
-          <TimerRing decorridos={decorridos} total={totalSegundos} />
-          <p className="text-xs text-muted-foreground">
-            Grupo {subBloco.grupo.indice + 1} · {subBloco.inicio} – {subBloco.fim}
-          </p>
-        </div>
+        <TimerAula
+          className="w-full shrink-0 lg:max-w-sm"
+          decorridosGrupo={decorridos}
+          totalGrupo={totalSegundos}
+          decorridosTurma={decorridosTurma}
+          totalTurma={totalTurma}
+          grupoAtual={subBloco.grupo.indice + 1}
+          totalGrupos={totalGrupos}
+          serie={turmaAtual.serie}
+          letra={turmaAtual.letra}
+          conteudo={subBloco.grupo.conteudo || conteudoDoDia}
+          inicioTurma={assignment.slot.inicio}
+          fimTurma={assignment.slot.fim}
+          comSom={somAtivo}
+        />
 
         <div className="flex min-w-0 flex-1 flex-col gap-5">
           <div>

@@ -47,3 +47,40 @@ export function playAlertaTroca(): void {
     oscillator.stop(start + 0.4);
   });
 }
+
+/**
+ * Sinal de encerramento da aula: três notas descendentes (sol–mi–dó), cada
+ * uma com ataque suave e cauda longa, como um carrilhão.
+ *
+ * Deliberadamente diferente do aviso de troca de grupo, que é curto, agudo e
+ * repetido — aquele pede uma ação imediata. Este anuncia o fim, e num
+ * laboratório com criança um som brusco no encerramento agita a turma justo
+ * na hora de organizar a saída.
+ */
+export function playFimDeAula(): void {
+  const ctx = getContext();
+  if (!ctx || ctx.state !== "running") return;
+
+  const notas = [783.99, 659.25, 523.25]; // sol5, mi5, dó5
+
+  notas.forEach((frequencia, indice) => {
+    const inicio = ctx.currentTime + indice * 0.42;
+    const duracao = indice === notas.length - 1 ? 1.5 : 0.9;
+
+    const oscilador = ctx.createOscillator();
+    const ganho = ctx.createGain();
+
+    // Triangular no lugar de senoidal: dá um harmônico a mais, o que soa
+    // como sino em vez de teste de áudio.
+    oscilador.type = "triangle";
+    oscilador.frequency.setValueAtTime(frequencia, inicio);
+
+    ganho.gain.setValueAtTime(0.0001, inicio);
+    ganho.gain.exponentialRampToValueAtTime(0.22, inicio + 0.04);
+    ganho.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+
+    oscilador.connect(ganho).connect(ctx.destination);
+    oscilador.start(inicio);
+    oscilador.stop(inicio + duracao + 0.05);
+  });
+}
