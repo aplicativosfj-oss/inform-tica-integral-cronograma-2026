@@ -273,6 +273,7 @@ export function WeeklySchedule() {
       <MistoDetalhesDialog
         assignment={mistoSelecionado}
         config={config}
+        series={series}
         weekIndex={weekIndex}
         onOpenChange={(open) => {
           if (!open) setMistoSelecionado(null);
@@ -431,17 +432,23 @@ function ScheduleEditDialog({
 
 /**
  * Explica, em linguagem simples, o que é um horário misto: quais turmas
- * dividem aquele período e o horário exato de cada uma — a versão em
- * diálogo do resumo que já aparece (mais compacto) direto na célula.
+ * dividem aquele período, o horário exato de cada uma e — o mais importante
+ * pro público — exatamente quais alunos formam o grupo que ficou de fora da
+ * sessão principal da turma. Esse grupo não é fixo pra sempre: como o
+ * rodízio semanal muda qual grupo "sobra" a cada semana (ver
+ * `buildWeeklySchedule`), ao longo de várias semanas todo aluno passa por
+ * aqui, não sempre os mesmos.
  */
 function MistoDetalhesDialog({
   assignment,
   config,
+  series,
   weekIndex,
   onOpenChange,
 }: {
   assignment: Assignment | null;
   config: ScheduleConfig;
+  series: string[];
   weekIndex: number;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -449,7 +456,7 @@ function MistoDetalhesDialog({
 
   return (
     <Dialog open={assignment !== null} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="flex max-h-[85vh] flex-col gap-4 overflow-hidden sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users2 className="size-4 text-primary" />
@@ -459,41 +466,63 @@ function MistoDetalhesDialog({
           </DialogTitle>
         </DialogHeader>
         {assignment ? (
-          <div className="flex flex-col gap-3">
+          <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
             <p className="text-sm text-muted-foreground">
               A escola só tem {config.numeroComputadores} computadores, então uma turma de mais de{" "}
               {config.numeroComputadores} alunos não cabe inteira numa única visita. O grupo que
-              sobra de cada turma grande usa este horário — 30 min por vez, uma turma depois da
-              outra.
+              sobra de cada turma grande usa este horário — e esse grupo roda: nas próximas semanas,
+              outros alunos da turma é que ficam de fora e vêm pra cá, não sempre os mesmos.
             </p>
-            <div className="flex flex-col divide-y divide-border/60 overflow-hidden rounded-lg border border-border/60">
+            <div className="flex flex-col gap-3">
               {subBlocos.map((sub, i) => {
                 const turma = sub.turma ?? assignment.turma;
+                const { bg, text } = serieClasses(Math.max(0, series.indexOf(turma.serie)));
                 return (
-                  <div key={i} className="flex items-center gap-3 px-3 py-2.5">
-                    {turma.imagem ? (
-                      <img
-                        src={turma.imagem}
-                        alt=""
-                        className="size-9 shrink-0 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-xs font-semibold text-secondary-foreground">
-                        {turma.letra}
+                  <div key={i} className="overflow-hidden rounded-xl border border-border/60">
+                    <div className={`flex items-center gap-3 px-3 py-2 ${bg} ${text}`}>
+                      {turma.imagem ? (
+                        <img
+                          src={turma.imagem}
+                          alt=""
+                          className="size-8 shrink-0 rounded-lg object-cover ring-2 ring-white/40"
+                        />
+                      ) : (
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-xs font-bold">
+                          {turma.letra}
+                        </span>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold">
+                          {turma.serie} &quot;{turma.letra}&quot;
+                        </p>
+                        <p className="truncate text-[11px] opacity-80">
+                          Prof(a). {turma.professorRegente}
+                        </p>
+                      </div>
+                      <span className="flex shrink-0 items-center gap-1 rounded-full bg-white/20 px-2 py-1 font-mono text-xs font-bold">
+                        <CalendarClock className="size-3.5" />
+                        {sub.inicio}–{sub.fim}
                       </span>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {turma.serie} &quot;{turma.letra}&quot;
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        Prof(a). {turma.professorRegente}
-                      </p>
                     </div>
-                    <span className="flex shrink-0 items-center gap-1 font-mono text-xs text-muted-foreground">
-                      <CalendarClock className="size-3.5" />
-                      {sub.inicio}–{sub.fim}
-                    </span>
+                    {sub.grupo.alunos.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-1 p-2.5 sm:grid-cols-2">
+                        {sub.grupo.alunos.map((aluno, indiceAluno) => (
+                          <div
+                            key={aluno.id}
+                            className="flex min-w-0 items-center gap-2 rounded-lg bg-muted/40 px-2 py-1.5"
+                          >
+                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-[10px] font-semibold text-muted-foreground ring-1 ring-border/60">
+                              {indiceAluno + 1}
+                            </span>
+                            <span className="truncate text-xs text-foreground">{aluno.nome}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="px-3 py-2 text-xs text-muted-foreground">
+                        Nenhum aluno neste grupo ainda.
+                      </p>
+                    )}
                   </div>
                 );
               })}
