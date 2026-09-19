@@ -123,7 +123,8 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
       return fracaoB - fracaoA || turmas[b]!.alunos.length - turmas[a]!.alunos.length;
     });
   for (let k = 0; restante > 0 && porPrioridade.length > 0; k += 1) {
-    alvos[porPrioridade[k % porPrioridade.length]!] += 1;
+    const indice = porPrioridade[k % porPrioridade.length]!;
+    alvos[indice] = (alvos[indice] ?? 0) + 1;
     restante -= 1;
   }
 
