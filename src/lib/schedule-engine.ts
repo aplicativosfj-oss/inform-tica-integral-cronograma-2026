@@ -138,24 +138,31 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
     });
   }
 
-  let cursorFila = 0;
+  // Fila mutável: quem não cabe no dia (já teve aula nele) volta para o
+  // início da fila e é atendida no dia seguinte — ninguém se perde.
+  const filaRestante = [...fila];
   const usadaNoDia = new Set<string>();
   config.diasSemana.forEach((dia, diaIndex) => {
     usadaNoDia.clear();
     slots.forEach((slot) => {
       const overrideId = config.slotOverrides?.[slotKey(dia, slot.inicio)];
       let turma = overrideId ? turmasById.get(overrideId) : undefined;
-      if (!turma && fila.length > 0) {
-        for (let tentativas = 0; tentativas < fila.length; tentativas += 1) {
-          const candidata = fila[cursorFila % fila.length]!;
-          cursorFila += 1;
+      if (!turma && filaRestante.length > 0) {
+        const adiadas: Turma[] = [];
+        while (filaRestante.length > 0) {
+          const candidata = filaRestante.shift()!;
           if (!usadaNoDia.has(candidata.id)) {
             turma = candidata;
             break;
           }
+          adiadas.push(candidata);
         }
-        turma ??= fila[cursorFila % fila.length];
-        cursorFila += 1;
+        filaRestante.unshift(...adiadas);
+        // Dia com mais horários do que turmas disponíveis: repete a próxima
+        // da fila para o horário não ficar vazio.
+        if (!turma) {
+          turma = filaRestante.shift();
+        }
       }
       if (!turma) return;
       usadaNoDia.add(turma.id);
