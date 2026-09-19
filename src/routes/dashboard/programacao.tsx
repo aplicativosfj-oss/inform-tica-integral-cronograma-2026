@@ -109,6 +109,34 @@ function ProgramacaoPage() {
                   </TableHeader>
                   <TableBody>
                     {assignmentsDoDia.map((assignment) => {
+                      if (assignment.misto) {
+                        return (
+                          <TableRow key={`${assignment.dia}-${assignment.slot.inicio}`}>
+                            <TableCell className="font-mono text-sm align-top">
+                              {assignment.slot.inicio} – {assignment.slot.fim}
+                            </TableCell>
+                            <TableCell colSpan={3}>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Badge variant="outline" className="text-[10px]">
+                                  horário misto
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  grupo que sobrou de cada turma, 30 min cada:
+                                </span>
+                                {assignment.misto.map((m, i) => (
+                                  <span
+                                    key={m.turma.id}
+                                    className="rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground"
+                                  >
+                                    {m.turma.serie} "{m.turma.letra}"
+                                    {i === 0 ? ` (${assignment.slot.inicio})` : ""}
+                                  </span>
+                                ))}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
                       const overridden = Boolean(
                         config.slotOverrides?.[`${assignment.dia}|${assignment.slot.inicio}`],
                       );

@@ -470,8 +470,11 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     );
   }
 
+  // Horário misto: cada sub-bloco já é de uma turma diferente e definitiva
+  // (calculado em buildSubBlocos), sem rodízio por presença — a lista de
+  // chamada do dia só cobre a primeira turma do grupo, então não se aplica.
   const gruposChamada =
-    chamada.presencas && chamada.presencas.length > 0
+    !assignment.misto && chamada.presencas && chamada.presencas.length > 0
       ? gruposFromPresencas(assignment.turma, chamada.presencas)
       : null;
   const subBlocosEfetivos: SubBloco[] | null = gruposChamada
@@ -479,6 +482,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     : null;
   const subBloco = subBlocosEfetivos?.[sessao.subBloco.indice] ?? sessao.subBloco;
   const proximoSubBloco = subBlocosEfetivos?.[sessao.subBloco.indice + 1] ?? sessao.proximoSubBloco;
+  const turmaAtual = subBloco.turma ?? assignment.turma;
 
   const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = totalSegundos - segundosRestantes;
@@ -546,11 +550,16 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
 
         <div className="flex min-w-0 flex-1 flex-col gap-5">
           <div>
+            {assignment.misto ? (
+              <Badge variant="outline" className="mb-1 text-[10px]">
+                horário misto
+              </Badge>
+            ) : null}
             <p className="text-2xl font-semibold text-foreground">
-              {assignment.turma.serie} "{assignment.turma.letra}"
+              {turmaAtual.serie} "{turmaAtual.letra}"
             </p>
             <p className="text-sm text-muted-foreground">
-              Prof(a). regente: {assignment.turma.professorRegente} · Informática:{" "}
+              Prof(a). regente: {turmaAtual.professorRegente} · Informática:{" "}
               {config.professorInformatica}
             </p>
           </div>
@@ -642,7 +651,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
             </p>
           )}
 
-          {editable && chamada.presencas && chamada.presencas.length > 0 ? (
+          {editable && !assignment.misto && chamada.presencas && chamada.presencas.length > 0 ? (
             <ChamadaDoDiaCard
               turma={assignment.turma}
               presencas={chamada.presencas}

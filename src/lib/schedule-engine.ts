@@ -1,4 +1,12 @@
-import type { Aluno, Assignment, Presenca, ScheduleConfig, Slot, Turma } from "@/lib/types";
+import type {
+  Aluno,
+  Assignment,
+  GrupoMisto,
+  Presenca,
+  ScheduleConfig,
+  Slot,
+  Turma,
+} from "@/lib/types";
 
 function toMinutes(hhmm: string): number {
   const parts = hhmm.split(":");
@@ -118,11 +126,6 @@ export function buildWeeklySchedule(
     slots.forEach((slot) => posicoes.push({ dia, diaIndex, slot }));
   });
 
-  const baseSessoesPorTurma = Math.floor(posicoes.length / n);
-  const totalBase = baseSessoesPorTurma * n;
-  const tamanhoBonus = posicoes.length - totalBase;
-  const inicioBonus = tamanhoBonus > 0 ? (weekIndex * tamanhoBonus) % n : 0;
-
   interface Pending {
     dia: string;
     diaIndex: number;
@@ -130,23 +133,88 @@ export function buildWeeklySchedule(
     turma: Turma;
     conteudo?: string | undefined;
     grupoIdFixo?: string | undefined;
+    misto?: GrupoMisto[] | undefined;
   }
   const pending: Pending[] = [];
 
-  posicoes.forEach(({ dia, diaIndex, slot }, index) => {
-    const overrideId = config.slotOverrides?.[slotKey(dia, slot.inicio)];
-    let turma: Turma | undefined;
-    if (overrideId) {
-      turma = turmasById.get(overrideId);
-    } else if (index < totalBase) {
-      turma = turmasPorTamanho[index % n];
-    } else {
-      const indiceNoBonus = index - totalBase;
-      turma = turmasPorTamanho[(inicioBonus + indiceNoBonus) % n];
+  // As trocas manuais (Programação) ganham de qualquer posição, base ou não
+  // — por isso são resolvidas primeiro, e a posição sai da lista de "livres"
+  // usada pelo rodízio automático. Sem isso, uma troca ocupando o que seria
+  // a sessão-base de uma turma a deixava sem NENHUMA sessão naquela semana
+  // (o rodízio automático continuava contando com ela como se tivesse
+  // recebido a sessão que, na prática, foi pro override).
+  const posicoesComIndice = posicoes.map((p, index) => ({ ...p, index }));
+  const overriddenIndices = new Set<number>();
+  for (const p of posicoesComIndice) {
+    const overrideId = config.slotOverrides?.[slotKey(p.dia, p.slot.inicio)];
+    if (!overrideId) continue;
+    overriddenIndices.add(p.index);
+    const turma = turmasById.get(overrideId);
+    if (turma) pending.push({ dia: p.dia, diaIndex: p.diaIndex, slot: p.slot, turma });
+  }
+  const livres = posicoesComIndice.filter((p) => !overriddenIndices.has(p.index));
+
+  const baseSessoesPorTurma = n > 0 ? Math.floor(livres.length / n) : 0;
+  const totalBase = baseSessoesPorTurma * n;
+  for (let i = 0; i < totalBase; i += 1) {
+    const p = livres[i]!;
+    const turma = turmasPorTamanho[i % n];
+    if (turma) pending.push({ dia: p.dia, diaIndex: p.diaIndex, slot: p.slot, turma });
+  }
+
+  // Com só `numeroComputadores` máquinas, uma turma grande (ex.: 24-27
+  // alunos, 7 por grupo) pode precisar de mais grupos do que cabem numa
+  // única visita de `baseSessoesPorTurma` sessões. Descobre, turma por
+  // turma, quantos grupos ficariam de fora só com a(s) sessão(ões)-base da
+  // semana — e quais índices de grupo são esses (mesma fórmula de rotação
+  // de `buildSubBlocos`, pra bater exatamente com o que a base já cobre).
+  // `baseSessoesPorTurma` vale igual pra toda turma (rodízio uniforme sobre
+  // as posições livres), então o cálculo abaixo reflete a semana real.
+  const roundsPorVisita = gruposPorVisita(config);
+  const filaMisto: GrupoMisto[] = [];
+  for (const turma of turmasPorTamanho) {
+    const totalGrupos = buildGrupos(turma, config).length;
+    const baseRounds = baseSessoesPorTurma * roundsPorVisita;
+    if (baseRounds >= totalGrupos) continue;
+    const cobertos = new Set<number>();
+    for (let s = 0; s < baseSessoesPorTurma; s += 1) {
+      const inicioGrupo = (weekIndex + s * roundsPorVisita) % totalGrupos;
+      for (let i = 0; i < roundsPorVisita; i += 1) cobertos.add((inicioGrupo + i) % totalGrupos);
     }
-    if (!turma) return;
-    pending.push({ dia, diaIndex, slot, turma });
+    for (let g = 0; g < totalGrupos; g += 1) {
+      if (!cobertos.has(g)) filaMisto.push({ turma, grupoIndice: g });
+    }
+  }
+
+  // As posições livres que sobram do rodízio-base primeiro tapam esses
+  // buracos (um horário "misto" reúne o grupo que faltou de até
+  // `roundsPorVisita` turmas diferentes, 30 min cada). Só o que sobrar
+  // depois disso vira bônus (2ª sessão inteira, como antes) ou fica mesmo
+  // livre — reserva natural pra reposição de falta.
+  const restantes = livres.slice(totalBase);
+  const posicoesParaMisto =
+    roundsPorVisita > 0
+      ? Math.min(restantes.length, Math.ceil(filaMisto.length / roundsPorVisita))
+      : 0;
+  let filaIdx = 0;
+  for (let i = 0; i < posicoesParaMisto; i += 1) {
+    const p = restantes[i]!;
+    const misto: GrupoMisto[] = [];
+    for (let k = 0; k < roundsPorVisita && filaIdx < filaMisto.length; k += 1) {
+      misto.push(filaMisto[filaIdx]!);
+      filaIdx += 1;
+    }
+    pending.push({ dia: p.dia, diaIndex: p.diaIndex, slot: p.slot, turma: misto[0]!.turma, misto });
+  }
+
+  const paraBonus = restantes.slice(posicoesParaMisto);
+  const inicioBonus = paraBonus.length > 0 ? (weekIndex * paraBonus.length) % n : 0;
+  paraBonus.forEach((p, idx) => {
+    const turma = turmasPorTamanho[(inicioBonus + idx) % n];
+    if (turma) pending.push({ dia: p.dia, diaIndex: p.diaIndex, slot: p.slot, turma });
   });
+  // Qualquer posição além dessas fica mesmo livre (célula vazia na grade) —
+  // não sobra nenhuma neste ponto, mas o corte acima é sempre seguro.
 
   // Aulas cadastradas manualmente na tela "Aulas" têm prioridade: substituem
   // o horário equivalente do rodízio automático ou entram como horário novo.
@@ -170,17 +238,25 @@ export function buildWeeklySchedule(
 
   // Session counts are derived from the final (post-override) assignments so
   // the group rotation in buildSubBlocos stays consistent for every turma.
+  // Horários mistos ficam de fora dessa contagem: eles não são "mais uma
+  // sessão" de nenhuma turma específica (o rodízio deles é resolvido
+  // diretamente por `grupoIndice`, sem depender de ocorrenciaIndex).
+  const normais = pending.filter((p) => !p.misto);
+  const mistos = pending.filter((p) => p.misto);
+
   const occurrenceCount = new Map<string, number>();
-  return pending
-    .map((p) => {
-      const ocorrenciaIndex = occurrenceCount.get(p.turma.id) ?? 0;
-      occurrenceCount.set(p.turma.id, ocorrenciaIndex + 1);
-      return { ...p, ocorrenciaIndex, sessoesPorSemana: 0 };
-    })
-    .map((assignment, _index, all) => ({
-      ...assignment,
-      sessoesPorSemana: all.filter((a) => a.turma.id === assignment.turma.id).length,
-    }));
+  const normaisComOcorrencia = normais.map((p) => {
+    const ocorrenciaIndex = occurrenceCount.get(p.turma.id) ?? 0;
+    occurrenceCount.set(p.turma.id, ocorrenciaIndex + 1);
+    return { ...p, ocorrenciaIndex, sessoesPorSemana: 0 };
+  });
+  const normaisFinal = normaisComOcorrencia.map((assignment) => ({
+    ...assignment,
+    sessoesPorSemana: normaisComOcorrencia.filter((a) => a.turma.id === assignment.turma.id).length,
+  }));
+  const mistosFinal = mistos.map((p) => ({ ...p, ocorrenciaIndex: 0, sessoesPorSemana: 1 }));
+
+  return [...normaisFinal, ...mistosFinal];
 }
 
 export interface GrupoRevezamento {
@@ -230,6 +306,8 @@ export interface SubBloco {
   inicio: string;
   fim: string;
   grupo: GrupoRevezamento;
+  /** Só definido num sub-bloco de horário misto: de qual turma é esse grupo (difere de `assignment.turma`). */
+  turma?: Turma | undefined;
 }
 
 /**
@@ -266,6 +344,24 @@ export function buildSubBlocos(
   config: ScheduleConfig,
   weekIndex = 0,
 ): SubBloco[] {
+  // Horário misto: cada fração é o grupo que sobrou de uma turma diferente —
+  // não tem rodízio semanal pra calcular, a atribuição já é a definitiva.
+  if (assignment.misto && assignment.misto.length > 0) {
+    const inicioMisto = toMinutes(assignment.slot.inicio);
+    const passoMisto = Math.max(1, config.duracaoGrupoMinutos);
+    return assignment.misto.map((m, i) => {
+      const gruposDaTurma = buildGrupos(m.turma, config);
+      const grupo = gruposDaTurma[m.grupoIndice] ?? gruposDaTurma[0] ?? { indice: 0, alunos: [] };
+      return {
+        indice: i,
+        inicio: toHHMM(inicioMisto + i * passoMisto),
+        fim: toHHMM(inicioMisto + (i + 1) * passoMisto),
+        grupo,
+        turma: m.turma,
+      };
+    });
+  }
+
   const todos = buildGrupos(assignment.turma, config);
   // Aula cadastrada com um grupo fixo: esse grupo ocupa o horário inteiro.
   const fixo = assignment.grupoIdFixo

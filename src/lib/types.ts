@@ -122,6 +122,13 @@ export interface Slot {
   fim: string;
 }
 
+/** Um grupo (já sobrando de outra turma) que ocupa só uma fração de um horário misto. */
+export interface GrupoMisto {
+  turma: Turma;
+  /** Índice do grupo (dentro de `buildGrupos(turma, config)`) que usa essa fração. */
+  grupoIndice: number;
+}
+
 export interface Assignment {
   dia: string;
   diaIndex: number;
@@ -133,6 +140,14 @@ export interface Assignment {
   conteudo?: string | undefined;
   /** Grupo fixo definido na aula cadastrada manualmente. */
   grupoIdFixo?: string | undefined;
+  /**
+   * Horário "misto": em vez de uma turma inteira, várias turmas mandam só o
+   * grupo que sobrou da sua sessão principal da semana (7 computadores não
+   * dão pra todo mundo de uma vez). Quando presente, `turma` acima é só a
+   * primeira do grupo (compatibilidade com código que ainda não sabe ler
+   * `misto`) — a fonte de verdade é este array.
+   */
+  misto?: GrupoMisto[] | undefined;
 }
 
 /** Registro de frequência de um aluno em uma data específica (tabela `presencas` no Supabase). */

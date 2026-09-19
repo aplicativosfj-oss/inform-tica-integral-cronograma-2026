@@ -15,11 +15,12 @@ import { useAuth } from "@/lib/auth-store";
 import { useConfirmar } from "@/lib/confirm-store";
 import {
   buildDailySlots,
+  buildSubBlocos,
   buildWeeklySchedule,
   currentWeekdayLabel,
   getWeekIndex,
 } from "@/lib/schedule-engine";
-import type { Assignment } from "@/lib/types";
+import type { Assignment, ScheduleConfig } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -75,7 +76,7 @@ export function WeeklySchedule() {
     setWeekIndex(getWeekIndex(now));
   }, []);
 
-  const { linhas, colunas, series, pausas, lookup } = useMemo(() => {
+  const { linhas, colunas, series, pausas, lookup, temMisto } = useMemo(() => {
     const dailySlots = buildDailySlots(config);
     const assignments = buildWeeklySchedule(turmas, config, weekIndex);
     const byDayAndSlot = new Map<string, Assignment>();
@@ -110,6 +111,7 @@ export function WeeklySchedule() {
       series: seriesUnicas,
       pausas: gaps,
       lookup: byDayAndSlot,
+      temMisto: assignments.some((a) => a.misto),
     };
   }, [turmas, config, weekIndex]);
 
@@ -117,124 +119,142 @@ export function WeeklySchedule() {
 
   return (
     <>
-    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="sticky left-0 z-10 w-24 shrink-0 border-b border-border/60 bg-card p-3" />
-              {colunas.map((dia) => {
-                const hoje = dia === todayLabel;
-                return (
-                  <th
-                    key={dia}
-                    scope="col"
-                    className="min-w-[152px] border-b border-border/60 p-3 text-center"
-                  >
-                    <span
-                      className={`inline-flex items-center gap-1.5 text-sm font-semibold ${hoje ? "text-primary" : "text-foreground"}`}
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="sticky left-0 z-10 w-24 shrink-0 border-b border-border/60 bg-card p-3" />
+                {colunas.map((dia) => {
+                  const hoje = dia === todayLabel;
+                  return (
+                    <th
+                      key={dia}
+                      scope="col"
+                      className="min-w-[152px] border-b border-border/60 p-3 text-center"
                     >
-                      {dia}
-                      {hoje ? (
-                        <span className="size-1.5 rounded-full bg-primary" aria-hidden />
-                      ) : null}
-                    </span>
-                  </th>
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-sm font-semibold ${hoje ? "text-primary" : "text-foreground"}`}
+                      >
+                        {dia}
+                        {hoje ? (
+                          <span className="size-1.5 rounded-full bg-primary" aria-hidden />
+                        ) : null}
+                      </span>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {linhas.map((slot, rowIndex) => {
+                const pausaApos = pausas.find((p) => p.apos === rowIndex);
+                return (
+                  <Fragment key={slot.inicio}>
+                    <tr className="group/row">
+                      <td className="sticky left-0 z-10 w-24 shrink-0 border-b border-border/40 bg-card p-3 text-right align-top text-xs font-medium whitespace-nowrap text-muted-foreground">
+                        {slot.inicio}
+                        <br />
+                        {slot.fim}
+                      </td>
+                      {colunas.map((dia) => {
+                        const assignment = lookup.get(`${dia}|${slot.inicio}`);
+                        const hoje = dia === todayLabel;
+                        const overridden = Boolean(config.slotOverrides?.[`${dia}|${slot.inicio}`]);
+                        return (
+                          <td
+                            key={dia}
+                            className={`border-b border-border/40 p-1.5 align-top ${hoje ? "bg-primary/[0.03]" : ""}`}
+                          >
+                            {assignment?.misto ? (
+                              <MixedPill
+                                assignment={assignment}
+                                config={config}
+                                series={series}
+                                weekIndex={weekIndex}
+                              />
+                            ) : assignment ? (
+                              <SchedulePill
+                                assignment={assignment}
+                                serieIndex={series.indexOf(assignment.turma.serie)}
+                                editavel={isAuthenticated}
+                                editado={overridden}
+                                onClick={
+                                  isAuthenticated ? () => setEditando(assignment) : undefined
+                                }
+                              />
+                            ) : (
+                              <div className="h-14 rounded-xl border border-dashed border-border/30" />
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {pausaApos ? (
+                      <tr>
+                        <td
+                          colSpan={colunas.length + 1}
+                          className="border-b border-border/40 bg-muted/40 px-3 py-1.5 text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+                        >
+                          {pausaApos.label} · {pausaApos.horario}
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
                 );
               })}
-            </tr>
-          </thead>
-          <tbody>
-            {linhas.map((slot, rowIndex) => {
-              const pausaApos = pausas.find((p) => p.apos === rowIndex);
-              return (
-                <Fragment key={slot.inicio}>
-                  <tr className="group/row">
-                    <td className="sticky left-0 z-10 w-24 shrink-0 border-b border-border/40 bg-card p-3 text-right align-top text-xs font-medium whitespace-nowrap text-muted-foreground">
-                      {slot.inicio}
-                      <br />
-                      {slot.fim}
-                    </td>
-                    {colunas.map((dia) => {
-                      const assignment = lookup.get(`${dia}|${slot.inicio}`);
-                      const hoje = dia === todayLabel;
-                      const overridden = Boolean(config.slotOverrides?.[`${dia}|${slot.inicio}`]);
-                      return (
-                        <td
-                          key={dia}
-                          className={`border-b border-border/40 p-1.5 align-top ${hoje ? "bg-primary/[0.03]" : ""}`}
-                        >
-                          {assignment ? (
-                            <SchedulePill
-                              assignment={assignment}
-                              serieIndex={series.indexOf(assignment.turma.serie)}
-                              editavel={isAuthenticated}
-                              editado={overridden}
-                              onClick={isAuthenticated ? () => setEditando(assignment) : undefined}
-                            />
-                          ) : (
-                            <div className="h-14 rounded-xl border border-dashed border-border/30" />
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  {pausaApos ? (
-                    <tr>
-                      <td
-                        colSpan={colunas.length + 1}
-                        className="border-b border-border/40 bg-muted/40 px-3 py-1.5 text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
-                      >
-                        {pausaApos.label} · {pausaApos.horario}
-                      </td>
-                    </tr>
-                  ) : null}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Legenda: um selo por série, na mesma rampa ordinal das células. */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/60 px-4 py-3">
+          {series.map((serie, index) => {
+            const { bg } = serieClasses(index);
+            return (
+              <span key={serie} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className={`size-2.5 rounded-full ${bg}`} aria-hidden />
+                {serie}
+              </span>
+            );
+          })}
+        </div>
+        {temMisto ? (
+          <p className="border-t border-border/60 px-4 py-2 text-[11px] text-muted-foreground">
+            Células listradas (várias faixas) = horário misto: o grupo que sobrou de cada turma
+            grande usa 30 min, uma turma depois da outra, já que só há {config.numeroComputadores}{" "}
+            computadores.
+          </p>
+        ) : null}
       </div>
 
-      {/* Legenda: um selo por série, na mesma rampa ordinal das células. */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/60 px-4 py-3">
-        {series.map((serie, index) => {
-          const { bg } = serieClasses(index);
-          return (
-            <span key={serie} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className={`size-2.5 rounded-full ${bg}`} aria-hidden />
-              {serie}
-            </span>
+      <ScheduleEditDialog
+        assignment={editando}
+        overridden={
+          editando
+            ? Boolean(config.slotOverrides?.[`${editando.dia}|${editando.slot.inicio}`])
+            : false
+        }
+        onOpenChange={(open) => {
+          if (!open) setEditando(null);
+        }}
+        onSelect={async (turmaId) => {
+          if (!editando) return;
+          const novaTurma = turmas.find((t) => t.id === turmaId);
+          const ok = await confirmar({
+            titulo: turmaId ? "Trocar a turma deste horário?" : "Restaurar o rodízio automático?",
+            descricao: turmaId
+              ? `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} passa a ser de ${novaTurma?.serie} "${novaTurma?.letra}" toda semana.`
+              : `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} volta a seguir o rodízio automático.`,
+          });
+          if (!ok) return;
+          setSlotOverride(editando.dia, editando.slot.inicio, turmaId);
+          toast.success(
+            turmaId ? "Horário atualizado." : "Horário restaurado ao rodízio automático.",
           );
-        })}
-      </div>
-    </div>
-
-    <ScheduleEditDialog
-      assignment={editando}
-      overridden={
-        editando ? Boolean(config.slotOverrides?.[`${editando.dia}|${editando.slot.inicio}`]) : false
-      }
-      onOpenChange={(open) => {
-        if (!open) setEditando(null);
-      }}
-      onSelect={async (turmaId) => {
-        if (!editando) return;
-        const novaTurma = turmas.find((t) => t.id === turmaId);
-        const ok = await confirmar({
-          titulo: turmaId ? "Trocar a turma deste horário?" : "Restaurar o rodízio automático?",
-          descricao: turmaId
-            ? `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} passa a ser de ${novaTurma?.serie} "${novaTurma?.letra}" toda semana.`
-            : `${editando.dia} ${editando.slot.inicio}–${editando.slot.fim} volta a seguir o rodízio automático.`,
-        });
-        if (!ok) return;
-        setSlotOverride(editando.dia, editando.slot.inicio, turmaId);
-        toast.success(
-          turmaId ? "Horário atualizado." : "Horário restaurado ao rodízio automático.",
-        );
-        setEditando(null);
-      }}
-    />
+          setEditando(null);
+        }}
+      />
     </>
   );
 }
@@ -273,6 +293,48 @@ function SchedulePill({
         />
       ) : null}
     </Comp>
+  );
+}
+
+/**
+ * Um horário "misto" reúne o grupo que sobrou da sessão principal de até
+ * `roundsPorVisita` turmas diferentes (só 7 computadores não dão pra uma
+ * turma de 20+ alunos inteira de uma vez) — 30 min cada, uma atrás da
+ * outra, em vez de uma turma só ocupando o horário inteiro. Editar horário
+ * misto não é suportado pelo diálogo de troca simples, então as fatias não
+ * são clicáveis.
+ */
+function MixedPill({
+  assignment,
+  config,
+  series,
+  weekIndex,
+}: {
+  assignment: Assignment;
+  config: ScheduleConfig;
+  series: string[];
+  weekIndex: number;
+}) {
+  const subBlocos = buildSubBlocos(assignment, config, weekIndex);
+  return (
+    <div className="flex h-14 flex-col gap-0.5 overflow-hidden rounded-xl ring-1 ring-border/60">
+      {subBlocos.map((sub, i) => {
+        const turma = sub.turma ?? assignment.turma;
+        const { bg, text } = serieClasses(Math.max(0, series.indexOf(turma.serie)));
+        return (
+          <div
+            key={i}
+            className={`flex flex-1 items-center justify-between gap-1 px-2 ${bg} ${text}`}
+            title={`${sub.inicio}–${sub.fim} · ${turma.serie} "${turma.letra}" (grupo restante)`}
+          >
+            <span className="truncate text-[10px] leading-none font-semibold">
+              {turma.serie} &quot;{turma.letra}&quot;
+            </span>
+            <span className="shrink-0 text-[9px] leading-none opacity-80">{sub.inicio}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

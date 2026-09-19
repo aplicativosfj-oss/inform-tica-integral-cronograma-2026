@@ -130,6 +130,7 @@ type Sessao = NonNullable<ReturnType<typeof findSessaoAtual>>;
 
 function TvSessao({ conteudoDoDia, sessao }: { conteudoDoDia: string; sessao: Sessao }) {
   const { assignment, subBloco, segundosRestantes, proximoSubBloco } = sessao;
+  const turmaAtual = subBloco.turma ?? assignment.turma;
   const total = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = total - segundosRestantes;
   const conteudoGrupo = subBloco.grupo.conteudo || assignment.conteudo || conteudoDoDia;
@@ -142,7 +143,7 @@ function TvSessao({ conteudoDoDia, sessao }: { conteudoDoDia: string; sessao: Se
         <div className="flex min-w-0 max-w-2xl flex-col gap-6 text-center lg:text-left">
           <div>
             <p className="text-6xl font-black tracking-tight text-foreground">
-              {assignment.turma.serie} "{assignment.turma.letra}"
+              {turmaAtual.serie} "{turmaAtual.letra}"
             </p>
             <p className="mt-2 text-2xl text-muted-foreground">
               {subBloco.grupo.nome || `Grupo ${subBloco.grupo.indice + 1}`} · {subBloco.inicio} –{" "}

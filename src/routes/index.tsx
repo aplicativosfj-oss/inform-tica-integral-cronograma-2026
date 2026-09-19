@@ -268,17 +268,19 @@ function Index() {
             </div>
             {/* Fotos reais dos alunos usando o laboratório — discreto, sem virar mosaico. */}
             <div className="flex shrink-0 items-center gap-2">
-              {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt="Aluno usando um computador do laboratório de informática"
-                  loading="lazy"
-                  width={64}
-                  height={64}
-                  className="size-14 rounded-xl border border-border/60 object-cover shadow-sm sm:size-16"
-                />
-              ))}
+              {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map(
+                (src, i) => (
+                  <img
+                    key={i}
+                    src={src}
+                    alt="Aluno usando um computador do laboratório de informática"
+                    loading="lazy"
+                    width={64}
+                    height={64}
+                    className="size-14 rounded-xl border border-border/60 object-cover shadow-sm sm:size-16"
+                  />
+                ),
+              )}
             </div>
           </div>
 
@@ -434,43 +436,63 @@ function ProximasTurmasPanel() {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col divide-y divide-border/60">
-          {assignmentsDoProximoDia.map((assignment) => (
-            <button
-              key={`${assignment.dia}-${assignment.slot.inicio}`}
-              type="button"
-              onClick={() => setAssignmentSelecionado(assignment)}
-              className="group flex items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-primary"
-            >
-              <div className="flex items-center gap-3">
-                {assignment.turma.imagem ? (
-                  <img
-                    src={assignment.turma.imagem}
-                    alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
-                    className="size-9 rounded-lg object-cover"
-                  />
-                ) : (
-                  <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-xs font-semibold text-secondary-foreground">
-                    {assignment.turma.letra}
-                  </span>
-                )}
-                <div>
-                  <p className="text-sm font-medium text-foreground group-hover:text-primary">
-                    {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Prof(a). {assignment.turma.professorRegente} · {assignment.turma.alunos.length}{" "}
-                    alunos
-                  </p>
+          {assignmentsDoProximoDia.map((assignment) =>
+            assignment.misto ? (
+              <div
+                key={`${assignment.dia}-${assignment.slot.inicio}`}
+                className="flex flex-col gap-1.5 py-2.5"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className="text-[10px]">
+                    horário misto
+                  </Badge>
+                  <Badge variant="secondary" className="font-mono">
+                    {assignment.slot.inicio} – {assignment.slot.fim}
+                  </Badge>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Grupo que sobrou de cada turma, 30 min cada:{" "}
+                  {assignment.misto.map((m) => `${m.turma.serie} "${m.turma.letra}"`).join(", ")}
+                </p>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Badge variant="secondary" className="font-mono">
-                  {assignment.slot.inicio} – {assignment.slot.fim}
-                </Badge>
-                <ChevronRight className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-              </div>
-            </button>
-          ))}
+            ) : (
+              <button
+                key={`${assignment.dia}-${assignment.slot.inicio}`}
+                type="button"
+                onClick={() => setAssignmentSelecionado(assignment)}
+                className="group flex items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-primary"
+              >
+                <div className="flex items-center gap-3">
+                  {assignment.turma.imagem ? (
+                    <img
+                      src={assignment.turma.imagem}
+                      alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
+                      className="size-9 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-xs font-semibold text-secondary-foreground">
+                      {assignment.turma.letra}
+                    </span>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground group-hover:text-primary">
+                      {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Prof(a). {assignment.turma.professorRegente} ·{" "}
+                      {assignment.turma.alunos.length} alunos
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="secondary" className="font-mono">
+                    {assignment.slot.inicio} – {assignment.slot.fim}
+                  </Badge>
+                  <ChevronRight className="size-4 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+                </div>
+              </button>
+            ),
+          )}
         </div>
       </CardContent>
 
@@ -607,49 +629,70 @@ function ProgramacaoSemanalDestaque() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {assignmentsDoDia.map((assignment) => (
-              <button
-                key={`${assignment.dia}-${assignment.slot.inicio}`}
-                type="button"
-                onClick={() => setAssignmentSelecionado(assignment)}
-                className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[transform,background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:bg-white/15"
-              >
-                <div className="flex items-center gap-3">
-                  {assignment.turma.imagem ? (
-                    <img
-                      src={assignment.turma.imagem}
-                      alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
-                      className="size-11 rounded-xl object-cover ring-2 ring-white/30"
-                    />
-                  ) : (
-                    <span className="flex size-11 items-center justify-center rounded-xl bg-white/20 text-sm font-bold text-white ring-2 ring-white/30">
-                      {assignment.turma.letra}
+            {assignmentsDoDia.map((assignment) =>
+              assignment.misto ? (
+                <div
+                  key={`${assignment.dia}-${assignment.slot.inicio}`}
+                  className="rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full border border-white/30 px-2 py-0.5 text-[10px] font-medium text-white">
+                      horário misto
                     </span>
-                  )}
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-white">
-                      {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
-                    </p>
-                    <p className="truncate text-xs text-blue-100/70">
-                      Prof(a). {assignment.turma.professorRegente}
-                    </p>
+                    <span className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">
+                      <Clock3 className="size-3.5 text-amber-300" />
+                      {assignment.slot.inicio} – {assignment.slot.fim}
+                    </span>
                   </div>
+                  <p className="mt-2 text-xs text-blue-100/70">
+                    Grupo que sobrou de cada turma, 30 min cada:{" "}
+                    {assignment.misto.map((m) => `${m.turma.serie} "${m.turma.letra}"`).join(", ")}
+                  </p>
                 </div>
-                <div className="mt-3 flex items-center justify-between border-t border-white/15 pt-3">
-                  <span className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">
-                    <Clock3 className="size-3.5 text-amber-300" />
-                    {assignment.slot.inicio} – {assignment.slot.fim}
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-blue-100/70">
-                    <Users2 className="size-3.5" />
-                    {assignment.turma.alunos.length}
-                  </span>
-                </div>
-                <p className="mt-2 text-[11px] text-blue-100/60 opacity-0 transition-opacity group-hover:opacity-100">
-                  Clique para ver os alunos previstos →
-                </p>
-              </button>
-            ))}
+              ) : (
+                <button
+                  key={`${assignment.dia}-${assignment.slot.inicio}`}
+                  type="button"
+                  onClick={() => setAssignmentSelecionado(assignment)}
+                  className="group rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-[transform,background-color,box-shadow] duration-200 ease-out [@media(hover:hover)]:hover:-translate-y-0.5 [@media(hover:hover)]:hover:bg-white/15"
+                >
+                  <div className="flex items-center gap-3">
+                    {assignment.turma.imagem ? (
+                      <img
+                        src={assignment.turma.imagem}
+                        alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
+                        className="size-11 rounded-xl object-cover ring-2 ring-white/30"
+                      />
+                    ) : (
+                      <span className="flex size-11 items-center justify-center rounded-xl bg-white/20 text-sm font-bold text-white ring-2 ring-white/30">
+                        {assignment.turma.letra}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white">
+                        {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
+                      </p>
+                      <p className="truncate text-xs text-blue-100/70">
+                        Prof(a). {assignment.turma.professorRegente}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between border-t border-white/15 pt-3">
+                    <span className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">
+                      <Clock3 className="size-3.5 text-amber-300" />
+                      {assignment.slot.inicio} – {assignment.slot.fim}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-blue-100/70">
+                      <Users2 className="size-3.5" />
+                      {assignment.turma.alunos.length}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-blue-100/60 opacity-0 transition-opacity group-hover:opacity-100">
+                    Clique para ver os alunos previstos →
+                  </p>
+                </button>
+              ),
+            )}
           </div>
         )}
       </div>

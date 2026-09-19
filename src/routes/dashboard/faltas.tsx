@@ -6,6 +6,13 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardShell } from "@/components/school/dashboard-shell";
@@ -60,16 +67,26 @@ interface GrupoFalta {
 
 /**
  * Ausências do mês agrupadas por turma+data, com um botão para reprogramar
- * a sessão automaticamente: sugere a próxima data do mesmo dia da semana,
- * suspende a data original e registra a nova ocorrência — tudo em uma única
- * atualização de configuração, então o cronômetro ao vivo já reflete a
- * mudança sem precisar recarregar a página.
+ * a sessão: sugere a próxima data do mesmo dia da semana no mesmo horário
+ * (pré-preenchido), mas deixa a coordenação escolher outra data/horário —
+ * por exemplo, um horário "livre" reservado para reposição — antes de
+ * confirmar. Suspende a data original e registra a nova ocorrência — tudo em
+ * uma única atualização de configuração, então o cronômetro ao vivo já
+ * reflete a mudança sem precisar recarregar a página.
  */
 function FaltasPage() {
   const { turmas, config, reprogramarAula, removeReprogramacao } = useAppStore();
   const confirmar = useConfirmar();
   const [mes, setMes] = useState(mesAtual);
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
+  const [reprogramando, setReprogramando] = useState<{
+    grupo: GrupoFalta;
+    inicioOriginal: string;
+    fimOriginal: string;
+    data: string;
+    inicio: string;
+    fim: string;
+  } | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
   const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
@@ -134,32 +151,53 @@ function FaltasPage() {
     );
   }
 
-  async function reprogramar(grupo: GrupoFalta) {
+  function abrirReprogramacao(grupo: GrupoFalta) {
     const assignment = assignments.find((a) => a.turma.id === grupo.turmaId && a.dia === grupo.dia);
     if (!assignment) {
       toast.error("Não foi possível encontrar o horário original dessa turma nesse dia.");
       return;
     }
     const proximaData = proximaDataDoDia(grupo.dia, addDias(grupo.data, 1));
+    setReprogramando({
+      grupo,
+      inicioOriginal: assignment.slot.inicio,
+      fimOriginal: assignment.slot.fim,
+      data: toDateKey(proximaData),
+      inicio: assignment.slot.inicio,
+      fim: assignment.slot.fim,
+    });
+  }
+
+  async function confirmarReprogramacao() {
+    if (!reprogramando) return;
+    const { grupo, inicioOriginal, fimOriginal, data, inicio, fim } = reprogramando;
+    if (!data || !inicio || !fim) {
+      toast.error("Preencha data, início e fim antes de confirmar.");
+      return;
+    }
+    const dataFormatada = new Date(`${data}T00:00:00`).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      weekday: "long",
+    });
     const ok = await confirmar({
       titulo: "Reprogramar esta aula?",
-      descricao: `A sessão de ${nomeTurma(grupo.turmaId)} do dia ${new Date(`${grupo.data}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} será movida para ${proximaData.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}.`,
+      descricao: `A sessão de ${nomeTurma(grupo.turmaId)} do dia ${new Date(`${grupo.data}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} será movida para ${dataFormatada}, ${inicio}–${fim}.`,
     });
     if (!ok) return;
     reprogramarAula({
       turmaId: grupo.turmaId,
       dataOriginal: grupo.data,
       diaOriginal: grupo.dia,
-      inicioOriginal: assignment.slot.inicio,
-      fimOriginal: assignment.slot.fim,
-      dataNova: toDateKey(proximaData),
-      inicio: assignment.slot.inicio,
-      fim: assignment.slot.fim,
+      inicioOriginal,
+      fimOriginal,
+      dataNova: data,
+      inicio,
+      fim,
       conteudo: undefined,
     });
-    toast.success(
-      `Aula de ${nomeTurma(grupo.turmaId)} reprogramada para ${proximaData.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}. O cronômetro já está atualizado.`,
-    );
+    toast.success(`Aula de ${nomeTurma(grupo.turmaId)} reprogramada para ${dataFormatada}.`);
+    setReprogramando(null);
   }
 
   return (
@@ -240,7 +278,7 @@ function FaltasPage() {
                       size="sm"
                       variant="outline"
                       className="shrink-0 gap-1.5"
-                      onClick={() => reprogramar(grupo)}
+                      onClick={() => abrirReprogramacao(grupo)}
                     >
                       <RotateCcw className="size-3.5" /> Reprogramar aula
                     </Button>
@@ -305,6 +343,67 @@ function FaltasPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={reprogramando !== null}
+        onOpenChange={(open) => {
+          if (!open) setReprogramando(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {reprogramando ? `Reprogramar aula de ${nomeTurma(reprogramando.grupo.turmaId)}` : ""}
+            </DialogTitle>
+          </DialogHeader>
+          {reprogramando ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-muted-foreground">
+                Sugerimos a próxima {reprogramando.grupo.dia} no mesmo horário, mas você pode
+                escolher outra data e horário — por exemplo, um horário "livre" reservado para
+                reposição na grade semanal.
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="reprog-data">Data</Label>
+                  <Input
+                    id="reprog-data"
+                    type="date"
+                    value={reprogramando.data}
+                    onChange={(e) => setReprogramando({ ...reprogramando, data: e.target.value })}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="reprog-inicio">Início</Label>
+                  <Input
+                    id="reprog-inicio"
+                    type="time"
+                    value={reprogramando.inicio}
+                    onChange={(e) => setReprogramando({ ...reprogramando, inicio: e.target.value })}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="reprog-fim">Fim</Label>
+                  <Input
+                    id="reprog-fim"
+                    type="time"
+                    value={reprogramando.fim}
+                    onChange={(e) => setReprogramando({ ...reprogramando, fim: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReprogramando(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmarReprogramacao}>
+              <RotateCcw className="size-3.5" /> Confirmar reprogramação
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardShell>
   );
 }
