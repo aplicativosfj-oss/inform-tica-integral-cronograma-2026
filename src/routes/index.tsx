@@ -5,14 +5,17 @@ import {
   CalendarDays,
   ChevronRight,
   Clock3,
+  ExternalLink,
   Gamepad2,
   GraduationCap,
   LayoutDashboard,
   MonitorSmartphone,
+  Play,
   ShieldCheck,
   Sparkles,
   Timer,
   Users2,
+  Youtube,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -335,6 +338,8 @@ function Index() {
 
         <ProgramacaoSemanalDestaque />
 
+        <CanalYoutubeSection />
+
         <section className="border-t border-border/60 bg-muted/30">
           <div className="mx-auto max-w-6xl px-4 py-6 text-center sm:px-6">
             <GraduationCap className="mx-auto size-7 text-primary" />
@@ -564,14 +569,14 @@ function ProgramacaoSemanalDestaque() {
                 onClick={() => setDiaSelecionado(dia)}
                 className={`relative cursor-pointer rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-all duration-300 ease-out ${
                   ativo
-                    ? "border-white bg-white text-primary shadow-lg scale-105"
+                    ? "border-white bg-white text-slate-900 shadow-lg scale-105"
                     : "border-white/25 bg-white/10 text-white [@media(hover:hover)]:hover:bg-white/20 [@media(hover:hover)]:hover:border-white/50 [@media(hover:hover)]:hover:shadow-lg"
                 }`}
               >
                 {dia}
                 {hoje ? (
                   <span
-                    className={`ml-1.5 inline-block size-1.5 rounded-full ${ativo ? "bg-primary" : "bg-amber-300"}`}
+                    className={`ml-1.5 inline-block size-1.5 rounded-full ${ativo ? "bg-slate-900" : "bg-amber-300"}`}
                   />
                 ) : null}
               </button>
@@ -673,6 +678,72 @@ function ProgramacaoSemanalDestaque() {
         }}
       />
     </section>
+  );
+}
+
+const CANAL_YOUTUBE_URL = "https://www.youtube.com/@DrEiraldoIntegral";
+
+const VIDEOS_DESTAQUE = [
+  { id: "3zxaoWcPAtg", titulo: "Primeiros passos na informática" },
+  { id: "U6r_g4UWB9g", titulo: "Aula de informática" },
+  { id: "URKMI30t744", titulo: "Visita da Defensoria Pública na escola" },
+];
+
+/**
+ * Divulgação discreta do canal oficial da escola no YouTube — miniaturas
+ * reais (sem incorporar o player, mais leve) que abrem o vídeo em uma nova
+ * aba. Fica perto do rodapé, como um convite a mais, não como destaque.
+ */
+function CanalYoutubeSection() {
+  return (
+    <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-xl">
+          <Badge variant="secondary" className="mb-2 gap-1.5">
+            <Youtube className="size-3.5" /> Canal da escola
+          </Badge>
+          <h2 className="text-xl font-semibold text-foreground">Acompanhe no YouTube</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Bastidores das aulas de informática e da rotina da escola, em vídeo.
+          </p>
+        </div>
+        <Button asChild variant="outline" size="sm" className="w-fit shrink-0">
+          <a href={CANAL_YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
+            Ver canal completo <ExternalLink className="size-3.5" />
+          </a>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 sm:max-w-xl">
+        {VIDEOS_DESTAQUE.map((video) => (
+          <a
+            key={video.id}
+            href={`https://www.youtube.com/shorts/${video.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative block overflow-hidden rounded-xl border border-border/60 bg-muted shadow-sm transition-shadow hover:shadow-md"
+          >
+            <img
+              src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+              alt={video.titulo}
+              loading="lazy"
+              width={480}
+              height={360}
+              className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/30">
+              <Play
+                className="size-6 text-white opacity-90 drop-shadow transition-transform group-hover:scale-110"
+                fill="currentColor"
+              />
+            </span>
+            <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-[11px] font-medium leading-tight text-white">
+              {video.titulo}
+            </span>
+          </a>
+        ))}
+      </div>
+    </RevealSection>
   );
 }
 
