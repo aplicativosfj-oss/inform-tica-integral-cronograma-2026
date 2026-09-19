@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavBar } from "@/components/school/nav-bar";
+import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import laboratorioTurmaImg from "@/assets/laboratorio-informatica-turma.jpg";
@@ -68,16 +69,17 @@ function SobrePage() {
             informática da {config.nomeEscola}.
           </p>
           <div className="mx-auto mt-6 max-w-3xl overflow-hidden rounded-2xl border border-border/60 shadow-xl">
-            <img
+            <SiteImage
               src={bannerEscolaImg}
               alt={`Turma da ${config.nomeEscola} no laboratório de informática, com a mensagem "Informática é porta para o futuro"`}
               width={1280}
               height={720}
-              className="aspect-[16/9] w-full object-cover"
+              className="aspect-[16/9] w-full"
               loading="eager"
               decoding="async"
             />
           </div>
+          <AvisoDireitosImagem className="mt-2" />
         </div>
       </section>
 
@@ -154,19 +156,18 @@ function SobrePage() {
       {/* Foto real do laboratório */}
       <section className="mx-auto max-w-4xl px-4 pb-4 sm:px-6">
         <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
-          <img
+          <SiteImage
             src={laboratorioTurmaImg}
             alt="Alunos usando os computadores do laboratório de informática durante a aula"
+            legenda={`O laboratório de informática da ${config.nomeEscola} em plena aula.`}
             width={1672}
             height={941}
-            className="aspect-video w-full object-cover"
+            className="aspect-video w-full"
             loading="lazy"
             decoding="async"
           />
         </div>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          O laboratório de informática da {config.nomeEscola} em plena aula.
-        </p>
+        <AvisoDireitosImagem className="mt-2" />
       </section>
 
       {/* GCompris */}
@@ -198,16 +199,19 @@ function SobrePage() {
                 </a>
               </Button>
             </div>
-            <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
-              <img
-                src={gcomprisColagemImg}
-                alt="Alunos usando atividades do GCompris no laboratório: teclado infantil, editor de texto e jogos educativos"
-                width={1280}
-                height={720}
-                className="aspect-[16/9] w-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+            <div>
+              <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
+                <SiteImage
+                  src={gcomprisColagemImg}
+                  alt="Alunos usando atividades do GCompris no laboratório: teclado infantil, editor de texto e jogos educativos"
+                  width={1280}
+                  height={720}
+                  className="aspect-[16/9] w-full"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <AvisoDireitosImagem className="mt-2" />
             </div>
           </div>
         </div>
@@ -246,25 +250,19 @@ function SobrePage() {
       {/* Cartaz oficial */}
       <section className="mx-auto max-w-4xl px-4 pb-8 sm:px-6">
         <div className="mx-auto max-w-sm">
-          <a
-            href={cartazAulasImg}
-            target="_blank"
-            rel="noreferrer"
-            className="group block overflow-hidden rounded-2xl border border-border/60 shadow-md transition-shadow hover:shadow-lg"
-          >
-            <img
+          <div className="group overflow-hidden rounded-2xl border border-border/60 shadow-md transition-shadow hover:shadow-lg">
+            <SiteImage
               src={cartazAulasImg}
               alt={`Cartaz oficial das aulas de informática da ${config.nomeEscola}, com o professor ${config.professorInformatica}`}
+              legenda={`Cartaz oficial das aulas de informática da ${config.nomeEscola}, com o professor ${config.professorInformatica}.`}
               width={1280}
               height={720}
-              className="aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              className="aspect-[16/9] w-full transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
               decoding="async"
             />
-          </a>
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            Cartaz oficial — toque para ver em tamanho completo.
-          </p>
+          </div>
+          <AvisoDireitosImagem className="mt-2" />
         </div>
       </section>
 

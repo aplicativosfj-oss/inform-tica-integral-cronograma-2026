@@ -25,6 +25,7 @@ import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { WeatherWidget } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
+import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { WeeklySchedule } from "@/components/school/weekly-schedule";
 import { useAppStore } from "@/lib/app-store";
@@ -214,12 +215,12 @@ function Index() {
                 alt="Agenda de Informática .Online"
                 className="absolute -left-2 -top-2 z-10 h-auto w-24 max-w-[28%] rounded-xl border border-white/40 bg-white/80 p-2 shadow-lg backdrop-blur-md sm:-left-3 sm:-top-3 sm:w-32"
               />
-              <img
+              <SiteImage
                 src={alunosHeroImg}
                 alt="Aluna usando um dos computadores do laboratório de informática da escola"
                 width={1560}
                 height={480}
-                className="relative aspect-[13/4] w-full rounded-2xl border border-border/60 bg-card object-cover shadow-2xl"
+                className="relative aspect-[13/4] w-full rounded-2xl border border-border/60 bg-card shadow-2xl"
                 loading="eager"
                 decoding="async"
               />
@@ -229,19 +230,18 @@ function Index() {
 
         <RevealSection className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
           <div className="group overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl">
-            <img
+            <SiteImage
               src={laboratorioTurmaFotoImg}
               alt={`Turma completa da ${config.nomeEscola} durante a aula de informática, cada aluno em seu computador`}
+              legenda={`O laboratório de informática da ${config.nomeEscola} em plena aula — turma completa, cada aluno em seu computador.`}
               width={1280}
               height={720}
-              className="aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              className="aspect-[16/9] w-full transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
               decoding="async"
             />
           </div>
-          <p className="mt-2 text-center text-xs text-muted-foreground">
-            O laboratório de informática da {config.nomeEscola} em plena aula.
-          </p>
+          <AvisoDireitosImagem className="mt-2" />
         </RevealSection>
 
         <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6">
@@ -270,19 +270,21 @@ function Index() {
             <div className="flex shrink-0 items-center gap-2">
               {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map(
                 (src, i) => (
-                  <img
+                  <SiteImage
                     key={i}
                     src={src}
                     alt="Aluno usando um computador do laboratório de informática"
+                    legenda="Aluno usando um computador do laboratório de informática da escola."
                     loading="lazy"
                     width={64}
                     height={64}
-                    className="size-14 rounded-xl border border-border/60 object-cover shadow-sm sm:size-16"
+                    className="size-14 rounded-xl border border-border/60 shadow-sm sm:size-16"
                   />
                 ),
               )}
             </div>
           </div>
+          <AvisoDireitosImagem className="mt-2 sm:justify-end" />
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <FeatureCard

@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NavBar } from "@/components/school/nav-bar";
+import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
@@ -106,7 +107,10 @@ function CoordenacaoPage() {
   };
 
   const porTurmaGrupo = useMemo(() => {
-    const mapa = new Map<string, { turmaId: string; grupo: number; presentes: number; faltas: number }>();
+    const mapa = new Map<
+      string,
+      { turmaId: string; grupo: number; presentes: number; faltas: number }
+    >();
     for (const r of registros ?? []) {
       const chave = `${r.turmaId}|${r.grupoIndice}`;
       const atual = mapa.get(chave) ?? {
@@ -146,12 +150,12 @@ function CoordenacaoPage() {
               faltas. Acesso aberto, somente leitura.
             </p>
           </div>
-          <img
+          <SiteImage
             src={coordenacaoHeroImg}
             alt="Aluno usando um computador do laboratório de informática durante a aula"
             width={2016}
             height={1134}
-            className="aspect-[16/10] w-full rounded-2xl border border-border/60 object-cover shadow-xl"
+            className="aspect-[16/10] w-full rounded-2xl border border-border/60 shadow-xl"
             loading="eager"
             decoding="async"
           />
@@ -186,8 +190,7 @@ function CoordenacaoPage() {
                             {a.slot.inicio} – {a.slot.fim}
                           </span>
                           <span>
-                            {a.turma.serie} "{a.turma.letra}"
-                            {a.conteudo ? ` · ${a.conteudo}` : ""}
+                            {a.turma.serie} "{a.turma.letra}"{a.conteudo ? ` · ${a.conteudo}` : ""}
                           </span>
                         </li>
                       ))}

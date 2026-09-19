@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { NavBar } from "@/components/school/nav-bar";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
+import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import {
@@ -100,15 +101,16 @@ function AgendaPage() {
             </h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
               Toque numa turma para ver os alunos previstos. Revezamento automático de{" "}
-              {config.horaInicio} às {config.horaFim}, com o professor {config.professorInformatica}.
+              {config.horaInicio} às {config.horaFim}, com o professor {config.professorInformatica}
+              .
             </p>
           </div>
-          <img
+          <SiteImage
             src={agendaHeroImg}
             alt="Aluno participando de uma atividade educativa no laboratório de informática"
             width={2016}
             height={1134}
-            className="aspect-[16/10] w-full rounded-2xl border border-border/60 object-cover shadow-xl"
+            className="aspect-[16/10] w-full rounded-2xl border border-border/60 shadow-xl"
             loading="eager"
             decoding="async"
           />
