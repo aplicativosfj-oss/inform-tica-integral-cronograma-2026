@@ -245,24 +245,30 @@ function CoordenacaoPage() {
               <CardHeader className="p-4 pb-1.5">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <UserCheck className="size-4 text-primary" />
-                  ✅ Aulas que tiveram alunos
+                  ✅ Sessões com Participação
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-2xl font-semibold text-foreground">{participacoes}</p>
-                <p className="text-xs text-muted-foreground mt-1">vezes que alunos foram participar</p>
+                <p className="text-xs text-muted-foreground mt-1">número de registros de presença</p>
+                <p className="text-xs text-primary/70 mt-2 font-medium">
+                  (Soma de todos os alunos que compareceram)
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="p-4 pb-1.5">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <UserX className="size-4 text-destructive" />
-                  ❌ Aulas que tiveram faltas
+                  ❌ Registros de Ausência
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-2xl font-semibold text-foreground">{faltas.length}</p>
-                <p className="text-xs text-muted-foreground mt-1">vezes que alunos faltaram</p>
+                <p className="text-xs text-muted-foreground mt-1">número de registros de falta</p>
+                <p className="text-xs text-destructive/70 mt-2 font-medium">
+                  (Soma de todos os alunos que faltaram)
+                </p>
               </CardContent>
             </Card>
           </div>
