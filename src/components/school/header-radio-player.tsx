@@ -54,7 +54,7 @@ export function HeaderRadioPlayer() {
             : "Ouvir Jovem Pan News ao vivo"
       }
       className={cn(
-        "group relative flex items-center gap-2 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
+        "group cursor-pointer relative flex items-center gap-2 overflow-hidden rounded-full border px-3 py-1.5 text-xs font-medium transition-all",
         "border-transparent bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-fuchsia-500/15",
         "before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-gradient-to-r before:from-cyan-400 before:via-blue-500 before:to-fuchsia-500 before:opacity-30 before:blur-[6px]",
         tocando ? "shadow-[0_0_12px_-1px] shadow-cyan-400/60" : "hover:before:opacity-50",

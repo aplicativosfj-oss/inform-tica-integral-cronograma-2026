@@ -149,7 +149,7 @@ function ProgramacaoPage() {
                           onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") setEditando(assignment);
                           }}
-                          className="transition-colors hover:bg-muted/60"
+                          className="cursor-pointer transition-colors hover:bg-muted/60"
                         >
                           <TableCell className="font-mono text-sm">
                             {assignment.slot.inicio} – {assignment.slot.fim}
@@ -248,7 +248,7 @@ function SlotEditDialog({
               type="button"
               onClick={() => onSelect(turma.id)}
               className={cn(
-                "flex items-center gap-3 rounded-md border border-border/60 px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
+                "cursor-pointer flex items-center gap-3 rounded-md border border-border/60 px-3 py-2 text-left text-sm transition-colors hover:bg-muted",
                 assignment?.turma.id === turma.id && "border-primary bg-primary/5",
               )}
             >

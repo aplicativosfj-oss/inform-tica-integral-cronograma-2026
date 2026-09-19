@@ -154,7 +154,7 @@ export function NavBar() {
                         setMenuAberto(false);
                         logout();
                       }}
-                      className="flex items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
+                      className="cursor-pointer flex items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
                     >
                       <LogOut className="size-4" /> Sair
                     </button>

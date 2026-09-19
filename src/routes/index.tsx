@@ -401,7 +401,7 @@ function ProximasTurmasPanel() {
                 key={`${assignment.dia}-${assignment.slot.inicio}`}
                 type="button"
                 onClick={() => setAssignmentSelecionado(assignment)}
-                className="group flex items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-primary"
+                className="group cursor-pointer flex items-center justify-between gap-3 py-2.5 text-left transition-colors hover:text-primary"
               >
                 <div className="flex items-center gap-3">
                   {assignment.turma.imagem ? (
