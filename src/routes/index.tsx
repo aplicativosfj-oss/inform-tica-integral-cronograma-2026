@@ -24,6 +24,7 @@ import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { LiveSessionPanel } from "@/components/school/live-session-panel";
 import { WeatherWidget } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
+import { PageBackground } from "@/components/school/page-background";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
 import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -41,12 +42,10 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
-import agendaPatternBg from "@/assets/agenda-pattern-bg.svg";
 import alunosHeroImg from "@/assets/alunos-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
-import backgroundImg from "@/assets/page-bg.jpg";
 import logoFull from "@/assets/logo-full-transparent.png";
 import laboratorioTurmaFotoImg from "@/assets/image3.png";
 import alunoJogoImg from "@/assets/image2.jpeg";
@@ -98,28 +97,7 @@ function Index() {
 
   return (
     <div className="relative min-h-screen bg-background">
-      {/*
-        Fundo do modo claro: padrão próprio (grade de agenda + trilhas de
-        circuito, no estilo da logomarca) em vez de uma foto genérica — fixo
-        e bem discreto, pra nunca competir com o hero, o cronômetro ao vivo
-        ou a grade da agenda semanal. Some no modo escuro, onde já existe
-        contraste suficiente sem ele.
-      */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-100 dark:hidden"
-        style={{ backgroundImage: `url(${agendaPatternBg})` }}
-      />
-      {/* Imagem de fundo antiga, só no modo escuro. */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 hidden bg-cover bg-center opacity-[0.12] dark:block"
-        style={{ backgroundImage: `url(${backgroundImg})` }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-background/20 dark:bg-background/70"
-      />
+      <PageBackground />
       <div className="relative z-10">
         <NavBar />
 
@@ -228,7 +206,7 @@ function Index() {
           </div>
         </section>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+        <RevealSection className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
           <div className="group overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl">
             <SiteImage
               src={laboratorioTurmaFotoImg}
@@ -236,12 +214,12 @@ function Index() {
               legenda={`O laboratório de informática da ${config.nomeEscola} em plena aula — turma completa, cada aluno em seu computador.`}
               width={1280}
               height={720}
-              className="aspect-[16/9] w-full transition-transform duration-300 group-hover:scale-[1.02]"
+              className="aspect-[21/9] max-h-52 w-full transition-transform duration-300 group-hover:scale-[1.02] sm:max-h-60"
               loading="lazy"
               decoding="async"
             />
           </div>
-          <AvisoDireitosImagem className="mt-2" />
+          <AvisoDireitosImagem className="mt-1.5" />
         </RevealSection>
 
         <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6">

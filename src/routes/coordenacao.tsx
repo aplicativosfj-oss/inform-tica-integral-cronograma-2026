@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NavBar } from "@/components/school/nav-bar";
+import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
@@ -133,212 +134,220 @@ function CoordenacaoPage() {
   const participacoes = (registros ?? []).length - faltas.length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <NavBar />
+    <div className="relative min-h-screen bg-background">
+      <PageBackground />
+      <div className="relative z-10">
+        <NavBar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border/60">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
-        />
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
-          <div>
-            <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              Calendário das aulas de informática, participação por turma e grupo e histórico de
-              faltas. Acesso aberto, somente leitura.
-            </p>
-          </div>
-          <SiteImage
-            src={coordenacaoHeroImg}
-            alt="Aluno usando um computador do laboratório de informática durante a aula"
-            width={2016}
-            height={1134}
-            className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
-            loading="eager"
-            decoding="async"
+        {/* Hero */}
+        <section className="relative overflow-hidden border-b border-border/60">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
           />
-        </div>
-      </section>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <CalendarDays className="size-4" /> Calendário da semana
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {config.diasSemana.map((dia) => {
-              const doDia = assignments
-                .filter((a) => a.dia === dia)
-                .sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
-              return (
-                <div key={dia} className="rounded-lg border border-border/60 bg-card p-3">
-                  <p className="mb-2 text-sm font-semibold text-foreground">{dia}</p>
-                  {doDia.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">Sem aulas programadas.</p>
-                  ) : (
-                    <ul className="flex flex-col gap-1.5">
-                      {doDia.map((a) => (
-                        <li
-                          key={`${a.dia}-${a.slot.inicio}`}
-                          className="flex flex-col text-xs text-muted-foreground"
-                        >
-                          <span className="font-mono text-foreground">
-                            {a.slot.inicio} – {a.slot.fim}
-                          </span>
-                          <span>
-                            {a.turma.serie} "{a.turma.letra}"{a.conteudo ? ` · ${a.conteudo}` : ""}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <div className="mb-4 flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="mes">Mês</Label>
-            <Input
-              id="mes"
-              type="month"
-              className="w-44"
-              value={mes}
-              onChange={(e) => setMes(e.target.value || mesAtual())}
+          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
+            <div>
+              <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
+              <p className="max-w-2xl text-sm text-muted-foreground">
+                Calendário das aulas de informática, participação por turma e grupo e histórico de
+                faltas. Acesso aberto, somente leitura.
+              </p>
+            </div>
+            <SiteImage
+              src={coordenacaoHeroImg}
+              alt="Aluno usando um computador do laboratório de informática durante a aula"
+              width={2016}
+              height={1134}
+              className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border/60 shadow-xl sm:max-h-64"
+              loading="eager"
+              decoding="async"
             />
           </div>
-        </div>
+        </section>
 
-        {erro ? (
-          <p className="mb-4 text-sm text-destructive">
-            Não foi possível carregar a frequência agora: {erro}
-          </p>
-        ) : null}
-
-        <div className="mb-4 grid gap-3 sm:grid-cols-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-2 p-4 pb-1.5">
-              <UserCheck className="size-4 text-primary" />
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Participações no mês
+        <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <Card className="mb-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarDays className="size-4" /> Calendário da semana
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <p className="text-2xl font-semibold text-foreground">{participacoes}</p>
+            <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {config.diasSemana.map((dia) => {
+                const doDia = assignments
+                  .filter((a) => a.dia === dia)
+                  .sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
+                return (
+                  <div key={dia} className="rounded-lg border border-border/60 bg-card p-3">
+                    <p className="mb-2 text-sm font-semibold text-foreground">{dia}</p>
+                    {doDia.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Sem aulas programadas.</p>
+                    ) : (
+                      <ul className="flex flex-col gap-1.5">
+                        {doDia.map((a) => (
+                          <li
+                            key={`${a.dia}-${a.slot.inicio}`}
+                            className="flex flex-col text-xs text-muted-foreground"
+                          >
+                            <span className="font-mono text-foreground">
+                              {a.slot.inicio} – {a.slot.fim}
+                            </span>
+                            <span>
+                              {a.turma.serie} "{a.turma.letra}"
+                              {a.conteudo ? ` · ${a.conteudo}` : ""}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-2 p-4 pb-1.5">
-              <UserX className="size-4 text-destructive" />
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Faltas no mês
+
+          <div className="mb-4 flex flex-wrap items-end gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="mes">Mês</Label>
+              <Input
+                id="mes"
+                type="month"
+                className="w-44"
+                value={mes}
+                onChange={(e) => setMes(e.target.value || mesAtual())}
+              />
+            </div>
+          </div>
+
+          {erro ? (
+            <p className="mb-4 text-sm text-destructive">
+              Não foi possível carregar a frequência agora: {erro}
+            </p>
+          ) : null}
+
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 p-4 pb-1.5">
+                <UserCheck className="size-4 text-primary" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Participações no mês
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <p className="text-2xl font-semibold text-foreground">{participacoes}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 p-4 pb-1.5">
+                <UserX className="size-4 text-destructive" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Faltas no mês
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                <p className="text-2xl font-semibold text-foreground">{faltas.length}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="mb-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ClipboardList className="size-4" /> Presença por turma e grupo
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <p className="text-2xl font-semibold text-foreground">{faltas.length}</p>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Turma</TableHead>
+                      <TableHead>Grupo</TableHead>
+                      <TableHead className="text-right">Participações</TableHead>
+                      <TableHead className="text-right">Faltas</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {porTurmaGrupo.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
+                          {registros === null ? "Carregando..." : "Nenhum registro neste mês."}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      porTurmaGrupo.map((linha) => (
+                        <TableRow key={`${linha.turmaId}-${linha.grupo}`}>
+                          <TableCell className="text-sm font-medium text-foreground">
+                            {nomeTurma(linha.turmaId)}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            Grupo {linha.grupo + 1}
+                          </TableCell>
+                          <TableCell className="text-right text-sm">{linha.presentes}</TableCell>
+                          <TableCell className="text-right text-sm">{linha.faltas}</TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
-        </div>
 
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ClipboardList className="size-4" /> Presença por turma e grupo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Turma</TableHead>
-                    <TableHead>Grupo</TableHead>
-                    <TableHead className="text-right">Participações</TableHead>
-                    <TableHead className="text-right">Faltas</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {porTurmaGrupo.length === 0 ? (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Histórico de faltas ({faltas.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
-                        {registros === null ? "Carregando..." : "Nenhum registro neste mês."}
-                      </TableCell>
+                      <TableHead className="w-28">Data</TableHead>
+                      <TableHead>Turma</TableHead>
+                      <TableHead>Aluno</TableHead>
+                      <TableHead>Grupo</TableHead>
+                      <TableHead className="text-right">Motivo</TableHead>
                     </TableRow>
-                  ) : (
-                    porTurmaGrupo.map((linha) => (
-                      <TableRow key={`${linha.turmaId}-${linha.grupo}`}>
-                        <TableCell className="text-sm font-medium text-foreground">
-                          {nomeTurma(linha.turmaId)}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          Grupo {linha.grupo + 1}
-                        </TableCell>
-                        <TableCell className="text-right text-sm">{linha.presentes}</TableCell>
-                        <TableCell className="text-right text-sm">{linha.faltas}</TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Histórico de faltas ({faltas.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-28">Data</TableHead>
-                    <TableHead>Turma</TableHead>
-                    <TableHead>Aluno</TableHead>
-                    <TableHead>Grupo</TableHead>
-                    <TableHead className="text-right">Motivo</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {faltas.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                        {registros === null ? "Carregando..." : "Nenhuma falta registrada no mês."}
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    faltas.map((f) => (
-                      <TableRow key={f.id}>
-                        <TableCell className="font-mono text-sm">
-                          {new Date(`${f.data}T00:00:00`).toLocaleDateString("pt-BR")}
-                        </TableCell>
-                        <TableCell className="text-sm">{nomeTurma(f.turmaId)}</TableCell>
-                        <TableCell className="text-sm text-foreground">{f.alunoNome}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          Grupo {f.grupoIndice + 1}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant="destructive">
-                            {f.motivo === "nao_quis_participar" ? "Não quis participar" : "Ausente"}
-                          </Badge>
+                  </TableHeader>
+                  <TableBody>
+                    {faltas.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                          {registros === null
+                            ? "Carregando..."
+                            : "Nenhuma falta registrada no mês."}
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
-      </main>
-      <SiteFooter />
+                    ) : (
+                      faltas.map((f) => (
+                        <TableRow key={f.id}>
+                          <TableCell className="font-mono text-sm">
+                            {new Date(`${f.data}T00:00:00`).toLocaleDateString("pt-BR")}
+                          </TableCell>
+                          <TableCell className="text-sm">{nomeTurma(f.turmaId)}</TableCell>
+                          <TableCell className="text-sm text-foreground">{f.alunoNome}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            Grupo {f.grupoIndice + 1}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge variant="destructive">
+                              {f.motivo === "nao_quis_participar"
+                                ? "Não quis participar"
+                                : "Ausente"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+        <SiteFooter />
+      </div>
     </div>
   );
 }
