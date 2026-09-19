@@ -253,14 +253,19 @@ export function PreviaAlunosDialog({
                               {horario.inicio} – {horario.fim}
                             </span>
                           </div>
-                          <div className="flex flex-wrap gap-1.5 px-3 pb-2.5">
-                            {grupo.alunos.map((aluno) => (
-                              <span
+                          <div className="grid grid-cols-1 gap-1 px-3 pb-2.5 sm:grid-cols-2">
+                            {grupo.alunos.map((aluno, indiceAluno) => (
+                              <div
                                 key={aluno.id}
-                                className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-xs text-foreground"
+                                className="flex min-w-0 items-center gap-2 rounded-lg bg-muted/40 px-2 py-1.5"
                               >
-                                {aluno.nome}
-                              </span>
+                                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-[10px] font-semibold text-muted-foreground ring-1 ring-border/60">
+                                  {indiceAluno + 1}
+                                </span>
+                                <span className="truncate text-xs text-foreground">
+                                  {aluno.nome}
+                                </span>
+                              </div>
                             ))}
                           </div>
                         </div>
