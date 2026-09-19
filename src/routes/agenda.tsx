@@ -14,6 +14,7 @@ import {
   buildGrupos,
   buildWeeklySchedule,
   currentWeekdayLabel,
+  getWeekIndex,
   proximaDataDoDia,
   proximasDatasDoDia,
   reprogramacoesParaData,
@@ -44,7 +45,11 @@ export const Route = createFileRoute("/agenda")({
 
 function AgendaPage() {
   const { turmas, config } = useAppStore();
-  const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
+  const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const assignments = useMemo(
+    () => buildWeeklySchedule(turmas, config, weekIndex),
+    [turmas, config, weekIndex],
+  );
   const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
   const [diaSelecionado, setDiaSelecionado] = useState(
     config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),

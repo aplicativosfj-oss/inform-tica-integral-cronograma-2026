@@ -25,7 +25,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
 import { useConfirmar } from "@/lib/confirm-store";
-import { buildWeeklySchedule, currentWeekdayLabel } from "@/lib/schedule-engine";
+import { buildWeeklySchedule, currentWeekdayLabel, getWeekIndex } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -42,7 +42,11 @@ export const Route = createFileRoute("/dashboard/programacao")({
 function ProgramacaoPage() {
   const { turmas, config, setSlotOverride } = useAppStore();
   const confirmar = useConfirmar();
-  const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
+  const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const assignments = useMemo(
+    () => buildWeeklySchedule(turmas, config, weekIndex),
+    [turmas, config, weekIndex],
+  );
   const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
   const [diaSelecionado, setDiaSelecionado] = useState(
     config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),

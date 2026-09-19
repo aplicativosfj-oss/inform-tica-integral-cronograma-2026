@@ -15,6 +15,7 @@ import { fetchPresencasRange } from "@/lib/presencas";
 import {
   buildWeeklySchedule,
   currentWeekdayLabel,
+  getWeekIndex,
   proximaDataDoDia,
   toDateKey,
 } from "@/lib/schedule-engine";
@@ -71,7 +72,11 @@ function FaltasPage() {
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
-  const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
+  const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const assignments = useMemo(
+    () => buildWeeklySchedule(turmas, config, weekIndex),
+    [turmas, config, weekIndex],
+  );
 
   useEffect(() => {
     let cancelado = false;

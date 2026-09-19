@@ -18,7 +18,7 @@ import { NavBar } from "@/components/school/nav-bar";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
-import { buildWeeklySchedule, toDateKey } from "@/lib/schedule-engine";
+import { buildWeeklySchedule, getWeekIndex, toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 import coordenacaoHeroImg from "@/assets/image7.jpeg";
 
@@ -66,7 +66,11 @@ function CoordenacaoPage() {
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
-  const assignments = useMemo(() => buildWeeklySchedule(turmas, config), [turmas, config]);
+  const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const assignments = useMemo(
+    () => buildWeeklySchedule(turmas, config, weekIndex),
+    [turmas, config, weekIndex],
+  );
 
   useEffect(() => {
     let cancelado = false;

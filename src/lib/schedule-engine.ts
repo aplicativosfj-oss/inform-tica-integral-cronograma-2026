@@ -83,16 +83,45 @@ export function aplicarExcecoesDeData(
 }
 
 /**
- * Assigns one turma to each day+slot, cycling through the registered turmas
- * in round-robin order so every turma gets computer-lab time spread across
- * the week (no repeats on the same day when possible). The administrator can
- * override individual slots from the Programação page (`config.slotOverrides`);
- * those take precedence over the automatic rotation.
+ * Assigns one turma to each day+slot. Every turma first gets exactly one
+ * fixed "base" session — same day, same time, every single week, like a
+ * real timetable — filled in size order (largest first) across the first
+ * `turmas.length` positions of the week (Monday morning first, and so on).
+ *
+ * When the week has more slots than turmas, the leftover ones become a
+ * shared "bonus" pool: a handful of turmas get a 2nd weekly session on top
+ * of their base one. Which turmas get it rotates by `weekIndex` — shifted
+ * by the pool's own size each week, so e.g. 5 leftover slots among 10
+ * turmas cleanly alternate between the two halves every week, and everyone
+ * ends up with an equal number of bonus sessions over just two weeks.
+ * Unlike the base sessions, a turma's bonus session (if any) can land on a
+ * different day each time it comes around — but it always falls on one of
+ * the leftover positions, which sit at the end of the week, so it never
+ * collides with anyone's base day.
+ *
+ * The administrator can override individual slots from the Programação page
+ * (`config.slotOverrides`); those take precedence over the automatic rotation.
  */
-export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): Assignment[] {
+export function buildWeeklySchedule(
+  turmas: Turma[],
+  config: ScheduleConfig,
+  weekIndex = 0,
+): Assignment[] {
   if (turmas.length === 0) return [];
   const slots = buildDailySlots(config);
   const turmasById = new Map(turmas.map((t) => [t.id, t]));
+  const turmasPorTamanho = [...turmas].sort((a, b) => b.alunos.length - a.alunos.length);
+  const n = turmasPorTamanho.length;
+
+  const posicoes: { dia: string; diaIndex: number; slot: Slot }[] = [];
+  config.diasSemana.forEach((dia, diaIndex) => {
+    slots.forEach((slot) => posicoes.push({ dia, diaIndex, slot }));
+  });
+
+  const baseSessoesPorTurma = Math.floor(posicoes.length / n);
+  const totalBase = baseSessoesPorTurma * n;
+  const tamanhoBonus = posicoes.length - totalBase;
+  const inicioBonus = tamanhoBonus > 0 ? (weekIndex * tamanhoBonus) % n : 0;
 
   interface Pending {
     dia: string;
@@ -104,16 +133,19 @@ export function buildWeeklySchedule(turmas: Turma[], config: ScheduleConfig): As
   }
   const pending: Pending[] = [];
 
-  let cursor = 0;
-  config.diasSemana.forEach((dia, diaIndex) => {
-    slots.forEach((slot) => {
-      const overrideId = config.slotOverrides?.[slotKey(dia, slot.inicio)];
-      const turma =
-        (overrideId ? turmasById.get(overrideId) : undefined) ?? turmas[cursor % turmas.length];
-      cursor += 1;
-      if (!turma) return;
-      pending.push({ dia, diaIndex, slot, turma });
-    });
+  posicoes.forEach(({ dia, diaIndex, slot }, index) => {
+    const overrideId = config.slotOverrides?.[slotKey(dia, slot.inicio)];
+    let turma: Turma | undefined;
+    if (overrideId) {
+      turma = turmasById.get(overrideId);
+    } else if (index < totalBase) {
+      turma = turmasPorTamanho[index % n];
+    } else {
+      const indiceNoBonus = index - totalBase;
+      turma = turmasPorTamanho[(inicioBonus + indiceNoBonus) % n];
+    }
+    if (!turma) return;
+    pending.push({ dia, diaIndex, slot, turma });
   });
 
   // Aulas cadastradas manualmente na tela "Aulas" têm prioridade: substituem

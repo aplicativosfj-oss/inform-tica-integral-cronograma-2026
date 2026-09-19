@@ -11,6 +11,7 @@ import {
   buildWeeklySchedule,
   currentWeekdayLabel,
   findSessaoAtual,
+  getWeekIndex,
   toDateKey,
 } from "@/lib/schedule-engine";
 
@@ -64,7 +65,9 @@ function TvPage() {
 
   const diaAtual = now ? currentWeekdayLabel(now) : "";
   const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
-  const sessao = now ? findSessaoAtual(buildWeeklySchedule(turmas, config), config, now) : null;
+  const sessao = now
+    ? findSessaoAtual(buildWeeklySchedule(turmas, config, getWeekIndex(now)), config, now)
+    : null;
   const dateKey = now ? toDateKey(now) : "";
 
   return (

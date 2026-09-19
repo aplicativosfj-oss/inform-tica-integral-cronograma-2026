@@ -20,12 +20,11 @@ export const SEED_CONFIG: ScheduleConfig = {
   endereco: "Rua Ernane Moreira Braga, 108, Cohab",
   professorInformatica: "Franc D'nis",
   diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
-  // 3 blocos de 90 min por dia (manhã 1, manhã 2, tarde), cada um rendendo 3
-  // grupos de 7 alunos (21 vagas) em vez dos 2 grupos (14 vagas) de antes —
-  // quase dobra quantos alunos de cada turma participam por semana, sem
-  // esticar o expediente além das 14:45 nem cortar o almoço/descanso.
+  // 3 blocos de 60 min por dia (manhã 1, manhã 2, tarde), cada um rendendo 2
+  // grupos de 7 alunos (14 vagas) revezando 30 min cada — o máximo que cabe
+  // sem esticar o expediente além das 14:30 nem cortar o almoço/descanso.
   horaInicio: "07:30",
-  horaFim: "14:45",
+  horaFim: "14:30",
   // Almoço + descanso do professor: 2h15, incluindo o tempo de as crianças
   // voltarem e se acomodarem antes da aula da tarde recomeçar às 13:15.
   intervaloInicio: "11:00",
@@ -34,7 +33,7 @@ export const SEED_CONFIG: ScheduleConfig = {
   // pausa extra antes), e a manhã 2 recomeça exatamente às 9:15.
   recreioInicio: "09:00",
   recreioFim: "09:15",
-  duracaoSlotMinutos: 90,
+  duracaoSlotMinutos: 60,
   duracaoGrupoMinutos: 30,
   numeroComputadores: 7,
   conteudoPorDia: {

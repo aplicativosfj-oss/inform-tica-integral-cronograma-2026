@@ -48,6 +48,7 @@ import {
   currentWeekdayLabel,
   escolherSubstituto,
   findSessaoAtual,
+  getWeekIndex,
   gruposFromPresencas,
   gruposPorVisita,
   reprogramacoesParaData,
@@ -379,7 +380,12 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
   const dateKey = now ? toDateKey(now) : "";
   const assignments = now
-    ? aplicarExcecoesDeData(buildWeeklySchedule(turmas, config), config, turmas, dateKey)
+    ? aplicarExcecoesDeData(
+        buildWeeklySchedule(turmas, config, getWeekIndex(now)),
+        config,
+        turmas,
+        dateKey,
+      )
     : [];
   const reprogramadasHoje = now ? reprogramacoesParaData(turmas, config, now) : [];
   const sessao = now ? findSessaoAtual(assignments, config, now, reprogramadasHoje) : null;

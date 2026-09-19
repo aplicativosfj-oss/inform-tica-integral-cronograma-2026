@@ -1,7 +1,12 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 
 import { useAppStore } from "@/lib/app-store";
-import { buildDailySlots, buildWeeklySchedule, currentWeekdayLabel } from "@/lib/schedule-engine";
+import {
+  buildDailySlots,
+  buildWeeklySchedule,
+  currentWeekdayLabel,
+  getWeekIndex,
+} from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 
 /**
@@ -42,14 +47,21 @@ function serieClasses(index: number) {
 export function WeeklySchedule() {
   const { turmas, config } = useAppStore();
 
-  // "Hoje" depends on the client's clock, which can differ from the server
-  // render — only applied after mount to avoid a hydration mismatch.
+  // "Hoje" and the week's rotation offset depend on the client's clock,
+  // which can differ from the server render — only applied after mount to
+  // avoid a hydration mismatch (both start at their week-0/no-highlight
+  // state, matching the server-rendered markup, then correct themselves).
   const [todayLabel, setTodayLabel] = useState("");
-  useEffect(() => setTodayLabel(currentWeekdayLabel(new Date())), []);
+  const [weekIndex, setWeekIndex] = useState(0);
+  useEffect(() => {
+    const now = new Date();
+    setTodayLabel(currentWeekdayLabel(now));
+    setWeekIndex(getWeekIndex(now));
+  }, []);
 
   const { linhas, colunas, series, pausas, lookup } = useMemo(() => {
     const dailySlots = buildDailySlots(config);
-    const assignments = buildWeeklySchedule(turmas, config);
+    const assignments = buildWeeklySchedule(turmas, config, weekIndex);
     const byDayAndSlot = new Map<string, Assignment>();
     for (const a of assignments) byDayAndSlot.set(`${a.dia}|${a.slot.inicio}`, a);
 
@@ -83,7 +95,7 @@ export function WeeklySchedule() {
       pausas: gaps,
       lookup: byDayAndSlot,
     };
-  }, [turmas, config]);
+  }, [turmas, config, weekIndex]);
 
   if (turmas.length === 0 || linhas.length === 0) return null;
 

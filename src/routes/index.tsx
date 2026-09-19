@@ -32,6 +32,7 @@ import {
   aplicarExcecoesDeData,
   buildWeeklySchedule,
   currentWeekdayLabel,
+  getWeekIndex,
   nextAssignmentsForDay,
   proximaDataDoDia,
   proximoDiaLetivo,
@@ -403,7 +404,7 @@ function ProximasTurmasPanel() {
     if (!proximo) return [];
     const dataKey = toDateKey(proximo.data);
     const assignments = aplicarExcecoesDeData(
-      buildWeeklySchedule(turmas, config),
+      buildWeeklySchedule(turmas, config, getWeekIndex(proximo.data)),
       config,
       turmas,
       dataKey,
@@ -507,7 +508,7 @@ function ProgramacaoSemanalDestaque() {
   const assignments = useMemo(
     () =>
       aplicarExcecoesDeData(
-        buildWeeklySchedule(turmas, config),
+        buildWeeklySchedule(turmas, config, getWeekIndex(dataDoDia)),
         config,
         turmas,
         toDateKey(dataDoDia),
