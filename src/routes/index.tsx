@@ -58,7 +58,7 @@ import alunoSorridenteImg from "@/assets/image10.jpeg";
 import homePageBgImg from "@/assets/homepage-bg.svg";
 import heroTechBgImg from "@/assets/feature-tools.jpg";
 import featureKidsBgImg from "@/assets/feature-kids-learning.jpg";
-import darkTechBgImg from "@/assets/feature-classroom-tech.jpg";
+import darkTechBgImg from "@/assets/programacao-semana-bg.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
