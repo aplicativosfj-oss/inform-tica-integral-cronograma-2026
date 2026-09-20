@@ -180,7 +180,7 @@ export function NavBar() {
                     const isActive =
                       location.pathname === link.to ||
                       (link.to === "/" && location.pathname === "");
-                    const Icone = LINK_ICONS[link.to];
+                    const Icone = LINK_ICONS[link.to] ?? Home;
                     return (
                       <SheetClose key={link.to} asChild>
                         <Link
