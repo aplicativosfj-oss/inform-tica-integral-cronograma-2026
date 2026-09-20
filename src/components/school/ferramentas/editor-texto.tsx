@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useConfirmar } from "@/lib/confirm-store";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import {
@@ -104,6 +105,13 @@ function formatarRelativo(dataIso: string): string {
   return rtf.format(-Math.round(diffHoras / 24), "day");
 }
 
+function formatarDataHora(dataIso: string): string {
+  const data = new Date(dataIso);
+  const dataFormatada = data.toLocaleDateString("pt-BR");
+  const horaFormatada = data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${dataFormatada} às ${horaFormatada}`;
+}
+
 function comando(nome: string, valor?: string) {
   document.execCommand(nome, false, valor);
 }
@@ -139,6 +147,7 @@ export function EditorTexto() {
     }
     comando(nome, valor);
     salvarSelecaoAtual();
+    setSujo(true);
   }
 
   /**
@@ -164,6 +173,7 @@ export function EditorTexto() {
     salvarSelecaoAtual();
     salvarRascunhoLocal();
     atualizarContagem();
+    setSujo(true);
   }
 
   const imagemInputRef = useRef<HTMLInputElement>(null);
@@ -203,6 +213,32 @@ export function EditorTexto() {
   // na régua — quem manda de verdade no recuo é o próprio navegador via
   // indent/outdent.
   const [nivelRecuo, setNivelRecuo] = useState(0);
+  // Marca se o documento aberto (novo ou existente) tem alguma mudança desde
+  // que foi criado/aberto/salvo pela última vez — usado para perguntar antes
+  // de trocar de texto e o aluno perder o que ainda não salvou.
+  const [sujo, setSujo] = useState(false);
+
+  /**
+   * Chamado antes de qualquer ação que troque o documento em tela (abrir
+   * outro texto, começar um novo). Se não há nada arriscado a perder, deixa
+   * passar direto; se há, pergunta e — quando o aluno está logado — oferece
+   * salvar antes de continuar.
+   */
+  async function confirmarTrocaSeNecessario(): Promise<boolean> {
+    const temConteudo = (areaRef.current?.innerText ?? "").trim().length > 0;
+    if (!sujo || !temConteudo) return true;
+
+    const ok = await confirmar({
+      titulo: "Salvar alterações?",
+      descricao: sessao
+        ? "Este documento tem mudanças que ainda não foram salvas. Deseja salvar antes de continuar?"
+        : "Este documento tem mudanças que ainda não foram salvas. Elas serão perdidas se você continuar.",
+      textoConfirmar: sessao ? "Salvar e continuar" : "Continuar sem salvar",
+    });
+    if (!ok) return false;
+    if (sessao) await salvar();
+    return true;
+  }
 
   function aplicarRecuo(direcao: 1 | -1) {
     comandoComSelecao(direcao === 1 ? "indent" : "outdent");
@@ -221,6 +257,7 @@ export function EditorTexto() {
     if (salvo && areaRef.current) {
       areaRef.current.innerHTML = salvo;
       atualizarContagem();
+      setSujo(true);
     }
     // Sem isso, cada Enter cria uma <div> nova com a margem padrão do
     // navegador (bem maior que o espaçamento entre linhas de um parágrafo de
@@ -259,18 +296,14 @@ export function EditorTexto() {
 
   async function novoDocumento() {
     if (!areaRef.current) return;
-    if (areaRef.current.innerText.trim().length > 0) {
-      const ok = await confirmar({
-        titulo: "Começar um documento novo?",
-        descricao: "O texto que não foi salvo vai se perder.",
-      });
-      if (!ok) return;
-    }
+    const podeContinuar = await confirmarTrocaSeNecessario();
+    if (!podeContinuar) return;
     areaRef.current.innerHTML = "";
     setArquivoAtualId(null);
     setTitulo("Sem título");
     localStorage.removeItem(CHAVE_RASCUNHO);
     setContagem(0);
+    setSujo(false);
   }
 
   async function excluirDocumentoAtual() {
@@ -297,6 +330,7 @@ export function EditorTexto() {
     setTitulo("Sem título");
     localStorage.removeItem(CHAVE_RASCUNHO);
     setContagem(0);
+    setSujo(false);
   }
 
   async function salvar() {
@@ -316,6 +350,7 @@ export function EditorTexto() {
         areaRef.current.innerHTML,
       );
       setArquivoAtualId(novoId);
+      setSujo(false);
       toast.success("Salvo na sua pasta.");
       carregarRecentes();
     } catch (err) {
@@ -344,6 +379,12 @@ export function EditorTexto() {
 
   async function abrirDocumento(id: string) {
     if (!sessao || !areaRef.current) return;
+    if (id === arquivoAtualId) {
+      setDialogAbrirAberto(false);
+      return;
+    }
+    const podeContinuar = await confirmarTrocaSeNecessario();
+    if (!podeContinuar) return;
     try {
       const arquivo = await obterArquivoAluno(sessao.alunoId, sessao.pin, id);
       if (!arquivo) {
@@ -354,6 +395,7 @@ export function EditorTexto() {
       setArquivoAtualId(arquivo.id);
       setTitulo(arquivo.titulo);
       atualizarContagem();
+      setSujo(false);
       setDialogAbrirAberto(false);
       toast.success(`"${arquivo.titulo}" aberto.`);
     } catch (err) {
@@ -366,8 +408,8 @@ export function EditorTexto() {
       {/* Painel lateral: últimos textos do aluno, para reabrir rápido sem
           precisar do diálogo "Abrir". Só aparece pra quem está logado. */}
       {sessao && (
-        <aside className="order-2 shrink-0 md:order-1 md:w-52">
-          <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <aside className="order-2 shrink-0 md:order-1 md:w-44">
+          <p className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Meus textos
           </p>
           {carregandoRecentes ? (
@@ -379,32 +421,44 @@ export function EditorTexto() {
               Seus textos salvos vão aparecer aqui.
             </p>
           ) : (
-            <div className="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
-              {recentes.map((arquivo, indice) => (
-                <button
-                  key={arquivo.id}
-                  type="button"
-                  onClick={() => abrirDocumento(arquivo.id)}
-                  className={`flex w-32 shrink-0 flex-col items-start gap-1.5 rounded-xl border p-2.5 text-left transition-colors md:w-full ${
-                    arquivo.id === arquivoAtualId
-                      ? "border-primary/50 bg-primary/5"
-                      : "border-border/60 bg-card hover:bg-muted"
-                  }`}
-                >
-                  <span
-                    className={`flex size-8 items-center justify-center rounded-lg ${CORES_CAPA[indice % CORES_CAPA.length]}`}
-                  >
-                    <FileText className="size-4" />
-                  </span>
-                  <span className="line-clamp-2 w-full text-xs font-medium leading-tight text-foreground">
-                    {arquivo.titulo}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {formatarRelativo(arquivo.atualizadoEm)}
-                  </span>
-                </button>
-              ))}
-            </div>
+            <TooltipProvider delayDuration={300}>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
+                {recentes.map((arquivo, indice) => (
+                  <Tooltip key={arquivo.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => abrirDocumento(arquivo.id)}
+                        className={`flex w-28 shrink-0 items-center gap-1.5 rounded-lg border p-1.5 text-left transition-colors md:w-full ${
+                          arquivo.id === arquivoAtualId
+                            ? "border-primary/50 bg-primary/5"
+                            : "border-border/60 bg-card hover:bg-muted"
+                        }`}
+                      >
+                        <span
+                          className={`flex size-6 shrink-0 items-center justify-center rounded-md ${CORES_CAPA[indice % CORES_CAPA.length]}`}
+                        >
+                          <FileText className="size-3.5" />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-xs font-medium leading-tight text-foreground">
+                            {arquivo.titulo}
+                          </span>
+                          <span className="block text-[10px] leading-tight text-muted-foreground">
+                            {formatarRelativo(arquivo.atualizadoEm)}
+                          </span>
+                        </span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="text-xs">
+                      <p className="font-medium">{arquivo.titulo}</p>
+                      <p className="mt-1 opacity-90">Criado em {formatarDataHora(arquivo.criadoEm)}</p>
+                      <p className="opacity-90">Atualizado em {formatarDataHora(arquivo.atualizadoEm)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
           )}
         </aside>
       )}
@@ -742,6 +796,7 @@ export function EditorTexto() {
           onInput={() => {
             atualizarContagem();
             salvarRascunhoLocal();
+            setSujo(true);
           }}
           onMouseUp={salvarSelecaoAtual}
           onKeyUp={salvarSelecaoAtual}

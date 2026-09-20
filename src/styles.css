@@ -334,6 +334,18 @@
     color: var(--color-foreground);
   }
 
+  /* Botão nativo do navegador (<button>) não vem com o cursor de "mãozinha"
+     por padrão — só links (<a>) têm isso de fábrica. Aplica em todo o site,
+     inclusive nos botões escritos à mão (sem o componente <Button>), como as
+     amostras de cor e os emojis do Editor de Texto. Os componentes prontos
+     (Select etc.) já continuam decidindo o cursor deles próprios quando
+     desabilitados. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="option"] {
+    cursor: pointer;
+  }
+
   /* Reserva sempre o espaço da barra de rolagem vertical, mesmo quando ela
      não está visível. Sem isso, a página inteira "pula" de largura toda vez
      que o conteúdo passa a precisar de rolagem (ex.: digitar até estourar a

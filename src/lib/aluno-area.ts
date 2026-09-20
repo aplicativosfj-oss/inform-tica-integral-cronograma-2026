@@ -245,6 +245,7 @@ export async function fetchPresencasDoAluno(alunoId: string, limite = 30): Promi
 export interface ArquivoAlunoResumo {
   id: string;
   titulo: string;
+  criadoEm: string;
   atualizadoEm: string;
 }
 
@@ -255,6 +256,7 @@ export interface ArquivoAluno extends ArquivoAlunoResumo {
 interface ArquivoResumoRow {
   id: string;
   titulo: string;
+  criado_em: string;
   atualizado_em: string;
 }
 
@@ -277,6 +279,7 @@ export async function listarArquivosAluno(
   return ((data ?? []) as ArquivoResumoRow[]).map((row) => ({
     id: row.id,
     titulo: row.titulo,
+    criadoEm: row.criado_em,
     atualizadoEm: row.atualizado_em,
   }));
 }
@@ -299,6 +302,7 @@ export async function obterArquivoAluno(
     id: row.id,
     titulo: row.titulo,
     conteudoHtml: row.conteudo_html,
+    criadoEm: row.criado_em,
     atualizadoEm: row.atualizado_em,
   };
 }
