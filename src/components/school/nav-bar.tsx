@@ -88,7 +88,9 @@ export function NavBar() {
             {/* O nome da escola acompanha a marca em toda tela. No celular o
                 espaço é disputado com o player e o menu, então entra a forma
                 abreviada — cabe inteira, em vez de truncar no meio. */}
-            <span className="truncate text-xs text-slate-600 dark:text-white/70">
+            {/* Em telas muito estreitas o subtítulo truncava feio ao lado do
+                player — só aparece quando há largura de sobra. */}
+            <span className="hidden truncate text-xs text-slate-600 dark:text-white/70 min-[400px]:block">
               <span className="sm:hidden">E.M. Dr. Eiraldo Carneiro</span>
               <span className="hidden sm:inline">Escola Dr. Eiraldo Carneiro</span>
             </span>

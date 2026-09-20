@@ -109,7 +109,7 @@ function LoginPage() {
                   />
                 </div>
                 {error ? <p className="text-sm text-destructive">{error}</p> : null}
-                <Button type="submit" className="mt-2" disabled={submitting}>
+                <Button type="submit" className="mt-1 h-10" disabled={submitting}>
                   <LogIn /> {submitting ? "Entrando..." : "Entrar"}
                 </Button>
                 <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
