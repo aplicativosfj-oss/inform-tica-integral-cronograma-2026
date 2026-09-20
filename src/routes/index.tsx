@@ -55,8 +55,10 @@ import alunosImg3 from "@/assets/alunos-3.jpg";
 import laboratorioTurmaFotoImg from "@/assets/image3.png";
 import alunoJogoImg from "@/assets/image2.jpeg";
 import alunoSorridenteImg from "@/assets/image10.jpeg";
-import programacaoBgImg from "@/assets/image9.png";
 import homePageBgImg from "@/assets/homepage-bg.svg";
+import heroTechBgImg from "@/assets/feature-tools.jpg";
+import featureKidsBgImg from "@/assets/feature-kids-learning.jpg";
+import darkTechBgImg from "@/assets/feature-classroom-tech.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -109,6 +111,14 @@ function Index() {
         <NavBar />
 
         <section className="relative overflow-hidden border-b border-border/60">
+          {/* Foto de ambiente (laptop + ícones de produtividade) bem desfocada e
+              apagada — dá cor e textura ao hero sem competir com o texto; os
+              véus abaixo garantem contraste por cima dela. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-20 scale-110 bg-cover bg-right opacity-[0.14] blur-2xl dark:opacity-[0.22]"
+            style={{ backgroundImage: `url("${heroTechBgImg}")` }}
+          />
           {/* O padrão de marca é a camada mais baixa. No celular a seção fica
               alta e estreita, então o bg-cover amplia muito o SVG — por isso
               ele entra bem apagado aqui e só ganha presença a partir do sm. */}
@@ -307,7 +317,14 @@ function Index() {
           <ProximasTurmasPanel />
         </section>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        <RevealSection className="relative mx-auto max-w-6xl overflow-hidden px-4 py-6 sm:px-6">
+          {/* Foto de ambiente infantil/educacional, bem apagada — só um toque de
+              cor atrás dos cards, coerente com o tema "aprendizado digital". */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-[0.1] blur-md dark:opacity-[0.14]"
+            style={{ backgroundImage: `url("${featureKidsBgImg}")` }}
+          />
           <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
               <h2 className="text-2xl font-semibold text-foreground">
@@ -594,14 +611,13 @@ function ProgramacaoSemanalDestaque() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-10">
-      {/* Ilustração de fundo, visível mas discreta — textura com bom contraste.
-          Sem véu colorido por cima: a própria arte já tem um amarelo forte nas
-          pontas, então nenhum brilho por perto pode ser dourado/âmbar ou o
-          conjunto fica com cara de manchado. */}
+      {/* Foto de ambiente tech (laptop + hexágonos), já escura e azulada —
+          combina direto com o gradiente slate da seção, sem precisar de véu
+          colorido por cima. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.08]"
-        style={{ backgroundImage: `url(${programacaoBgImg})` }}
+        className="pointer-events-none absolute inset-0 bg-cover bg-right opacity-[0.22]"
+        style={{ backgroundImage: `url("${darkTechBgImg}")` }}
       />
       {/* Brilhos suaves atrás dos cartões de vidro, só em tons de azul — dão
           profundidade sem se misturar com o amarelo da ilustração acima. */}
