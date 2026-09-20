@@ -68,19 +68,22 @@ function LoginPage() {
       />
       <div className="relative z-10">
         <NavBar />
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center px-4 py-8">
-          <Card className="w-full backdrop-blur-sm">
-            <CardHeader className="items-center text-center">
-              <span className="mb-2 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <MonitorSmartphone className="size-6" />
+        {/* dvh em vez de vh: no celular o navegador mostra/esconde a barra de
+            endereço e o vh "vaza" — com dvh o card fica centrado de verdade,
+            sem sobrar um vão em cima e embaixo. */}
+        <div className="mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-md items-center justify-center px-4 py-6 sm:py-10">
+          <Card className="w-full shadow-xl backdrop-blur-sm">
+            <CardHeader className="items-center gap-1 pb-4 text-center">
+              <span className="mb-1 flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <MonitorSmartphone className="size-5" />
               </span>
-              <CardTitle>Painel de gestão</CardTitle>
+              <CardTitle className="text-xl">Painel de gestão</CardTitle>
               <CardDescription>
                 Acesso exclusivo do professor responsável pela sala de informática.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <CardContent className="pt-0">
+              <form className="flex flex-col gap-3.5" onSubmit={handleSubmit}>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="email">E-mail</Label>
                   <Input
@@ -106,7 +109,7 @@ function LoginPage() {
                   />
                 </div>
                 {error ? <p className="text-sm text-destructive">{error}</p> : null}
-                <Button type="submit" className="mt-2" disabled={submitting}>
+                <Button type="submit" className="mt-1 h-10" disabled={submitting}>
                   <LogIn /> {submitting ? "Entrando..." : "Entrar"}
                 </Button>
                 <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">

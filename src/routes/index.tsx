@@ -58,7 +58,7 @@ import alunoSorridenteImg from "@/assets/image10.jpeg";
 import homePageBgImg from "@/assets/homepage-bg.svg";
 import heroTechBgImg from "@/assets/feature-tools.jpg";
 import featureKidsBgImg from "@/assets/feature-kids-learning.jpg";
-import darkTechBgImg from "@/assets/feature-classroom-tech.jpg";
+import darkTechBgImg from "@/assets/programacao-semana-bg.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -142,7 +142,7 @@ function Index() {
             aria-hidden
             className="pointer-events-none absolute -right-12 -top-12 -z-10 size-32 rotate-45 bg-amber-400/20 sm:-right-16 sm:-top-16 sm:size-56 sm:bg-amber-400/25"
           />
-          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-10">
+          <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
               <Badge variant="secondary" className="mb-3 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
@@ -686,7 +686,7 @@ function ProgramacaoSemanalDestaque() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {assignmentsDoDia.map((assignment) =>
               assignment.misto ? (
                 <div
@@ -745,7 +745,9 @@ function ProgramacaoSemanalDestaque() {
                       {assignment.turma.alunos.length}
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-white/70 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
+                  {/* Dica só faz sentido onde existe cursor; no celular ela
+                      ficava invisível ocupando altura à toa. */}
+                  <p className="mt-2 hidden text-[11px] text-white/70 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100 [@media(hover:hover)]:block">
                     Clique para ver os alunos previstos
                   </p>
                 </button>

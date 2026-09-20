@@ -103,21 +103,88 @@ export function WeeklySchedule() {
   return (
     <>
       <div className="overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-card/70 shadow-lg backdrop-blur-xl">
-        <div className="overflow-x-auto">
+        {/* No celular a tabela virava rolagem horizontal com buracos; aqui ela
+            vira uma lista por dia, compacta e sem células vazias. */}
+        <div className="divide-y divide-border/60 sm:hidden">
+          {colunas.map((dia) => {
+            const hoje = dia === todayLabel;
+            const doDia = linhas
+              .map((slot) => ({ slot, assignment: lookup.get(`${dia}|${slot.inicio}`) }))
+              .filter((item) => item.assignment);
+            return (
+              <section key={dia} className={hoje ? "bg-primary/[0.04]" : ""}>
+                <h3
+                  className={`flex items-center gap-1.5 px-4 pt-3 pb-2 text-[13px] font-semibold ${hoje ? "text-primary" : "text-foreground"}`}
+                >
+                  {dia}
+                  {hoje ? (
+                    <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                      hoje
+                    </span>
+                  ) : null}
+                </h3>
+                {doDia.length === 0 ? (
+                  <p className="px-4 pb-3 text-xs text-muted-foreground">Sem aulas neste dia.</p>
+                ) : (
+                  <ul className="space-y-1.5 px-3 pb-3">
+                    {doDia.map(({ slot, assignment }) => {
+                      const overridden = Boolean(
+                        config.slotOverrides?.[`${dia}|${slot.inicio}`],
+                      );
+                      return (
+                        <li key={slot.inicio} className="flex items-stretch gap-2">
+                          <span className="flex w-[56px] shrink-0 flex-col justify-center rounded-lg bg-slate-100/90 px-1.5 py-1 text-center font-mono text-[11px] leading-tight font-semibold text-slate-700 dark:bg-muted/60 dark:text-slate-200">
+                            {slot.inicio}
+                            <span className="font-normal text-slate-500 dark:text-slate-400">
+                              {slot.fim}
+                            </span>
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            {assignment!.misto ? (
+                              <MixedPill
+                                assignment={assignment!}
+                                config={config}
+                                series={series}
+                                weekIndex={weekIndex}
+                                onClick={() => setMistoSelecionado(assignment!)}
+                              />
+                            ) : (
+                              <SchedulePill
+                                assignment={assignment!}
+                                serieIndex={series.indexOf(assignment!.turma.serie)}
+                                editado={overridden}
+                                onClick={() =>
+                                  isAuthenticated
+                                    ? setEditando(assignment!)
+                                    : setPrevisto(assignment!)
+                                }
+                              />
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </section>
+            );
+          })}
+        </div>
+        <div className="hidden overflow-x-auto scroll-smooth sm:block [scrollbar-width:thin]">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 dark:bg-muted/50" />
+                <th className="sticky left-0 z-20 w-[68px] shrink-0 border-r border-b border-border/60 bg-slate-100/90 p-2 backdrop-blur sm:w-24 sm:p-3 dark:bg-muted/60" />
                 {colunas.map((dia) => {
                   const hoje = dia === todayLabel;
                   return (
                     <th
                       key={dia}
                       scope="col"
-                      className="min-w-[152px] border-b border-border/60 p-3 text-center"
+                      className={`min-w-[140px] border-b border-border/60 p-2.5 text-center sm:min-w-[152px] sm:p-3 ${hoje ? "bg-primary/5" : ""}`}
                     >
                       <span
-                        className={`inline-flex items-center gap-1.5 text-sm font-semibold ${hoje ? "text-primary" : "text-foreground"}`}
+                        className={`inline-flex items-center gap-1.5 text-[13px] font-semibold sm:text-sm ${hoje ? "text-primary" : "text-foreground"}`}
                       >
                         {dia}
                         {hoje ? (
@@ -135,10 +202,13 @@ export function WeeklySchedule() {
                 return (
                   <Fragment key={slot.inicio}>
                     <tr className="group/row">
-                      <td className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 text-right align-top text-xs font-semibold whitespace-nowrap text-slate-600 dark:bg-muted/50 dark:text-slate-300">
-                        {slot.inicio}
-                        <br />
-                        {slot.fim}
+                      <td className="sticky left-0 z-10 w-[68px] shrink-0 border-r border-b border-border/60 bg-slate-100/90 px-2 py-2.5 text-center align-middle whitespace-nowrap backdrop-blur sm:w-24 sm:px-3 sm:py-3 dark:bg-muted/60">
+                        <span className="block font-mono text-[11px] font-bold text-slate-700 sm:text-xs dark:text-slate-200">
+                          {slot.inicio}
+                        </span>
+                        <span className="block font-mono text-[11px] text-slate-500 sm:text-xs dark:text-slate-400">
+                          {slot.fim}
+                        </span>
                       </td>
                       {colunas.map((dia) => {
                         const assignment = lookup.get(`${dia}|${slot.inicio}`);
@@ -179,9 +249,17 @@ export function WeeklySchedule() {
                       <tr>
                         <td
                           colSpan={colunas.length + 1}
-                          className="border-b border-border/40 bg-muted/40 px-3 py-1.5 text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+                          className="border-b border-border/40 bg-muted/50 p-0"
                         >
-                          {pausaApos.label} · {pausaApos.horario}
+                          {/* O rótulo da pausa acompanha a rolagem horizontal
+                              para continuar legível no celular. */}
+                          <span className="sticky left-0 flex items-center gap-2 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                            <span
+                              aria-hidden
+                              className="h-px w-4 shrink-0 rounded bg-border sm:w-8"
+                            />
+                            {pausaApos.label} · {pausaApos.horario}
+                          </span>
                         </td>
                       </tr>
                     ) : null}
