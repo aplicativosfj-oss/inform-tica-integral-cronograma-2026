@@ -82,13 +82,15 @@ export function NavBar() {
             className="size-9 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20"
           />
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+            <span className="truncate text-[13px] font-semibold text-slate-900 dark:text-white sm:text-sm">
               Agenda de Informática
             </span>
             {/* O nome da escola acompanha a marca em toda tela. No celular o
                 espaço é disputado com o player e o menu, então entra a forma
                 abreviada — cabe inteira, em vez de truncar no meio. */}
-            <span className="truncate text-xs text-slate-600 dark:text-white/70">
+            {/* Em telas muito estreitas o subtítulo truncava feio ao lado do
+                player — só aparece quando há largura de sobra. */}
+            <span className="hidden truncate text-xs text-slate-600 dark:text-white/70 min-[400px]:block">
               <span className="sm:hidden">E.M. Dr. Eiraldo Carneiro</span>
               <span className="hidden sm:inline">Escola Dr. Eiraldo Carneiro</span>
             </span>
