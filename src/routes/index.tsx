@@ -686,7 +686,7 @@ function ProgramacaoSemanalDestaque() {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {assignmentsDoDia.map((assignment) =>
               assignment.misto ? (
                 <div
@@ -745,7 +745,9 @@ function ProgramacaoSemanalDestaque() {
                       {assignment.turma.alunos.length}
                     </span>
                   </div>
-                  <p className="mt-2 text-[11px] text-white/70 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100">
+                  {/* Dica só faz sentido onde existe cursor; no celular ela
+                      ficava invisível ocupando altura à toa. */}
+                  <p className="mt-2 hidden text-[11px] text-white/70 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100 [@media(hover:hover)]:block">
                     Clique para ver os alunos previstos
                   </p>
                 </button>

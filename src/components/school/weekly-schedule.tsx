@@ -1,4 +1,4 @@
-import { CalendarClock, RotateCcw, Users2 } from "lucide-react";
+import { CalendarClock, MoveHorizontal, RotateCcw, Users2 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -103,21 +103,27 @@ export function WeeklySchedule() {
   return (
     <>
       <div className="overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-card/70 shadow-lg backdrop-blur-xl">
-        <div className="overflow-x-auto">
+        {/* No celular a grade rola na horizontal: um aviso curto evita que o
+            usuário pense que só existem dois dias. */}
+        <p className="flex items-center gap-1.5 border-b border-border/60 px-4 py-2 text-[11px] text-muted-foreground sm:hidden">
+          <MoveHorizontal className="size-3.5 shrink-0" />
+          Arraste para o lado para ver os outros dias
+        </p>
+        <div className="overflow-x-auto scroll-smooth [scrollbar-width:thin]">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 dark:bg-muted/50" />
+                <th className="sticky left-0 z-20 w-[68px] shrink-0 border-r border-b border-border/60 bg-slate-100/90 p-2 backdrop-blur sm:w-24 sm:p-3 dark:bg-muted/60" />
                 {colunas.map((dia) => {
                   const hoje = dia === todayLabel;
                   return (
                     <th
                       key={dia}
                       scope="col"
-                      className="min-w-[152px] border-b border-border/60 p-3 text-center"
+                      className={`min-w-[140px] border-b border-border/60 p-2.5 text-center sm:min-w-[152px] sm:p-3 ${hoje ? "bg-primary/5" : ""}`}
                     >
                       <span
-                        className={`inline-flex items-center gap-1.5 text-sm font-semibold ${hoje ? "text-primary" : "text-foreground"}`}
+                        className={`inline-flex items-center gap-1.5 text-[13px] font-semibold sm:text-sm ${hoje ? "text-primary" : "text-foreground"}`}
                       >
                         {dia}
                         {hoje ? (
@@ -135,10 +141,13 @@ export function WeeklySchedule() {
                 return (
                   <Fragment key={slot.inicio}>
                     <tr className="group/row">
-                      <td className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 text-right align-top text-xs font-semibold whitespace-nowrap text-slate-600 dark:bg-muted/50 dark:text-slate-300">
-                        {slot.inicio}
-                        <br />
-                        {slot.fim}
+                      <td className="sticky left-0 z-10 w-[68px] shrink-0 border-r border-b border-border/60 bg-slate-100/90 px-2 py-2.5 text-center align-middle whitespace-nowrap backdrop-blur sm:w-24 sm:px-3 sm:py-3 dark:bg-muted/60">
+                        <span className="block font-mono text-[11px] font-bold text-slate-700 sm:text-xs dark:text-slate-200">
+                          {slot.inicio}
+                        </span>
+                        <span className="block font-mono text-[11px] text-slate-500 sm:text-xs dark:text-slate-400">
+                          {slot.fim}
+                        </span>
                       </td>
                       {colunas.map((dia) => {
                         const assignment = lookup.get(`${dia}|${slot.inicio}`);
@@ -179,9 +188,17 @@ export function WeeklySchedule() {
                       <tr>
                         <td
                           colSpan={colunas.length + 1}
-                          className="border-b border-border/40 bg-muted/40 px-3 py-1.5 text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+                          className="border-b border-border/40 bg-muted/50 p-0"
                         >
-                          {pausaApos.label} · {pausaApos.horario}
+                          {/* O rótulo da pausa acompanha a rolagem horizontal
+                              para continuar legível no celular. */}
+                          <span className="sticky left-0 flex items-center gap-2 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                            <span
+                              aria-hidden
+                              className="h-px w-4 shrink-0 rounded bg-border sm:w-8"
+                            />
+                            {pausaApos.label} · {pausaApos.horario}
+                          </span>
                         </td>
                       </tr>
                     ) : null}
