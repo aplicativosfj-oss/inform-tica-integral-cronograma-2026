@@ -211,7 +211,8 @@ function InfotecaPage() {
       <div className="relative z-10">
         <NavBar />
 
-        {/* Hero — banner de verdade, imagem visível com texto sobreposto */}
+        {/* Hero — banner mais baixo, com painel glassmorphism sobre a imagem em
+            vez de um véu escuro cobrindo tudo (deixa a foto respirar). */}
         <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-8">
           <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-xl">
             <SiteImage
@@ -219,43 +220,45 @@ function InfotecaPage() {
               alt="Criança sorrindo em frente a um computador com ícones coloridos de aprendizagem — teclado, mouse, alfabeto, números e jogos educativos"
               width={1600}
               height={600}
-              className="h-[420px] w-full sm:h-auto sm:aspect-[16/9] lg:aspect-[21/9]"
+              className="h-[300px] w-full sm:h-[280px] lg:aspect-[21/8] lg:h-auto"
               loading="eager"
               decoding="async"
               fetchPriority="high"
             />
-            {/* Véu escuro só do lado do texto, para o banner continuar colorido
-                à direita mas o título ficar legível em qualquer tema. */}
+            {/* Sombra suave só embaixo, pra imagem continuar viva mas a faixa
+                de chips abaixo do hero não colar direto na foto. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/55 to-transparent"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent"
             />
-            <div className="absolute inset-0 flex flex-col justify-center gap-3 px-5 py-6 sm:px-10 sm:py-10 lg:max-w-xl">
-              <Badge className="w-fit gap-1.5 border-white/20 bg-white/10 text-white backdrop-blur">
-                <Puzzle className="size-3.5" /> Espaço de aprendizagem digital
-              </Badge>
-              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                Infoteca
-              </h1>
-              <p className="max-w-md text-balance text-sm text-white/90 sm:text-base">
-                Um espaço lúdico, criativo e de apoio pedagógico digital — ferramentas e jogos
-                educativos selecionados para alunos, professores, pais e toda a comunidade, com
-                atenção especial a alunos com necessidades especiais.
-              </p>
-              <div className="mt-1 flex flex-wrap gap-3">
-                <Button asChild size="sm" className="gap-1.5 bg-white text-slate-900 hover:bg-white/90">
-                  <a href="#gcompris">
-                    <Download className="size-4" /> Baixar o GCompris
-                  </a>
-                </Button>
-                <Button
-                  asChild
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5 border-white/40 bg-white/5 text-white hover:bg-white/15"
-                >
-                  <a href="#ferramentas">Ver ferramentas</a>
-                </Button>
+            <div className="absolute inset-0 flex items-center p-4 sm:p-6 lg:p-8">
+              <div className="flex max-w-lg flex-col gap-2.5 rounded-2xl border border-white/25 bg-white/10 p-4 shadow-2xl backdrop-blur-xl sm:gap-3 sm:p-6">
+                <Badge className="w-fit gap-1.5 border-white/25 bg-white/15 text-white backdrop-blur">
+                  <Puzzle className="size-3.5" /> Espaço de aprendizagem digital
+                </Badge>
+                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                  Infoteca
+                </h1>
+                <p className="text-balance text-xs text-white/90 sm:text-sm">
+                  Um espaço lúdico, criativo e de apoio pedagógico digital — ferramentas e jogos
+                  educativos para alunos, professores, pais e comunidade, com atenção especial a
+                  alunos com necessidades especiais.
+                </p>
+                <div className="mt-1 flex flex-wrap gap-2.5">
+                  <Button asChild size="sm" className="gap-1.5 bg-white text-slate-900 hover:bg-white/90">
+                    <a href="#gcompris">
+                      <Download className="size-4" /> Baixar o GCompris
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20"
+                  >
+                    <a href="#ferramentas">Ver ferramentas</a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
