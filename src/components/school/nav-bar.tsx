@@ -82,7 +82,7 @@ export function NavBar() {
             className="size-9 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20"
           />
           <span className="flex min-w-0 flex-col leading-tight">
-            <span className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+            <span className="truncate text-[13px] font-semibold text-slate-900 dark:text-white sm:text-sm">
               Agenda de Informática
             </span>
             {/* O nome da escola acompanha a marca em toda tela. No celular o

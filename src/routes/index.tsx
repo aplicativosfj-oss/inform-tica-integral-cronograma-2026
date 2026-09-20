@@ -142,7 +142,7 @@ function Index() {
             aria-hidden
             className="pointer-events-none absolute -right-12 -top-12 -z-10 size-32 rotate-45 bg-amber-400/20 sm:-right-16 sm:-top-16 sm:size-56 sm:bg-amber-400/25"
           />
-          <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:items-center lg:py-10">
+          <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
               <Badge variant="secondary" className="mb-3 gap-1.5">
                 <MonitorSmartphone className="size-3.5" /> Agenda online
