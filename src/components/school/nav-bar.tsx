@@ -142,7 +142,7 @@ export function NavBar() {
                         to={link.to}
                         className={`rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-300 ${
                           isActive
-                            ? "bg-primary/15 text-primary font-semibold border-l-4 border-primary"
+                            ? "bg-primary/15 text-primary font-semibold border-l-4 border-primary dark:bg-cyan-400/15 dark:text-cyan-300 dark:border-cyan-400"
                             : "text-foreground hover:bg-muted"
                         }`}
                       >

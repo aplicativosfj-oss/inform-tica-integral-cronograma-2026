@@ -115,7 +115,7 @@ function Index() {
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-30 sm:opacity-60"
-            style={{ backgroundImage: `url(${homePageBgImg})` }}
+            style={{ backgroundImage: `url("${homePageBgImg}")` }}
           />
           {/* Véu que define a luz do hero: claro e arejado no modo claro,
               azul-noite um tom acima do fundo da página no modo escuro. */}
@@ -346,25 +346,25 @@ function Index() {
           <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
             <FeatureCard
               icon={<Gamepad2 className="size-5" />}
-              iconClassName="bg-blue-500/10 text-blue-600"
+              iconClassName="bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300"
               title="Aprendizado digital"
               description="Tecnologia que estimula o raciocínio e a criatividade."
             />
             <FeatureCard
               icon={<CalendarClock className="size-5" />}
-              iconClassName="bg-violet-500/10 text-violet-600"
+              iconClassName="bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300"
               title="Rodízio automático"
               description="O sistema distribui e gira os grupos sozinho, sem favorecer ninguém."
             />
             <FeatureCard
               icon={<Timer className="size-5" />}
-              iconClassName="bg-amber-500/10 text-amber-600"
+              iconClassName="bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300"
               title="Cronômetro ao vivo"
               description="Contagem regressiva em tempo real de quando o grupo troca."
             />
             <FeatureCard
               icon={<ShieldCheck className="size-5" />}
-              iconClassName="bg-emerald-500/10 text-emerald-600"
+              iconClassName="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300"
               title="Painel de gestão"
               description="Turmas, professores, fotos e alunos com acesso restrito por login."
             />

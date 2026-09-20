@@ -10,9 +10,9 @@
     </radialGradient>
   </defs>
 
-  <!-- Grade de fundo, lembrando uma agenda/planilha de horários. -->
+  <!-- Grade de fundo, lembrando uma agenda/planilha de horarios. -->
   <rect width="1920" height="1080" fill="url(#grade)" />
-  <!-- Clareia só bem na borda, mantendo a grade visível na maior parte da tela. -->
+  <!-- Clareia so bem na borda, mantendo a grade visivel na maior parte da tela. -->
   <rect width="1920" height="1080" fill="url(#fadeCenter)" />
 
   <!-- Trilhas de circuito nos quatro cantos, no mesmo estilo da logomarca. -->
@@ -38,7 +38,7 @@
     <circle cx="1460" cy="1040" r="5" opacity="0.45" />
   </g>
 
-  <!-- Ícones sutis de "agenda" espalhados (quadradinhos de calendário), quase imperceptíveis. -->
+  <!-- Icones sutis de "agenda" espalhados (quadradinhos de calendario), quase imperceptiveis. -->
   <g fill="#1e3a8a" opacity="0.06">
     <rect x="120" y="260" width="26" height="26" rx="4" />
     <rect x="160" y="260" width="26" height="26" rx="4" />
