@@ -52,11 +52,12 @@ function AlunoPicker() {
         setErro("PIN incorreto. Peça o código de acesso ao professor(a).");
         return;
       }
-      await registrarAcesso(alunoSelecionado.id, turmaId);
+      await registrarAcesso(alunoSelecionado.id, turmaId, pin);
       iniciarAlunoSessao({
         alunoId: alunoSelecionado.id,
         turmaId,
         nome: alunoSelecionado.nome,
+        pin,
       });
       navigate({
         to: "/aluno/$turmaId/$alunoId",

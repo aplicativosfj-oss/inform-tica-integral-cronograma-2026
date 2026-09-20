@@ -2,6 +2,18 @@ import { gravarCache, lerCache } from "@/lib/offline-queue";
 import { supabase } from "@/lib/supabase-client";
 import type { Atividade, AtividadeStatus, Presenca } from "@/lib/types";
 
+/**
+ * Todo acesso do ALUNO a dados sensíveis (histórico, presenças, status de
+ * atividades) passa por funções do banco (RPC) que exigem o `aluno_id` E o
+ * PIN certo, verificados dentro do Postgres — nunca um `select` direto nas
+ * tabelas. Isso fecha a brecha de um aluno (ou qualquer visitante com a
+ * chave pública do site) conseguir ler dados de outro aluno/turma direto
+ * pela API, ainda que a tela nunca mostrasse isso. O professor, que tem
+ * login de verdade (Supabase Auth), continua lendo essas tabelas
+ * diretamente — a política de acesso do banco libera isso só para quem
+ * está autenticado.
+ */
+
 /** Gera um PIN de 4 dígitos (0000–9999), com zero à esquerda quando preciso. */
 function gerarPin(): string {
   return String(Math.floor(Math.random() * 10000)).padStart(4, "0");
@@ -15,8 +27,8 @@ interface AlunoPinRow {
 
 /**
  * Busca o PIN do aluno; cria um novo (aleatório) na primeira vez que alguém
- * tenta acessar essa conta. Assim não é preciso gerar os PINs de todos os
- * alunos de uma vez — cada um ganha o dele no primeiro acesso.
+ * tenta acessar essa conta. Só o professor (autenticado no dashboard) chama
+ * isso — por isso ainda lê a tabela direto, sem RPC.
  */
 export async function obterOuCriarPin(alunoId: string, turmaId: string): Promise<string> {
   const { data, error } = await supabase
@@ -35,14 +47,14 @@ export async function obterOuCriarPin(alunoId: string, turmaId: string): Promise
   return pin;
 }
 
+/** Confere o PIN sem nunca trazer o valor guardado para o navegador. */
 export async function verificarPin(alunoId: string, pinDigitado: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("aluno_pins")
-    .select("pin")
-    .eq("aluno_id", alunoId)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("verificar_pin_aluno", {
+    p_aluno_id: alunoId,
+    p_pin: pinDigitado,
+  });
   if (error) throw error;
-  return (data as AlunoPinRow | null)?.pin === pinDigitado;
+  return data === true;
 }
 
 interface AcessoRow {
@@ -52,34 +64,32 @@ interface AcessoRow {
   acessado_em: string;
 }
 
-/** Último acesso já registrado (antes deste), para mostrar "última vez que entrou". */
-export async function fetchUltimoAcesso(alunoId: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from("aluno_acessos")
-    .select("acessado_em")
-    .eq("aluno_id", alunoId)
-    .order("acessado_em", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+/** Registra o acesso de agora — o próprio banco recusa se o PIN não bater. */
+export async function registrarAcesso(
+  alunoId: string,
+  turmaId: string,
+  pin: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("registrar_acesso_aluno", {
+    p_aluno_id: alunoId,
+    p_turma_id: turmaId,
+    p_pin: pin,
+  });
   if (error) throw error;
-  return (data as { acessado_em: string } | null)?.acessado_em ?? null;
+  if (data !== true) throw new Error("PIN inválido.");
 }
 
-/** Registra o acesso de agora (chamar depois de conferir o PIN). */
-export async function registrarAcesso(alunoId: string, turmaId: string): Promise<void> {
-  const { error } = await supabase
-    .from("aluno_acessos")
-    .insert({ aluno_id: alunoId, turma_id: turmaId });
-  if (error) throw error;
-}
-
-export async function fetchHistoricoAcessos(alunoId: string, limite = 10): Promise<AcessoRow[]> {
-  const { data, error } = await supabase
-    .from("aluno_acessos")
-    .select("*")
-    .eq("aluno_id", alunoId)
-    .order("acessado_em", { ascending: false })
-    .limit(limite);
+/** Histórico de acessos do próprio aluno — exige o PIN a cada leitura. */
+export async function fetchHistoricoAcessos(
+  alunoId: string,
+  pin: string,
+  limite = 10,
+): Promise<AcessoRow[]> {
+  const { data, error } = await supabase.rpc("historico_acessos_aluno", {
+    p_aluno_id: alunoId,
+    p_pin: pin,
+    p_limite: limite,
+  });
   if (error) throw error;
   return (data ?? []) as AcessoRow[];
 }
@@ -106,6 +116,7 @@ function rowToAtividade(row: AtividadeRow): Atividade {
   };
 }
 
+/** Atividades de uma turma — como o quadro de tarefas é público (igual à agenda), continua lida direto. */
 export async function fetchAtividadesDaTurma(turmaId: string): Promise<Atividade[]> {
   const chave = `atividades:${turmaId}`;
   try {
@@ -163,12 +174,15 @@ function rowToStatus(row: AtividadeStatusRow): AtividadeStatus {
   };
 }
 
-/** Status de todas as atividades de um aluno específico, indexado por atividadeId. */
-export async function fetchStatusDoAluno(alunoId: string): Promise<Map<string, AtividadeStatus>> {
-  const { data, error } = await supabase
-    .from("atividades_status")
-    .select("*")
-    .eq("aluno_id", alunoId);
+/** Status de todas as atividades do próprio aluno, indexado por atividadeId — exige o PIN. */
+export async function fetchStatusDoAluno(
+  alunoId: string,
+  pin: string,
+): Promise<Map<string, AtividadeStatus>> {
+  const { data, error } = await supabase.rpc("status_atividades_aluno", {
+    p_aluno_id: alunoId,
+    p_pin: pin,
+  });
   if (error) throw error;
   const mapa = new Map<string, AtividadeStatus>();
   for (const row of (data ?? []) as AtividadeStatusRow[]) {
@@ -177,7 +191,7 @@ export async function fetchStatusDoAluno(alunoId: string): Promise<Map<string, A
   return mapa;
 }
 
-/** Status de uma atividade para todos os alunos que já mexeram nela — usado no painel do professor. */
+/** Status de uma atividade para todos os alunos — só o professor autenticado enxerga isso. */
 export async function fetchStatusDaAtividade(atividadeId: string): Promise<AtividadeStatus[]> {
   const { data, error } = await supabase
     .from("atividades_status")
@@ -200,7 +214,12 @@ interface PresencaRow {
   criado_em: string;
 }
 
-/** Histórico de presença/falta de um aluno específico, mais recente primeiro. */
+/**
+ * Histórico de presença/falta de um aluno específico, mais recente primeiro.
+ * A tabela `presencas` já é pública de propósito no resto do site (a
+ * Frequência e a Coordenação mostram a mesma informação abertamente para
+ * pais e coordenação) — mantém leitura direta, sem RPC.
+ */
 export async function fetchPresencasDoAluno(alunoId: string, limite = 30): Promise<Presenca[]> {
   const { data, error } = await supabase
     .from("presencas")
@@ -223,19 +242,19 @@ export async function fetchPresencasDoAluno(alunoId: string, limite = 30): Promi
   }));
 }
 
+/** Marca uma atividade como concluída/pendente para o próprio aluno — exige o PIN. */
 export async function marcarAtividade(
   atividadeId: string,
   alunoId: string,
+  pin: string,
   status: "pendente" | "concluida",
 ): Promise<void> {
-  const { error } = await supabase.from("atividades_status").upsert(
-    {
-      atividade_id: atividadeId,
-      aluno_id: alunoId,
-      status,
-      concluido_em: status === "concluida" ? new Date().toISOString() : null,
-    },
-    { onConflict: "atividade_id,aluno_id" },
-  );
+  const { data, error } = await supabase.rpc("marcar_atividade_aluno", {
+    p_atividade_id: atividadeId,
+    p_aluno_id: alunoId,
+    p_pin: pin,
+    p_status: status,
+  });
   if (error) throw error;
+  if (data !== true) throw new Error("PIN inválido.");
 }

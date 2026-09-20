@@ -12,6 +12,13 @@ export interface AlunoSessao {
   alunoId: string;
   turmaId: string;
   nome: string;
+  /**
+   * PIN já conferido nesta sessão — guardado para provar identidade de novo
+   * a cada leitura sensível (histórico, presenças, status de atividades),
+   * já que o banco não confia mais só no `aluno_id` sozinho (ver
+   * aluno-area.ts): sem o PIN certo, o Postgres recusa devolver os dados.
+   */
+  pin: string;
   verificadoEm: string;
 }
 

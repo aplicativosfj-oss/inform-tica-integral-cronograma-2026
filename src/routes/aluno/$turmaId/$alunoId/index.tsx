@@ -31,6 +31,7 @@ import {
   fetchStatusDoAluno,
   marcarAtividade,
 } from "@/lib/aluno-area";
+import { useConfirmar } from "@/lib/confirm-store";
 import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, AtividadeStatus, Presenca } from "@/lib/types";
@@ -71,6 +72,7 @@ function AlunoPainel() {
   const { turmaId, alunoId } = Route.useParams();
   const { turmas, config } = useAppStore();
   const navigate = useNavigate();
+  const confirmar = useConfirmar();
   const turma = turmas.find((t) => t.id === turmaId);
   const aluno = turma?.alunos.find((a) => a.id === alunoId);
 
@@ -82,8 +84,10 @@ function AlunoPainel() {
     new Map(),
   );
 
+  const sessao = lerAlunoSessao();
+  const pin = sessao?.pin;
+
   useEffect(() => {
-    const sessao = lerAlunoSessao();
     if (!sessao || sessao.alunoId !== alunoId || sessao.turmaId !== turmaId) {
       navigate({ to: "/aluno/$turmaId", params: { turmaId } });
     }
@@ -91,16 +95,18 @@ function AlunoPainel() {
   }, [alunoId, turmaId]);
 
   useEffect(() => {
+    if (!pin) return;
+    const pinConfirmado = pin;
     let cancelado = false;
     async function carregar() {
       setCarregando(true);
       try {
         const [historico, historicoPresencas, atividadesDaTurma, statusDoAluno] = await Promise.all(
           [
-            fetchHistoricoAcessos(alunoId, 2),
+            fetchHistoricoAcessos(alunoId, pinConfirmado, 2),
             fetchPresencasDoAluno(alunoId),
             fetchAtividadesDaTurma(turmaId),
-            fetchStatusDoAluno(alunoId),
+            fetchStatusDoAluno(alunoId, pinConfirmado),
           ],
         );
         if (cancelado) return;
@@ -121,7 +127,7 @@ function AlunoPainel() {
     return () => {
       cancelado = true;
     };
-  }, [alunoId, turmaId]);
+  }, [alunoId, turmaId, pin]);
 
   const totalFaltas = useMemo(
     () => presencas.filter((p) => p.status === "faltou").length,
@@ -144,8 +150,9 @@ function AlunoPainel() {
   }, [presencas, atividades, statusPorAtividade]);
 
   async function concluirAtividade(atividadeId: string) {
+    if (!pin) return;
     try {
-      await marcarAtividade(atividadeId, alunoId, "concluida");
+      await marcarAtividade(atividadeId, alunoId, pin, "concluida");
       setStatusPorAtividade((mapa) => {
         const novo = new Map(mapa);
         novo.set(atividadeId, {
@@ -409,9 +416,14 @@ function AlunoPainel() {
           <Button
             variant="outline"
             className="gap-1.5"
-            onClick={() => {
+            onClick={async () => {
+              const ok = await confirmar({
+                titulo: "Sair da sua área?",
+                descricao: "Você vai precisar do seu PIN de novo para entrar da próxima vez.",
+              });
+              if (!ok) return;
               encerrarAlunoSessao();
-              navigate({ to: "/aluno/$turmaId", params: { turmaId } });
+              navigate({ to: "/" });
             }}
           >
             <LogOut className="size-4" /> Sair
