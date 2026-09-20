@@ -6,6 +6,7 @@ import {
   Clock3,
   ExternalLink,
   GraduationCap,
+  HeartHandshake,
   History,
   LogOut,
   UserRound,
@@ -224,6 +225,13 @@ function AlunoPainel() {
                     {config.professorInformatica}
                   </span>
                 </div>
+                {aluno.necessidadeEspecial && turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (
+                  <span className="mt-1 flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] text-white/80">
+                    <HeartHandshake className="size-3 shrink-0" />
+                    Conta com apoio de{" "}
+                    {turma.apoioEspecial.map((a) => a.nome.split(" ")[0]).join(", ")}
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>
