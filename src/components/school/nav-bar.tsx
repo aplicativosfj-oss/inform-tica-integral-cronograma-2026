@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   CalendarDays,
   ChevronRight,
@@ -13,7 +13,7 @@ import {
   Puzzle,
   type LucideIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,10 @@ import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
 import { ShareButton } from "@/components/school/share-button";
 import { ThemeToggle } from "@/components/school/theme-toggle";
 import { useAuth } from "@/lib/auth-store";
+import { useAppStore } from "@/lib/app-store";
+import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
+import { useConfirmar } from "@/lib/confirm-store";
+import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import logoIcon from "@/assets/logo-icon.png";
 
 function NavLink({ to, label }: { to: string; label: string }) {
@@ -77,6 +81,88 @@ export function NavBar() {
   const { isAuthenticated, isReady, logout } = useAuth();
   const [menuAberto, setMenuAberto] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const confirmar = useConfirmar();
+  const { turmas } = useAppStore();
+
+  // sessionStorage não é reativo por si só — relemos a cada navegação de rota
+  // para o cabeçalho trocar de modo assim que o aluno entra ou sai.
+  const [sessaoAluno, setSessaoAluno] = useState(() => lerAlunoSessao());
+  useEffect(() => {
+    setSessaoAluno(lerAlunoSessao());
+  }, [location.pathname]);
+
+  if (sessaoAluno) {
+    const turma = turmas.find((t) => t.id === sessaoAluno.turmaId);
+    const corTurma = turma ? serieClasses(serieIndexPorNumero(turma.serie)) : null;
+
+    async function sairDaAreaDoAluno() {
+      const ok = await confirmar({
+        titulo: "Sair da sua área?",
+        descricao: "Você vai precisar do seu PIN de novo para entrar da próxima vez.",
+      });
+      if (!ok) return;
+      encerrarAlunoSessao();
+      setSessaoAluno(null);
+      navigate({ to: "/" });
+    }
+
+    return (
+      <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-background/75 dark:text-white dark:shadow-black/20">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:h-14 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <img
+              src={logoIcon}
+              alt="Agenda de Informática .Online"
+              className="size-9 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20"
+            />
+            <div className="flex min-w-0 items-center gap-2">
+              {corTurma && (
+                <span
+                  className={`hidden size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:flex ${corTurma.bg} ${corTurma.text}`}
+                >
+                  {turma?.letra}
+                </span>
+              )}
+              <span className="flex min-w-0 flex-col leading-tight">
+                <span className="truncate text-[13px] font-semibold text-slate-900 dark:text-white sm:text-sm">
+                  {sessaoAluno.nome.split(" ").slice(0, 2).join(" ")}
+                </span>
+                <span className="truncate text-xs text-slate-600 dark:text-white/70">
+                  {turma ? `${turma.serie} "${turma.letra}"` : "Área do Aluno"}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <ThemeToggle />
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="hidden text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:inline-flex"
+            >
+              <Link
+                to="/aluno/$turmaId/$alunoId"
+                params={{ turmaId: sessaoAluno.turmaId, alunoId: sessaoAluno.alunoId }}
+              >
+                <GraduationCap /> Minha área
+              </Link>
+            </Button>
+            <Button
+              size="sm"
+              onClick={sairDaAreaDoAluno}
+              className="border border-slate-300/50 bg-slate-100/60 text-slate-900 hover:bg-slate-200/60 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+            >
+              <LogOut />
+              Sair
+            </Button>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-background/75 dark:text-white dark:shadow-black/20">

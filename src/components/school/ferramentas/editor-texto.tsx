@@ -1,17 +1,33 @@
 import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
   Bold,
-  Download,
+  FilePlus2,
+  FolderOpen,
   Italic,
   List,
   ListOrdered,
+  Loader2,
+  Palette,
   Redo2,
+  Save,
   Trash2,
   Underline,
   Undo2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,8 +36,37 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useConfirmar } from "@/lib/confirm-store";
+import { lerAlunoSessao } from "@/lib/aluno-session";
+import {
+  excluirArquivoAluno,
+  listarArquivosAluno,
+  obterArquivoAluno,
+  salvarArquivoAluno,
+  type ArquivoAlunoResumo,
+} from "@/lib/aluno-area";
 
 const CHAVE_RASCUNHO = "informatica:editor-texto-rascunho";
+
+const FONTES = [
+  { valor: "Calibri, Carlito, Arial, sans-serif", rotulo: "Calibri" },
+  { valor: "Arial, sans-serif", rotulo: "Arial" },
+  { valor: "'Times New Roman', Times, serif", rotulo: "Times New Roman" },
+  { valor: "Verdana, sans-serif", rotulo: "Verdana" },
+  { valor: "'Courier New', monospace", rotulo: "Courier New" },
+  { valor: "'Comic Sans MS', cursive", rotulo: "Comic Sans MS" },
+] as const;
+
+const CORES = [
+  "#1f2937",
+  "#dc2626",
+  "#ea580c",
+  "#ca8a04",
+  "#16a34a",
+  "#2563eb",
+  "#7c3aed",
+  "#db2777",
+  "#ffffff",
+];
 
 function comando(nome: string, valor?: string) {
   document.execCommand(nome, false, valor);
@@ -29,8 +74,44 @@ function comando(nome: string, valor?: string) {
 
 export function EditorTexto() {
   const areaRef = useRef<HTMLDivElement>(null);
+  // Clicar num botão fora da área de digitação (fonte, cor) tira o foco do
+  // texto e o navegador esquece o que estava selecionado — sem isso, o
+  // comando (ex.: mudar a fonte) seria aplicado a nada. Guardamos a seleção
+  // aqui assim que o aluno solta o mouse ou o teclado dentro do texto, para
+  // poder devolvê-la ao documento no instante de aplicar o comando.
+  const selecaoSalvaRef = useRef<Range | null>(null);
   const [contagem, setContagem] = useState(0);
   const confirmar = useConfirmar();
+
+  const sessao = lerAlunoSessao();
+
+  function salvarSelecaoAtual() {
+    const selecao = window.getSelection();
+    if (!selecao || selecao.rangeCount === 0 || !areaRef.current) return;
+    const range = selecao.getRangeAt(0);
+    if (areaRef.current.contains(range.commonAncestorContainer)) {
+      selecaoSalvaRef.current = range.cloneRange();
+    }
+  }
+
+  function comandoComSelecao(nome: string, valor?: string) {
+    areaRef.current?.focus();
+    const selecao = window.getSelection();
+    if (selecao && selecaoSalvaRef.current) {
+      selecao.removeAllRanges();
+      selecao.addRange(selecaoSalvaRef.current);
+    }
+    comando(nome, valor);
+    salvarSelecaoAtual();
+  }
+
+  const [arquivoAtualId, setArquivoAtualId] = useState<string | null>(null);
+  const [titulo, setTitulo] = useState("Sem título");
+  const [salvando, setSalvando] = useState(false);
+  const [carregandoLista, setCarregandoLista] = useState(false);
+  const [dialogAbrirAberto, setDialogAbrirAberto] = useState(false);
+  const [arquivos, setArquivos] = useState<ArquivoAlunoResumo[]>([]);
+  const [corAberta, setCorAberta] = useState(false);
 
   useEffect(() => {
     const salvo = localStorage.getItem(CHAVE_RASCUNHO);
@@ -38,6 +119,7 @@ export function EditorTexto() {
       areaRef.current.innerHTML = salvo;
       atualizarContagem();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function atualizarContagem() {
@@ -45,66 +127,187 @@ export function EditorTexto() {
     setContagem(texto.trim().length === 0 ? 0 : texto.trim().split(/\s+/).length);
   }
 
-  function salvarRascunho() {
+  function salvarRascunhoLocal() {
     if (!areaRef.current) return;
     localStorage.setItem(CHAVE_RASCUNHO, areaRef.current.innerHTML);
     atualizarContagem();
   }
 
-  async function limpar() {
-    const ok = await confirmar({
-      titulo: "Apagar todo o texto?",
-      descricao: "Isso não pode ser desfeito.",
-    });
-    if (!ok || !areaRef.current) return;
+  async function novoDocumento() {
+    if (!areaRef.current) return;
+    if (areaRef.current.innerText.trim().length > 0) {
+      const ok = await confirmar({
+        titulo: "Começar um documento novo?",
+        descricao: "O texto que não foi salvo vai se perder.",
+      });
+      if (!ok) return;
+    }
     areaRef.current.innerHTML = "";
+    setArquivoAtualId(null);
+    setTitulo("Sem título");
     localStorage.removeItem(CHAVE_RASCUNHO);
     setContagem(0);
   }
 
-  function baixar() {
-    const texto = areaRef.current?.innerText ?? "";
-    const blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "meu-texto.txt";
-    a.click();
-    URL.revokeObjectURL(url);
+  async function excluirDocumentoAtual() {
+    if (!areaRef.current) return;
+    const ok = await confirmar({
+      titulo: "Apagar este documento?",
+      descricao: "Isso não pode ser desfeito.",
+    });
+    if (!ok) return;
+
+    if (sessao && arquivoAtualId) {
+      try {
+        await excluirArquivoAluno(sessao.alunoId, sessao.pin, arquivoAtualId);
+        toast.success("Documento apagado.");
+      } catch (err) {
+        toast.error(`Não foi possível apagar: ${(err as Error).message}`);
+        return;
+      }
+    }
+
+    areaRef.current.innerHTML = "";
+    setArquivoAtualId(null);
+    setTitulo("Sem título");
+    localStorage.removeItem(CHAVE_RASCUNHO);
+    setContagem(0);
+  }
+
+  async function salvar() {
+    if (!areaRef.current) return;
+    if (!sessao) {
+      toast.error("Entre na sua área de aluno para salvar o documento.");
+      return;
+    }
+    setSalvando(true);
+    try {
+      const novoId = await salvarArquivoAluno(
+        sessao.alunoId,
+        sessao.turmaId,
+        sessao.pin,
+        arquivoAtualId,
+        titulo,
+        areaRef.current.innerHTML,
+      );
+      setArquivoAtualId(novoId);
+      toast.success("Salvo na sua pasta.");
+    } catch (err) {
+      toast.error(`Não foi possível salvar: ${(err as Error).message}`);
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  async function abrirLista() {
+    if (!sessao) {
+      toast.error("Entre na sua área de aluno para ver seus documentos.");
+      return;
+    }
+    setDialogAbrirAberto(true);
+    setCarregandoLista(true);
+    try {
+      const lista = await listarArquivosAluno(sessao.alunoId, sessao.pin);
+      setArquivos(lista);
+    } catch (err) {
+      toast.error(`Não foi possível carregar seus documentos: ${(err as Error).message}`);
+    } finally {
+      setCarregandoLista(false);
+    }
+  }
+
+  async function abrirDocumento(id: string) {
+    if (!sessao || !areaRef.current) return;
+    try {
+      const arquivo = await obterArquivoAluno(sessao.alunoId, sessao.pin, id);
+      if (!arquivo) {
+        toast.error("Documento não encontrado.");
+        return;
+      }
+      areaRef.current.innerHTML = arquivo.conteudoHtml;
+      setArquivoAtualId(arquivo.id);
+      setTitulo(arquivo.titulo);
+      atualizarContagem();
+      setDialogAbrirAberto(false);
+      toast.success(`"${arquivo.titulo}" aberto.`);
+    } catch (err) {
+      toast.error(`Não foi possível abrir: ${(err as Error).message}`);
+    }
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-1 rounded-lg border border-border/60 bg-card p-1.5">
-        <Button variant="ghost" size="icon" className="size-8" onClick={() => comando("bold")}>
-          <Bold className="size-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="size-8" onClick={() => comando("italic")}>
-          <Italic className="size-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="size-8" onClick={() => comando("underline")}>
-          <Underline className="size-4" />
-        </Button>
-        <div className="mx-1 h-5 w-px bg-border" />
+      {/* Barra de título estilo Word: nome do arquivo editável */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          value={titulo}
+          onChange={(e) => setTitulo(e.target.value)}
+          className="h-8 max-w-xs font-medium"
+          placeholder="Nome do documento"
+        />
+        {!sessao && (
+          <p className="text-xs text-muted-foreground">
+            Entre na sua área de aluno para salvar seus documentos.
+          </p>
+        )}
+      </div>
+
+      {/* Faixa de ferramentas cinza, igual à do Word */}
+      <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[#d8d6d2] bg-[#f3f2f1] p-1.5 dark:border-white/10 dark:bg-zinc-800">
         <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comando("insertUnorderedList")}
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5 bg-white dark:bg-zinc-700"
+          onClick={novoDocumento}
         >
-          <List className="size-4" />
+          <FilePlus2 className="size-3.5" /> Novo
         </Button>
         <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comando("insertOrderedList")}
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5 bg-white dark:bg-zinc-700"
+          onClick={abrirLista}
         >
-          <ListOrdered className="size-4" />
+          <FolderOpen className="size-3.5" /> Abrir
         </Button>
-        <div className="mx-1 h-5 w-px bg-border" />
-        <Select onValueChange={(v) => comando("fontSize", v)}>
-          <SelectTrigger className="h-8 w-28">
+        <Button
+          size="sm"
+          className="h-8 gap-1.5"
+          onClick={salvar}
+          disabled={salvando}
+        >
+          {salvando ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Save className="size-3.5" />
+          )}
+          Salvar
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5 bg-white text-destructive hover:bg-destructive/10 dark:bg-zinc-700"
+          onClick={excluirDocumentoAtual}
+        >
+          <Trash2 className="size-3.5" /> Excluir
+        </Button>
+
+        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+        <Select onValueChange={(v) => comandoComSelecao("fontName", v)}>
+          <SelectTrigger className="h-8 w-40 bg-white dark:bg-zinc-700">
+            <SelectValue placeholder="Fonte" />
+          </SelectTrigger>
+          <SelectContent>
+            {FONTES.map((f) => (
+              <SelectItem key={f.valor} value={f.valor} style={{ fontFamily: f.valor }}>
+                {f.rotulo}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select onValueChange={(v) => comandoComSelecao("fontSize", v)}>
+          <SelectTrigger className="h-8 w-28 bg-white dark:bg-zinc-700">
             <SelectValue placeholder="Tamanho" />
           </SelectTrigger>
           <SelectContent>
@@ -114,43 +317,196 @@ export function EditorTexto() {
             <SelectItem value="7">Enorme</SelectItem>
           </SelectContent>
         </Select>
-        <div className="mx-1 h-5 w-px bg-border" />
-        <Button variant="ghost" size="icon" className="size-8" onClick={() => comando("undo")}>
-          <Undo2 className="size-4" />
+
+        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("bold")}
+          title="Negrito"
+        >
+          <Bold className="size-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="size-8" onClick={() => comando("redo")}>
-          <Redo2 className="size-4" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("italic")}
+          title="Itálico"
+        >
+          <Italic className="size-4" />
         </Button>
-        <div className="ml-auto flex items-center gap-1">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={baixar}>
-            <Download className="size-3.5" /> Baixar
-          </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("underline")}
+          title="Sublinhado"
+        >
+          <Underline className="size-4" />
+        </Button>
+
+        <div className="relative">
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 text-destructive hover:bg-destructive/10"
-            onClick={limpar}
+            className="size-8"
+            onClick={() => setCorAberta((v) => !v)}
+            title="Cor do texto"
           >
-            <Trash2 className="size-4" />
+            <Palette className="size-4" />
           </Button>
+          {corAberta && (
+            <div
+              className="absolute left-0 top-9 z-20 grid w-[148px] grid-cols-5 gap-1.5 rounded-lg border border-border bg-popover p-2 shadow-lg"
+            >
+              {CORES.map((cor) => (
+                <button
+                  key={cor}
+                  type="button"
+                  className="size-6 shrink-0 rounded-full ring-1 ring-black/15 transition-transform hover:scale-110"
+                  style={{ backgroundColor: cor }}
+                  onClick={() => {
+                    comandoComSelecao("foreColor", cor);
+                    setCorAberta(false);
+                  }}
+                  aria-label={`Cor ${cor}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
+
+        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("justifyLeft")}
+          title="Alinhar à esquerda"
+        >
+          <AlignLeft className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("justifyCenter")}
+          title="Centralizar"
+        >
+          <AlignCenter className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("justifyRight")}
+          title="Alinhar à direita"
+        >
+          <AlignRight className="size-4" />
+        </Button>
+
+        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("insertUnorderedList")}
+          title="Lista com marcadores"
+        >
+          <List className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("insertOrderedList")}
+          title="Lista numerada"
+        >
+          <ListOrdered className="size-4" />
+        </Button>
+
+        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comando("undo")}
+          title="Desfazer"
+        >
+          <Undo2 className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comando("redo")}
+          title="Refazer"
+        >
+          <Redo2 className="size-4" />
+        </Button>
       </div>
 
-      <div
-        ref={areaRef}
-        contentEditable
-        onInput={() => {
-          atualizarContagem();
-          salvarRascunho();
-        }}
-        className="min-h-[320px] rounded-lg border border-border/60 bg-card p-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        style={{ lineHeight: 1.6 }}
-        suppressContentEditableWarning
-      />
+      {/* "Folha" branca centralizada sobre fundo cinza, como no Word */}
+      <div className="rounded-lg bg-[#e7e5e2] p-4 dark:bg-zinc-900 sm:p-8">
+        <div
+          ref={areaRef}
+          contentEditable
+          onInput={() => {
+            atualizarContagem();
+            salvarRascunhoLocal();
+          }}
+          onMouseUp={salvarSelecaoAtual}
+          onKeyUp={salvarSelecaoAtual}
+          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16"
+          style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
+          suppressContentEditableWarning
+        />
+      </div>
+
       <p className="text-right text-xs text-muted-foreground">
-        {contagem} {contagem === 1 ? "palavra" : "palavras"} · salvo automaticamente neste
-        computador
+        {contagem} {contagem === 1 ? "palavra" : "palavras"} ·{" "}
+        {sessao ? "salvo na sua pasta ao clicar em Salvar" : "salvo automaticamente neste computador"}
       </p>
+
+      <Dialog open={dialogAbrirAberto} onOpenChange={setDialogAbrirAberto}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Seus documentos</DialogTitle>
+            <DialogDescription>Escolha um documento para abrir.</DialogDescription>
+          </DialogHeader>
+          {carregandoLista ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : arquivos.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Você ainda não salvou nenhum documento.
+            </p>
+          ) : (
+            <div className="flex max-h-72 flex-col gap-1 overflow-y-auto">
+              {arquivos.map((arquivo) => (
+                <button
+                  key={arquivo.id}
+                  type="button"
+                  onClick={() => abrirDocumento(arquivo.id)}
+                  className="flex flex-col rounded-lg border border-border/60 px-3 py-2 text-left transition-colors hover:bg-muted"
+                >
+                  <span className="text-sm font-medium text-foreground">{arquivo.titulo}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(arquivo.atualizadoEm).toLocaleString("pt-BR")}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

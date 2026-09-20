@@ -242,6 +242,109 @@ export async function fetchPresencasDoAluno(alunoId: string, limite = 30): Promi
   }));
 }
 
+export interface ArquivoAlunoResumo {
+  id: string;
+  titulo: string;
+  atualizadoEm: string;
+}
+
+export interface ArquivoAluno extends ArquivoAlunoResumo {
+  conteudoHtml: string;
+}
+
+interface ArquivoResumoRow {
+  id: string;
+  titulo: string;
+  atualizado_em: string;
+}
+
+interface ArquivoRow extends ArquivoResumoRow {
+  conteudo_html: string;
+}
+
+/** Lista os arquivos salvos pelo próprio aluno numa ferramenta (ex.: editor de texto) — exige o PIN. */
+export async function listarArquivosAluno(
+  alunoId: string,
+  pin: string,
+  ferramenta = "editor-texto",
+): Promise<ArquivoAlunoResumo[]> {
+  const { data, error } = await supabase.rpc("listar_arquivos_aluno", {
+    p_aluno_id: alunoId,
+    p_pin: pin,
+    p_ferramenta: ferramenta,
+  });
+  if (error) throw error;
+  return ((data ?? []) as ArquivoResumoRow[]).map((row) => ({
+    id: row.id,
+    titulo: row.titulo,
+    atualizadoEm: row.atualizado_em,
+  }));
+}
+
+/** Busca um arquivo específico (com conteúdo) do próprio aluno — exige o PIN. */
+export async function obterArquivoAluno(
+  alunoId: string,
+  pin: string,
+  arquivoId: string,
+): Promise<ArquivoAluno | null> {
+  const { data, error } = await supabase.rpc("obter_arquivo_aluno", {
+    p_aluno_id: alunoId,
+    p_pin: pin,
+    p_arquivo_id: arquivoId,
+  });
+  if (error) throw error;
+  const row = ((data ?? []) as ArquivoRow[])[0];
+  if (!row) return null;
+  return {
+    id: row.id,
+    titulo: row.titulo,
+    conteudoHtml: row.conteudo_html,
+    atualizadoEm: row.atualizado_em,
+  };
+}
+
+/**
+ * Salva (cria ou atualiza) um arquivo do próprio aluno — exige o PIN.
+ * Passe `arquivoId` null para criar um arquivo novo; devolve o id salvo.
+ */
+export async function salvarArquivoAluno(
+  alunoId: string,
+  turmaId: string,
+  pin: string,
+  arquivoId: string | null,
+  titulo: string,
+  conteudoHtml: string,
+  ferramenta = "editor-texto",
+): Promise<string> {
+  const { data, error } = await supabase.rpc("salvar_arquivo_aluno", {
+    p_aluno_id: alunoId,
+    p_turma_id: turmaId,
+    p_pin: pin,
+    p_arquivo_id: arquivoId,
+    p_titulo: titulo,
+    p_conteudo_html: conteudoHtml,
+    p_ferramenta: ferramenta,
+  });
+  if (error) throw error;
+  if (!data) throw new Error("PIN inválido.");
+  return data as string;
+}
+
+/** Apaga um arquivo do próprio aluno — exige o PIN. */
+export async function excluirArquivoAluno(
+  alunoId: string,
+  pin: string,
+  arquivoId: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("excluir_arquivo_aluno", {
+    p_aluno_id: alunoId,
+    p_pin: pin,
+    p_arquivo_id: arquivoId,
+  });
+  if (error) throw error;
+  if (data !== true) throw new Error("PIN inválido.");
+}
+
 /** Marca uma atividade como concluída/pendente para o próprio aluno — exige o PIN. */
 export async function marcarAtividade(
   atividadeId: string,
