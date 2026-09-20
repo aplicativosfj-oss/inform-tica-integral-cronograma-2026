@@ -15,9 +15,9 @@ import type { LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
+import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import infotecaHeroImg from "@/assets/feature-kids-learning.jpg";
 
@@ -48,25 +48,29 @@ interface Ferramenta {
 }
 
 interface Categoria {
+  id: string;
   titulo: string;
   descricao: string;
   icon: LucideIcon;
   cor: string;
+  faixa: string;
   ferramentas: Ferramenta[];
 }
 
 /**
  * Curadoria verificada por busca na web (setembro/2026) — só entram links com
  * site oficial confirmado. Descartamos nomes sugeridos sem site oficial
- * localizável (ex.: "DesafioMente", "Classeem") para não apontar o visitante
- * para um endereço adivinhado ou incorreto.
+ * localizável (ex.: "DesafioMente", "Classeem", "Aprenda Jogando") para não
+ * apontar o visitante para um endereço adivinhado ou incorreto.
  */
 const CATEGORIAS: Categoria[] = [
   {
+    id: "digitacao",
     titulo: "Digitação",
     descricao: "Para aprender a digitar com as duas mãos, sem olhar pro teclado.",
     icon: Keyboard,
-    cor: "bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300",
+    cor: "text-blue-600 dark:text-blue-300",
+    faixa: "from-blue-500/15 to-blue-500/0",
     ferramentas: [
       {
         nome: "EdClub — Biblioteca de digitação",
@@ -81,10 +85,12 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
   {
+    id: "alfabetizacao",
     titulo: "Alfabetização e leitura",
     descricao: "Letras, sílabas, primeiras palavras e histórias interativas.",
     icon: Sparkles,
-    cor: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300",
+    cor: "text-violet-600 dark:text-violet-300",
+    faixa: "from-violet-500/15 to-violet-500/0",
     ferramentas: [
       {
         nome: "GraphoGame Brasil (MEC)",
@@ -105,10 +111,12 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
   {
+    id: "plataformas",
     titulo: "Plataformas completas",
     descricao: "Reúnem várias disciplinas num só lugar, organizadas por ano escolar.",
     icon: Layers,
-    cor: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300",
+    cor: "text-emerald-600 dark:text-emerald-300",
+    faixa: "from-emerald-500/15 to-emerald-500/0",
     ferramentas: [
       {
         nome: "Escola Games",
@@ -128,10 +136,12 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
   {
+    id: "raciocinio",
     titulo: "Raciocínio lógico",
     descricao: "Quebra-cabeças, estratégia e lógica para exercitar o pensamento.",
     icon: Brain,
-    cor: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300",
+    cor: "text-amber-600 dark:text-amber-300",
+    faixa: "from-amber-500/15 to-amber-500/0",
     ferramentas: [
       {
         nome: "LogicLike",
@@ -141,10 +151,12 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
   {
+    id: "diversao",
     titulo: "Diversão educativa",
     descricao: "Portais de jogos variados para os momentos mais livres e recreativos.",
     icon: Gamepad2,
-    cor: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-300",
+    cor: "text-pink-600 dark:text-pink-300",
+    faixa: "from-pink-500/15 to-pink-500/0",
     ferramentas: [
       {
         nome: "Coquinhos",
@@ -169,10 +181,12 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
   {
+    id: "professores",
     titulo: "Curadoria para professores",
     descricao: "Catálogos organizados para quem está planejando a aula.",
     icon: Users2,
-    cor: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-300",
+    cor: "text-cyan-600 dark:text-cyan-300",
+    faixa: "from-cyan-500/15 to-cyan-500/0",
     ferramentas: [
       {
         nome: "Escola Digital (Governo do Paraná)",
@@ -182,6 +196,8 @@ const CATEGORIAS: Categoria[] = [
     ],
   },
 ];
+
+const TOTAL_FERRAMENTAS = CATEGORIAS.reduce((soma, c) => soma + c.ferramentas.length, 0);
 
 function faviconUrl(url: string) {
   const dominio = new URL(url).hostname;
@@ -195,122 +211,181 @@ function InfotecaPage() {
       <div className="relative z-10">
         <NavBar />
 
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-border/60">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-[0.16] blur-[2px] dark:opacity-[0.24]"
-            style={{ backgroundImage: `url("${infotecaHeroImg}")` }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-sky-50/85 via-white/70 to-background dark:from-muted/40 dark:via-background/70 dark:to-background"
-          />
-          <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6 lg:py-14">
-            <Badge variant="secondary" className="mb-3 gap-1.5">
-              <Puzzle className="size-3.5" /> Espaço de aprendizagem digital
-            </Badge>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Infoteca
-            </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-balance text-base text-muted-foreground sm:text-lg">
-              Um espaço lúdico, criativo e de apoio pedagógico digital, com ferramentas e jogos
-              educativos selecionados para alunos, professores, pais e toda a comunidade escolar —
-              pensado também para alunos com necessidades especiais.
-            </p>
+        {/* Hero — banner de verdade, imagem visível com texto sobreposto */}
+        <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-8">
+          <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-xl">
+            <SiteImage
+              src={infotecaHeroImg}
+              alt="Criança sorrindo em frente a um computador com ícones coloridos de aprendizagem — teclado, mouse, alfabeto, números e jogos educativos"
+              width={1600}
+              height={600}
+              className="h-[420px] w-full sm:h-auto sm:aspect-[16/9] lg:aspect-[21/9]"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+            />
+            {/* Véu escuro só do lado do texto, para o banner continuar colorido
+                à direita mas o título ficar legível em qualquer tema. */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/55 to-transparent"
+            />
+            <div className="absolute inset-0 flex flex-col justify-center gap-3 px-5 py-6 sm:px-10 sm:py-10 lg:max-w-xl">
+              <Badge className="w-fit gap-1.5 border-white/20 bg-white/10 text-white backdrop-blur">
+                <Puzzle className="size-3.5" /> Espaço de aprendizagem digital
+              </Badge>
+              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                Infoteca
+              </h1>
+              <p className="max-w-md text-balance text-sm text-white/90 sm:text-base">
+                Um espaço lúdico, criativo e de apoio pedagógico digital — ferramentas e jogos
+                educativos selecionados para alunos, professores, pais e toda a comunidade, com
+                atenção especial a alunos com necessidades especiais.
+              </p>
+              <div className="mt-1 flex flex-wrap gap-3">
+                <Button asChild size="sm" className="gap-1.5 bg-white text-slate-900 hover:bg-white/90">
+                  <a href="#gcompris">
+                    <Download className="size-4" /> Baixar o GCompris
+                  </a>
+                </Button>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 border-white/40 bg-white/5 text-white hover:bg-white/15"
+                >
+                  <a href="#ferramentas">Ver ferramentas</a>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Chips com o resumo do que tem aqui embaixo */}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
+              <strong className="text-foreground">{TOTAL_FERRAMENTAS}</strong> ferramentas
+            </span>
+            <span className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
+              <strong className="text-foreground">{CATEGORIAS.length}</strong> categorias
+            </span>
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+              <HeartHandshake className="mr-1 inline size-3.5" /> Com opções acessíveis
+            </span>
           </div>
         </section>
 
-        {/* Acessibilidade */}
-        <section className="mx-auto max-w-4xl px-4 pt-6 sm:px-6">
-          <Card className="border-emerald-500/30 bg-emerald-500/5">
-            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+        {/* Navegação rápida por categoria */}
+        <nav
+          aria-label="Ir direto para uma categoria"
+          className="sticky top-16 z-30 border-b border-border/60 bg-background/85 py-2.5 backdrop-blur-lg sm:top-14"
+        >
+          <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 sm:px-6 [&::-webkit-scrollbar]:hidden">
+            {CATEGORIAS.map((categoria) => (
+              <a
+                key={categoria.id}
+                href={`#${categoria.id}`}
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+              >
+                <categoria.icon className={`size-3.5 ${categoria.cor}`} />
+                {categoria.titulo}
+              </a>
+            ))}
+          </div>
+        </nav>
+
+        {/* GCompris + Acessibilidade, lado a lado */}
+        <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+            <div
+              id="gcompris"
+              className="scroll-mt-32 flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5 sm:flex-row sm:items-center"
+            >
+              <div className="flex items-start gap-3">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                  <Download className="size-5" />
+                </span>
+                <div>
+                  <p className="text-base font-semibold text-foreground">
+                    GCompris — pacote educacional gratuito
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Dezenas de atividades de matemática, leitura, ciências, lógica e arte para
+                    crianças a partir dos 2 anos. Funciona offline, sem anúncios e sem precisar de
+                    internet na hora da aula.
+                  </p>
+                </div>
+              </div>
+              <Button asChild className="w-full shrink-0 gap-1.5 sm:w-auto">
+                <a
+                  href="https://gcompris.net/downloads-en.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Baixar <ExternalLink className="size-3.5" />
+                </a>
+              </Button>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
                 <HeartHandshake className="size-5" />
               </span>
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  Pensado também para alunos com necessidades especiais
+                  Alunos com necessidades especiais
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Priorizamos aqui ferramentas com interface simples, visual e pouco texto — mais
-                  fáceis de usar para quem tem alguma limitação motora, sensorial ou de
-                  aprendizagem. O <strong className="text-foreground">GCompris</strong> (abaixo) é
-                  especialmente indicado por funcionar offline, sem anúncios e com atividades
-                  bem graduais. Ainda assim, cada criança é diferente — vale testar junto e
-                  observar o que funciona melhor.
+                  Priorizamos ferramentas simples, visuais e com pouco texto. O GCompris ao lado é
+                  o ponto de partida mais indicado — mas cada criança é diferente, vale testar
+                  junto.
                 </p>
               </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* GCompris em destaque */}
-        <section className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
-          <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 to-transparent">
-            <CardContent className="flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center">
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                <Download className="size-6" />
-              </span>
-              <div className="flex-1">
-                <p className="text-base font-semibold text-foreground">
-                  GCompris — pacote educacional gratuito
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Dezenas de atividades de matemática, leitura, ciências, lógica e arte para
-                  crianças a partir dos 2 anos. Funciona offline, sem anúncios e sem precisar de
-                  internet na hora da aula.
-                </p>
-              </div>
-              <Button asChild className="w-full shrink-0 gap-1.5 sm:w-auto">
-                <a href="https://gcompris.net/downloads-en.html" target="_blank" rel="noopener noreferrer">
-                  Baixar o GCompris <ExternalLink className="size-3.5" />
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </section>
 
         {/* Categorias */}
-        <section className="mx-auto max-w-4xl px-4 pb-10 sm:px-6">
-          <div className="flex flex-col gap-6">
+        <section id="ferramentas" className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-14 sm:px-6">
+          <div className="flex flex-col gap-10">
             {CATEGORIAS.map((categoria) => (
-              <div key={categoria.titulo}>
-                <div className="mb-3 flex items-center gap-2.5">
-                  <span
-                    className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${categoria.cor}`}
-                  >
-                    <categoria.icon className="size-4.5" />
+              <div key={categoria.id} id={categoria.id} className="scroll-mt-32">
+                <div
+                  className={`mb-4 flex items-center gap-3 rounded-2xl bg-gradient-to-r ${categoria.faixa} px-4 py-3`}
+                >
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card shadow-sm">
+                    <categoria.icon className={`size-5 ${categoria.cor}`} />
                   </span>
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">{categoria.titulo}</h2>
                     <p className="text-xs text-muted-foreground">{categoria.descricao}</p>
                   </div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {categoria.ferramentas.map((ferramenta) => (
                     <a
                       key={ferramenta.url}
                       href={ferramenta.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card p-3.5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                      className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                     >
                       <img
                         src={faviconUrl(ferramenta.url)}
                         alt=""
                         aria-hidden
-                        width={28}
-                        height={28}
+                        width={32}
+                        height={32}
                         loading="lazy"
-                        className="mt-0.5 size-7 shrink-0 rounded-md border border-border/40 bg-white object-contain p-1"
+                        className="mt-0.5 size-8 shrink-0 rounded-lg border border-border/40 bg-white object-contain p-1.5"
                       />
                       <div className="min-w-0 flex-1">
                         <p className="flex items-center gap-1 text-sm font-semibold text-foreground group-hover:text-primary">
                           <span className="truncate">{ferramenta.nome}</span>
                           <ExternalLink className="size-3 shrink-0 opacity-60" />
                         </p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{ferramenta.descricao}</p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                          {ferramenta.descricao}
+                        </p>
                       </div>
                     </a>
                   ))}
