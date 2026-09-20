@@ -1,5 +1,16 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, LogOut, Menu } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  ClipboardList,
+  Home,
+  Info,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Menu,
+  type LucideIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
