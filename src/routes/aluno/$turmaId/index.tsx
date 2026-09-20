@@ -137,7 +137,7 @@ function AlunoPicker() {
                     setPin("");
                     setErro(null);
                   }}
-                  className="group flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-card p-3.5 text-center shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                  className="group flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-border/60 bg-card p-3.5 text-center shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                 >
                   <span
                     className={`flex size-10 items-center justify-center rounded-full text-sm font-bold ${corTurma.bg} ${corTurma.text}`}
