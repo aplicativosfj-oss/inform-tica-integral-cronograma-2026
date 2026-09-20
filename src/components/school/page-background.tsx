@@ -1,4 +1,4 @@
-import agendaPatternBg from "@/assets/agenda-pattern-bg.svg";
+import fundoSite from "@/assets/fundo-site.jpg.asset.json";
 
 /**
  * Fundo decorativo padrão de toda página pública: um padrão próprio (grade
@@ -17,12 +17,12 @@ export function PageBackground() {
     <>
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-100 dark:opacity-70 dark:invert dark:hue-rotate-180 dark:saturate-150"
-        style={{ backgroundImage: `url("${agendaPatternBg}")` }}
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url("${fundoSite.url}")` }}
       />
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-background/20 dark:bg-background/40"
+        className="pointer-events-none fixed inset-0 z-0 bg-background/80 backdrop-blur-[2px] dark:bg-background/85"
       />
     </>
   );
