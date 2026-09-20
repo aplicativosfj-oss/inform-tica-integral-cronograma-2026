@@ -121,7 +121,7 @@ function Index() {
               azul-noite um tom acima do fundo da página no modo escuro. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-sky-50/85 via-white/55 to-background dark:from-slate-800/70 dark:via-slate-900/60 dark:to-background"
+            className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-sky-50/85 via-white/55 to-background dark:from-muted/35 dark:via-background/60 dark:to-background"
           />
           <div
             aria-hidden
@@ -267,13 +267,13 @@ function Index() {
                   className="absolute inset-0 hidden scale-110 bg-cover bg-center opacity-60 blur-2xl lg:block"
                   style={{ backgroundImage: `url(${escolaInformaticaHeroImg})` }}
                 />
-                <div aria-hidden className="absolute inset-0 hidden bg-slate-900/35 lg:block" />
+                <div aria-hidden className="absolute inset-0 hidden bg-slate-900/25 lg:block" />
                 <SiteImage
                   src={escolaInformaticaHeroImg}
                   alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
                   width={854}
                   height={302}
-                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/40 sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-full lg:rounded-2xl"
+                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-card/60 sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-full lg:rounded-2xl"
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
@@ -340,7 +340,10 @@ function Index() {
           </div>
           <AvisoDireitosImagem className="mt-2 sm:justify-end" />
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Duas colunas já no celular: em coluna única os quatro cards viravam
+              uma fila vertical longa demais, empurrando a grade da semana pra
+              fora da tela. */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
             <FeatureCard
               icon={<Gamepad2 className="size-5" />}
               iconClassName="bg-blue-500/10 text-blue-600"
@@ -870,17 +873,17 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <Card className="group">
-      <CardHeader className="pb-2">
+    <Card className="group flex h-full flex-col">
+      <CardHeader className="p-3.5 pb-1.5 sm:p-6 sm:pb-2">
         <span
-          className={`group-hover-hop mb-2 flex size-10 items-center justify-center rounded-lg ${iconClassName ?? "bg-primary/10 text-primary"}`}
+          className={`group-hover-hop mb-2 flex size-9 items-center justify-center rounded-lg sm:size-10 ${iconClassName ?? "bg-primary/10 text-primary"}`}
         >
           {icon}
         </span>
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="text-sm leading-snug text-balance sm:text-base">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground">{description}</p>
+      <CardContent className="p-3.5 pt-0 sm:p-6 sm:pt-0">
+        <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">{description}</p>
       </CardContent>
     </Card>
   );

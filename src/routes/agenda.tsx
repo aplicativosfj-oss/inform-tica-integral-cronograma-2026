@@ -117,7 +117,7 @@ function AgendaPage() {
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-card/60 p-3 backdrop-blur-xl">
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
                     <Clock3 className="size-4" />
                   </span>
@@ -128,7 +128,7 @@ function AgendaPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-slate-900/40 p-3 backdrop-blur-xl">
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-card/60 p-3 backdrop-blur-xl">
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                     <MonitorSmartphone className="size-4" />
                   </span>
@@ -146,7 +146,7 @@ function AgendaPage() {
               alt="Laboratório de informática da escola com turmas em cronograma semanal"
               width={1200}
               height={750}
-              className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-lg bg-white/70 dark:bg-slate-900/40 sm:max-h-64"
+              className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-lg bg-white/70 dark:bg-card/60 sm:max-h-64"
               loading="eager"
               decoding="async"
             />

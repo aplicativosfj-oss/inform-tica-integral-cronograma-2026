@@ -55,7 +55,7 @@ export function NavBar() {
   const location = useLocation();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/50 dark:text-white dark:shadow-black/20">
+    <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-background/75 dark:text-white dark:shadow-black/20">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-1.5 px-3 sm:h-14 sm:gap-2 sm:px-6">
         <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
           <img

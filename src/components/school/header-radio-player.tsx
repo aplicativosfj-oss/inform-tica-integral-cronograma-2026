@@ -153,7 +153,7 @@ export function HeaderRadioPlayer() {
         <div
           role="status"
           className={cn(
-            "pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg border border-blue-400/30 bg-white/95 px-3 py-1.5 text-center shadow-lg backdrop-blur-md dark:border-cyan-400/30 dark:bg-slate-900/95",
+            "pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-max max-w-[220px] -translate-x-1/2 rounded-lg border border-blue-400/30 bg-white/95 px-3 py-1.5 text-center shadow-lg backdrop-blur-md dark:border-cyan-400/30 dark:bg-popover/95",
             troca.saindo
               ? "animate-out fade-out-0 slide-out-to-top-1 duration-500"
               : "animate-in fade-in-0 slide-in-from-top-1 duration-300",

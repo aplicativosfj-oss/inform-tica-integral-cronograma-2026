@@ -133,7 +133,7 @@ export function AndroidFeatures({
               // Silently handle AbortError
             }
           }}
-          className="gap-2 text-xs sm:text-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800"
+          className="gap-2 text-xs sm:text-sm cursor-pointer hover:bg-accent/60"
           title="Compartilhar com outro aplicativo"
         >
           <Share2 className="size-4" />

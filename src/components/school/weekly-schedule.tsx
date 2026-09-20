@@ -102,12 +102,12 @@ export function WeeklySchedule() {
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-slate-900/50 shadow-lg backdrop-blur-xl">
+      <div className="overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-card/70 shadow-lg backdrop-blur-xl">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 dark:bg-slate-900/60" />
+                <th className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 dark:bg-muted/50" />
                 {colunas.map((dia) => {
                   const hoje = dia === todayLabel;
                   return (
@@ -135,7 +135,7 @@ export function WeeklySchedule() {
                 return (
                   <Fragment key={slot.inicio}>
                     <tr className="group/row">
-                      <td className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 text-right align-top text-xs font-semibold whitespace-nowrap text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
+                      <td className="sticky left-0 z-10 w-24 shrink-0 border-r border-b border-border/60 bg-slate-100/80 p-3 text-right align-top text-xs font-semibold whitespace-nowrap text-slate-600 dark:bg-muted/50 dark:text-slate-300">
                         {slot.inicio}
                         <br />
                         {slot.fim}

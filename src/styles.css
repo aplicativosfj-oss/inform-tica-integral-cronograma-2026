@@ -111,43 +111,48 @@
 }
 
 .dark {
-  --background: oklch(0.15 0.035 265);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* Paleta escura "suave": cinza levemente azulado, bem dessaturado.
+     Antes o fundo era um azul-marinho carregado e os cards vinham de
+     slate-900 cru — a tela inteira ficava pesada e o azul competia com o
+     conteúdo. Aqui a croma cai pra perto de zero e a luminosidade sobe um
+     degrau: continua escuro, mas sem o "preto/azul forte". */
+  --background: oklch(0.235 0.008 265);
+  --foreground: oklch(0.955 0.004 247.858);
+  --card: oklch(0.278 0.009 265);
+  --card-foreground: oklch(0.955 0.004 247.858);
+  --popover: oklch(0.285 0.009 265);
+  --popover-foreground: oklch(0.955 0.004 247.858);
+  --primary: oklch(0.915 0.008 255.508);
+  --primary-foreground: oklch(0.255 0.012 265.755);
+  --secondary: oklch(0.325 0.012 260.031);
+  --secondary-foreground: oklch(0.955 0.004 247.858);
+  --muted: oklch(0.325 0.012 260.031);
+  --muted-foreground: oklch(0.735 0.018 256.788);
+  --accent: oklch(0.345 0.014 260.031);
+  --accent-foreground: oklch(0.955 0.004 247.858);
+  --destructive: oklch(0.68 0.16 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --serie-1: oklch(0.78 0.085 255);
-  --serie-2: oklch(0.7 0.12 256);
-  --serie-3: oklch(0.615 0.155 258);
-  --serie-4: oklch(0.53 0.175 260);
-  --serie-5: oklch(0.445 0.15 262);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.62 0.02 264.364);
+  --chart-1: oklch(0.62 0.15 264.376);
+  --chart-2: oklch(0.7 0.13 162.48);
+  --chart-3: oklch(0.76 0.14 70.08);
+  --chart-4: oklch(0.66 0.16 303.9);
+  --chart-5: oklch(0.67 0.16 16.439);
+  --serie-1: oklch(0.8 0.055 255);
+  --serie-2: oklch(0.73 0.08 256);
+  --serie-3: oklch(0.655 0.1 258);
+  --serie-4: oklch(0.58 0.115 260);
+  --serie-5: oklch(0.505 0.1 262);
+  --sidebar: oklch(0.278 0.009 265);
+  --sidebar-foreground: oklch(0.955 0.004 247.858);
+  --sidebar-primary: oklch(0.62 0.15 264.376);
   --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --sidebar-accent: oklch(0.325 0.012 260.031);
+  --sidebar-accent-foreground: oklch(0.955 0.004 247.858);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.62 0.02 264.364);
 }
 
 /* Barras do equalizador do player de rádio flutuante — cada uma anima em um
