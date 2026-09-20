@@ -334,6 +334,16 @@
     color: var(--color-foreground);
   }
 
+  /* Reserva sempre o espaço da barra de rolagem vertical, mesmo quando ela
+     não está visível. Sem isso, a página inteira "pula" de largura toda vez
+     que o conteúdo passa a precisar de rolagem (ex.: digitar até estourar a
+     altura da tela) ou que um menu/diálogo trava e destrava a rolagem do
+     body — o efeito de "redimensionar sozinho" que isso causa incomoda mais
+     ainda numa área de digitação, como o Editor de Texto. */
+  html {
+    scrollbar-gutter: stable;
+  }
+
   /* Scrollbar styles — professional and minimal */
   ::-webkit-scrollbar {
     width: 8px;

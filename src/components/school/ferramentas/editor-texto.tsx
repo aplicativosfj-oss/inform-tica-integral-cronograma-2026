@@ -1,10 +1,12 @@
 import {
   AlignCenter,
+  AlignJustify,
   AlignLeft,
   AlignRight,
   Bold,
   FilePlus2,
   FolderOpen,
+  ImageUp,
   Italic,
   List,
   ListOrdered,
@@ -16,7 +18,7 @@ import {
   Underline,
   Undo2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -55,6 +57,8 @@ const FONTES = [
   { valor: "'Courier New', monospace", rotulo: "Courier New" },
   { valor: "'Comic Sans MS', cursive", rotulo: "Comic Sans MS" },
 ] as const;
+
+const TAMANHOS = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48] as const;
 
 const CORES = [
   "#1f2937",
@@ -103,6 +107,54 @@ export function EditorTexto() {
     }
     comando(nome, valor);
     salvarSelecaoAtual();
+  }
+
+  /**
+   * `execCommand("fontSize")` só aceita os números 1-7 (a escala antiga do
+   * HTML), não um tamanho em pixels de verdade. O truque padrão é aplicar o
+   * tamanho "7" (o maior da escala) e depois trocar a tag <font size="7">
+   * gerada por um <span style="font-size:...px">, que aceita qualquer valor.
+   */
+  function aplicarTamanhoFonte(tamanhoPx: string) {
+    areaRef.current?.focus();
+    const selecao = window.getSelection();
+    if (selecao && selecaoSalvaRef.current) {
+      selecao.removeAllRanges();
+      selecao.addRange(selecaoSalvaRef.current);
+    }
+    document.execCommand("fontSize", false, "7");
+    areaRef.current?.querySelectorAll('font[size="7"]').forEach((el) => {
+      const span = document.createElement("span");
+      span.style.fontSize = `${tamanhoPx}px`;
+      while (el.firstChild) span.appendChild(el.firstChild);
+      el.replaceWith(span);
+    });
+    salvarSelecaoAtual();
+    salvarRascunhoLocal();
+    atualizarContagem();
+  }
+
+  const imagemInputRef = useRef<HTMLInputElement>(null);
+
+  function inserirImagem(e: ChangeEvent<HTMLInputElement>) {
+    const arquivo = e.target.files?.[0];
+    e.target.value = "";
+    if (!arquivo) return;
+    if (!arquivo.type.startsWith("image/")) {
+      toast.error("Escolha um arquivo de imagem.");
+      return;
+    }
+    if (arquivo.size > 4 * 1024 * 1024) {
+      toast.error("Escolha uma imagem menor que 4 MB.");
+      return;
+    }
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      comandoComSelecao("insertImage", leitor.result as string);
+      salvarRascunhoLocal();
+      atualizarContagem();
+    };
+    leitor.readAsDataURL(arquivo);
   }
 
   const [arquivoAtualId, setArquivoAtualId] = useState<string | null>(null);
@@ -306,15 +358,16 @@ export function EditorTexto() {
             ))}
           </SelectContent>
         </Select>
-        <Select onValueChange={(v) => comandoComSelecao("fontSize", v)}>
-          <SelectTrigger className="h-8 w-28 bg-white dark:bg-zinc-700">
-            <SelectValue placeholder="Tamanho" />
+        <Select onValueChange={aplicarTamanhoFonte}>
+          <SelectTrigger className="h-8 w-20 bg-white dark:bg-zinc-700">
+            <SelectValue placeholder="Tam." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="2">Pequeno</SelectItem>
-            <SelectItem value="4">Normal</SelectItem>
-            <SelectItem value="6">Grande</SelectItem>
-            <SelectItem value="7">Enorme</SelectItem>
+            {TAMANHOS.map((t) => (
+              <SelectItem key={t} value={String(t)}>
+                {t}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -408,6 +461,34 @@ export function EditorTexto() {
         >
           <AlignRight className="size-4" />
         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => comandoComSelecao("justifyFull")}
+          title="Justificar"
+        >
+          <AlignJustify className="size-4" />
+        </Button>
+
+        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+        <input
+          ref={imagemInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={inserirImagem}
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => imagemInputRef.current?.click()}
+          title="Inserir imagem"
+        >
+          <ImageUp className="size-4" />
+        </Button>
 
         <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
 
@@ -463,7 +544,7 @@ export function EditorTexto() {
           }}
           onMouseUp={salvarSelecaoAtual}
           onKeyUp={salvarSelecaoAtual}
-          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16"
+          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm"
           style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
           suppressContentEditableWarning
         />
