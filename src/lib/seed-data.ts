@@ -36,6 +36,10 @@ export const SEED_CONFIG: ScheduleConfig = {
   duracaoSlotMinutos: 60,
   duracaoGrupoMinutos: 30,
   numeroComputadores: 7,
+  // Uso real do sistema começa nesta data — qualquer presença/falta salva
+  // antes dela (testes feitos durante a configuração) fica oculta dos
+  // relatórios de frequência.
+  dataInicioOperacao: "2026-09-21",
   conteudoPorDia: {
     Segunda: "Introdução ao computador: partes, ligar/desligar e cuidados com os equipamentos",
     Terça: "Digitação e edição de texto: teclado, maiúsculas, acentos e formatação básica",

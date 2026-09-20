@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
+import { Route as InfotecaRouteImport } from './routes/infoteca'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TvRouteImport } from './routes/tv'
@@ -39,6 +40,11 @@ const AgendaRoute = AgendaRouteImport.update({
 const CoordenacaoRoute = CoordenacaoRouteImport.update({
   id: '/coordenacao',
   path: '/coordenacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InfotecaRoute = InfotecaRouteImport.update({
+  id: '/infoteca',
+  path: '/infoteca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/coordenacao': typeof CoordenacaoRoute
+  '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/coordenacao': typeof CoordenacaoRoute
+  '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/coordenacao': typeof CoordenacaoRoute
+  '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/coordenacao'
+    | '/infoteca'
     | '/login'
     | '/sobre'
     | '/tv'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/coordenacao'
+    | '/infoteca'
     | '/login'
     | '/sobre'
     | '/tv'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/coordenacao'
+    | '/infoteca'
     | '/login'
     | '/sobre'
     | '/tv'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
   CoordenacaoRoute: typeof CoordenacaoRoute
+  InfotecaRoute: typeof InfotecaRoute
   LoginRoute: typeof LoginRoute
   SobreRoute: typeof SobreRoute
   TvRoute: typeof TvRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/coordenacao'
       fullPath: '/coordenacao'
       preLoaderRoute: typeof CoordenacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/infoteca': {
+      id: '/infoteca'
+      path: '/infoteca'
+      fullPath: '/infoteca'
+      preLoaderRoute: typeof InfotecaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -359,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
   CoordenacaoRoute: CoordenacaoRoute,
+  InfotecaRoute: InfotecaRoute,
   LoginRoute: LoginRoute,
   SobreRoute: SobreRoute,
   TvRoute: TvRoute,

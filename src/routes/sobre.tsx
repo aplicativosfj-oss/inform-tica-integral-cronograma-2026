@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BookOpen,
   ExternalLink,
   GraduationCap,
   Mail,
   MonitorSmartphone,
+  Puzzle,
   RefreshCcw,
   ShieldCheck,
   Sparkles,
@@ -218,6 +219,34 @@ function SobrePage() {
                 <AvisoDireitosImagem className="mt-2" />
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Infoteca */}
+        <section className="border-t border-border/60 bg-muted/30">
+          <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+            <div className="mb-4 text-center">
+              <Badge variant="secondary" className="mb-3 gap-1.5">
+                <Puzzle className="size-3.5" /> Novidade
+              </Badge>
+              <h2 className="text-2xl font-semibold text-foreground">Conheça a Infoteca</h2>
+            </div>
+            <Card>
+              <CardContent className="p-5 text-center">
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Além da agenda das aulas, o site tem um espaço próprio chamado{" "}
+                  <strong className="text-foreground">Infoteca</strong>: uma seleção de jogos e
+                  ferramentas educativas gratuitas, organizadas por área (alfabetização,
+                  matemática, digitação, raciocínio lógico e mais), pensada para alunos,
+                  professores, pais e também para alunos com necessidades especiais.
+                </p>
+                <Button asChild className="mt-4 gap-1.5">
+                  <Link to="/infoteca">
+                    <Puzzle className="size-4" /> Explorar a Infoteca
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </section>
 

@@ -9,6 +9,7 @@ import {
   LogIn,
   LogOut,
   Menu,
+  Puzzle,
   type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -57,6 +58,7 @@ const LINKS = [
   { to: "/", label: "Início" },
   { to: "/agenda", label: "Agenda" },
   { to: "/coordenacao", label: "Coordenação" },
+  { to: "/infoteca", label: "Infoteca" },
   { to: "/sobre", label: "Sobre" },
 ] as const;
 
@@ -64,6 +66,7 @@ const LINK_ICONS: Record<string, LucideIcon> = {
   "/": Home,
   "/agenda": CalendarDays,
   "/coordenacao": ClipboardList,
+  "/infoteca": Puzzle,
   "/sobre": Info,
 };
 
@@ -101,6 +104,7 @@ export function NavBar() {
           <NavLink to="/" label="Início" />
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
+          <NavLink to="/infoteca" label="Infoteca" />
           <NavLink to="/sobre" label="Sobre" />
           <HeaderRadioPlayer />
           <ShareButton />
