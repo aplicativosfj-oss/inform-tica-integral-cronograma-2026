@@ -95,6 +95,27 @@ function ConfiguracoesPage() {
 
         <Card>
           <CardHeader>
+            <CardTitle className="text-base">Início oficial de uso</CardTitle>
+            <CardDescription>
+              Registros de presença/falta salvos antes desta data são tratados como teste (feito
+              durante a configuração do sistema) e ficam ocultos dos relatórios de frequência. Deixe
+              em branco para contar tudo desde o primeiro registro.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Field label="A partir de (opcional)">
+              <Input
+                type="date"
+                className="w-48"
+                value={form.dataInicioOperacao ?? ""}
+                onChange={(e) => set("dataInicioOperacao", e.target.value || undefined)}
+              />
+            </Field>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle className="text-base">Regras de revezamento</CardTitle>
             <CardDescription>
               Como a agenda calcula os horários e o revezamento dos grupos automaticamente. A

@@ -99,6 +99,13 @@ export interface ScheduleConfig {
   duracaoSlotMinutos: number;
   duracaoGrupoMinutos: number;
   numeroComputadores: number;
+  /**
+   * Data (YYYY-MM-DD) a partir da qual a frequência registrada conta como
+   * real. Qualquer presença/falta salva antes dela é tratada como teste
+   * interno (feito durante a configuração do sistema) e fica oculta dos
+   * relatórios, para não ser confundida com uso de verdade da escola.
+   */
+  dataInicioOperacao?: string | undefined;
   /** Conteúdo programático exibido no cronômetro, por dia da semana. */
   conteudoPorDia?: Record<string, string> | undefined;
   /** Aulas cadastradas manualmente (tela "Aulas"), com prioridade sobre o rodízio. */

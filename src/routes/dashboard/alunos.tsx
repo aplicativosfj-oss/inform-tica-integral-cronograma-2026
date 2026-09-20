@@ -142,7 +142,13 @@ function AlunosPage() {
                           </Link>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {grupo ? grupo.nome : "Sem grupo"}
+                          {grupo ? (
+                            grupo.nome
+                          ) : (
+                            <span title="Participa do rodízio automático normalmente — só não está fixo em nenhum grupo nomeado criado em Turmas > Grupos.">
+                              Sem grupo fixo
+                            </span>
+                          )}
                         </TableCell>
                       </TableRow>
                     );

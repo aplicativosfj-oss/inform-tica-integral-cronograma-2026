@@ -58,6 +58,7 @@ function FrequenciaPage() {
   const [{ inicio, fim }, setRange] = useState(defaultRange);
   const [turmaId, setTurmaId] = useState<string>("todas");
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
+  const [ocultosPorCorte, setOcultosPorCorte] = useState(0);
   const [carregando, setCarregando] = useState(false);
 
   async function consultar() {
@@ -68,7 +69,10 @@ function FrequenciaPage() {
         fim,
         turmaId === "todas" ? undefined : turmaId,
       );
-      setRegistros(dados);
+      const corte = config.dataInicioOperacao;
+      const filtrados = corte ? dados.filter((r) => r.data >= corte) : dados;
+      setOcultosPorCorte(dados.length - filtrados.length);
+      setRegistros(filtrados);
     } catch (err) {
       toast.error(`Não foi possível carregar o histórico: ${(err as Error).message}`);
     } finally {
@@ -178,6 +182,18 @@ function FrequenciaPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {ocultosPorCorte > 0 ? (
+        <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+          {ocultosPorCorte === 1
+            ? "1 registro"
+            : `${ocultosPorCorte} registros`}{" "}
+          anterior{ocultosPorCorte === 1 ? "" : "es"} a{" "}
+          {new Date(`${config.dataInicioOperacao}T00:00:00`).toLocaleDateString("pt-BR")}{" "}
+          {ocultosPorCorte === 1 ? "foi ocultado" : "foram ocultados"} por serem testes feitos
+          durante a configuração do sistema, antes do início oficial de uso.
+        </p>
+      ) : null}
 
       {registros ? (
         <div className="mb-4 grid gap-4 sm:grid-cols-2">

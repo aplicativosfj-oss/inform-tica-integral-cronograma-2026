@@ -55,13 +55,15 @@ export const Route = createFileRoute("/agenda")({
 
 function AgendaPage() {
   const { turmas, config } = useAppStore();
-  const [weekIndex, setWeekIndex] = useState(() => getWeekIndex(new Date()));
+  const semanaAtualIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const [weekIndex, setWeekIndex] = useState(semanaAtualIndex);
   const assignments = useMemo(
     () => buildWeeklySchedule(turmas, config, weekIndex),
     [turmas, config, weekIndex],
   );
   const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
-  const isCurrentWeek = weekIndex === getWeekIndex(new Date());
+  const isCurrentWeek = weekIndex === semanaAtualIndex;
+  const semanasAnterioresBloqueadas = weekIndex <= semanaAtualIndex;
   const [diaSelecionado, setDiaSelecionado] = useState(
     config.diasSemana.includes(todayLabel) ? todayLabel : (config.diasSemana[0] ?? ""),
   );
@@ -159,9 +161,15 @@ function AgendaPage() {
           <div className="mb-6 flex items-center justify-between rounded-lg border border-border/60 bg-card/50 p-3 backdrop-blur-sm">
             <button
               type="button"
-              onClick={() => setWeekIndex((w) => w - 1)}
-              className="cursor-pointer rounded-lg p-2 text-primary hover:bg-primary/10 transition-colors"
+              onClick={() => setWeekIndex((w) => Math.max(semanaAtualIndex, w - 1))}
+              disabled={semanasAnterioresBloqueadas}
+              className="cursor-pointer rounded-lg p-2 text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
               aria-label="Semana anterior"
+              title={
+                semanasAnterioresBloqueadas
+                  ? "Sem aulas registradas antes da semana atual"
+                  : "Semana anterior"
+              }
             >
               <ChevronLeft className="size-5" />
             </button>
@@ -169,7 +177,7 @@ function AgendaPage() {
               <CalendarDays className="size-4 text-primary" />
               {isCurrentWeek
                 ? "Semana atual"
-                : `Semana ${weekIndex > getWeekIndex(new Date()) ? `+${weekIndex - getWeekIndex(new Date())}` : weekIndex - getWeekIndex(new Date())}`}
+                : `Daqui a ${weekIndex - semanaAtualIndex} semana${weekIndex - semanaAtualIndex === 1 ? "" : "s"}`}
             </span>
             <button
               type="button"
