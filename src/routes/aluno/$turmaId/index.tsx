@@ -58,7 +58,10 @@ function AlunoPicker() {
         turmaId,
         nome: alunoSelecionado.nome,
       });
-      navigate({ to: "/aluno/$turmaId/$alunoId", params: { turmaId, alunoId: alunoSelecionado.id } });
+      navigate({
+        to: "/aluno/$turmaId/$alunoId",
+        params: { turmaId, alunoId: alunoSelecionado.id },
+      });
     } catch (err) {
       toast.error(`Não foi possível entrar: ${(err as Error).message}`);
     } finally {
@@ -165,7 +168,8 @@ function AlunoPicker() {
         <DialogContent className="max-w-xs">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <KeyRound className="size-4 text-primary" /> Olá, {alunoSelecionado?.nome.split(" ")[0]}!
+              <KeyRound className="size-4 text-primary" /> Olá,{" "}
+              {alunoSelecionado?.nome.split(" ")[0]}!
             </DialogTitle>
             <DialogDescription>Digite seu PIN de 4 dígitos para entrar.</DialogDescription>
           </DialogHeader>
@@ -188,8 +192,16 @@ function AlunoPicker() {
             />
             {erro ? <p className="text-sm text-destructive">{erro}</p> : null}
           </div>
-          <Button onClick={confirmarPin} disabled={pin.length !== 4 || verificando} className="gap-1.5">
-            {verificando ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
+          <Button
+            onClick={confirmarPin}
+            disabled={pin.length !== 4 || verificando}
+            className="gap-1.5"
+          >
+            {verificando ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <KeyRound className="size-4" />
+            )}
             Entrar
           </Button>
         </DialogContent>

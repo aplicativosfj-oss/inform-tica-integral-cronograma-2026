@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   CalendarDays,
   CheckCircle2,
@@ -9,6 +9,7 @@ import {
   HeartHandshake,
   History,
   LogOut,
+  Sparkles,
   UserRound,
   UserX,
 } from "lucide-react";
@@ -21,6 +22,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
+import { FERRAMENTAS } from "@/components/school/ferramentas/registro";
 import { useAppStore } from "@/lib/app-store";
 import {
   fetchAtividadesDaTurma,
@@ -34,7 +36,7 @@ import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, AtividadeStatus, Presenca } from "@/lib/types";
 import alunoPainelBgImg from "@/assets/feature-kids-learning.jpg";
 
-export const Route = createFileRoute("/aluno/$turmaId/$alunoId")({
+export const Route = createFileRoute("/aluno/$turmaId/$alunoId/")({
   component: AlunoPainel,
   head: () => ({
     meta: [
@@ -93,13 +95,14 @@ function AlunoPainel() {
     async function carregar() {
       setCarregando(true);
       try {
-        const [historico, historicoPresencas, atividadesDaTurma, statusDoAluno] =
-          await Promise.all([
+        const [historico, historicoPresencas, atividadesDaTurma, statusDoAluno] = await Promise.all(
+          [
             fetchHistoricoAcessos(alunoId, 2),
             fetchPresencasDoAluno(alunoId),
             fetchAtividadesDaTurma(turmaId),
             fetchStatusDoAluno(alunoId),
-          ]);
+          ],
+        );
         if (cancelado) return;
         // O acesso de agora já foi registrado na tela anterior — o penúltimo
         // (índice 1) é o "último acesso" de verdade, antes deste.
@@ -108,7 +111,8 @@ function AlunoPainel() {
         setAtividades(atividadesDaTurma);
         setStatusPorAtividade(statusDoAluno);
       } catch (err) {
-        if (!cancelado) toast.error(`Não foi possível carregar seus dados: ${(err as Error).message}`);
+        if (!cancelado)
+          toast.error(`Não foi possível carregar seus dados: ${(err as Error).message}`);
       } finally {
         if (!cancelado) setCarregando(false);
       }
@@ -225,7 +229,9 @@ function AlunoPainel() {
                     {config.professorInformatica}
                   </span>
                 </div>
-                {aluno.necessidadeEspecial && turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (
+                {aluno.necessidadeEspecial &&
+                turma.apoioEspecial &&
+                turma.apoioEspecial.length > 0 ? (
                   <span className="mt-1 flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] text-white/80">
                     <HeartHandshake className="size-3 shrink-0" />
                     Conta com apoio de{" "}
@@ -252,7 +258,11 @@ function AlunoPainel() {
                 <Clock3 className="size-4 text-blue-600 dark:text-blue-400" />
                 <p className="text-[11px] text-muted-foreground">Último acesso</p>
                 <p className="text-xs font-semibold text-foreground sm:text-sm">
-                  {carregando ? "..." : ultimoAcesso ? formatarDataHora(ultimoAcesso) : "1º acesso!"}
+                  {carregando
+                    ? "..."
+                    : ultimoAcesso
+                      ? formatarDataHora(ultimoAcesso)
+                      : "1º acesso!"}
                 </p>
               </CardContent>
             </Card>
@@ -266,6 +276,31 @@ function AlunoPainel() {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        {/* Ferramentas e exercícios */}
+        <section className="mx-auto max-w-6xl px-4 pb-2 sm:px-6">
+          <Link
+            to="/aluno/$turmaId/$alunoId/ferramentas"
+            params={{ turmaId, alunoId }}
+            className="group flex cursor-pointer items-center gap-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <Sparkles className="size-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-foreground sm:text-base">
+                Ferramentas e exercícios
+              </p>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                Calculadora, editor de texto, tabuada, matemática, leitura, história do Acre e mais{" "}
+                {FERRAMENTAS.length - 6} atividades.
+              </p>
+            </div>
+            <span className="hidden shrink-0 text-sm font-medium text-primary group-hover:underline sm:block">
+              Explorar →
+            </span>
+          </Link>
         </section>
 
         {/* Atividades */}
