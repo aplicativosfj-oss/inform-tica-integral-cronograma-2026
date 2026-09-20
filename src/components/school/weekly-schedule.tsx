@@ -188,9 +188,17 @@ export function WeeklySchedule() {
                       <tr>
                         <td
                           colSpan={colunas.length + 1}
-                          className="border-b border-border/40 bg-muted/40 px-3 py-1.5 text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+                          className="border-b border-border/40 bg-muted/50 p-0"
                         >
-                          {pausaApos.label} · {pausaApos.horario}
+                          {/* O rótulo da pausa acompanha a rolagem horizontal
+                              para continuar legível no celular. */}
+                          <span className="sticky left-0 flex items-center gap-2 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                            <span
+                              aria-hidden
+                              className="h-px w-4 shrink-0 rounded bg-border sm:w-8"
+                            />
+                            {pausaApos.label} · {pausaApos.horario}
+                          </span>
                         </td>
                       </tr>
                     ) : null}
