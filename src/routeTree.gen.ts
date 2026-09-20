@@ -16,14 +16,18 @@ import { Route as InfotecaRouteImport } from './routes/infoteca'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TvRouteImport } from './routes/tv'
+import { Route as AlunoIndexRouteImport } from './routes/aluno/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
+import { Route as DashboardAtividadesRouteImport } from './routes/dashboard/atividades'
 import { Route as DashboardAulasRouteImport } from './routes/dashboard/aulas'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
 import { Route as DashboardFaltasRouteImport } from './routes/dashboard/faltas'
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
+import { Route as AlunoTurmaIdIndexRouteImport } from './routes/aluno/$turmaId/index'
+import { Route as AlunoTurmaIdAlunoIdRouteImport } from './routes/aluno/$turmaId/$alunoId'
 import { Route as DashboardTurmasIndexRouteImport } from './routes/dashboard/turmas/index'
 import { Route as DashboardTurmasTurmaIdRouteImport } from './routes/dashboard/turmas/$turmaId'
 
@@ -62,6 +66,11 @@ const TvRoute = TvRouteImport.update({
   path: '/tv',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlunoIndexRoute = AlunoIndexRouteImport.update({
+  id: '/aluno/',
+  path: '/aluno/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
@@ -70,6 +79,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const DashboardAlunosRoute = DashboardAlunosRouteImport.update({
   id: '/dashboard/alunos',
   path: '/dashboard/alunos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAtividadesRoute = DashboardAtividadesRouteImport.update({
+  id: '/dashboard/atividades',
+  path: '/dashboard/atividades',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardAulasRoute = DashboardAulasRouteImport.update({
@@ -102,6 +116,16 @@ const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
   path: '/dashboard/programacao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlunoTurmaIdIndexRoute = AlunoTurmaIdIndexRouteImport.update({
+  id: '/aluno/$turmaId/',
+  path: '/aluno/$turmaId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlunoTurmaIdAlunoIdRoute = AlunoTurmaIdAlunoIdRouteImport.update({
+  id: '/aluno/$turmaId/$alunoId',
+  path: '/aluno/$turmaId/$alunoId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardTurmasIndexRoute = DashboardTurmasIndexRouteImport.update({
   id: '/dashboard/turmas/',
   path: '/dashboard/turmas/',
@@ -122,14 +146,18 @@ export interface FileRoutesByFullPath {
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/aluno/$turmaId/$alunoId': typeof AlunoTurmaIdAlunoIdRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
 }
 export interface FileRoutesByTo {
@@ -141,14 +169,18 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/aluno': typeof AlunoIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/aluno/$turmaId/$alunoId': typeof AlunoTurmaIdAlunoIdRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/aluno/$turmaId': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas': typeof DashboardTurmasIndexRoute
 }
 export interface FileRoutesById {
@@ -161,14 +193,18 @@ export interface FileRoutesById {
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/aluno/$turmaId/$alunoId': typeof AlunoTurmaIdAlunoIdRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
 }
 export interface FileRouteTypes {
@@ -182,14 +218,18 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/atividades'
     | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/faltas'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/aluno/'
     | '/dashboard/'
+    | '/aluno/$turmaId/$alunoId'
     | '/dashboard/turmas/$turmaId'
+    | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -201,14 +241,18 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/atividades'
     | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/faltas'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/aluno'
     | '/dashboard'
+    | '/aluno/$turmaId/$alunoId'
     | '/dashboard/turmas/$turmaId'
+    | '/aluno/$turmaId'
     | '/dashboard/turmas'
   id:
     | '__root__'
@@ -220,14 +264,18 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/tv'
     | '/dashboard/alunos'
+    | '/dashboard/atividades'
     | '/dashboard/aulas'
     | '/dashboard/configuracoes'
     | '/dashboard/faltas'
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/aluno/'
     | '/dashboard/'
+    | '/aluno/$turmaId/$alunoId'
     | '/dashboard/turmas/$turmaId'
+    | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
   fileRoutesById: FileRoutesById
 }
@@ -240,14 +288,18 @@ export interface RootRouteChildren {
   SobreRoute: typeof SobreRoute
   TvRoute: typeof TvRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
+  DashboardAtividadesRoute: typeof DashboardAtividadesRoute
   DashboardAulasRoute: typeof DashboardAulasRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
   DashboardFaltasRoute: typeof DashboardFaltasRoute
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
+  AlunoIndexRoute: typeof AlunoIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  AlunoTurmaIdAlunoIdRoute: typeof AlunoTurmaIdAlunoIdRoute
   DashboardTurmasTurmaIdRoute: typeof DashboardTurmasTurmaIdRoute
+  AlunoTurmaIdIndexRoute: typeof AlunoTurmaIdIndexRoute
   DashboardTurmasIndexRoute: typeof DashboardTurmasIndexRoute
 }
 
@@ -302,6 +354,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TvRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aluno/': {
+      id: '/aluno/'
+      path: '/aluno'
+      fullPath: '/aluno/'
+      preLoaderRoute: typeof AlunoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/dashboard'
@@ -314,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/alunos'
       fullPath: '/dashboard/alunos'
       preLoaderRoute: typeof DashboardAlunosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/atividades': {
+      id: '/dashboard/atividades'
+      path: '/dashboard/atividades'
+      fullPath: '/dashboard/atividades'
+      preLoaderRoute: typeof DashboardAtividadesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/aulas': {
@@ -358,6 +424,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProgramacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aluno/$turmaId/': {
+      id: '/aluno/$turmaId/'
+      path: '/aluno/$turmaId'
+      fullPath: '/aluno/$turmaId/'
+      preLoaderRoute: typeof AlunoTurmaIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aluno/$turmaId/$alunoId': {
+      id: '/aluno/$turmaId/$alunoId'
+      path: '/aluno/$turmaId/$alunoId'
+      fullPath: '/aluno/$turmaId/$alunoId'
+      preLoaderRoute: typeof AlunoTurmaIdAlunoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/turmas/': {
       id: '/dashboard/turmas/'
       path: '/dashboard/turmas'
@@ -384,14 +464,18 @@ const rootRouteChildren: RootRouteChildren = {
   SobreRoute: SobreRoute,
   TvRoute: TvRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
+  DashboardAtividadesRoute: DashboardAtividadesRoute,
   DashboardAulasRoute: DashboardAulasRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
   DashboardFaltasRoute: DashboardFaltasRoute,
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
+  AlunoIndexRoute: AlunoIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  AlunoTurmaIdAlunoIdRoute: AlunoTurmaIdAlunoIdRoute,
   DashboardTurmasTurmaIdRoute: DashboardTurmasTurmaIdRoute,
+  AlunoTurmaIdIndexRoute: AlunoTurmaIdIndexRoute,
   DashboardTurmasIndexRoute: DashboardTurmasIndexRoute,
 }
 export const routeTree = rootRouteImport

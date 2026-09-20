@@ -3,6 +3,7 @@ import {
   CalendarDays,
   ChevronRight,
   ClipboardList,
+  GraduationCap,
   Home,
   Info,
   LayoutDashboard,
@@ -59,6 +60,7 @@ const LINKS = [
   { to: "/agenda", label: "Agenda" },
   { to: "/coordenacao", label: "Coordenação" },
   { to: "/infoteca", label: "Infoteca" },
+  { to: "/aluno", label: "Área do Aluno" },
   { to: "/sobre", label: "Sobre" },
 ] as const;
 
@@ -67,6 +69,7 @@ const LINK_ICONS: Record<string, LucideIcon> = {
   "/agenda": CalendarDays,
   "/coordenacao": ClipboardList,
   "/infoteca": Puzzle,
+  "/aluno": GraduationCap,
   "/sobre": Info,
 };
 
@@ -105,6 +108,7 @@ export function NavBar() {
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/infoteca" label="Infoteca" />
+          <NavLink to="/aluno" label="Área do Aluno" />
           <NavLink to="/sobre" label="Sobre" />
           <HeaderRadioPlayer />
           <ShareButton />

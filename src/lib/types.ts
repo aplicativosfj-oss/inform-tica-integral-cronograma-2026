@@ -166,6 +166,39 @@ export interface Assignment {
   misto?: GrupoMisto[] | undefined;
 }
 
+/**
+ * Atividade remota atribuída pelo professor a uma turma inteira (tabela
+ * `atividades` no Supabase) — o aluno acessa pela Área do Aluno e marca como
+ * concluída; o professor acompanha o andamento pelo dashboard.
+ */
+export interface Atividade {
+  id: string;
+  turmaId: string;
+  titulo: string;
+  descricao?: string | undefined;
+  /** Link da ferramenta/jogo (ex.: um item da Infoteca), opcional. */
+  url?: string | undefined;
+  /** Data no formato YYYY-MM-DD a que a atividade se refere. */
+  data: string;
+  criadoEm: string;
+}
+
+/** Andamento de uma atividade para um aluno específico (tabela `atividades_status`). */
+export interface AtividadeStatus {
+  atividadeId: string;
+  alunoId: string;
+  status: "pendente" | "concluida";
+  concluidoEm?: string | undefined;
+}
+
+/** Um acesso do aluno à própria área (tabela `aluno_acessos`), usado para "último acesso" e timeline. */
+export interface AlunoAcesso {
+  id: string;
+  alunoId: string;
+  turmaId: string;
+  acessadoEm: string;
+}
+
 /** Registro de frequência de um aluno em uma data específica (tabela `presencas` no Supabase). */
 export interface Presenca {
   id: string;

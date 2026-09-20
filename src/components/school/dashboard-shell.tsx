@@ -3,6 +3,7 @@ import {
   CalendarClock,
   CalendarPlus,
   CalendarSearch,
+  ClipboardCheck,
   GraduationCap,
   Layers,
   LayoutDashboard,
@@ -37,6 +38,7 @@ const NAV_GROUPS = [
       { to: "/dashboard/programacao", label: "Programação", icon: CalendarClock },
       { to: "/dashboard/frequencia", label: "Frequência", icon: CalendarSearch },
       { to: "/dashboard/faltas", label: "Faltas do mês", icon: UserX },
+      { to: "/dashboard/atividades", label: "Área do Aluno", icon: ClipboardCheck },
     ],
   },
   {
