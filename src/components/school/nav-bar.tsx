@@ -92,8 +92,18 @@ export function NavBar() {
     setSessaoAluno(lerAlunoSessao());
   }, [location.pathname]);
 
-  if (sessaoAluno) {
-    const turma = turmas.find((t) => t.id === sessaoAluno.turmaId);
+  // Decidir o modo do cabeçalho pela URL (e não só pela sessão) evita um
+  // "flash" do menu completo da home ao recarregar a página dentro da área
+  // do aluno: a rota já dá certeza absoluta, no primeiríssimo render, de que
+  // estamos numa página isolada — sem precisar esperar o efeito acima ler o
+  // sessionStorage do navegador.
+  const correspondenciaAluno = location.pathname.match(/^\/aluno\/([^/]+)\/([^/]+)/);
+  const emPaginaIsoladaDoAluno = Boolean(correspondenciaAluno);
+
+  if (emPaginaIsoladaDoAluno) {
+    const turmaIdUrl = correspondenciaAluno?.[1] ?? sessaoAluno?.turmaId;
+    const alunoIdUrl = correspondenciaAluno?.[2] ?? sessaoAluno?.alunoId;
+    const turma = turmas.find((t) => t.id === (sessaoAluno?.turmaId ?? turmaIdUrl));
     const corTurma = turma ? serieClasses(serieIndexPorNumero(turma.serie)) : null;
 
     async function sairDaAreaDoAluno() {
@@ -126,10 +136,10 @@ export function NavBar() {
               )}
               <span className="flex min-w-0 flex-col leading-tight">
                 <span className="truncate text-[13px] font-semibold text-slate-900 dark:text-white sm:text-sm">
-                  {sessaoAluno.nome.split(" ").slice(0, 2).join(" ")}
+                  {sessaoAluno ? sessaoAluno.nome.split(" ").slice(0, 2).join(" ") : "Área do Aluno"}
                 </span>
                 <span className="truncate text-xs text-slate-600 dark:text-white/70">
-                  {turma ? `${turma.serie} "${turma.letra}"` : "Área do Aluno"}
+                  {turma ? `${turma.serie} "${turma.letra}"` : "Escola Dr. Eiraldo Carneiro"}
                 </span>
               </span>
             </div>
@@ -137,22 +147,25 @@ export function NavBar() {
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <ThemeToggle />
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="hidden text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:inline-flex"
-            >
-              <Link
-                to="/aluno/$turmaId/$alunoId"
-                params={{ turmaId: sessaoAluno.turmaId, alunoId: sessaoAluno.alunoId }}
+            {turmaIdUrl && alunoIdUrl && (
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="hidden text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:inline-flex"
               >
-                <GraduationCap /> Minha área
-              </Link>
-            </Button>
+                <Link
+                  to="/aluno/$turmaId/$alunoId"
+                  params={{ turmaId: turmaIdUrl, alunoId: alunoIdUrl }}
+                >
+                  <GraduationCap /> Minha área
+                </Link>
+              </Button>
+            )}
             <Button
               size="sm"
               onClick={sairDaAreaDoAluno}
+              disabled={!sessaoAluno}
               className="border border-slate-300/50 bg-slate-100/60 text-slate-900 hover:bg-slate-200/60 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             >
               <LogOut />
