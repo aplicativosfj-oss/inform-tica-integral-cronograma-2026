@@ -1,5 +1,5 @@
-import { CheckCircle2, RotateCcw, Trophy, XCircle } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, Clock3, RotateCcw, Trophy, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -125,6 +125,8 @@ const CATEGORIAS: { valor: Categoria; label: string }[] = [
 ];
 
 const TOTAL = 8;
+const TEMPO_LEITURA_SEGUNDOS = 5;
+const MAX_TENTATIVAS = 3;
 
 export function ProblemasMatematica() {
   const [categoria, setCategoria] = useState<Categoria>("soma");
@@ -134,9 +136,27 @@ export function ProblemasMatematica() {
   );
   const [indice, setIndice] = useState(0);
   const [resposta, setResposta] = useState("");
-  const [respondida, setRespondida] = useState(false);
-  const [acertos, setAcertos] = useState(0);
+  const [tentativas, setTentativas] = useState(0);
+  const [acertouAgora, setAcertouAgora] = useState(false);
+  const [revelada, setRevelada] = useState(false);
+  const [acertosDeUmaVez, setAcertosDeUmaVez] = useState(0);
   const [finalizado, setFinalizado] = useState(false);
+  const [segundosRestantes, setSegundosRestantes] = useState(TEMPO_LEITURA_SEGUNDOS);
+
+  const problema = problemas[indice];
+  const liberada = segundosRestantes <= 0;
+  const resolvida = acertouAgora || revelada;
+
+  useEffect(() => {
+    setSegundosRestantes(TEMPO_LEITURA_SEGUNDOS);
+    const inicio = Date.now();
+    const timer = window.setInterval(() => {
+      setSegundosRestantes(
+        Math.max(0, TEMPO_LEITURA_SEGUNDOS - Math.floor((Date.now() - inicio) / 1000)),
+      );
+    }, 250);
+    return () => window.clearInterval(timer);
+  }, [indice]);
 
   function iniciar(novaCategoria: Categoria, novaDificuldade: Dificuldade) {
     setCategoria(novaCategoria);
@@ -146,18 +166,24 @@ export function ProblemasMatematica() {
     );
     setIndice(0);
     setResposta("");
-    setRespondida(false);
-    setAcertos(0);
+    setTentativas(0);
+    setAcertouAgora(false);
+    setRevelada(false);
+    setAcertosDeUmaVez(0);
     setFinalizado(false);
   }
 
-  const problema = problemas[indice];
-  const acertou = Number(resposta) === problema?.resposta;
-
   function confirmar() {
-    if (!resposta) return;
-    setRespondida(true);
-    if (acertou) setAcertos((a) => a + 1);
+    if (!resposta || !liberada || resolvida || !problema) return;
+    if (Number(resposta) === problema.resposta) {
+      setAcertouAgora(true);
+      if (tentativas === 0) setAcertosDeUmaVez((a) => a + 1);
+      return;
+    }
+    const novasTentativas = tentativas + 1;
+    setTentativas(novasTentativas);
+    setResposta("");
+    if (novasTentativas >= MAX_TENTATIVAS) setRevelada(true);
   }
 
   function proxima() {
@@ -167,7 +193,9 @@ export function ProblemasMatematica() {
     }
     setIndice((i) => i + 1);
     setResposta("");
-    setRespondida(false);
+    setTentativas(0);
+    setAcertouAgora(false);
+    setRevelada(false);
   }
 
   return (
@@ -204,7 +232,7 @@ export function ProblemasMatematica() {
               <Trophy className="size-7" />
             </span>
             <p className="text-lg font-semibold text-foreground">
-              Você acertou {acertos} de {problemas.length}!
+              Você acertou {acertosDeUmaVez} de {problemas.length} de primeira!
             </p>
             <Button onClick={() => iniciar(categoria, dificuldade)} className="mt-2 gap-1.5">
               <RotateCcw className="size-4" /> Novos problemas
@@ -216,7 +244,7 @@ export function ProblemasMatematica() {
           <div className="h-1.5 overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${((indice + (respondida ? 1 : 0)) / problemas.length) * 100}%` }}
+              style={{ width: `${(indice / problemas.length) * 100}%` }}
             />
           </div>
           <Card>
@@ -226,19 +254,24 @@ export function ProblemasMatematica() {
                 type="number"
                 inputMode="numeric"
                 value={resposta}
-                disabled={respondida}
+                disabled={!liberada || resolvida}
                 onChange={(e) => setResposta(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !respondida && confirmar()}
+                onKeyDown={(e) => e.key === "Enter" && liberada && !resolvida && confirmar()}
                 placeholder="Sua resposta"
                 autoFocus
               />
-              {respondida ? (
+              {!liberada ? (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock3 className="size-3.5" /> Leia com calma... você pode responder em{" "}
+                  {segundosRestantes}s.
+                </p>
+              ) : resolvida ? (
                 <p
                   className={`flex items-center gap-1.5 text-sm font-medium ${
-                    acertou ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                    acertouAgora ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
                   }`}
                 >
-                  {acertou ? (
+                  {acertouAgora ? (
                     <>
                       <CheckCircle2 className="size-4" /> Certinho!
                     </>
@@ -248,13 +281,19 @@ export function ProblemasMatematica() {
                     </>
                   )}
                 </p>
+              ) : tentativas > 0 ? (
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  Quase — tenta de novo ({MAX_TENTATIVAS - tentativas} tentativa
+                  {MAX_TENTATIVAS - tentativas === 1 ? "" : "s"} restante
+                  {MAX_TENTATIVAS - tentativas === 1 ? "" : "s"}).
+                </p>
               ) : null}
               <div className="flex justify-end">
                 <Button
-                  onClick={respondida ? proxima : confirmar}
-                  disabled={!respondida && !resposta}
+                  onClick={resolvida ? proxima : confirmar}
+                  disabled={!liberada || (!resolvida && !resposta)}
                 >
-                  {respondida
+                  {resolvida
                     ? indice + 1 >= problemas.length
                       ? "Ver resultado"
                       : "Próximo"

@@ -1,4 +1,5 @@
 import {
+  BookOpenText,
   Calculator,
   FileText,
   Ghost,
@@ -11,11 +12,14 @@ import {
   PieChart,
   ScrollText,
   Shapes,
+  SpellCheck2,
   Table2,
   TreePine,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
+import { AcervoLeitura } from "@/components/school/ferramentas/acervo-leitura";
+import { Alfabetizacao } from "@/components/school/ferramentas/alfabetizacao";
 import { Calculadora } from "@/components/school/ferramentas/calculadora";
 import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemorativas";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
@@ -35,7 +39,7 @@ export interface FerramentaInfo {
   slug: string;
   titulo: string;
   descricao: string;
-  categoria: "Ferramentas" | "Matemática" | "Português" | "Nossa região";
+  categoria: "Ferramentas" | "Matemática" | "Alfabetização e Leitura" | "Nossa região";
   icon: LucideIcon;
   cor: string;
   Componente: ComponentType;
@@ -106,10 +110,28 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     Componente: Geometria,
   },
   {
+    slug: "alfabetizacao",
+    titulo: "Alfabetização",
+    descricao: "Vogais, sílabas, maiúsculas e minúsculas, rimas.",
+    categoria: "Alfabetização e Leitura",
+    icon: SpellCheck2,
+    cor: "bg-lime-500/10 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300",
+    Componente: Alfabetizacao,
+  },
+  {
+    slug: "acervo-leitura",
+    titulo: "Acervo de leitura",
+    descricao: "Contos, poemas e textos para ler com calma, sem pressa.",
+    categoria: "Alfabetização e Leitura",
+    icon: BookOpenText,
+    cor: "bg-teal-500/10 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300",
+    Componente: AcervoLeitura,
+  },
+  {
     slug: "leitura",
     titulo: "Leitura e interpretação",
     descricao: "Leia textos e responda perguntas sobre eles.",
-    categoria: "Português",
+    categoria: "Alfabetização e Leitura",
     icon: ScrollText,
     cor: "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-300",
     Componente: Leitura,
@@ -118,7 +140,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     slug: "generos-textuais",
     titulo: "Gêneros textuais",
     descricao: "Descubra se é receita, poema, notícia ou bilhete.",
-    categoria: "Português",
+    categoria: "Alfabetização e Leitura",
     icon: FileText,
     cor: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
     Componente: GenerosTextuais,

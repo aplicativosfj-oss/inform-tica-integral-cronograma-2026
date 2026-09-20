@@ -18,7 +18,12 @@ export const Route = createFileRoute("/aluno/$turmaId/$alunoId/ferramentas/")({
   }),
 });
 
-const CATEGORIAS = ["Ferramentas", "Matemática", "Português", "Nossa região"] as const;
+const CATEGORIAS = [
+  "Ferramentas",
+  "Matemática",
+  "Alfabetização e Leitura",
+  "Nossa região",
+] as const;
 
 function FerramentasHub() {
   const { turmaId, alunoId } = Route.useParams();

@@ -1,5 +1,5 @@
-import { CheckCircle2, RotateCcw, Trophy, XCircle } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { CheckCircle2, Clock3, Lock, RotateCcw, Trophy, XCircle } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,9 +17,23 @@ export interface Questao {
   explicacao?: string;
 }
 
+/** Segundos de leitura obrigatória antes de poder responder — impede clicar sem ler. */
+const TEMPO_LEITURA_SEGUNDOS = 4;
+/** Depois de errar essa quantidade de vezes, a resposta certa é revelada — ajuda em vez de travar de vez. */
+const MAX_TENTATIVAS = 3;
+
 /**
- * Motor genérico de exercício de múltipla escolha: uma pergunta por vez,
- * feedback imediato, barra de progresso e nota final com opção de refazer.
+ * Motor genérico de exercício de múltipla escolha, pensado para que a
+ * criança precise realmente ler e acertar para avançar (não dá pra "só
+ * marcar qualquer coisa" e passar direto):
+ *
+ * - As opções ficam bloqueadas por alguns segundos (tempo de leitura).
+ * - Errar não libera a próxima pergunta: a opção errada é descartada e é
+ *   preciso tentar de novo, com a explicação já visível para ajudar.
+ * - Depois de algumas tentativas erradas seguidas, a resposta certa é
+ *   revelada — o objetivo é ensinar, não deixar a criança presa e
+ *   frustrada numa pergunta só.
+ *
  * Reaproveitado por praticamente toda atividade de "conteúdo" (história,
  * geografia, gêneros textuais, frações, geometria...) — só muda o banco de
  * perguntas passado em `questoes`.
@@ -27,33 +41,66 @@ export interface Questao {
 export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBotao?: string }) {
   const [indice, setIndice] = useState(0);
   const [selecionada, setSelecionada] = useState<number | null>(null);
-  const [respondida, setRespondida] = useState(false);
-  const [acertos, setAcertos] = useState(0);
+  const [descartadas, setDescartadas] = useState<Set<number>>(new Set());
+  const [tentativas, setTentativas] = useState(0);
+  const [acertouAgora, setAcertouAgora] = useState(false);
+  const [revelada, setRevelada] = useState(false);
+  const [acertosDeUmaVez, setAcertosDeUmaVez] = useState(0);
+  const [concluidas, setConcluidas] = useState(0);
   const [finalizado, setFinalizado] = useState(false);
+  const [segundosRestantes, setSegundosRestantes] = useState(TEMPO_LEITURA_SEGUNDOS);
 
   const questao = questoes[indice];
+  const liberada = segundosRestantes <= 0;
+  const resolvida = acertouAgora || revelada;
+
+  useEffect(() => {
+    setSegundosRestantes(TEMPO_LEITURA_SEGUNDOS);
+    const inicio = Date.now();
+    const timer = window.setInterval(() => {
+      const passado = Math.floor((Date.now() - inicio) / 1000);
+      setSegundosRestantes(Math.max(0, TEMPO_LEITURA_SEGUNDOS - passado));
+    }, 250);
+    return () => window.clearInterval(timer);
+  }, [indice]);
 
   function confirmar() {
-    if (selecionada === null) return;
-    setRespondida(true);
-    if (selecionada === questao?.respostaCorreta) setAcertos((a) => a + 1);
+    if (selecionada === null || !liberada || resolvida) return;
+    if (selecionada === questao?.respostaCorreta) {
+      setAcertouAgora(true);
+      if (tentativas === 0) setAcertosDeUmaVez((a) => a + 1);
+      return;
+    }
+    const novasTentativas = tentativas + 1;
+    setTentativas(novasTentativas);
+    setDescartadas((atual) => new Set(atual).add(selecionada));
+    setSelecionada(null);
+    if (novasTentativas >= MAX_TENTATIVAS) setRevelada(true);
   }
 
   function proxima() {
+    setConcluidas((c) => c + 1);
     if (indice + 1 >= questoes.length) {
       setFinalizado(true);
       return;
     }
     setIndice((i) => i + 1);
     setSelecionada(null);
-    setRespondida(false);
+    setDescartadas(new Set());
+    setTentativas(0);
+    setAcertouAgora(false);
+    setRevelada(false);
   }
 
   function reiniciar() {
     setIndice(0);
     setSelecionada(null);
-    setRespondida(false);
-    setAcertos(0);
+    setDescartadas(new Set());
+    setTentativas(0);
+    setAcertouAgora(false);
+    setRevelada(false);
+    setAcertosDeUmaVez(0);
+    setConcluidas(0);
     setFinalizado(false);
   }
 
@@ -66,22 +113,21 @@ export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBota
   }
 
   if (finalizado) {
-    const percentual = Math.round((acertos / questoes.length) * 100);
+    const percentual = Math.round((acertosDeUmaVez / questoes.length) * 100);
     return (
       <Card>
         <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
           <span className="flex size-14 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
             <Trophy className="size-7" />
           </span>
-          <p className="text-lg font-semibold text-foreground">
-            Você acertou {acertos} de {questoes.length}!
-          </p>
+          <p className="text-lg font-semibold text-foreground">Atividade concluída!</p>
           <p className="text-sm text-muted-foreground">
+            Você acertou {acertosDeUmaVez} de {questoes.length} de primeira.
             {percentual >= 80
-              ? "Mandou muito bem! 🎉"
+              ? " Mandou muito bem! 🎉"
               : percentual >= 50
-                ? "Muito bom, continue praticando!"
-                : "Vale a pena revisar e tentar de novo."}
+                ? " Muito bom, continue praticando!"
+                : " O importante é que você chegou até o fim — vale revisar de novo."}
           </p>
           <Button onClick={reiniciar} className="mt-2 gap-1.5">
             <RotateCcw className="size-4" /> Refazer
@@ -99,7 +145,7 @@ export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBota
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
           <div
             className={cn("h-full rounded-full bg-primary transition-all", corBotao)}
-            style={{ width: `${((indice + (respondida ? 1 : 0)) / questoes.length) * 100}%` }}
+            style={{ width: `${(concluidas / questoes.length) * 100}%` }}
           />
         </div>
         <span className="shrink-0 text-xs text-muted-foreground">
@@ -117,39 +163,66 @@ export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBota
             {questao.opcoes.map((opcao, i) => {
               const correta = i === questao.respostaCorreta;
               const marcada = i === selecionada;
+              const descartada = descartadas.has(i);
               return (
                 <button
                   key={i}
                   type="button"
-                  disabled={respondida}
+                  disabled={!liberada || resolvida || descartada}
                   onClick={() => setSelecionada(i)}
                   className={cn(
-                    "flex cursor-pointer items-center justify-between gap-2 rounded-lg border p-3 text-left text-sm transition-colors disabled:cursor-default",
-                    !respondida && marcada && "border-primary bg-primary/5",
-                    !respondida && !marcada && "border-border/60 hover:bg-muted",
-                    respondida && correta && "border-emerald-500 bg-emerald-500/10",
-                    respondida && marcada && !correta && "border-destructive bg-destructive/10",
-                    respondida && !marcada && !correta && "border-border/60 opacity-60",
+                    "flex items-center justify-between gap-2 rounded-lg border p-3 text-left text-sm transition-colors",
+                    !liberada && "cursor-not-allowed opacity-50",
+                    liberada && !resolvida && !descartada && "cursor-pointer",
+                    liberada && !resolvida && marcada && "border-primary bg-primary/5",
+                    liberada &&
+                      !resolvida &&
+                      !marcada &&
+                      !descartada &&
+                      "border-border/60 hover:bg-muted",
+                    descartada &&
+                      !resolvida &&
+                      "cursor-not-allowed border-destructive/40 bg-destructive/5 opacity-60 line-through",
+                    resolvida && correta && "border-emerald-500 bg-emerald-500/10",
+                    resolvida && !correta && "cursor-default border-border/60 opacity-60",
                   )}
                 >
                   {opcao}
-                  {respondida && correta ? (
+                  {resolvida && correta ? (
                     <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                  ) : respondida && marcada && !correta ? (
+                  ) : descartada ? (
                     <XCircle className="size-4 shrink-0 text-destructive" />
                   ) : null}
                 </button>
               );
             })}
           </div>
-          {respondida && questao.explicacao ? (
-            <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
-              {questao.explicacao}
+
+          {!liberada ? (
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock3 className="size-3.5" /> Leia com calma... você pode responder em{" "}
+              {segundosRestantes}s.
+            </p>
+          ) : !resolvida && tentativas > 0 ? (
+            <p className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+              <Lock className="size-3.5" /> Essa não era — tente outra opção.
             </p>
           ) : null}
+
+          {resolvida && questao.explicacao ? (
+            <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
+              {revelada && !acertouAgora ? "Resposta certa: " : ""}
+              {questao.explicacao}
+            </p>
+          ) : revelada && !acertouAgora ? (
+            <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
+              A resposta certa era: {questao.opcoes[questao.respostaCorreta]}.
+            </p>
+          ) : null}
+
           <div className="flex justify-end">
-            {!respondida ? (
-              <Button onClick={confirmar} disabled={selecionada === null}>
+            {!resolvida ? (
+              <Button onClick={confirmar} disabled={selecionada === null || !liberada}>
                 Confirmar
               </Button>
             ) : (
