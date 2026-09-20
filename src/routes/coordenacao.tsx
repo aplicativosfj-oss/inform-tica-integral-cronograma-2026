@@ -221,10 +221,10 @@ function CoordenacaoPage() {
                                 {a.turma.letra}
                               </span>
                               <span className="flex flex-col">
-                                <span className="font-mono text-foreground">
+                                <span className="font-mono text-sm font-bold text-foreground">
                                   {a.slot.inicio} – {a.slot.fim}
                                 </span>
-                                <span>
+                                <span className="text-xs">
                                   {a.turma.serie} "{a.turma.letra}"
                                   {a.conteudo ? ` · ${a.conteudo}` : ""}
                                 </span>

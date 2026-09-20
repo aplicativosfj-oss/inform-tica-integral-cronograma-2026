@@ -256,12 +256,12 @@ function AgendaPage() {
                       <ChevronRight className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3 text-xs">
-                      <span className="flex items-center gap-1.5 font-mono font-medium text-foreground">
-                        <Clock3 className="size-3.5 text-primary" />
+                    <div className="mt-3 flex items-center justify-between border-t border-border/60 pt-3">
+                      <span className="flex items-center gap-1.5 font-mono text-base font-bold text-foreground">
+                        <Clock3 className="size-4 text-primary" />
                         {assignment.slot.inicio} – {assignment.slot.fim}
                       </span>
-                      <span className="flex items-center gap-1 text-muted-foreground">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Users2 className="size-3.5" />
                         {assignment.turma.alunos.length} · {grupos.length}{" "}
                         {grupos.length === 1 ? "grupo" : "grupos"}

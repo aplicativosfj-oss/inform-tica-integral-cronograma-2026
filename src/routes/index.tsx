@@ -495,7 +495,7 @@ function ProximasTurmasPanel() {
                   <Badge variant="outline" className="text-xs">
                     horário misto
                   </Badge>
-                  <Badge variant="secondary" className="font-mono">
+                  <Badge variant="secondary" className="font-mono text-sm font-bold">
                     {assignment.slot.inicio} – {assignment.slot.fim}
                   </Badge>
                 </div>
@@ -540,7 +540,7 @@ function ProximasTurmasPanel() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="secondary" className="font-mono">
+                  <Badge variant="secondary" className="font-mono text-sm font-bold">
                     {assignment.slot.inicio} – {assignment.slot.fim}
                   </Badge>
                   <ChevronRight className="size-4 text-muted-foreground/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
