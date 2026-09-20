@@ -1,5 +1,16 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, LogOut, Menu } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  ClipboardList,
+  Home,
+  Info,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Menu,
+  type LucideIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +59,13 @@ const LINKS = [
   { to: "/coordenacao", label: "Coordenação" },
   { to: "/sobre", label: "Sobre" },
 ] as const;
+
+const LINK_ICONS: Record<string, LucideIcon> = {
+  "/": Home,
+  "/agenda": CalendarDays,
+  "/coordenacao": ClipboardList,
+  "/sobre": Info,
+};
 
 export function NavBar() {
   const { isAuthenticated, isReady, logout } = useAuth();
@@ -128,36 +146,78 @@ export function NavBar() {
                 <Menu />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
+            <SheetContent
+              side="right"
+              className="flex w-[19rem] flex-col gap-0 border-l border-border/60 bg-background/95 p-0 backdrop-blur-xl"
+            >
+              {/* Cabeçalho do menu: marca da escola, para o painel lateral ter
+                  a mesma identidade do topo do site. */}
+              <SheetHeader className="space-y-0 border-b border-border/60 bg-gradient-to-br from-primary/10 to-transparent px-5 py-4 text-left">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={logoIcon}
+                    alt=""
+                    aria-hidden
+                    className="size-10 shrink-0 rounded-xl bg-card object-contain p-1 shadow-sm ring-1 ring-border"
+                  />
+                  <div className="min-w-0">
+                    <SheetTitle className="truncate text-sm font-semibold">
+                      Agenda de Informática
+                    </SheetTitle>
+                    <p className="truncate text-xs text-muted-foreground">
+                      E.M. Dr. Eiraldo Carneiro
+                    </p>
+                  </div>
+                </div>
               </SheetHeader>
-              <nav className="mt-4 flex flex-col gap-1">
-                {LINKS.map((link) => {
-                  const isActive =
-                    location.pathname === link.to || (link.to === "/" && location.pathname === "");
-                  return (
-                    <SheetClose key={link.to} asChild>
-                      <Link
-                        to={link.to}
-                        className={`rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-300 ${
-                          isActive
-                            ? "bg-primary/15 text-primary font-semibold border-l-4 border-primary dark:bg-cyan-400/15 dark:text-cyan-300 dark:border-cyan-400"
-                            : "text-foreground hover:bg-muted"
-                        }`}
-                      >
-                        {link.label}
-                      </Link>
-                    </SheetClose>
-                  );
-                })}
-                <div className="my-2 border-t border-border/60" />
+
+              <nav className="flex-1 overflow-y-auto px-3 py-4">
+                <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Navegação
+                </p>
+                <div className="flex flex-col gap-1">
+                  {LINKS.map((link) => {
+                    const isActive =
+                      location.pathname === link.to ||
+                      (link.to === "/" && location.pathname === "");
+                    const Icone = LINK_ICONS[link.to] ?? Home;
+                    return (
+                      <SheetClose key={link.to} asChild>
+                        <Link
+                          to={link.to}
+                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
+                            isActive
+                              ? "bg-primary/12 text-primary font-semibold ring-1 ring-primary/25"
+                              : "text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          <span
+                            className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                              isActive
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground group-hover:text-foreground"
+                            }`}
+                          >
+                            <Icone className="size-4" />
+                          </span>
+                          <span className="flex-1">{link.label}</span>
+                          <ChevronRight
+                            className={`size-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground/60"}`}
+                          />
+                        </Link>
+                      </SheetClose>
+                    );
+                  })}
+                </div>
+              </nav>
+
+              <div className="border-t border-border/60 p-3">
                 {isReady && isAuthenticated ? (
-                  <>
+                  <div className="flex flex-col gap-2">
                     <SheetClose asChild>
                       <Link
                         to="/dashboard"
-                        className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+                        className="flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
                       >
                         <LayoutDashboard className="size-4" /> Painel
                       </Link>
@@ -168,22 +228,25 @@ export function NavBar() {
                         setMenuAberto(false);
                         logout();
                       }}
-                      className="cursor-pointer flex items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm font-medium text-destructive hover:bg-muted"
+                      className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                     >
                       <LogOut className="size-4" /> Sair
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <SheetClose asChild>
                     <Link
                       to="/login"
-                      className="rounded-md px-3 py-2.5 text-sm font-medium text-primary hover:bg-muted"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
                     >
-                      Entrar
+                      <LogIn className="size-4" /> Entrar
                     </Link>
                   </SheetClose>
                 )}
-              </nav>
+                <p className="pt-3 text-center text-[11px] text-muted-foreground">
+                  Prof. Franc D'nis · Informática
+                </p>
+              </div>
             </SheetContent>
           </Sheet>
         </nav>
