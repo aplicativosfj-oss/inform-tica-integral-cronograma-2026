@@ -540,7 +540,9 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     return (
       <Card className="border-dashed bg-muted/30">
         <CardContent className="flex flex-col items-center gap-2 py-6 text-center">
-          <Clock3 className="size-8 text-muted-foreground" />
+          <span className="flex size-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
+            <Clock3 className="size-6" />
+          </span>
           <p className="text-sm font-medium text-foreground">Nenhuma aula de informática agora</p>
           <p className="text-xs text-muted-foreground">
             {now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}

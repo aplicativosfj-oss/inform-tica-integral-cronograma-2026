@@ -19,6 +19,7 @@ import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
 import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
+import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import {
   buildGrupos,
   buildWeeklySchedule,
@@ -190,11 +191,17 @@ function AgendaPage() {
                 <TabsTrigger
                   key={dia}
                   value={dia}
-                  className="flex-col gap-0 rounded-xl border border-border/60 px-4 py-1.5 leading-tight data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className={`flex-col gap-0 rounded-xl border px-4 py-1.5 leading-tight data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground ${
+                    dia === todayLabel
+                      ? "border-blue-400/50 bg-blue-500/10 dark:bg-blue-500/15"
+                      : "border-border/60"
+                  }`}
                 >
-                  <span>
+                  <span className="flex items-center gap-1">
                     {dia}
-                    {dia === todayLabel ? " · hoje" : ""}
+                    {dia === todayLabel ? (
+                      <span className="size-1.5 rounded-full bg-blue-500 data-[state=active]:bg-primary-foreground" />
+                    ) : null}
                   </span>
                   <span className="font-mono text-xs opacity-70">{dataCurta(dia)}</span>
                 </TabsTrigger>
@@ -232,7 +239,9 @@ function AgendaPage() {
                           className="size-11 shrink-0 rounded-lg object-cover"
                         />
                       ) : (
-                        <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
+                        <span
+                          className={`flex size-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg} ${serieClasses(serieIndexPorNumero(assignment.turma.serie)).text}`}
+                        >
                           {assignment.turma.letra}
                         </span>
                       )}

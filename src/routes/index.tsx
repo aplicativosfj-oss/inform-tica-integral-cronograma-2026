@@ -393,7 +393,7 @@ function Index() {
 
         <section className="border-t border-border/60 bg-gradient-to-b from-muted/50 to-background">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-10 text-center sm:px-6">
-            <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <span className="flex size-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
               <GraduationCap className="size-6" />
             </span>
             <h2 className="text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
@@ -809,8 +809,8 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
       className="group relative block aspect-video overflow-hidden rounded-xl border border-border/60 bg-muted shadow-sm transition-shadow hover:shadow-md"
     >
       {imagemFalhou ? (
-        <div className="flex size-full flex-col items-center justify-center gap-1 bg-secondary p-1.5 text-center">
-          <Youtube className="size-4 text-muted-foreground" />
+        <div className="flex size-full flex-col items-center justify-center gap-1 bg-red-500/10 p-1.5 text-center dark:bg-red-500/15">
+          <Youtube className="size-4 text-red-600 dark:text-red-400" />
           <span className="line-clamp-2 text-xs font-medium leading-tight text-muted-foreground">
             {video.titulo}
           </span>

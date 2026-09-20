@@ -21,6 +21,7 @@ import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { buildWeeklySchedule, getWeekIndex, toDateKey } from "@/lib/schedule-engine";
+import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Presenca } from "@/lib/types";
 import coordenacaoHeroImg from "@/assets/alunos-hero.jpg";
 
@@ -206,21 +207,31 @@ function CoordenacaoPage() {
                     {doDia.length === 0 ? (
                       <p className="text-xs text-muted-foreground">Sem aulas programadas.</p>
                     ) : (
-                      <ul className="flex flex-col gap-1.5">
-                        {doDia.map((a) => (
-                          <li
-                            key={`${a.dia}-${a.slot.inicio}`}
-                            className="flex flex-col text-xs text-muted-foreground"
-                          >
-                            <span className="font-mono text-foreground">
-                              {a.slot.inicio} – {a.slot.fim}
-                            </span>
-                            <span>
-                              {a.turma.serie} "{a.turma.letra}"
-                              {a.conteudo ? ` · ${a.conteudo}` : ""}
-                            </span>
-                          </li>
-                        ))}
+                      <ul className="flex flex-col gap-2">
+                        {doDia.map((a) => {
+                          const cor = serieClasses(serieIndexPorNumero(a.turma.serie));
+                          return (
+                            <li
+                              key={`${a.dia}-${a.slot.inicio}`}
+                              className="flex items-start gap-2 text-xs text-muted-foreground"
+                            >
+                              <span
+                                className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${cor.bg} ${cor.text}`}
+                              >
+                                {a.turma.letra}
+                              </span>
+                              <span className="flex flex-col">
+                                <span className="font-mono text-foreground">
+                                  {a.slot.inicio} – {a.slot.fim}
+                                </span>
+                                <span>
+                                  {a.turma.serie} "{a.turma.letra}"
+                                  {a.conteudo ? ` · ${a.conteudo}` : ""}
+                                </span>
+                              </span>
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                   </div>
