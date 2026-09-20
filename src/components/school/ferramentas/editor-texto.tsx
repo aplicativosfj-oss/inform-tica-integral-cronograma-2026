@@ -8,6 +8,8 @@ import {
   FileText,
   FolderOpen,
   ImageUp,
+  IndentDecrease,
+  IndentIncrease,
   Italic,
   List,
   ListOrdered,
@@ -15,6 +17,7 @@ import {
   Palette,
   Redo2,
   Save,
+  SmilePlus,
   Trash2,
   Underline,
   Undo2,
@@ -82,6 +85,14 @@ const CORES_CAPA = [
 ] as const;
 
 const QUANTIDADE_RECENTES = 5;
+
+const EMOJIS_E_SIMBOLOS = [
+  "😀", "😂", "😍", "🤔", "😮", "😢", "😴", "🙌", "👍", "👎",
+  "👏", "🙏", "💪", "🎉", "✨", "⭐", "🔥", "❤️", "📚", "✏️",
+  "🎓", "🏫", "🖥️", "💡", "🌟", "🌈", "☀️", "🌙", "⚽", "🎨",
+  "✅", "❌", "❓", "❗", "➕", "➖", "✖️", "➗", "≈", "≠",
+  "±", "√", "π", "°", "%", "→", "←", "↑", "↓", "★",
+] as const;
 
 function formatarRelativo(dataIso: string): string {
   const diffMin = Math.round((Date.now() - new Date(dataIso).getTime()) / 60000);
@@ -185,8 +196,25 @@ export function EditorTexto() {
   const [dialogAbrirAberto, setDialogAbrirAberto] = useState(false);
   const [arquivos, setArquivos] = useState<ArquivoAlunoResumo[]>([]);
   const [corAberta, setCorAberta] = useState(false);
+  const [emojisAbertos, setEmojisAbertos] = useState(false);
   const [recentes, setRecentes] = useState<ArquivoAlunoResumo[]>([]);
   const [carregandoRecentes, setCarregandoRecentes] = useState(false);
+  // Nível de recuo do parágrafo atual (0 a 4), só para desenhar o marcador
+  // na régua — quem manda de verdade no recuo é o próprio navegador via
+  // indent/outdent.
+  const [nivelRecuo, setNivelRecuo] = useState(0);
+
+  function aplicarRecuo(direcao: 1 | -1) {
+    comandoComSelecao(direcao === 1 ? "indent" : "outdent");
+    setNivelRecuo((atual) => Math.min(4, Math.max(0, atual + direcao)));
+  }
+
+  function inserirEmoji(emoji: string) {
+    comandoComSelecao("insertText", emoji);
+    salvarRascunhoLocal();
+    atualizarContagem();
+    setEmojisAbertos(false);
+  }
 
   useEffect(() => {
     const salvo = localStorage.getItem(CHAVE_RASCUNHO);
@@ -566,6 +594,27 @@ export function EditorTexto() {
 
         <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
 
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => aplicarRecuo(-1)}
+          title="Diminuir recuo"
+        >
+          <IndentDecrease className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => aplicarRecuo(1)}
+          title="Aumentar recuo"
+        >
+          <IndentIncrease className="size-4" />
+        </Button>
+
+        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
         <input
           ref={imagemInputRef}
           type="file"
@@ -582,6 +631,32 @@ export function EditorTexto() {
         >
           <ImageUp className="size-4" />
         </Button>
+
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => setEmojisAbertos((v) => !v)}
+            title="Emojis e símbolos"
+          >
+            <SmilePlus className="size-4" />
+          </Button>
+          {emojisAbertos && (
+            <div className="absolute left-0 top-9 z-20 grid w-64 grid-cols-10 gap-0.5 rounded-lg border border-border bg-popover p-2 shadow-lg">
+              {EMOJIS_E_SIMBOLOS.map((emoji, indice) => (
+                <button
+                  key={`${emoji}-${indice}`}
+                  type="button"
+                  className="flex size-6 items-center justify-center rounded text-base hover:bg-muted"
+                  onClick={() => inserirEmoji(emoji)}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
 
@@ -626,6 +701,39 @@ export function EditorTexto() {
         </Button>
       </div>
 
+      {/* Régua horizontal, só decorativa/de referência (como a do Word), com
+          o marcador do recuo padrão de parágrafo (1,25cm) já aplicado no
+          texto e, se o aluno usar "Aumentar recuo", um segundo marcador. */}
+      <div className="mx-auto hidden w-full max-w-[800px] select-none sm:block">
+        <div className="relative h-5 overflow-hidden rounded-t-sm border border-b-0 border-[#d8d6d2] bg-[#ececea] dark:border-white/10 dark:bg-zinc-700">
+          {Array.from({ length: 22 }).map((_, cm) => (
+            <div
+              key={cm}
+              className="absolute top-0 h-full border-l border-[#c3c1bd] dark:border-white/20"
+              style={{ left: `${cm * 37.8}px` }}
+            >
+              {cm % 5 === 0 && (
+                <span className="absolute left-1 top-0.5 text-[9px] text-[#8a8886] dark:text-white/50">
+                  {cm}
+                </span>
+              )}
+            </div>
+          ))}
+          <div
+            className="absolute top-0 h-full w-0 border-l-2 border-primary"
+            style={{ left: `${1.25 * 37.8}px` }}
+            title="Recuo padrão do parágrafo: 1,25cm"
+          />
+          {nivelRecuo > 0 && (
+            <div
+              className="absolute top-0 h-full w-0 border-l-2 border-dashed border-amber-500"
+              style={{ left: `${(1.25 + nivelRecuo * 1.25) * 37.8}px` }}
+              title={`Recuo aplicado: ${(1.25 + nivelRecuo * 1.25).toFixed(2).replace(".", ",")}cm`}
+            />
+          )}
+        </div>
+      </div>
+
       {/* "Folha" branca centralizada sobre fundo cinza, como no Word */}
       <div className="rounded-lg bg-[#e7e5e2] p-4 dark:bg-zinc-900 sm:p-8">
         <div
@@ -637,7 +745,7 @@ export function EditorTexto() {
           }}
           onMouseUp={salvarSelecaoAtual}
           onKeyUp={salvarSelecaoAtual}
-          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mb-3 [&_p]:mt-0"
+          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mb-3 [&_p]:mt-0 [&_p]:indent-[1.25cm]"
           style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
           suppressContentEditableWarning
         />

@@ -340,8 +340,27 @@
      altura da tela) ou que um menu/diálogo trava e destrava a rolagem do
      body — o efeito de "redimensionar sozinho" que isso causa incomoda mais
      ainda numa área de digitação, como o Editor de Texto. */
+  /* `scrollbar-gutter` só reserva espaço em elementos que já rolam de
+     verdade (overflow "auto"/"scroll") — sem isso, como o <html> ficava com
+     o "visible" padrão do navegador, a propriedade não tinha efeito nenhum
+     de fato, mesmo estando escrita aqui. */
   html {
+    overflow-y: auto;
     scrollbar-gutter: stable;
+  }
+
+  /* O Radix (usado pelos <Select>, diálogos etc.) trava a rolagem da página
+     quando um menu abre; para a largura não mudar quando a barra de rolagem
+     some, ele mesmo tenta compensar aplicando `margin-right` no
+     `body[data-scroll-locked]` do tamanho da barra. Como a régua acima já
+     reserva esse espaço sempre (`scrollbar-gutter: stable`), as duas coisas
+     juntas compensavam duas vezes — e a página "pulava" de largura toda vez
+     que um seletor (como o de tamanho de fonte) abria ou fechava. Zeramos
+     essa compensação do Radix porque a nossa já resolve sozinha. */
+  body,
+  body[data-scroll-locked] {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
   }
 
   /* Scrollbar styles — professional and minimal */
