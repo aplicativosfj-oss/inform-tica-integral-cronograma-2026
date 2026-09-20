@@ -332,7 +332,7 @@ function Index() {
                     loading="lazy"
                     width={64}
                     height={64}
-                    className="size-14 rounded-xl border border-border/60 shadow-sm sm:size-16"
+                    className="size-16 rounded-xl border border-border/60 shadow-sm sm:size-20"
                   />
                 ),
               )}
@@ -462,7 +462,7 @@ function ProximasTurmasPanel() {
             month: "long",
           })}
         </CardTitle>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground">
           Toque numa turma para ver os alunos previstos.
         </p>
       </CardHeader>
@@ -482,7 +482,7 @@ function ProximasTurmasPanel() {
                     {assignment.slot.inicio} – {assignment.slot.fim}
                   </Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[13px] text-muted-foreground">
                   Grupo que sobrou de cada turma, 30 min cada:{" "}
                   {assignment.misto.map((m) => `${m.turma.serie} "${m.turma.letra}"`).join(", ")}
                 </p>
@@ -499,12 +499,12 @@ function ProximasTurmasPanel() {
                     <img
                       src={assignment.turma.imagem}
                       alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
-                      className="size-9 rounded-lg object-cover"
+                      className="size-11 rounded-lg object-cover"
                     />
                   ) : (
                     <span
                       className={cn(
-                        "flex size-9 items-center justify-center rounded-lg text-xs font-semibold",
+                        "flex size-11 items-center justify-center rounded-lg text-sm font-semibold",
                         serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg,
                         serieClasses(serieIndexPorNumero(assignment.turma.serie)).text,
                       )}
@@ -516,7 +516,7 @@ function ProximasTurmasPanel() {
                     <p className="text-sm font-medium text-foreground group-hover:text-primary">
                       {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[13px] text-muted-foreground">
                       Prof(a). {assignment.turma.professorRegente} ·{" "}
                       {assignment.turma.alunos.length} alunos
                     </p>
@@ -686,7 +686,7 @@ function ProgramacaoSemanalDestaque() {
                       {assignment.slot.inicio} – {assignment.slot.fim}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs text-blue-100/70">
+                  <p className="mt-2 text-[13px] text-blue-100/80">
                     Grupo que sobrou de cada turma, 30 min cada:{" "}
                     {assignment.misto.map((m) => `${m.turma.serie} "${m.turma.letra}"`).join(", ")}
                   </p>
@@ -703,10 +703,10 @@ function ProgramacaoSemanalDestaque() {
                       <img
                         src={assignment.turma.imagem}
                         alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
-                        className="size-11 rounded-xl object-cover ring-2 ring-white/30"
+                        className="size-14 rounded-xl object-cover ring-2 ring-white/30"
                       />
                     ) : (
-                      <span className="flex size-11 items-center justify-center rounded-xl bg-white/20 text-sm font-bold text-white ring-2 ring-white/30">
+                      <span className="flex size-14 items-center justify-center rounded-xl bg-white/20 text-base font-bold text-white ring-2 ring-white/30">
                         {assignment.turma.letra}
                       </span>
                     )}
@@ -714,7 +714,7 @@ function ProgramacaoSemanalDestaque() {
                       <p className="truncate text-sm font-semibold text-white">
                         {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
                       </p>
-                      <p className="truncate text-xs text-white/80">
+                      <p className="truncate text-[13px] text-white/85">
                         Prof(a). {assignment.turma.professorRegente}
                       </p>
                     </div>
@@ -783,7 +783,7 @@ function CanalYoutubeSection() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 sm:max-w-xl">
+      <div className="grid grid-cols-2 gap-3 sm:max-w-xl sm:grid-cols-3">
         {VIDEOS_DESTAQUE.map((video) => (
           <VideoThumb key={video.id} video={video} />
         ))}
@@ -811,7 +811,7 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
       {imagemFalhou ? (
         <div className="flex size-full flex-col items-center justify-center gap-1 bg-secondary p-1.5 text-center">
           <Youtube className="size-4 text-muted-foreground" />
-          <span className="line-clamp-2 text-[10px] font-medium leading-tight text-muted-foreground">
+          <span className="line-clamp-2 text-xs font-medium leading-tight text-muted-foreground">
             {video.titulo}
           </span>
         </div>
@@ -832,7 +832,7 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
               fill="currentColor"
             />
           </span>
-          <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-[11px] font-medium leading-tight text-white">
+          <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-xs font-medium leading-tight text-white">
             {video.titulo}
           </span>
         </>
@@ -883,7 +883,7 @@ function FeatureCard({
         <CardTitle className="text-sm leading-snug text-balance sm:text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-3.5 pt-0 sm:p-6 sm:pt-0">
-        <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">{description}</p>
+        <p className="text-[13px] leading-relaxed text-muted-foreground sm:text-sm">{description}</p>
       </CardContent>
     </Card>
   );

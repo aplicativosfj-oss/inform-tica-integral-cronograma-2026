@@ -79,7 +79,10 @@
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
+  /* Mais escuro que o slate-500 padrao (0.554) para melhorar a leitura de
+     texto secundario no celular -- o valor original passava raspando no
+     minimo de contraste AA em telas pequenas com luz forte. */
+  --muted-foreground: oklch(0.462 0.046 257.417);
   --accent: oklch(0.968 0.007 247.896);
   --accent-foreground: oklch(0.208 0.042 265.755);
   --destructive: oklch(0.577 0.245 27.325);
@@ -127,7 +130,7 @@
   --secondary: oklch(0.325 0.012 260.031);
   --secondary-foreground: oklch(0.955 0.004 247.858);
   --muted: oklch(0.325 0.012 260.031);
-  --muted-foreground: oklch(0.735 0.018 256.788);
+  --muted-foreground: oklch(0.79 0.018 256.788);
   --accent: oklch(0.345 0.014 260.031);
   --accent-foreground: oklch(0.955 0.004 247.858);
   --destructive: oklch(0.68 0.16 22.216);
