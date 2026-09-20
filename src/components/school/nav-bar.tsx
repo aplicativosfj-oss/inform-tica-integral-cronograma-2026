@@ -60,6 +60,13 @@ const LINKS = [
   { to: "/sobre", label: "Sobre" },
 ] as const;
 
+const LINK_ICONS: Record<string, LucideIcon> = {
+  "/": Home,
+  "/agenda": CalendarDays,
+  "/coordenacao": ClipboardList,
+  "/sobre": Info,
+};
+
 export function NavBar() {
   const { isAuthenticated, isReady, logout } = useAuth();
   const [menuAberto, setMenuAberto] = useState(false);
