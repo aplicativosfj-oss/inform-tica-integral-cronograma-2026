@@ -5,6 +5,7 @@ import {
   AlignRight,
   Bold,
   FilePlus2,
+  FileText,
   FolderOpen,
   ImageUp,
   Italic,
@@ -71,6 +72,26 @@ const CORES = [
   "#db2777",
   "#ffffff",
 ];
+
+const CORES_CAPA = [
+  "bg-blue-100 text-blue-600",
+  "bg-purple-100 text-purple-600",
+  "bg-emerald-100 text-emerald-600",
+  "bg-amber-100 text-amber-600",
+  "bg-pink-100 text-pink-600",
+] as const;
+
+const QUANTIDADE_RECENTES = 5;
+
+function formatarRelativo(dataIso: string): string {
+  const diffMin = Math.round((Date.now() - new Date(dataIso).getTime()) / 60000);
+  const rtf = new Intl.RelativeTimeFormat("pt-BR", { numeric: "auto" });
+  if (diffMin < 1) return "agora mesmo";
+  if (diffMin < 60) return rtf.format(-diffMin, "minute");
+  const diffHoras = Math.round(diffMin / 60);
+  if (diffHoras < 24) return rtf.format(-diffHoras, "hour");
+  return rtf.format(-Math.round(diffHoras / 24), "day");
+}
 
 function comando(nome: string, valor?: string) {
   document.execCommand(nome, false, valor);
@@ -164,6 +185,8 @@ export function EditorTexto() {
   const [dialogAbrirAberto, setDialogAbrirAberto] = useState(false);
   const [arquivos, setArquivos] = useState<ArquivoAlunoResumo[]>([]);
   const [corAberta, setCorAberta] = useState(false);
+  const [recentes, setRecentes] = useState<ArquivoAlunoResumo[]>([]);
+  const [carregandoRecentes, setCarregandoRecentes] = useState(false);
 
   useEffect(() => {
     const salvo = localStorage.getItem(CHAVE_RASCUNHO);
@@ -171,8 +194,29 @@ export function EditorTexto() {
       areaRef.current.innerHTML = salvo;
       atualizarContagem();
     }
+    // Sem isso, cada Enter cria uma <div> nova com a margem padrão do
+    // navegador (bem maior que o espaçamento entre linhas de um parágrafo de
+    // verdade), e é isso que fazia o texto parecer com espaços enormes entre
+    // as linhas depois de apertar Enter.
+    document.execCommand("defaultParagraphSeparator", false, "p");
+    carregarRecentes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function carregarRecentes() {
+    const sessaoAtual = lerAlunoSessao();
+    if (!sessaoAtual) return;
+    setCarregandoRecentes(true);
+    try {
+      const lista = await listarArquivosAluno(sessaoAtual.alunoId, sessaoAtual.pin);
+      setRecentes(lista.slice(0, QUANTIDADE_RECENTES));
+    } catch {
+      // Falha silenciosa: a lista de recentes é só um atalho de conveniência,
+      // não vale interromper o aluno com um erro por causa dela.
+    } finally {
+      setCarregandoRecentes(false);
+    }
+  }
 
   function atualizarContagem() {
     const texto = areaRef.current?.innerText ?? "";
@@ -213,6 +257,7 @@ export function EditorTexto() {
       try {
         await excluirArquivoAluno(sessao.alunoId, sessao.pin, arquivoAtualId);
         toast.success("Documento apagado.");
+        carregarRecentes();
       } catch (err) {
         toast.error(`Não foi possível apagar: ${(err as Error).message}`);
         return;
@@ -244,6 +289,7 @@ export function EditorTexto() {
       );
       setArquivoAtualId(novoId);
       toast.success("Salvo na sua pasta.");
+      carregarRecentes();
     } catch (err) {
       toast.error(`Não foi possível salvar: ${(err as Error).message}`);
     } finally {
@@ -288,7 +334,54 @@ export function EditorTexto() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4 md:flex-row md:items-start">
+      {/* Painel lateral: últimos textos do aluno, para reabrir rápido sem
+          precisar do diálogo "Abrir". Só aparece pra quem está logado. */}
+      {sessao && (
+        <aside className="order-2 shrink-0 md:order-1 md:w-52">
+          <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Meus textos
+          </p>
+          {carregandoRecentes ? (
+            <div className="flex justify-center py-4">
+              <Loader2 className="size-4 animate-spin text-muted-foreground" />
+            </div>
+          ) : recentes.length === 0 ? (
+            <p className="px-1 text-xs text-muted-foreground">
+              Seus textos salvos vão aparecer aqui.
+            </p>
+          ) : (
+            <div className="flex gap-2 overflow-x-auto pb-1 md:flex-col md:overflow-visible md:pb-0">
+              {recentes.map((arquivo, indice) => (
+                <button
+                  key={arquivo.id}
+                  type="button"
+                  onClick={() => abrirDocumento(arquivo.id)}
+                  className={`flex w-32 shrink-0 flex-col items-start gap-1.5 rounded-xl border p-2.5 text-left transition-colors md:w-full ${
+                    arquivo.id === arquivoAtualId
+                      ? "border-primary/50 bg-primary/5"
+                      : "border-border/60 bg-card hover:bg-muted"
+                  }`}
+                >
+                  <span
+                    className={`flex size-8 items-center justify-center rounded-lg ${CORES_CAPA[indice % CORES_CAPA.length]}`}
+                  >
+                    <FileText className="size-4" />
+                  </span>
+                  <span className="line-clamp-2 w-full text-xs font-medium leading-tight text-foreground">
+                    {arquivo.titulo}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {formatarRelativo(arquivo.atualizadoEm)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </aside>
+      )}
+
+      <div className="order-1 flex min-w-0 flex-1 flex-col gap-3 md:order-2">
       {/* Barra de título estilo Word: nome do arquivo editável */}
       <div className="flex flex-wrap items-center gap-2">
         <Input
@@ -544,7 +637,7 @@ export function EditorTexto() {
           }}
           onMouseUp={salvarSelecaoAtual}
           onKeyUp={salvarSelecaoAtual}
-          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm"
+          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mb-3 [&_p]:mt-0"
           style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
           suppressContentEditableWarning
         />
@@ -554,6 +647,7 @@ export function EditorTexto() {
         {contagem} {contagem === 1 ? "palavra" : "palavras"} ·{" "}
         {sessao ? "salvo na sua pasta ao clicar em Salvar" : "salvo automaticamente neste computador"}
       </p>
+      </div>
 
       <Dialog open={dialogAbrirAberto} onOpenChange={setDialogAbrirAberto}>
         <DialogContent className="max-w-sm">
