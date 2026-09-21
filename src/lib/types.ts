@@ -89,6 +89,13 @@ export interface Reprogramacao {
   inicio: string;
   fim: string;
   conteudo?: string | undefined;
+  /** Por que a turma não pôde ter a aula original (ex.: passeio, avaliação). */
+  motivo?: string | undefined;
+  /**
+   * Quando a nova data ocupou a sessão extra de outra turma, essa sessão fica
+   * suspensa junto — e volta a valer se a reprogramação for desfeita.
+   */
+  slotDeslocado?: { data: string; dia: string; inicio: string; turmaId: string } | undefined;
   criadoEm: string;
 }
 

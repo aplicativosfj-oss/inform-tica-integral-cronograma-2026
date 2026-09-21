@@ -663,3 +663,86 @@ export function proximasDatasDoDia(dia: string, from: Date, quantidade: number):
     return data;
   });
 }
+
+export interface HorarioReprogramacao {
+  data: Date;
+  dataKey: string;
+  dia: string;
+  slot: Slot;
+  /**
+   * "livre": ninguém usa o laboratório nesse horário.
+   * "extra": o horário é a sessão extra de outra turma (que já tem outra aula
+   * na mesma semana) — ela cede a vez, mas continua com a sessão principal.
+   */
+  tipo: "livre" | "extra";
+  /** Turma que cede a sessão extra, quando `tipo` é "extra". */
+  turmaDeslocada?: Turma | undefined;
+}
+
+/**
+ * Procura, a partir de `desde`, os próximos horários em que uma turma que
+ * perdeu a aula pode ser reprogramada — sem tirar de nenhuma turma a sua
+ * única aula da semana. Primeiro os horários livres; depois as sessões
+ * extras de turmas que já têm outra aula na semana. Horários mistos, já
+ * suspensos, já reprogramados ou da própria turma ficam de fora.
+ */
+export function encontrarHorariosParaReprogramar(
+  turmas: Turma[],
+  config: ScheduleConfig,
+  turmaId: string,
+  desde: Date,
+  quantidade = 6,
+  diasAFrente = 21,
+): HorarioReprogramacao[] {
+  const slots = buildDailySlots(config);
+  const agoraMin = desde.getHours() * 60 + desde.getMinutes();
+  const livres: HorarioReprogramacao[] = [];
+  const extras: HorarioReprogramacao[] = [];
+
+  for (let i = 0; i <= diasAFrente; i += 1) {
+    const data = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate() + i);
+    const dia = currentWeekdayLabel(data);
+    if (!config.diasSemana.includes(dia)) continue;
+    const dataKey = toDateKey(data);
+    const semana = aplicarExcecoesDeData(
+      buildWeeklySchedule(turmas, config, getWeekIndex(data)),
+      config,
+      turmas,
+      dataKey,
+    );
+    const doDia = semana.filter((a) => a.dia === dia);
+    const reprogramadas = reprogramacoesParaData(turmas, config, data);
+
+    for (const slot of slots) {
+      if (i === 0 && toMinutes(slot.inicio) <= agoraMin) continue;
+      const ini = toMinutes(slot.inicio);
+      const fim = toMinutes(slot.fim);
+      const sobrepoe = (s: Slot) => toMinutes(s.inicio) < fim && toMinutes(s.fim) > ini;
+      if (reprogramadas.some((r) => sobrepoe(r.slot))) continue;
+
+      const ocupante = doDia.find((a) => sobrepoe(a.slot));
+      const suspenso = ocupante
+        ? Boolean(config.suspensoes?.[suspensaoKey(dataKey, dia, ocupante.slot.inicio)])
+        : false;
+
+      if (!ocupante || suspenso) {
+        livres.push({ data, dataKey, dia, slot, tipo: "livre" });
+        continue;
+      }
+      if (ocupante.misto || ocupante.turma.id === turmaId) continue;
+      const aulasDaTurmaNaSemana = semana.filter(
+        (a) => !a.misto && a.turma.id === ocupante.turma.id,
+      ).length;
+      if (aulasDaTurmaNaSemana >= 2 && ocupante.ocorrenciaIndex > 0) {
+        extras.push({ data, dataKey, dia, slot, tipo: "extra", turmaDeslocada: ocupante.turma });
+      }
+    }
+  }
+
+  const porData = (a: HorarioReprogramacao, b: HorarioReprogramacao) =>
+    a.dataKey.localeCompare(b.dataKey) || toMinutes(a.slot.inicio) - toMinutes(b.slot.inicio);
+  // O mais cedo possível; no mesmo horário, um livre vale mais que deslocar alguém.
+  return [...livres, ...extras]
+    .sort((a, b) => porData(a, b) || (a.tipo === b.tipo ? 0 : a.tipo === "livre" ? -1 : 1))
+    .slice(0, quantidade);
+}

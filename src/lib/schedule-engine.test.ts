@@ -263,3 +263,42 @@ describe("currentWeekdayLabel", () => {
     expect(currentWeekdayLabel(new Date(2026, 8, 20))).toBe("Domingo");
   });
 });
+
+describe("encontrarHorariosParaReprogramar", () => {
+  test("nunca devolve horário da própria turma nem tira a única aula de outra", async () => {
+    const { encontrarHorariosParaReprogramar } = await import("@/lib/schedule-engine");
+    const config = makeConfig();
+    const turmas = ["A", "B", "C", "D"].map((id) => makeTurma(id, 14));
+    const desde = new Date(2026, 8, 21, 7, 0); // segunda, antes da aula
+    const semana = buildWeeklySchedule(turmas, config, getWeekIndex(desde));
+    const opcoes = encontrarHorariosParaReprogramar(turmas, config, "A", desde);
+    expect(opcoes.length).toBeGreaterThan(0);
+    for (const o of opcoes) {
+      expect(o.turmaDeslocada?.id).not.toBe("A");
+      if (o.tipo === "extra") {
+        const aulas = semana.filter((a) => a.turma.id === o.turmaDeslocada?.id).length;
+        expect(aulas).toBeGreaterThanOrEqual(2);
+      }
+    }
+  });
+
+  test("um horário suspenso vira horário livre", async () => {
+    const { encontrarHorariosParaReprogramar, suspensaoKey } =
+      await import("@/lib/schedule-engine");
+    const turmas = ["A", "B"].map((id) => makeTurma(id, 7));
+    const base = makeConfig({
+      diasSemana: ["Segunda"],
+      horaFim: "10:00",
+      intervaloInicio: "12:00",
+      intervaloFim: "13:00",
+    });
+    const desde = new Date(2026, 8, 21, 7, 0);
+    const config = {
+      ...base,
+      suspensoes: { [suspensaoKey("2026-09-21", "Segunda", "09:00")]: true as const },
+    };
+    const opcoes = encontrarHorariosParaReprogramar(turmas, config, "A", desde);
+    expect(opcoes[0]?.tipo).toBe("livre");
+    expect(opcoes[0]?.slot.inicio).toBe("09:00");
+  });
+});

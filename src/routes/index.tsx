@@ -4,6 +4,7 @@ import {
   BookOpen,
   CalendarClock,
   CalendarDays,
+  CalendarX2,
   ChevronRight,
   Clock3,
   ExternalLink,
@@ -34,6 +35,8 @@ import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { WeeklySchedule } from "@/components/school/weekly-schedule";
 import { useAppStore } from "@/lib/app-store";
+import { useAuth } from "@/lib/auth-store";
+import { SuspenderAulaDialog } from "@/components/school/suspender-aula-dialog";
 import {
   aplicarExcecoesDeData,
   buildWeeklySchedule,
@@ -309,12 +312,14 @@ function Index() {
           <AvisoDireitosImagem className="mt-1.5" />
         </RevealSection>
 
-        <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6">
-          <div className="grid gap-3 lg:grid-cols-[1fr_1.6fr] lg:items-start">
+        {/* Aula ao vivo em destaque, na largura toda; clima e próximas turmas
+            logo abaixo, lado a lado — cada bloco com espaço para respirar. */}
+        <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
+          <LiveSessionPanel />
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:items-start">
             <WeatherWidget />
-            <LiveSessionPanel />
+            <ProximasTurmasPanel />
           </div>
-          <ProximasTurmasPanel />
         </section>
 
         <RevealSection className="relative mx-auto max-w-6xl overflow-hidden px-4 py-6 sm:px-6">
@@ -440,6 +445,7 @@ function Index() {
  */
 function ProximasTurmasPanel() {
   const { turmas, config } = useAppStore();
+  const { isAuthenticated } = useAuth();
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
   // A data atual difere entre servidor e navegador; só renderizamos após montar
@@ -505,47 +511,64 @@ function ProximasTurmasPanel() {
                 </p>
               </div>
             ) : (
-              <button
+              <div
                 key={`${assignment.dia}-${assignment.slot.inicio}`}
-                type="button"
-                onClick={() => setAssignmentSelecionado(assignment)}
-                className="group cursor-pointer flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-300 ease-out hover:bg-primary/5 hover:shadow-md hover:scale-105"
+                className="flex items-center gap-1"
               >
-                <div className="flex items-center gap-3">
-                  {assignment.turma.imagem ? (
-                    <img
-                      src={assignment.turma.imagem}
-                      alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
-                      className="size-11 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <span
-                      className={cn(
-                        "flex size-11 items-center justify-center rounded-lg text-sm font-semibold",
-                        serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg,
-                        serieClasses(serieIndexPorNumero(assignment.turma.serie)).text,
-                      )}
-                    >
-                      {assignment.turma.letra}
-                    </span>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-foreground group-hover:text-primary">
-                      {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
-                    </p>
-                    <p className="text-[13px] text-muted-foreground">
-                      Prof(a). {assignment.turma.professorRegente} ·{" "}
-                      {assignment.turma.alunos.length} alunos
-                    </p>
+                <button
+                  type="button"
+                  onClick={() => setAssignmentSelecionado(assignment)}
+                  className="group flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-200 hover:bg-primary/5"
+                >
+                  <div className="flex items-center gap-3">
+                    {assignment.turma.imagem ? (
+                      <img
+                        src={assignment.turma.imagem}
+                        alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
+                        className="size-11 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <span
+                        className={cn(
+                          "flex size-11 items-center justify-center rounded-lg text-sm font-semibold",
+                          serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg,
+                          serieClasses(serieIndexPorNumero(assignment.turma.serie)).text,
+                        )}
+                      >
+                        {assignment.turma.letra}
+                      </span>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-foreground group-hover:text-primary">
+                        {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
+                      </p>
+                      <p className="text-[13px] text-muted-foreground">
+                        Prof(a). {assignment.turma.professorRegente} ·{" "}
+                        {assignment.turma.alunos.length} alunos
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="secondary" className="font-mono text-sm font-bold">
-                    {assignment.slot.inicio} – {assignment.slot.fim}
-                  </Badge>
-                  <ChevronRight className="size-4 text-muted-foreground/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
-                </div>
-              </button>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant="secondary" className="font-mono text-sm font-bold">
+                      {assignment.slot.inicio} – {assignment.slot.fim}
+                    </Badge>
+                    <ChevronRight className="size-4 text-muted-foreground/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
+                  </div>
+                </button>
+                {isAuthenticated ? (
+                  <SuspenderAulaDialog assignment={assignment} data={proximo.data}>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-9 shrink-0 text-muted-foreground hover:text-amber-600"
+                      title="Turma não pode ter esta aula — suspender e reprogramar"
+                      aria-label={`Suspender aula de ${assignment.turma.serie} ${assignment.turma.letra}`}
+                    >
+                      <CalendarX2 className="size-4" />
+                    </Button>
+                  </SuspenderAulaDialog>
+                ) : null}
+              </div>
             ),
           )}
         </div>

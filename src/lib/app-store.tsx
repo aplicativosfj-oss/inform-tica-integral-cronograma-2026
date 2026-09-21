@@ -325,9 +325,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
             id: generateId("reprog"),
             criadoEm: new Date().toISOString(),
           };
+          const suspensoes = { ...(prev.suspensoes ?? {}), [key]: true as const };
+          if (input.slotDeslocado) {
+            const d = input.slotDeslocado;
+            suspensoes[suspensaoKey(d.data, d.dia, d.inicio)] = true;
+          }
           return {
             ...prev,
-            suspensoes: { ...(prev.suspensoes ?? {}), [key]: true },
+            suspensoes,
             reprogramacoes: [...(prev.reprogramacoes ?? []), nova],
           };
         });
@@ -340,6 +345,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             delete nextSuspensoes[
               suspensaoKey(alvo.dataOriginal, alvo.diaOriginal, alvo.inicioOriginal)
             ];
+            if (alvo.slotDeslocado) {
+              const d = alvo.slotDeslocado;
+              delete nextSuspensoes[suspensaoKey(d.data, d.dia, d.inicio)];
+            }
           }
           return {
             ...prev,
