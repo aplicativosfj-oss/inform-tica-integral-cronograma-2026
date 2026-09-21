@@ -342,3 +342,34 @@ describe("rotacaoHorarios", () => {
     expect(new Set(s.map((a) => a.turma.id)).size).toBe(turmas.length);
   });
 });
+
+describe("reposição em horário cedido", () => {
+  test("a reposição não herda a suspensão do horário que ela ocupa", async () => {
+    const { reprogramacoesParaData, suspensaoKey } = await import("@/lib/schedule-engine");
+    const turmas = ["A", "B"].map((id) => makeTurma(id, 7));
+    const config = {
+      ...makeConfig({ diasSemana: ["Terça"], horaFim: "10:00" }),
+      suspensoes: { [suspensaoKey("2026-09-22", "Terça", "08:00")]: true as const },
+      reprogramacoes: [
+        {
+          id: "r1",
+          turmaId: "B",
+          dataOriginal: "2026-09-21",
+          diaOriginal: "Segunda",
+          inicioOriginal: "08:00",
+          fimOriginal: "09:00",
+          dataNova: "2026-09-22",
+          inicio: "08:00",
+          fim: "09:00",
+          criadoEm: "",
+        },
+      ],
+    };
+    const agora = new Date(2026, 8, 22, 8, 10);
+    const semana = buildWeeklySchedule(turmas, config, getWeekIndex(agora));
+    const extras = reprogramacoesParaData(turmas, config, agora);
+    const sessao = findSessaoAtual(semana, config, agora, extras);
+    expect(sessao?.assignment.turma.id).toBe("B");
+    expect(sessao?.suspensa).toBe(false);
+  });
+});

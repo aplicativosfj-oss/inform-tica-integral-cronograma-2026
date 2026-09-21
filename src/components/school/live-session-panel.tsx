@@ -10,6 +10,7 @@ import {
   MonitorPlay,
   MessageSquareText,
   MoreHorizontal,
+  Pencil,
   Repeat2,
   Square,
   Tv,
@@ -18,7 +19,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ObservacaoAulaDialog } from "@/components/school/observacao-aula-dialog";
+import { SenhaProfissionalDialog } from "@/components/school/senha-profissional-dialog";
 import { SuspenderAulaDialog } from "@/components/school/suspender-aula-dialog";
 import { TimerAula } from "@/components/school/timer-aula";
 import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
@@ -50,6 +52,12 @@ import { unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
 import { useConfirmar } from "@/lib/confirm-store";
+import { conferirSenhaProfessor, idProfessor } from "@/lib/profissional-acesso";
+import {
+  encerrarProfissionalSessao,
+  iniciarProfissionalSessao,
+  senhaDoProfessorDaTurma,
+} from "@/lib/profissional-session";
 import {
   fetchPresencasDoDia,
   fetchUltimaParticipacao,
@@ -713,12 +721,23 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const reprogramadasHoje = now ? reprogramacoesParaData(turmas, config, now) : [];
   const sessao = now ? findSessaoAtual(assignments, config, now, reprogramadasHoje) : null;
 
+  // Professor regente da turma em aula, liberado pelo PIN dele nesta aba.
+  const [versaoSessao, setVersaoSessao] = useState(0);
+  const turmaEmAulaId = sessao?.assignment.misto ? undefined : sessao?.assignment.turma.id;
+  const professorLiberado = useMemo(
+    () => (turmaEmAulaId ? Boolean(senhaDoProfessorDaTurma(turmaEmAulaId)) : false),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [turmaEmAulaId, versaoSessao],
+  );
+  const podeEditar = isAuthenticated || professorLiberado;
+  const [pedindoPin, setPedindoPin] = useState(false);
+
   const chamada = useChamadaDoDia(
     sessao?.assignment.turma,
     config,
     dateKey,
     isReady && Boolean(sessao) && !sessao?.suspensa,
-    isAuthenticated,
+    podeEditar,
   );
 
   if (!now) {
@@ -737,7 +756,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const proximaAula = nextAssignmentsForDay([...reprogramadasHoje, ...assignments], diaAtual).find(
     (a) =>
       a.slot.inicio >= (sessao ? sessao.assignment.slot.fim : nowHHMM) &&
-      !config.suspensoes?.[suspensaoKey(dateKey, a.dia, a.slot.inicio)],
+      (reprogramadasHoje.includes(a) ||
+        !config.suspensoes?.[suspensaoKey(dateKey, a.dia, a.slot.inicio)]),
   );
   const nomeProxima = proximaAula
     ? proximaAula.misto
@@ -902,7 +922,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const proximoSubBloco = subBlocosEfetivos?.[sessao.subBloco.indice + 1] ?? sessao.proximoSubBloco;
   const turmaAtual = subBloco.turma ?? assignment.turma;
   const turmaProxima = proximoSubBloco?.turma ?? assignment.turma;
-  const podeGerenciar = isAuthenticated && Boolean(gruposChamada);
+  const podeGerenciar = podeEditar && Boolean(gruposChamada);
 
   const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = totalSegundos - segundosRestantes;
@@ -1012,7 +1032,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           totalGrupo={totalSegundos}
           decorridosTurma={decorridosTurma}
           totalTurma={totalTurma}
-          grupoAtual={subBloco.grupo.indice + 1}
+          grupoAtual={subBloco.indice + 1}
           totalGrupos={totalGrupos}
           serie={turmaAtual.serie}
           letra={turmaAtual.letra}
@@ -1055,7 +1075,37 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                   <Users className="size-4 text-primary" /> Agora · Grupo{" "}
                   {subBloco.grupo.indice + 1}
                 </p>
-                <span className="font-mono text-xs text-muted-foreground">
+                <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+                  {!assignment.misto ? (
+                    podeEditar ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 font-sans text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                        <Pencil className="size-3" />
+                        {isAuthenticated ? "Edição" : "Professor(a)"}
+                        {!isAuthenticated ? (
+                          <button
+                            type="button"
+                            className="ml-0.5 underline-offset-2 hover:underline"
+                            onClick={() => {
+                              encerrarProfissionalSessao();
+                              setVersaoSessao((v) => v + 1);
+                              toast.success("Modo de edição encerrado.");
+                            }}
+                          >
+                            · sair
+                          </button>
+                        ) : null}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setPedindoPin(true)}
+                        title="Professor(a) regente: registrar falta ou substituição com o seu PIN"
+                        className="inline-flex items-center gap-1 rounded-full border border-border/70 px-2 py-0.5 font-sans text-[11px] font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                      >
+                        <Lock className="size-3" /> Editar
+                      </button>
+                    )
+                  ) : null}
                   {subBloco.inicio}–{subBloco.fim}
                 </span>
               </header>
@@ -1117,14 +1167,43 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
             </section>
           </div>
 
-          {!isAuthenticated && gruposChamada ? (
+          {!podeEditar && !assignment.misto ? (
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Lock className="size-3" /> Professor(a):{" "}
+              <Lock className="size-3" /> Professor(a) regente desta turma: toque em{" "}
+              <strong>Editar</strong> no grupo e use o seu PIN para registrar faltas e
+              substituições. Coordenação:{" "}
               <Link to="/login" className="font-medium text-primary hover:underline">
-                entre
-              </Link>{" "}
-              para registrar ausências e substituir alunos.
+                entrar no painel
+              </Link>
+              .
             </p>
+          ) : null}
+
+          {pedindoPin && !assignment.misto ? (
+            <SenhaProfissionalDialog
+              aberto
+              aoFechar={() => setPedindoPin(false)}
+              nome={`Prof(a). ${assignment.turma.professorRegente}`}
+              contexto={`Editar a aula ao vivo · ${assignment.turma.serie} "${assignment.turma.letra}"`}
+              verificar={(senha) => {
+                const ok = conferirSenhaProfessor(assignment.turma, senha);
+                if (ok) {
+                  iniciarProfissionalSessao({
+                    tipo: "professor",
+                    id: idProfessor(assignment.turma),
+                    nome: assignment.turma.professorRegente,
+                    turmaId: assignment.turma.id,
+                    senha,
+                  });
+                }
+                return ok;
+              }}
+              aoEntrar={() => {
+                setPedindoPin(false);
+                setVersaoSessao((v) => v + 1);
+                toast.success("Modo de edição liberado para esta aula.");
+              }}
+            />
           ) : null}
 
           {editable && !assignment.misto && chamada.presencas && chamada.presencas.length > 0 ? (

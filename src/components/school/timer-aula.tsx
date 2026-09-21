@@ -138,21 +138,24 @@ export function TimerAula({
               {relogio(restanteGrupo)}
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              restam no grupo {grupoAtual}
+              restam nesta rodada ({grupoAtual}ª)
             </p>
           </div>
           <div className="text-right text-sm text-muted-foreground">
             <p className="text-lg font-semibold text-foreground">
               {grupoAtual} de {totalGrupos}
             </p>
-            <p>grupos no revezamento</p>
+            <p>rodadas no revezamento</p>
           </div>
         </div>
 
         <div className="relative mt-5 h-4 overflow-hidden rounded-md border border-border/60 bg-muted">
           <div
             className="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-600 transition-[width] duration-1000 ease-out"
-            style={{ width: `${progresso}%`, backgroundSize: `${(100 / Math.max(progresso, 1)) * 100}% 100%` }}
+            style={{
+              width: `${progresso}%`,
+              backgroundSize: `${(100 / Math.max(progresso, 1)) * 100}% 100%`,
+            }}
           />
         </div>
         <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground">

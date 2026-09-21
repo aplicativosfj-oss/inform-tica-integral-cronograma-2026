@@ -7,7 +7,7 @@ import {
   Presentation,
   Users2,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { HeroProfissional } from "@/components/school/hero-profissional";
@@ -40,6 +40,7 @@ function ProfessorPicker() {
   const { turmas, config } = useAppStore();
   const navigate = useNavigate();
   const [turmaEscolhida, setTurmaEscolhida] = useState<Turma | null>(null);
+  const senhaDigitada = useRef<string | undefined>(undefined);
 
   const totalAlunos = turmas.reduce((soma, turma) => soma + turma.alunos.length, 0);
   const totalApoio = turmas.reduce((soma, turma) => soma + (turma.apoioEspecial?.length ?? 0), 0);
@@ -138,11 +139,16 @@ function ProfessorPicker() {
           aoFechar={() => setTurmaEscolhida(null)}
           nome={`Prof(a). ${turmaEscolhida.professorRegente}`}
           contexto={`Professor(a) regente · ${turmaEscolhida.serie} "${turmaEscolhida.letra}"`}
-          verificar={(senha) => conferirSenhaProfessor(turmaEscolhida, senha)}
+          verificar={(senha) => {
+            const ok = conferirSenhaProfessor(turmaEscolhida, senha);
+            if (ok) senhaDigitada.current = senha;
+            return ok;
+          }}
           aoEntrar={() => {
             iniciarProfissionalSessao({
               tipo: "professor",
               id: idProfessor(turmaEscolhida),
+              senha: senhaDigitada.current,
               nome: turmaEscolhida.professorRegente,
               turmaId: turmaEscolhida.id,
             });

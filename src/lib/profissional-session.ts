@@ -27,6 +27,12 @@ export interface ProfissionalSessao {
    */
   alunoAtendidoId?: string;
   alunoAtendidoNome?: string;
+  /**
+   * Só para o professor regente: a senha digitada, guardada apenas nesta aba
+   * (sessionStorage), para o servidor conferir quando ele edita a chamada
+   * ao vivo da própria turma.
+   */
+  senha?: string | undefined;
   /** Entrou pela senha mestra da coordenação do AEE, não pela própria senha. */
   viaCoordenacaoAEE?: string;
   entrouEm: string;
@@ -97,6 +103,14 @@ export function limparAlunoAtendido(): void {
 export function temSessaoDeProfessor(turmaId: string): boolean {
   const sessao = lerProfissionalSessao();
   return sessao?.tipo === "professor" && sessao.turmaId === turmaId;
+}
+
+/** Senha do professor regente desta turma, se ele estiver com a sessão aberta nesta aba. */
+export function senhaDoProfessorDaTurma(turmaId: string): string | null {
+  const sessao = lerProfissionalSessao();
+  return sessao?.tipo === "professor" && sessao.turmaId === turmaId && sessao.senha
+    ? sessao.senha
+    : null;
 }
 
 /** A sessão atual é deste mediador/cuidador desta turma? */

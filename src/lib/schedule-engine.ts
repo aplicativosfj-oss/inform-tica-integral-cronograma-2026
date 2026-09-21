@@ -603,9 +603,13 @@ export function findSessaoAtual(
   });
   if (!assignment) return null;
 
-  const suspensa = Boolean(
-    config.suspensoes?.[suspensaoKey(toDateKey(now), dia, assignment.slot.inicio)],
-  );
+  // Uma reposição (extra) ocupa justamente um horário marcado como suspenso
+  // — o da turma que cedeu a vez. A suspensão vale para a aula original, não
+  // para a reposição que entrou no lugar.
+  const ehReposicao = extras.includes(assignment);
+  const suspensa =
+    !ehReposicao &&
+    Boolean(config.suspensoes?.[suspensaoKey(toDateKey(now), dia, assignment.slot.inicio)]);
 
   const subBlocos = buildSubBlocos(assignment, config, getWeekIndex(now));
   const subBlocoIndex = subBlocos.findIndex((sb) => {

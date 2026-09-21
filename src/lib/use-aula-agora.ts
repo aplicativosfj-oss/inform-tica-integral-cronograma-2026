@@ -73,7 +73,7 @@ export function useAulaAgora(): AulaAgora | null {
   const proximaAula = nextAssignmentsForDay([...reposicoes, ...semana], dia).find(
     (a) =>
       minutos(a.slot.inicio) > agoraMin &&
-      !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)],
+      (reposicoes.includes(a) || !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)]),
   );
   const proxima = proximaAula
     ? { turma: nomeDe(proximaAula), inicio: proximaAula.slot.inicio }

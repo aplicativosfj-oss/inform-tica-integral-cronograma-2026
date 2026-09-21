@@ -6,6 +6,7 @@ import {
   sincronizarTudo,
   totalPendente,
 } from "@/lib/offline-queue";
+import { senhaDoProfessorDaTurma } from "@/lib/profissional-session";
 import { supabase } from "@/lib/supabase-client";
 import type { Presenca } from "@/lib/types";
 
@@ -148,11 +149,42 @@ export async function registrarPresencasIniciais(
   }
 }
 
+/**
+ * Quem não tem login do painel, mas é o professor regente da turma com a
+ * sessão aberta (senha conferida), grava pelas funções do banco que conferem
+ * a senha no servidor. O administrador logado continua gravando direto.
+ */
+async function senhaParaRpc(turmaId: string): Promise<string | null> {
+  const senha = senhaDoProfessorDaTurma(turmaId);
+  if (!senha) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session ? null : senha;
+}
+
 async function enviarPresencasIniciais(
   turmaId: string,
   data: string,
   grupos: { indice: number; alunos: { id: string; nome: string }[] }[],
 ): Promise<void> {
+  const senha = await senhaParaRpc(turmaId);
+  if (senha) {
+    const linhas = grupos.flatMap((grupo) =>
+      grupo.alunos.map((aluno) => ({
+        aluno_id: aluno.id,
+        aluno_nome: aluno.nome,
+        grupo_indice: grupo.indice,
+      })),
+    );
+    if (linhas.length === 0) return;
+    const { error } = await supabase.rpc("professor_registrar_chamada", {
+      p_turma_id: turmaId,
+      p_senha: senha,
+      p_data: data,
+      p_linhas: linhas,
+    });
+    if (error) throw error;
+    return;
+  }
   const rows = grupos.flatMap((grupo) =>
     grupo.alunos.map((aluno) => ({
       data,
@@ -219,6 +251,21 @@ async function enviarFalta(
   substituto: { id: string; nome: string } | null,
   motivo: "ausente" | "nao_quis_participar" | "limitacao",
 ): Promise<void> {
+  const senha = await senhaParaRpc(turmaId);
+  if (senha) {
+    const { error } = await supabase.rpc("professor_marcar_falta", {
+      p_turma_id: turmaId,
+      p_senha: senha,
+      p_data: data,
+      p_aluno_id: aluno.id,
+      p_motivo: motivo,
+      p_grupo_indice: grupoIndice,
+      p_substituto_id: substituto?.id ?? null,
+      p_substituto_nome: substituto?.nome ?? null,
+    });
+    if (error) throw error;
+    return;
+  }
   const { error: updateError } = await supabase
     .from("presencas")
     .update({ status: "faltou", motivo })
