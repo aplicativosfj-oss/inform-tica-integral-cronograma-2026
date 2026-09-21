@@ -97,6 +97,29 @@ tbody tr.click:hover td{background:var(--surface2)}
 .names{display:flex;flex-wrap:wrap;gap:6px}
 .names span{padding:3px 10px;border-radius:8px;background:var(--surface2);font-size:13.5px;font-weight:600}
 svg text{fill:var(--mut);font:600 12px "Nunito Sans",sans-serif}
+.scat svg text{font-size:15px}
+/* barras horizontais */
+.hb{display:grid;gap:12px}
+.hb .r{display:grid;grid-template-columns:minmax(90px,var(--lw,150px)) 1fr;gap:12px;align-items:center}
+.hb .l{font-weight:700;font-size:15px;text-align:right;color:var(--ink);line-height:1.2}
+.t{position:relative;height:24px;border-radius:99px;background:var(--surface2)}
+.hb .t::after{content:"";position:absolute;left:70%;top:-5px;bottom:-5px;border-left:2px dashed color-mix(in srgb,var(--ot) 55%,transparent)}
+.hb .t i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:var(--f)}
+.hb .t b{position:absolute;top:50%;transform:translateY(-50%);font:800 14px "Nunito Sans";color:var(--ink);white-space:nowrap}
+.axis{display:grid;grid-template-columns:minmax(90px,var(--lw,150px)) 1fr;gap:12px;margin-top:-2px}
+.axis div{position:relative;height:18px}
+.axis em{position:absolute;transform:translateX(-50%);font:700 12.5px "Nunito Sans";font-style:normal;color:var(--mut)}
+.axis em:first-child{transform:none}.axis em:last-child{transform:translateX(-100%)}
+/* halteres (comparação) */
+.db{display:grid;gap:16px}
+.db .r{display:grid;gap:6px}
+.db .l{font-weight:700;font-size:15px;line-height:1.3}
+.db .v{font-size:14.5px;white-space:nowrap}
+.db .cb{color:color-mix(in srgb,var(--chalk) 70%,var(--ink))}
+.db .t{height:14px;background:var(--surface2)}
+.db .t i{position:absolute;top:5px;height:4px;background:color-mix(in srgb,var(--mut) 45%,transparent);border-radius:2px}
+.db .t u{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.db .axis{grid-template-columns:1fr}
 svg .lbl{fill:var(--ink);font-weight:700}
 dialog{border:0;border-radius:22px;background:var(--surface);color:var(--ink);padding:0;width:min(860px,94vw);max-height:90vh;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
 dialog::backdrop{background:rgba(9,20,30,.55);backdrop-filter:blur(3px)}
@@ -171,15 +194,15 @@ function donut(c,{size=150}={}){const tot=Object.values(c).reduce((a,b)=>a+b,0)|
  ["OT","BO","RE","IN"].forEach(k=>{const L=C*c[k]/tot;if(L>0)s+=`<circle class="f-${k}" cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--f)" stroke-width="22" stroke-dasharray="${Math.max(0,L-2)} ${C}" stroke-dashoffset="${-off}" transform="rotate(-90 ${size/2} ${size/2})"><title>${F[k].p}: ${c[k]} alunos</title></circle>`;off+=L});
  return s+`<text x="50%" y="46%" text-anchor="middle" style="font:800 26px Sora;fill:var(--ink)">${tot}</text><text x="50%" y="62%" text-anchor="middle">alunos</text></svg>`}
 const distBar=c=>{const tot=Object.values(c).reduce((a,b)=>a+b,0)||1;return `<div class="dist">${["OT","BO","RE","IN"].map(k=>c[k]?`<i class="f-${k}" style="width:${100*c[k]/tot}%" title="${F[k].p}: ${c[k]} (${pct(100*c[k]/tot)})"></i>`:"").join("")}</div>`};
-function hbars(items,{w=640,lw=150}={}){const rh=34,h=items.length*rh+26,X=v=>lw+(w-lw-50)*v/100;let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
- [0,25,50,70,100].forEach(v=>s+=`<line x1="${X(v)}" x2="${X(v)}" y1="0" y2="${h-22}" stroke="var(--line)" ${v==70?'stroke-dasharray="4 4" stroke="var(--ot)"':""}/><text x="${X(v)}" y="${h-6}" text-anchor="middle">${v}%</text>`);
- items.forEach((it,i)=>{const y=i*rh+6;s+=`<text class="lbl" x="${lw-10}" y="${y+16}" text-anchor="end">${esc(it.l)}</text><rect x="${X(0)}" y="${y+4}" width="${X(100)-X(0)}" height="18" rx="9" fill="var(--surface2)"/><rect class="f-${fx(it.v)}" x="${X(0)}" y="${y+4}" width="${X(it.v)-X(0)}" height="18" rx="9" fill="var(--f)"/><text class="lbl" x="${X(it.v)+6}" y="${y+18}">${pct(it.v)}</text>`});
- return s+"</svg>"}
-function dumbbell(rows,A,B,{w=680}={}){// rows:[{l,a,b}]
- const lw=Math.min(300,w*.42),rh=40,h=rows.length*rh+34,X=v=>lw+(w-lw-24)*v/100;let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
- [0,25,50,75,100].forEach(v=>s+=`<line x1="${X(v)}" x2="${X(v)}" y1="0" y2="${h-24}" stroke="var(--line)"/><text x="${X(v)}" y="${h-8}" text-anchor="middle">${v}%</text>`);
- rows.forEach((r,i)=>{const y=i*rh+18;const lab=r.l.length>44?r.l.slice(0,42)+"…":r.l;s+=`<text class="lbl" x="${lw-12}" y="${y+4}" text-anchor="end"><title>${esc(r.l)}</title>${esc(lab)}</text><line x1="${X(Math.min(r.a,r.b))}" x2="${X(Math.max(r.a,r.b))}" y1="${y}" y2="${y}" stroke="var(--mut)" stroke-width="3" opacity=".35"/><circle cx="${X(r.a)}" cy="${y}" r="7.5" fill="var(--pri)"><title>${A}: ${pct(r.a)}</title></circle><circle cx="${X(r.b)}" cy="${y}" r="7.5" fill="var(--chalk)" stroke="var(--surface)" stroke-width="1.5"><title>${B}: ${pct(r.b)}</title></circle>`});
- return s+"</svg>"}
+/* Barras e halteres em HTML (não SVG): o texto fica sempre no tamanho de leitura, em qualquer largura. */
+const cl=v=>Math.max(0,Math.min(100,v||0));
+const eixo=`<div class="axis"><span></span><div>${[0,25,50,70,100].map(v=>`<em style="left:${v}%">${v}%</em>`).join("")}</div></div>`;
+function hbars(items,{lw=150}={}){
+ return `<div class="hb" style="--lw:${lw}px">${items.map(it=>{const v=cl(it.v),dentro=v>82;
+  return `<div class="r"><span class="l">${esc(it.l)}</span><div class="t" title="${esc(it.l)}: ${pct(it.v)}"><i class="f-${fx(it.v)}" style="width:${v}%"></i><b style="${dentro?`right:${100-v}%;padding-right:10px;color:#fff`:`left:${v}%;padding-left:8px`}">${pct(it.v)}</b></div></div>`}).join("")}${eixo}</div>`}
+function dumbbell(rows,A,B){
+ return `<div class="db">${rows.map(r=>{const a=cl(r.a),b=cl(r.b),lo=Math.min(a,b),hi=Math.max(a,b),d=Math.round(r.a-r.b);
+  return `<div class="r"><div class="row between" style="gap:8px;flex-wrap:nowrap"><span class="l">${esc(r.l)}</span><span class="v"><b style="color:var(--pri)">${pct(r.a)}</b> × <b class="cb">${pct(r.b)}</b>${d?` <span class="mut">(${d>0?"+":""}${d})</span>`:""}</span></div><div class="t"><i style="left:${lo}%;width:${hi-lo}%"></i><u style="left:${a}%;background:var(--pri)" title="${A}: ${pct(r.a)}"></u><u style="left:${b}%;background:var(--chalk)" title="${B}: ${pct(r.b)}"></u></div></div>`}).join("")}${eixo.replace('<span></span>','')}</div>`}
 function scatter(pts,{w=600,h=400}={}){const p=46,X=v=>p+(w-p-14)*v/100,Y=v=>h-p-(h-p-14)*v/100;let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
  s+=`<rect x="${X(0)}" y="${Y(50)}" width="${X(50)-X(0)}" height="${Y(0)-Y(50)}" fill="var(--in)" opacity=".08"/><rect x="${X(70)}" y="${Y(100)}" width="${X(100)-X(70)}" height="${Y(70)-Y(100)}" fill="var(--ot)" opacity=".08"/>`;
  [0,25,50,75,100].forEach(v=>s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${Y(0)}" y2="${Y(100)}" stroke="var(--line)"/><line x1="${X(0)}" x2="${X(100)}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${X(v)}" y="${h-p+18}" text-anchor="middle">${v}</text><text x="${p-8}" y="${Y(v)+4}" text-anchor="end">${v}</text>`);
@@ -336,7 +359,7 @@ V.alunos=()=>{
  main.innerHTML=`<div class="stack"><div class="card" style="display:grid;gap:14px"><div><h2>Todos os alunos</h2><p class="sub">Toque num aluno para ver a ficha com o que ele já domina e o que precisa retomar.</p></div>
   <div class="row noprint"><input id="lq" placeholder="Buscar pelo nome…" aria-label="Buscar" value="${esc(lf.q)}" style="flex:1;min-width:200px"><select id="lt" aria-label="Turma"><option value="">Todas as turmas</option>${T.map(k=>`<option ${k==lf.t?"selected":""}>${k}</option>`).join("")}</select><select id="lfx" aria-label="Faixa"><option value="">Todas as faixas</option>${["IN","RE","BO","OT"].map(k=>`<option value="${k}" ${k==lf.f?"selected":""}>${F[k].p}</option>`).join("")}</select></div>
   <div class="sm mut" id="lc"></div><div class="scroll"><table><thead id="lh"></thead><tbody id="lb"></tbody></table></div></div>
-  <div class="card" style="display:grid;gap:10px"><h2>Português × Matemática</h2><p class="sub">Cada ponto é um aluno. No canto vermelho estão os que precisam de apoio nas duas disciplinas; no verde, os que foram bem nas duas.</p><div id="sc" style="max-width:680px"></div><div class="row xs">${[1,2,3,4,5].map(a=>`<span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="${SC[a]}"/></svg> ${a}º ano</span>`).join("")}</div></div></div>`;
+  <div class="card" style="display:grid;gap:10px"><h2>Português × Matemática</h2><p class="sub">Cada ponto é um aluno. No canto vermelho estão os que precisam de apoio nas duas disciplinas; no verde, os que foram bem nas duas.</p><div id="sc" class="scat" style="max-width:680px"></div><div class="row xs">${[1,2,3,4,5].map(a=>`<span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="${SC[a]}"/></svg> ${a}º ano</span>`).join("")}</div></div></div>`;
  const draw=()=>{let rows=ALS.filter(a=>(!lf.q||norm(a.nome).includes(norm(lf.q)))&&(!lf.t||a.turma==lf.t)&&(!lf.f||fx(a.media)==lf.f));
   const v=a=>lf.s=="nome"?norm(a.nome):lf.s=="turma"?a.turma:lf.s=="media"?a.media:(a.d[lf.s]??-1);rows.sort((a,b)=>(v(a)>v(b)?1:v(a)<v(b)?-1:0)*lf.dir);
   const th=(k,l,r)=>`<th class="s ${r?"r":""}" data-s="${k}">${l}${lf.s==k?(lf.dir>0?" ↑":" ↓"):""}</th>`;
