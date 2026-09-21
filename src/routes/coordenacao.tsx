@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarDays, ClipboardList, GraduationCap, UserCheck, UserX, Users2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -20,8 +20,7 @@ import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
-import { buildWeeklySchedule, getWeekIndex, toDateKey } from "@/lib/schedule-engine";
-import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
+import { toDateKey } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 import coordenacaoHeroImg from "@/assets/alunos-hero.jpg";
 
@@ -29,19 +28,16 @@ export const Route = createFileRoute("/coordenacao")({
   component: CoordenacaoPage,
   head: () => ({
     meta: [
-      { title: "Coordenação · Calendário de aulas e frequência de informática" },
+      { title: "Coordenação · Frequência das aulas de informática" },
       {
         name: "description",
         content:
-          "Painel aberto da coordenação: calendário semanal das aulas de informática, participação por turma e grupo e histórico de faltas do mês.",
+          "Painel aberto da coordenação: participação e faltas por turma e grupo nas aulas de informática.",
       },
-      { property: "og:title", content: "Coordenação · Aulas e frequência de informática" },
-      {
-        property: "og:description",
-        content: "Calendário das aulas, presença por turma e grupo e histórico de faltas.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      // A página fala de frequência de crianças. Mesmo sem nomes, ela não
+      // tem por que aparecer em busca — some do índice junto com as demais
+      // áreas internas do site.
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
 });
@@ -69,12 +65,6 @@ function CoordenacaoPage() {
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
-  const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
-  const assignments = useMemo(
-    () => buildWeeklySchedule(turmas, config, weekIndex),
-    [turmas, config, weekIndex],
-  );
-
   useEffect(() => {
     let cancelado = false;
     const { inicio, fim } = intervaloDoMes(mes);
@@ -90,7 +80,13 @@ function CoordenacaoPage() {
 
     Promise.race([fetchPresencasRange(inicio, fim), timeout])
       .then((dados) => {
-        if (!cancelado) setRegistros(dados);
+        if (cancelado) return;
+        // Mesmo corte do painel administrativo: o que foi registrado antes do
+        // início oficial de uso são testes da configuração do sistema. Sem
+        // isso, esta página e a Frequência do painel mostravam contagens
+        // diferentes para o mesmo mês.
+        const corte = config.dataInicioOperacao;
+        setRegistros(corte ? dados.filter((r) => r.data >= corte) : dados);
       })
       .catch((err: Error) => {
         if (!cancelado) {
@@ -101,7 +97,7 @@ function CoordenacaoPage() {
     return () => {
       cancelado = true;
     };
-  }, [mes]);
+  }, [mes, config.dataInicioOperacao]);
 
   const nomeTurma = (id: string) => {
     const t = turmas.find((turma) => turma.id === id);
@@ -132,6 +128,23 @@ function CoordenacaoPage() {
   }, [registros, turmas]);
 
   const faltas = (registros ?? []).filter((r) => r.status === "faltou");
+
+  /** Faltas somadas por dia e turma — sem identificar a criança. */
+  const faltasPorDia = useMemo(() => {
+    const mapa = new Map<string, { data: string; turmaId: string; faltas: number }>();
+    for (const registro of faltas) {
+      const chave = `${registro.data}|${registro.turmaId}`;
+      const atual = mapa.get(chave) ?? {
+        data: registro.data,
+        turmaId: registro.turmaId,
+        faltas: 0,
+      };
+      atual.faltas += 1;
+      mapa.set(chave, atual);
+    }
+    return [...mapa.values()].sort((a, b) => b.data.localeCompare(a.data));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registros]);
   const participacoes = (registros ?? []).length - faltas.length;
 
   return (
@@ -190,55 +203,29 @@ function CoordenacaoPage() {
         </section>
 
         <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-          <Card className="mb-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <CalendarDays className="size-4 text-primary" /> Calendário da semana
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {config.diasSemana.map((dia) => {
-                const doDia = assignments
-                  .filter((a) => a.dia === dia)
-                  .sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
-                return (
-                  <div key={dia} className="rounded-lg border border-border/60 bg-card p-3">
-                    <p className="mb-2 text-sm font-semibold text-foreground">{dia}</p>
-                    {doDia.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">Sem aulas programadas.</p>
-                    ) : (
-                      <ul className="flex flex-col gap-2">
-                        {doDia.map((a) => {
-                          const cor = serieClasses(serieIndexPorNumero(a.turma.serie));
-                          return (
-                            <li
-                              key={`${a.dia}-${a.slot.inicio}`}
-                              className="flex items-start gap-2 text-xs text-muted-foreground"
-                            >
-                              <span
-                                className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md text-[10px] font-bold ${cor.bg} ${cor.text}`}
-                              >
-                                {a.turma.letra}
-                              </span>
-                              <span className="flex flex-col">
-                                <span className="font-mono text-sm font-bold text-foreground">
-                                  {a.slot.inicio} – {a.slot.fim}
-                                </span>
-                                <span className="text-xs">
-                                  {a.turma.serie} "{a.turma.letra}"
-                                  {a.conteudo ? ` · ${a.conteudo}` : ""}
-                                </span>
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
+          {/* O cronograma da semana mora na Agenda, que navega entre as
+            semanas e abre a lista de alunos de cada turma. Aqui fica só o
+            atalho — manter uma segunda cópia, mais pobre, só criava duas
+            versões da mesma informação. */}
+          <Link
+            to="/agenda"
+            className="group mb-4 flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-card p-4 transition-colors hover:border-primary/40"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <CalendarDays className="size-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-foreground group-hover:text-primary">
+                Calendário das aulas
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                Semana a semana, com os alunos previstos em cada turma.
+              </span>
+            </span>
+            <span className="hidden shrink-0 text-sm font-medium text-primary group-hover:underline sm:block">
+              Abrir a Agenda →
+            </span>
+          </Link>
 
           <div className="mb-4 flex flex-wrap items-end gap-3">
             <div className="flex flex-col gap-1.5">
@@ -338,46 +325,44 @@ function CoordenacaoPage() {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Histórico de faltas ({faltas.length})</CardTitle>
+              <CardTitle className="text-base">Faltas por dia ({faltas.length} no mês)</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Antes esta tabela trazia o nome de cada criança e o motivo da
+                falta ("não quis participar") numa página aberta e indexável.
+                A coordenação precisa enxergar o tamanho do problema, não
+                expor a criança: aqui ficam as contagens por dia e turma, e o
+                caso a caso continua no painel, atrás do login. */}
+              <p className="mb-3 text-xs text-muted-foreground">
+                Contagem por dia e turma. O detalhe por aluno fica no painel da escola, com login.
+              </p>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-28">Data</TableHead>
                       <TableHead>Turma</TableHead>
-                      <TableHead>Aluno</TableHead>
-                      <TableHead>Grupo</TableHead>
-                      <TableHead className="text-right">Motivo</TableHead>
+                      <TableHead className="text-right">Faltas</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {faltas.length === 0 ? (
+                    {faltasPorDia.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                        <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
                           {registros === null
                             ? "Carregando..."
                             : "Nenhuma falta registrada no mês."}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      faltas.map((f) => (
-                        <TableRow key={f.id}>
+                      faltasPorDia.map((linha) => (
+                        <TableRow key={`${linha.data}-${linha.turmaId}`}>
                           <TableCell className="font-mono text-sm">
-                            {new Date(`${f.data}T00:00:00`).toLocaleDateString("pt-BR")}
+                            {new Date(`${linha.data}T00:00:00`).toLocaleDateString("pt-BR")}
                           </TableCell>
-                          <TableCell className="text-sm">{nomeTurma(f.turmaId)}</TableCell>
-                          <TableCell className="text-sm text-foreground">{f.alunoNome}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            Grupo {f.grupoIndice + 1}
-                          </TableCell>
+                          <TableCell className="text-sm">{nomeTurma(linha.turmaId)}</TableCell>
                           <TableCell className="text-right">
-                            <Badge variant="destructive">
-                              {f.motivo === "nao_quis_participar"
-                                ? "Não quis participar"
-                                : "Ausente"}
-                            </Badge>
+                            <Badge variant="destructive">{linha.faltas}</Badge>
                           </TableCell>
                         </TableRow>
                       ))
