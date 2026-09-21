@@ -14,15 +14,26 @@ import {
   List,
   ListOrdered,
   Loader2,
+  PanelLeft,
+  PanelRight,
   Palette,
   Redo2,
   Save,
   SmilePlus,
+  Square,
   Trash2,
+  Type,
   Underline,
   Undo2,
+  X,
 } from "lucide-react";
-import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -88,11 +99,56 @@ const CORES_CAPA = [
 const QUANTIDADE_RECENTES = 5;
 
 const EMOJIS_E_SIMBOLOS = [
-  "😀", "😂", "😍", "🤔", "😮", "😢", "😴", "🙌", "👍", "👎",
-  "👏", "🙏", "💪", "🎉", "✨", "⭐", "🔥", "❤️", "📚", "✏️",
-  "🎓", "🏫", "🖥️", "💡", "🌟", "🌈", "☀️", "🌙", "⚽", "🎨",
-  "✅", "❌", "❓", "❗", "➕", "➖", "✖️", "➗", "≈", "≠",
-  "±", "√", "π", "°", "%", "→", "←", "↑", "↓", "★",
+  "😀",
+  "😂",
+  "😍",
+  "🤔",
+  "😮",
+  "😢",
+  "😴",
+  "🙌",
+  "👍",
+  "👎",
+  "👏",
+  "🙏",
+  "💪",
+  "🎉",
+  "✨",
+  "⭐",
+  "🔥",
+  "❤️",
+  "📚",
+  "✏️",
+  "🎓",
+  "🏫",
+  "🖥️",
+  "💡",
+  "🌟",
+  "🌈",
+  "☀️",
+  "🌙",
+  "⚽",
+  "🎨",
+  "✅",
+  "❌",
+  "❓",
+  "❗",
+  "➕",
+  "➖",
+  "✖️",
+  "➗",
+  "≈",
+  "≠",
+  "±",
+  "√",
+  "π",
+  "°",
+  "%",
+  "→",
+  "←",
+  "↑",
+  "↓",
+  "★",
 ] as const;
 
 function formatarRelativo(dataIso: string): string {
@@ -116,6 +172,18 @@ function comando(nome: string, valor?: string) {
   document.execCommand(nome, false, valor);
 }
 
+/** Estado do que está sendo arrastado no momento (imagem/caixa de texto). */
+interface EstadoArraste {
+  tipo: "imagem" | "textbox-mover" | "textbox-redimensionar";
+  elemento: HTMLElement;
+  startX: number;
+  startY: number;
+  startWidth: number;
+  startHeight: number;
+  startLeft: number;
+  startTop: number;
+}
+
 export function EditorTexto() {
   const areaRef = useRef<HTMLDivElement>(null);
   // Clicar num botão fora da área de digitação (fonte, cor) tira o foco do
@@ -126,6 +194,16 @@ export function EditorTexto() {
   const selecaoSalvaRef = useRef<Range | null>(null);
   const [contagem, setContagem] = useState(0);
   const confirmar = useConfirmar();
+
+  // Imagem atualmente selecionada na página (mostra a barrinha flutuante de
+  // alinhamento/tamanho) e o que está sendo arrastado (redimensionar imagem,
+  // mover ou redimensionar caixa de texto).
+  const [imagemSelecionada, setImagemSelecionada] = useState<HTMLElement | null>(null);
+  const [posicaoBarraImagem, setPosicaoBarraImagem] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const arrastandoRef = useRef<EstadoArraste | null>(null);
 
   const sessao = lerAlunoSessao();
 
@@ -178,6 +256,13 @@ export function EditorTexto() {
 
   const imagemInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * A imagem é inserida dentro de um "envelope" (`.editor-img-wrap`) que não
+   * é editável (`contenteditable="false"`) e carrega uma alcinha
+   * (`.editor-img-handle`) no canto: é nela que o aluno arrasta para
+   * redimensionar. O envelope também guarda o alinhamento atual em
+   * `data-align`, usado pelos botões da barrinha flutuante.
+   */
   function inserirImagem(e: ChangeEvent<HTMLInputElement>) {
     const arquivo = e.target.files?.[0];
     e.target.value = "";
@@ -192,12 +277,247 @@ export function EditorTexto() {
     }
     const leitor = new FileReader();
     leitor.onload = () => {
-      comandoComSelecao("insertImage", leitor.result as string);
+      const src = leitor.result as string;
+      const html =
+        `<span class="editor-img-wrap" contenteditable="false" draggable="false" data-align="inline" ` +
+        `style="display:inline-block;position:relative;max-width:100%;margin:0 4px;vertical-align:middle;">` +
+        `<button type="button" class="editor-img-delete" contenteditable="false" title="Remover imagem" ` +
+        `style="position:absolute;left:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;background:#dc2626;` +
+        `color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;">×</button>` +
+        `<img src="${src}" draggable="false" style="width:320px;max-width:100%;height:auto;display:block;border-radius:2px;" />` +
+        `<span class="editor-img-handle" contenteditable="false" title="Arrastar para redimensionar" ` +
+        `style="position:absolute;right:-6px;bottom:-6px;width:14px;height:14px;border-radius:9999px;background:#2563eb;` +
+        `border:2px solid #fff;cursor:nwse-resize;display:none;"></span></span>&nbsp;`;
+      comandoComSelecao("insertHTML", html);
       salvarRascunhoLocal();
       atualizarContagem();
     };
     leitor.readAsDataURL(arquivo);
   }
+
+  /**
+   * Insere uma caixa de texto independente, que fica flutuando sobre a
+   * folha e pode ser arrastada para qualquer posição (pela alcinha roxa no
+   * canto superior) e redimensionada (pela alcinha no canto inferior
+   * direito). Como fica com `position:absolute`, ela é posicionada em
+   * relação à própria área de digitação (que agora é `position:relative`).
+   */
+  function inserirCaixaTexto() {
+    areaRef.current?.focus();
+    const html =
+      `<div class="editor-textbox" contenteditable="false" draggable="false" ` +
+      `style="position:absolute;left:32px;top:32px;width:220px;min-height:100px;z-index:5;` +
+      `background:#ffffff;border:1px dashed #94a3b8;border-radius:4px;padding:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);">` +
+      `<span class="editor-textbox-handle" contenteditable="false" title="Arrastar caixa de texto" ` +
+      `style="position:absolute;top:-11px;left:-11px;width:18px;height:18px;border-radius:9999px;background:#7c3aed;` +
+      `border:2px solid #fff;cursor:move;"></span>` +
+      `<button type="button" class="editor-textbox-delete" contenteditable="false" title="Remover caixa de texto" ` +
+      `style="position:absolute;top:-11px;right:-11px;width:18px;height:18px;border-radius:9999px;background:#dc2626;` +
+      `color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;">×</button>` +
+      `<div class="editor-textbox-content" contenteditable="true" style="outline:none;min-height:60px;font-size:14px;line-height:1.4;">Digite aqui...</div>` +
+      `<span class="editor-textbox-resize" contenteditable="false" title="Redimensionar caixa de texto" ` +
+      `style="position:absolute;right:-6px;bottom:-6px;width:14px;height:14px;border-radius:9999px;background:#7c3aed;` +
+      `border:2px solid #fff;cursor:nwse-resize;"></span></div>`;
+    document.execCommand("insertHTML", false, html);
+    salvarRascunhoLocal();
+    atualizarContagem();
+    setSujo(true);
+  }
+
+  function atualizarPosicaoBarraImagem(wrap: HTMLElement) {
+    const rect = wrap.getBoundingClientRect();
+    setPosicaoBarraImagem({ top: rect.top - 44, left: rect.left });
+  }
+
+  function selecionarImagem(wrap: HTMLElement) {
+    if (imagemSelecionada && imagemSelecionada !== wrap) desselecionarImagem();
+    wrap.querySelectorAll<HTMLElement>(".editor-img-handle, .editor-img-delete").forEach((el) => {
+      el.style.display = "flex";
+    });
+    setImagemSelecionada(wrap);
+    atualizarPosicaoBarraImagem(wrap);
+  }
+
+  function desselecionarImagem() {
+    imagemSelecionada
+      ?.querySelectorAll<HTMLElement>(".editor-img-handle, .editor-img-delete")
+      .forEach((el) => {
+        el.style.display = "none";
+      });
+    setImagemSelecionada(null);
+    setPosicaoBarraImagem(null);
+  }
+
+  /**
+   * Aplica o alinhamento na imagem selecionada: "em linha" (comportamento
+   * padrão, no meio do texto), "esquerda"/"direita" (a imagem flutua para o
+   * lado e o texto contorna, como no Word) ou "centro" (a imagem fica
+   * sozinha numa linha, centralizada).
+   */
+  function aplicarAlinhamentoImagem(alinhamento: "inline" | "esquerda" | "direita" | "centro") {
+    if (!imagemSelecionada) return;
+    const wrap = imagemSelecionada;
+    wrap.dataset["align"] = alinhamento;
+    wrap.style.float = "none";
+    wrap.style.display = "inline-block";
+    wrap.style.margin = "0 4px";
+    if (alinhamento === "esquerda") {
+      wrap.style.float = "left";
+      wrap.style.margin = "4px 14px 4px 0";
+    } else if (alinhamento === "direita") {
+      wrap.style.float = "right";
+      wrap.style.margin = "4px 0 4px 14px";
+    } else if (alinhamento === "centro") {
+      wrap.style.display = "block";
+      wrap.style.margin = "10px auto";
+    }
+    atualizarPosicaoBarraImagem(wrap);
+    salvarRascunhoLocal();
+    setSujo(true);
+  }
+
+  function excluirImagemSelecionada() {
+    imagemSelecionada?.remove();
+    desselecionarImagem();
+    salvarRascunhoLocal();
+    atualizarContagem();
+    setSujo(true);
+  }
+
+  /** Clique dentro da folha: seleciona/deseleciona imagem ou apaga um item. */
+  function aoClicarNaArea(e: ReactMouseEvent<HTMLDivElement>) {
+    const alvo = e.target as HTMLElement;
+
+    const botaoExcluirImagem = alvo.closest(".editor-img-delete");
+    if (botaoExcluirImagem) {
+      e.preventDefault();
+      botaoExcluirImagem.closest<HTMLElement>(".editor-img-wrap")?.remove();
+      desselecionarImagem();
+      salvarRascunhoLocal();
+      atualizarContagem();
+      setSujo(true);
+      return;
+    }
+
+    const botaoExcluirCaixa = alvo.closest(".editor-textbox-delete");
+    if (botaoExcluirCaixa) {
+      e.preventDefault();
+      botaoExcluirCaixa.closest<HTMLElement>(".editor-textbox")?.remove();
+      salvarRascunhoLocal();
+      atualizarContagem();
+      setSujo(true);
+      return;
+    }
+
+    const wrap = alvo.closest<HTMLElement>(".editor-img-wrap");
+    if (wrap) {
+      selecionarImagem(wrap);
+    } else if (imagemSelecionada) {
+      desselecionarImagem();
+    }
+  }
+
+  /** Início do arraste: redimensionar imagem, mover ou redimensionar caixa de texto. */
+  function aoPressionarNaArea(e: ReactMouseEvent<HTMLDivElement>) {
+    const alvo = e.target as HTMLElement;
+
+    const alcaImagem = alvo.closest(".editor-img-handle");
+    if (alcaImagem) {
+      e.preventDefault();
+      const wrap = alcaImagem.closest<HTMLElement>(".editor-img-wrap");
+      const img = wrap?.querySelector("img");
+      if (!img) return;
+      const rect = img.getBoundingClientRect();
+      arrastandoRef.current = {
+        tipo: "imagem",
+        elemento: img,
+        startX: e.clientX,
+        startY: e.clientY,
+        startWidth: rect.width,
+        startHeight: rect.height,
+        startLeft: 0,
+        startTop: 0,
+      };
+      return;
+    }
+
+    const alcaMoverCaixa = alvo.closest(".editor-textbox-handle");
+    if (alcaMoverCaixa) {
+      e.preventDefault();
+      const caixa = alcaMoverCaixa.closest<HTMLElement>(".editor-textbox");
+      if (!caixa) return;
+      arrastandoRef.current = {
+        tipo: "textbox-mover",
+        elemento: caixa,
+        startX: e.clientX,
+        startY: e.clientY,
+        startWidth: 0,
+        startHeight: 0,
+        startLeft: Number.parseFloat(caixa.style.left || "0"),
+        startTop: Number.parseFloat(caixa.style.top || "0"),
+      };
+      return;
+    }
+
+    const alcaRedimensionarCaixa = alvo.closest(".editor-textbox-resize");
+    if (alcaRedimensionarCaixa) {
+      e.preventDefault();
+      const caixa = alcaRedimensionarCaixa.closest<HTMLElement>(".editor-textbox");
+      if (!caixa) return;
+      const rect = caixa.getBoundingClientRect();
+      arrastandoRef.current = {
+        tipo: "textbox-redimensionar",
+        elemento: caixa,
+        startX: e.clientX,
+        startY: e.clientY,
+        startWidth: rect.width,
+        startHeight: rect.height,
+        startLeft: 0,
+        startTop: 0,
+      };
+    }
+  }
+
+  // Escuta o mouse na janela inteira (não só na área de digitação) para que
+  // o arraste continue funcionando mesmo se o cursor sair da folha por um
+  // instante, e termina o arraste quando o botão do mouse é solto.
+  useEffect(() => {
+    function aoMoverMouse(e: MouseEvent) {
+      const estado = arrastandoRef.current;
+      if (!estado) return;
+      const dx = e.clientX - estado.startX;
+      const dy = e.clientY - estado.startY;
+
+      if (estado.tipo === "imagem") {
+        const novaLargura = Math.max(40, Math.round(estado.startWidth + dx));
+        estado.elemento.style.width = `${novaLargura}px`;
+        const wrap = estado.elemento.closest<HTMLElement>(".editor-img-wrap");
+        if (wrap) atualizarPosicaoBarraImagem(wrap);
+      } else if (estado.tipo === "textbox-redimensionar") {
+        estado.elemento.style.width = `${Math.max(80, Math.round(estado.startWidth + dx))}px`;
+        estado.elemento.style.height = `${Math.max(48, Math.round(estado.startHeight + dy))}px`;
+      } else if (estado.tipo === "textbox-mover") {
+        estado.elemento.style.left = `${Math.round(estado.startLeft + dx)}px`;
+        estado.elemento.style.top = `${Math.round(estado.startTop + dy)}px`;
+      }
+    }
+
+    function aoSoltarMouse() {
+      if (!arrastandoRef.current) return;
+      arrastandoRef.current = null;
+      salvarRascunhoLocal();
+      atualizarContagem();
+      setSujo(true);
+    }
+
+    window.addEventListener("mousemove", aoMoverMouse);
+    window.addEventListener("mouseup", aoSoltarMouse);
+    return () => {
+      window.removeEventListener("mousemove", aoMoverMouse);
+      window.removeEventListener("mouseup", aoSoltarMouse);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [arquivoAtualId, setArquivoAtualId] = useState<string | null>(null);
   const [titulo, setTitulo] = useState("Sem título");
@@ -218,27 +538,62 @@ export function EditorTexto() {
   // de trocar de texto e o aluno perder o que ainda não salvou.
   const [sujo, setSujo] = useState(false);
 
+  // Diálogo de "salvar antes de sair", com três respostas possíveis (não dá
+  // pra fazer isso com o `useConfirmar` genérico, que só tem Confirmar/
+  // Cancelar). `resolverSairRef` guarda a função que destrava a Promise que
+  // `confirmarTrocaSeNecessario` está esperando.
+  const [dialogSairAberto, setDialogSairAberto] = useState(false);
+  const resolverSairRef = useRef<((resposta: "salvar" | "descartar" | "cancelar") => void) | null>(
+    null,
+  );
+
+  function perguntarSobreSair(): Promise<"salvar" | "descartar" | "cancelar"> {
+    return new Promise((resolve) => {
+      resolverSairRef.current = resolve;
+      setDialogSairAberto(true);
+    });
+  }
+
+  function responderSair(resposta: "salvar" | "descartar" | "cancelar") {
+    resolverSairRef.current?.(resposta);
+    resolverSairRef.current = null;
+    setDialogSairAberto(false);
+  }
+
   /**
    * Chamado antes de qualquer ação que troque o documento em tela (abrir
-   * outro texto, começar um novo). Se não há nada arriscado a perder, deixa
-   * passar direto; se há, pergunta e — quando o aluno está logado — oferece
-   * salvar antes de continuar.
+   * outro texto, começar um novo, fechar a página). Se não há nada
+   * arriscado a perder, deixa passar direto; se há, pergunta se o aluno
+   * quer salvar, sair sem salvar, ou cancelar e continuar editando.
    */
   async function confirmarTrocaSeNecessario(): Promise<boolean> {
     const temConteudo = (areaRef.current?.innerText ?? "").trim().length > 0;
     if (!sujo || !temConteudo) return true;
 
-    const ok = await confirmar({
-      titulo: "Salvar alterações?",
-      descricao: sessao
-        ? "Este documento tem mudanças que ainda não foram salvas. Deseja salvar antes de continuar?"
-        : "Este documento tem mudanças que ainda não foram salvas. Elas serão perdidas se você continuar.",
-      textoConfirmar: sessao ? "Salvar e continuar" : "Continuar sem salvar",
-    });
-    if (!ok) return false;
-    if (sessao) await salvar();
+    const resposta = await perguntarSobreSair();
+    if (resposta === "cancelar") return false;
+    if (resposta === "salvar") {
+      if (!sessao) {
+        toast.error("Entre na sua área de aluno para salvar o documento.");
+        return false;
+      }
+      await salvar();
+    }
     return true;
   }
+
+  // Se o aluno tentar fechar a aba, atualizar a página ou sair pelo
+  // navegador com mudanças não salvas, o próprio navegador mostra um aviso
+  // nativo perguntando se ele quer mesmo sair.
+  useEffect(() => {
+    function aoTentarFecharAba(e: BeforeUnloadEvent) {
+      if (!sujo) return;
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", aoTentarFecharAba);
+    return () => window.removeEventListener("beforeunload", aoTentarFecharAba);
+  }, [sujo]);
 
   function aplicarRecuo(direcao: 1 | -1) {
     comandoComSelecao(direcao === 1 ? "indent" : "outdent");
@@ -265,7 +620,6 @@ export function EditorTexto() {
     // as linhas depois de apertar Enter.
     document.execCommand("defaultParagraphSeparator", false, "p");
     carregarRecentes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function carregarRecentes() {
@@ -452,8 +806,12 @@ export function EditorTexto() {
                     </TooltipTrigger>
                     <TooltipContent side="right" className="text-xs">
                       <p className="font-medium">{arquivo.titulo}</p>
-                      <p className="mt-1 opacity-90">Criado em {formatarDataHora(arquivo.criadoEm)}</p>
-                      <p className="opacity-90">Atualizado em {formatarDataHora(arquivo.atualizadoEm)}</p>
+                      <p className="mt-1 opacity-90">
+                        Criado em {formatarDataHora(arquivo.criadoEm)}
+                      </p>
+                      <p className="opacity-90">
+                        Atualizado em {formatarDataHora(arquivo.atualizadoEm)}
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 ))}
@@ -464,352 +822,428 @@ export function EditorTexto() {
       )}
 
       <div className="order-1 flex min-w-0 flex-1 flex-col gap-3 md:order-2">
-      {/* Barra de título estilo Word: nome do arquivo editável */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          className="h-8 max-w-xs font-medium"
-          placeholder="Nome do documento"
-        />
-        {!sessao && (
-          <p className="text-xs text-muted-foreground">
-            Entre na sua área de aluno para salvar seus documentos.
-          </p>
-        )}
-      </div>
-
-      {/* Faixa de ferramentas cinza, igual à do Word */}
-      <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[#d8d6d2] bg-[#f3f2f1] p-1.5 dark:border-white/10 dark:bg-zinc-800">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 bg-white dark:bg-zinc-700"
-          onClick={novoDocumento}
-        >
-          <FilePlus2 className="size-3.5" /> Novo
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 bg-white dark:bg-zinc-700"
-          onClick={abrirLista}
-        >
-          <FolderOpen className="size-3.5" /> Abrir
-        </Button>
-        <Button
-          size="sm"
-          className="h-8 gap-1.5"
-          onClick={salvar}
-          disabled={salvando}
-        >
-          {salvando ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Save className="size-3.5" />
+        {/* Barra de título estilo Word: nome do arquivo editável */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            className="h-8 max-w-xs font-medium"
+            placeholder="Nome do documento"
+          />
+          {!sessao && (
+            <p className="text-xs text-muted-foreground">
+              Entre na sua área de aluno para salvar seus documentos.
+            </p>
           )}
-          Salvar
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 bg-white text-destructive hover:bg-destructive/10 dark:bg-zinc-700"
-          onClick={excluirDocumentoAtual}
-        >
-          <Trash2 className="size-3.5" /> Excluir
-        </Button>
+        </div>
 
-        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+        {/* Faixa de ferramentas cinza, igual à do Word */}
+        <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[#d8d6d2] bg-[#f3f2f1] p-1.5 dark:border-white/10 dark:bg-zinc-800">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 bg-white dark:bg-zinc-700"
+            onClick={novoDocumento}
+          >
+            <FilePlus2 className="size-3.5" /> Novo
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 bg-white dark:bg-zinc-700"
+            onClick={abrirLista}
+          >
+            <FolderOpen className="size-3.5" /> Abrir
+          </Button>
+          <Button size="sm" className="h-8 gap-1.5" onClick={salvar} disabled={salvando}>
+            {salvando ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Save className="size-3.5" />
+            )}
+            Salvar
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 bg-white text-destructive hover:bg-destructive/10 dark:bg-zinc-700"
+            onClick={excluirDocumentoAtual}
+          >
+            <Trash2 className="size-3.5" /> Excluir
+          </Button>
 
-        <Select onValueChange={(v) => comandoComSelecao("fontName", v)}>
-          <SelectTrigger className="h-8 w-40 bg-white dark:bg-zinc-700">
-            <SelectValue placeholder="Fonte" />
-          </SelectTrigger>
-          <SelectContent>
-            {FONTES.map((f) => (
-              <SelectItem key={f.valor} value={f.valor} style={{ fontFamily: f.valor }}>
-                {f.rotulo}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select onValueChange={aplicarTamanhoFonte}>
-          <SelectTrigger className="h-8 w-20 bg-white dark:bg-zinc-700">
-            <SelectValue placeholder="Tam." />
-          </SelectTrigger>
-          <SelectContent>
-            {TAMANHOS.map((t) => (
-              <SelectItem key={t} value={String(t)}>
-                {t}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
 
-        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+          <Select onValueChange={(v) => comandoComSelecao("fontName", v)}>
+            <SelectTrigger className="h-8 w-40 bg-white dark:bg-zinc-700">
+              <SelectValue placeholder="Fonte" />
+            </SelectTrigger>
+            <SelectContent>
+              {FONTES.map((f) => (
+                <SelectItem key={f.valor} value={f.valor} style={{ fontFamily: f.valor }}>
+                  {f.rotulo}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select onValueChange={aplicarTamanhoFonte}>
+            <SelectTrigger className="h-8 w-20 bg-white dark:bg-zinc-700">
+              <SelectValue placeholder="Tam." />
+            </SelectTrigger>
+            <SelectContent>
+              {TAMANHOS.map((t) => (
+                <SelectItem key={t} value={String(t)}>
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("bold")}
-          title="Negrito"
-        >
-          <Bold className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("italic")}
-          title="Itálico"
-        >
-          <Italic className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("underline")}
-          title="Sublinhado"
-        >
-          <Underline className="size-4" />
-        </Button>
+          <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
 
-        <div className="relative">
           <Button
             variant="ghost"
             size="icon"
             className="size-8"
-            onClick={() => setCorAberta((v) => !v)}
-            title="Cor do texto"
+            onClick={() => comandoComSelecao("bold")}
+            title="Negrito"
           >
-            <Palette className="size-4" />
+            <Bold className="size-4" />
           </Button>
-          {corAberta && (
-            <div
-              className="absolute left-0 top-9 z-20 grid w-[148px] grid-cols-5 gap-1.5 rounded-lg border border-border bg-popover p-2 shadow-lg"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comandoComSelecao("italic")}
+            title="Itálico"
+          >
+            <Italic className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comandoComSelecao("underline")}
+            title="Sublinhado"
+          >
+            <Underline className="size-4" />
+          </Button>
+
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setCorAberta((v) => !v)}
+              title="Cor do texto"
             >
-              {CORES.map((cor) => (
-                <button
-                  key={cor}
-                  type="button"
-                  className="size-6 shrink-0 rounded-full ring-1 ring-black/15 transition-transform hover:scale-110"
-                  style={{ backgroundColor: cor }}
-                  onClick={() => {
-                    comandoComSelecao("foreColor", cor);
-                    setCorAberta(false);
-                  }}
-                  aria-label={`Cor ${cor}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+              <Palette className="size-4" />
+            </Button>
+            {corAberta && (
+              <div className="absolute left-0 top-9 z-20 grid w-[148px] grid-cols-5 gap-1.5 rounded-lg border border-border bg-popover p-2 shadow-lg">
+                {CORES.map((cor) => (
+                  <button
+                    key={cor}
+                    type="button"
+                    className="size-6 shrink-0 rounded-full ring-1 ring-black/15 transition-transform hover:scale-110"
+                    style={{ backgroundColor: cor }}
+                    onClick={() => {
+                      comandoComSelecao("foreColor", cor);
+                      setCorAberta(false);
+                    }}
+                    aria-label={`Cor ${cor}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
-        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+          <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("justifyLeft")}
-          title="Alinhar à esquerda"
-        >
-          <AlignLeft className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("justifyCenter")}
-          title="Centralizar"
-        >
-          <AlignCenter className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("justifyRight")}
-          title="Alinhar à direita"
-        >
-          <AlignRight className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("justifyFull")}
-          title="Justificar"
-        >
-          <AlignJustify className="size-4" />
-        </Button>
-
-        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => aplicarRecuo(-1)}
-          title="Diminuir recuo"
-        >
-          <IndentDecrease className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => aplicarRecuo(1)}
-          title="Aumentar recuo"
-        >
-          <IndentIncrease className="size-4" />
-        </Button>
-
-        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
-
-        <input
-          ref={imagemInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={inserirImagem}
-        />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => imagemInputRef.current?.click()}
-          title="Inserir imagem"
-        >
-          <ImageUp className="size-4" />
-        </Button>
-
-        <div className="relative">
           <Button
             variant="ghost"
             size="icon"
             className="size-8"
-            onClick={() => setEmojisAbertos((v) => !v)}
-            title="Emojis e símbolos"
+            onClick={() => comandoComSelecao("justifyLeft")}
+            title="Alinhar à esquerda"
           >
-            <SmilePlus className="size-4" />
+            <AlignLeft className="size-4" />
           </Button>
-          {emojisAbertos && (
-            <div className="absolute left-0 top-9 z-20 grid w-64 grid-cols-10 gap-0.5 rounded-lg border border-border bg-popover p-2 shadow-lg">
-              {EMOJIS_E_SIMBOLOS.map((emoji, indice) => (
-                <button
-                  key={`${emoji}-${indice}`}
-                  type="button"
-                  className="flex size-6 items-center justify-center rounded text-base hover:bg-muted"
-                  onClick={() => inserirEmoji(emoji)}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comandoComSelecao("justifyCenter")}
+            title="Centralizar"
+          >
+            <AlignCenter className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comandoComSelecao("justifyRight")}
+            title="Alinhar à direita"
+          >
+            <AlignRight className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comandoComSelecao("justifyFull")}
+            title="Justificar"
+          >
+            <AlignJustify className="size-4" />
+          </Button>
+
+          <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => aplicarRecuo(-1)}
+            title="Diminuir recuo"
+          >
+            <IndentDecrease className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => aplicarRecuo(1)}
+            title="Aumentar recuo"
+          >
+            <IndentIncrease className="size-4" />
+          </Button>
+
+          <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+          <input
+            ref={imagemInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={inserirImagem}
+          />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => imagemInputRef.current?.click()}
+            title="Inserir imagem"
+          >
+            <ImageUp className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={inserirCaixaTexto}
+            title="Inserir caixa de texto arrastável"
+          >
+            <Square className="size-4" />
+          </Button>
+
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setEmojisAbertos((v) => !v)}
+              title="Emojis e símbolos"
+            >
+              <SmilePlus className="size-4" />
+            </Button>
+            {emojisAbertos && (
+              <div className="absolute left-0 top-9 z-20 grid w-64 grid-cols-10 gap-0.5 rounded-lg border border-border bg-popover p-2 shadow-lg">
+                {EMOJIS_E_SIMBOLOS.map((emoji, indice) => (
+                  <button
+                    key={`${emoji}-${indice}`}
+                    type="button"
+                    className="flex size-6 items-center justify-center rounded text-base hover:bg-muted"
+                    onClick={() => inserirEmoji(emoji)}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comandoComSelecao("insertUnorderedList")}
+            title="Lista com marcadores"
+          >
+            <List className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comandoComSelecao("insertOrderedList")}
+            title="Lista numerada"
+          >
+            <ListOrdered className="size-4" />
+          </Button>
+
+          <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comando("undo")}
+            title="Desfazer"
+          >
+            <Undo2 className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => comando("redo")}
+            title="Refazer"
+          >
+            <Redo2 className="size-4" />
+          </Button>
         </div>
 
-        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("insertUnorderedList")}
-          title="Lista com marcadores"
-        >
-          <List className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comandoComSelecao("insertOrderedList")}
-          title="Lista numerada"
-        >
-          <ListOrdered className="size-4" />
-        </Button>
-
-        <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comando("undo")}
-          title="Desfazer"
-        >
-          <Undo2 className="size-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          onClick={() => comando("redo")}
-          title="Refazer"
-        >
-          <Redo2 className="size-4" />
-        </Button>
-      </div>
-
-      {/* Régua horizontal, só decorativa/de referência (como a do Word), com
+        {/* Régua horizontal, só decorativa/de referência (como a do Word), com
           o marcador do recuo padrão de parágrafo (1,25cm) já aplicado no
           texto e, se o aluno usar "Aumentar recuo", um segundo marcador. */}
-      <div className="mx-auto hidden w-full max-w-[800px] select-none sm:block">
-        <div className="relative h-5 overflow-hidden rounded-t-sm border border-b-0 border-[#d8d6d2] bg-[#ececea] dark:border-white/10 dark:bg-zinc-700">
-          {Array.from({ length: 22 }).map((_, cm) => (
+        <div className="mx-auto hidden w-full max-w-[800px] select-none sm:block">
+          <div className="relative h-5 overflow-hidden rounded-t-sm border border-b-0 border-[#d8d6d2] bg-[#ececea] dark:border-white/10 dark:bg-zinc-700">
+            {Array.from({ length: 22 }).map((_, cm) => (
+              <div
+                key={cm}
+                className="absolute top-0 h-full border-l border-[#c3c1bd] dark:border-white/20"
+                style={{ left: `${cm * 37.8}px` }}
+              >
+                {cm % 5 === 0 && (
+                  <span className="absolute left-1 top-0.5 text-[9px] text-[#8a8886] dark:text-white/50">
+                    {cm}
+                  </span>
+                )}
+              </div>
+            ))}
             <div
-              key={cm}
-              className="absolute top-0 h-full border-l border-[#c3c1bd] dark:border-white/20"
-              style={{ left: `${cm * 37.8}px` }}
-            >
-              {cm % 5 === 0 && (
-                <span className="absolute left-1 top-0.5 text-[9px] text-[#8a8886] dark:text-white/50">
-                  {cm}
-                </span>
-              )}
-            </div>
-          ))}
-          <div
-            className="absolute top-0 h-full w-0 border-l-2 border-primary"
-            style={{ left: `${1.25 * 37.8}px` }}
-            title="Recuo padrão do parágrafo: 1,25cm"
-          />
-          {nivelRecuo > 0 && (
-            <div
-              className="absolute top-0 h-full w-0 border-l-2 border-dashed border-amber-500"
-              style={{ left: `${(1.25 + nivelRecuo * 1.25) * 37.8}px` }}
-              title={`Recuo aplicado: ${(1.25 + nivelRecuo * 1.25).toFixed(2).replace(".", ",")}cm`}
+              className="absolute top-0 h-full w-0 border-l-2 border-primary"
+              style={{ left: `${1.25 * 37.8}px` }}
+              title="Recuo padrão do parágrafo: 1,25cm"
             />
-          )}
+            {nivelRecuo > 0 && (
+              <div
+                className="absolute top-0 h-full w-0 border-l-2 border-dashed border-amber-500"
+                style={{ left: `${(1.25 + nivelRecuo * 1.25) * 37.8}px` }}
+                title={`Recuo aplicado: ${(1.25 + nivelRecuo * 1.25).toFixed(2).replace(".", ",")}cm`}
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* "Folha" branca centralizada sobre fundo cinza, como no Word */}
-      <div className="rounded-lg bg-[#e7e5e2] p-4 dark:bg-zinc-900 sm:p-8">
-        <div
-          ref={areaRef}
-          contentEditable
-          onInput={() => {
-            atualizarContagem();
-            salvarRascunhoLocal();
-            setSujo(true);
-          }}
-          onMouseUp={salvarSelecaoAtual}
-          onKeyUp={salvarSelecaoAtual}
-          className="mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mb-3 [&_p]:mt-0 [&_p]:indent-[1.25cm]"
-          style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
-          suppressContentEditableWarning
-        />
-      </div>
+        {/* "Folha" branca centralizada sobre fundo cinza, como no Word */}
+        <div className="rounded-lg bg-[#e7e5e2] p-4 dark:bg-zinc-900 sm:p-8">
+          <div
+            ref={areaRef}
+            contentEditable
+            onInput={() => {
+              atualizarContagem();
+              salvarRascunhoLocal();
+              setSujo(true);
+            }}
+            onMouseUp={salvarSelecaoAtual}
+            onKeyUp={salvarSelecaoAtual}
+            onClick={aoClicarNaArea}
+            onMouseDown={aoPressionarNaArea}
+            className="relative mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mb-3 [&_p]:mt-0 [&_p]:indent-[1.25cm]"
+            style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
+            suppressContentEditableWarning
+          />
+        </div>
 
-      <p className="text-right text-xs text-muted-foreground">
-        {contagem} {contagem === 1 ? "palavra" : "palavras"} ·{" "}
-        {sessao ? "salvo na sua pasta ao clicar em Salvar" : "salvo automaticamente neste computador"}
-      </p>
+        {/* Barrinha flutuante que aparece quando uma imagem está selecionada,
+          com as opções de posicionar em relação ao texto (como no Word) e
+          de excluir a imagem. */}
+        {imagemSelecionada && posicaoBarraImagem && (
+          <div
+            className="fixed z-30 flex items-center gap-0.5 rounded-lg border border-border bg-popover p-1 shadow-lg"
+            style={{ top: posicaoBarraImagem.top, left: posicaoBarraImagem.left }}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              title="Em linha com o texto"
+              onClick={() => aplicarAlinhamentoImagem("inline")}
+            >
+              <Type className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              title="Flutuar à esquerda (texto contorna à direita)"
+              onClick={() => aplicarAlinhamentoImagem("esquerda")}
+            >
+              <PanelLeft className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              title="Centralizar"
+              onClick={() => aplicarAlinhamentoImagem("centro")}
+            >
+              <AlignCenter className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              title="Flutuar à direita (texto contorna à esquerda)"
+              onClick={() => aplicarAlinhamentoImagem("direita")}
+            >
+              <PanelRight className="size-3.5" />
+            </Button>
+            <div className="mx-0.5 h-5 w-px bg-border" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 text-destructive hover:bg-destructive/10"
+              title="Excluir imagem"
+              onClick={excluirImagemSelecionada}
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              title="Fechar"
+              onClick={desselecionarImagem}
+            >
+              <X className="size-3.5" />
+            </Button>
+          </div>
+        )}
+
+        <p className="text-right text-xs text-muted-foreground">
+          {contagem} {contagem === 1 ? "palavra" : "palavras"} ·{" "}
+          {sessao
+            ? "salvo na sua pasta ao clicar em Salvar"
+            : "salvo automaticamente neste computador"}{" "}
+          ·{" "}
+          <span className="text-muted-foreground/70">
+            arraste a alcinha da imagem/caixa de texto para redimensionar
+          </span>
+        </p>
       </div>
 
       <Dialog open={dialogAbrirAberto} onOpenChange={setDialogAbrirAberto}>
@@ -843,6 +1277,35 @@ export function EditorTexto() {
               ))}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Pergunta com três respostas ao tentar sair/trocar de documento com
+          mudanças não salvas: salvar, sair sem salvar, ou cancelar. */}
+      <Dialog open={dialogSairAberto} onOpenChange={(open) => !open && responderSair("cancelar")}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Salvar alterações?</DialogTitle>
+            <DialogDescription>
+              Este documento tem mudanças que ainda não foram salvas.{" "}
+              {sessao
+                ? "Deseja salvar antes de continuar?"
+                : "Entre na sua área de aluno para salvar, ou continue sem salvar."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button variant="outline" onClick={() => responderSair("cancelar")}>
+              Cancelar
+            </Button>
+            <Button
+              variant="outline"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => responderSair("descartar")}
+            >
+              Sair sem salvar
+            </Button>
+            {sessao && <Button onClick={() => responderSair("salvar")}>Salvar e continuar</Button>}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
