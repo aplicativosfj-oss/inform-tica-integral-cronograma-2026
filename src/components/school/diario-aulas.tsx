@@ -8,7 +8,7 @@ import {
   Repeat2,
   Undo2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppStore } from "@/lib/app-store";
@@ -23,6 +23,8 @@ import {
   toDateKey,
 } from "@/lib/schedule-engine";
 import type { Assignment, Presenca, ScheduleConfig, Turma } from "@/lib/types";
+import { Paginacao } from "@/components/school/paginacao";
+import { paginar } from "@/lib/paginar";
 import { cn } from "@/lib/utils";
 
 type Situacao =
@@ -87,6 +89,9 @@ interface Dia {
   data: Date;
   registros: Registro[];
 }
+
+/** Dias de aula por página do diário. */
+const DIAS_POR_PAGINA = 5;
 
 function nome(t: Turma | undefined): string {
   return t ? `${t.serie} "${t.letra}"` : "Turma";
@@ -227,6 +232,9 @@ function montarDiario(
 export function DiarioAulas({ registros, mes }: { registros: Presenca[] | null; mes: string }) {
   const { turmas, config } = useAppStore();
   const [filtro, setFiltro] = useState("");
+  const [pagina, setPagina] = useState(1);
+  // Trocar de mês ou de turma volta para a primeira página.
+  useEffect(() => setPagina(1), [filtro, mes]);
 
   const dias = useMemo(
     () => (registros ? montarDiario(turmas, config, registros, mes, new Date()) : null),
@@ -242,6 +250,8 @@ export function DiarioAulas({ registros, mes }: { registros: Presenca[] | null; 
       .map((d) => ({ ...d, registros: d.registros.filter((r) => r.turmaNome.includes(rotulo)) }))
       .filter((d) => d.registros.length > 0);
   }, [dias, filtro, turmas]);
+
+  const pag = visiveis ? paginar(visiveis, pagina, DIAS_POR_PAGINA) : null;
 
   const resumo = useMemo(() => {
     const todos = (dias ?? []).flatMap((d) => d.registros);
@@ -301,74 +311,79 @@ export function DiarioAulas({ registros, mes }: { registros: Presenca[] | null; 
             Nenhuma aula registrada neste mês.
           </p>
         ) : (
-          <ol className="max-h-[36rem] divide-y divide-border/60 overflow-y-auto">
-            {visiveis.map((d) => (
-              <li key={d.dataKey}>
-                <p className="sticky top-0 z-[1] bg-muted/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur first-letter:uppercase">
-                  {d.data.toLocaleDateString("pt-BR", {
-                    weekday: "long",
-                    day: "2-digit",
-                    month: "long",
-                  })}
-                </p>
-                <ul className="divide-y divide-border/40">
-                  {d.registros.map((r) => {
-                    const s = SITUACOES[r.situacao];
-                    const Icone = s.icone;
-                    return (
-                      <li
-                        key={r.chave}
-                        className="flex flex-col gap-1.5 px-4 py-3 sm:flex-row sm:gap-4"
-                      >
-                        <span className="w-24 shrink-0 font-mono text-xs text-muted-foreground sm:pt-0.5">
-                          {r.inicio}–{r.fim}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-semibold text-foreground">
-                              {r.turmaNome}
-                            </span>
-                            <span
-                              className={cn(
-                                "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",
-                                s.classe,
-                              )}
-                            >
-                              <Icone className="size-3" /> {s.rotulo}
-                            </span>
+          <>
+            <ol className="divide-y divide-border/60">
+              {(pag?.itens ?? []).map((d) => (
+                <li key={d.dataKey}>
+                  <p className="bg-muted/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur first-letter:uppercase">
+                    {d.data.toLocaleDateString("pt-BR", {
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "long",
+                    })}
+                  </p>
+                  <ul className="divide-y divide-border/40">
+                    {d.registros.map((r) => {
+                      const s = SITUACOES[r.situacao];
+                      const Icone = s.icone;
+                      return (
+                        <li
+                          key={r.chave}
+                          className="flex flex-col gap-1.5 px-4 py-3 sm:flex-row sm:gap-4"
+                        >
+                          <span className="w-24 shrink-0 font-mono text-xs text-muted-foreground sm:pt-0.5">
+                            {r.inicio}–{r.fim}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold text-foreground">
+                                {r.turmaNome}
+                              </span>
+                              <span
+                                className={cn(
+                                  "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",
+                                  s.classe,
+                                )}
+                              >
+                                <Icone className="size-3" /> {s.rotulo}
+                              </span>
+                            </div>
+                            {r.situacao === "realizada" ||
+                            (r.situacao === "reposicao" && r.presentes + r.faltas > 0) ? (
+                              <p className="mt-0.5 text-xs text-muted-foreground">
+                                {r.presentes}{" "}
+                                {r.presentes === 1 ? "aluno participou" : "alunos participaram"}
+                                {r.faltas > 0
+                                  ? ` · ${r.faltas} ${r.faltas === 1 ? "falta" : "faltas"}`
+                                  : " · sem faltas"}
+                                {r.substituicoes > 0
+                                  ? ` · ${r.substituicoes} ${r.substituicoes === 1 ? "substituição" : "substituições"}`
+                                  : ""}
+                              </p>
+                            ) : null}
+                            {r.detalhes.map((t) => (
+                              <p key={t} className="mt-0.5 text-xs text-muted-foreground">
+                                {t}
+                              </p>
+                            ))}
+                            {r.observacao ? (
+                              <p className="mt-1 flex items-start gap-1.5 rounded-md bg-primary/5 px-2 py-1 text-xs text-foreground">
+                                <MessageSquareText className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                                <span>{r.observacao}</span>
+                              </p>
+                            ) : null}
                           </div>
-                          {r.situacao === "realizada" ||
-                          (r.situacao === "reposicao" && r.presentes + r.faltas > 0) ? (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {r.presentes}{" "}
-                              {r.presentes === 1 ? "aluno participou" : "alunos participaram"}
-                              {r.faltas > 0
-                                ? ` · ${r.faltas} ${r.faltas === 1 ? "falta" : "faltas"}`
-                                : " · sem faltas"}
-                              {r.substituicoes > 0
-                                ? ` · ${r.substituicoes} ${r.substituicoes === 1 ? "substituição" : "substituições"}`
-                                : ""}
-                            </p>
-                          ) : null}
-                          {r.detalhes.map((t) => (
-                            <p key={t} className="mt-0.5 text-xs text-muted-foreground">
-                              {t}
-                            </p>
-                          ))}
-                          {r.observacao ? (
-                            <p className="mt-1 flex items-start gap-1.5 rounded-md bg-primary/5 px-2 py-1 text-xs text-foreground">
-                              <MessageSquareText className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                              <span>{r.observacao}</span>
-                            </p>
-                          ) : null}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            ))}
-          </ol>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+            {pag ? (
+              <Paginacao atual={pag.atual} totalPaginas={pag.totalPaginas} onChange={setPagina} />
+            ) : null}
+          </>
         )}
       </CardContent>
     </Card>

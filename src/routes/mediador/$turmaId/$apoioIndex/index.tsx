@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
+  ArrowRight,
+  BookHeart,
+  FileText,
   Baby,
   CakeSlice,
   CalendarDays,
@@ -49,6 +52,7 @@ import {
 } from "@/lib/profissional-session";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade } from "@/lib/types";
+import fundoInclusaoImg from "@/assets/feature-kids-learning.jpg";
 
 export const Route = createFileRoute("/mediador/$turmaId/$apoioIndex/")({
   component: MediadorPainel,
@@ -279,6 +283,43 @@ function MediadorPainel() {
             </div>
           )}
 
+          {/* Ferramenta em destaque: relatório de acompanhamento */}
+          <Link
+            to="/mediador/$turmaId/$apoioIndex/relatorio"
+            params={{ turmaId, apoioIndex }}
+            search={{}}
+            className="group relative mt-8 block overflow-hidden rounded-2xl ring-1 ring-fuchsia-500/40 shadow-xl shadow-fuchsia-900/20"
+          >
+            <img
+              src={fundoInclusaoImg}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-violet-950/95 via-fuchsia-900/85 to-rose-800/50" />
+            <div className="relative flex flex-col gap-4 p-5 text-white sm:flex-row sm:items-center sm:p-6">
+              <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/30 backdrop-blur">
+                <BookHeart className="size-7" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-fuchsia-200">
+                  Ferramenta do profissional de apoio
+                </p>
+                <p className="text-xl font-bold tracking-tight sm:text-2xl">
+                  Relatório de acompanhamento
+                </p>
+                <p className="mt-1 text-sm text-white/85">
+                  Elabore um documento profissional sobre a criança: especialidade, desafios,
+                  potencialidades e o seu olhar cuidadoso — com guia de especialidades, PDF e
+                  compartilhamento.
+                </p>
+              </div>
+              <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full bg-white px-4 py-2 text-sm font-semibold text-violet-900 transition-transform group-hover:translate-x-0.5 sm:self-center">
+                Abrir <ArrowRight className="size-4" />
+              </span>
+            </div>
+          </Link>
+
           <h2 className="mb-1 mt-8 text-lg font-semibold text-foreground">
             Crianças que você acompanha
           </h2>
@@ -299,22 +340,32 @@ function MediadorPainel() {
               {criancas.map((crianca) => {
                 const idade = idadeEmAnos(crianca.nascimento);
                 return (
-                  <Card key={crianca.id}>
-                    <CardContent className="flex flex-col gap-2 p-4">
-                      <div className="flex items-start gap-3">
-                        <span
-                          className={`flex size-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold ${cor.bg} ${cor.text}`}
-                        >
-                          {crianca.nome.charAt(0)}
+                  <Card
+                    key={crianca.id}
+                    className="overflow-hidden border-fuchsia-500/30 shadow-lg shadow-fuchsia-900/10"
+                  >
+                    <div className="relative bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 px-4 py-4 text-white">
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-lg font-bold ring-2 ring-white/40">
+                          {crianca.nome
+                            .split(" ")
+                            .slice(0, 2)
+                            .map((p) => p.charAt(0))
+                            .join("")}
                         </span>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground">{crianca.nome}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-white/75">
+                            Criança acompanhada
+                          </p>
+                          <p className="text-base font-bold leading-tight">{crianca.nome}</p>
+                          <p className="text-xs text-white/80">
                             {turma.serie} &quot;{turma.letra}&quot;
                           </p>
                         </div>
+                        <HeartHandshake className="ml-auto size-6 shrink-0 text-white/70" />
                       </div>
-
+                    </div>
+                    <CardContent className="flex flex-col gap-2.5 p-4">
                       <dl className="flex flex-col gap-1 text-xs">
                         <div className="flex items-center gap-1.5">
                           <CakeSlice className="size-3.5 shrink-0 text-muted-foreground" />
@@ -343,24 +394,39 @@ function MediadorPainel() {
                         </p>
                       )}
 
-                      {atendido?.id === crianca.id ? (
-                        <Badge className="w-fit gap-1 bg-emerald-600 font-normal hover:bg-emerald-600">
-                          <CheckCircle2 className="size-3" /> Atendendo agora
-                        </Badge>
-                      ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {atendido?.id === crianca.id ? (
+                          <Badge className="w-fit gap-1 bg-emerald-600 font-normal hover:bg-emerald-600">
+                            <CheckCircle2 className="size-3" /> Atendendo agora
+                          </Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-fit gap-1.5"
+                            onClick={() => {
+                              setCandidato({ id: crianca.id, nome: crianca.nome });
+                              setPin("");
+                              setErroPin(null);
+                            }}
+                          >
+                            <UserRound className="size-3.5" /> Atender {crianca.nome.split(" ")[0]}
+                          </Button>
+                        )}
                         <Button
+                          asChild
                           size="sm"
-                          variant="outline"
-                          className="w-fit gap-1.5"
-                          onClick={() => {
-                            setCandidato({ id: crianca.id, nome: crianca.nome });
-                            setPin("");
-                            setErroPin(null);
-                          }}
+                          className="w-fit gap-1.5 bg-violet-600 text-white hover:bg-violet-700"
                         >
-                          <UserRound className="size-3.5" /> Atender {crianca.nome.split(" ")[0]}
+                          <Link
+                            to="/mediador/$turmaId/$apoioIndex/relatorio"
+                            params={{ turmaId, apoioIndex }}
+                            search={{ aluno: crianca.id }}
+                          >
+                            <FileText className="size-3.5" /> Elaborar relatório
+                          </Link>
                         </Button>
-                      )}
+                      </div>
                     </CardContent>
                   </Card>
                 );

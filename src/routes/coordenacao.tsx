@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/table";
 import { DiarioAulas } from "@/components/school/diario-aulas";
 import { NavBar } from "@/components/school/nav-bar";
+import { Paginacao } from "@/components/school/paginacao";
+import { paginar } from "@/lib/paginar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -65,6 +67,8 @@ function CoordenacaoPage() {
   const [mes, setMes] = useState(mesAtual);
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [paginaFaltas, setPaginaFaltas] = useState(1);
+  useEffect(() => setPaginaFaltas(1), [mes]);
 
   useEffect(() => {
     let cancelado = false;
@@ -147,6 +151,7 @@ function CoordenacaoPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [registros]);
   const participacoes = (registros ?? []).length - faltas.length;
+  const pagFaltas = paginar(faltasPorDia, paginaFaltas, 10);
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -358,7 +363,7 @@ function CoordenacaoPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      faltasPorDia.map((linha) => (
+                      pagFaltas.itens.map((linha) => (
                         <TableRow key={`${linha.data}-${linha.turmaId}`}>
                           <TableCell className="font-mono text-sm">
                             {new Date(`${linha.data}T00:00:00`).toLocaleDateString("pt-BR")}
@@ -373,6 +378,11 @@ function CoordenacaoPage() {
                   </TableBody>
                 </Table>
               </div>
+              <Paginacao
+                atual={pagFaltas.atual}
+                totalPaginas={pagFaltas.totalPaginas}
+                onChange={setPaginaFaltas}
+              />
             </CardContent>
           </Card>
         </main>
