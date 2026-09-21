@@ -30,6 +30,15 @@ interface AppState {
   addAluno: (turmaId: string, aluno: Omit<Aluno, "id">) => void;
   updateAluno: (turmaId: string, alunoId: string, patch: Partial<Omit<Aluno, "id">>) => void;
   removeAluno: (turmaId: string, alunoId: string) => void;
+  /**
+   * Importa dados de vários alunos de uma vez (ex.: as datas de nascimento
+   * da lista de chamada). Cada entrada casa pelo id do aluno. Feito num
+   * único envio ao banco — 200 chamadas de `updateAluno` seriam 200
+   * gravações do cadastro inteiro.
+   */
+  importarAlunos: (
+    patches: { turmaId: string; alunoId: string; patch: Partial<Omit<Aluno, "id">> }[],
+  ) => void;
   addGrupo: (turmaId: string, grupo: Omit<Grupo, "id">) => void;
   updateGrupo: (turmaId: string, grupoId: string, patch: Partial<Omit<Grupo, "id">>) => void;
   removeGrupo: (turmaId: string, grupoId: string) => void;
@@ -197,6 +206,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 }
               : t,
           ),
+        );
+      },
+      importarAlunos: (patches) => {
+        const porTurma = new Map<string, Map<string, Partial<Omit<Aluno, "id">>>>();
+        for (const item of patches) {
+          const daTurma = porTurma.get(item.turmaId) ?? new Map();
+          daTurma.set(item.alunoId, { ...(daTurma.get(item.alunoId) ?? {}), ...item.patch });
+          porTurma.set(item.turmaId, daTurma);
+        }
+        applyTurmas((prev) =>
+          prev.map((t) => {
+            const daTurma = porTurma.get(t.id);
+            if (!daTurma) return t;
+            return {
+              ...t,
+              alunos: t.alunos.map((a) => {
+                const patch = daTurma.get(a.id);
+                return patch ? { ...a, ...patch } : a;
+              }),
+            };
+          }),
         );
       },
       removeAluno: (turmaId, alunoId) => {

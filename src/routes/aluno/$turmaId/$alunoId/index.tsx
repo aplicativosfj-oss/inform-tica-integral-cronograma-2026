@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
+  CakeSlice,
   CalendarDays,
   CheckCircle2,
   Circle,
@@ -33,6 +34,7 @@ import {
 } from "@/lib/aluno-area";
 import { useConfirmar } from "@/lib/confirm-store";
 import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
+import { idadeEmAnos } from "@/lib/profissional-acesso";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, AtividadeStatus, Presenca } from "@/lib/types";
 import alunoPainelBgImg from "@/assets/feature-kids-learning.jpg";
@@ -86,6 +88,7 @@ function AlunoPainel() {
 
   const sessao = lerAlunoSessao();
   const pin = sessao?.pin;
+  const idade = idadeEmAnos(aluno?.nascimento);
 
   useEffect(() => {
     if (!sessao || sessao.alunoId !== alunoId || sessao.turmaId !== turmaId) {
@@ -227,6 +230,13 @@ function AlunoPainel() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 text-xs text-white/85 sm:text-sm">
+                  {aluno.nascimento ? (
+                    <span className="flex items-center gap-1.5">
+                      <CakeSlice className="size-3.5 shrink-0" /> Nasci em{" "}
+                      {new Date(`${aluno.nascimento}T12:00:00`).toLocaleDateString("pt-BR")}
+                      {idade !== null ? ` · tenho ${idade} anos` : ""}
+                    </span>
+                  ) : null}
                   <span className="flex items-center gap-1.5">
                     <UserRound className="size-3.5 shrink-0" /> Prof(a) regente:{" "}
                     {turma.professorRegente}

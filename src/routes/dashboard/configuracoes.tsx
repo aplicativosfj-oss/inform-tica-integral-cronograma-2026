@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardShell } from "@/components/school/dashboard-shell";
+import { ImportarNascimentos } from "@/components/school/importar-nascimentos";
 import { useAppStore } from "@/lib/app-store";
 import { useConfirmar } from "@/lib/confirm-store";
 import { useAuth } from "@/lib/auth-store";
@@ -92,6 +93,8 @@ function ConfiguracoesPage() {
             </Field>
           </CardContent>
         </Card>
+
+        <ImportarNascimentos />
 
         <Card>
           <CardHeader>
