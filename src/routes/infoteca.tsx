@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Brain,
+  Calculator,
   Download,
   ExternalLink,
   Gamepad2,
@@ -16,6 +17,7 @@ import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
+import { Calculadora } from "@/components/school/ferramentas/calculadora";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
@@ -320,6 +322,24 @@ function InfotecaPage() {
               acao="Abrir →"
             />
           </Link>
+
+          {/* A calculadora fica aberta na própria página: é a ferramenta mais
+            procurada por quem cai aqui de fora, e obrigar um clique a mais
+            para somar dois números seria atrito à toa. */}
+          <div className="mt-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+            <div className="mb-3 flex items-center gap-2.5">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-300">
+                <Calculator className="size-4" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Calculadora</p>
+                <p className="text-xs text-muted-foreground">
+                  Use aqui mesmo — as quatro operações, sem sair da página.
+                </p>
+              </div>
+            </div>
+            <Calculadora />
+          </div>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {publicas.map((ferramenta) => (
