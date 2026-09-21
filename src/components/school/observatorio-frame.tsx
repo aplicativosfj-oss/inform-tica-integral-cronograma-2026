@@ -14,7 +14,7 @@ export function ObservatorioFrame({ dados, className }: { dados: unknown; classN
     <iframe
       title="Observatório pedagógico"
       srcDoc={srcDoc}
-      sandbox="allow-scripts allow-modals"
+      sandbox="allow-scripts allow-modals allow-popups allow-popups-to-escape-sandbox"
       className={className}
     />
   );

@@ -46,7 +46,11 @@ export function Quiz({
   questoes: Questao[];
   corBotao?: string;
   /** Chamado ao terminar a rodada, com os acertos de primeira e o total. */
-  onConcluir?: (acertosDeUmaVez: number, total: number) => void;
+  /**
+   * Chamado ao terminar a rodada, com os acertos de primeira, o total e,
+   * questão a questão, se acertou de primeira (usado no mini-teste).
+   */
+  onConcluir?: (acertosDeUmaVez: number, total: number, deUmaVez: boolean[]) => void;
 }) {
   const [indice, setIndice] = useState(0);
   const [selecionada, setSelecionada] = useState<number | null>(null);
@@ -55,6 +59,7 @@ export function Quiz({
   const [acertouAgora, setAcertouAgora] = useState(false);
   const [revelada, setRevelada] = useState(false);
   const [acertosDeUmaVez, setAcertosDeUmaVez] = useState(0);
+  const [deUmaVez, setDeUmaVez] = useState<boolean[]>([]);
   const [concluidas, setConcluidas] = useState(0);
   const [finalizado, setFinalizado] = useState(false);
   const [segundosRestantes, setSegundosRestantes] = useState(TEMPO_LEITURA_SEGUNDOS);
@@ -78,6 +83,11 @@ export function Quiz({
     if (selecionada === questao?.respostaCorreta) {
       setAcertouAgora(true);
       if (tentativas === 0) setAcertosDeUmaVez((a) => a + 1);
+      setDeUmaVez((lista) => {
+        const nova = [...lista];
+        nova[indice] = tentativas === 0;
+        return nova;
+      });
       return;
     }
     const novasTentativas = tentativas + 1;
@@ -91,7 +101,11 @@ export function Quiz({
     setConcluidas((c) => c + 1);
     if (indice + 1 >= questoes.length) {
       setFinalizado(true);
-      onConcluir?.(acertosDeUmaVez, questoes.length);
+      onConcluir?.(
+        acertosDeUmaVez,
+        questoes.length,
+        questoes.map((_, i) => deUmaVez[i] === true),
+      );
       return;
     }
     setIndice((i) => i + 1);
@@ -110,6 +124,7 @@ export function Quiz({
     setAcertouAgora(false);
     setRevelada(false);
     setAcertosDeUmaVez(0);
+    setDeUmaVez([]);
     setConcluidas(0);
     setFinalizado(false);
   }

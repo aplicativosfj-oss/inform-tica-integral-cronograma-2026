@@ -30,6 +30,7 @@ import { Route as DashboardFichasAcessoRouteImport } from './routes/dashboard/fi
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
+import { Route as DashboardTrilhasRouteImport } from './routes/dashboard/trilhas'
 import { Route as FerramentasIndexRouteImport } from './routes/ferramentas/index'
 import { Route as FerramentasFerramentaRouteImport } from './routes/ferramentas/$ferramenta'
 import { Route as MediadorIndexRouteImport } from './routes/mediador/index'
@@ -154,6 +155,11 @@ const DashboardGruposRoute = DashboardGruposRouteImport.update({
 const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
   id: '/dashboard/programacao',
   path: '/dashboard/programacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardTrilhasRoute = DashboardTrilhasRouteImport.update({
+  id: '/dashboard/trilhas',
+  path: '/dashboard/trilhas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FerramentasIndexRoute = FerramentasIndexRouteImport.update({
@@ -288,6 +294,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -331,6 +338,7 @@ export interface FileRoutesByTo {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
   '/aluno': typeof AlunoIndexRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
     | '/aluno/'
     | '/dashboard/'
@@ -463,6 +473,7 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
     | '/aluno'
     | '/dashboard'
@@ -506,6 +517,7 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
     | '/aluno/'
     | '/dashboard/'
@@ -550,6 +562,7 @@ export interface RootRouteChildren {
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
+  DashboardTrilhasRoute: typeof DashboardTrilhasRoute
   FerramentasFerramentaRoute: typeof FerramentasFerramentaRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -723,6 +736,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProgramacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/trilhas': {
+      id: '/dashboard/trilhas'
+      path: '/dashboard/trilhas'
+      fullPath: '/dashboard/trilhas'
+      preLoaderRoute: typeof DashboardTrilhasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ferramentas/': {
       id: '/ferramentas/'
       path: '/ferramentas'
@@ -886,6 +906,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
+  DashboardTrilhasRoute: DashboardTrilhasRoute,
   FerramentasFerramentaRoute: FerramentasFerramentaRoute,
   AlunoIndexRoute: AlunoIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,

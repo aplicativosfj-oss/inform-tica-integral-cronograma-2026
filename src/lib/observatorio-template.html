@@ -265,6 +265,8 @@ function go(t){cur=t;try{sessionStorage.setItem("obs.tab",t)}catch(e){}tabs.quer
 const V={};
 const seg=(id,opts,v)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" aria-pressed="${k==v}">${l}</button>`).join("")}</div>`;
 const bindSeg=(id,fn)=>{const el=document.getElementById(id);el.onclick=e=>{const b=e.target.closest("[data-v]");if(!b)return;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x==b));fn(b.dataset.v)}};
+/* link para as "Atividades por habilidade" do site, já filtradas */
+const linkAtiv=(ano,d,txt="Abrir atividades para esta turma →")=>`<a class="btn pri noprint" href="/ferramentas/atividades-por-habilidade?serie=${ano}&disc=${d}" target="_blank" rel="noopener" style="text-decoration:none">${txt}</a>`;
 /* ================= RESUMO ================= */
 V.resumo=()=>{
  const best=T.slice().sort((a,b)=>tMedia(b)-tMedia(a)),worstH=HAB.slice().sort((a,b)=>a.p-b.p)[0],bestD=DS.slice().sort((a,b)=>discM(b)-discM(a));
@@ -323,7 +325,7 @@ function turmaDlg(k,d,aba){if(aba)dlgAba=aba;const t=get(k,d);
    <div style="display:grid;gap:6px"><div class="label">Média da turma</div><div class="num">${pct(t.media)}</div><p class="sub">Média da escola nesta disciplina: ${pct(discM(d))}. ${t.media>=discM(d)?"A turma está <b>acima</b> da média da escola.":"A turma está <b>abaixo</b> da média da escola."}${t.ausentes?` ${t.ausentes} aluno(s) sem registro.`:""}</p></div></div>
    <div class="insight f-${fx(fracas.length?fracas[0].p:80)}"><div class="ic">${fracas.length?"!":"✓"}</div><p class="sm">${fracas.length?`Ponto mais frágil: <b>${esc(fracas[0].txt)}</b> (${pct(fracas[0].p)} de acertos). Veja a aba “O que fazer”.`:"Todas as habilidades estão acima de 70%."}</p></div>`,
   hab:tabHab(hs),
-  acao:fracas.length?fracas.map(h=>`<div class="insight f-${fx(h.p)}"><div class="ic">Q${h.q}</div><div style="display:grid;gap:4px"><b>${esc(h.txt)} · ${pct(h.p)} de acertos</b><span class="sm">${nivelAcao(h.p)} ${dica(h.txt)}</span></div></div>`).join("")+`<p class="xs mut">Para montar grupos de trabalho com os nomes dos alunos, use a aba “Plano de ação” no topo da página.</p>`:`<div class="insight f-OT"><div class="ic">✓</div><p>Todas as habilidades acima de 70%. Hora de aprofundar com desafios.</p></div>`,
+  acao:fracas.length?fracas.map(h=>`<div class="insight f-${fx(h.p)}"><div class="ic">Q${h.q}</div><div style="display:grid;gap:4px"><b>${esc(h.txt)} · ${pct(h.p)} de acertos</b><span class="sm">${nivelAcao(h.p)} ${dica(h.txt)}</span></div></div>`).join("")+`<div class="row">${linkAtiv(t.ano,d)}</div><p class="xs mut">As atividades têm três níveis, podem ser feitas no computador ou impressas. Para montar grupos com os nomes dos alunos, use a aba “Plano de ação”.</p>`:`<div class="insight f-OT"><div class="ic">✓</div><p>Todas as habilidades acima de 70%. Hora de aprofundar com desafios.</p></div>`,
   alunos:grupos.filter(g=>g.al.length).map(g=>`<div class="group"><span class="tag f-${g.f}">${F[g.f].p} · ${g.al.length}</span><div class="names">${g.al.map(a=>`<span>${esc(a.nome.replace(/\s*\(Especial\)/i,""))} <span class="mut">${pct(a.p)}</span></span>`).join("")}</div></div>`).join("")};
  document.getElementById("dlgBody").innerHTML=cab(esc(prof(k)),`${k} · ${DL[d]}`,"",`<div class="row between">${seg("dd",DS.map(x=>[x,DN[x]]),d)}${seg("da",[["geral","Visão geral"],["hab","Habilidades"],["acao","O que fazer"],["alunos","Alunos"]],dlgAba)}</div>`)+`<div style="display:grid;gap:12px">${corpo[dlgAba]}</div>`;
  abrirDlg();document.getElementById("dx").onclick=()=>dlgEl.close();bindSeg("dd",v=>turmaDlg(k,v));bindSeg("da",v=>turmaDlg(k,d,v))}
@@ -345,13 +347,14 @@ const plano={k:"5º A",d:"LP"};
 V.plano=()=>{
  main.innerHTML=`<div class="stack"><div class="card" style="display:grid;gap:14px">
   <div><h2>Plano de ação e reagrupamento</h2><p class="sub">Escolha a turma e a disciplina. O painel monta os grupos de trabalho pelas habilidades que cada aluno errou, sugere atividades e indica colegas que podem ajudar (monitores).</p></div>
-  <div class="row noprint"><select id="pk" aria-label="Turma">${T.map(k=>`<option ${k==plano.k?"selected":""}>${k}</option>`).join("")}</select>${seg("pd",DS.map(d=>[d,DN[d]]),plano.d)}<button class="btn" onclick="print()">Imprimir plano</button></div></div><div id="pbody" class="stack"></div></div>`;
+  <div class="row noprint"><select id="pk" aria-label="Turma">${T.map(k=>`<option ${k==plano.k?"selected":""}>${k}</option>`).join("")}</select>${seg("pd",DS.map(d=>[d,DN[d]]),plano.d)}<button class="btn" onclick="print()">Imprimir plano</button><span id="plink"></span></div></div><div id="pbody" class="stack"></div></div>`;
  const draw=()=>{const t=get(plano.k,plano.d);const hs=t.qs.map((q,i)=>({q,i,p:t.qp[i],...hsplit(t.hab[q])}));
   const prio=hs.filter(h=>h.p<70).sort((a,b)=>a.p-b.p).slice(0,4);
   const nm=a=>esc(a.nome.replace(/\s*\(Especial\)/i,""));
   const monit=t.feitos.filter(a=>a.p>=80).sort((a,b)=>b.p-a.p);
   const grupos=prio.map(h=>({h,al:t.feitos.filter(a=>a.r[h.i]=="E"),mon:monit.filter(a=>a.r[h.i]=="C").slice(0,3)}));
   const intensivo=t.feitos.filter(a=>a.p<25);
+  document.getElementById("plink").innerHTML=linkAtiv(t.ano,plano.d,"Atividades no site →");
   document.getElementById("pbody").innerHTML=`
   <section class="grid g3">
    <div class="card flat"><div class="label">Turma</div><div class="num">${plano.k}</div><p class="sub">${DL[plano.d]} · ${esc(prof(plano.k))}</p></div>

@@ -10,6 +10,7 @@ import {
   Layers,
   LayoutDashboard,
   Settings2,
+  Target,
   UserX,
   Users2,
 } from "lucide-react";
@@ -49,6 +50,7 @@ const NAV_GROUPS = [
     label: "Pedagógico",
     items: [
       { to: "/dashboard/avaliacao", label: "Avaliação diagnóstica", icon: BarChart3 },
+      { to: "/dashboard/trilhas", label: "Progresso das trilhas", icon: Target },
     ],
   },
   {
