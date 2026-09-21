@@ -114,6 +114,29 @@ svg text{fill:var(--mut);font:600 12px "Nunito Sans",sans-serif}
 .axis em{position:absolute;transform:translateX(-50%);font:700 12.5px "Nunito Sans";font-style:normal;color:var(--mut)}
 .axis em:first-child{transform:none}.axis em:last-child{transform:translateX(-100%)}
 /* halteres (comparação) */
+/* comparar turmas */
+:root{--ca:#1F4E79;--cb:#D9822B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ca:#8CB8E4;--cb:#F0A35B}}
+:root[data-theme="dark"]{--ca:#8CB8E4;--cb:#F0A35B}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}
+.vs .lado{border-radius:14px;padding:14px;background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--c);display:grid;gap:8px;justify-items:start}
+.vs .x{align-self:center;font:800 22px Sora;color:var(--mut)}
+.vs select{font:800 20px Sora;padding:4px 8px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}.vs .x{justify-self:center}}
+.duelo{display:grid;gap:10px;padding:14px;border-radius:14px;background:var(--surface2)}
+.pb{display:grid;gap:6px}
+.pb .b{display:grid;grid-template-columns:54px 1fr 46px;gap:8px;align-items:center}
+.pb .b span{font:800 13.5px "Nunito Sans";color:var(--c)}
+.pb .b .trk{height:16px;border-radius:99px;background:var(--surface);overflow:hidden}
+.pb .b .trk i{display:block;height:100%;border-radius:99px;background:var(--c)}
+.pb .b b{text-align:right;font-size:15px}
+.venc{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font:800 12.5px "Nunito Sans";white-space:nowrap;background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c) 80%,var(--ink))}
+.qrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.qrow:last-child{border-bottom:0}
+@media (max-width:720px){.qrow{grid-template-columns:1fr}}
+.placar{display:flex;flex-wrap:wrap;gap:10px}
+.placar div{flex:1;min-width:150px;border-radius:14px;padding:12px 14px;background:color-mix(in srgb,var(--c) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 30%,transparent)}
+.placar b{display:block;font:800 26px Sora;color:color-mix(in srgb,var(--c) 85%,var(--ink))}
 .db{display:grid;gap:16px}
 .db .r{display:grid;gap:6px}
 .db .l{font-weight:700;font-size:15px;line-height:1.3}
@@ -352,13 +375,36 @@ V.comparar=()=>{
  const opt=v=>T.map(k=>`<option ${k==v?"selected":""}>${k}</option>`).join("");
  const draw=()=>{const box=document.getElementById("cbody");
   if(cmp.mode=="turmas"){const A=cmp.a,B=cmp.b,same=A[0]==B[0];
-   box.innerHTML=`<div class="card" style="display:grid;gap:16px"><div class="row"><label class="sm"><b>Turma</b> <select id="ca">${opt(A)}</select></label><span class="mut">×</span><label class="sm"><b>Turma</b> <select id="cb">${opt(B)}</select></label></div>
-    <div class="row sm" style="gap:18px"><span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="var(--pri)"/></svg> ${A} · ${esc(prof(A))}</span><span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="var(--chalk)"/></svg> ${B} · ${esc(prof(B))}</span></div>
-    <h3>Média por disciplina</h3>${dumbbell(DS.map(d=>({l:DN[d],a:get(A,d).media,b:get(B,d).media})).concat([{l:"Média geral",a:tMedia(A),b:tMedia(B)}]),A,B)}
-    <div class="grid g2">${[A,B].map(k=>`<div class="card flat" style="display:grid;gap:10px"><b>${k}</b>${DS.map(d=>`<div class="discline"><span>${DN[d]}</span>${distBar(get(k,d).dist)}<b>${pct(get(k,d).media)}</b></div>`).join("")}</div>`).join("")}</div></div>
-    ${same?`<div class="card" style="display:grid;gap:14px"><div class="row between"><div><h2>Questão por questão</h2><p class="sub">As duas turmas fizeram a mesma prova. Pontos distantes mostram onde uma turma pode aprender com a outra.</p></div>${seg("cd",DS.map(d=>[d,DN[d]]),cmp.d)}</div><div id="qq"></div></div>`:`<div class="insight"><div class="ic">i</div><p class="sm">Turmas de séries diferentes fazem provas diferentes; por isso a comparação fica só nas médias. Escolha duas turmas da mesma série para comparar questão por questão.</p></div>`}`;
+   const gA=tMedia(A),gB=tMedia(B),dG=Math.round(gA)-Math.round(gB);
+   const venc=(a,b)=>{const d=Math.round(a)-Math.round(b);return Math.abs(d)<3?`<span class="venc" style="--c:var(--mut)">Empate</span>`:`<span class="venc" style="--c:var(--${d>0?"ca":"cb"})">${d>0?A:B} na frente · +${Math.abs(d)}</span>`};
+   const par=(a,b)=>`<div class="pb"><div class="b" style="--c:var(--ca)"><span>${A}</span><div class="trk"><i style="width:${cl(a)}%"></i></div><b>${pct(a)}</b></div><div class="b" style="--c:var(--cb)"><span>${B}</span><div class="trk"><i style="width:${cl(b)}%"></i></div><b>${pct(b)}</b></div></div>`;
+   const frase=Math.abs(dG)<3?`As duas turmas tiveram resultado <b>parecido</b>: ${A} com ${pct(gA)} e ${B} com ${pct(gB)} de acertos em média.`:`<b>${dG>0?A:B}</b> acertou, em média, <span class="hl">${Math.abs(dG)} pontos a mais</span> que ${dG>0?B:A} (${pct(Math.max(gA,gB))} contra ${pct(Math.min(gA,gB))}).`;
+   box.innerHTML=`<div class="card" style="display:grid;gap:16px">
+    <div><h2>Qual turma foi melhor, e em quê?</h2><p class="sub">Escolha duas turmas. Azul é a primeira turma; laranja é a segunda.</p></div>
+    <div class="vs"><div class="lado" style="--c:var(--ca)"><select id="ca" aria-label="Primeira turma">${opt(A)}</select><span class="sm mut">${esc(prof(A))}</span><div class="row" style="gap:10px">${ring(gA,{size:64,stroke:8})}<span class="sm">média geral</span></div></div>
+     <div class="x">×</div>
+     <div class="lado" style="--c:var(--cb)"><select id="cb" aria-label="Segunda turma">${opt(B)}</select><span class="sm mut">${esc(prof(B))}</span><div class="row" style="gap:10px">${ring(gB,{size:64,stroke:8})}<span class="sm">média geral</span></div></div></div>
+    <div class="insight" style="--f:var(--${Math.abs(dG)<3?"mut":dG>0?"ca":"cb"})"><div class="ic">${Math.abs(dG)<3?"=":"★"}</div><p>${frase}</p></div>
+   </div>
+   <div class="card" style="display:grid;gap:14px"><h2>Disciplina por disciplina</h2><p class="sub">Percentual médio de acertos em cada prova.</p>
+    <div class="grid g3">${DS.map(d=>{const a=get(A,d).media,b=get(B,d).media;return `<div class="duelo"><div class="row between" style="flex-wrap:nowrap"><b>${DN[d]}</b>${venc(a,b)}</div>${par(a,b)}</div>`}).join("")}</div></div>
+   <div class="card" style="display:grid;gap:14px"><h2>Como os alunos estão distribuídos</h2><p class="sub">Quanto mais verde, mais alunos aprenderam bem. Vermelho e laranja são os alunos que precisam de apoio.</p>
+    <div class="grid g2">${[[A,"ca"],[B,"cb"]].map(([k,c])=>`<div class="card flat" style="display:grid;gap:10px;border-left:6px solid var(--${c})"><b style="font:800 17px Sora">${k}</b>${DS.map(d=>`<div class="discline"><span>${DN[d]}</span>${distBar(get(k,d).dist)}<b>${pct(get(k,d).media)}</b></div>`).join("")}</div>`).join("")}</div>
+    <div class="row xs" style="gap:14px">${["OT","BO","RE","IN"].map(f=>`<span class="tag f-${f}">${F[f].p}</span>`).join("")}</div></div>
+   ${same?`<div class="card" style="display:grid;gap:14px"><div class="row between"><div><h2>Questão por questão</h2><p class="sub">As duas turmas fizeram a mesma prova. Onde a diferença é grande, uma turma pode aprender com a outra.</p></div>${seg("cd",DS.map(d=>[d,DN[d]]),cmp.d)}</div><div id="qq" style="display:grid;gap:14px"></div></div>`
+   :`<div class="insight"><div class="ic">i</div><p class="sm">Turmas de séries diferentes fazem provas diferentes, por isso só dá para comparar as médias. Para ver questão por questão, escolha duas turmas da <b>mesma série</b> (por exemplo, 5º A e 5º B).</p></div>`}`;
    document.getElementById("ca").onchange=e=>{cmp.a=e.target.value;draw()};document.getElementById("cb").onchange=e=>{cmp.b=e.target.value;draw()};
-   if(same){const q=()=>{const ta=get(A,cmp.d),tb=get(B,cmp.d);document.getElementById("qq").innerHTML=dumbbell(ta.qs.map((x,i)=>({l:`Q${x} · ${hsplit(ta.hab[x]).txt}`,a:ta.qp[i],b:tb.qp[i]})),A,B,{w:760})};q();bindSeg("cd",v=>{cmp.d=v;q()})}
+   if(same){let ord="prova";const q=()=>{const ta=get(A,cmp.d),tb=get(B,cmp.d);
+     let rows=ta.qs.map((x,i)=>({q:x,a:ta.qp[i],b:tb.qp[i],d:Math.round(ta.qp[i])-Math.round(tb.qp[i]),...hsplit(ta.hab[x])}));
+     const nA=rows.filter(r=>r.d>=3).length,nB=rows.filter(r=>r.d<=-3).length,nE=rows.length-nA-nB;
+     const top=rows.slice().sort((x,y)=>Math.abs(y.d)-Math.abs(x.d)).filter(r=>Math.abs(r.d)>=15).slice(0,3);
+     if(ord=="dif")rows.sort((x,y)=>Math.abs(y.d)-Math.abs(x.d));
+     document.getElementById("qq").innerHTML=`<div class="placar"><div style="--c:var(--ca)"><b>${nA}</b>questões em que o ${A} foi melhor</div><div style="--c:var(--cb)"><b>${nB}</b>questões em que o ${B} foi melhor</div><div style="--c:var(--mut)"><b>${nE}</b>empates (diferença menor que 3 pontos)</div></div>
+      ${top.length?`<div style="display:grid;gap:8px"><div class="label">Onde a diferença é maior</div>${top.map(r=>{const w=r.d>0?A:B,l=r.d>0?B:A;return `<div class="insight" style="--f:var(--${r.d>0?"ca":"cb"})"><div class="ic">Q${r.q}</div><p class="sm">Em <b>${esc(r.txt)}</b>, o <b>${w}</b> acertou ${pct(Math.max(r.a,r.b))} e o ${l}, ${pct(Math.min(r.a,r.b))}. Vale trocar experiências entre os professores sobre como essa habilidade foi trabalhada.</p></div>`}).join("")}</div>`:""}
+      <div class="row between"><div class="label">Todas as questões</div>${seg("qo",[["prova","Ordem da prova"],["dif","Maiores diferenças primeiro"]],ord)}</div>
+      <div>${rows.map(r=>`<div class="qrow"><div><span class="xs mut">Questão ${r.q}${r.cod?" · "+r.cod:""}</span><br><b class="sm">${esc(r.txt)}</b></div>${par(r.a,r.b)}<div>${venc(r.a,r.b)}</div></div>`).join("")}</div>`;
+     bindSeg("qo",v=>{ord=v;q()})};
+    q();bindSeg("cd",v=>{cmp.d=v;q()})}
   }else{
    if(!selA.length){const t=ALS.filter(a=>a.turma=="5º A").sort((a,b)=>b.media-a.media);selA=[t[0].id,t.at(-1).id]}
    const C=["var(--pri)","var(--chalk)","var(--ot)","var(--in)"];const S=selA.map(i=>AL[i]).filter(Boolean);
