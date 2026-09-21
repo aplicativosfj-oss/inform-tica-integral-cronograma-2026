@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
 import { FERRAMENTAS } from "@/components/school/ferramentas/registro";
 import { FERRAMENTAS_ADAPTADAS } from "@/lib/profissional-acesso";
-import { temSessaoDeApoio } from "@/lib/profissional-session";
+import { lerProfissionalSessao, temSessaoDeApoio } from "@/lib/profissional-session";
 
 export const Route = createFileRoute("/mediador/$turmaId/$apoioIndex/ferramentas/")({
   component: FerramentasAdaptadas,
@@ -24,10 +25,21 @@ function FerramentasAdaptadas() {
   const navigate = useNavigate();
   const indice = Number(apoioIndex);
 
+  // As ferramentas só abrem com um aluno em atendimento: é a sessão dele que
+  // recebe o que for produzido aqui.
   useEffect(() => {
-    if (!temSessaoDeApoio(turmaId, indice)) navigate({ to: "/mediador" });
+    if (!temSessaoDeApoio(turmaId, indice)) {
+      navigate({ to: "/mediador" });
+      return;
+    }
+    if (!lerProfissionalSessao()?.alunoAtendidoId) {
+      toast.info("Escolha primeiro a criança que você vai atender.");
+      navigate({ to: "/mediador/$turmaId/$apoioIndex", params: { turmaId, apoioIndex } });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turmaId, indice]);
+
+  const alunoAtendido = lerProfissionalSessao()?.alunoAtendidoNome;
 
   const adaptadas = FERRAMENTAS.filter((f) =>
     (FERRAMENTAS_ADAPTADAS as readonly string[]).includes(f.slug),
@@ -47,6 +59,13 @@ function FerramentasAdaptadas() {
           >
             <ArrowLeft className="size-4" /> Voltar para minha área
           </Link>
+
+          {alunoAtendido ? (
+            <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-foreground">
+              Trabalhando com <strong>{alunoAtendido}</strong> — o que for salvo aqui vai para a
+              área dele(a).
+            </p>
+          ) : null}
 
           <h1 className="mb-1 text-xl font-semibold text-foreground">Ferramentas adaptadas</h1>
           <p className="mb-6 text-sm text-muted-foreground">

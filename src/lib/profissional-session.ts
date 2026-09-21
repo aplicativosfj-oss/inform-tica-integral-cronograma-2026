@@ -19,6 +19,14 @@ export interface ProfissionalSessao {
   apoioIndice?: number;
   /** Só para o apoio: "Mediador(a)" ou "Cuidador(a)". */
   funcao?: string;
+  /**
+   * Só para o apoio: aluno que ele está atendendo agora. Enquanto não há um
+   * escolhido, as ferramentas ficam fechadas — é o que garante que tudo o
+   * que for feito no atendimento caia na área daquela criança, e não num
+   * espaço solto do profissional.
+   */
+  alunoAtendidoId?: string;
+  alunoAtendidoNome?: string;
   entrouEm: string;
 }
 
@@ -41,6 +49,24 @@ export function iniciarProfissionalSessao(sessao: Omit<ProfissionalSessao, "entr
 export function encerrarProfissionalSessao(): void {
   if (typeof window === "undefined") return;
   window.sessionStorage.removeItem(CHAVE);
+}
+
+/** Marca (ou troca) o aluno que o profissional de apoio está atendendo. */
+export function definirAlunoAtendido(alunoId: string, nome: string): void {
+  const sessao = lerProfissionalSessao();
+  if (!sessao || typeof window === "undefined") return;
+  window.sessionStorage.setItem(
+    CHAVE,
+    JSON.stringify({ ...sessao, alunoAtendidoId: alunoId, alunoAtendidoNome: nome }),
+  );
+}
+
+/** Encerra o atendimento atual, sem deslogar o profissional. */
+export function limparAlunoAtendido(): void {
+  const sessao = lerProfissionalSessao();
+  if (!sessao || typeof window === "undefined") return;
+  const { alunoAtendidoId: _id, alunoAtendidoNome: _nome, ...resto } = sessao;
+  window.sessionStorage.setItem(CHAVE, JSON.stringify(resto));
 }
 
 /** A sessão atual é do professor regente desta turma? */

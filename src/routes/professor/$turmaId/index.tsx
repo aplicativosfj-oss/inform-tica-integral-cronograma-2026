@@ -8,7 +8,6 @@ import {
   HeartHandshake,
   LogOut,
   Presentation,
-  Sparkles,
   UserX,
   Users2,
 } from "lucide-react";
@@ -17,6 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
 import { HeroProfissional } from "@/components/school/hero-profissional";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
@@ -184,23 +184,13 @@ function ProfessorPainel() {
           <Link
             to="/professor/$turmaId/ferramentas"
             params={{ turmaId }}
-            className="group mt-4 flex cursor-pointer items-center gap-4 rounded-2xl border border-primary/30 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
+            className={`mt-4 ${CLASSES_BARRA_FERRAMENTAS}`}
           >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-              <Sparkles className="size-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground sm:text-base">
-                Ferramentas de trabalho
-              </p>
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                As mesmas {FERRAMENTAS.length} ferramentas da Área do Aluno, para preparar e
-                conduzir a aula.
-              </p>
-            </div>
-            <span className="hidden shrink-0 text-sm font-medium text-primary group-hover:underline sm:block">
-              Abrir →
-            </span>
+            <BarraFerramentas
+              titulo="Ferramentas de trabalho"
+              descricao={`As mesmas ${FERRAMENTAS.length} ferramentas da Área do Aluno, para preparar e conduzir a aula.`}
+              acao="Abrir →"
+            />
           </Link>
 
           {turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (

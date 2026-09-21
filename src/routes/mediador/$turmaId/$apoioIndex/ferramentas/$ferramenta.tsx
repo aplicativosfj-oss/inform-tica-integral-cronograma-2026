@@ -1,13 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
 import { encontrarFerramenta } from "@/components/school/ferramentas/registro";
-import { temSessaoDeApoio } from "@/lib/profissional-session";
+import { lerProfissionalSessao, temSessaoDeApoio } from "@/lib/profissional-session";
 
 export const Route = createFileRoute("/mediador/$turmaId/$apoioIndex/ferramentas/$ferramenta")({
   component: FerramentaAdaptadaPage,
@@ -25,10 +26,21 @@ function FerramentaAdaptadaPage() {
   const indice = Number(apoioIndex);
   const info = encontrarFerramenta(ferramenta);
 
+  // As ferramentas só abrem com um aluno em atendimento: é a sessão dele que
+  // recebe o que for produzido aqui.
   useEffect(() => {
-    if (!temSessaoDeApoio(turmaId, indice)) navigate({ to: "/mediador" });
+    if (!temSessaoDeApoio(turmaId, indice)) {
+      navigate({ to: "/mediador" });
+      return;
+    }
+    if (!lerProfissionalSessao()?.alunoAtendidoId) {
+      toast.info("Escolha primeiro a criança que você vai atender.");
+      navigate({ to: "/mediador/$turmaId/$apoioIndex", params: { turmaId, apoioIndex } });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turmaId, indice]);
+
+  const alunoAtendido = lerProfissionalSessao()?.alunoAtendidoNome;
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -44,6 +56,13 @@ function FerramentaAdaptadaPage() {
           >
             <ArrowLeft className="size-4" /> Todas as ferramentas adaptadas
           </Link>
+
+          {alunoAtendido ? (
+            <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs text-foreground">
+              Trabalhando com <strong>{alunoAtendido}</strong> — o que for salvo aqui vai para a
+              área dele(a).
+            </p>
+          ) : null}
 
           {info ? (
             <>

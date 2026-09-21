@@ -9,7 +9,6 @@ import {
   HeartHandshake,
   History,
   LogOut,
-  Sparkles,
   UserRound,
   UserX,
 } from "lucide-react";
@@ -22,6 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
+import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
 import { FERRAMENTAS } from "@/components/school/ferramentas/registro";
 import { useAppStore } from "@/lib/app-store";
 import {
@@ -290,23 +290,13 @@ function AlunoPainel() {
           <Link
             to="/aluno/$turmaId/$alunoId/ferramentas"
             params={{ turmaId, alunoId }}
-            className="group flex cursor-pointer items-center gap-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md sm:p-5"
+            className={CLASSES_BARRA_FERRAMENTAS}
           >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
-              <Sparkles className="size-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground sm:text-base">
-                Ferramentas e exercícios
-              </p>
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                Calculadora, editor de texto, tabuada, matemática, leitura, história do Acre e mais{" "}
-                {FERRAMENTAS.length - 6} atividades.
-              </p>
-            </div>
-            <span className="hidden shrink-0 text-sm font-medium text-primary group-hover:underline sm:block">
-              Explorar →
-            </span>
+            <BarraFerramentas
+              titulo="Ferramentas e exercícios"
+              descricao={`Calculadora, editor de texto, tabuada, leitura, história do Acre e mais ${FERRAMENTAS.length - 6} atividades.`}
+              acao="Explorar →"
+            />
           </Link>
         </section>
 
