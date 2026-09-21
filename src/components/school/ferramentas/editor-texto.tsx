@@ -235,7 +235,19 @@ export function EditorTexto() {
   } | null>(null);
   const arrastandoRef = useRef<EstadoArraste | null>(null);
 
-  const sessao = lerAlunoSessao();
+  // `sessionStorage` não existe no servidor, então a primeira pintura da
+  // página não tem como saber se há aluno logado. Ler direto no corpo do
+  // componente fazia o HTML do servidor sair SEM o painel "Meus textos" e o
+  // do navegador sair COM ele: a folha nascia larga e encolhia no instante
+  // seguinte, com um tranco visível ao atualizar a página. Agora a leitura
+  // acontece depois de montar, e `undefined` marca esse "ainda não sei" —
+  // durante o qual o espaço do painel já fica reservado, sem tranco.
+  const [sessao, setSessao] = useState<ReturnType<typeof lerAlunoSessao> | undefined>(undefined);
+  const sessaoDesconhecida = sessao === undefined;
+
+  useEffect(() => {
+    setSessao(lerAlunoSessao());
+  }, []);
 
   function salvarSelecaoAtual() {
     const selecao = window.getSelection();
@@ -924,12 +936,12 @@ export function EditorTexto() {
     <div className="flex flex-col gap-4 md:flex-row md:items-start">
       {/* Painel lateral: últimos textos do aluno, para reabrir rápido sem
           precisar do diálogo "Abrir". Só aparece pra quem está logado. */}
-      {sessao && (
+      {(sessao || sessaoDesconhecida) && (
         <aside className="order-2 shrink-0 md:order-1 md:w-44">
           <p className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Meus textos
           </p>
-          {carregandoRecentes ? (
+          {sessaoDesconhecida ? null : carregandoRecentes ? (
             <div className="flex justify-center py-4">
               <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
@@ -993,7 +1005,7 @@ export function EditorTexto() {
             className="h-8 max-w-xs font-medium"
             placeholder="Nome do documento"
           />
-          {!sessao && (
+          {sessao === null && (
             <p className="text-xs text-muted-foreground">
               Entre na sua área de aluno para salvar seus documentos.
             </p>
@@ -1311,8 +1323,11 @@ export function EditorTexto() {
           </div>
         </div>
 
-        {/* "Folha" branca centralizada sobre fundo cinza, como no Word */}
-        <div className="rounded-lg bg-[#e7e5e2] p-4 dark:bg-zinc-900 sm:p-8">
+        {/* "Folha" branca centralizada sobre a mesa cinza, como no Word. No
+          tema escuro a mesa era quase preta (zinc-900) e, em volta da folha
+          branca, virava uma moldura preta forte em torno da página — aqui
+          ela é só um véu claro sobre o fundo da própria página. */}
+        <div className="rounded-lg bg-[#e7e5e2] p-4 dark:bg-white/5 sm:p-8">
           <div
             ref={areaRef}
             contentEditable
