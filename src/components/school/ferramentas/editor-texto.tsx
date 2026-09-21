@@ -14,6 +14,7 @@ import {
   List,
   ListOrdered,
   Loader2,
+  Move,
   PanelLeft,
   PanelRight,
   Palette,
@@ -174,7 +175,7 @@ function comando(nome: string, valor?: string) {
 
 /** Estado do que está sendo arrastado no momento (imagem/caixa de texto). */
 interface EstadoArraste {
-  tipo: "imagem" | "textbox-mover" | "textbox-redimensionar";
+  tipo: "imagem" | "imagem-mover" | "textbox-mover" | "textbox-redimensionar";
   elemento: HTMLElement;
   /** id do ponteiro (mouse/dedo/caneta) que começou o arraste. */
   ponteiro: number;
@@ -314,9 +315,12 @@ export function EditorTexto() {
         `style="position:absolute;left:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;background:#dc2626;` +
         `color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;">×</button>` +
         `<img src="${src}" draggable="false" style="width:320px;max-width:100%;height:auto;display:block;border-radius:2px;" />` +
-        `<span class="editor-img-handle" contenteditable="false" title="Arrastar para redimensionar" ` +
+        `<span class="editor-img-move" contenteditable="false" draggable="false" title="Arrastar a imagem pela folha" ` +
+        `style="position:absolute;right:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;background:#2563eb;` +
+        `border:2px solid #fff;cursor:move;display:none;touch-action:none;user-select:none;"></span>` +
+        `<span class="editor-img-handle" contenteditable="false" draggable="false" title="Arrastar para redimensionar" ` +
         `style="position:absolute;right:-6px;bottom:-6px;width:14px;height:14px;border-radius:9999px;background:#2563eb;` +
-        `border:2px solid #fff;cursor:nwse-resize;display:none;"></span></span>&nbsp;`;
+        `border:2px solid #fff;cursor:nwse-resize;display:none;touch-action:none;user-select:none;"></span></span>&nbsp;`;
       comandoComSelecao("insertHTML", html);
       salvarRascunhoLocal();
       atualizarContagem();
@@ -349,9 +353,30 @@ export function EditorTexto() {
       `border:2px solid #fff;cursor:nwse-resize;touch-action:none;user-select:none;"></span></div>`;
     document.execCommand("insertHTML", false, html);
     prepararCaixasTexto();
+    prepararImagens();
     salvarRascunhoLocal();
     atualizarContagem();
     setSujo(true);
+  }
+
+  /**
+   * Imagens salvas antes desta versão não têm a alcinha de mover. Aqui ela é
+   * criada, para que um texto antigo também possa ser reorganizado.
+   */
+  function prepararImagens() {
+    areaRef.current?.querySelectorAll<HTMLElement>(".editor-img-wrap").forEach((wrap) => {
+      wrap.setAttribute("draggable", "false");
+      if (wrap.querySelector(".editor-img-move")) return;
+      const alca = document.createElement("span");
+      alca.className = "editor-img-move";
+      alca.setAttribute("contenteditable", "false");
+      alca.setAttribute("draggable", "false");
+      alca.title = "Arrastar a imagem pela folha";
+      alca.style.cssText =
+        "position:absolute;right:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;" +
+        "background:#2563eb;border:2px solid #fff;cursor:move;display:none;touch-action:none;user-select:none;";
+      wrap.appendChild(alca);
+    });
   }
 
   /** Aplica `prepararCaixaTexto` em todas as caixas da folha. */
@@ -366,9 +391,12 @@ export function EditorTexto() {
     setPosicaoBarraImagem({ top: rect.top - 44, left: rect.left });
   }
 
+  /** Alcinhas que aparecem em volta da imagem quando ela está selecionada. */
+  const ALCAS_IMAGEM = ".editor-img-handle, .editor-img-delete, .editor-img-move";
+
   function selecionarImagem(wrap: HTMLElement) {
     if (imagemSelecionada && imagemSelecionada !== wrap) desselecionarImagem();
-    wrap.querySelectorAll<HTMLElement>(".editor-img-handle, .editor-img-delete").forEach((el) => {
+    wrap.querySelectorAll<HTMLElement>(ALCAS_IMAGEM).forEach((el) => {
       el.style.display = "flex";
     });
     setImagemSelecionada(wrap);
@@ -376,24 +404,64 @@ export function EditorTexto() {
   }
 
   function desselecionarImagem() {
-    imagemSelecionada
-      ?.querySelectorAll<HTMLElement>(".editor-img-handle, .editor-img-delete")
-      .forEach((el) => {
-        el.style.display = "none";
-      });
+    imagemSelecionada?.querySelectorAll<HTMLElement>(ALCAS_IMAGEM).forEach((el) => {
+      el.style.display = "none";
+    });
     setImagemSelecionada(null);
     setPosicaoBarraImagem(null);
   }
 
   /**
+   * Solta a imagem do texto: ela passa a flutuar sobre a folha, na posição
+   * onde já estava, e daí em diante anda com a alcinha azul de cima. É o
+   * modo "livre" — enquanto a imagem está no meio do texto (em linha,
+   * flutuando ou centralizada), quem manda na posição é o parágrafo, e
+   * arrastar não faria sentido.
+   */
+  function soltarImagemNaFolha(wrap: HTMLElement) {
+    const area = areaRef.current;
+    if (!area || wrap.dataset["align"] === "livre") return;
+    const retanguloImagem = wrap.getBoundingClientRect();
+    const retanguloArea = area.getBoundingClientRect();
+    wrap.dataset["align"] = "livre";
+    wrap.style.float = "none";
+    wrap.style.margin = "0";
+    wrap.style.display = "inline-block";
+    wrap.style.position = "absolute";
+    wrap.style.zIndex = "5";
+    wrap.style.left = `${Math.round(retanguloImagem.left - retanguloArea.left + area.scrollLeft)}px`;
+    wrap.style.top = `${Math.round(retanguloImagem.top - retanguloArea.top + area.scrollTop)}px`;
+  }
+
+  /** Devolve a imagem ao texto, desfazendo o modo livre. */
+  function prenderImagemNoTexto(wrap: HTMLElement) {
+    wrap.style.position = "relative";
+    wrap.style.left = "";
+    wrap.style.top = "";
+    wrap.style.zIndex = "";
+  }
+
+  /**
    * Aplica o alinhamento na imagem selecionada: "em linha" (comportamento
    * padrão, no meio do texto), "esquerda"/"direita" (a imagem flutua para o
-   * lado e o texto contorna, como no Word) ou "centro" (a imagem fica
-   * sozinha numa linha, centralizada).
+   * lado e o texto contorna, como no Word), "centro" (a imagem fica sozinha
+   * numa linha, centralizada) ou "livre" (solta sobre a folha, arrastável).
    */
-  function aplicarAlinhamentoImagem(alinhamento: "inline" | "esquerda" | "direita" | "centro") {
+  function aplicarAlinhamentoImagem(
+    alinhamento: "inline" | "esquerda" | "direita" | "centro" | "livre",
+  ) {
     if (!imagemSelecionada) return;
     const wrap = imagemSelecionada;
+
+    if (alinhamento === "livre") {
+      soltarImagemNaFolha(wrap);
+      atualizarPosicaoBarraImagem(wrap);
+      salvarRascunhoLocal();
+      setSujo(true);
+      return;
+    }
+
+    prenderImagemNoTexto(wrap);
     wrap.dataset["align"] = alinhamento;
     wrap.style.float = "none";
     wrap.style.display = "inline-block";
@@ -471,9 +539,10 @@ export function EditorTexto() {
       if (!alvo) return;
 
       const alcaImagem = alvo.closest(".editor-img-handle");
+      const alcaMoverImagem = alvo.closest(".editor-img-move");
       const alcaMoverCaixa = alvo.closest(".editor-textbox-handle");
       const alcaRedimensionarCaixa = alvo.closest(".editor-textbox-resize");
-      if (!alcaImagem && !alcaMoverCaixa && !alcaRedimensionarCaixa) return;
+      if (!alcaImagem && !alcaMoverImagem && !alcaMoverCaixa && !alcaRedimensionarCaixa) return;
 
       // Impede a seleção de texto e o drag-and-drop nativo do bloco.
       e.preventDefault();
@@ -497,6 +566,21 @@ export function EditorTexto() {
           startHeight: rect.height,
           startLeft: 0,
           startTop: 0,
+        };
+      } else if (alcaMoverImagem) {
+        const wrap = alcaMoverImagem.closest<HTMLElement>(".editor-img-wrap");
+        if (!wrap) return;
+        // Na primeira vez que o aluno arrasta, a imagem sai do texto e passa
+        // a flutuar sobre a folha — daí em diante ela anda livre.
+        soltarImagemNaFolha(wrap);
+        arrastandoRef.current = {
+          ...base,
+          tipo: "imagem-mover",
+          elemento: wrap,
+          startWidth: 0,
+          startHeight: 0,
+          startLeft: wrap.offsetLeft,
+          startTop: wrap.offsetTop,
         };
       } else if (alcaMoverCaixa) {
         const caixa = alcaMoverCaixa.closest<HTMLElement>(".editor-textbox");
@@ -550,6 +634,10 @@ export function EditorTexto() {
         estado.elemento.style.width = `${novaLargura}px`;
         const wrap = estado.elemento.closest<HTMLElement>(".editor-img-wrap");
         if (wrap) atualizarPosicaoBarraImagem(wrap);
+      } else if (estado.tipo === "imagem-mover") {
+        estado.elemento.style.left = `${Math.round(estado.startLeft + dx)}px`;
+        estado.elemento.style.top = `${Math.round(estado.startTop + dy)}px`;
+        atualizarPosicaoBarraImagem(estado.elemento);
       } else if (estado.tipo === "textbox-redimensionar") {
         estado.elemento.style.width = `${Math.max(80, Math.round(estado.startWidth + dx))}px`;
         estado.elemento.style.height = `${Math.max(48, Math.round(estado.startHeight + dy))}px`;
@@ -683,6 +771,7 @@ export function EditorTexto() {
     if (salvo && areaRef.current) {
       areaRef.current.innerHTML = salvo;
       prepararCaixasTexto();
+      prepararImagens();
       atualizarContagem();
       setSujo(true);
     }
@@ -819,6 +908,7 @@ export function EditorTexto() {
       }
       areaRef.current.innerHTML = arquivo.conteudoHtml;
       prepararCaixasTexto();
+      prepararImagens();
       setArquivoAtualId(arquivo.id);
       setTitulo(arquivo.titulo);
       atualizarContagem();
@@ -1283,6 +1373,15 @@ export function EditorTexto() {
               onClick={() => aplicarAlinhamentoImagem("direita")}
             >
               <PanelRight className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              title="Solta na folha (arraste para onde quiser)"
+              onClick={() => aplicarAlinhamentoImagem("livre")}
+            >
+              <Move className="size-3.5" />
             </Button>
             <div className="mx-0.5 h-5 w-px bg-border" />
             <Button
