@@ -12,7 +12,7 @@ import { FERRAMENTAS, type FerramentaInfo } from "@/components/school/ferramenta
  * A lista começa com a calculadora e cresce conforme a escola quiser abrir
  * mais — basta acrescentar o slug.
  */
-export const FERRAMENTAS_PUBLICAS = ["calculadora"] as const;
+export const FERRAMENTAS_PUBLICAS = ["atividades-por-habilidade", "calculadora"] as const;
 
 export function listarFerramentasPublicas(): FerramentaInfo[] {
   return FERRAMENTAS.filter((f) => (FERRAMENTAS_PUBLICAS as readonly string[]).includes(f.slug));

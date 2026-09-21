@@ -19,6 +19,7 @@ export const Route = createFileRoute("/aluno/$turmaId/$alunoId/ferramentas/")({
 });
 
 const CATEGORIAS = [
+  "Recomposição",
   "Ferramentas",
   "Matemática",
   "Alfabetização e Leitura",

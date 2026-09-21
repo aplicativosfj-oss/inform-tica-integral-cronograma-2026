@@ -15,6 +15,7 @@ import {
   Shapes,
   SpellCheck2,
   Table2,
+  Target,
   TreePine,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -36,18 +37,28 @@ import { Leitura } from "@/components/school/ferramentas/leitura";
 import { Planilha } from "@/components/school/ferramentas/planilha";
 import { ProblemasMatematica } from "@/components/school/ferramentas/problemas-matematica";
 import { TabuadaJogo } from "@/components/school/ferramentas/tabuada";
+import { Trilhas } from "@/components/school/ferramentas/trilhas";
 
 export interface FerramentaInfo {
   slug: string;
   titulo: string;
   descricao: string;
-  categoria: "Ferramentas" | "Matemática" | "Alfabetização e Leitura" | "Nossa região";
+  categoria: "Recomposição" | "Ferramentas" | "Matemática" | "Alfabetização e Leitura" | "Nossa região";
   icon: LucideIcon;
   cor: string;
   Componente: ComponentType;
 }
 
 export const FERRAMENTAS: FerramentaInfo[] = [
+  {
+    slug: "atividades-por-habilidade",
+    titulo: "Atividades por habilidade",
+    descricao: "Treine o que a Avaliação Diagnóstica mostrou que precisa melhorar, por série e nível.",
+    categoria: "Recomposição",
+    icon: Target,
+    cor: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300",
+    Componente: Trilhas,
+  },
   {
     slug: "calculadora",
     titulo: "Calculadora",
