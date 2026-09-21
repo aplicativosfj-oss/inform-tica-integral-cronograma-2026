@@ -216,6 +216,8 @@ export function NavBar() {
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/infoteca" label="Infoteca" />
           <NavLink to="/aluno" label="Área do Aluno" />
+          <NavLink to="/professor" label="Professor" />
+          <NavLink to="/mediador" label="Mediadores" />
           <NavLink to="/sobre" label="Sobre" />
           <HeaderRadioPlayer />
           <ShareButton />
