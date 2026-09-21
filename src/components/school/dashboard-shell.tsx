@@ -15,6 +15,8 @@ import {
 import type { ReactNode } from "react";
 
 import { NavBar } from "@/components/school/nav-bar";
+import { useAuth } from "@/lib/auth-store";
+import { SessaoAtiva } from "@/components/school/sessao-ativa";
 import { Protected } from "@/components/school/protected";
 import { cn } from "@/lib/utils";
 import dashboardBgImg from "@/assets/image8.png";
@@ -53,6 +55,7 @@ const NAV_GROUPS = [
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { email, logout } = useAuth();
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -106,7 +109,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 ))}
               </nav>
             </aside>
-            <div className="min-w-0 flex-1">{children}</div>
+            <div className="min-w-0 flex-1">
+              {email ? (
+                <SessaoAtiva
+                  nome={email}
+                  papel="Administração do sistema"
+                  detalhe="Painel de gestão"
+                  onSair={logout}
+                />
+              ) : null}
+              {children}
+            </div>
           </div>
         </Protected>
       </div>

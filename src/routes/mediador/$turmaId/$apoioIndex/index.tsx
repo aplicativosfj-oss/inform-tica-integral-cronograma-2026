@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
 import { FaleComProfessor } from "@/components/school/fale-com-professor";
+import { SessaoAtiva } from "@/components/school/sessao-ativa";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -219,6 +220,19 @@ function MediadorPainel() {
             <ArrowLeft className="size-4" /> Trocar de profissional
           </Link>
 
+          <SessaoAtiva
+            nome={viaCoordenacao ?? apoio.nome}
+            papel={viaCoordenacao ? "Coordenação do AEE" : apoio.funcao}
+            detalhe={`${turma.serie} "${turma.letra}"`}
+            desde={lerProfissionalSessao()?.entrouEm}
+            aviso={
+              viaCoordenacao
+                ? `Acesso pela senha mestra: você está vendo a área de ${apoio.nome}.`
+                : undefined
+            }
+            onSair={sair}
+          />
+
           {/* Cabeçalho de perfil: o profissional em destaque */}
           <header className="relative overflow-hidden rounded-3xl text-white shadow-2xl shadow-indigo-950/30 ring-1 ring-white/10">
             <img
@@ -253,14 +267,6 @@ function MediadorPainel() {
                     &rdquo; · Prof(a). regente {turma.professorRegente}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="self-start border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-                  onClick={sair}
-                >
-                  <LogOut className="size-4" /> Sair
-                </Button>
               </div>
 
               <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">

@@ -21,6 +21,8 @@ import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school
 import { NovaAtividadeDialog } from "@/components/school/nova-atividade-dialog";
 import { FaleComProfessor } from "@/components/school/fale-com-professor";
 import { HeroProfissional } from "@/components/school/hero-profissional";
+import { SessaoAtiva } from "@/components/school/sessao-ativa";
+import { lerProfissionalSessao } from "@/lib/profissional-session";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -166,6 +168,14 @@ function ProfessorPainel() {
           >
             <ArrowLeft className="size-4" /> Trocar de turma
           </Link>
+
+          <SessaoAtiva
+            nome={`Prof(a). ${turma.professorRegente}`}
+            papel="Professor(a) regente"
+            detalhe={`${turma.serie} "${turma.letra}"`}
+            desde={lerProfissionalSessao()?.entrouEm}
+            onSair={sair}
+          />
 
           <HeroProfissional
             etiqueta="Espaço do Professor"
