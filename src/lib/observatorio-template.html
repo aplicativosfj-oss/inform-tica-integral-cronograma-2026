@@ -12,37 +12,38 @@
 :root[data-theme="dark"]{--bg:#0E171E;--surface:#16222B;--surface2:#1C2A35;--ink:#E7EEF2;--mut:#9AAAB6;--line:#26363F;--pri:#8CB8E4;--pri2:#1D3246;--chalk:#F5C451;--chalk2:#3A3018;--na:#34424B;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Nunito Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Nunito Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
 h1,h2,h3,h4{font-family:Sora,system-ui,sans-serif;margin:0;text-wrap:balance;letter-spacing:-.01em}
 p{margin:0}
 .wrap{max-width:1220px;margin:0 auto;padding-inline:clamp(16px,3vw,32px)}
 /* topo */
-.top{background:var(--pri);color:#fff;padding-block:26px 0;position:relative;overflow:hidden}
+.top{background:var(--pri);color:#fff;padding-block:18px 16px;position:relative;overflow:hidden}
 :root:not([data-theme="light"]) .top{background:var(--pri)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .top{background:#12304B}}
 :root[data-theme="dark"] .top{background:#12304B}
 .top::after{content:"";position:absolute;inset:auto -10% -60% 45%;height:260px;background:radial-gradient(closest-side,rgba(242,182,50,.35),transparent);pointer-events:none}
 .top .eyebrow{font:700 12px/1 "Nunito Sans";letter-spacing:.14em;text-transform:uppercase;color:#FFD877}
-.top h1{font-size:clamp(24px,3.4vw,36px);font-weight:800;margin-top:8px;max-width:28ch}
-.top p.lead{color:#D6E4F1;margin-top:8px;max-width:70ch}
-.tabs{display:flex;gap:4px;margin-top:22px;overflow-x:auto;scrollbar-width:none}
+.top h1{font-size:clamp(20px,2.6vw,28px);font-weight:800;margin-top:6px;max-width:40ch}
+.top p.lead{color:#D6E4F1;margin-top:4px;max-width:80ch;font-size:14px}
+.tabbar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 4px 14px -10px rgba(0,0,0,.25)}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.tabs button{all:unset;cursor:pointer;padding:11px 16px 13px;font:700 14.5px "Nunito Sans";color:#C9DAEA;border-radius:12px 12px 0 0;white-space:nowrap;position:relative}
-.tabs button:hover{color:#fff}
-.tabs button[aria-selected=true]{background:var(--bg);color:var(--ink)}
+.tabs button{all:unset;cursor:pointer;padding:12px 14px;font:700 14px "Nunito Sans";color:var(--mut);white-space:nowrap;border-bottom:3px solid transparent}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected=true]{color:var(--pri);border-bottom-color:var(--chalk)}
 .tabs button:focus-visible{outline:2px solid var(--chalk);outline-offset:-2px}
-main{padding-block:28px 70px}
-.stack{display:grid;gap:22px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,2.2vw,24px);box-shadow:var(--shadow);min-width:0}
+main{padding-block:20px 48px}
+.stack{display:grid;gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(14px,1.8vw,20px);box-shadow:var(--shadow);min-width:0}
 .card.flat{box-shadow:none}
-.card h2{font-size:clamp(18px,2vw,21px);font-weight:700}
+.card h2{font-size:clamp(16px,1.7vw,19px);font-weight:700}
 .card h3{font-size:16px;font-weight:700}
 .sub{color:var(--mut);font-size:14.5px}
 .sm{font-size:13.5px}.xs{font-size:12.5px}
 .mut{color:var(--mut)}
 .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .between{justify-content:space-between}
-.grid{display:grid;gap:18px}
+.grid{display:grid;gap:14px}
 .g2{grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))}
 .g4{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))}
@@ -51,7 +52,7 @@ main{padding-block:28px 70px}
 .f-OT{--f:var(--ot)}.f-BO{--f:var(--bo)}.f-RE{--f:var(--re)}.f-IN{--f:var(--in)}.f-NA{--f:var(--na)}
 .tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:999px;font:800 12.5px "Nunito Sans";background:color-mix(in srgb,var(--f) 16%,transparent);color:color-mix(in srgb,var(--f) 75%,var(--ink));white-space:nowrap}
 .tag::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--f)}
-.num{font:800 clamp(28px,3.4vw,40px)/1 Sora,sans-serif;letter-spacing:-.02em}
+.num{font:800 clamp(24px,2.6vw,32px)/1 Sora,sans-serif;letter-spacing:-.02em}
 .bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
 .bar i{display:block;height:100%;border-radius:99px;background:var(--f)}
 .dist{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--surface2);gap:2px}
@@ -89,6 +90,8 @@ td.r,th.r{text-align:right}
 tbody tr.click{cursor:pointer}
 tbody tr.click:hover td{background:var(--surface2)}
 /* matriz */
+.ht td{font-size:14px}
+.mx td{padding:8px}
 .mx td.c{text-align:center;font-weight:800;color:#fff;border-radius:10px;border:3px solid var(--surface);background:var(--f)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{all:unset;cursor:pointer;padding:5px 11px;border-radius:999px;background:var(--surface2);font:700 13px "Nunito Sans";border:1px solid var(--line)}
@@ -121,9 +124,11 @@ svg text{fill:var(--mut);font:600 12px "Nunito Sans",sans-serif}
 .db .t u{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .db .axis{grid-template-columns:1fr}
 svg .lbl{fill:var(--ink);font-weight:700}
-dialog{border:0;border-radius:22px;background:var(--surface);color:var(--ink);padding:0;width:min(860px,94vw);max-height:90vh;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
+html.modal-aberto,html.modal-aberto body{overflow:hidden}
+dialog{border:0;border-radius:18px;background:var(--surface);color:var(--ink);padding:0;width:min(1000px,96vw);max-height:92vh;overflow:auto;overscroll-behavior:contain;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
 dialog::backdrop{background:rgba(9,20,30,.55);backdrop-filter:blur(3px)}
-.dlg{padding:clamp(18px,3vw,30px);display:grid;gap:20px}
+.dlg{padding:clamp(16px,2.4vw,26px);display:grid;gap:16px}
+.dlghead{position:sticky;top:0;z-index:2;background:var(--surface);margin:calc(-1 * clamp(16px,2.4vw,26px));margin-bottom:0;padding:clamp(16px,2.4vw,26px);padding-bottom:12px;border-bottom:1px solid var(--line);display:grid;gap:12px}
 .help{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--surface2);font:800 11px Sora;color:var(--mut);cursor:help;vertical-align:1px}
 .steps{counter-reset:s;display:grid;gap:10px;padding:0;margin:0;list-style:none}
 .steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px}
@@ -137,9 +142,9 @@ dialog::backdrop{background:rgba(9,20,30,.55);backdrop-filter:blur(3px)}
   <div class="eyebrow">II Avaliação Diagnóstica · Anos iniciais · junho de 2026</div>
   <h1>Como estão aprendendo os alunos da Escola Dr. Eiraldo</h1>
   <p class="lead">Resultados de 10 turmas do 1º ao 5º ano em Português, Matemática e Ciências, explicados de forma simples, com sugestões do que fazer a seguir.</p>
-  <nav class="tabs" id="tabs" role="tablist" aria-label="Seções"></nav>
- </div>
+  </div>
 </header>
+<div class="tabbar"><nav class="wrap tabs" id="tabs" role="tablist" aria-label="Seções"></nav></div>
 <main class="wrap" id="main"></main>
 <dialog id="dlg" aria-label="Detalhe"><div class="dlg" id="dlgBody"></div></dialog>
 
@@ -279,29 +284,39 @@ V.turmas=()=>{
   ${DS.map(d=>{const t=get(k,d);return `<div class="discline"><span>${DN[d]}</span>${distBar(t.dist)}<b>${pct(t.media)}</b></div>`}).join("")}
   <span class="xs mut">${get(k,"LP").feitos.length} alunos avaliados · toque para abrir</span></article>`).join("")}</div></div>`;
  main.querySelectorAll("[data-k]").forEach(c=>{c.onclick=()=>turmaDlg(c.dataset.k,"LP");c.onkeydown=e=>{if(e.key=="Enter")turmaDlg(c.dataset.k,"LP")}})};
-function turmaDlg(k,d){const t=get(k,d),dlg=document.getElementById("dlg");
+/* janela: trava a rolagem do fundo enquanto estiver aberta */
+const dlgEl=document.getElementById("dlg");
+dlgEl.addEventListener("close",()=>document.documentElement.classList.remove("modal-aberto"));
+function abrirDlg(){if(!dlgEl.open){document.documentElement.classList.add("modal-aberto");dlgEl.showModal()}dlgEl.scrollTop=0}
+const cab=(eb,tit,sub,extra="")=>`<div class="dlghead"><div class="row between" style="flex-wrap:nowrap;align-items:start"><div><div class="label">${eb}</div><h2 style="font-size:clamp(19px,2.4vw,24px)">${tit}</h2>${sub?`<p class="sub">${sub}</p>`:""}</div><div class="row noprint" style="flex-wrap:nowrap"><button class="btn" onclick="print()">Imprimir</button><button class="btn pri" id="dx" aria-label="Fechar">Fechar ✕</button></div></div>${extra}</div>`;
+/* tabela de habilidades: questão, habilidade e barra de acerto numa linha só */
+const tabHab=hs=>`<div class="scroll"><table class="ht"><thead><tr><th style="width:44px">Q</th><th>Habilidade avaliada</th><th style="width:34%">Acertos da turma</th></tr></thead><tbody>${hs.map(h=>`<tr><td><b>${h.q}</b></td><td>${h.cod?`<span class="mut xs">${h.cod}</span><br>`:""}${esc(h.txt)}</td><td><div class="row" style="flex-wrap:nowrap;gap:8px"><div style="flex:1">${bar(h.p)}</div><b style="min-width:40px;text-align:right">${pct(h.p)}</b></div></td></tr>`).join("")}</tbody></table></div>`;
+let dlgAba="geral";
+function turmaDlg(k,d,aba){if(aba)dlgAba=aba;const t=get(k,d);
  const hs=t.qs.map((q,i)=>({q,p:t.qp[i],...hsplit(t.hab[q])}));const fracas=hs.filter(h=>h.p<70).sort((a,b)=>a.p-b.p).slice(0,3);
  const grupos=["IN","RE","BO","OT"].map(f=>({f,al:t.feitos.filter(a=>fx(a.p)==f).sort((a,b)=>a.p-b.p)}));
- document.getElementById("dlgBody").innerHTML=`<div class="row between"><div><div class="label">${esc(prof(k))}</div><h2 style="font-size:26px">${k} · ${DL[d]}</h2></div><div class="row noprint"><button class="btn" onclick="print()">Imprimir</button><button class="btn pri" id="dx">Fechar</button></div></div>
- ${seg("dd",DS.map(x=>[x,DN[x]]),d)}
- <div class="grid g2"><div class="row" style="gap:20px;flex-wrap:nowrap">${donut(t.dist)}<div style="display:grid;gap:6px">${["OT","BO","RE","IN"].map(f=>`<div class="row sm" style="gap:8px"><span class="tag f-${f}">${F[f].p}</span><b>${t.dist[f]}</b></div>`).join("")}</div></div>
- <div style="display:grid;gap:8px;align-content:center"><div class="label">Média da turma</div><div class="num">${pct(t.media)}</div><p class="sub">Escola nesta disciplina: ${pct(discM(d))}. ${t.media>=discM(d)?"A turma está <b>acima</b> da média da escola.":"A turma está <b>abaixo</b> da média da escola."}${t.ausentes?` ${t.ausentes} aluno(s) sem registro.`:""}</p></div></div>
- <div style="display:grid;gap:8px"><h3>Acertos em cada habilidade</h3>${hbars(hs.map(h=>({l:"Q"+h.q,v:h.p})),{lw:60,w:620})}
- <ol class="sm" style="margin:0;padding-left:20px;display:grid;gap:4px">${hs.map(h=>`<li value="${h.q}">${h.cod?`<span class="mut">${h.cod} · </span>`:""}${esc(h.txt)} — <b>${pct(h.p)}</b></li>`).join("")}</ol></div>
- ${fracas.length?`<div style="display:grid;gap:10px"><h3>O que fazer agora</h3>${fracas.map(h=>`<div class="insight f-${fx(h.p)}"><div class="ic">Q${h.q}</div><div style="display:grid;gap:4px"><b>${esc(h.txt)} · ${pct(h.p)} de acertos</b><span class="sm">${nivelAcao(h.p)} ${dica(h.txt)}</span></div></div>`).join("")}</div>`:`<div class="insight f-OT"><div class="ic">✓</div><p>Todas as habilidades acima de 70%. Hora de aprofundar com desafios.</p></div>`}
- <div style="display:grid;gap:10px"><h3>Alunos por faixa</h3>${grupos.filter(g=>g.al.length).map(g=>`<div class="group"><span class="tag f-${g.f}">${F[g.f].p} · ${g.al.length}</span><div class="names">${g.al.map(a=>`<span>${esc(a.nome.replace(/\s*\(Especial\)/i,""))} <span class="mut">${pct(a.p)}</span></span>`).join("")}</div></div>`).join("")}</div>`;
- if(!dlg.open)dlg.showModal();document.getElementById("dx").onclick=()=>dlg.close();bindSeg("dd",v=>turmaDlg(k,v))}
+ const corpo={
+  geral:`<div class="grid g2" style="align-items:center"><div class="row" style="gap:18px;flex-wrap:nowrap">${donut(t.dist,{size:140})}<div style="display:grid;gap:6px">${["OT","BO","RE","IN"].map(f=>`<div class="row sm" style="gap:8px;flex-wrap:nowrap"><span class="tag f-${f}">${F[f].p}</span><b>${t.dist[f]} alunos</b></div>`).join("")}</div></div>
+   <div style="display:grid;gap:6px"><div class="label">Média da turma</div><div class="num">${pct(t.media)}</div><p class="sub">Média da escola nesta disciplina: ${pct(discM(d))}. ${t.media>=discM(d)?"A turma está <b>acima</b> da média da escola.":"A turma está <b>abaixo</b> da média da escola."}${t.ausentes?` ${t.ausentes} aluno(s) sem registro.`:""}</p></div></div>
+   <div class="insight f-${fx(fracas.length?fracas[0].p:80)}"><div class="ic">${fracas.length?"!":"✓"}</div><p class="sm">${fracas.length?`Ponto mais frágil: <b>${esc(fracas[0].txt)}</b> (${pct(fracas[0].p)} de acertos). Veja a aba “O que fazer”.`:"Todas as habilidades estão acima de 70%."}</p></div>`,
+  hab:tabHab(hs),
+  acao:fracas.length?fracas.map(h=>`<div class="insight f-${fx(h.p)}"><div class="ic">Q${h.q}</div><div style="display:grid;gap:4px"><b>${esc(h.txt)} · ${pct(h.p)} de acertos</b><span class="sm">${nivelAcao(h.p)} ${dica(h.txt)}</span></div></div>`).join("")+`<p class="xs mut">Para montar grupos de trabalho com os nomes dos alunos, use a aba “Plano de ação” no topo da página.</p>`:`<div class="insight f-OT"><div class="ic">✓</div><p>Todas as habilidades acima de 70%. Hora de aprofundar com desafios.</p></div>`,
+  alunos:grupos.filter(g=>g.al.length).map(g=>`<div class="group"><span class="tag f-${g.f}">${F[g.f].p} · ${g.al.length}</span><div class="names">${g.al.map(a=>`<span>${esc(a.nome.replace(/\s*\(Especial\)/i,""))} <span class="mut">${pct(a.p)}</span></span>`).join("")}</div></div>`).join("")};
+ document.getElementById("dlgBody").innerHTML=cab(esc(prof(k)),`${k} · ${DL[d]}`,"",`<div class="row between">${seg("dd",DS.map(x=>[x,DN[x]]),d)}${seg("da",[["geral","Visão geral"],["hab","Habilidades"],["acao","O que fazer"],["alunos","Alunos"]],dlgAba)}</div>`)+`<div style="display:grid;gap:12px">${corpo[dlgAba]}</div>`;
+ abrirDlg();document.getElementById("dx").onclick=()=>dlgEl.close();bindSeg("dd",v=>turmaDlg(k,v));bindSeg("da",v=>turmaDlg(k,d,v))}
 /* ================= HABILIDADES ================= */
-let hD="CN";
+let hD="CN",hA=0;
 V.habilidades=()=>{
- main.innerHTML=`<div class="stack"><div class="card" style="display:grid;gap:14px"><div class="row between"><div><h2>Mapa das habilidades</h2><p class="sub">Cada quadrado é o percentual de alunos da turma que acertaram a questão. Vermelho e laranja mostram onde está a maior necessidade.</p></div>${seg("hd",DS.map(d=>[d,DN[d]]),hD)}</div><div id="mx" class="stack"></div></div>
- <div class="card" style="display:grid;gap:14px"><h2>As 10 habilidades mais frágeis da escola</h2><p class="sub">Somando as duas turmas de cada série. São os pontos que pedem ação coletiva dos professores.</p><div id="top10" style="display:grid;gap:10px"></div></div></div>`;
- const draw=()=>{let html="";[1,2,3,4,5].forEach(a=>{const A=get(a+"º A",hD),B=get(a+"º B",hD);
-  html+=`<div class="scroll"><table class="mx"><thead><tr><th>${a}º ano</th><th style="width:70px;text-align:center">Turma A</th><th style="width:70px;text-align:center">Turma B</th></tr></thead><tbody>${A.qs.map((q,i)=>{const h=hsplit(A.hab[q]);return `<tr><td class="sm">${h.cod?`<span class="mut xs">${h.cod}</span> `:""}${esc(h.txt)}</td><td class="c f-${fx(A.qp[i])}">${pct(A.qp[i])}</td><td class="c f-${fx(B.qp[i])}">${pct(B.qp[i])}</td></tr>`}).join("")}</tbody></table></div>`});
-  document.getElementById("mx").innerHTML=html;
-  const agg=[];[1,2,3,4,5].forEach(a=>{const A=get(a+"º A",hD),B=get(a+"º B",hD);A.qs.forEach((q,i)=>{const n=A.feitos.length+B.feitos.length;agg.push({a,q,p:(A.qp[i]*A.feitos.length+B.qp[i]*B.feitos.length)/n,...hsplit(A.hab[q])})})});
-  document.getElementById("top10").innerHTML=agg.sort((x,y)=>x.p-y.p).slice(0,10).map((h,i)=>`<div class="insight f-${fx(h.p)}" style="grid-template-columns:auto 1fr auto"><div class="ic">${i+1}</div><div style="display:grid;gap:3px"><b>${esc(h.txt)}</b><span class="sm mut">${h.a}º ano · questão ${h.q} · ${dica(h.txt)}</span></div><b style="font:800 20px Sora">${pct(h.p)}</b></div>`).join("")};
- bindSeg("hd",v=>{hD=v;draw()});draw()};
+ main.innerHTML=`<div class="stack"><div class="card" style="display:grid;gap:14px"><div><h2>Mapa das habilidades</h2><p class="sub">Percentual de alunos que acertaram cada questão, nas turmas A e B. Vermelho e laranja mostram onde está a maior necessidade.</p></div>
+  <div class="row between">${seg("hd",DS.map(d=>[d,DN[d]]),hD)}${seg("ha",[[0,"Todas"],...[1,2,3,4,5].map(a=>[a,a+"º ano"])],hA)}</div><div id="mx" class="grid g2" style="align-items:start"></div></div>
+ <div class="card" style="display:grid;gap:12px"><h2>As 10 habilidades mais frágeis</h2><p class="sub">Somando as duas turmas de cada série. São os pontos que pedem ação coletiva dos professores.</p><div id="top10" style="display:grid;gap:8px"></div></div></div>`;
+ const draw=()=>{const anos=hA?[hA]:[1,2,3,4,5];const mx=document.getElementById("mx");
+  mx.style.gridTemplateColumns=hA?"1fr":"";
+  mx.innerHTML=anos.map(a=>{const A=get(a+"º A",hD),B=get(a+"º B",hD);
+   return `<div class="card flat" style="padding:12px"><div class="scroll"><table class="mx"><thead><tr><th>${a}º ano · ${DN[hD]}</th><th style="width:62px;text-align:center">A</th><th style="width:62px;text-align:center">B</th></tr></thead><tbody>${A.qs.map((q,i)=>{const h=hsplit(A.hab[q]);return `<tr><td class="sm"><span class="mut xs">Q${q}${h.cod?" · "+h.cod:""}</span><br>${esc(h.txt)}</td><td class="c f-${fx(A.qp[i])}">${pct(A.qp[i])}</td><td class="c f-${fx(B.qp[i])}">${pct(B.qp[i])}</td></tr>`}).join("")}</tbody></table></div></div>`}).join("");
+  const agg=[];anos.forEach(a=>{const A=get(a+"º A",hD),B=get(a+"º B",hD);A.qs.forEach((q,i)=>{const n=A.feitos.length+B.feitos.length;agg.push({a,q,p:(A.qp[i]*A.feitos.length+B.qp[i]*B.feitos.length)/n,...hsplit(A.hab[q])})})});
+  document.getElementById("top10").innerHTML=agg.sort((x,y)=>x.p-y.p).slice(0,10).map((h,i)=>`<div class="insight f-${fx(h.p)}" style="grid-template-columns:auto 1fr auto;align-items:center"><div class="ic">${i+1}</div><div style="display:grid;gap:2px"><b>${esc(h.txt)}</b><span class="sm mut">${h.a}º ano · questão ${h.q} · ${dica(h.txt)}</span></div><b style="font:800 18px Sora">${pct(h.p)}</b></div>`).join("")};
+ bindSeg("hd",v=>{hD=v;draw()});bindSeg("ha",v=>{hA=+v;draw()});draw()};
 /* ================= PLANO DE AÇÃO ================= */
 const plano={k:"5º A",d:"LP"};
 V.plano=()=>{
@@ -371,13 +386,13 @@ V.alunos=()=>{
  const lb=document.getElementById("lb");lb.onclick=e=>{const r=e.target.closest("[data-id]");if(r)ficha(r.dataset.id)};lb.onkeydown=e=>{const r=e.target.closest("[data-id]");if(r&&e.key=="Enter")ficha(r.dataset.id)};
  document.getElementById("lq").oninput=e=>{lf.q=e.target.value;draw()};document.getElementById("lt").onchange=e=>{lf.t=e.target.value;draw()};document.getElementById("lfx").onchange=e=>{lf.f=e.target.value;draw()};draw()};
 const SC={1:"#1F4E79",2:"#E39B2F",3:"#1E8A5A",4:"#8E4A9E",5:"#D1495B"};
-function ficha(id){const a=AL[id],dlg=document.getElementById("dlg");
+function ficha(id){const a=AL[id],dlg=dlgEl;
  const sabe=[],ret=[];DS.forEach(d=>{const t=get(a.turma,d);if(!a.r[d])return;t.qs.forEach((q,i)=>{const h=hsplit(t.hab[q]);(a.r[d][i]=="C"?sabe:ret).push({d,txt:h.txt,tp:t.qp[i]})})});
- document.getElementById("dlgBody").innerHTML=`<div class="row between"><div><div class="label">Ficha do aluno · ${a.turma}</div><h2 style="font-size:26px">${esc(a.nome)}</h2><p class="sub">${esc(prof(a.turma))}${a.esc?` · Escrita: nível ${a.esc}`:""}</p></div><div class="row noprint"><button class="btn" onclick="print()">Imprimir</button><button class="btn pri" id="dx">Fechar</button></div></div>
+ document.getElementById("dlgBody").innerHTML=cab(`Ficha do aluno · ${a.turma}`,esc(a.nome),`${esc(prof(a.turma))}${a.esc?` · Escrita: nível ${a.esc}`:""}`)+`
  <div class="grid g4">${DS.map(d=>{const t=get(a.turma,d);return `<div class="card flat" style="display:grid;gap:8px;justify-items:start"><b>${DN[d]}</b>${a.d[d]!=null?ring(a.d[d],{size:84,stroke:9})+tag(a.d[d])+`<span class="xs mut">Turma: ${pct(t.media)}</span>`:'<span class="sub">Não fez esta prova</span>'}</div>`}).join("")}</div>
  <div class="grid g2"><div style="display:grid;gap:8px"><h3 style="color:var(--ot)">✓ Já domina (${sabe.length})</h3><ul class="sm" style="margin:0;padding-left:18px;display:grid;gap:3px">${sabe.map(s=>`<li>${esc(s.txt)} <span class="mut">· ${DN[s.d]}</span></li>`).join("")}</ul></div>
  <div style="display:grid;gap:8px"><h3 style="color:var(--in)">↻ Precisa retomar (${ret.length})</h3>${ret.length?`<ul class="sm" style="margin:0;padding-left:18px;display:grid;gap:6px">${ret.map(s=>`<li><b>${esc(s.txt)}</b> <span class="mut">· ${DN[s.d]}</span><br><span class="xs mut">${s.tp>=60?"A maioria da turma acertou: vale reforço individual.":"Boa parte da turma também errou: retomar com o grupo."}</span></li>`).join("")}</ul>`:'<p class="sub">Acertou todas as questões.</p>'}</div></div>`;
- if(!dlg.open)dlg.showModal();document.getElementById("dx").onclick=()=>dlg.close()}
+ abrirDlg();document.getElementById("dx").onclick=()=>dlg.close()}
 /* ================= COMO LER ================= */
 V.como=()=>{main.innerHTML=`<div class="stack" style="max-width:860px">
  <div class="card" style="display:grid;gap:14px"><h2>O que é a Avaliação Diagnóstica?</h2><p>É uma prova aplicada pela Secretaria Municipal de Educação (SEME) para <b>descobrir o que os alunos já aprenderam e o que ainda precisam aprender</b>. Não vale nota. Serve para a escola planejar as aulas e ajudar cada criança.</p><p class="sub">Esta é a segunda aplicação de 2026, feita entre 25 e 27 de junho, em Português, Matemática e Ciências, do 1º ao 5º ano.</p></div>

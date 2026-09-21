@@ -144,7 +144,7 @@ function AvaliacaoPage() {
       ) : dados ? (
         <ObservatorioFrame
           dados={dados}
-          className="h-[calc(100vh-11rem)] min-h-[600px] w-full rounded-xl border border-border bg-background"
+          className="h-[calc(100dvh-7rem)] min-h-[520px] w-full rounded-xl border border-border bg-background"
         />
       ) : (
         <Card>

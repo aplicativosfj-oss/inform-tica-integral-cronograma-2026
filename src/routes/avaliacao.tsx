@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { NavBar } from "@/components/school/nav-bar";
@@ -37,26 +37,20 @@ function AvaliacaoPublica() {
       });
   }, []);
 
+  // O painel ocupa a tela inteira abaixo do menu e rola por dentro:
+  // assim há uma rolagem só e as janelas de detalhe ficam centralizadas.
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <NavBar />
-      <main className="mx-auto max-w-[1400px] px-4 py-6">
-        <h1 className="mb-4 flex items-center gap-2 text-2xl font-bold tracking-tight">
-          <BarChart3 className="size-6 text-primary" /> II Avaliação Diagnóstica 2026
-        </h1>
-        {erro ? (
-          <p className="text-muted-foreground">{erro}</p>
-        ) : dados ? (
-          <ObservatorioFrame
-            dados={dados}
-            className="h-[calc(100vh-9rem)] min-h-[600px] w-full rounded-xl border border-border bg-background"
-          />
-        ) : (
-          <div className="flex min-h-[40vh] items-center justify-center">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
-          </div>
-        )}
-      </main>
+      {erro ? (
+        <p className="p-6 text-muted-foreground">{erro}</p>
+      ) : dados ? (
+        <ObservatorioFrame dados={dados} className="min-h-0 w-full flex-1 border-0 bg-background" />
+      ) : (
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        </div>
+      )}
     </div>
   );
 }
