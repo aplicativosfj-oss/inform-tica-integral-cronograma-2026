@@ -921,6 +921,38 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     conteudoDoDia ||
     "Nenhum conteúdo cadastrado.";
 
+  // Só esta rodada foi suspensa (o grupo da vez não pôde vir): a aula em si
+  // aconteceu, então o painel mostra a pausa em vez do cronômetro.
+  const rodadaSuspensa =
+    config.rodadasSuspensas?.[suspensaoKey(dateKey, assignment.dia, assignment.slot.inicio)];
+  if (rodadaSuspensa?.rodadas.includes(sessao.subBloco.indice + 1)) {
+    return (
+      <Card className="overflow-hidden border-amber-500/50 shadow-xl shadow-amber-950/20">
+        <div className="flex flex-wrap items-center gap-3 bg-gradient-to-r from-amber-600 via-amber-500 to-orange-500 px-4 py-3 text-white sm:px-5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-black/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider">
+            <CalendarX2 className="size-3.5" /> Rodada suspensa
+          </span>
+          <h2 className="text-lg font-bold tracking-tight">
+            {turmaAtual.serie} &ldquo;{turmaAtual.letra}&rdquo; · {sessao.subBloco.indice + 1}ª
+            rodada ({subBloco.inicio}–{subBloco.fim})
+          </h2>
+        </div>
+        <CardContent className="flex flex-col gap-2 p-5 text-sm">
+          <p className="text-foreground">
+            {rodadaSuspensa.motivo ?? "O grupo desta rodada não participou da aula."}
+          </p>
+          <p className="text-muted-foreground">
+            Os alunos desta rodada continuam com prioridade e serão chamados primeiro na próxima
+            aula da turma.
+            {nomeProxima && proximaAula
+              ? ` Próxima aula no laboratório: ${nomeProxima} às ${proximaAula.slot.inicio}.`
+              : ""}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="overflow-hidden border-emerald-500/40 bg-card/90 shadow-xl shadow-emerald-950/20 ring-1 ring-emerald-500/20">
       {/* Cabeçalho verde "ao vivo": o público identifica de longe que há aula

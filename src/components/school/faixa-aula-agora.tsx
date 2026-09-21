@@ -57,7 +57,7 @@ export function FaixaAulaAgora() {
           ) : (
             <Icone className="size-3.5" />
           )}
-          {estilo.rotulo}
+          {aula.rodadaSuspensa ? "Rodada suspensa" : estilo.rotulo}
         </span>
 
         <span className="min-w-0 flex-1 truncate">

@@ -221,6 +221,13 @@ function montarDiario(
         situacao = "sem-registro";
       }
 
+      const rodadas = config.rodadasSuspensas?.[chave];
+      if (rodadas && rodadas.rodadas.length > 0) {
+        detalhes.push(
+          `${rodadas.rodadas.map((r) => `${r}ª`).join(" e ")} rodada suspensa${rodadas.motivo ? `: ${rodadas.motivo}` : "."}`,
+        );
+      }
+
       return {
         chave,
         inicio: a.slot.inicio,

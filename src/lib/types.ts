@@ -162,6 +162,12 @@ export interface ScheduleConfig {
    * cuidador da escola.
    */
   coordenacaoAEE?: { nome: string } | undefined;
+  /**
+   * Rodadas (1ª, 2ª, 3ª…) suspensas dentro de uma aula que aconteceu — ex.:
+   * o grupo da vez não pôde ir. A aula continua "realizada"; só aquela
+   * rodada para. Mesma chave de `suspensoes`.
+   */
+  rodadasSuspensas?: Record<string, { rodadas: number[]; motivo?: string | undefined }> | undefined;
 }
 
 export interface Slot {

@@ -27,6 +27,8 @@ export interface AulaAgora {
   /** Minutos até o fim da aula da turma. */
   minutosRestantes?: number;
   proxima?: { turma: string; inicio: string } | undefined;
+  /** Só a rodada atual está suspensa (a aula em si aconteceu). */
+  rodadaSuspensa?: boolean;
 }
 
 function minutos(hhmm: string): number {
@@ -90,6 +92,23 @@ export function useAulaAgora(): AulaAgora | null {
     proxima,
   };
   if (sessao.suspensa) return { estado: "suspensa", ...base };
+
+  const rodadaSuspensa = config.rodadasSuspensas?.[
+    suspensaoKey(dataKey, assignment.dia, assignment.slot.inicio)
+  ]?.rodadas.includes(subBloco.indice + 1);
+  if (rodadaSuspensa) {
+    const total = Math.round(
+      (minutos(assignment.slot.fim) - minutos(assignment.slot.inicio)) /
+        Math.max(1, config.duracaoGrupoMinutos),
+    );
+    return {
+      estado: "suspensa",
+      ...base,
+      grupo: subBloco.indice + 1,
+      totalGrupos: Math.max(1, total),
+      rodadaSuspensa: true,
+    };
+  }
 
   const restantes = minutos(assignment.slot.fim) - agoraMin;
   const passo = Math.max(1, config.duracaoGrupoMinutos);
