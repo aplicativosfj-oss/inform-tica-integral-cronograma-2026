@@ -61,12 +61,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           dados e formulários por cima. */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.1] dark:opacity-[0.22]"
+        className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.04] dark:opacity-[0.22]"
         style={{ backgroundImage: `url(${dashboardBgImg})` }}
       />
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-background/70 via-background/90 to-background dark:from-background/35 dark:via-background/65 dark:to-background"
+        className="pointer-events-none fixed inset-0 z-0 bg-gradient-to-b from-background/85 via-background/95 to-background dark:from-background/35 dark:via-background/65 dark:to-background"
       />
       <div className="relative z-10">
         <NavBar />

@@ -7,6 +7,10 @@ import fundoSite from "@/assets/fundo-site.jpg.asset.json";
  * texto ou os cards. Mesmo tratamento visual já usado na home, só que
  * reaproveitável nas demais páginas.
  *
+ * No claro a camada por cima é quase opaca (93%): com fundo claro, o
+ * padrão aparecendo forte virava uma textura acinzentada que sujava a
+ * página e roubava contraste do texto. Fica só como marca d'água.
+ *
  * No escuro reaproveitamos o mesmo SVG (em vez de trocar por uma foto): o
  * traço é azul-marinho sólido sobre transparente, então `invert` +
  * `hue-rotate-180` vira um traço azul-claro sobre fundo escuro — mantém a
@@ -22,7 +26,7 @@ export function PageBackground() {
       />
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-0 bg-background/80 backdrop-blur-[2px] dark:bg-background/85"
+        className="pointer-events-none fixed inset-0 z-0 bg-background/[0.93] backdrop-blur-[2px] dark:bg-background/85"
       />
     </>
   );

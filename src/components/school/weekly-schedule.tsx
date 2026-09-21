@@ -102,7 +102,7 @@ export function WeeklySchedule() {
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-card/70 shadow-lg backdrop-blur-xl">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm dark:border-white/10 dark:bg-card/70 dark:shadow-lg dark:backdrop-blur-xl">
         {/* No celular a tabela virava rolagem horizontal com buracos; aqui ela
             vira uma lista por dia, compacta e sem células vazias. */}
         <div className="divide-y divide-border/60 sm:hidden">
@@ -128,9 +128,7 @@ export function WeeklySchedule() {
                 ) : (
                   <ul className="space-y-1.5 px-3 pb-3">
                     {doDia.map(({ slot, assignment }) => {
-                      const overridden = Boolean(
-                        config.slotOverrides?.[`${dia}|${slot.inicio}`],
-                      );
+                      const overridden = Boolean(config.slotOverrides?.[`${dia}|${slot.inicio}`]);
                       return (
                         <li key={slot.inicio} className="flex items-stretch gap-2">
                           <span className="flex w-[56px] shrink-0 flex-col justify-center rounded-lg bg-slate-100/90 px-1.5 py-1 text-center font-mono text-[11px] leading-tight font-semibold text-slate-700 dark:bg-muted/60 dark:text-slate-200">

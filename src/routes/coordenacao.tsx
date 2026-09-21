@@ -168,7 +168,7 @@ function CoordenacaoPage() {
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-card/60 p-3 backdrop-blur-xl">
+                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
                     <Users2 className="size-4" />
                   </span>
@@ -177,7 +177,7 @@ function CoordenacaoPage() {
                     <p className="text-sm font-semibold text-foreground">{turmas.length}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 rounded-lg border border-white/20 dark:border-white/15 bg-white/60 dark:bg-card/60 p-3 backdrop-blur-xl">
+                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
                     <GraduationCap className="size-4" />
                   </span>
@@ -195,7 +195,7 @@ function CoordenacaoPage() {
               alt="Sala de aula com tecnologia educacional para coordenação de aulas e gestão escolar"
               width={1200}
               height={750}
-              className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-white/20 dark:border-white/10 shadow-xl backdrop-blur-lg bg-white/70 dark:bg-card/60 sm:max-h-64"
+              className="aspect-[16/10] max-h-56 w-full rounded-2xl border border-border bg-card shadow-md dark:border-white/10 dark:bg-card/60 dark:shadow-xl dark:backdrop-blur-lg sm:max-h-64"
               loading="eager"
               decoding="async"
             />

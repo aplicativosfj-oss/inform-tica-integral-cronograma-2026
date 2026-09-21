@@ -6,7 +6,15 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("rounded-xl border bg-white/70 dark:bg-card/70 text-card-foreground shadow-lg backdrop-blur-xl border-white/20 dark:border-white/15", className)}
+      // O efeito de vidro (branco translúcido com borda branca) só funciona
+      // sobre um fundo colorido — no tema claro ele desaparecia dentro da
+      // página e o cartão ficava sem contorno nem relevo. Aqui o claro é
+      // card sólido com borda de verdade e sombra leve, e o vidro fica para
+      // o escuro, onde ele realmente se destaca do fundo.
+      className={cn(
+        "rounded-xl border border-border bg-card text-card-foreground shadow-sm dark:border-white/15 dark:bg-card/70 dark:shadow-lg dark:backdrop-blur-xl",
+        className,
+      )}
       {...props}
     />
   ),

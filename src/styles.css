@@ -68,28 +68,44 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  /*
+   * Tema claro.
+   *
+   * Antes o fundo da página e o dos cards eram os dois branco puro: nada
+   * separava um do outro, e a tela virava uma folha lisa onde título, texto
+   * e cartão tinham o mesmo peso. E `--primary` era um azul-marinho quase
+   * preto (0.208), então tudo o que devia chamar atenção — botões, selos,
+   * ícones, as faixas `bg-primary/10` — saía cinza-escuro, sem cor nenhuma.
+   *
+   * Agora a página é um cinza-azulado bem claro e o card é o branco: o card
+   * "levanta" do fundo sozinho, sem precisar de sombra pesada. E `--primary`
+   * passa a ser o azul da marca, que é o que dá o destaque profissional nos
+   * elementos de ação.
+   */
+  --background: oklch(0.974 0.006 253);
+  --foreground: oklch(0.145 0.04 264.695);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.145 0.04 264.695);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
+  --popover-foreground: oklch(0.145 0.04 264.695);
+  --primary: oklch(0.53 0.17 258);
+  --primary-foreground: oklch(0.99 0.002 247.858);
+  --secondary: oklch(0.955 0.011 252);
+  --secondary-foreground: oklch(0.255 0.045 265.755);
+  --muted: oklch(0.955 0.011 252);
   /* Mais escuro que o slate-500 padrao (0.554) para melhorar a leitura de
      texto secundario no celular -- o valor original passava raspando no
      minimo de contraste AA em telas pequenas com luz forte. */
-  --muted-foreground: oklch(0.462 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --muted-foreground: oklch(0.455 0.042 257.417);
+  --accent: oklch(0.945 0.018 252);
+  --accent-foreground: oklch(0.36 0.12 258);
+  --destructive: oklch(0.55 0.225 27.325);
+  --destructive-foreground: oklch(0.99 0.002 247.858);
+  /* Borda um degrau mais presente: com card branco sobre fundo claro, a
+     borda anterior (0.929) praticamente sumia. */
+  --border: oklch(0.898 0.014 254);
+  --input: oklch(0.898 0.014 254);
+  --ring: oklch(0.53 0.17 258);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -103,14 +119,14 @@
   --serie-3: oklch(0.565 0.145 258);
   --serie-4: oklch(0.475 0.165 260);
   --serie-5: oklch(0.385 0.135 262);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.145 0.04 264.695);
+  --sidebar-primary: oklch(0.53 0.17 258);
+  --sidebar-primary-foreground: oklch(0.99 0.002 247.858);
+  --sidebar-accent: oklch(0.945 0.018 252);
+  --sidebar-accent-foreground: oklch(0.36 0.12 258);
+  --sidebar-border: oklch(0.898 0.014 254);
+  --sidebar-ring: oklch(0.53 0.17 258);
 }
 
 .dark {

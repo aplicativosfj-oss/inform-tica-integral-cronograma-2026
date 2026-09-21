@@ -283,7 +283,7 @@ function Index() {
                   alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
                   width={854}
                   height={302}
-                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-white/30 bg-white/70 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-card/60 sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-full lg:rounded-2xl"
+                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-border bg-card shadow-lg dark:border-white/10 dark:bg-card/60 dark:shadow-2xl dark:backdrop-blur-xl sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-full lg:rounded-2xl"
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
@@ -681,9 +681,7 @@ function ProgramacaoSemanalDestaque() {
 
         {assignmentsDoDia.length === 0 ? (
           <div className="rounded-2xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-md">
-            <p className="text-sm text-white/90">
-              Nenhuma turma programada para {diaSelecionado}.
-            </p>
+            <p className="text-sm text-white/90">Nenhuma turma programada para {diaSelecionado}.</p>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
@@ -901,7 +899,9 @@ function FeatureCard({
         <CardTitle className="text-sm leading-snug text-balance sm:text-base">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-3.5 pt-0 sm:p-6 sm:pt-0">
-        <p className="text-[13px] leading-relaxed text-muted-foreground sm:text-sm">{description}</p>
+        <p className="text-[13px] leading-relaxed text-muted-foreground sm:text-sm">
+          {description}
+        </p>
       </CardContent>
     </Card>
   );
