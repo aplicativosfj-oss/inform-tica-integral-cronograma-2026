@@ -4,6 +4,7 @@ import {
   FileText,
   Ghost,
   Globe2,
+  GraduationCap,
   Hash,
   Landmark,
   type LucideIcon,
@@ -20,6 +21,7 @@ import type { ComponentType } from "react";
 
 import { AcervoLeitura } from "@/components/school/ferramentas/acervo-leitura";
 import { Alfabetizacao } from "@/components/school/ferramentas/alfabetizacao";
+import { AtividadesLP } from "@/components/school/ferramentas/atividades-lp";
 import { Calculadora } from "@/components/school/ferramentas/calculadora";
 import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemorativas";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
@@ -117,6 +119,15 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: SpellCheck2,
     cor: "bg-lime-500/10 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300",
     Componente: Alfabetizacao,
+  },
+  {
+    slug: "atividades-portugues",
+    titulo: "Atividades de Português (1º ao 5º)",
+    descricao: "Atividades por série, com versão adaptada para inclusão.",
+    categoria: "Alfabetização e Leitura",
+    icon: GraduationCap,
+    cor: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300",
+    Componente: AtividadesLP,
   },
   {
     slug: "acervo-leitura",
