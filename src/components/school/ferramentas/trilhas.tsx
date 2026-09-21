@@ -201,7 +201,21 @@ export function Trilhas() {
   );
 }
 
-function Jogar({ e, nivelInicial, voltar }: { e: Entrada; nivelInicial: Nivel; voltar: () => void }) {
+/** Tela de uma atividade: níveis, texto de apoio, quiz e dicas para a sala. */
+export function Jogar({
+  e,
+  nivelInicial,
+  voltar,
+  rotuloVoltar = "Todas as atividades",
+  onResultado,
+}: {
+  e: Entrada;
+  nivelInicial: Nivel;
+  voltar: () => void;
+  rotuloVoltar?: string;
+  /** Chamado ao terminar uma rodada (usado pela “Minha trilha” para dar estrelas). */
+  onResultado?: (nivel: Nivel, acertos: number, total: number) => void;
+}) {
   const [nivel, setNivel] = useState<Nivel>(nivelInicial);
   const [rodada, setRodada] = useState(0);
   const questoes = useMemo(() => questoesDe(e, nivel), [e, nivel, rodada]);
@@ -221,7 +235,7 @@ function Jogar({ e, nivelInicial, voltar }: { e: Entrada; nivelInicial: Nivel; v
   return (
     <div className="flex flex-col gap-4">
       <Button variant="ghost" size="sm" onClick={voltar} className="w-fit gap-1.5">
-        <ArrowLeft className="size-4" /> Todas as atividades
+        <ArrowLeft className="size-4" /> {rotuloVoltar}
       </Button>
       <div className="flex items-start gap-3">
         <span className="text-4xl leading-none" aria-hidden>
@@ -270,7 +284,11 @@ function Jogar({ e, nivelInicial, voltar }: { e: Entrada; nivelInicial: Nivel; v
         </Card>
       ) : null}
 
-      <Quiz key={`${nivel}-${rodada}`} questoes={questoes} />
+      <Quiz
+        key={`${nivel}-${rodada}`}
+        questoes={questoes}
+        {...(onResultado ? { onConcluir: (a: number, t: number) => onResultado(nivel, a, t) } : {})}
+      />
 
       {dicas?.length ? (
         <details className="rounded-xl border border-border bg-muted/30 p-4 text-sm">

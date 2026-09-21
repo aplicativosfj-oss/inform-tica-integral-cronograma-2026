@@ -35,6 +35,7 @@ import {
 } from "@/lib/aluno-area";
 import { useConfirmar } from "@/lib/confirm-store";
 import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
+import { cn } from "@/lib/utils";
 import { idadeEmAnos } from "@/lib/profissional-acesso";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, AtividadeStatus, Presenca } from "@/lib/types";
@@ -305,7 +306,21 @@ function AlunoPainel() {
         </section>
 
         {/* Ferramentas e exercícios */}
-        <section className="mx-auto max-w-6xl px-4 pb-2 sm:px-6">
+        <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 pb-2 sm:px-6">
+          <Link
+            to="/aluno/$turmaId/$alunoId/trilha"
+            params={{ turmaId, alunoId }}
+            className={cn(
+              CLASSES_BARRA_FERRAMENTAS,
+              "from-emerald-700 via-teal-700 to-sky-700 shadow-emerald-500/20 hover:shadow-emerald-500/30",
+            )}
+          >
+            <BarraFerramentas
+              titulo="Minha trilha ⭐"
+              descricao="Atividades escolhidas para você a partir da Avaliação Diagnóstica. Ganhe estrelas e suba de nível!"
+              acao="Continuar →"
+            />
+          </Link>
           <Link
             to="/aluno/$turmaId/$alunoId/ferramentas"
             params={{ turmaId, alunoId }}

@@ -38,7 +38,16 @@ const MAX_TENTATIVAS = 3;
  * geografia, gêneros textuais, frações, geometria...) — só muda o banco de
  * perguntas passado em `questoes`.
  */
-export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBotao?: string }) {
+export function Quiz({
+  questoes,
+  corBotao = "",
+  onConcluir,
+}: {
+  questoes: Questao[];
+  corBotao?: string;
+  /** Chamado ao terminar a rodada, com os acertos de primeira e o total. */
+  onConcluir?: (acertosDeUmaVez: number, total: number) => void;
+}) {
   const [indice, setIndice] = useState(0);
   const [selecionada, setSelecionada] = useState<number | null>(null);
   const [descartadas, setDescartadas] = useState<Set<number>>(new Set());
@@ -82,6 +91,7 @@ export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBota
     setConcluidas((c) => c + 1);
     if (indice + 1 >= questoes.length) {
       setFinalizado(true);
+      onConcluir?.(acertosDeUmaVez, questoes.length);
       return;
     }
     setIndice((i) => i + 1);

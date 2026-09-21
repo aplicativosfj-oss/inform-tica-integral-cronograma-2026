@@ -40,6 +40,7 @@ import { Route as DashboardTurmasTurmaIdRouteImport } from './routes/dashboard/t
 import { Route as ProfessorTurmaIdIndexRouteImport } from './routes/professor/$turmaId/index'
 import { Route as ProfessorTurmaIdChamadaRouteImport } from './routes/professor/$turmaId/chamada'
 import { Route as AlunoTurmaIdAlunoIdIndexRouteImport } from './routes/aluno/$turmaId/$alunoId/index'
+import { Route as AlunoTurmaIdAlunoIdTrilhaRouteImport } from './routes/aluno/$turmaId/$alunoId/trilha'
 import { Route as MediadorTurmaIdApoioIndexIndexRouteImport } from './routes/mediador/$turmaId/$apoioIndex/index'
 import { Route as MediadorTurmaIdApoioIndexRelatorioRouteImport } from './routes/mediador/$turmaId/$apoioIndex/relatorio'
 import { Route as ProfessorTurmaIdAlunoAlunoIdRouteImport } from './routes/professor/$turmaId/aluno/$alunoId'
@@ -206,6 +207,12 @@ const AlunoTurmaIdAlunoIdIndexRoute =
     path: '/aluno/$turmaId/$alunoId/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AlunoTurmaIdAlunoIdTrilhaRoute =
+  AlunoTurmaIdAlunoIdTrilhaRouteImport.update({
+    id: '/aluno/$turmaId/$alunoId/trilha',
+    path: '/aluno/$turmaId/$alunoId/trilha',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MediadorTurmaIdApoioIndexIndexRoute =
   MediadorTurmaIdApoioIndexIndexRouteImport.update({
     id: '/mediador/$turmaId/$apoioIndex/',
@@ -292,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
   '/professor/$turmaId/': typeof ProfessorTurmaIdIndexRoute
+  '/aluno/$turmaId/$alunoId/trilha': typeof AlunoTurmaIdAlunoIdTrilhaRoute
   '/mediador/$turmaId/$apoioIndex/relatorio': typeof MediadorTurmaIdApoioIndexRelatorioRoute
   '/professor/$turmaId/aluno/$alunoId': typeof ProfessorTurmaIdAlunoAlunoIdRoute
   '/professor/$turmaId/ferramentas/$ferramenta': typeof ProfessorTurmaIdFerramentasFerramentaRoute
@@ -334,6 +342,7 @@ export interface FileRoutesByTo {
   '/aluno/$turmaId': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas': typeof DashboardTurmasIndexRoute
   '/professor/$turmaId': typeof ProfessorTurmaIdIndexRoute
+  '/aluno/$turmaId/$alunoId/trilha': typeof AlunoTurmaIdAlunoIdTrilhaRoute
   '/mediador/$turmaId/$apoioIndex/relatorio': typeof MediadorTurmaIdApoioIndexRelatorioRoute
   '/professor/$turmaId/aluno/$alunoId': typeof ProfessorTurmaIdAlunoAlunoIdRoute
   '/professor/$turmaId/ferramentas/$ferramenta': typeof ProfessorTurmaIdFerramentasFerramentaRoute
@@ -377,6 +386,7 @@ export interface FileRoutesById {
   '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
   '/professor/$turmaId/': typeof ProfessorTurmaIdIndexRoute
+  '/aluno/$turmaId/$alunoId/trilha': typeof AlunoTurmaIdAlunoIdTrilhaRoute
   '/mediador/$turmaId/$apoioIndex/relatorio': typeof MediadorTurmaIdApoioIndexRelatorioRoute
   '/professor/$turmaId/aluno/$alunoId': typeof ProfessorTurmaIdAlunoAlunoIdRoute
   '/professor/$turmaId/ferramentas/$ferramenta': typeof ProfessorTurmaIdFerramentasFerramentaRoute
@@ -421,6 +431,7 @@ export interface FileRouteTypes {
     | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
     | '/professor/$turmaId/'
+    | '/aluno/$turmaId/$alunoId/trilha'
     | '/mediador/$turmaId/$apoioIndex/relatorio'
     | '/professor/$turmaId/aluno/$alunoId'
     | '/professor/$turmaId/ferramentas/$ferramenta'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/aluno/$turmaId'
     | '/dashboard/turmas'
     | '/professor/$turmaId'
+    | '/aluno/$turmaId/$alunoId/trilha'
     | '/mediador/$turmaId/$apoioIndex/relatorio'
     | '/professor/$turmaId/aluno/$alunoId'
     | '/professor/$turmaId/ferramentas/$ferramenta'
@@ -505,6 +517,7 @@ export interface FileRouteTypes {
     | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
     | '/professor/$turmaId/'
+    | '/aluno/$turmaId/$alunoId/trilha'
     | '/mediador/$turmaId/$apoioIndex/relatorio'
     | '/professor/$turmaId/aluno/$alunoId'
     | '/professor/$turmaId/ferramentas/$ferramenta'
@@ -548,6 +561,7 @@ export interface RootRouteChildren {
   AlunoTurmaIdIndexRoute: typeof AlunoTurmaIdIndexRoute
   DashboardTurmasIndexRoute: typeof DashboardTurmasIndexRoute
   ProfessorTurmaIdIndexRoute: typeof ProfessorTurmaIdIndexRoute
+  AlunoTurmaIdAlunoIdTrilhaRoute: typeof AlunoTurmaIdAlunoIdTrilhaRoute
   MediadorTurmaIdApoioIndexRelatorioRoute: typeof MediadorTurmaIdApoioIndexRelatorioRoute
   ProfessorTurmaIdAlunoAlunoIdRoute: typeof ProfessorTurmaIdAlunoAlunoIdRoute
   ProfessorTurmaIdFerramentasFerramentaRoute: typeof ProfessorTurmaIdFerramentasFerramentaRoute
@@ -779,6 +793,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlunoTurmaIdAlunoIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aluno/$turmaId/$alunoId/trilha': {
+      id: '/aluno/$turmaId/$alunoId/trilha'
+      path: '/aluno/$turmaId/$alunoId/trilha'
+      fullPath: '/aluno/$turmaId/$alunoId/trilha'
+      preLoaderRoute: typeof AlunoTurmaIdAlunoIdTrilhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mediador/$turmaId/$apoioIndex/': {
       id: '/mediador/$turmaId/$apoioIndex/'
       path: '/mediador/$turmaId/$apoioIndex'
@@ -876,6 +897,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlunoTurmaIdIndexRoute: AlunoTurmaIdIndexRoute,
   DashboardTurmasIndexRoute: DashboardTurmasIndexRoute,
   ProfessorTurmaIdIndexRoute: ProfessorTurmaIdIndexRoute,
+  AlunoTurmaIdAlunoIdTrilhaRoute: AlunoTurmaIdAlunoIdTrilhaRoute,
   MediadorTurmaIdApoioIndexRelatorioRoute:
     MediadorTurmaIdApoioIndexRelatorioRoute,
   ProfessorTurmaIdAlunoAlunoIdRoute: ProfessorTurmaIdAlunoAlunoIdRoute,
