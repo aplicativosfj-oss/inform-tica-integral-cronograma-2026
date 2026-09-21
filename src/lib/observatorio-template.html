@@ -1,0 +1,260 @@
+<title>Observatório Pedagógico Eiraldo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{--bg:#EEF1F5;--card:#FFFFFF;--side:#15263A;--sideInk:#C9D6E4;--ink:#17283A;--mut:#5A6B7D;--line:#DCE2EA;--acc:#2F5D8C;--acc2:#E3EBF5;--accB:#C0782F;
+--ot:#2E8B57;--bo:#8DB255;--re:#E0A12E;--in:#C8553D;--na:#CDD4DD;--grid:#E6EBF1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1620;--card:#172230;--side:#0B121B;--sideInk:#A9B9CA;--ink:#E5ECF4;--mut:#98A9BB;--line:#283646;--acc:#7FB0E0;--acc2:#1E3045;--accB:#E3A262;--na:#34414F;--grid:#223040}}
+:root[data-theme="dark"]{--bg:#0F1620;--card:#172230;--side:#0B121B;--sideInk:#A9B9CA;--ink:#E5ECF4;--mut:#98A9BB;--line:#283646;--acc:#7FB0E0;--acc2:#1E3045;--accB:#E3A262;--na:#34414F;--grid:#223040}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Source Sans 3",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+nav.side{background:var(--side);color:var(--sideInk);padding:22px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.brand{font:800 18px/1.15 "Bricolage Grotesque",sans-serif;color:#fff;padding:0 10px 16px}
+.brand small{display:block;font:600 11px "Source Sans 3",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--sideInk);margin-top:6px}
+nav.side button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;font-weight:600}
+nav.side button:hover{background:rgba(255,255,255,.06)}
+nav.side button[aria-current=page]{background:rgba(127,176,224,.18);color:#fff}
+nav.side button:focus-visible{outline:2px solid #7FB0E0}
+.side .foot{margin-top:auto;font-size:12px;padding:10px;opacity:.8}
+main{padding-inline:clamp(16px,3vw,36px);padding-block:26px 60px;display:grid;gap:22px;align-content:start;min-width:0}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;margin:0;text-wrap:balance}
+h1{font-size:clamp(24px,3vw,32px);font-weight:800}
+h2{font-size:19px;font-weight:600}
+h3{font-size:15px;font-weight:600}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:700}
+.mut{color:var(--mut)} .sm{font-size:13px}
+.head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:end}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:14px;min-width:0;align-content:start}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi b{display:block;font:800 28px "Bricolage Grotesque",sans-serif;font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--mut)}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr));gap:22px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:600 13px "Source Sans 3",sans-serif;border:0;background:var(--card);color:var(--ink);padding:7px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--acc);color:var(--card)}
+.btn{font:600 13px "Source Sans 3",sans-serif;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible,tr:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+select,input{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;max-width:100%}
+label.f{display:grid;gap:4px;font-size:12px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:700;white-space:nowrap}
+th.s{cursor:pointer} th.s:hover{color:var(--ink)}
+td.n,th.n{text-align:right}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--acc2)}
+.heat td.c{text-align:center;font-weight:700;border:3px solid var(--card);border-radius:6px;color:#fff;cursor:pointer}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;white-space:nowrap}
+.OT{background:var(--ot)}.BO{background:var(--bo)}.RE{background:var(--re)}.IN{background:var(--in)}.NA{background:var(--na);color:var(--ink)}
+.bar{height:9px;border-radius:5px;background:var(--acc2);overflow:hidden;min-width:70px}
+.bar i{display:block;height:100%}
+.stack{display:flex;height:20px;border-radius:5px;overflow:hidden;background:var(--acc2)}
+.stack i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--mut)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--c);vertical-align:-1px}
+.dots{display:flex;gap:3px;flex-wrap:wrap}
+.dots i{width:13px;height:13px;border-radius:3px;display:inline-block}
+.delta{font:500 12.5px "JetBrains Mono",monospace}
+.up{color:var(--ot)} .dn{color:var(--in)}
+.note{font-size:14px;border-left:3px solid var(--re);padding-left:10px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;gap:6px;align-items:center;background:var(--acc2);border-radius:999px;padding:3px 6px 3px 11px;font-size:13px;font-weight:600}
+.chip button{border:0;background:transparent;color:var(--mut);cursor:pointer;font-size:15px;line-height:1;padding:0 4px}
+.cmpcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:12px}
+.scard{border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:8px;border-top:4px solid var(--c)}
+svg text{fill:var(--mut);font:12px "Source Sans 3",sans-serif}
+svg .lbl{fill:var(--ink);font-weight:600}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:0;width:min(760px,94vw);max-height:88vh}
+dialog::backdrop{background:rgba(10,20,30,.5)}
+.dlg{padding:22px;display:grid;gap:16px}
+.topbar{display:none}
+@media (max-width:860px){
+ .app{grid-template-columns:1fr}
+ nav.side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:12px 16px;gap:4px}
+ .brand{width:100%;padding:0 0 8px}.side .foot{display:none}
+ nav.side button{padding:6px 10px;font-size:14px}
+}
+@media print{nav.side,.noprint{display:none!important}.app{display:block}.panel{break-inside:avoid}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+<div class="app">
+<nav class="side" id="nav" aria-label="Seções">
+ <div class="brand">Observatório Pedagógico<small>Dr. Eiraldo · 2026</small></div>
+</nav>
+<main id="main"></main>
+</div>
+<dialog id="dlg"><div class="dlg" id="dlgBody"></div></dialog>
+<script>
+const D=/*DATA*/;
+const DN={LP:"Língua Portuguesa",MAT:"Matemática",CN:"Ciências da Natureza"},DS=["LP","MAT","CN"],DSH={LP:"Português",MAT:"Matemática",CN:"Ciências"};
+const cls=p=>p==null?"NA":p>=70?"OT":p>=50?"BO":p>=25?"RE":"IN";
+const lab={OT:"Ótimo",BO:"Bom",RE:"Regular",IN:"Insuficiente",NA:"—"};
+const col=k=>"var(--"+({OT:"ot",BO:"bo",RE:"re",IN:"in",NA:"na"})[k]+")";
+const pct=x=>x==null||isNaN(x)?"—":Math.round(x)+"%";
+const avg=x=>x.length?x.reduce((a,b)=>a+b,0)/x.length:null;
+const med=x=>{if(!x.length)return null;const s=[...x].sort((a,b)=>a-b),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+const qt=(x,q)=>{const s=[...x].sort((a,b)=>a-b),p=(s.length-1)*q,b=Math.floor(p);return s[b]+(s[b+1]!==undefined?(p-b)*(s[b+1]-s[b]):0)};
+const sd=x=>{const m=avg(x);return Math.sqrt(avg(x.map(v=>(v-m)**2)))};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const dl=(v,suf="pp")=>{if(v==null||isNaN(v))return"";const r=Math.round(v);return `<span class="delta ${r>0?"up":r<0?"dn":""}">${r>0?"+":""}${r}${suf}</span>`};
+const pillP=p=>p==null?`<span class="pill NA">—</span>`:`<span class="pill ${cls(p)}">${pct(p)}</span>`;
+const barP=p=>`<div class="row" style="flex-wrap:nowrap;gap:8px"><div class="bar" style="flex:1"><i style="width:${p||0}%;background:${col(cls(p))}"></i></div><b style="min-width:38px;text-align:right">${pct(p)}</b></div>`;
+/* ---------- modelo ---------- */
+D.forEach(t=>{t.key=t.ano+"º "+t.turma;t.qs=Object.keys(t.hab).map(Number).sort((a,b)=>a-b);
+ t.alunos.forEach(a=>{a.ok=!a.r.includes("-");a.dup=a.nome.startsWith("Linha");if(a.ok)a.p=100*[...a.r].filter(c=>c=="C").length/a.r.length});
+ t.feitos=t.alunos.filter(a=>a.ok&&!a.dup);const ps=t.feitos.map(a=>a.p);
+ t.m={media:avg(ps),mediana:med(ps),dp:sd(ps),min:Math.min(...ps),max:Math.max(...ps),q1:qt(ps,.25),q3:qt(ps,.75),
+  adeq:100*ps.filter(p=>p>=70).length/ps.length,crit:100*ps.filter(p=>p<25).length/ps.length,abaixo50:100*ps.filter(p=>p<50).length/ps.length,
+  part:100*t.feitos.length/t.alunos.filter(a=>!a.dup).length,n:t.feitos.length,aus:t.alunos.filter(a=>!a.ok&&!a.dup).length};
+ t.qp=t.qs.map((q,i)=>100*t.feitos.filter(a=>a.r[i]=="C").length/t.feitos.length);});
+const T=[...new Set(D.map(t=>t.key))].sort();
+const get=(k,d)=>D.find(t=>t.key==k&&t.disc==d);
+const profOf=k=>get(k,"LP").prof;
+/* alunos consolidados */
+const norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim();
+const AL={};
+D.forEach(t=>t.alunos.forEach(a=>{if(a.dup)return;const id=t.key+"|"+norm(a.nome);const o=AL[id]??={id,nome:a.nome,turma:t.key,ano:t.ano,d:{},r:{},esc:null};
+ if(a.ok){o.d[t.disc]=a.p;o.r[t.disc]=a.r}if(a.esc)o.esc=a.esc;if(/especial/i.test(a.nome))o.esp=true}));
+const ALS=Object.values(AL).map(o=>{const v=Object.values(o.d);o.media=avg(v);o.nd=v.length;return o}).filter(o=>o.nd>0);
+ALS.forEach(o=>{DS.forEach(d=>{if(o.d[d]==null)return;const peers=ALS.filter(x=>x.turma==o.turma&&x.d[d]!=null).map(x=>x.d[d]);o["pos"+d]=100*peers.filter(p=>p<o.d[d]).length/Math.max(1,peers.length-1)})});
+const turmaMedia=k=>avg(DS.map(d=>get(k,d).m.media));
+/* ---------- SVG helpers ---------- */
+function hbars(items,{w=560,max=100,color}={}){const rh=26,lw=110,h=items.length*rh+24;let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
+ [0,25,50,75,100].forEach(v=>{const x=lw+(w-lw-44)*v/max;s+=`<line x1="${x}" y1="0" x2="${x}" y2="${h-18}" stroke="var(--grid)"/><text x="${x}" y="${h-4}" text-anchor="middle">${v}%</text>`});
+ items.forEach((it,i)=>{const y=i*rh+4,bw=(w-lw-44)*(it.v||0)/max;s+=`<text class="lbl" x="${lw-8}" y="${y+14}" text-anchor="end">${esc(it.l)}</text><rect x="${lw}" y="${y+3}" width="${bw}" height="15" rx="3" fill="${it.c||color||col(cls(it.v))}"/><text x="${lw+bw+5}" y="${y+15}">${pct(it.v)}</text>`});
+ return s+"</svg>"}
+function groupBars(groups,series,{w=620,h=240}={}){// groups:[{l,vals:[..]}], series:[{l,c}]
+ const pl=34,pb=38,pt=10,gw=(w-pl-10)/groups.length,bw=Math.min(26,(gw-14)/series.length);let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
+ [0,25,50,75,100].forEach(v=>{const y=pt+(h-pt-pb)*(1-v/100);s+=`<line x1="${pl}" x2="${w-6}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${pl-6}" y="${y+4}" text-anchor="end">${v}</text>`});
+ groups.forEach((g,i)=>{const x0=pl+i*gw+(gw-bw*series.length)/2;g.vals.forEach((v,j)=>{if(v==null)return;const bh=(h-pt-pb)*v/100;s+=`<rect x="${x0+j*bw}" y="${pt+(h-pt-pb)-bh}" width="${bw-3}" height="${bh}" rx="2" fill="${series[j].c}"><title>${esc(series[j].l)} · ${esc(g.l)}: ${pct(v)}</title></rect>`});
+  s+=`<text class="lbl" x="${pl+i*gw+gw/2}" y="${h-pb+18}" text-anchor="middle">${esc(g.l)}</text>`});
+ return s+"</svg>"}
+function boxes(ts,{w=620}={}){const rh=30,lw=60,h=ts.length*rh+26,X=v=>lw+(w-lw-16)*v/100;let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
+ [0,25,50,75,100].forEach(v=>s+=`<line x1="${X(v)}" x2="${X(v)}" y1="0" y2="${h-20}" stroke="var(--grid)"/><text x="${X(v)}" y="${h-5}" text-anchor="middle">${v}%</text>`);
+ ts.forEach((t,i)=>{const y=i*rh+14,m=t.m;s+=`<text class="lbl" x="${lw-8}" y="${y+4}" text-anchor="end">${t.key}</text><line x1="${X(m.min)}" x2="${X(m.max)}" y1="${y}" y2="${y}" stroke="var(--mut)"/><rect x="${X(m.q1)}" y="${y-8}" width="${Math.max(2,X(m.q3)-X(m.q1))}" height="16" rx="3" fill="var(--acc2)" stroke="var(--acc)"/><line x1="${X(m.mediana)}" x2="${X(m.mediana)}" y1="${y-8}" y2="${y+8}" stroke="var(--acc)" stroke-width="3"/><circle cx="${X(m.media)}" cy="${y}" r="3.5" fill="var(--accB)"><title>média ${pct(m.media)}</title></circle><title>${t.key}: mín ${pct(m.min)} · Q1 ${pct(m.q1)} · mediana ${pct(m.mediana)} · Q3 ${pct(m.q3)} · máx ${pct(m.max)}</title>`});
+ return s+"</svg>"}
+function scatter(pts,xl,yl,{w=560,h=380}={}){const p=40,X=v=>p+(w-p-12)*v/100,Y=v=>h-p-(h-p-12)*v/100;let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
+ [0,25,50,75,100].forEach(v=>{s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${Y(0)}" y2="${Y(100)}" stroke="var(--grid)"/><line x1="${X(0)}" x2="${X(100)}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${X(v)}" y="${h-p+16}" text-anchor="middle">${v}</text><text x="${p-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`});
+ s+=`<rect x="${X(0)}" y="${Y(50)}" width="${X(50)-X(0)}" height="${Y(0)-Y(50)}" fill="var(--in)" opacity=".07"/>`;
+ s+=`<text class="lbl" x="${(X(0)+X(100))/2}" y="${h-6}" text-anchor="middle">${xl}</text><text class="lbl" transform="translate(12 ${(Y(0)+Y(100))/2}) rotate(-90)" text-anchor="middle">${yl}</text>`;
+ const jit=i=>((i*37)%7-3)*0.5;pts.forEach((q,i)=>s+=`<circle cx="${X(q.x)+jit(i)}" cy="${Y(q.y)+jit(i+3)}" r="4.5" fill="${q.c}" fill-opacity=".75" stroke="var(--card)"><title>${esc(q.l)}: ${pct(q.x)} × ${pct(q.y)}</title></circle>`);
+ return s+"</svg>"}
+const TC=["#2F5D8C","#C0782F","#2E8B57","#8E4A9E","#C8553D"];
+/* ---------- páginas ---------- */
+const PAGES=[["geral","Visão geral"],["turmas","Comparar turmas"],["alunos","Comparar alunos"],["hab","Habilidades"],["lista","Todos os alunos"],["esc","Escrita"],["dados","Qualidade dos dados"]];
+let page="geral";try{page=localStorage.getItem("obs.page")||"geral"}catch(e){}
+const nav=document.getElementById("nav"),main=document.getElementById("main");
+nav.insertAdjacentHTML("beforeend",PAGES.map(([k,l])=>`<button data-p="${k}">${l}</button>`).join("")+`<div class="foot">II Avaliação Diagnóstica · SEME<br>Aplicação 25–27/06/2026<br>Faixas: Ótimo ≥70 · Bom 50–69 · Regular 25–49 · Insuf. &lt;25</div>`);
+nav.onclick=e=>{const b=e.target.closest("[data-p]");if(b)go(b.dataset.p)};
+function go(p){page=p;try{localStorage.setItem("obs.page",p)}catch(e){}nav.querySelectorAll("[data-p]").forEach(b=>b.toggleAttribute("aria-current",b.dataset.p==p)||b.setAttribute("aria-current",b.dataset.p==p?"page":"false"));nav.querySelectorAll("[data-p]").forEach(b=>b.setAttribute("aria-current",b.dataset.p==p?"page":"false"));R[p]();window.scrollTo(0,0)}
+const header=(eb,h,sub,extra="")=>`<div class="head"><div style="display:grid;gap:4px"><div class="eyebrow">${eb}</div><h1>${h}</h1>${sub?`<p class="mut" style="margin:0;max-width:80ch">${sub}</p>`:""}</div><div class="row noprint">${extra}<button class="btn" onclick="print()">Imprimir / PDF</button></div></div>`;
+const segHTML=(id,opts,cur)=>`<div class="seg" id="${id}">${opts.map(([k,l])=>`<button data-v="${k}" aria-pressed="${k==cur}">${l}</button>`).join("")}</div>`;
+const R={};
+/* Visão geral */
+let gDisc="LP";
+R.geral=()=>{const all=ALS.map(a=>a.media);
+ const kp=[[ALS.length,"alunos avaliados"],[pct(avg(D.flatMap(t=>t.feitos.map(a=>a.p)))),"média geral de acertos"],...DS.map(d=>[pct(avg(D.filter(t=>t.disc==d).flatMap(t=>t.feitos.map(a=>a.p)))),"média · "+DSH[d]]),
+  [pct(100*all.filter(p=>p>=70).length/all.length),"alunos com média ≥70%"],[ALS.filter(a=>a.media<40).length,"alunos em atenção (<40%)"]];
+ let h=`<tr><th>Turma</th><th>Professor(a)</th>${DS.map(d=>`<th style="text-align:center">${DSH[d]}</th>`).join("")}<th class="n">Geral</th><th class="n">Posição</th></tr>`;
+ const rank=T.slice().sort((a,b)=>turmaMedia(b)-turmaMedia(a));
+ T.forEach(k=>{h+=`<tr><td><b>${k}</b></td><td class="mut sm">${profOf(k)}</td>${DS.map(d=>{const t=get(k,d);return `<td class="c ${cls(t.m.media)}" tabindex="0" data-t="${k}" data-d="${d}" title="${DN[d]} · mediana ${pct(t.m.mediana)} · ${t.m.n} alunos">${pct(t.m.media)}</td>`}).join("")}<td class="n"><b>${pct(turmaMedia(k))}</b></td><td class="n mut">${rank.indexOf(k)+1}º</td></tr>`});
+ const ts=T.map(k=>get(k,gDisc));
+ main.innerHTML=header("Visão geral","Desempenho da escola na II Avaliação Diagnóstica","Anos iniciais, com 10 turmas e 30 provas. Os números são recalculados a partir da resposta de cada aluno em cada questão.")+
+ `<section class="kpis">${kp.map(([v,l])=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join("")}</section>
+ <section class="panel"><div class="head"><h2>Mapa de calor · média de acertos</h2><div class="legend"><span style="--c:var(--ot)">Ótimo</span><span style="--c:var(--bo)">Bom</span><span style="--c:var(--re)">Regular</span><span style="--c:var(--in)">Insuficiente</span></div></div><div class="scroll"><table class="heat" id="heat">${h}</table></div><p class="mut sm" style="margin:0">Clique numa célula para abrir a comparação dessa turma.</p></section>
+ <section class="g2"><div class="panel"><div class="head"><h2>Ranking de turmas</h2>${segHTML("gs",[["ALL","Geral"],...DS.map(d=>[d,DSH[d]])],gDisc)}</div><div id="rk"></div></div>
+ <div class="panel"><div class="head"><h2>Dispersão dentro da turma</h2></div><p class="mut sm" style="margin:0">A caixa vai do 1º ao 3º quartil, a barra marca a mediana e o ponto laranja a média. Caixa larga significa turma heterogênea.</p><div id="bx"></div></div></section>
+ <section class="panel"><h2>Indicadores por turma e disciplina</h2><div class="scroll" id="ind"></div></section>`;
+ const draw=()=>{const items=T.map(k=>({l:k,v:gDisc=="ALL"?turmaMedia(k):get(k,gDisc).m.media})).sort((a,b)=>b.v-a.v);document.getElementById("rk").innerHTML=hbars(items);
+  document.getElementById("bx").innerHTML=boxes(T.map(k=>gDisc=="ALL"?get(k,"LP"):get(k,gDisc)));
+  document.querySelectorAll("#gs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v==gDisc))};
+ document.getElementById("gs").onclick=e=>{if(e.target.dataset.v){gDisc=e.target.dataset.v;draw()}};draw();
+ document.getElementById("ind").innerHTML=`<table><tr><th>Turma</th><th>Disc.</th><th class="n">Alunos</th><th class="n">Particip.</th><th class="n">Média</th><th class="n">Mediana</th><th class="n">Desvio</th><th class="n">Mín–Máx</th><th class="n">% ≥70</th><th class="n">% &lt;50</th><th class="n">% &lt;25</th><th>Distribuição</th></tr>${D.slice().sort((a,b)=>a.key.localeCompare(b.key)||DS.indexOf(a.disc)-DS.indexOf(b.disc)).map(t=>{const c={OT:0,BO:0,RE:0,IN:0};t.feitos.forEach(a=>c[cls(a.p)]++);return `<tr><td>${t.key}</td><td>${t.disc}</td><td class="n">${t.m.n}</td><td class="n">${pct(t.m.part)}</td><td class="n"><b>${pct(t.m.media)}</b></td><td class="n">${pct(t.m.mediana)}</td><td class="n">${Math.round(t.m.dp)}</td><td class="n">${pct(t.m.min)}–${pct(t.m.max)}</td><td class="n">${pct(t.m.adeq)}</td><td class="n">${pct(t.m.abaixo50)}</td><td class="n">${pct(t.m.crit)}</td><td style="min-width:140px"><div class="stack">${Object.entries(c).map(([k,v])=>`<i style="width:${100*v/t.m.n}%;background:${col(k)}" title="${lab[k]}: ${v}"></i>`).join("")}</div></td></tr>`}).join("")}</table>`;
+ const heat=document.getElementById("heat");const open=e=>{const c=e.target.closest("[data-t]");if(!c)return;cmp.a=c.dataset.t;const same=T.find(k=>k!=c.dataset.t&&k.startsWith(c.dataset.t[0]));cmp.b=same;cmp.d=c.dataset.d;go("turmas")};
+ heat.onclick=open;heat.onkeydown=e=>{if(e.key=="Enter")open(e)}};
+/* Comparar turmas */
+const cmp={a:"5º A",b:"5º B",d:"LP"};
+R.turmas=()=>{const opt=v=>T.map(k=>`<option ${k==v?"selected":""}>${k}</option>`).join("");
+ main.innerHTML=header("Comparar turmas","Uma turma ao lado da outra","Turmas da mesma série fizeram a mesma prova, então dá para comparar questão por questão. Entre séries diferentes, a comparação fica nos indicadores gerais.",
+ `<label class="f">Turma A<select id="ca">${opt(cmp.a)}</select></label><label class="f">Turma B<select id="cb">${opt(cmp.b)}</select></label>`)+`<div id="cbody" style="display:grid;gap:22px"></div>`;
+ const draw=()=>{const A=cmp.a,B=cmp.b,same=A[0]==B[0];
+  const met=[["Média","media"],["Mediana","mediana"],["% alunos ≥70%","adeq"],["% alunos <50%","abaixo50"],["% alunos <25%","crit"],["Desvio padrão","dp",1],["Participação","part"]];
+  const tbl=`<table><tr><th>Indicador</th>${DS.map(d=>`<th class="n">${DSH[d]} · ${A}</th><th class="n">${B}</th><th class="n">Dif.</th>`).join("")}</tr>${met.map(([l,k,raw])=>`<tr><td>${l}</td>${DS.map(d=>{const a=get(A,d).m[k],b=get(B,d).m[k],inv=k=="abaixo50"||k=="crit"||k=="dp";return `<td class="n">${raw?Math.round(a):pct(a)}</td><td class="n">${raw?Math.round(b):pct(b)}</td><td class="n">${raw?"":dl(inv?-(a-b):(a-b))}</td>`}).join("")}</tr>`).join("")}</table>`;
+  let qhtml="";
+  if(same){const ta=get(A,cmp.d),tb=get(B,cmp.d);
+   qhtml=`<section class="panel"><div class="head"><h2>Questão por questão</h2>${segHTML("cd",DS.map(d=>[d,DSH[d]]),cmp.d)}</div><div class="legend"><span style="--c:${TC[0]}">${A}</span><span style="--c:${TC[1]}">${B}</span></div>
+   ${groupBars(ta.qs.map((q,i)=>({l:"Q"+q,vals:[ta.qp[i],tb.qp[i]]})),[{l:A,c:TC[0]},{l:B,c:TC[1]}])}
+   <div class="scroll"><table><tr><th>Q</th><th>Habilidade</th><th class="n">${A}</th><th class="n">${B}</th><th class="n">Dif. (A−B)</th><th>Leitura</th></tr>${ta.qs.map((q,i)=>{const d=ta.qp[i]-tb.qp[i],both=Math.max(ta.qp[i],tb.qp[i])<50;return `<tr><td>Q${q}</td><td>${esc(ta.hab[q])}</td><td class="n">${pillP(ta.qp[i])}</td><td class="n">${pillP(tb.qp[i])}</td><td class="n">${dl(d)}</td><td class="sm mut">${both?"<b class='dn'>Fraca nas duas</b>, retomar em conjunto":Math.abs(d)>=25?`Diferença grande; ver a prática da turma ${d>0?A:B}`:"Semelhantes"}</td></tr>`}).join("")}</table></div></section>`}
+  document.getElementById("cbody").innerHTML=`<section class="g2"><div class="panel"><h2>Média por disciplina</h2><div class="legend"><span style="--c:${TC[0]}">${A} · ${profOf(A)}</span><span style="--c:${TC[1]}">${B} · ${profOf(B)}</span></div>${groupBars(DS.map(d=>({l:DSH[d],vals:[get(A,d).m.media,get(B,d).m.media]})),[{l:A,c:TC[0]},{l:B,c:TC[1]}],{w:520})}</div>
+  <div class="panel"><h2>Distribuição dos alunos</h2>${[A,B].map(k=>`<div style="display:grid;gap:6px"><h3>${k}</h3>${DS.map(d=>{const t=get(k,d),c={OT:0,BO:0,RE:0,IN:0};t.feitos.forEach(a=>c[cls(a.p)]++);return `<div style="display:grid;grid-template-columns:86px 1fr;gap:8px;align-items:center" class="sm"><span>${DSH[d]}</span><div class="stack">${Object.entries(c).map(([q,v])=>`<i style="width:${100*v/t.m.n}%;background:${col(q)}" title="${lab[q]}: ${v}"></i>`).join("")}</div></div>`}).join("")}</div>`).join("")}<div class="legend"><span style="--c:var(--ot)">Ótimo</span><span style="--c:var(--bo)">Bom</span><span style="--c:var(--re)">Regular</span><span style="--c:var(--in)">Insuficiente</span></div></div></section>
+  <section class="panel"><h2>Indicadores lado a lado</h2><div class="scroll">${tbl}</div><p class="mut sm" style="margin:0">Dif. em pontos percentuais. Verde é vantagem da turma A; nos indicadores negativos (% abaixo de 50 e de 25), o sinal já vem invertido.</p></section>${qhtml}`;
+  const cd=document.getElementById("cd");if(cd)cd.onclick=e=>{if(e.target.dataset.v){cmp.d=e.target.dataset.v;draw()}}};
+ document.getElementById("ca").onchange=e=>{cmp.a=e.target.value;draw()};document.getElementById("cb").onchange=e=>{cmp.b=e.target.value;draw()};draw()};
+/* Comparar alunos */
+let selA=[];
+R.alunos=()=>{if(!selA.length){const t5=ALS.filter(a=>a.turma=="5º A").sort((a,b)=>b.media-a.media);selA=[t5[0].id,t5[Math.floor(t5.length/2)].id,t5[t5.length-1].id]}
+ main.innerHTML=header("Comparar alunos","Perfil lado a lado","Escolha até 5 alunos de qualquer turma. A posição na turma mostra quantos colegas da mesma turma tiveram resultado menor.")+
+ `<section class="panel noprint"><div class="row"><input id="as" list="al" placeholder="Digite o nome do aluno e escolha na lista…" style="flex:1;min-width:240px" aria-label="Adicionar aluno"><datalist id="al">${ALS.map(a=>`<option value="${esc(a.nome)} — ${a.turma}">`).join("")}</datalist><button class="btn" id="clr">Limpar</button></div><div class="chips" id="chips"></div><p class="mut sm" style="margin:0">Os três alunos de exemplo (5º A: maior média, média do meio e menor média) já vêm selecionados. Troque à vontade.</p></section><div id="abody" style="display:grid;gap:22px"></div>`;
+ const draw=()=>{const S=selA.map(id=>AL[id]).filter(Boolean);
+  document.getElementById("chips").innerHTML=S.map((a,i)=>`<span class="chip" style="box-shadow:inset 3px 0 0 ${TC[i]}">${esc(a.nome)} · ${a.turma}<button data-x="${a.id}" aria-label="Remover">×</button></span>`).join("");
+  if(!S.length){document.getElementById("abody").innerHTML=`<p class="mut">Adicione alunos pela busca acima.</p>`;return}
+  const cards=S.map((a,i)=>`<div class="scard" style="--c:${TC[i]}"><div><b>${esc(a.nome)}</b><div class="mut sm">${a.turma} · ${profOf(a.turma)}</div></div><div class="row" style="justify-content:space-between"><span class="mut sm">Média geral</span>${pillP(a.media)}</div>${DS.map(d=>`<div style="display:grid;gap:2px"><div class="row sm" style="justify-content:space-between"><span>${DSH[d]}</span><span class="mut">${a["pos"+d]!=null?"acima de "+pct(a["pos"+d])+" da turma":"não fez"}</span></div>${barP(a.d[d])}</div>`).join("")}${a.esc?`<div class="sm">Escrita: <b>${a.esc}</b></div>`:""}${a.esp?`<div class="sm mut">Estudante público da Educação Especial</div>`:""}</div>`).join("");
+  const erros=S.map((a,i)=>{const L=[];DS.forEach(d=>{const t=get(a.turma,d);if(!a.r[d])return;t.qs.forEach((q,j)=>{if(a.r[d][j]=="E")L.push(`<li><b>${d} Q${q}</b> · ${esc(t.hab[q])} <span class="mut">(turma: ${pct(t.qp[j])})</span></li>`)})});return `<div style="display:grid;gap:6px"><h3 style="color:${TC[i]}">${esc(a.nome)}</h3>${L.length?`<ul style="margin:0;padding-left:18px;display:grid;gap:3px" class="sm">${L.join("")}</ul>`:`<p class="sm mut" style="margin:0">Acertou todas.</p>`}</div>`}).join("");
+  document.getElementById("abody").innerHTML=`<section class="cmpcards">${cards}</section><section class="panel"><h2>Comparativo por disciplina</h2><div class="legend">${S.map((a,i)=>`<span style="--c:${TC[i]}">${esc(a.nome.split(" ")[0])} (${a.turma})</span>`).join("")}</div>${groupBars(DS.map(d=>({l:DSH[d],vals:S.map(a=>a.d[d]??null)})).concat([{l:"Média",vals:S.map(a=>a.media)}]),S.map((a,i)=>({l:a.nome,c:TC[i]})))}</section><section class="panel"><h2>Habilidades a retomar (questões erradas)</h2><div class="g2">${erros}</div></section>`;
+  document.querySelectorAll("#chips [data-x]").forEach(b=>b.onclick=()=>{selA=selA.filter(x=>x!=b.dataset.x);draw()})};
+ const inp=document.getElementById("as");inp.onchange=()=>{const [n,t]=inp.value.split(" — ");const a=ALS.find(x=>x.nome==n&&x.turma==t);if(a&&!selA.includes(a.id)&&selA.length<5){selA.push(a.id);draw()}inp.value=""};
+ document.getElementById("clr").onclick=()=>{selA=[];draw()};draw()};
+/* Habilidades */
+let hDisc="CN",hAno=0;
+R.hab=()=>{main.innerHTML=header("Habilidades","Onde estão as lacunas","Percentual de acerto de cada habilidade por turma. Use essa tela para planejar a recomposição das aprendizagens.",`<label class="f">Série<select id="ha"><option value="0">Todas</option>${[1,2,3,4,5].map(a=>`<option value="${a}" ${a==hAno?"selected":""}>${a}º ano</option>`).join("")}</select></label>`)+
+ `<section class="panel"><div class="head"><h2 id="ht"></h2>${segHTML("hs",DS.map(d=>[d,DSH[d]]),hDisc)}</div><div class="scroll" id="hbody"></div></section><section class="g2"><div class="panel"><h2>Resumo por faixa</h2><div id="hsum"></div></div><div class="panel"><h2>Prioridades de intervenção</h2><p class="mut sm" style="margin:0">Habilidades com acerto abaixo de 40% nas duas turmas da série.</p><div id="hpri"></div></div></section>`;
+ const draw=()=>{document.querySelectorAll("#hs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v==hDisc));
+  const anos=hAno?[hAno]:[1,2,3,4,5];let html="",all=[],pri=[];
+  document.getElementById("ht").textContent=DN[hDisc]+(hAno?` · ${hAno}º ano`:" · todas as séries");
+  html=`<table><tr><th>Série</th><th>Q</th><th>Habilidade</th><th class="n">Turma A</th><th class="n">Turma B</th><th class="n">Série</th><th style="min-width:130px">Nível</th></tr>`;
+  anos.forEach(an=>{const a=get(an+"º A",hDisc),b=get(an+"º B",hDisc);a.qs.forEach((q,i)=>{const tot=(a.qp[i]*a.m.n+b.qp[i]*b.m.n)/(a.m.n+b.m.n);all.push(tot);if(a.qp[i]<40&&b.qp[i]<40)pri.push({an,q,h:a.hab[q],v:tot});
+   html+=`<tr><td>${an}º</td><td>Q${q}</td><td>${esc(a.hab[q])}</td><td class="n">${pillP(a.qp[i])}</td><td class="n">${pillP(b.qp[i])}</td><td class="n"><b>${pct(tot)}</b></td><td>${barP(tot)}</td></tr>`})});
+  document.getElementById("hbody").innerHTML=html+"</table>";
+  const c={OT:0,BO:0,RE:0,IN:0};all.forEach(v=>c[cls(v)]++);
+  document.getElementById("hsum").innerHTML=hbars(Object.entries(c).map(([k,v])=>({l:lab[k],v:100*v/all.length,c:col(k)})),{w:460})+`<p class="mut sm" style="margin:0">${all.length} habilidades avaliadas. O gráfico mostra a proporção de habilidades em cada faixa (desempenho da série somada).</p>`;
+  document.getElementById("hpri").innerHTML=pri.length?`<ol style="margin:0;padding-left:20px;display:grid;gap:6px">${pri.sort((a,b)=>a.v-b.v).map(p=>`<li><b>${p.an}º ano Q${p.q}</b> · ${esc(p.h)} <span class="pill ${cls(p.v)}">${pct(p.v)}</span></li>`).join("")}</ol>`:`<p class="mut">Nenhuma habilidade abaixo de 40% nas duas turmas.</p>`};
+ document.getElementById("hs").onclick=e=>{if(e.target.dataset.v){hDisc=e.target.dataset.v;draw()}};document.getElementById("ha").onchange=e=>{hAno=+e.target.value;draw()};draw()};
+/* Lista de alunos */
+const lf={q:"",ano:"",turma:"",faixa:"",sort:"media",dir:1};
+R.lista=()=>{main.innerHTML=header("Todos os alunos","Lista completa com filtros",`${ALS.length} alunos. Clique numa linha para abrir a ficha. Clique nos títulos das colunas para ordenar.`)+
+ `<section class="panel"><div class="row noprint"><input id="lq" placeholder="Buscar por nome…" aria-label="Buscar" value="${esc(lf.q)}"><select id="la" aria-label="Série"><option value="">Todas as séries</option>${[1,2,3,4,5].map(a=>`<option value="${a}">${a}º ano</option>`).join("")}</select><select id="lt" aria-label="Turma"><option value="">Todas as turmas</option>${T.map(k=>`<option>${k}</option>`).join("")}</select><select id="lfx" aria-label="Faixa"><option value="">Todas as faixas</option><option value="IN">Insuficiente</option><option value="RE">Regular</option><option value="BO">Bom</option><option value="OT">Ótimo</option><option value="AT">Em atenção (&lt;40%)</option></select></div><div class="mut sm" id="lcount"></div><div class="scroll"><table id="lt2"></table></div></section>
+ <section class="panel"><h2>Português × Matemática</h2><p class="mut sm" style="margin:0">Cada ponto é um aluno (com os filtros aplicados). A área vermelha reúne quem ficou abaixo de 50% nas duas disciplinas.</p><div id="sc" style="max-width:640px"></div></section>`;
+ ["la","lt","lfx"].forEach((id,i)=>document.getElementById(id).value=[lf.ano,lf.turma,lf.faixa][i]);
+ const draw=()=>{let rows=ALS.filter(a=>(!lf.q||norm(a.nome).includes(norm(lf.q)))&&(!lf.ano||a.ano==lf.ano)&&(!lf.turma||a.turma==lf.turma)&&(!lf.faixa||(lf.faixa=="AT"?a.media<40:cls(a.media)==lf.faixa)));
+  const k=lf.sort,v=a=>k=="nome"?norm(a.nome):k=="turma"?a.turma:k=="esc"?(a.esc||"~"):(k=="media"?a.media:a.d[k]??-1);
+  rows.sort((a,b)=>(v(a)>v(b)?1:v(a)<v(b)?-1:0)*lf.dir);
+  const th=(key,l,n)=>`<th class="s ${n?"n":""}" data-s="${key}">${l}${lf.sort==key?(lf.dir>0?" ▲":" ▼"):""}</th>`;
+  document.getElementById("lcount").textContent=`${rows.length} aluno(s) · média do grupo ${pct(avg(rows.map(a=>a.media)))}`;
+  document.getElementById("lt2").innerHTML=`<tr>${th("nome","Aluno")}${th("turma","Turma")}${DS.map(d=>th(d,DSH[d],1)).join("")}${th("media","Média",1)}${th("esc","Escrita",1)}</tr>`+rows.map(a=>`<tr class="click" tabindex="0" data-id="${esc(a.id)}"><td>${esc(a.nome)}${a.esp?' <span class="mut sm">· AEE</span>':""}</td><td>${a.turma}</td>${DS.map(d=>`<td class="n">${pillP(a.d[d])}</td>`).join("")}<td class="n"><b>${pct(a.media)}</b></td><td class="n">${a.esc||"—"}</td></tr>`).join("");
+  document.getElementById("sc").innerHTML=scatter(rows.filter(a=>a.d.LP!=null&&a.d.MAT!=null).map(a=>({x:a.d.LP,y:a.d.MAT,l:a.nome+" ("+a.turma+")",c:TC[a.ano%5]})),"Português (%)","Matemática (%)")+`<div class="legend">${[1,2,3,4,5].map(a=>`<span style="--c:${TC[a%5]}">${a}º ano</span>`).join("")}</div>`};
+ const t2=document.getElementById("lt2");t2.onclick=e=>{const s=e.target.closest("[data-s]");if(s){lf.dir=lf.sort==s.dataset.s?-lf.dir:1;lf.sort=s.dataset.s;draw();return}const r=e.target.closest("[data-id]");if(r)ficha(r.dataset.id)};
+ t2.onkeydown=e=>{const r=e.target.closest("[data-id]");if(r&&e.key=="Enter")ficha(r.dataset.id)};
+ document.getElementById("lq").oninput=e=>{lf.q=e.target.value;draw()};document.getElementById("la").onchange=e=>{lf.ano=e.target.value;draw()};document.getElementById("lt").onchange=e=>{lf.turma=e.target.value;draw()};document.getElementById("lfx").onchange=e=>{lf.faixa=e.target.value;draw()};draw()};
+function ficha(id){const a=AL[id];const dlg=document.getElementById("dlg");
+ document.getElementById("dlgBody").innerHTML=`<div class="head"><div><div class="eyebrow">Ficha do aluno</div><h2>${esc(a.nome)}</h2><div class="mut sm">${a.turma} · Prof.(ª) ${profOf(a.turma)}${a.esc?" · Escrita "+a.esc:""}</div></div><div class="row"><button class="btn" id="fc">Comparar</button><button class="btn" onclick="document.getElementById('dlg').close()">Fechar</button></div></div>`+
+ DS.map(d=>{const t=get(a.turma,d);if(!a.r[d])return `<div><h3>${DN[d]}</h3><p class="mut sm" style="margin:0">Sem registro nesta prova.</p></div>`;return `<div style="display:grid;gap:6px"><div class="row" style="justify-content:space-between"><h3>${DN[d]}</h3><span class="sm">${pillP(a.d[d])} <span class="mut">turma ${pct(t.m.media)} · ${dl(a.d[d]-t.m.media)}</span></span></div><div class="dots">${[...a.r[d]].map((c,i)=>`<i title="Q${t.qs[i]} · ${esc(t.hab[t.qs[i]])}" style="background:${c=="C"?"var(--ot)":"var(--in)"}"></i>`).join("")}</div>${[...a.r[d]].some(c=>c=="E")?`<ul class="sm" style="margin:0;padding-left:18px">${t.qs.filter((q,i)=>a.r[d][i]=="E").map(q=>`<li>Q${q} · ${esc(t.hab[q])}</li>`).join("")}</ul>`:""}</div>`}).join("");
+ dlg.showModal();document.getElementById("fc").onclick=()=>{if(!selA.includes(id)){if(selA.length>=5)selA.shift();selA.push(id)}dlg.close();go("alunos")}}
+/* Escrita */
+R.esc=()=>{const alf=["B","C1","C2","C3","D"],ort=["A","B","C","D","E"],alfC=["#A9C1DC","#7FA3CB","#5885B8","#2F5D8C","#1C3A5C"],ortC=["var(--ot)","var(--bo)","var(--re)","#E07A3E","var(--in)"];
+ const blk=(anos,cats,cc,tit,sub)=>`<div class="panel"><h2>${tit}</h2><p class="mut sm" style="margin:0">${sub}</p><div class="legend">${cats.map((c,i)=>`<span style="--c:${cc[i]}">${c}</span>`).join("")}</div>${anos.flatMap(an=>["A","B"].map(tu=>{const t=get(an+"º "+tu,"LP"),n={};t.alunos.forEach(a=>{if(a.esc)n[a.esc]=(n[a.esc]||0)+1});const tot=Object.values(n).reduce((x,y)=>x+y,0);return `<div style="display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center" class="sm"><b>${t.key}</b><div style="display:grid;gap:3px"><div class="stack">${cats.map((c,i)=>n[c]?`<i style="width:${100*n[c]/tot}%;background:${cc[i]}" title="${c}: ${n[c]} alunos"></i>`:"").join("")}</div><span class="mut">${cats.filter(c=>n[c]).map(c=>`${c}: ${n[c]} (${pct(100*n[c]/tot)})`).join(" · ")}</span></div></div>`})).join("")}</div>`;
+ main.innerHTML=header("Escrita","Indicadores de escrita em Língua Portuguesa","Registrados pelos professores na aba de tabulação de LP.")+`<section class="g2">${blk([1,2],alf,alfC,"Escrita alfabética · 1º e 2º ano","Códigos do instrumento da SEME. O painel não assume ordem entre os níveis; confira a legenda oficial da rede.")}${blk([3,4,5],ort,ortC,"Escrita ortográfica · 3º ao 5º ano","A = mais adequado … E = menos adequado.")}</section>`};
+/* Dados */
+R.dados=()=>{main.innerHTML=header("Qualidade dos dados","O que corrigir nas planilhas","Pontos encontrados ao transcrever as 30 planilhas do Drive. Nenhum deles altera os números deste painel, que usa a aba de Tabulação.")+`<section class="panel">${[
+"<b>3º B e 4º A:</b> data de aplicação em branco (aparece 1/0/1900). No 3º B também falta o nome da escola.",
+"<b>1º B, LP:</b> a aba “Relatório dos alunos” tem #REF! e nomes desalinhados. Os percentuais individuais dessa aba estão errados.",
+"<b>5º B, MAT e CN:</b> João Lucas Silva Araujo aparece em duas linhas (9 e 10) com respostas diferentes. A linha 10 deve ser de outro aluno e ficou fora das médias.",
+"<b>5º B, LP:</b> o relatório ignora as respostas de Izaquel, e o nome de Kaique contém uma fórmula colada (“+C17:C31…”).",
+"<b>2º A:</b> os três arquivos se chamam “CN”, mas são MAT, LP e CN.",
+"<b>Todas:</b> #N/A no “Relatório das questões” nas questões que não existem naquela série (resíduo do modelo).",
+"<b>Faltosos:</b> o campo “Quantidade de faltosos” da capa não bate com as linhas em branco em várias turmas. Este painel conta como ausente quem não tem respostas registradas."
+].map(s=>`<p class="note">${s}</p>`).join("")}</section><section class="panel"><h2>Participação por prova</h2><div class="scroll"><table><tr><th>Turma</th>${DS.map(d=>`<th class="n">${DSH[d]}</th>`).join("")}<th>Professor(a)</th><th>Datas</th></tr>${T.map(k=>`<tr><td>${k}</td>${DS.map(d=>{const t=get(k,d);return `<td class="n">${t.m.n} fizeram · ${t.m.aus} sem registro</td>`}).join("")}<td class="sm">${profOf(k)}</td><td class="sm mut">${DS.map(d=>get(k,d).data?get(k,d).data.split("-").reverse().slice(0,2).join("/"):"—").join(" · ")}</td></tr>`).join("")}</table></div></section>`};
+go(PAGES.some(p=>p[0]==page)?page:"geral");
+</script>

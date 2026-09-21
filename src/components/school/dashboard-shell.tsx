@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  BarChart3,
   CalendarClock,
   CalendarPlus,
   CalendarSearch,
@@ -42,6 +43,12 @@ const NAV_GROUPS = [
       { to: "/dashboard/frequencia", label: "Frequência", icon: CalendarSearch },
       { to: "/dashboard/faltas", label: "Faltas do mês", icon: UserX },
       { to: "/dashboard/atividades", label: "Área do Aluno", icon: ClipboardCheck },
+    ],
+  },
+  {
+    label: "Pedagógico",
+    items: [
+      { to: "/dashboard/avaliacao", label: "Avaliação diagnóstica", icon: BarChart3 },
     ],
   },
   {

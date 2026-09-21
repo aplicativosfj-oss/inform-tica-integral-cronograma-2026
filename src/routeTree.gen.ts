@@ -22,6 +22,7 @@ import { Route as DashboardAcessosRouteImport } from './routes/dashboard/acessos
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
 import { Route as DashboardAtividadesRouteImport } from './routes/dashboard/atividades'
 import { Route as DashboardAulasRouteImport } from './routes/dashboard/aulas'
+import { Route as DashboardAvaliacaoRouteImport } from './routes/dashboard/avaliacao'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
 import { Route as DashboardFaltasRouteImport } from './routes/dashboard/faltas'
 import { Route as DashboardFichasAcessoRouteImport } from './routes/dashboard/fichas-acesso'
@@ -111,6 +112,11 @@ const DashboardAtividadesRoute = DashboardAtividadesRouteImport.update({
 const DashboardAulasRoute = DashboardAulasRouteImport.update({
   id: '/dashboard/aulas',
   path: '/dashboard/aulas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAvaliacaoRoute = DashboardAvaliacaoRouteImport.update({
+  id: '/dashboard/avaliacao',
+  path: '/dashboard/avaliacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
+  '/dashboard/avaliacao': typeof DashboardAvaliacaoRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/fichas-acesso': typeof DashboardFichasAcessoRoute
@@ -301,6 +308,7 @@ export interface FileRoutesByTo {
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
+  '/dashboard/avaliacao': typeof DashboardAvaliacaoRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/fichas-acesso': typeof DashboardFichasAcessoRoute
@@ -342,6 +350,7 @@ export interface FileRoutesById {
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
+  '/dashboard/avaliacao': typeof DashboardAvaliacaoRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/fichas-acesso': typeof DashboardFichasAcessoRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
     | '/dashboard/alunos'
     | '/dashboard/atividades'
     | '/dashboard/aulas'
+    | '/dashboard/avaliacao'
     | '/dashboard/configuracoes'
     | '/dashboard/faltas'
     | '/dashboard/fichas-acesso'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/dashboard/alunos'
     | '/dashboard/atividades'
     | '/dashboard/aulas'
+    | '/dashboard/avaliacao'
     | '/dashboard/configuracoes'
     | '/dashboard/faltas'
     | '/dashboard/fichas-acesso'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/dashboard/alunos'
     | '/dashboard/atividades'
     | '/dashboard/aulas'
+    | '/dashboard/avaliacao'
     | '/dashboard/configuracoes'
     | '/dashboard/faltas'
     | '/dashboard/fichas-acesso'
@@ -505,6 +517,7 @@ export interface RootRouteChildren {
   DashboardAlunosRoute: typeof DashboardAlunosRoute
   DashboardAtividadesRoute: typeof DashboardAtividadesRoute
   DashboardAulasRoute: typeof DashboardAulasRoute
+  DashboardAvaliacaoRoute: typeof DashboardAvaliacaoRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
   DashboardFaltasRoute: typeof DashboardFaltasRoute
   DashboardFichasAcessoRoute: typeof DashboardFichasAcessoRoute
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/aulas'
       fullPath: '/dashboard/aulas'
       preLoaderRoute: typeof DashboardAulasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/avaliacao': {
+      id: '/dashboard/avaliacao'
+      path: '/dashboard/avaliacao'
+      fullPath: '/dashboard/avaliacao'
+      preLoaderRoute: typeof DashboardAvaliacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/configuracoes': {
@@ -817,6 +837,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardAlunosRoute: DashboardAlunosRoute,
   DashboardAtividadesRoute: DashboardAtividadesRoute,
   DashboardAulasRoute: DashboardAulasRoute,
+  DashboardAvaliacaoRoute: DashboardAvaliacaoRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
   DashboardFaltasRoute: DashboardFaltasRoute,
   DashboardFichasAcessoRoute: DashboardFichasAcessoRoute,
