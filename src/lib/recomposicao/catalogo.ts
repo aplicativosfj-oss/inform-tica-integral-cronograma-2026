@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 
 import { ATIVIDADES_LP, type AtividadeLP } from "@/components/school/ferramentas/atividades-lp-dados";
+import { BANCO_CN } from "@/lib/recomposicao/banco-cn";
+import { BANCO_LP } from "@/lib/recomposicao/banco-lp";
+import type { AtividadeBanco } from "@/lib/recomposicao/banco-tipos";
 import { GERADORES, type Gerador, type Nivel, type Serie } from "@/lib/recomposicao/geradores";
 import { supabase } from "@/lib/supabase-client";
 
 export type { Nivel, Serie };
-export type Disciplina = "MAT" | "LP";
+export type Disciplina = "MAT" | "LP" | "CN";
+
+export const NOME_DISC: Record<Disciplina, string> = { MAT: "Matemática", LP: "Português", CN: "Ciências" };
 
 export const NIVEIS: { id: Nivel; nome: string; emoji: string; para: string }[] = [
   { id: "retomada", nome: "Retomada", emoji: "🌱", para: "Para quem ainda está começando: passo a passo, com apoio visual." },
@@ -64,7 +69,10 @@ export const DESCRITORES: Record<string, string> = {
   "5E1.3": "Ler gráficos de colunas",
 };
 
-export type Fonte = { tipo: "gerador"; gerador: Gerador } | { tipo: "lp"; atividade: AtividadeLP };
+export type Fonte =
+  | { tipo: "gerador"; gerador: Gerador }
+  | { tipo: "lp"; atividade: AtividadeLP }
+  | { tipo: "banco"; atividade: AtividadeBanco };
 
 export interface Entrada {
   id: string;
@@ -74,6 +82,8 @@ export interface Entrada {
   emoji: string;
   conteudo: string;
   descritores: string[];
+  /** Textos das habilidades da avaliação (Português e Ciências não têm código). */
+  habilidades: string[];
   niveis: Nivel[];
   fonte: Fonte;
 }
@@ -88,8 +98,23 @@ export const CATALOGO: Entrada[] = [
       emoji: g.emoji,
       conteudo: g.conteudo,
       descritores: cods,
+      habilidades: [] as string[],
       niveis: ["retomada", "pratica", "desafio"] as Nivel[],
       fonte: { tipo: "gerador" as const, gerador: g },
+    })),
+  ),
+  ...[...BANCO_LP, ...BANCO_CN].flatMap((a) =>
+    a.series.map((serie) => ({
+      id: `${a.id}-${serie}`,
+      disc: a.disc,
+      serie,
+      titulo: a.titulo,
+      emoji: a.emoji,
+      conteudo: a.conteudo,
+      descritores: [] as string[],
+      habilidades: a.habilidades,
+      niveis: ["retomada", "pratica", "desafio"] as Nivel[],
+      fonte: { tipo: "banco" as const, atividade: a },
     })),
   ),
   ...ATIVIDADES_LP.map((a) => ({
@@ -100,6 +125,7 @@ export const CATALOGO: Entrada[] = [
     emoji: a.emoji,
     conteudo: "Leitura e interpretação",
     descritores: [],
+    habilidades: [] as string[],
     // A versão adaptada vira a retomada; as questões completas, a prática.
     niveis: ["retomada", "pratica"] as Nivel[],
     fonte: { tipo: "lp" as const, atividade: a },
@@ -117,6 +143,15 @@ interface TurmaAval {
 
 /** Percentual de acerto por série e descritor (e a média da série em LP). */
 export type MapaPrioridade = Map<string, number>;
+
+/** Texto da habilidade sem acentos, maiúsculas e espaços extras, para comparar. */
+export const chaveHab = (h: string) =>
+  h
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 
 function calcular(dados: TurmaAval[]): MapaPrioridade {
   const soma = new Map<string, { c: number; n: number }>();
@@ -136,6 +171,7 @@ function calcular(dados: TurmaAval[]): MapaPrioridade {
         const certo = al.r[i] === "C";
         const cod = /^(\d[A-Z]\d\.\d+)/.exec(t.hab[String(q)] ?? "")?.[1];
         if (cod) add(`${t.ano}|${cod}`, certo);
+        add(`${t.ano}|h:${chaveHab(t.hab[String(q)] ?? "")}`, certo);
         add(`${t.ano}|${t.disc}`, certo);
       });
     }
@@ -168,6 +204,12 @@ export function usePrioridades(): MapaPrioridade | null {
 /** Acerto da série na avaliação para esta entrada (o pior dos seus descritores). */
 export function acertoDaEntrada(e: Entrada, mapa: MapaPrioridade | null): number | null {
   if (!mapa) return null;
+  if (e.habilidades.length) {
+    const v = e.habilidades
+      .map((h) => mapa.get(`${e.serie}|h:${chaveHab(h)}`))
+      .filter((x): x is number => x != null);
+    if (v.length) return Math.min(...v);
+  }
   if (e.descritores.length) {
     const v = e.descritores.map((d) => mapa.get(`${e.serie}|${d}`)).filter((x): x is number => x != null);
     return v.length ? Math.min(...v) : null;

@@ -10,6 +10,7 @@ import {
   CATALOGO,
   DESCRITORES,
   NIVEIS,
+  NOME_DISC,
   acertoDaEntrada,
   nivelRecomendado,
   usePrioridades,
@@ -27,6 +28,7 @@ const DISC: { id: Disciplina | "todas"; nome: string }[] = [
   { id: "todas", nome: "Todas" },
   { id: "MAT", nome: "Matemática" },
   { id: "LP", nome: "Português" },
+  { id: "CN", nome: "Ciências" },
 ];
 
 /** Cor e frase da prioridade, a partir do acerto da série na avaliação. */
@@ -48,6 +50,7 @@ function embaralhar(questoes: Questao[]): Questao[] {
 
 function questoesDe(e: Entrada, nivel: Nivel): Questao[] {
   if (e.fonte.tipo === "gerador") return gerarRodada(e.fonte.gerador, e.serie, nivel);
+  if (e.fonte.tipo === "banco") return embaralhar(e.fonte.atividade.niveis[nivel].questoes);
   const a = e.fonte.atividade;
   return embaralhar(nivel === "retomada" ? a.adaptada.questoes : a.questoes);
 }
@@ -146,7 +149,7 @@ export function Trilhas() {
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-foreground">{e.titulo}</p>
                     <p className="text-xs text-muted-foreground">
-                      {e.disc === "MAT" ? "Matemática" : "Português"} · {e.conteudo}
+                      {NOME_DISC[e.disc]} · {e.conteudo}
                     </p>
                   </div>
                   {pr ? (
@@ -172,7 +175,7 @@ export function Trilhas() {
                 {p != null ? (
                   <p className="text-xs text-muted-foreground">
                     Na avaliação, o {e.serie}º ano acertou <b className="text-foreground">{Math.round(p)}%</b>
-                    {e.descritores.length ? " nesta habilidade." : " em Português, em média."}
+                    {e.descritores.length || e.habilidades.length ? " nesta habilidade." : ` em ${NOME_DISC[e.disc]}, em média.`}
                   </p>
                 ) : null}
                 <div className="mt-auto flex flex-wrap gap-2">
@@ -203,7 +206,17 @@ function Jogar({ e, nivelInicial, voltar }: { e: Entrada; nivelInicial: Nivel; v
   const [rodada, setRodada] = useState(0);
   const questoes = useMemo(() => questoesDe(e, nivel), [e, nivel, rodada]);
   const lp = e.fonte.tipo === "lp" ? e.fonte.atividade : null;
-  const texto = lp ? (nivel === "retomada" && lp.adaptada.textoCurto ? lp.adaptada.textoCurto : lp.texto?.paragrafos) : null;
+  const banco = e.fonte.tipo === "banco" ? e.fonte.atividade : null;
+  const textoBanco = banco?.niveis[nivel].texto;
+  const tituloTexto = textoBanco?.titulo ?? lp?.texto?.titulo;
+  const texto = banco
+    ? textoBanco?.paragrafos
+    : lp
+      ? nivel === "retomada" && lp.adaptada.textoCurto
+        ? lp.adaptada.textoCurto
+        : lp.texto?.paragrafos
+      : null;
+  const dicas = banco ? banco.emSala : lp ? (nivel === "retomada" ? lp.adaptada.dicasMediador : lp.emSala) : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -217,7 +230,7 @@ function Jogar({ e, nivelInicial, voltar }: { e: Entrada; nivelInicial: Nivel; v
         <div>
           <h2 className="text-lg font-semibold text-foreground">{e.titulo}</h2>
           <p className="text-sm text-muted-foreground">
-            {e.serie}º ano · {e.disc === "MAT" ? "Matemática" : "Português"}
+            {e.serie}º ano · {NOME_DISC[e.disc]}
             {e.descritores.length ? ` · ${e.descritores.map((d) => DESCRITORES[d] ?? d).join(" · ")}` : ""}
           </p>
         </div>
@@ -244,10 +257,10 @@ function Jogar({ e, nivelInicial, voltar }: { e: Entrada; nivelInicial: Nivel; v
         ) : null}
       </div>
 
-      {lp && texto?.length ? (
+      {texto?.length ? (
         <Card>
           <CardContent className="flex flex-col gap-2 p-5">
-            {lp.texto?.titulo ? <p className="font-semibold text-foreground">{lp.texto.titulo}</p> : null}
+            {tituloTexto ? <p className="font-semibold text-foreground">{tituloTexto}</p> : null}
             {texto.map((par, i) => (
               <p key={i} className="text-base leading-relaxed text-foreground">
                 {par}
@@ -259,13 +272,13 @@ function Jogar({ e, nivelInicial, voltar }: { e: Entrada; nivelInicial: Nivel; v
 
       <Quiz key={`${nivel}-${rodada}`} questoes={questoes} />
 
-      {lp ? (
+      {dicas?.length ? (
         <details className="rounded-xl border border-border bg-muted/30 p-4 text-sm">
           <summary className="flex cursor-pointer items-center gap-2 font-semibold text-foreground">
             <School className="size-4" /> Para o professor e o mediador
           </summary>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
-            {(nivel === "retomada" ? lp.adaptada.dicasMediador : lp.emSala).map((d, i) => (
+            {dicas.map((d, i) => (
               <li key={i}>{d}</li>
             ))}
           </ul>
