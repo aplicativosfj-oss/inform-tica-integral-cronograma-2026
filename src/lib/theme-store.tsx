@@ -4,10 +4,8 @@ export type Theme = "light" | "dark";
 
 const THEME_KEY = "informatica:theme";
 
-function getSystemTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
+// Modo escuro é o padrão do site/app; o usuário pode trocar e a escolha fica salva.
+const DEFAULT_THEME: Theme = "dark";
 
 function readStoredTheme(): Theme | null {
   if (typeof window === "undefined") return null;
@@ -38,7 +36,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [sincronizado, setSincronizado] = useState(false);
 
   useEffect(() => {
-    setTheme(readStoredTheme() ?? getSystemTheme());
+    setTheme(readStoredTheme() ?? DEFAULT_THEME);
     setSincronizado(true);
   }, []);
 

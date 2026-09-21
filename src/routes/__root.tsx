@@ -23,7 +23,7 @@ import { usePWAInstallInitializer } from "../lib/use-pwa-install";
  * Aplica o tema salvo (ou o do sistema) antes da primeira pintura, para
  * nunca piscar claro->escuro ao carregar a página.
  */
-const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('informatica:theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('informatica:theme');if(t!=='light')document.documentElement.classList.add('dark');}catch(e){}})();`;
 
 function NotFoundComponent() {
   return (
