@@ -176,12 +176,41 @@ function comando(nome: string, valor?: string) {
 interface EstadoArraste {
   tipo: "imagem" | "textbox-mover" | "textbox-redimensionar";
   elemento: HTMLElement;
+  /** id do ponteiro (mouse/dedo/caneta) que começou o arraste. */
+  ponteiro: number;
   startX: number;
   startY: number;
   startWidth: number;
   startHeight: number;
   startLeft: number;
   startTop: number;
+}
+
+/**
+ * Deixa uma caixa de texto pronta para ser arrastada/redimensionada.
+ *
+ * Isso é aplicado tanto nas caixas recém-inseridas quanto nas que vêm de um
+ * documento salvo antes desta correção: sem `position`/`left`/`top` no
+ * próprio elemento não há de onde partir o arraste, e sem `draggable=false`
+ * o navegador tenta fazer o *drag and drop* nativo do bloco não-editável
+ * (é isso que fazia a alcinha "não responder" ao mouse).
+ */
+function prepararCaixaTexto(caixa: HTMLElement) {
+  caixa.setAttribute("contenteditable", "false");
+  caixa.setAttribute("draggable", "false");
+  caixa.style.position = "absolute";
+  caixa.style.boxSizing = "border-box";
+  if (!caixa.style.left) caixa.style.left = `${caixa.offsetLeft || 32}px`;
+  if (!caixa.style.top) caixa.style.top = `${caixa.offsetTop || 32}px`;
+  caixa
+    .querySelectorAll<HTMLElement>(
+      ".editor-textbox-handle, .editor-textbox-resize, .editor-textbox-delete",
+    )
+    .forEach((alca) => {
+      alca.setAttribute("draggable", "false");
+      alca.style.touchAction = "none";
+      alca.style.userSelect = "none";
+    });
 }
 
 export function EditorTexto() {
@@ -308,20 +337,28 @@ export function EditorTexto() {
       `<div class="editor-textbox" contenteditable="false" draggable="false" ` +
       `style="position:absolute;left:32px;top:32px;width:220px;min-height:100px;z-index:5;` +
       `background:#ffffff;border:1px dashed #94a3b8;border-radius:4px;padding:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);">` +
-      `<span class="editor-textbox-handle" contenteditable="false" title="Arrastar caixa de texto" ` +
+      `<span class="editor-textbox-handle" contenteditable="false" draggable="false" title="Arrastar caixa de texto" ` +
       `style="position:absolute;top:-11px;left:-11px;width:18px;height:18px;border-radius:9999px;background:#7c3aed;` +
-      `border:2px solid #fff;cursor:move;"></span>` +
-      `<button type="button" class="editor-textbox-delete" contenteditable="false" title="Remover caixa de texto" ` +
+      `border:2px solid #fff;cursor:move;touch-action:none;user-select:none;"></span>` +
+      `<button type="button" class="editor-textbox-delete" contenteditable="false" draggable="false" title="Remover caixa de texto" ` +
       `style="position:absolute;top:-11px;right:-11px;width:18px;height:18px;border-radius:9999px;background:#dc2626;` +
       `color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;">×</button>` +
       `<div class="editor-textbox-content" contenteditable="true" style="outline:none;min-height:60px;font-size:14px;line-height:1.4;">Digite aqui...</div>` +
-      `<span class="editor-textbox-resize" contenteditable="false" title="Redimensionar caixa de texto" ` +
+      `<span class="editor-textbox-resize" contenteditable="false" draggable="false" title="Redimensionar caixa de texto" ` +
       `style="position:absolute;right:-6px;bottom:-6px;width:14px;height:14px;border-radius:9999px;background:#7c3aed;` +
-      `border:2px solid #fff;cursor:nwse-resize;"></span></div>`;
+      `border:2px solid #fff;cursor:nwse-resize;touch-action:none;user-select:none;"></span></div>`;
     document.execCommand("insertHTML", false, html);
+    prepararCaixasTexto();
     salvarRascunhoLocal();
     atualizarContagem();
     setSujo(true);
+  }
+
+  /** Aplica `prepararCaixaTexto` em todas as caixas da folha. */
+  function prepararCaixasTexto() {
+    areaRef.current
+      ?.querySelectorAll<HTMLElement>(".editor-textbox")
+      .forEach((caixa) => prepararCaixaTexto(caixa));
   }
 
   function atualizarPosicaoBarraImagem(wrap: HTMLElement) {
@@ -417,74 +454,94 @@ export function EditorTexto() {
     }
   }
 
-  /** Início do arraste: redimensionar imagem, mover ou redimensionar caixa de texto. */
-  function aoPressionarNaArea(e: ReactMouseEvent<HTMLDivElement>) {
-    const alvo = e.target as HTMLElement;
-
-    const alcaImagem = alvo.closest(".editor-img-handle");
-    if (alcaImagem) {
-      e.preventDefault();
-      const wrap = alcaImagem.closest<HTMLElement>(".editor-img-wrap");
-      const img = wrap?.querySelector("img");
-      if (!img) return;
-      const rect = img.getBoundingClientRect();
-      arrastandoRef.current = {
-        tipo: "imagem",
-        elemento: img,
-        startX: e.clientX,
-        startY: e.clientY,
-        startWidth: rect.width,
-        startHeight: rect.height,
-        startLeft: 0,
-        startTop: 0,
-      };
-      return;
-    }
-
-    const alcaMoverCaixa = alvo.closest(".editor-textbox-handle");
-    if (alcaMoverCaixa) {
-      e.preventDefault();
-      const caixa = alcaMoverCaixa.closest<HTMLElement>(".editor-textbox");
-      if (!caixa) return;
-      arrastandoRef.current = {
-        tipo: "textbox-mover",
-        elemento: caixa,
-        startX: e.clientX,
-        startY: e.clientY,
-        startWidth: 0,
-        startHeight: 0,
-        startLeft: Number.parseFloat(caixa.style.left || "0"),
-        startTop: Number.parseFloat(caixa.style.top || "0"),
-      };
-      return;
-    }
-
-    const alcaRedimensionarCaixa = alvo.closest(".editor-textbox-resize");
-    if (alcaRedimensionarCaixa) {
-      e.preventDefault();
-      const caixa = alcaRedimensionarCaixa.closest<HTMLElement>(".editor-textbox");
-      if (!caixa) return;
-      const rect = caixa.getBoundingClientRect();
-      arrastandoRef.current = {
-        tipo: "textbox-redimensionar",
-        elemento: caixa,
-        startX: e.clientX,
-        startY: e.clientY,
-        startWidth: rect.width,
-        startHeight: rect.height,
-        startLeft: 0,
-        startTop: 0,
-      };
-    }
-  }
-
-  // Escuta o mouse na janela inteira (não só na área de digitação) para que
-  // o arraste continue funcionando mesmo se o cursor sair da folha por um
-  // instante, e termina o arraste quando o botão do mouse é solto.
+  // Arraste das alcinhas (imagem e caixa de texto).
+  //
+  // Os eventos são de *ponteiro* (mouse, dedo ou caneta) e presos direto na
+  // folha com `capture: true`: dentro de um `contenteditable` o navegador
+  // trata o próprio mousedown como início de seleção/arraste nativo do bloco
+  // não-editável, e engolia o evento antes de ele chegar ao React — por isso
+  // a alcinha parecia "morta". Com a captura do ponteiro o arraste também
+  // continua quando o cursor sai da folha, e funciona no touch.
   useEffect(() => {
-    function aoMoverMouse(e: MouseEvent) {
+    const area = areaRef.current;
+    if (!area) return;
+
+    function iniciarArraste(e: PointerEvent) {
+      const alvo = e.target as HTMLElement | null;
+      if (!alvo) return;
+
+      const alcaImagem = alvo.closest(".editor-img-handle");
+      const alcaMoverCaixa = alvo.closest(".editor-textbox-handle");
+      const alcaRedimensionarCaixa = alvo.closest(".editor-textbox-resize");
+      if (!alcaImagem && !alcaMoverCaixa && !alcaRedimensionarCaixa) return;
+
+      // Impede a seleção de texto e o drag-and-drop nativo do bloco.
+      e.preventDefault();
+      e.stopPropagation();
+
+      const base = {
+        ponteiro: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+      };
+
+      if (alcaImagem) {
+        const img = alcaImagem.closest(".editor-img-wrap")?.querySelector("img");
+        if (!img) return;
+        const rect = img.getBoundingClientRect();
+        arrastandoRef.current = {
+          ...base,
+          tipo: "imagem",
+          elemento: img,
+          startWidth: rect.width,
+          startHeight: rect.height,
+          startLeft: 0,
+          startTop: 0,
+        };
+      } else if (alcaMoverCaixa) {
+        const caixa = alcaMoverCaixa.closest<HTMLElement>(".editor-textbox");
+        if (!caixa) return;
+        prepararCaixaTexto(caixa);
+        arrastandoRef.current = {
+          ...base,
+          tipo: "textbox-mover",
+          elemento: caixa,
+          startWidth: 0,
+          startHeight: 0,
+          // `offsetLeft/offsetTop` já é a posição real dentro da folha, então
+          // a caixa não "pula" para o canto quando o style.left vem vazio ou
+          // em outra unidade (era o que zerava o arraste antes).
+          startLeft: caixa.offsetLeft,
+          startTop: caixa.offsetTop,
+        };
+      } else if (alcaRedimensionarCaixa) {
+        const caixa = alcaRedimensionarCaixa.closest<HTMLElement>(".editor-textbox");
+        if (!caixa) return;
+        prepararCaixaTexto(caixa);
+        const rect = caixa.getBoundingClientRect();
+        arrastandoRef.current = {
+          ...base,
+          tipo: "textbox-redimensionar",
+          elemento: caixa,
+          startWidth: rect.width,
+          startHeight: rect.height,
+          startLeft: 0,
+          startTop: 0,
+        };
+      }
+
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        // Navegador sem captura de ponteiro: os listeners de window abaixo
+        // dão conta do recado sozinhos.
+      }
+    }
+
+    function aoMoverPonteiro(e: PointerEvent) {
       const estado = arrastandoRef.current;
-      if (!estado) return;
+      if (!estado || e.pointerId !== estado.ponteiro) return;
+      e.preventDefault();
       const dx = e.clientX - estado.startX;
       const dy = e.clientY - estado.startY;
 
@@ -502,19 +559,33 @@ export function EditorTexto() {
       }
     }
 
-    function aoSoltarMouse() {
-      if (!arrastandoRef.current) return;
+    function aoSoltarPonteiro(e: PointerEvent) {
+      const estado = arrastandoRef.current;
+      if (!estado || e.pointerId !== estado.ponteiro) return;
       arrastandoRef.current = null;
       salvarRascunhoLocal();
       atualizarContagem();
       setSujo(true);
     }
 
-    window.addEventListener("mousemove", aoMoverMouse);
-    window.addEventListener("mouseup", aoSoltarMouse);
+    // O navegador ainda pode tentar arrastar a imagem/caixa como um objeto;
+    // aqui esse arraste nativo é barrado de vez.
+    function barrarArrasteNativo(e: DragEvent) {
+      const alvo = e.target as HTMLElement | null;
+      if (alvo?.closest(".editor-textbox, .editor-img-wrap")) e.preventDefault();
+    }
+
+    area.addEventListener("pointerdown", iniciarArraste, { capture: true });
+    area.addEventListener("dragstart", barrarArrasteNativo);
+    window.addEventListener("pointermove", aoMoverPonteiro);
+    window.addEventListener("pointerup", aoSoltarPonteiro);
+    window.addEventListener("pointercancel", aoSoltarPonteiro);
     return () => {
-      window.removeEventListener("mousemove", aoMoverMouse);
-      window.removeEventListener("mouseup", aoSoltarMouse);
+      area.removeEventListener("pointerdown", iniciarArraste, { capture: true });
+      area.removeEventListener("dragstart", barrarArrasteNativo);
+      window.removeEventListener("pointermove", aoMoverPonteiro);
+      window.removeEventListener("pointerup", aoSoltarPonteiro);
+      window.removeEventListener("pointercancel", aoSoltarPonteiro);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -611,6 +682,7 @@ export function EditorTexto() {
     const salvo = localStorage.getItem(CHAVE_RASCUNHO);
     if (salvo && areaRef.current) {
       areaRef.current.innerHTML = salvo;
+      prepararCaixasTexto();
       atualizarContagem();
       setSujo(true);
     }
@@ -746,6 +818,7 @@ export function EditorTexto() {
         return;
       }
       areaRef.current.innerHTML = arquivo.conteudoHtml;
+      prepararCaixasTexto();
       setArquivoAtualId(arquivo.id);
       setTitulo(arquivo.titulo);
       atualizarContagem();
@@ -1161,7 +1234,6 @@ export function EditorTexto() {
             onMouseUp={salvarSelecaoAtual}
             onKeyUp={salvarSelecaoAtual}
             onClick={aoClicarNaArea}
-            onMouseDown={aoPressionarNaArea}
             className="relative mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mb-3 [&_p]:mt-0 [&_p]:indent-[1.25cm]"
             style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
             suppressContentEditableWarning
