@@ -639,13 +639,15 @@ function ProgramacaoSemanalDestaque() {
       ),
     [turmas, config, dataDoDia],
   );
-  const assignmentsDoDia = useMemo(
-    () =>
-      nextAssignmentsForDay(assignments, diaSelecionado).filter(
-        (a) => !config.suspensoes?.[suspensaoKey(toDateKey(dataDoDia), a.dia, a.slot.inicio)],
-      ),
-    [assignments, diaSelecionado, config.suspensoes, dataDoDia],
-  );
+  const assignmentsDoDia = useMemo(() => {
+    // Reposições marcadas para o dia entram no lugar do horário cedido.
+    const reposicoes = reprogramacoesParaData(turmas, config, dataDoDia);
+    return nextAssignmentsForDay([...reposicoes, ...assignments], diaSelecionado).filter(
+      (a) =>
+        reposicoes.includes(a) ||
+        !config.suspensoes?.[suspensaoKey(toDateKey(dataDoDia), a.dia, a.slot.inicio)],
+    );
+  }, [turmas, config, assignments, diaSelecionado, dataDoDia]);
   const dataFormatada = useMemo(() => {
     if (!todayLabel) return "";
     return dataDoDia.toLocaleDateString("pt-BR", {

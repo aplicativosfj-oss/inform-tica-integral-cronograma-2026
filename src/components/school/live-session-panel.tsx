@@ -61,6 +61,7 @@ import {
 import {
   fetchPresencasDoDia,
   fetchUltimaParticipacao,
+  desfazerFalta,
   marcarFalta,
   registrarPresencasIniciais,
 } from "@/lib/presencas";
@@ -236,9 +237,9 @@ function useChamadaDoDia(
     substitutoEscolhido?: Aluno | null,
   ) {
     if (!turma || !presencas || !ultimaParticipacao) return null;
-    const jaChamadosHojeIds = new Set(
-      presencas.filter((p) => p.status !== "faltou").map((p) => p.alunoId),
-    );
+    // Quem já está na chamada de hoje — inclusive quem faltou — não pode ser
+    // chamado de novo como substituto: evita o mesmo aluno duas vezes no dia.
+    const jaChamadosHojeIds = new Set(presencas.map((p) => p.alunoId));
     const substituto =
       substitutoEscolhido !== undefined
         ? substitutoEscolhido
@@ -256,7 +257,13 @@ function useChamadaDoDia(
     return substituto;
   }
 
-  return { presencas, marcarFaltaDoAluno, candidatosASubstituto };
+  async function desfazerFaltaDoAluno(alunoId: string) {
+    if (!turma) return;
+    await desfazerFalta(turma.id, dateKey, alunoId);
+    setPresencas(await fetchPresencasDoDia(turma.id, dateKey));
+  }
+
+  return { presencas, marcarFaltaDoAluno, candidatosASubstituto, desfazerFaltaDoAluno };
 }
 
 type Chamada = ReturnType<typeof useChamadaDoDia>;
@@ -387,8 +394,10 @@ function ImpedirDialog({
   open,
   onOpenChange,
   onConfirmar,
+  soHoje = false,
 }: {
   aluno: Aluno;
+  soHoje?: boolean;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onConfirmar: (motivo: string) => Promise<void>;
@@ -408,9 +417,19 @@ function ImpedirDialog({
         <DialogHeader>
           <DialogTitle>Impedir {aluno.nome} de participar?</DialogTitle>
           <DialogDescription>
-            Use quando o(a) professor(a) regente indicar que o aluno não pode participar (ex.: não
-            cumpriu as tarefas). O próximo da fila entra no lugar, e {aluno.nome} fica fora do
-            rodízio até ser liberado(a) na página da turma.
+            {soHoje ? (
+              <>
+                Vale só para a aula de hoje: o próximo da fila entra no lugar, e {aluno.nome}{" "}
+                continua com prioridade para a próxima aula. Para afastar por mais dias, fale com a
+                coordenação.
+              </>
+            ) : (
+              <>
+                Use quando o(a) professor(a) regente indicar que o aluno não pode participar (ex.:
+                não cumpriu as tarefas). O próximo da fila entra no lugar, e {aluno.nome} fica fora
+                do rodízio até ser liberado(a) na página da turma.
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-1.5">
@@ -488,6 +507,7 @@ function AcoesAluno({
   chamada: Chamada;
 }) {
   const { updateAluno } = useAppStore();
+  const { isAuthenticated: admin } = useAuth();
   const confirmar = useConfirmar();
   const [substituirAberto, setSubstituirAberto] = useState(false);
   const [impedirAberto, setImpedirAberto] = useState(false);
@@ -565,11 +585,16 @@ function AcoesAluno({
         aluno={aluno}
         open={impedirAberto}
         onOpenChange={setImpedirAberto}
+        soHoje={!admin}
         onConfirmar={async (motivo) => {
-          updateAluno(turma.id, aluno.id, {
-            impedido: true,
-            motivoImpedimento: motivo || undefined,
-          });
+          // O impedimento permanente fica no cadastro, que só a coordenação
+          // grava. Com o PIN do professor, vale só para a aula de hoje.
+          if (admin) {
+            updateAluno(turma.id, aluno.id, {
+              impedido: true,
+              motivoImpedimento: motivo || undefined,
+            });
+          }
           await registrar("limitacao");
         }}
       />
@@ -625,6 +650,95 @@ function ListaAlunos({
         );
       })}
     </ul>
+  );
+}
+
+/**
+ * Resumo do que já foi alterado hoje na chamada (faltas, impedimentos e
+ * substituições), com "Desfazer" para corrigir um toque errado. Para o
+ * professor regente, traz também as regras de uso, para a programação não
+ * virar bagunça.
+ */
+function RegistrosDoDia({
+  presencas,
+  mostrarGuia,
+  onDesfazer,
+}: {
+  presencas: Presenca[];
+  mostrarGuia: boolean;
+  onDesfazer: (alunoId: string, nome: string) => void;
+}) {
+  const faltas = presencas.filter((p) => p.status === "faltou");
+  const substitutoDe = (alunoId: string) =>
+    presencas.find((p) => p.status === "substituido" && p.substitutoDeAlunoId === alunoId);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {mostrarGuia ? (
+        <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 p-3 text-xs text-muted-foreground">
+          <p className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            <BookOpen className="size-4 text-sky-600 dark:text-sky-300" /> Como registrar sem
+            bagunçar a programação
+          </p>
+          <ul className="list-disc space-y-0.5 pl-4">
+            <li>
+              <strong className="text-foreground">Ausente</strong>: o sistema chama sozinho quem
+              está há mais tempo sem vir. Use{" "}
+              <strong className="text-foreground">Substituir</strong> só se precisar escolher outro
+              aluno.
+            </li>
+            <li>
+              Quem falta ou é impedido <strong className="text-foreground">não perde a vez</strong>:
+              volta primeiro na próxima aula. Não é preciso reprogramar ninguém.
+            </li>
+            <li>
+              Um aluno <strong className="text-foreground">nunca entra duas vezes</strong> no mesmo
+              dia: quem já está na chamada (ou faltou) não aparece como substituto.
+            </li>
+            <li>
+              Registrou errado? Use <strong className="text-foreground">Desfazer</strong> abaixo.
+              Mudanças maiores (turma inteira, outro dia): fale com a coordenação.
+            </li>
+          </ul>
+        </div>
+      ) : null}
+
+      {faltas.length > 0 ? (
+        <div className="overflow-hidden rounded-xl border border-border/60 bg-background/40">
+          <p className="border-b border-border/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Alterações de hoje ({faltas.length})
+          </p>
+          <ul className="divide-y divide-border/50">
+            {faltas.map((f) => {
+              const sub = substitutoDe(f.alunoId);
+              return (
+                <li key={f.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-foreground">
+                      <span className="text-muted-foreground line-through">{f.alunoNome}</span>{" "}
+                      <span className="text-xs text-rose-700 dark:text-rose-300">
+                        · {ROTULO_MOTIVO[(f.motivo as MotivoFalta) ?? "ausente"] ?? "Ausente"}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {sub ? `Substituído(a) por ${sub.alunoNome}` : "Sem substituto"}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="shrink-0 text-xs"
+                    onClick={() => onDesfazer(f.alunoId, f.alunoNome)}
+                  >
+                    Desfazer
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -1166,6 +1280,27 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               )}
             </section>
           </div>
+
+          {podeGerenciar && chamada.presencas ? (
+            <RegistrosDoDia
+              presencas={chamada.presencas}
+              mostrarGuia={professorLiberado && !isAuthenticated}
+              onDesfazer={async (alunoId, nome) => {
+                const ok = await confirmar({
+                  titulo: `Desfazer o registro de ${nome}?`,
+                  descricao:
+                    "O aluno volta para a chamada como presente e o substituto chamado no lugar dele (se houver) sai da lista de hoje.",
+                });
+                if (!ok) return;
+                try {
+                  await chamada.desfazerFaltaDoAluno(alunoId);
+                  toast.success("Registro desfeito.");
+                } catch (err) {
+                  toast.error(`Não foi possível desfazer: ${(err as Error).message}`);
+                }
+              }}
+            />
+          ) : null}
 
           {!podeEditar && !assignment.misto ? (
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">

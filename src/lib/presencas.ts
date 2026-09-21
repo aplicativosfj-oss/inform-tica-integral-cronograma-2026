@@ -317,3 +317,36 @@ export async function fetchPresencasRange(
     throw err;
   }
 }
+
+/**
+ * Desfaz uma falta registrada por engano: o aluno volta a "presente" e o
+ * substituto que entrou no lugar dele sai da chamada do dia.
+ */
+export async function desfazerFalta(turmaId: string, data: string, alunoId: string): Promise<void> {
+  const senha = await senhaParaRpc(turmaId);
+  if (senha) {
+    const { error } = await supabase.rpc("professor_desfazer_falta", {
+      p_turma_id: turmaId,
+      p_senha: senha,
+      p_data: data,
+      p_aluno_id: alunoId,
+    });
+    if (error) throw error;
+    return;
+  }
+  const { error: e1 } = await supabase
+    .from("presencas")
+    .update({ status: "presente", motivo: null })
+    .eq("turma_id", turmaId)
+    .eq("data", data)
+    .eq("aluno_id", alunoId)
+    .eq("status", "faltou");
+  if (e1) throw e1;
+  const { error: e2 } = await supabase
+    .from("presencas")
+    .delete()
+    .eq("turma_id", turmaId)
+    .eq("data", data)
+    .eq("substituto_de_aluno_id", alunoId);
+  if (e2) throw e2;
+}
