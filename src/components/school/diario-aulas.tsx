@@ -3,6 +3,7 @@ import {
   CalendarClock,
   CalendarX2,
   CircleDashed,
+  MonitorPlay,
   MessageSquareText,
   NotebookPen,
   Repeat2,
@@ -28,12 +29,25 @@ import { paginar } from "@/lib/paginar";
 import { cn } from "@/lib/utils";
 
 type Situacao =
-  "realizada" | "reposicao" | "reprogramada" | "cedida" | "suspensa" | "prevista" | "sem-registro";
+  | "andamento"
+  | "realizada"
+  | "reposicao"
+  | "reprogramada"
+  | "cedida"
+  | "suspensa"
+  | "prevista"
+  | "sem-registro";
 
 const SITUACOES: Record<
   Situacao,
   { rotulo: string; classe: string; icone: typeof CalendarCheck2 }
 > = {
+  andamento: {
+    rotulo: "Em andamento agora",
+    classe:
+      "bg-emerald-500 text-white ring-emerald-400 animate-pulse shadow-sm shadow-emerald-500/40",
+    icone: MonitorPlay,
+  },
   realizada: {
     rotulo: "Realizada",
     classe: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 ring-emerald-500/30",
@@ -197,6 +211,8 @@ function montarDiario(
           const motivo = config.motivosSuspensao?.[chave];
           detalhes.push(motivo ? `Motivo: ${motivo}` : "Aula suspensa pela coordenação.");
         }
+      } else if (dataKey === hojeKey && a.slot.inicio <= agoraHHMM && agoraHHMM < a.slot.fim) {
+        situacao = "andamento";
       } else if (presencas.length > 0) {
         situacao = "realizada";
       } else if (dataKey === hojeKey && a.slot.fim > agoraHHMM) {
@@ -349,6 +365,7 @@ export function DiarioAulas({ registros, mes }: { registros: Presenca[] | null; 
                               </span>
                             </div>
                             {r.situacao === "realizada" ||
+                            (r.situacao === "andamento" && r.presentes + r.faltas > 0) ||
                             (r.situacao === "reposicao" && r.presentes + r.faltas > 0) ? (
                               <p className="mt-0.5 text-xs text-muted-foreground">
                                 {r.presentes}{" "}

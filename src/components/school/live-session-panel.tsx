@@ -922,20 +922,24 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     "Nenhum conteúdo cadastrado.";
 
   return (
-    <Card className="overflow-hidden border-primary/25 bg-card/90 shadow-xl shadow-black/10">
-      {/* Cabeçalho: título à esquerda, ações à direita — quebra limpo no celular. */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-3 sm:px-5">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="relative flex size-2.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-rose-500 opacity-75" />
-            <span className="relative inline-flex size-2.5 rounded-full bg-rose-500" />
+    <Card className="overflow-hidden border-emerald-500/40 bg-card/90 shadow-xl shadow-emerald-950/20 ring-1 ring-emerald-500/20">
+      {/* Cabeçalho verde "ao vivo": o público identifica de longe que há aula
+          agora e qual turma está no laboratório. */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 px-4 py-3 text-white sm:px-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-black/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider">
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex size-2 rounded-full bg-white" />
+            </span>
+            Ao vivo
           </span>
-          <MonitorPlay className="size-5 text-primary" />
-          <h2 className="text-base font-semibold text-foreground">Aula em andamento</h2>
+          <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight">
+            <MonitorPlay className="size-5" /> {turmaAtual.serie} &ldquo;{turmaAtual.letra}&rdquo;
+            está no laboratório
+          </h2>
           {assignment.misto ? (
-            <Badge variant="outline" className="text-xs">
-              horário misto
-            </Badge>
+            <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">horário misto</span>
           ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">

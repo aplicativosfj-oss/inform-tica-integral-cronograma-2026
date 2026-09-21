@@ -26,6 +26,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { FaixaAulaAgora } from "@/components/school/faixa-aula-agora";
 import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
 import { ShareButton } from "@/components/school/share-button";
 import { ThemeToggle } from "@/components/school/theme-toggle";
@@ -198,7 +199,8 @@ export function NavBar() {
               Textos curtos e sem quebra, para caberem inteiros em qualquer tela. */}
           <span className="flex min-w-0 flex-col justify-center gap-0.5 border-l border-slate-300/70 pl-2.5 dark:border-white/15">
             <span className="whitespace-nowrap text-[13px] font-bold leading-none tracking-tight text-slate-900 dark:text-white sm:text-[15px]">
-              Agenda <span className="font-medium text-blue-600 dark:text-blue-400">de Informática</span>
+              Agenda{" "}
+              <span className="font-medium text-blue-600 dark:text-blue-400">de Informática</span>
             </span>
             <span className="whitespace-nowrap text-[9.5px] font-semibold uppercase leading-none tracking-[0.12em] text-slate-500 dark:text-white/60 sm:text-[10.5px]">
               <span className="sm:hidden">E.M. Dr. Eiraldo</span>
@@ -367,6 +369,7 @@ export function NavBar() {
           </Sheet>
         </nav>
       </div>
+      <FaixaAulaAgora />
     </header>
   );
 }

@@ -316,7 +316,9 @@ function Index() {
         {/* Aula ao vivo em destaque, na largura toda; clima e próximas turmas
             logo abaixo, lado a lado — cada bloco com espaço para respirar. */}
         <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
-          <LiveSessionPanel />
+          <div id="aula-ao-vivo" className="scroll-mt-28">
+            <LiveSessionPanel />
+          </div>
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:items-start">
             <WeatherWidget />
             <ProximasTurmasPanel />
