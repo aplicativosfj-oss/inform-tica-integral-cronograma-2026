@@ -39,6 +39,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AtendimentoApoio } from "@/components/school/atendimento-apoio";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { ImageUploadField } from "@/components/school/image-upload-field";
 import { useAppStore } from "@/lib/app-store";
@@ -330,25 +331,7 @@ function TurmaAlunosPage() {
         </CardContent>
       </Card>
 
-      {turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (
-        <Card className="mb-6 border-primary/30 bg-primary/5">
-          <CardContent className="flex flex-col gap-2 py-4">
-            <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-              <HeartHandshake className="size-4 text-primary" /> Apoio especializado desta turma
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {turma.apoioEspecial.map((apoio, index) => (
-                <Badge key={index} variant="outline" className="font-normal">
-                  {apoio.funcao} {apoio.nome}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Marque abaixo o(s) aluno(s) atendido(s) para orientar as atividades de informática.
-            </p>
-          </CardContent>
-        </Card>
-      ) : null}
+      <AtendimentoApoio turma={turma} />
 
       <div className="flex flex-col gap-3">
         {grupos.map((grupo) => (

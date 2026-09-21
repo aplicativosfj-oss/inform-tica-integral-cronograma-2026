@@ -192,6 +192,7 @@ function MediadorPainel() {
 
   const cor = serieClasses(serieIndexPorNumero(turma.serie));
   const criancas = alunosDoApoio(turma, indice);
+  const temDivisaoDefinida = (apoio.alunosIds?.length ?? 0) > 0;
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -282,8 +283,9 @@ function MediadorPainel() {
             Crianças que você acompanha
           </h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            O sistema identifica, no cadastro da escola, os alunos desta turma com atendimento
-            especializado e divide entre os profissionais de apoio da turma.
+            {temDivisaoDefinida
+              ? "Divisão definida pela coordenação da escola, no cadastro da turma."
+              : "A coordenação ainda não registrou quem acompanha quem, então o sistema dividiu as crianças com atendimento especializado entre os profissionais da turma. Peça o ajuste à coordenação se não for essa a divisão combinada."}
           </p>
 
           {criancas.length === 0 ? (
