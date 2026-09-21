@@ -45,7 +45,7 @@ function NavLink({ to, label }: { to: string; label: string }) {
       asChild
       variant="ghost"
       size="sm"
-      className={`relative hidden transition-all duration-300 sm:inline-flex ${
+      className={`relative hidden whitespace-nowrap px-2.5 transition-all duration-300 xl:inline-flex ${
         isActive
           ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
           : "text-slate-700 hover:text-white hover:bg-blue-500 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
@@ -187,8 +187,8 @@ export function NavBar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-background/75 dark:text-white dark:shadow-black/20">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-1.5 px-3 sm:h-14 sm:gap-2 sm:px-6">
-        <Link to="/" className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+      <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-3 sm:gap-4 sm:px-6">
+        <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
           <img
             src={logoIcon}
             alt="Agenda de Informática .Online"
@@ -207,7 +207,7 @@ export function NavBar() {
           </span>
         </Link>
 
-        <nav className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5">
           <NavLink to="/" label="Início" />
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
@@ -257,7 +257,7 @@ export function NavBar() {
                 variant="ghost"
                 size="icon"
                 aria-label="Abrir menu"
-                className="size-10 text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white sm:hidden [&_svg]:size-[22px]"
+                className="size-10 text-slate-700 hover:bg-slate-100/50 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white xl:hidden [&_svg]:size-[22px]"
               >
                 <Menu />
               </Button>
