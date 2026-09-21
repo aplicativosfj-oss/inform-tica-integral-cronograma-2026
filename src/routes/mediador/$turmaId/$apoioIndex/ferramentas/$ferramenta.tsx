@@ -6,30 +6,29 @@ import { Button } from "@/components/ui/button";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
-import { temSessaoDeProfessor } from "@/lib/profissional-session";
 import { encontrarFerramenta } from "@/components/school/ferramentas/registro";
+import { temSessaoDeApoio } from "@/lib/profissional-session";
 
-export const Route = createFileRoute("/professor/$turmaId/ferramentas/$ferramenta")({
-  component: FerramentaProfessorPage,
+export const Route = createFileRoute("/mediador/$turmaId/$apoioIndex/ferramentas/$ferramenta")({
+  component: FerramentaAdaptadaPage,
   head: () => ({
     meta: [
-      { title: "Ferramenta · Espaço do Professor" },
+      { title: "Ferramenta adaptada · Espaço do Mediador e do Cuidador" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
 });
 
-function FerramentaProfessorPage() {
-  const { turmaId, ferramenta } = Route.useParams();
+function FerramentaAdaptadaPage() {
+  const { turmaId, apoioIndex, ferramenta } = Route.useParams();
   const navigate = useNavigate();
-
-  // Ferramenta do professor só abre com a senha já conferida nesta aba.
-  useEffect(() => {
-    if (!temSessaoDeProfessor(turmaId)) navigate({ to: "/professor" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turmaId]);
-
+  const indice = Number(apoioIndex);
   const info = encontrarFerramenta(ferramenta);
+
+  useEffect(() => {
+    if (!temSessaoDeApoio(turmaId, indice)) navigate({ to: "/mediador" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turmaId, indice]);
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -39,11 +38,11 @@ function FerramentaProfessorPage() {
 
         <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
           <Link
-            to="/professor/$turmaId/ferramentas"
-            params={{ turmaId }}
+            to="/mediador/$turmaId/$apoioIndex/ferramentas"
+            params={{ turmaId, apoioIndex }}
             className="mb-4 inline-flex cursor-pointer items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="size-4" /> Todas as ferramentas
+            <ArrowLeft className="size-4" /> Todas as ferramentas adaptadas
           </Link>
 
           {info ? (
@@ -63,7 +62,10 @@ function FerramentaProfessorPage() {
             <div className="py-10 text-center">
               <p className="text-sm text-muted-foreground">Ferramenta não encontrada.</p>
               <Button asChild variant="outline" className="mt-4">
-                <Link to="/professor/$turmaId/ferramentas" params={{ turmaId }}>
+                <Link
+                  to="/mediador/$turmaId/$apoioIndex/ferramentas"
+                  params={{ turmaId, apoioIndex }}
+                >
                   Voltar
                 </Link>
               </Button>

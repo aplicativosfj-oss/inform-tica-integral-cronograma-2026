@@ -6,6 +6,7 @@ import {
   Loader2,
   Pencil,
   Plus,
+  KeyRound,
   ShieldCheck,
   Trash2,
 } from "lucide-react";
@@ -41,6 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { ImageUploadField } from "@/components/school/image-upload-field";
 import { useAppStore } from "@/lib/app-store";
+import { senhaApoio, senhaProfessor } from "@/lib/profissional-acesso";
 import { buildGrupos } from "@/lib/schedule-engine";
 import type { Aluno } from "@/lib/types";
 
@@ -57,6 +59,8 @@ export const Route = createFileRoute("/dashboard/turmas/$turmaId")({
 interface AlunoFormValues {
   nome: string;
   foto?: string | undefined;
+  nascimento?: string | undefined;
+  especialidade?: string | undefined;
   necessidadeEspecial?: boolean | undefined;
   observacoesNecessidade?: string | undefined;
   impedido?: boolean | undefined;
@@ -76,6 +80,8 @@ function AlunoFormDialog({
     ? {
         nome: aluno.nome,
         foto: aluno.foto,
+        nascimento: aluno.nascimento ?? "",
+        especialidade: aluno.especialidade ?? "",
         necessidadeEspecial: aluno.necessidadeEspecial ?? false,
         observacoesNecessidade: aluno.observacoesNecessidade ?? "",
         impedido: aluno.impedido ?? false,
@@ -84,6 +90,8 @@ function AlunoFormDialog({
     : {
         nome: "",
         foto: undefined,
+        nascimento: "",
+        especialidade: "",
         necessidadeEspecial: false,
         observacoesNecessidade: "",
         impedido: false,
@@ -139,6 +147,18 @@ function AlunoFormDialog({
               autoFocus
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="nascimento">Data de nascimento</Label>
+            <Input
+              id="nascimento"
+              type="date"
+              value={values.nascimento ?? ""}
+              onChange={(e) => setValues((v) => ({ ...v, nascimento: e.target.value }))}
+            />
+            <p className="text-xs text-muted-foreground">
+              Vira a idade mostrada ao mediador/cuidador que acompanha a criança.
+            </p>
+          </div>
           <div className="flex items-center gap-2">
             <Checkbox
               id="necessidadeEspecial"
@@ -151,6 +171,17 @@ function AlunoFormDialog({
               Necessita de atendimento especializado (mediador/cuidador)
             </Label>
           </div>
+          {values.necessidadeEspecial ? (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="especialidade">Especialidade do atendimento</Label>
+              <Input
+                id="especialidade"
+                placeholder="Ex: TEA nível 1, deficiência auditiva, síndrome de Down."
+                value={values.especialidade ?? ""}
+                onChange={(e) => setValues((v) => ({ ...v, especialidade: e.target.value }))}
+              />
+            </div>
+          ) : null}
           {values.necessidadeEspecial ? (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="observacoes">Orientações para atividades de informática</Label>
@@ -257,6 +288,47 @@ function TurmaAlunosPage() {
           }
         />
       </div>
+
+      {/* Senhas das áreas profissionais: geradas pelo sistema a partir do
+        nome e da turma, sempre as mesmas. A coordenação lê aqui e entrega a
+        cada profissional — eles não têm onde se cadastrar. */}
+      <Card className="mb-6">
+        <CardContent className="flex flex-col gap-3 py-4">
+          <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <KeyRound className="size-4 text-primary" /> Senhas de acesso desta turma
+          </p>
+          <div className="flex flex-col divide-y divide-border/60">
+            <div className="flex items-center justify-between gap-3 py-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm text-foreground">
+                  Prof(a). {turma.professorRegente}
+                </p>
+                <p className="text-xs text-muted-foreground">Espaço do Professor · /professor</p>
+              </div>
+              <span className="shrink-0 rounded-md bg-muted px-2 py-1 font-mono text-sm tracking-[0.3em] text-foreground">
+                {senhaProfessor(turma)}
+              </span>
+            </div>
+            {(turma.apoioEspecial ?? []).map((apoio, index) => (
+              <div key={index} className="flex items-center justify-between gap-3 py-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-foreground">{apoio.nome}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {apoio.funcao} · Espaço do Mediador · /mediador
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-md bg-muted px-2 py-1 font-mono text-sm tracking-[0.3em] text-foreground">
+                  {senhaApoio(turma, index)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Entregue a senha a cada profissional. Ela separa as áreas de trabalho — não substitui o
+            login do painel administrativo, que é o que protege os dados de verdade.
+          </p>
+        </CardContent>
+      </Card>
 
       {turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (
         <Card className="mb-6 border-primary/30 bg-primary/5">

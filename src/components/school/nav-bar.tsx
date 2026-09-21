@@ -4,12 +4,14 @@ import {
   ChevronRight,
   ClipboardList,
   GraduationCap,
+  HandHeart,
   Home,
   Info,
   LayoutDashboard,
   LogIn,
   LogOut,
   Menu,
+  Presentation,
   Puzzle,
   type LucideIcon,
 } from "lucide-react";
@@ -65,6 +67,8 @@ const LINKS = [
   { to: "/coordenacao", label: "Coordenação" },
   { to: "/infoteca", label: "Infoteca" },
   { to: "/aluno", label: "Área do Aluno" },
+  { to: "/professor", label: "Professor" },
+  { to: "/mediador", label: "Mediadores" },
   { to: "/sobre", label: "Sobre" },
 ] as const;
 
@@ -74,6 +78,8 @@ const LINK_ICONS: Record<string, LucideIcon> = {
   "/coordenacao": ClipboardList,
   "/infoteca": Puzzle,
   "/aluno": GraduationCap,
+  "/professor": Presentation,
+  "/mediador": HandHeart,
   "/sobre": Info,
 };
 
@@ -136,7 +142,9 @@ export function NavBar() {
               )}
               <span className="flex min-w-0 flex-col leading-tight">
                 <span className="truncate text-[13px] font-semibold text-slate-900 dark:text-white sm:text-sm">
-                  {sessaoAluno ? sessaoAluno.nome.split(" ").slice(0, 2).join(" ") : "Área do Aluno"}
+                  {sessaoAluno
+                    ? sessaoAluno.nome.split(" ").slice(0, 2).join(" ")
+                    : "Área do Aluno"}
                 </span>
                 <span className="truncate text-xs text-slate-600 dark:text-white/70">
                   {turma ? `${turma.serie} "${turma.letra}"` : "Escola Dr. Eiraldo Carneiro"}

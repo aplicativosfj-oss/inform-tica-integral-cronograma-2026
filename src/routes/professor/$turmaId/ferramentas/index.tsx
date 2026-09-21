@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
+import { temSessaoDeProfessor } from "@/lib/profissional-session";
 import { FERRAMENTAS, type FerramentaInfo } from "@/components/school/ferramentas/registro";
 
 export const Route = createFileRoute("/professor/$turmaId/ferramentas/")({
@@ -25,6 +27,13 @@ const CATEGORIAS = [
 
 function FerramentasProfessor() {
   const { turmaId } = Route.useParams();
+  const navigate = useNavigate();
+
+  // Ferramenta do professor só abre com a senha já conferida nesta aba.
+  useEffect(() => {
+    if (!temSessaoDeProfessor(turmaId)) navigate({ to: "/professor" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turmaId]);
 
   return (
     <div className="relative min-h-screen bg-background">

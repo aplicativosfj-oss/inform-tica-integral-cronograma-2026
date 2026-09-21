@@ -1,10 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Ban,
   CalendarDays,
+  ChevronRight,
   ExternalLink,
   HeartHandshake,
+  LogOut,
+  Presentation,
   Sparkles,
   UserX,
   Users2,
@@ -14,13 +17,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { HeroProfissional } from "@/components/school/hero-profissional";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
 import { FERRAMENTAS } from "@/components/school/ferramentas/registro";
 import { useAppStore } from "@/lib/app-store";
 import { fetchAtividadesDaTurma } from "@/lib/aluno-area";
+import { useConfirmar } from "@/lib/confirm-store";
 import { fetchPresencasRange } from "@/lib/presencas";
+import { encerrarProfissionalSessao, temSessaoDeProfessor } from "@/lib/profissional-session";
 import { buildGrupos } from "@/lib/schedule-engine";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, Presenca } from "@/lib/types";
@@ -49,11 +55,19 @@ function fimDoMes(hoje: Date): string {
 function ProfessorPainel() {
   const { turmaId } = Route.useParams();
   const { turmas, config } = useAppStore();
+  const navigate = useNavigate();
+  const confirmar = useConfirmar();
   const turma = turmas.find((t) => t.id === turmaId);
 
   const [presencas, setPresencas] = useState<Presenca[]>([]);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [carregando, setCarregando] = useState(true);
+
+  // Sem a senha conferida nesta aba, a página volta para a escolha da turma.
+  useEffect(() => {
+    if (!temSessaoDeProfessor(turmaId)) navigate({ to: "/professor" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turmaId]);
 
   useEffect(() => {
     let cancelado = false;
@@ -94,6 +108,16 @@ function ProfessorPainel() {
     return mapa;
   }, [presencas]);
 
+  async function sair() {
+    const ok = await confirmar({
+      titulo: "Sair do Espaço do Professor?",
+      descricao: "Você vai precisar da sua senha de novo para entrar.",
+    });
+    if (!ok) return;
+    encerrarProfissionalSessao();
+    navigate({ to: "/professor" });
+  }
+
   if (!turma) {
     return (
       <div className="relative min-h-screen bg-background">
@@ -131,54 +155,36 @@ function ProfessorPainel() {
             <ArrowLeft className="size-4" /> Trocar de turma
           </Link>
 
-          <div className="flex items-center gap-3">
-            <span
-              className={`flex size-12 items-center justify-center rounded-xl text-lg font-bold ${cor.bg} ${cor.text}`}
-            >
-              {turma.letra}
-            </span>
-            <div className="min-w-0">
-              <h1 className="truncate text-xl font-semibold text-foreground">
-                {turma.serie} &quot;{turma.letra}&quot;
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Prof(a). {turma.professorRegente} · {turma.alunos.length} alunos
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-3 gap-2.5">
-            <Card>
-              <CardContent className="flex flex-col items-center gap-1 p-3 text-center">
-                <Users2 className="size-4 text-primary" />
-                <p className="text-[11px] text-muted-foreground">Grupos</p>
-                <p className="text-sm font-semibold text-foreground">{grupos.length}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex flex-col items-center gap-1 p-3 text-center">
-                <UserX className="size-4 text-destructive" />
-                <p className="text-[11px] text-muted-foreground">Faltas no mês</p>
-                <p className="text-sm font-semibold text-foreground">
-                  {carregando ? "..." : totalFaltasMes}
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex flex-col items-center gap-1 p-3 text-center">
-                <CalendarDays className="size-4 text-blue-600 dark:text-blue-400" />
-                <p className="text-[11px] text-muted-foreground">Atividades</p>
-                <p className="text-sm font-semibold text-foreground">
-                  {carregando ? "..." : atividades.length}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <HeroProfissional
+            etiqueta="Espaço do Professor"
+            EtiquetaIcon={Presentation}
+            titulo={`${turma.serie} "${turma.letra}" · Prof(a). ${turma.professorRegente}`}
+            subtitulo="Acompanhe a turma no dia a dia da informática: quem está em cada grupo do rodízio, como anda a frequência do mês e o que cada aluno já fez das atividades."
+            indicadores={[
+              { rotulo: "Alunos", valor: turma.alunos.length, icon: Users2 },
+              { rotulo: "Grupos", valor: grupos.length, icon: Users2 },
+              {
+                rotulo: "Faltas no mês",
+                valor: carregando ? "..." : totalFaltasMes,
+                icon: UserX,
+              },
+              {
+                rotulo: "Atividades",
+                valor: carregando ? "..." : atividades.length,
+                icon: CalendarDays,
+              },
+            ]}
+            acoes={
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={sair}>
+                <LogOut className="size-4" /> Sair
+              </Button>
+            }
+          />
 
           <Link
             to="/professor/$turmaId/ferramentas"
             params={{ turmaId }}
-            className="group mt-4 flex cursor-pointer items-center gap-4 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
+            className="group mt-4 flex cursor-pointer items-center gap-4 rounded-2xl border border-primary/30 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
           >
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
               <Sparkles className="size-5" />
@@ -188,8 +194,8 @@ function ProfessorPainel() {
                 Ferramentas de trabalho
               </p>
               <p className="text-xs text-muted-foreground sm:text-sm">
-                As mesmas {FERRAMENTAS.length} ferramentas da Área do Aluno, para preparar e conduzir
-                a aula.
+                As mesmas {FERRAMENTAS.length} ferramentas da Área do Aluno, para preparar e
+                conduzir a aula.
               </p>
             </div>
             <span className="hidden shrink-0 text-sm font-medium text-primary group-hover:underline sm:block">
@@ -226,7 +232,10 @@ function ProfessorPainel() {
             </Card>
           ) : null}
 
-          <h2 className="mb-3 mt-8 text-lg font-semibold text-foreground">Grupos e alunos</h2>
+          <h2 className="mb-1 mt-8 text-lg font-semibold text-foreground">Grupos e alunos</h2>
+          <p className="mb-3 text-sm text-muted-foreground">
+            Clique em um aluno para ver o painel dele: atividades, presenças e últimos acessos.
+          </p>
           <div className="flex flex-col gap-3">
             {grupos.map((grupo) => (
               <Card key={grupo.indice}>
@@ -241,12 +250,14 @@ function ProfessorPainel() {
                       {grupo.alunos.map((aluno) => {
                         const resumo = resumoPorAluno.get(aluno.id);
                         return (
-                          <div
+                          <Link
                             key={aluno.id}
-                            className="flex items-center justify-between gap-3 py-2"
+                            to="/professor/$turmaId/aluno/$alunoId"
+                            params={{ turmaId, alunoId: aluno.id }}
+                            className="group flex cursor-pointer items-center justify-between gap-3 py-2 transition-colors hover:text-primary"
                           >
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-foreground">
+                              <p className="truncate text-sm font-medium text-foreground group-hover:text-primary">
                                 {aluno.nome}
                               </p>
                               {aluno.necessidadeEspecial ? (
@@ -264,12 +275,13 @@ function ProfessorPainel() {
                                 </span>
                               ) : null}
                             </div>
-                            <span className="shrink-0 text-xs text-muted-foreground">
+                            <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
                               {carregando
                                 ? "..."
                                 : `${resumo?.presencas ?? 0} presenças · ${resumo?.faltas ?? 0} faltas`}
+                              <ChevronRight className="size-4 group-hover:text-primary" />
                             </span>
-                          </div>
+                          </Link>
                         );
                       })}
                     </div>
@@ -312,6 +324,11 @@ function ProfessorPainel() {
               ))}
             </div>
           )}
+
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            Turma {turma.serie} &quot;{turma.letra}&quot; ·{" "}
+            <span className={`rounded px-1.5 py-0.5 ${cor.bg} ${cor.text}`}>{turma.letra}</span>
+          </p>
         </section>
 
         <SiteFooter />

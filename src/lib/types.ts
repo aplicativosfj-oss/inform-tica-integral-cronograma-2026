@@ -17,12 +17,22 @@ export interface Aluno {
   impedido?: boolean | undefined;
   /** Motivo do impedimento, registrado por quem marcou. */
   motivoImpedimento?: string | undefined;
+  /** Data de nascimento (YYYY-MM-DD) — usada para mostrar a idade no espaço do apoio. */
+  nascimento?: string | undefined;
+  /** Especialidade/laudo do atendimento especializado (ex.: TEA, deficiência auditiva). */
+  especialidade?: string | undefined;
 }
 
 /** Profissional de apoio (mediador/cuidador) designado oficialmente para a turma. */
 export interface ApoioEspecial {
   nome: string;
   funcao: "Mediador(a)" | "Cuidador(a)";
+  /**
+   * Alunos que este profissional acompanha. Quando vazio, o sistema reparte
+   * os alunos com atendimento especializado entre os profissionais da turma
+   * (ver `alunosDoApoio` em profissional-acesso.ts).
+   */
+  alunosIds?: string[] | undefined;
 }
 
 /** Grupo de revezamento cadastrado manualmente pelo administrador. */
