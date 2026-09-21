@@ -137,6 +137,11 @@ function useNow(enabled: boolean) {
   return now;
 }
 
+/** Tira o ponto final para o motivo caber no meio de uma frase. */
+function semPontoFinal(texto: string): string {
+  return texto.replace(/[.s]+$/, "");
+}
+
 /** "08:30" -> 30600 seconds since midnight. */
 function hhmmToSeconds(hhmm: string): number {
   const [h, m] = hhmm.split(":");
@@ -810,7 +815,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
                 <span className="text-white/90">
                   <strong className="font-semibold text-white">{nomeDaTurma(r.turmaId)}</strong> não
                   teve a aula das {r.inicioOriginal}
-                  {r.motivo ? <> — {r.motivo}</> : null}. Reposição:{" "}
+                  {r.motivo ? <> — {semPontoFinal(r.motivo)}</> : null}. Reposição:{" "}
                   <strong className="font-semibold text-cyan-200">
                     {dataCurta(r.dataNova)}, {r.inicio}–{r.fim}
                   </strong>
@@ -847,7 +852,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
             )
             .map((r) => (
               <p key={r.id} className="max-w-lg text-sm text-foreground">
-                {r.motivo ? <>Motivo: {r.motivo}. </> : null}
+                {r.motivo ? <>Motivo: {semPontoFinal(r.motivo)}. </> : null}
                 Reposição em{" "}
                 <strong className="text-primary">
                   {dataCurta(r.dataNova)}, {r.inicio}–{r.fim}
