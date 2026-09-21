@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
+import { Route as AvaliacaoRouteImport } from './routes/avaliacao'
 import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
 import { Route as InfotecaRouteImport } from './routes/infoteca'
 import { Route as LoginRouteImport } from './routes/login'
@@ -57,6 +58,11 @@ const IndexRoute = IndexRouteImport.update({
 const AgendaRoute = AgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvaliacaoRoute = AvaliacaoRouteImport.update({
+  id: '/avaliacao',
+  path: '/avaliacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoordenacaoRoute = CoordenacaoRouteImport.update({
@@ -258,6 +264,7 @@ const MediadorTurmaIdApoioIndexFerramentasFerramentaRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
@@ -341,6 +349,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
+  '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
@@ -384,6 +393,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/agenda'
+    | '/avaliacao'
     | '/coordenacao'
     | '/infoteca'
     | '/login'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/agenda'
+    | '/avaliacao'
     | '/coordenacao'
     | '/infoteca'
     | '/login'
@@ -466,6 +477,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/agenda'
+    | '/avaliacao'
     | '/coordenacao'
     | '/infoteca'
     | '/login'
@@ -508,6 +520,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
+  AvaliacaoRoute: typeof AvaliacaoRoute
   CoordenacaoRoute: typeof CoordenacaoRoute
   InfotecaRoute: typeof InfotecaRoute
   LoginRoute: typeof LoginRoute
@@ -561,6 +574,13 @@ declare module '@tanstack/react-router' {
       path: '/agenda'
       fullPath: '/agenda'
       preLoaderRoute: typeof AgendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avaliacao': {
+      id: '/avaliacao'
+      path: '/avaliacao'
+      fullPath: '/avaliacao'
+      preLoaderRoute: typeof AvaliacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coordenacao': {
@@ -828,6 +848,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
+  AvaliacaoRoute: AvaliacaoRoute,
   CoordenacaoRoute: CoordenacaoRoute,
   InfotecaRoute: InfotecaRoute,
   LoginRoute: LoginRoute,

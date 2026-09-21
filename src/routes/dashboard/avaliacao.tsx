@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, Loader2, Upload } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/school/dashboard-shell";
+import { ObservatorioFrame, versaoPublica } from "@/components/school/observatorio-frame";
 import { supabase } from "@/lib/supabase-client";
-import template from "@/lib/observatorio-template.html?raw";
 
 export const Route = createFileRoute("/dashboard/avaliacao")({
   component: AvaliacaoPage,
@@ -75,12 +75,13 @@ function AvaliacaoPage() {
         toast.error("Arquivo inválido. Escolha o dados.json gerado a partir das planilhas da SEME.");
         return;
       }
-      const { error } = await supabase.from("avaliacao_diagnostica").upsert({
-        id: AVALIACAO_ID,
-        titulo: "II Avaliação Diagnóstica 2026",
-        dados: json,
-        atualizado_em: new Date().toISOString(),
-      });
+      const agora = new Date().toISOString();
+      const titulo = "II Avaliação Diagnóstica 2026";
+      // Grava a versão completa (só gestão) e a versão pública (/avaliacao).
+      const { error } = await supabase.from("avaliacao_diagnostica").upsert([
+        { id: AVALIACAO_ID, titulo, dados: json, atualizado_em: agora },
+        { id: `${AVALIACAO_ID}-publico`, titulo, dados: versaoPublica(json), atualizado_em: agora },
+      ]);
       if (error) {
         toast.error("Não foi possível salvar: " + error.message);
         return;
@@ -95,12 +96,6 @@ function AvaliacaoPage() {
       if (inputRef.current) inputRef.current.value = "";
     }
   }
-
-  const srcDoc = useMemo(() => {
-    if (!dados) return "";
-    const json = JSON.stringify(dados).replace(/</g, "\\u003c");
-    return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0">${template.replace("/*DATA*/", json)}</body></html>`;
-  }, [dados]);
 
   const botaoImportar = (
     <>
@@ -147,10 +142,8 @@ function AvaliacaoPage() {
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
       ) : dados ? (
-        <iframe
-          title="Observatório pedagógico"
-          srcDoc={srcDoc}
-          sandbox="allow-scripts allow-modals"
+        <ObservatorioFrame
+          dados={dados}
           className="h-[calc(100vh-11rem)] min-h-[600px] w-full rounded-xl border border-border bg-background"
         />
       ) : (
