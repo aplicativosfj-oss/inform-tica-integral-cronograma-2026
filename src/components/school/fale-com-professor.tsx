@@ -140,7 +140,7 @@ export function FaleComProfessor({
                     href={linkWhatsApp(a)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-emerald-400"
+                    className="inline-flex items-center gap-1 rounded-full bg-emerald-700 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-emerald-800"
                   >
                     <MessageCircle className="size-3.5" /> WhatsApp
                   </a>
@@ -157,7 +157,7 @@ export function FaleComProfessor({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <Button asChild size="sm" className="bg-emerald-500 text-white hover:bg-emerald-400">
+          <Button asChild size="sm" className="bg-emerald-700 text-white hover:bg-emerald-800">
             <a href={linkWhatsApp()} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="size-4" /> {WHATSAPP_EXIBICAO}
             </a>

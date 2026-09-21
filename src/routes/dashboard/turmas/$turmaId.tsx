@@ -365,7 +365,7 @@ function TurmaAlunosPage() {
                             </span>
                           ) : null}
                           {aluno.impedido ? (
-                            <span className="flex items-center gap-1 text-xs text-amber-600">
+                            <span className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
                               <Ban className="size-3" /> Impedido de participar
                               {aluno.motivoImpedimento ? ` — ${aluno.motivoImpedimento}` : ""}
                             </span>
@@ -377,7 +377,7 @@ function TurmaAlunosPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-emerald-600 hover:text-emerald-600"
+                            className="text-emerald-700 dark:text-emerald-400 hover:text-emerald-600"
                             aria-label={`Liberar participação de ${aluno.nome}`}
                             onClick={() => {
                               updateAluno(turma.id, aluno.id, {

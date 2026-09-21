@@ -42,12 +42,12 @@ export function SessaoAtiva({
       role="status"
       className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 via-card to-card px-4 py-3 shadow-sm"
     >
-      <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-bold text-white ring-2 ring-emerald-500/30">
+      <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-700 to-teal-700 text-sm font-bold text-white ring-2 ring-emerald-500/30">
         {iniciais(nome) || "?"}
         <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-card bg-emerald-400" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:text-emerald-400">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400">
           <ShieldCheck className="size-3.5" /> Sessão ativa · você está conectado(a) como
         </p>
         <p className="truncate text-sm text-foreground">
@@ -60,7 +60,7 @@ export function SessaoAtiva({
           </span>
         </p>
         {aviso ? (
-          <p className="mt-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">{aviso}</p>
+          <p className="mt-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">{aviso}</p>
         ) : null}
       </div>
       {onSair ? (

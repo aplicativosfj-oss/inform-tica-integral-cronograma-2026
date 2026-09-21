@@ -346,7 +346,7 @@ function SubstituirDialog({
                     <span className="truncate font-medium">{c.nome}</span>
                   </span>
                   {i === 0 ? (
-                    <span className="shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                       Na vez
                     </span>
                   ) : null}
@@ -538,7 +538,7 @@ function AcoesAluno({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="text-amber-600 focus:text-amber-600"
+            className="text-amber-700 dark:text-amber-400 focus:text-amber-600"
             onSelect={() => setImpedirAberto(true)}
           >
             <Ban className="size-4" /> Impedir de participar…
@@ -605,7 +605,10 @@ function ListaAlunos({
             </span>
             {destacar ? <HeartHandshake className="size-3.5 shrink-0 text-primary" /> : null}
             {aluno.impedido ? (
-              <Ban className="size-3.5 shrink-0 text-amber-600" aria-label="Impedido" />
+              <Ban
+                className="size-3.5 shrink-0 text-amber-700 dark:text-amber-400"
+                aria-label="Impedido"
+              />
             ) : null}
             {podeGerenciar && chamada ? (
               <AcoesAluno aluno={aluno} grupoIndice={grupoIndice} turma={turma} chamada={chamada} />
@@ -928,7 +931,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   if (rodadaSuspensa?.rodadas.includes(sessao.subBloco.indice + 1)) {
     return (
       <Card className="overflow-hidden border-amber-500/50 shadow-xl shadow-amber-950/20">
-        <div className="flex flex-wrap items-center gap-3 bg-gradient-to-r from-amber-600 via-amber-500 to-orange-500 px-4 py-3 text-white sm:px-5">
+        <div className="flex flex-wrap items-center gap-3 bg-gradient-to-r from-amber-800 via-amber-700 to-orange-700 px-4 py-3 text-white sm:px-5">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-black/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider">
             <CalendarX2 className="size-3.5" /> Rodada suspensa
           </span>
@@ -957,7 +960,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
     <Card className="overflow-hidden border-emerald-500/40 bg-card/90 shadow-xl shadow-emerald-950/20 ring-1 ring-emerald-500/20">
       {/* Cabeçalho verde "ao vivo": o público identifica de longe que há aula
           agora e qual turma está no laboratório. */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 px-4 py-3 text-white sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 px-4 py-3 text-white sm:px-5">
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-black/20 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider">
             <span className="relative flex size-2">
@@ -994,7 +997,7 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           ) : null}
           {isAuthenticated && !assignment.misto ? (
             <SuspenderAulaDialog assignment={assignment} data={now}>
-              <Button size="sm" variant="outline" className="text-amber-600 dark:text-amber-400">
+              <Button size="sm" variant="outline" className="text-amber-700 dark:text-amber-400">
                 <Square className="size-3.5" /> Suspender
               </Button>
             </SuspenderAulaDialog>

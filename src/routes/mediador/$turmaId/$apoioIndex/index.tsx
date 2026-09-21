@@ -244,7 +244,7 @@ function MediadorPainel() {
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-indigo-950/90 to-violet-900/60" />
             <div className="relative flex flex-col gap-6 p-6 sm:p-8">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                <span className="flex size-20 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-fuchsia-500 to-violet-600 text-3xl font-bold tracking-tight shadow-lg ring-4 ring-white/20 sm:size-24 sm:text-4xl">
+                <span className="flex size-20 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-fuchsia-600 to-violet-700 text-3xl font-bold tracking-tight shadow-lg ring-4 ring-white/20 sm:size-24 sm:text-4xl">
                   {iniciais}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -342,7 +342,7 @@ function MediadorPainel() {
               <section>
                 <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fuchsia-500">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-fuchsia-700 dark:text-fuchsia-300">
                       Atendimento especializado
                     </p>
                     <h2 className="text-xl font-bold tracking-tight text-foreground">
@@ -372,7 +372,7 @@ function MediadorPainel() {
                           key={crianca.id}
                           className={`overflow-hidden shadow-lg shadow-fuchsia-900/10 ${emAtendimento ? "border-emerald-500/60 ring-2 ring-emerald-500/40" : "border-fuchsia-500/30"}`}
                         >
-                          <div className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 px-4 py-4 text-white">
+                          <div className="bg-gradient-to-r from-violet-700 via-fuchsia-700 to-rose-700 px-4 py-4 text-white">
                             <div className="flex items-center gap-3">
                               <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-lg font-bold ring-2 ring-white/40">
                                 {crianca.nome
@@ -417,7 +417,7 @@ function MediadorPainel() {
                             </p>
                             <div className="flex flex-wrap gap-2">
                               {emAtendimento ? (
-                                <Badge className="gap-1 bg-emerald-600 font-normal hover:bg-emerald-600">
+                                <Badge className="gap-1 bg-emerald-700 font-normal hover:bg-emerald-700">
                                   <CheckCircle2 className="size-3" /> Atendendo agora
                                 </Badge>
                               ) : (
@@ -437,7 +437,7 @@ function MediadorPainel() {
                               <Button
                                 asChild
                                 size="sm"
-                                className="gap-1.5 bg-violet-600 text-white hover:bg-violet-700"
+                                className="gap-1.5 bg-violet-700 text-white hover:bg-violet-800"
                               >
                                 <Link
                                   to="/mediador/$turmaId/$apoioIndex/relatorio"

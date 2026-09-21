@@ -6,15 +6,15 @@ import { cn } from "@/lib/utils";
 
 const ESTILO: Record<EstadoLaboratorio, { fundo: string; rotulo: string }> = {
   "em-aula": {
-    fundo: "bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500",
+    fundo: "bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700",
     rotulo: "Em aula agora",
   },
   encerrando: {
-    fundo: "bg-gradient-to-r from-amber-600 via-amber-500 to-orange-500",
+    fundo: "bg-gradient-to-r from-amber-800 via-amber-700 to-orange-700",
     rotulo: "Encerrando",
   },
   suspensa: {
-    fundo: "bg-gradient-to-r from-rose-700 via-rose-600 to-pink-600",
+    fundo: "bg-gradient-to-r from-rose-800 via-rose-700 to-pink-700",
     rotulo: "Aula suspensa",
   },
   livre: {

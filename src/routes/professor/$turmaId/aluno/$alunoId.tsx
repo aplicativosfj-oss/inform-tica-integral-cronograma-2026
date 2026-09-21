@@ -292,7 +292,7 @@ function AcompanharAluno() {
                   <Card key={atividade.id}>
                     <CardContent className="flex items-start gap-3 p-4">
                       {feita ? (
-                        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-700 dark:text-emerald-400" />
                       ) : (
                         <Circle className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
                       )}

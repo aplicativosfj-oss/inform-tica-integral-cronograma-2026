@@ -45,7 +45,7 @@ const SITUACOES: Record<
   andamento: {
     rotulo: "Em andamento agora",
     classe:
-      "bg-emerald-500 text-white ring-emerald-400 animate-pulse shadow-sm shadow-emerald-500/40",
+      "bg-emerald-700 text-white ring-emerald-500 animate-pulse shadow-sm shadow-emerald-500/40",
     icone: MonitorPlay,
   },
   realizada: {

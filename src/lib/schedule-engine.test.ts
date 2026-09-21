@@ -302,3 +302,43 @@ describe("encontrarHorariosParaReprogramar", () => {
     expect(opcoes[0]?.slot.inicio).toBe("09:00");
   });
 });
+
+describe("rotacaoHorarios", () => {
+  const turmas = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"].map((id, i) =>
+    makeTurma(id, 20 + i),
+  );
+  const base = makeConfig({
+    horaInicio: "07:30",
+    horaFim: "14:45",
+    intervaloInicio: "11:00",
+    intervaloFim: "13:15",
+    recreioInicio: "09:00",
+    recreioFim: "09:15",
+    duracaoSlotMinutos: 90,
+  });
+  const semana = (config: typeof base, w: number) =>
+    buildWeeklySchedule(turmas, config, getWeekIndex(new Date(2026, 8, 28 + 7 * w)));
+  const posicaoDe = (config: typeof base, w: number, id: string) => {
+    const a = semana(config, w).find(
+      (x) => !x.misto && x.turma.id === id && x.ocorrenciaIndex === 0,
+    )!;
+    return `${a.dia} ${a.slot.inicio}`;
+  };
+
+  test("sem rotação, a turma fica sempre no mesmo horário", () => {
+    expect(posicaoDe(base, 0, "A")).toBe(posicaoDe(base, 3, "A"));
+  });
+
+  test("com rotação, muda de dia e horário e passa pelos dois turnos", () => {
+    const config = { ...base, rotacaoHorarios: { aPartirDe: "2026-09-28" } };
+    // semana do início ainda é igual à grade fixa
+    expect(posicaoDe(config, 0, "J")).toBe(posicaoDe(base, 0, "J"));
+    const posicoes = [1, 2, 3, 4, 5, 6].map((w) => posicaoDe(config, w, "J"));
+    expect(new Set(posicoes).size).toBe(posicoes.length);
+    expect(posicoes.some((p) => p.endsWith("13:15"))).toBe(true);
+    expect(posicoes.some((p) => p.endsWith("07:30") || p.endsWith("09:15"))).toBe(true);
+    // cada turma continua com uma aula principal por semana
+    const s = semana(config, 4).filter((a) => !a.misto && a.ocorrenciaIndex === 0);
+    expect(new Set(s.map((a) => a.turma.id)).size).toBe(turmas.length);
+  });
+});

@@ -277,7 +277,7 @@ function AtividadesDaTurma({ turma }: { turma: ReturnType<typeof useAppStore>["t
                             className="flex items-center gap-2 text-xs text-muted-foreground"
                           >
                             {concluiu ? (
-                              <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                              <CheckCircle2 className="size-3.5 text-emerald-700 dark:text-emerald-400" />
                             ) : (
                               <Circle className="size-3.5" />
                             )}

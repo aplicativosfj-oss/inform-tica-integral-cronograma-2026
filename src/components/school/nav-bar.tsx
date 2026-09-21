@@ -49,7 +49,7 @@ function NavLink({ to, label }: { to: string; label: string }) {
       className={`relative hidden whitespace-nowrap px-2.5 transition-all duration-300 xl:inline-flex ${
         isActive
           ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
-          : "text-slate-700 hover:text-white hover:bg-blue-500 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
+          : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
       }`}
     >
       <Link to={to}>
@@ -247,7 +247,7 @@ export function NavBar() {
             <Button
               asChild
               size="sm"
-              className="hidden bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg sm:inline-flex"
+              className="hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg sm:inline-flex"
             >
               <Link to="/login">Entrar</Link>
             </Button>

@@ -14,7 +14,7 @@ import { Sparkles } from "lucide-react";
  * `className={CLASSES_BARRA_FERRAMENTAS}`.
  */
 export const CLASSES_BARRA_FERRAMENTAS =
-  "group flex cursor-pointer items-center gap-4 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 p-4 text-white shadow-lg shadow-fuchsia-500/20 ring-1 ring-white/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-fuchsia-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:p-5";
+  "group flex cursor-pointer items-center gap-4 rounded-2xl bg-gradient-to-r from-violet-700 via-fuchsia-700 to-orange-700 p-4 text-white shadow-lg shadow-fuchsia-500/20 ring-1 ring-white/20 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-xl hover:shadow-fuchsia-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:p-5";
 
 interface BarraFerramentasProps {
   titulo: string;

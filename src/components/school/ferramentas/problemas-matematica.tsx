@@ -228,7 +228,7 @@ export function ProblemasMatematica() {
       {finalizado ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-            <span className="flex size-14 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+            <span className="flex size-14 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400">
               <Trophy className="size-7" />
             </span>
             <p className="text-lg font-semibold text-foreground">
@@ -268,7 +268,7 @@ export function ProblemasMatematica() {
               ) : resolvida ? (
                 <p
                   className={`flex items-center gap-1.5 text-sm font-medium ${
-                    acertouAgora ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+                    acertouAgora ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"
                   }`}
                 >
                   {acertouAgora ? (
@@ -282,7 +282,7 @@ export function ProblemasMatematica() {
                   )}
                 </p>
               ) : tentativas > 0 ? (
-                <p className="text-xs text-amber-600 dark:text-amber-400">
+                <p className="text-xs text-amber-700 dark:text-amber-400">
                   Quase — tenta de novo ({MAX_TENTATIVAS - tentativas} tentativa
                   {MAX_TENTATIVAS - tentativas === 1 ? "" : "s"} restante
                   {MAX_TENTATIVAS - tentativas === 1 ? "" : "s"}).

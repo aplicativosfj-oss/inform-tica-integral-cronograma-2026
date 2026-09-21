@@ -127,7 +127,7 @@ function AlunosPage() {
                             </span>
                           ) : null}
                           {aluno.impedido ? (
-                            <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-600">
+                            <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
                               <Ban className="size-3" /> Impedido
                             </span>
                           ) : null}

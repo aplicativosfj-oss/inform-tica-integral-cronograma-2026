@@ -152,7 +152,25 @@ export function buildWeeklySchedule(
     const turma = turmasById.get(overrideId);
     if (turma) pending.push({ dia: p.dia, diaIndex: p.diaIndex, slot: p.slot, turma });
   }
-  const livres = posicoesComIndice.filter((p) => !overriddenIndices.has(p.index));
+  const livresFixas = posicoesComIndice.filter((p) => !overriddenIndices.has(p.index));
+
+  // Rodízio de horários (opcional): gira a grade inteira a cada semana. O
+  // passo é "um dia e um horário" (slots do dia + 1), então a turma que teve
+  // aula segunda 07:30 vai para terça 09:15, depois quarta 13:15… e passa por
+  // todos os dias e pelos dois turnos. Semanas anteriores ao início ficam como
+  // estavam, para não mexer em reposições já marcadas.
+  const semanasDeRotacao = config.rotacaoHorarios
+    ? weekIndex - getWeekIndex(new Date(`${config.rotacaoHorarios.aPartirDe}T12:00:00`))
+    : -1;
+  let livres = livresFixas;
+  if (semanasDeRotacao > 0 && livresFixas.length > 0) {
+    const total = livresFixas.length;
+    let passo = slots.length + 1;
+    const mdc = (a: number, b: number): number => (b === 0 ? a : mdc(b, a % b));
+    while (mdc(passo, total) !== 1) passo += 1;
+    const k = (semanasDeRotacao * passo) % total;
+    livres = [...livresFixas.slice(k), ...livresFixas.slice(0, k)];
+  }
 
   const baseSessoesPorTurma = n > 0 ? Math.floor(livres.length / n) : 0;
   const totalBase = baseSessoesPorTurma * n;

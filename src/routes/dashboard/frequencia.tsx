@@ -185,10 +185,8 @@ function FrequenciaPage() {
 
       {ocultosPorCorte > 0 ? (
         <p className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
-          {ocultosPorCorte === 1
-            ? "1 registro"
-            : `${ocultosPorCorte} registros`}{" "}
-          anterior{ocultosPorCorte === 1 ? "" : "es"} a{" "}
+          {ocultosPorCorte === 1 ? "1 registro" : `${ocultosPorCorte} registros`} anterior
+          {ocultosPorCorte === 1 ? "" : "es"} a{" "}
           {new Date(`${config.dataInicioOperacao}T00:00:00`).toLocaleDateString("pt-BR")}{" "}
           {ocultosPorCorte === 1 ? "foi ocultado" : "foram ocultados"} por serem testes feitos
           durante a configuração do sistema, antes do início oficial de uso.
@@ -199,7 +197,7 @@ function FrequenciaPage() {
         <div className="mb-4 grid gap-4 sm:grid-cols-2">
           <Card>
             <CardHeader className="flex flex-row items-center gap-2 pb-2">
-              <UserCheck className="size-4 text-emerald-600" />
+              <UserCheck className="size-4 text-emerald-700 dark:text-emerald-400" />
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Participações no período
               </CardTitle>

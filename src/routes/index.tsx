@@ -217,7 +217,7 @@ function Index() {
                 </div>
                 <div>
                   <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                       <MonitorSmartphone className="size-3" />
                     </span>
                     <span>
@@ -234,7 +234,7 @@ function Index() {
                 </div>
                 <div>
                   <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400">
                       <Clock3 className="size-3" />
                     </span>
                     Horário das aulas
@@ -383,13 +383,13 @@ function Index() {
             />
             <FeatureCard
               icon={<Timer className="size-5" />}
-              iconClassName="bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300"
+              iconClassName="bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
               title="Cronômetro ao vivo"
               description="Contagem regressiva em tempo real de quando o grupo troca."
             />
             <FeatureCard
               icon={<ShieldCheck className="size-5" />}
-              iconClassName="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300"
+              iconClassName="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
               title="Painel de gestão"
               description="Turmas, professores, fotos e alunos com acesso restrito por login."
             />

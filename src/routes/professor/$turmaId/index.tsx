@@ -296,7 +296,7 @@ function ProfessorPainel() {
                                 </span>
                               ) : null}
                               {aluno.impedido ? (
-                                <span className="flex items-center gap-1 text-xs text-amber-600">
+                                <span className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400">
                                   <Ban className="size-3" /> Impedido de participar
                                   {aluno.motivoImpedimento ? ` — ${aluno.motivoImpedimento}` : ""}
                                 </span>

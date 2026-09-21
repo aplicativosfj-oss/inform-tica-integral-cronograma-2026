@@ -121,7 +121,7 @@ const CATEGORIAS: Categoria[] = [
     titulo: "Plataformas completas",
     descricao: "Reúnem várias disciplinas num só lugar, organizadas por ano escolar.",
     icon: Layers,
-    cor: "text-emerald-600 dark:text-emerald-300",
+    cor: "text-emerald-700 dark:text-emerald-300",
     faixa: "from-emerald-500/15 to-emerald-500/0",
     ferramentas: [
       {
@@ -148,7 +148,7 @@ const CATEGORIAS: Categoria[] = [
     titulo: "Raciocínio lógico",
     descricao: "Quebra-cabeças, estratégia e lógica para exercitar o pensamento.",
     icon: Brain,
-    cor: "text-amber-600 dark:text-amber-300",
+    cor: "text-amber-700 dark:text-amber-300",
     faixa: "from-amber-500/15 to-amber-500/0",
     ferramentas: [
       {
@@ -399,7 +399,7 @@ function InfotecaPage() {
             </div>
 
             <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
                 <HeartHandshake className="size-5" />
               </span>
               <div>

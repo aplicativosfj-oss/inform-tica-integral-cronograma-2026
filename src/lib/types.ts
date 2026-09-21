@@ -163,6 +163,12 @@ export interface ScheduleConfig {
    */
   coordenacaoAEE?: { nome: string } | undefined;
   /**
+   * Rodízio de horários: a partir da semana de `aPartirDe` (YYYY-MM-DD), a
+   * aula de cada turma anda na grade a cada semana — próximo dia e próximo
+   * horário — para ninguém ficar preso ao mesmo dia, hora ou turno.
+   */
+  rotacaoHorarios?: { aPartirDe: string } | undefined;
+  /**
    * Rodadas (1ª, 2ª, 3ª…) suspensas dentro de uma aula que aconteceu — ex.:
    * o grupo da vez não pôde ir. A aula continua "realizada"; só aquela
    * rodada para. Mesma chave de `suspensoes`.

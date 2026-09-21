@@ -117,7 +117,7 @@ export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBota
     return (
       <Card>
         <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+          <span className="flex size-14 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400">
             <Trophy className="size-7" />
           </span>
           <p className="text-lg font-semibold text-foreground">Atividade concluída!</p>
@@ -189,7 +189,7 @@ export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBota
                 >
                   {opcao}
                   {resolvida && correta ? (
-                    <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <CheckCircle2 className="size-4 shrink-0 text-emerald-700 dark:text-emerald-400" />
                   ) : descartada ? (
                     <XCircle className="size-4 shrink-0 text-destructive" />
                   ) : null}
@@ -204,7 +204,7 @@ export function Quiz({ questoes, corBotao = "" }: { questoes: Questao[]; corBota
               {segundosRestantes}s.
             </p>
           ) : !resolvida && tentativas > 0 ? (
-            <p className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+            <p className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400">
               <Lock className="size-3.5" /> Essa não era — tente outra opção.
             </p>
           ) : null}

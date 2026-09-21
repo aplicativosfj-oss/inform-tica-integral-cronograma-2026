@@ -121,7 +121,7 @@ function AgendaPage() {
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400">
                     <Clock3 className="size-4" />
                   </span>
                   <div>
@@ -132,7 +132,7 @@ function AgendaPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <MonitorSmartphone className="size-4" />
                   </span>
                   <div>

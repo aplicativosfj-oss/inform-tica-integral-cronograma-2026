@@ -186,7 +186,7 @@ export function SuspenderAulaDialog({
                 </span>
                 <span className="flex shrink-0 items-center gap-1.5">
                   {i === 0 ? (
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                       Sugerido
                     </span>
                   ) : null}

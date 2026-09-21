@@ -340,7 +340,7 @@ function RelatorioPage() {
               </Button>
               <Button
                 onClick={exportarPdf}
-                className="bg-violet-600 text-white hover:bg-violet-700"
+                className="bg-violet-700 text-white hover:bg-violet-800"
               >
                 <FileDown className="size-4" /> Exportar PDF
               </Button>
@@ -352,7 +352,7 @@ function RelatorioPage() {
               <div className="flex flex-col gap-4">
                 {/* Identificação */}
                 <section className="rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/10 via-card to-card p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-violet-500">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
                     Identificação
                   </p>
                   <p className="mt-1 text-xl font-bold text-foreground">{aluno.nome}</p>
@@ -528,7 +528,7 @@ function GuiaEspecialidade({
   ];
   return (
     <div className="overflow-hidden rounded-2xl border border-violet-500/30 bg-card">
-      <div className="bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-3 text-white">
+      <div className="bg-gradient-to-r from-violet-700 to-fuchsia-700 px-5 py-3 text-white">
         <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/80">
           <Lightbulb className="size-4" /> Guia da especialidade
         </p>
@@ -565,7 +565,7 @@ function GuiaEspecialidade({
                     onClick={() => onInserir(campo, f)}
                     className="flex items-start gap-2 rounded-lg border border-border/60 p-2 text-left text-xs text-muted-foreground transition-colors hover:border-violet-500/50 hover:bg-violet-500/5"
                   >
-                    <Plus className="mt-0.5 size-3.5 shrink-0 text-violet-500" />
+                    <Plus className="mt-0.5 size-3.5 shrink-0 text-violet-700 dark:text-violet-300" />
                     <span>
                       <strong className="text-foreground">{rotulo}:</strong> {f}
                     </span>

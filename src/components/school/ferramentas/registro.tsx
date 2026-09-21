@@ -72,7 +72,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     descricao: "Organize números e use fórmulas simples.",
     categoria: "Ferramentas",
     icon: Table2,
-    cor: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300",
+    cor: "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
     Componente: Planilha,
   },
   {
@@ -81,7 +81,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     descricao: "Treine a tabuada de multiplicação.",
     categoria: "Matemática",
     icon: Hash,
-    cor: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-300",
+    cor: "bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
     Componente: TabuadaJogo,
   },
   {
