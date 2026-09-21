@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Ban,
+  CalendarCheck2,
   CalendarDays,
   ChevronRight,
   ExternalLink,
@@ -17,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
+import { NovaAtividadeDialog } from "@/components/school/nova-atividade-dialog";
 import { HeroProfissional } from "@/components/school/hero-profissional";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
@@ -62,6 +64,15 @@ function ProfessorPainel() {
   const [presencas, setPresencas] = useState<Presenca[]>([]);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [carregando, setCarregando] = useState(true);
+
+  /** Recarrega só as atividades — usado depois de criar uma. */
+  async function recarregarAtividades() {
+    try {
+      setAtividades(await fetchAtividadesDaTurma(turmaId));
+    } catch {
+      // A lista continua com o que já estava na tela.
+    }
+  }
 
   // Sem a senha conferida nesta aba, a página volta para a escolha da turma.
   useEffect(() => {
@@ -192,6 +203,15 @@ function ProfessorPainel() {
               acao="Abrir →"
             />
           </Link>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button asChild variant="outline" className="gap-1.5">
+              <Link to="/professor/$turmaId/chamada" params={{ turmaId }}>
+                <CalendarCheck2 className="size-4" /> Fazer a chamada
+              </Link>
+            </Button>
+            <NovaAtividadeDialog turmaId={turmaId} aoCriar={recarregarAtividades} />
+          </div>
 
           {turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (
             <Card className="mt-4 border-primary/30 bg-primary/5">

@@ -2,19 +2,23 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Ban,
+  BookOpenCheck,
   CalendarCheck2,
   CheckCircle2,
   Circle,
   ExternalLink,
   HeartHandshake,
+  Star,
   UserRound,
   UserX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AvaliarDialog, SeloAvaliacao } from "@/components/school/avaliar-dialog";
 import { HeroProfissional } from "@/components/school/hero-profissional";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
@@ -25,8 +29,14 @@ import {
   fetchPresencasDoAluno,
   fetchStatusDaAtividade,
 } from "@/lib/aluno-area";
+import {
+  fetchAvaliacoesDoAluno,
+  fetchEntregasDoAluno,
+  type Avaliacao,
+  type Entrega,
+} from "@/lib/avaliacoes";
 import { idadeEmAnos } from "@/lib/profissional-acesso";
-import { temSessaoDeProfessor } from "@/lib/profissional-session";
+import { lerProfissionalSessao, temSessaoDeProfessor } from "@/lib/profissional-session";
 import type { Atividade, Presenca } from "@/lib/types";
 
 export const Route = createFileRoute("/professor/$turmaId/aluno/$alunoId")({
@@ -45,7 +55,7 @@ function formatarData(data: string) {
 
 function AcompanharAluno() {
   const { turmaId, alunoId } = Route.useParams();
-  const { turmas } = useAppStore();
+  const { turmas, updateAluno } = useAppStore();
   const navigate = useNavigate();
   const turma = turmas.find((t) => t.id === turmaId);
   const aluno = turma?.alunos.find((a) => a.id === alunoId);
@@ -59,6 +69,49 @@ function AcompanharAluno() {
   // professor, então esse pedaço pode voltar vazio — e a tela avisa em vez
   // de fingir que o aluno não fez nada.
   const [semAcessoAoAndamento, setSemAcessoAoAndamento] = useState(false);
+  const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
+  const [entregas, setEntregas] = useState<Entrega[]>([]);
+  const [avaliando, setAvaliando] = useState<{
+    titulo: string;
+    tipo: "atividade" | "entrega";
+    referenciaId: string;
+  } | null>(null);
+  const [textoAberto, setTextoAberto] = useState<Entrega | null>(null);
+
+  const nomeDoProfessor = lerProfissionalSessao()?.nome ?? "Professor(a)";
+
+  /** Avaliação já registrada para um trabalho, se houver. */
+  function avaliacaoDe(tipo: "atividade" | "entrega", referenciaId: string) {
+    return avaliacoes.find((a) => a.tipo === tipo && a.referenciaId === referenciaId);
+  }
+
+  async function recarregarAvaliacoes() {
+    try {
+      setAvaliacoes(await fetchAvaliacoesDoAluno(alunoId));
+    } catch {
+      // Sem as avaliações a tela ainda serve: mostra os trabalhos sem selo.
+    }
+  }
+
+  /** Liga/desliga o impedimento do aluno no rodízio, com o motivo. */
+  async function alternarImpedimento() {
+    if (!aluno) return;
+    if (aluno.impedido) {
+      updateAluno(turmaId, alunoId, { impedido: false, motivoImpedimento: undefined });
+      toast.success(`${aluno.nome.split(" ")[0]} voltou a participar do rodízio.`);
+      return;
+    }
+    const motivo = window.prompt(
+      "Por que este aluno está impedido de participar? (o motivo fica registrado)",
+      "",
+    );
+    if (motivo === null) return;
+    updateAluno(turmaId, alunoId, {
+      impedido: true,
+      motivoImpedimento: motivo.trim() || undefined,
+    });
+    toast.success("Aluno marcado como impedido. A chamada passa a pular a vez dele.");
+  }
 
   useEffect(() => {
     if (!temSessaoDeProfessor(turmaId)) navigate({ to: "/professor" });
@@ -70,13 +123,17 @@ function AcompanharAluno() {
     async function carregar() {
       setCarregando(true);
       try {
-        const [tarefas, historico] = await Promise.all([
+        const [tarefas, historico, avaliadas, entregues] = await Promise.all([
           fetchAtividadesDaTurma(turmaId),
           fetchPresencasDoAluno(alunoId),
+          fetchAvaliacoesDoAluno(alunoId).catch(() => [] as Avaliacao[]),
+          fetchEntregasDoAluno(alunoId).catch(() => [] as Entrega[]),
         ]);
         if (cancelado) return;
         setAtividades(tarefas);
         setPresencas(historico);
+        setAvaliacoes(avaliadas);
+        setEntregas(entregues);
 
         const resultados = await Promise.allSettled(
           tarefas.map((tarefa) => fetchStatusDaAtividade(tarefa.id)),
@@ -197,6 +254,21 @@ function AcompanharAluno() {
             </Card>
           ) : null}
 
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button
+              variant={aluno.impedido ? "outline" : "ghost"}
+              size="sm"
+              className={`gap-1.5 ${aluno.impedido ? "" : "text-muted-foreground"}`}
+              onClick={alternarImpedimento}
+            >
+              <Ban className="size-4" />
+              {aluno.impedido ? "Liberar para o rodízio" : "Marcar como impedido"}
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              Enquanto impedido, a chamada pula a vez dele e chama o próximo da fila.
+            </span>
+          </div>
+
           <h2 className="mb-3 mt-8 text-lg font-semibold text-foreground">Atividades</h2>
           {semAcessoAoAndamento ? (
             <p className="mb-3 text-xs text-muted-foreground">
@@ -237,18 +309,103 @@ function AcompanharAluno() {
                         <Badge variant={feita ? "default" : "secondary"} className="font-normal">
                           {feita ? "Concluída" : "Pendente"}
                         </Badge>
-                        {atividade.url ? (
-                          <Button asChild size="sm" variant="ghost" className="h-7 gap-1 px-2">
-                            <a href={atividade.url} target="_blank" rel="noopener noreferrer">
-                              Abrir <ExternalLink className="size-3" />
-                            </a>
+                        <SeloAvaliacao avaliacao={avaliacaoDe("atividade", atividade.id)} />
+                        <div className="flex gap-1">
+                          {atividade.url ? (
+                            <Button asChild size="sm" variant="ghost" className="h-7 gap-1 px-2">
+                              <a href={atividade.url} target="_blank" rel="noopener noreferrer">
+                                Abrir <ExternalLink className="size-3" />
+                              </a>
+                            </Button>
+                          ) : null}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 px-2"
+                            onClick={() =>
+                              setAvaliando({
+                                titulo: atividade.titulo,
+                                tipo: "atividade",
+                                referenciaId: atividade.id,
+                              })
+                            }
+                          >
+                            <Star className="size-3" /> Avaliar
                           </Button>
-                        ) : null}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 );
               })}
+            </div>
+          )}
+
+          <h2 className="mb-1 mt-8 text-lg font-semibold text-foreground">Textos entregues</h2>
+          <p className="mb-3 text-sm text-muted-foreground">
+            O que o aluno escreveu no editor e escolheu entregar para você ler.
+          </p>
+          {entregas.length === 0 ? (
+            <Card className="border-dashed">
+              <CardContent className="py-6 text-center text-sm text-muted-foreground">
+                Nenhum texto entregue ainda. No editor, o aluno usa o botão &quot;Entregar ao
+                professor&quot;.
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {entregas.map((entrega) => (
+                <Card key={entrega.id}>
+                  <CardContent className="flex flex-wrap items-start justify-between gap-3 p-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                        <BookOpenCheck className="size-4 shrink-0 text-primary" /> {entrega.titulo}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        Entregue em {new Date(entrega.criadoEm).toLocaleString("pt-BR")}
+                      </p>
+                      <div className="mt-1.5">
+                        <SeloAvaliacao avaliacao={avaliacaoDe("entrega", entrega.id)} />
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 gap-1.5">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          setTextoAberto(textoAberto?.id === entrega.id ? null : entrega)
+                        }
+                      >
+                        {textoAberto?.id === entrega.id ? "Fechar" : "Ler"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5"
+                        onClick={() =>
+                          setAvaliando({
+                            titulo: entrega.titulo,
+                            tipo: "entrega",
+                            referenciaId: entrega.id,
+                          })
+                        }
+                      >
+                        <Star className="size-3.5" /> Avaliar
+                      </Button>
+                    </div>
+
+                    {textoAberto?.id === entrega.id ? (
+                      <div
+                        className="w-full rounded-lg border border-border bg-white p-4 text-sm text-[#1f2937] [&_img]:max-w-full"
+                        // O texto vem do editor do próprio aluno, que grava HTML
+                        // formatado (negrito, cor, imagens). Mostrar como texto
+                        // puro exibiria as tags em vez do trabalho dele.
+                        dangerouslySetInnerHTML={{ __html: entrega.conteudoHtml }}
+                      />
+                    ) : null}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
 
@@ -286,6 +443,21 @@ function AcompanharAluno() {
 
         <SiteFooter />
       </div>
+
+      {avaliando ? (
+        <AvaliarDialog
+          aberto
+          aoFechar={() => setAvaliando(null)}
+          titulo={avaliando.titulo}
+          turmaId={turmaId}
+          alunoId={alunoId}
+          tipo={avaliando.tipo}
+          referenciaId={avaliando.referenciaId}
+          avaliadoPor={nomeDoProfessor}
+          atual={avaliacaoDe(avaliando.tipo, avaliando.referenciaId)}
+          aoSalvar={recarregarAvaliacoes}
+        />
+      ) : null}
     </div>
   );
 }

@@ -25,6 +25,7 @@ import { SiteFooter } from "@/components/school/site-footer";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
 import { FERRAMENTAS } from "@/components/school/ferramentas/registro";
 import { useAppStore } from "@/lib/app-store";
+import { fetchAvaliacoesDoAluno, selo, type Avaliacao } from "@/lib/avaliacoes";
 import {
   fetchAtividadesDaTurma,
   fetchHistoricoAcessos,
@@ -81,6 +82,7 @@ function AlunoPainel() {
   const [carregando, setCarregando] = useState(true);
   const [ultimoAcesso, setUltimoAcesso] = useState<string | null>(null);
   const [presencas, setPresencas] = useState<Presenca[]>([]);
+  const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [statusPorAtividade, setStatusPorAtividade] = useState<Map<string, AtividadeStatus>>(
     new Map(),
@@ -117,6 +119,13 @@ function AlunoPainel() {
         // (índice 1) é o "último acesso" de verdade, antes deste.
         setUltimoAcesso(historico[1]?.acessado_em ?? null);
         setPresencas(historicoPresencas);
+        // O retorno do professor é o que a criança mais quer ver ao entrar —
+        // se falhar, o resto da área continua funcionando sem ele.
+        fetchAvaliacoesDoAluno(alunoId)
+          .then((lista) => {
+            if (!cancelado) setAvaliacoes(lista);
+          })
+          .catch(() => undefined);
         setAtividades(atividadesDaTurma);
         setStatusPorAtividade(statusDoAluno);
       } catch (err) {
@@ -309,6 +318,51 @@ function AlunoPainel() {
             />
           </Link>
         </section>
+
+        {/* O que o professor achou do trabalho: selo, nota e recado. */}
+        {avaliacoes.length > 0 ? (
+          <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+            <h2 className="mb-1 text-lg font-semibold text-foreground">O que o professor achou</h2>
+            <p className="mb-3 text-sm text-muted-foreground">
+              Retorno dos seus trabalhos — o mais recente primeiro.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {avaliacoes.map((avaliacao) => {
+                const info = selo(avaliacao.selo);
+                return (
+                  <Card key={avaliacao.id}>
+                    <CardContent className="flex flex-col gap-2 p-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {info ? (
+                          <Badge className={`font-normal hover:bg-inherit ${info.cor}`}>
+                            {info.rotulo}
+                          </Badge>
+                        ) : null}
+                        {avaliacao.nota !== undefined ? (
+                          <Badge variant="secondary" className="font-normal">
+                            nota {avaliacao.nota}
+                          </Badge>
+                        ) : null}
+                        <span className="text-xs text-muted-foreground">
+                          {avaliacao.tipo === "entrega" ? "texto entregue" : "atividade"}
+                        </span>
+                      </div>
+                      {avaliacao.comentario ? (
+                        <p className="rounded-lg bg-muted/60 p-2.5 text-sm text-foreground">
+                          “{avaliacao.comentario}”
+                        </p>
+                      ) : null}
+                      <p className="text-xs text-muted-foreground">
+                        {avaliacao.avaliadoPor} ·{" "}
+                        {new Date(avaliacao.atualizadoEm).toLocaleDateString("pt-BR")}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         {/* Atividades */}
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">

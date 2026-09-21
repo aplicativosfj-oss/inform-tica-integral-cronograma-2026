@@ -20,6 +20,7 @@ import {
   Palette,
   Redo2,
   Save,
+  Send,
   SmilePlus,
   Square,
   Trash2,
@@ -56,6 +57,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useConfirmar } from "@/lib/confirm-store";
 import { lerAlunoSessao } from "@/lib/aluno-session";
+import { entregarTexto } from "@/lib/avaliacoes";
 import {
   excluirArquivoAluno,
   listarArquivosAluno,
@@ -730,6 +732,7 @@ export function EditorTexto() {
   const [arquivoAtualId, setArquivoAtualId] = useState<string | null>(null);
   const [titulo, setTitulo] = useState("Sem título");
   const [salvando, setSalvando] = useState(false);
+  const [entregando, setEntregando] = useState(false);
   const [carregandoLista, setCarregandoLista] = useState(false);
   const [dialogAbrirAberto, setDialogAbrirAberto] = useState(false);
   const [arquivos, setArquivos] = useState<ArquivoAlunoResumo[]>([]);
@@ -850,6 +853,46 @@ export function EditorTexto() {
   function atualizarContagem() {
     const texto = areaRef.current?.innerText ?? "";
     setContagem(texto.trim().length === 0 ? 0 : texto.trim().split(/\s+/).length);
+  }
+
+  /**
+   * Entrega o texto atual ao professor.
+   *
+   * Os documentos do editor ficam numa área que só o próprio aluno abre (as
+   * funções do banco exigem o PIN dele). Entregar é um ato deliberado: manda
+   * uma cópia do que está na tela para o professor ler e avaliar, sem abrir
+   * o resto da pasta.
+   */
+  async function entregarAoProfessor() {
+    const sessaoAtual = lerAlunoSessao();
+    if (!sessaoAtual || !areaRef.current) {
+      toast.error("Entre na sua área de aluno para entregar o texto.");
+      return;
+    }
+    if ((areaRef.current.innerText ?? "").trim().length === 0) {
+      toast.error("Escreva alguma coisa antes de entregar.");
+      return;
+    }
+    const ok = await confirmar({
+      titulo: "Entregar este texto ao professor?",
+      descricao: "O professor vai poder ler e dar um selo. Você continua podendo editar o seu.",
+    });
+    if (!ok) return;
+    setEntregando(true);
+    try {
+      await entregarTexto({
+        turmaId: sessaoAtual.turmaId,
+        alunoId: sessaoAtual.alunoId,
+        alunoNome: sessaoAtual.nome,
+        titulo: titulo.trim() || "Sem título",
+        conteudoHtml: areaRef.current.innerHTML,
+      });
+      toast.success("Entregue! O professor vai ver na área dele.");
+    } catch (err) {
+      toast.error(`Não foi possível entregar: ${(err as Error).message}`);
+    } finally {
+      setEntregando(false);
+    }
   }
 
   function salvarRascunhoLocal() {
@@ -1075,6 +1118,23 @@ export function EditorTexto() {
             )}
             Salvar
           </Button>
+          {sessao ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 bg-white dark:bg-zinc-700"
+              onClick={entregarAoProfessor}
+              disabled={entregando}
+              title="Mandar este texto para o professor ler e avaliar"
+            >
+              {entregando ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Send className="size-3.5" />
+              )}
+              Entregar ao professor
+            </Button>
+          ) : null}
           <Button
             variant="outline"
             size="sm"

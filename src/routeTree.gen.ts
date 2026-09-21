@@ -35,6 +35,7 @@ import { Route as AlunoTurmaIdIndexRouteImport } from './routes/aluno/$turmaId/i
 import { Route as DashboardTurmasIndexRouteImport } from './routes/dashboard/turmas/index'
 import { Route as DashboardTurmasTurmaIdRouteImport } from './routes/dashboard/turmas/$turmaId'
 import { Route as ProfessorTurmaIdIndexRouteImport } from './routes/professor/$turmaId/index'
+import { Route as ProfessorTurmaIdChamadaRouteImport } from './routes/professor/$turmaId/chamada'
 import { Route as AlunoTurmaIdAlunoIdIndexRouteImport } from './routes/aluno/$turmaId/$alunoId/index'
 import { Route as MediadorTurmaIdApoioIndexIndexRouteImport } from './routes/mediador/$turmaId/$apoioIndex/index'
 import { Route as ProfessorTurmaIdAlunoAlunoIdRouteImport } from './routes/professor/$turmaId/aluno/$alunoId'
@@ -175,6 +176,11 @@ const ProfessorTurmaIdIndexRoute = ProfessorTurmaIdIndexRouteImport.update({
   path: '/professor/$turmaId/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfessorTurmaIdChamadaRoute = ProfessorTurmaIdChamadaRouteImport.update({
+  id: '/professor/$turmaId/chamada',
+  path: '/professor/$turmaId/chamada',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlunoTurmaIdAlunoIdIndexRoute =
   AlunoTurmaIdAlunoIdIndexRouteImport.update({
     id: '/aluno/$turmaId/$alunoId/',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/mediador/': typeof MediadorIndexRoute
   '/professor/': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/professor/$turmaId/chamada': typeof ProfessorTurmaIdChamadaRoute
   '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
   '/professor/$turmaId/': typeof ProfessorTurmaIdIndexRoute
@@ -291,6 +298,7 @@ export interface FileRoutesByTo {
   '/mediador': typeof MediadorIndexRoute
   '/professor': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/professor/$turmaId/chamada': typeof ProfessorTurmaIdChamadaRoute
   '/aluno/$turmaId': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas': typeof DashboardTurmasIndexRoute
   '/professor/$turmaId': typeof ProfessorTurmaIdIndexRoute
@@ -329,6 +337,7 @@ export interface FileRoutesById {
   '/mediador/': typeof MediadorIndexRoute
   '/professor/': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
+  '/professor/$turmaId/chamada': typeof ProfessorTurmaIdChamadaRoute
   '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
   '/professor/$turmaId/': typeof ProfessorTurmaIdIndexRoute
@@ -368,6 +377,7 @@ export interface FileRouteTypes {
     | '/mediador/'
     | '/professor/'
     | '/dashboard/turmas/$turmaId'
+    | '/professor/$turmaId/chamada'
     | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
     | '/professor/$turmaId/'
@@ -405,6 +415,7 @@ export interface FileRouteTypes {
     | '/mediador'
     | '/professor'
     | '/dashboard/turmas/$turmaId'
+    | '/professor/$turmaId/chamada'
     | '/aluno/$turmaId'
     | '/dashboard/turmas'
     | '/professor/$turmaId'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/mediador/'
     | '/professor/'
     | '/dashboard/turmas/$turmaId'
+    | '/professor/$turmaId/chamada'
     | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
     | '/professor/$turmaId/'
@@ -480,6 +492,7 @@ export interface RootRouteChildren {
   MediadorIndexRoute: typeof MediadorIndexRoute
   ProfessorIndexRoute: typeof ProfessorIndexRoute
   DashboardTurmasTurmaIdRoute: typeof DashboardTurmasTurmaIdRoute
+  ProfessorTurmaIdChamadaRoute: typeof ProfessorTurmaIdChamadaRoute
   AlunoTurmaIdIndexRoute: typeof AlunoTurmaIdIndexRoute
   DashboardTurmasIndexRoute: typeof DashboardTurmasIndexRoute
   ProfessorTurmaIdIndexRoute: typeof ProfessorTurmaIdIndexRoute
@@ -678,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfessorTurmaIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/professor/$turmaId/chamada': {
+      id: '/professor/$turmaId/chamada'
+      path: '/professor/$turmaId/chamada'
+      fullPath: '/professor/$turmaId/chamada'
+      preLoaderRoute: typeof ProfessorTurmaIdChamadaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/aluno/$turmaId/$alunoId/': {
       id: '/aluno/$turmaId/$alunoId/'
       path: '/aluno/$turmaId/$alunoId'
@@ -768,6 +788,7 @@ const rootRouteChildren: RootRouteChildren = {
   MediadorIndexRoute: MediadorIndexRoute,
   ProfessorIndexRoute: ProfessorIndexRoute,
   DashboardTurmasTurmaIdRoute: DashboardTurmasTurmaIdRoute,
+  ProfessorTurmaIdChamadaRoute: ProfessorTurmaIdChamadaRoute,
   AlunoTurmaIdIndexRoute: AlunoTurmaIdIndexRoute,
   DashboardTurmasIndexRoute: DashboardTurmasIndexRoute,
   ProfessorTurmaIdIndexRoute: ProfessorTurmaIdIndexRoute,
