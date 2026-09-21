@@ -46,6 +46,7 @@ import {
   proximaDataDoDia,
   proximoDiaLetivo,
   suspensaoKey,
+  reprogramacoesParaData,
   toDateKey,
 } from "@/lib/schedule-engine";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
@@ -466,10 +467,23 @@ function ProximasTurmasPanel() {
       turmas,
       dataKey,
     );
-    return nextAssignmentsForDay(assignments, proximo.dia).filter(
-      (a) => !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)],
+    // Reposições marcadas para esse dia entram na lista (e ganham selo próprio).
+    const reposicoes = reprogramacoesParaData(turmas, config, proximo.data);
+    return nextAssignmentsForDay([...reposicoes, ...assignments], proximo.dia).filter(
+      (a) =>
+        reposicoes.includes(a) || !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)],
     );
   }, [turmas, config, proximo]);
+
+  const reposicaoDe = (a: Assignment) =>
+    proximo
+      ? (config.reprogramacoes ?? []).find(
+          (r) =>
+            r.dataNova === toDateKey(proximo.data) &&
+            r.turmaId === a.turma.id &&
+            r.inicio === a.slot.inicio,
+        )
+      : undefined;
 
   if (!montado || !proximo || assignmentsDoProximoDia.length === 0) return null;
 
@@ -539,8 +553,16 @@ function ProximasTurmasPanel() {
                       </span>
                     )}
                     <div>
-                      <p className="text-sm font-medium text-foreground group-hover:text-primary">
+                      <p className="flex flex-wrap items-center gap-1.5 text-sm font-medium text-foreground group-hover:text-primary">
                         {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
+                        {reposicaoDe(assignment) ? (
+                          <Badge
+                            className="bg-amber-500/15 text-[11px] text-amber-700 hover:bg-amber-500/15 dark:text-amber-300"
+                            title={reposicaoDe(assignment)?.motivo}
+                          >
+                            Reposição
+                          </Badge>
+                        ) : null}
                       </p>
                       <p className="text-[13px] text-muted-foreground">
                         Prof(a). {assignment.turma.professorRegente} ·{" "}

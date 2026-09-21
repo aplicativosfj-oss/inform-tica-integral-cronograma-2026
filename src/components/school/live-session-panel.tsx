@@ -735,32 +735,92 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
       : `${proximaAula.turma.serie} "${proximaAula.turma.letra}"`
     : null;
 
+  // Avisos públicos do dia: aulas de hoje que não aconteceram, com o motivo
+  // e a nova data — o que a escola precisa saber sem entrar no painel.
+  const avisosDoDia = (config.reprogramacoes ?? []).filter((r) => r.dataOriginal === dateKey);
+  const nomeDaTurma = (id: string) => {
+    const t = turmas.find((x) => x.id === id);
+    return t ? `${t.serie} "${t.letra}"` : "Turma";
+  };
+  const dataCurta = (iso: string) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+    });
+
   if (!sessao) {
     return (
-      <Card className="border-border/60 bg-card/80">
-        <CardContent className="flex flex-col items-center gap-3 py-8 text-center sm:flex-row sm:text-left">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Clock3 className="size-6" />
+      <section
+        aria-label="Situação do laboratório agora"
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white shadow-xl shadow-indigo-900/30 ring-1 ring-white/15"
+      >
+        {/* Brilhos decorativos */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-10 -top-16 size-48 rounded-full bg-cyan-400/30 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 right-10 size-56 rounded-full bg-fuchsia-500/30 blur-3xl"
+        />
+
+        <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:gap-5 sm:p-6">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25 backdrop-blur">
+            <Clock3 className="size-7" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-foreground">Nenhuma aula de informática agora</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/70">
+              Laboratório de informática
+            </p>
+            <p className="text-xl font-bold tracking-tight sm:text-2xl">
+              Nenhuma aula de informática agora
+            </p>
+            <p className="mt-0.5 text-sm text-white/80 first-letter:uppercase">
               {now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}
               {" · "}
               {now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-              {conteudoDoDia ? ` · Conteúdo de hoje: ${conteudoDoDia}` : ""}
             </p>
+            {conteudoDoDia ? (
+              <p className="mt-1 text-sm text-white/85">Conteúdo de hoje: {conteudoDoDia}</p>
+            ) : null}
           </div>
-          {proximaAula && nomeProxima ? (
-            <div className="rounded-xl border border-border/60 bg-background/50 px-4 py-2 text-sm">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Próxima aula</p>
-              <p className="font-semibold text-foreground">
-                {nomeProxima} · {proximaAula.slot.inicio}
+          <div className="shrink-0 rounded-xl bg-white/15 px-4 py-3 ring-1 ring-white/25 backdrop-blur">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
+              Próxima aula
+            </p>
+            {proximaAula && nomeProxima ? (
+              <p className="text-lg font-bold">
+                {nomeProxima}{" "}
+                <span className="font-mono text-base font-semibold text-cyan-200">
+                  {proximaAula.slot.inicio}
+                </span>
               </p>
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
+            ) : (
+              <p className="text-sm font-medium text-white/85">Sem mais aulas hoje</p>
+            )}
+          </div>
+        </div>
+
+        {avisosDoDia.length > 0 ? (
+          <ul className="relative flex flex-col gap-2 border-t border-white/15 bg-black/15 px-5 py-3 sm:px-6">
+            {avisosDoDia.map((r) => (
+              <li key={r.id} className="flex items-start gap-2.5 text-sm">
+                <CalendarX2 className="mt-0.5 size-4 shrink-0 text-amber-300" />
+                <span className="text-white/90">
+                  <strong className="font-semibold text-white">{nomeDaTurma(r.turmaId)}</strong> não
+                  teve a aula das {r.inicioOriginal}
+                  {r.motivo ? <> — {r.motivo}</> : null}. Reposição:{" "}
+                  <strong className="font-semibold text-cyan-200">
+                    {dataCurta(r.dataNova)}, {r.inicio}–{r.fim}
+                  </strong>
+                  .
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
     );
   }
 
@@ -780,6 +840,21 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               ? ` · Próxima: ${nomeProxima} às ${proximaAula.slot.inicio}`
               : ""}
           </p>
+          {avisosDoDia
+            .filter(
+              (r) =>
+                r.turmaId === assignment.turma.id && r.inicioOriginal === assignment.slot.inicio,
+            )
+            .map((r) => (
+              <p key={r.id} className="max-w-lg text-sm text-foreground">
+                {r.motivo ? <>Motivo: {r.motivo}. </> : null}
+                Reposição em{" "}
+                <strong className="text-primary">
+                  {dataCurta(r.dataNova)}, {r.inicio}–{r.fim}
+                </strong>
+                .
+              </p>
+            ))}
           {editable ? (
             <Button
               size="sm"

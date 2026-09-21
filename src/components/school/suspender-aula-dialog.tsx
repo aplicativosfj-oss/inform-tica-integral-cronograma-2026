@@ -20,6 +20,7 @@ import type { Assignment } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const MOTIVOS = [
+  "Atividade de revisão com o(a) professor(a) regente",
   "Evento da escola",
   "Passeio / atividade externa",
   "Avaliação em sala",
@@ -40,11 +41,14 @@ export function SuspenderAulaDialog({
   assignment,
   data,
   children,
+  onConcluido,
 }: {
   assignment: Assignment;
   /** Data da ocorrência que não vai acontecer. */
   data: Date;
   children: ReactNode;
+  /** Chamado depois de salvar (ex.: para fechar uma lista). */
+  onConcluido?: (() => void) | undefined;
 }) {
   const { turmas, config, reprogramarAula, setSessaoSuspensa } = useAppStore();
   const [open, setOpen] = useState(false);
@@ -56,9 +60,12 @@ export function SuspenderAulaDialog({
 
   const opcoes = useMemo(() => {
     if (!open) return [];
-    // A busca começa depois do fim desta aula, para não "reprogramar" para agora.
+    // A busca começa depois do fim desta aula — ou de agora, se a aula já
+    // passou (registro feito depois do horário) — para nunca sugerir o passado.
     const [h, m] = assignment.slot.fim.split(":").map(Number);
-    const desde = new Date(data.getFullYear(), data.getMonth(), data.getDate(), h ?? 0, m ?? 0);
+    const fimDaAula = new Date(data.getFullYear(), data.getMonth(), data.getDate(), h ?? 0, m ?? 0);
+    const agora = new Date();
+    const desde = fimDaAula > agora ? fimDaAula : agora;
     return encontrarHorariosParaReprogramar(turmas, config, turma.id, desde);
   }, [open, turmas, config, turma.id, data, assignment.slot.fim]);
 
@@ -94,6 +101,7 @@ export function SuspenderAulaDialog({
       );
     }
     setOpen(false);
+    onConcluido?.();
   }
 
   return (

@@ -1,5 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarClock, RotateCcw, Trash2, UserX } from "lucide-react";
+import {
+  CalendarClock,
+  CalendarX2,
+  History,
+  MessageSquareText,
+  RotateCcw,
+  Trash2,
+  UserX,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -16,17 +24,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardShell } from "@/components/school/dashboard-shell";
+import { SuspenderAulaDialog } from "@/components/school/suspender-aula-dialog";
 import { useAppStore } from "@/lib/app-store";
 import { useConfirmar } from "@/lib/confirm-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import {
+  aplicarExcecoesDeData,
   buildWeeklySchedule,
   currentWeekdayLabel,
   getWeekIndex,
+  nextAssignmentsForDay,
   proximaDataDoDia,
+  suspensaoKey,
   toDateKey,
 } from "@/lib/schedule-engine";
-import type { Presenca } from "@/lib/types";
+import type { Assignment, Presenca } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/faltas")({
   component: FaltasPage,
@@ -94,6 +106,32 @@ function FaltasPage() {
     () => buildWeeklySchedule(turmas, config, weekIndex),
     [turmas, config, weekIndex],
   );
+
+  // Aulas de hoje e dos últimos dias letivos que ainda aconteceram
+  // normalmente — é daqui que se registra "a turma não pôde participar".
+  const aulasRecentes = useMemo(() => {
+    const hoje = new Date();
+    const lista: { data: Date; dataKey: string; assignment: Assignment }[] = [];
+    for (let i = 0; i < 7; i += 1) {
+      const data = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - i);
+      const dia = currentWeekdayLabel(data);
+      if (!config.diasSemana.includes(dia)) continue;
+      const dataKey = toDateKey(data);
+      const doDia = nextAssignmentsForDay(
+        aplicarExcecoesDeData(
+          buildWeeklySchedule(turmas, config, getWeekIndex(data)),
+          config,
+          turmas,
+          dataKey,
+        ),
+        dia,
+      ).filter(
+        (a) => !a.misto && !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)],
+      );
+      for (const assignment of doDia) lista.push({ data, dataKey, assignment });
+    }
+    return lista;
+  }, [turmas, config]);
 
   useEffect(() => {
     let cancelado = false;
@@ -231,6 +269,52 @@ function FaltasPage() {
       <Card className="mb-6">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
+            <CalendarX2 className="size-4 text-amber-500" /> Turma não pôde participar?
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Aulas de hoje e dos últimos dias. Registre o motivo e o sistema reprograma a turma
+            inteira para o próximo horário possível — a observação fica no histórico abaixo.
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          {aulasRecentes.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              Nenhuma aula nos últimos dias.
+            </p>
+          ) : (
+            aulasRecentes.map(({ data, dataKey, assignment }) => (
+              <div
+                key={`${dataKey}-${assignment.slot.inicio}`}
+                className="flex flex-col gap-2 rounded-lg border border-border/60 bg-background/60 p-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <p className="text-sm text-foreground">
+                  <span className="font-semibold">
+                    {assignment.turma.serie} &ldquo;{assignment.turma.letra}&rdquo;
+                  </span>{" "}
+                  <span className="text-muted-foreground">
+                    ·{" "}
+                    {data.toLocaleDateString("pt-BR", {
+                      weekday: "long",
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}{" "}
+                    · {assignment.slot.inicio}–{assignment.slot.fim}
+                  </span>
+                </p>
+                <SuspenderAulaDialog assignment={assignment} data={data}>
+                  <Button size="sm" variant="outline" className="shrink-0 gap-1.5">
+                    <CalendarX2 className="size-3.5" /> Não pôde participar
+                  </Button>
+                </SuspenderAulaDialog>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
             <UserX className="size-4" /> Sessões com ausências ({grupos.length})
           </CardTitle>
         </CardHeader>
@@ -292,7 +376,10 @@ function FaltasPage() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Aulas reprogramadas ({reprogramacoes.length})</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <History className="size-4" /> Histórico de aulas reprogramadas ({reprogramacoes.length}
+            )
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {reprogramacoes.length === 0 ? (
@@ -303,23 +390,47 @@ function FaltasPage() {
             reprogramacoes.map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/60 p-3"
+                className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-background/60 p-3"
               >
-                <p className="text-sm text-foreground">
-                  <span className="font-medium">{nomeTurma(r.turmaId)}</span> ·{" "}
-                  {new Date(`${r.dataOriginal}T00:00:00`).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                  })}{" "}
-                  →{" "}
-                  <span className="font-medium text-primary">
-                    {new Date(`${r.dataNova}T00:00:00`).toLocaleDateString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
+                <div className="min-w-0 text-sm text-foreground">
+                  <p>
+                    <span className="font-semibold">{nomeTurma(r.turmaId)}</span> ·{" "}
+                    <span className="text-muted-foreground line-through">
+                      {new Date(`${r.dataOriginal}T00:00:00`).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}{" "}
+                      {r.inicioOriginal}
+                    </span>{" "}
+                    →{" "}
+                    <span className="font-medium text-primary">
+                      {new Date(`${r.dataNova}T00:00:00`).toLocaleDateString("pt-BR", {
+                        weekday: "short",
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}{" "}
+                      ({r.inicio} – {r.fim})
+                    </span>
+                  </p>
+                  {r.motivo ? (
+                    <p className="mt-1 flex items-start gap-1.5 text-muted-foreground">
+                      <MessageSquareText className="mt-0.5 size-3.5 shrink-0" />
+                      <span>Observação: {r.motivo}</span>
+                    </p>
+                  ) : null}
+                  {r.slotDeslocado ? (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Usou a aula extra de {nomeTurma(r.slotDeslocado.turmaId)} nesse horário.
+                    </p>
+                  ) : null}
+                  <p className="mt-0.5 text-xs text-muted-foreground/70">
+                    Registrado em{" "}
+                    {new Date(r.criadoEm).toLocaleString("pt-BR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
                     })}
-                  </span>{" "}
-                  ({r.inicio} – {r.fim})
-                </p>
+                  </p>
+                </div>
                 <Button
                   size="icon"
                   variant="ghost"
