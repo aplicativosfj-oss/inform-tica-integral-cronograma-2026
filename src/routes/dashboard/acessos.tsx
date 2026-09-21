@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Copy,
   Eye,
@@ -7,6 +7,7 @@ import {
   KeyRound,
   Loader2,
   Presentation,
+  Printer,
   RefreshCw,
   Users2,
 } from "lucide-react";
@@ -343,6 +344,18 @@ function AcessosPage() {
         <Badge variant="secondary" className="gap-1 font-normal">
           <HandHeart className="size-3" /> {turma.apoioEspecial?.length ?? 0} de apoio
         </Badge>
+        <div className="ml-auto flex flex-wrap gap-2">
+          <Button asChild size="sm">
+            <Link to="/dashboard/fichas-acesso" search={{ turma: turma.id }}>
+              <Printer className="size-3.5" /> Fichas em PDF desta turma
+            </Link>
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/dashboard/fichas-acesso" search={{}}>
+              <Printer className="size-3.5" /> Todas as turmas
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-4">
