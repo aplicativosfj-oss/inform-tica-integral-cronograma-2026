@@ -26,10 +26,14 @@ import { Route as DashboardFaltasRouteImport } from './routes/dashboard/faltas'
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
+import { Route as ProfessorIndexRouteImport } from './routes/professor/index'
 import { Route as AlunoTurmaIdIndexRouteImport } from './routes/aluno/$turmaId/index'
 import { Route as DashboardTurmasIndexRouteImport } from './routes/dashboard/turmas/index'
 import { Route as DashboardTurmasTurmaIdRouteImport } from './routes/dashboard/turmas/$turmaId'
+import { Route as ProfessorTurmaIdIndexRouteImport } from './routes/professor/$turmaId/index'
 import { Route as AlunoTurmaIdAlunoIdIndexRouteImport } from './routes/aluno/$turmaId/$alunoId/index'
+import { Route as ProfessorTurmaIdFerramentasIndexRouteImport } from './routes/professor/$turmaId/ferramentas/index'
+import { Route as ProfessorTurmaIdFerramentasFerramentaRouteImport } from './routes/professor/$turmaId/ferramentas/$ferramenta'
 import { Route as AlunoTurmaIdAlunoIdFerramentasIndexRouteImport } from './routes/aluno/$turmaId/$alunoId/ferramentas/index'
 import { Route as AlunoTurmaIdAlunoIdFerramentasFerramentaRouteImport } from './routes/aluno/$turmaId/$alunoId/ferramentas/$ferramenta'
 
@@ -118,6 +122,11 @@ const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
   path: '/dashboard/programacao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfessorIndexRoute = ProfessorIndexRouteImport.update({
+  id: '/professor/',
+  path: '/professor/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlunoTurmaIdIndexRoute = AlunoTurmaIdIndexRouteImport.update({
   id: '/aluno/$turmaId/',
   path: '/aluno/$turmaId/',
@@ -133,10 +142,27 @@ const DashboardTurmasTurmaIdRoute = DashboardTurmasTurmaIdRouteImport.update({
   path: '/dashboard/turmas/$turmaId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfessorTurmaIdIndexRoute = ProfessorTurmaIdIndexRouteImport.update({
+  id: '/professor/$turmaId/',
+  path: '/professor/$turmaId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlunoTurmaIdAlunoIdIndexRoute =
   AlunoTurmaIdAlunoIdIndexRouteImport.update({
     id: '/aluno/$turmaId/$alunoId/',
     path: '/aluno/$turmaId/$alunoId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ProfessorTurmaIdFerramentasIndexRoute =
+  ProfessorTurmaIdFerramentasIndexRouteImport.update({
+    id: '/professor/$turmaId/ferramentas/',
+    path: '/professor/$turmaId/ferramentas/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ProfessorTurmaIdFerramentasFerramentaRoute =
+  ProfessorTurmaIdFerramentasFerramentaRouteImport.update({
+    id: '/professor/$turmaId/ferramentas/$ferramenta',
+    path: '/professor/$turmaId/ferramentas/$ferramenta',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AlunoTurmaIdAlunoIdFerramentasIndexRoute =
@@ -170,10 +196,14 @@ export interface FileRoutesByFullPath {
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/professor/': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
+  '/professor/$turmaId/': typeof ProfessorTurmaIdIndexRoute
+  '/professor/$turmaId/ferramentas/$ferramenta': typeof ProfessorTurmaIdFerramentasFerramentaRoute
   '/aluno/$turmaId/$alunoId/': typeof AlunoTurmaIdAlunoIdIndexRoute
+  '/professor/$turmaId/ferramentas/': typeof ProfessorTurmaIdFerramentasIndexRoute
   '/aluno/$turmaId/$alunoId/ferramentas/$ferramenta': typeof AlunoTurmaIdAlunoIdFerramentasFerramentaRoute
   '/aluno/$turmaId/$alunoId/ferramentas/': typeof AlunoTurmaIdAlunoIdFerramentasIndexRoute
 }
@@ -195,10 +225,14 @@ export interface FileRoutesByTo {
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/aluno': typeof AlunoIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/professor': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/aluno/$turmaId': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas': typeof DashboardTurmasIndexRoute
+  '/professor/$turmaId': typeof ProfessorTurmaIdIndexRoute
+  '/professor/$turmaId/ferramentas/$ferramenta': typeof ProfessorTurmaIdFerramentasFerramentaRoute
   '/aluno/$turmaId/$alunoId': typeof AlunoTurmaIdAlunoIdIndexRoute
+  '/professor/$turmaId/ferramentas': typeof ProfessorTurmaIdFerramentasIndexRoute
   '/aluno/$turmaId/$alunoId/ferramentas/$ferramenta': typeof AlunoTurmaIdAlunoIdFerramentasFerramentaRoute
   '/aluno/$turmaId/$alunoId/ferramentas': typeof AlunoTurmaIdAlunoIdFerramentasIndexRoute
 }
@@ -221,10 +255,14 @@ export interface FileRoutesById {
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/professor/': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
   '/aluno/$turmaId/': typeof AlunoTurmaIdIndexRoute
   '/dashboard/turmas/': typeof DashboardTurmasIndexRoute
+  '/professor/$turmaId/': typeof ProfessorTurmaIdIndexRoute
+  '/professor/$turmaId/ferramentas/$ferramenta': typeof ProfessorTurmaIdFerramentasFerramentaRoute
   '/aluno/$turmaId/$alunoId/': typeof AlunoTurmaIdAlunoIdIndexRoute
+  '/professor/$turmaId/ferramentas/': typeof ProfessorTurmaIdFerramentasIndexRoute
   '/aluno/$turmaId/$alunoId/ferramentas/$ferramenta': typeof AlunoTurmaIdAlunoIdFerramentasFerramentaRoute
   '/aluno/$turmaId/$alunoId/ferramentas/': typeof AlunoTurmaIdAlunoIdFerramentasIndexRoute
 }
@@ -248,10 +286,14 @@ export interface FileRouteTypes {
     | '/dashboard/programacao'
     | '/aluno/'
     | '/dashboard/'
+    | '/professor/'
     | '/dashboard/turmas/$turmaId'
     | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
+    | '/professor/$turmaId/'
+    | '/professor/$turmaId/ferramentas/$ferramenta'
     | '/aluno/$turmaId/$alunoId/'
+    | '/professor/$turmaId/ferramentas/'
     | '/aluno/$turmaId/$alunoId/ferramentas/$ferramenta'
     | '/aluno/$turmaId/$alunoId/ferramentas/'
   fileRoutesByTo: FileRoutesByTo
@@ -273,10 +315,14 @@ export interface FileRouteTypes {
     | '/dashboard/programacao'
     | '/aluno'
     | '/dashboard'
+    | '/professor'
     | '/dashboard/turmas/$turmaId'
     | '/aluno/$turmaId'
     | '/dashboard/turmas'
+    | '/professor/$turmaId'
+    | '/professor/$turmaId/ferramentas/$ferramenta'
     | '/aluno/$turmaId/$alunoId'
+    | '/professor/$turmaId/ferramentas'
     | '/aluno/$turmaId/$alunoId/ferramentas/$ferramenta'
     | '/aluno/$turmaId/$alunoId/ferramentas'
   id:
@@ -298,10 +344,14 @@ export interface FileRouteTypes {
     | '/dashboard/programacao'
     | '/aluno/'
     | '/dashboard/'
+    | '/professor/'
     | '/dashboard/turmas/$turmaId'
     | '/aluno/$turmaId/'
     | '/dashboard/turmas/'
+    | '/professor/$turmaId/'
+    | '/professor/$turmaId/ferramentas/$ferramenta'
     | '/aluno/$turmaId/$alunoId/'
+    | '/professor/$turmaId/ferramentas/'
     | '/aluno/$turmaId/$alunoId/ferramentas/$ferramenta'
     | '/aluno/$turmaId/$alunoId/ferramentas/'
   fileRoutesById: FileRoutesById
@@ -324,10 +374,14 @@ export interface RootRouteChildren {
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  ProfessorIndexRoute: typeof ProfessorIndexRoute
   DashboardTurmasTurmaIdRoute: typeof DashboardTurmasTurmaIdRoute
   AlunoTurmaIdIndexRoute: typeof AlunoTurmaIdIndexRoute
   DashboardTurmasIndexRoute: typeof DashboardTurmasIndexRoute
+  ProfessorTurmaIdIndexRoute: typeof ProfessorTurmaIdIndexRoute
+  ProfessorTurmaIdFerramentasFerramentaRoute: typeof ProfessorTurmaIdFerramentasFerramentaRoute
   AlunoTurmaIdAlunoIdIndexRoute: typeof AlunoTurmaIdAlunoIdIndexRoute
+  ProfessorTurmaIdFerramentasIndexRoute: typeof ProfessorTurmaIdFerramentasIndexRoute
   AlunoTurmaIdAlunoIdFerramentasFerramentaRoute: typeof AlunoTurmaIdAlunoIdFerramentasFerramentaRoute
   AlunoTurmaIdAlunoIdFerramentasIndexRoute: typeof AlunoTurmaIdAlunoIdFerramentasIndexRoute
 }
@@ -453,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProgramacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/professor/': {
+      id: '/professor/'
+      path: '/professor'
+      fullPath: '/professor/'
+      preLoaderRoute: typeof ProfessorIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/aluno/$turmaId/': {
       id: '/aluno/$turmaId/'
       path: '/aluno/$turmaId'
@@ -474,11 +535,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardTurmasTurmaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/professor/$turmaId/': {
+      id: '/professor/$turmaId/'
+      path: '/professor/$turmaId'
+      fullPath: '/professor/$turmaId/'
+      preLoaderRoute: typeof ProfessorTurmaIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/aluno/$turmaId/$alunoId/': {
       id: '/aluno/$turmaId/$alunoId/'
       path: '/aluno/$turmaId/$alunoId'
       fullPath: '/aluno/$turmaId/$alunoId/'
       preLoaderRoute: typeof AlunoTurmaIdAlunoIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/professor/$turmaId/ferramentas/': {
+      id: '/professor/$turmaId/ferramentas/'
+      path: '/professor/$turmaId/ferramentas'
+      fullPath: '/professor/$turmaId/ferramentas/'
+      preLoaderRoute: typeof ProfessorTurmaIdFerramentasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/professor/$turmaId/ferramentas/$ferramenta': {
+      id: '/professor/$turmaId/ferramentas/$ferramenta'
+      path: '/professor/$turmaId/ferramentas/$ferramenta'
+      fullPath: '/professor/$turmaId/ferramentas/$ferramenta'
+      preLoaderRoute: typeof ProfessorTurmaIdFerramentasFerramentaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/aluno/$turmaId/$alunoId/ferramentas/': {
@@ -516,10 +598,15 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
   AlunoIndexRoute: AlunoIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  ProfessorIndexRoute: ProfessorIndexRoute,
   DashboardTurmasTurmaIdRoute: DashboardTurmasTurmaIdRoute,
   AlunoTurmaIdIndexRoute: AlunoTurmaIdIndexRoute,
   DashboardTurmasIndexRoute: DashboardTurmasIndexRoute,
+  ProfessorTurmaIdIndexRoute: ProfessorTurmaIdIndexRoute,
+  ProfessorTurmaIdFerramentasFerramentaRoute:
+    ProfessorTurmaIdFerramentasFerramentaRoute,
   AlunoTurmaIdAlunoIdIndexRoute: AlunoTurmaIdAlunoIdIndexRoute,
+  ProfessorTurmaIdFerramentasIndexRoute: ProfessorTurmaIdFerramentasIndexRoute,
   AlunoTurmaIdAlunoIdFerramentasFerramentaRoute:
     AlunoTurmaIdAlunoIdFerramentasFerramentaRoute,
   AlunoTurmaIdAlunoIdFerramentasIndexRoute:
