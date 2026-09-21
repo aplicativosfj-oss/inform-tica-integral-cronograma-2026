@@ -8,6 +8,7 @@ import {
   HeartHandshake,
   Lock,
   MonitorPlay,
+  MessageSquareText,
   MoreHorizontal,
   Repeat2,
   Square,
@@ -41,6 +42,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ObservacaoAulaDialog } from "@/components/school/observacao-aula-dialog";
 import { SuspenderAulaDialog } from "@/components/school/suspender-aula-dialog";
 import { TimerAula } from "@/components/school/timer-aula";
 import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
@@ -946,6 +948,14 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           <Button size="sm" variant="outline" onClick={() => navigate({ to: "/tv" })}>
             <Tv className="size-3.5" /> <span className="hidden sm:inline">Modo TV</span>
           </Button>
+          {isAuthenticated && !assignment.misto ? (
+            <ObservacaoAulaDialog assignment={assignment} data={now}>
+              <Button size="sm" variant="outline">
+                <MessageSquareText className="size-3.5" />{" "}
+                <span className="hidden sm:inline">Observação</span>
+              </Button>
+            </ObservacaoAulaDialog>
+          ) : null}
           {isAuthenticated && !assignment.misto ? (
             <SuspenderAulaDialog assignment={assignment} data={now}>
               <Button size="sm" variant="outline" className="text-amber-600 dark:text-amber-400">

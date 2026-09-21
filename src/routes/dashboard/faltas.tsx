@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DashboardShell } from "@/components/school/dashboard-shell";
+import { ObservacaoAulaDialog } from "@/components/school/observacao-aula-dialog";
 import { SuspenderAulaDialog } from "@/components/school/suspender-aula-dialog";
 import { useAppStore } from "@/lib/app-store";
 import { useConfirmar } from "@/lib/confirm-store";
@@ -301,11 +302,18 @@ function FaltasPage() {
                     · {assignment.slot.inicio}–{assignment.slot.fim}
                   </span>
                 </p>
-                <SuspenderAulaDialog assignment={assignment} data={data}>
-                  <Button size="sm" variant="outline" className="shrink-0 gap-1.5">
-                    <CalendarX2 className="size-3.5" /> Não pôde participar
-                  </Button>
-                </SuspenderAulaDialog>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <ObservacaoAulaDialog assignment={assignment} data={data}>
+                    <Button size="sm" variant="ghost" className="gap-1.5">
+                      <MessageSquareText className="size-3.5" /> Observação
+                    </Button>
+                  </ObservacaoAulaDialog>
+                  <SuspenderAulaDialog assignment={assignment} data={data}>
+                    <Button size="sm" variant="outline" className="gap-1.5">
+                      <CalendarX2 className="size-3.5" /> Não pôde participar
+                    </Button>
+                  </SuspenderAulaDialog>
+                </div>
               </div>
             ))
           )}

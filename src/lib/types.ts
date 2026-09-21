@@ -148,6 +148,14 @@ export interface ScheduleConfig {
   excecoesPorData?: Record<string, string> | undefined;
   /** Sessões reprogramadas a partir da tela "Faltas do mês". */
   reprogramacoes?: Reprogramacao[] | undefined;
+  /** Motivo de uma aula suspensa sem reprogramação. Mesma chave de `suspensoes`. */
+  motivosSuspensao?: Record<string, string> | undefined;
+  /**
+   * Observação registrada pelo professor sobre o que aconteceu numa aula
+   * (ex.: "grupo 2 saiu mais cedo para ensaio"). Mesma chave de `suspensoes`;
+   * aparece no Diário das aulas, aberto ao público.
+   */
+  observacoesAula?: Record<string, string> | undefined;
 }
 
 export interface Slot {

@@ -49,7 +49,15 @@ interface AppState {
   /** Overrides which turma occupies a fixed weekly slot (Programação page). Pass `null` to restore the automatic rotation. */
   setSlotOverride: (dia: string, slotInicio: string, turmaId: string | null) => void;
   /** Stops (or resumes) the class scheduled for a specific date + slot, without affecting future weeks. */
-  setSessaoSuspensa: (dateISO: string, dia: string, slotInicio: string, suspensa: boolean) => void;
+  setSessaoSuspensa: (
+    dateISO: string,
+    dia: string,
+    slotInicio: string,
+    suspensa: boolean,
+    motivo?: string,
+  ) => void;
+  /** Grava (ou apaga, com texto vazio) a observação de uma aula específica. */
+  setObservacaoAula: (dateISO: string, dia: string, slotInicio: string, texto: string) => void;
   /**
    * Reprograma uma sessão específica para outra data/horário: marca a
    * original como suspensa e registra a nova ocorrência, sem afetar o
@@ -305,16 +313,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
           return { ...prev, slotOverrides: next };
         });
       },
-      setSessaoSuspensa: (dateISO, dia, slotInicio, suspensa) => {
+      setSessaoSuspensa: (dateISO, dia, slotInicio, suspensa, motivo) => {
         applyConfig((prev) => {
           const key = suspensaoKey(dateISO, dia, slotInicio);
           const next = { ...(prev.suspensoes ?? {}) };
+          const motivos = { ...(prev.motivosSuspensao ?? {}) };
           if (suspensa) {
             next[key] = true;
+            if (motivo) motivos[key] = motivo;
           } else {
             delete next[key];
+            delete motivos[key];
           }
-          return { ...prev, suspensoes: next };
+          return { ...prev, suspensoes: next, motivosSuspensao: motivos };
+        });
+      },
+      setObservacaoAula: (dateISO, dia, slotInicio, texto) => {
+        applyConfig((prev) => {
+          const key = suspensaoKey(dateISO, dia, slotInicio);
+          const next = { ...(prev.observacoesAula ?? {}) };
+          if (texto.trim()) next[key] = texto.trim();
+          else delete next[key];
+          return { ...prev, observacoesAula: next };
         });
       },
       reprogramarAula: (input) => {

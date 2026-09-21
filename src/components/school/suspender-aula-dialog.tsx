@@ -73,7 +73,7 @@ export function SuspenderAulaDialog({
     const motivoFinal = motivo.trim() || undefined;
     const opcao = escolha === "nenhum" ? undefined : opcoes[escolha];
     if (!opcao) {
-      setSessaoSuspensa(dataKey, assignment.dia, assignment.slot.inicio, true);
+      setSessaoSuspensa(dataKey, assignment.dia, assignment.slot.inicio, true, motivoFinal);
       toast.success(`Aula de ${turma.serie} "${turma.letra}" suspensa em ${formatarData(data)}.`);
     } else {
       reprogramarAula({

@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { DiarioAulas } from "@/components/school/diario-aulas";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
@@ -163,8 +164,8 @@ function CoordenacaoPage() {
             <div className="flex flex-col gap-4">
               <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                Calendário das aulas de informática, participação por turma e grupo e histórico de
-                faltas. Acesso aberto, somente leitura.
+                Diário das aulas (dadas, suspensas e reprogramadas), participação por turma e grupo
+                e histórico de faltas. Acesso aberto, somente leitura.
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
@@ -245,6 +246,8 @@ function CoordenacaoPage() {
               Não foi possível carregar a frequência agora: {erro}
             </p>
           ) : null}
+
+          <DiarioAulas registros={registros} mes={mes} />
 
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
             <Card>
