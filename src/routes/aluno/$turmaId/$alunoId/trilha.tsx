@@ -193,7 +193,7 @@ function MinhaTrilha() {
                               <span
                                 className={cn(
                                   "flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-                                  feito ? "bg-emerald-500 text-white" : "bg-muted text-foreground",
+                                  feito ? "bg-emerald-700 text-white" : "bg-muted text-foreground",
                                 )}
                               >
                                 {feito ? "✓" : i + 1}

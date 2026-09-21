@@ -5,11 +5,11 @@
 :root{
  --bg:#F4F6F3;--surface:#FFFFFF;--surface2:#EEF2F0;--ink:#13232F;--mut:#586878;--line:#DDE4E0;
  --pri:#1F4E79;--pri2:#DCE8F3;--chalk:#F2B632;--chalk2:#FFF3D1;
- --ot:#1E8A5A;--bo:#6DA544;--re:#E39B2F;--in:#D1495B;--na:#CBD3CF;
+ --ot:#17744A;--bo:#4A7A26;--re:#A35A00;--in:#B3344A;--tagp:62%;--na:#CBD3CF;
  --shadow:0 1px 2px rgba(19,35,47,.06),0 8px 24px -12px rgba(19,35,47,.18);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E171E;--surface:#16222B;--surface2:#1C2A35;--ink:#E7EEF2;--mut:#9AAAB6;--line:#26363F;--pri:#8CB8E4;--pri2:#1D3246;--chalk:#F5C451;--chalk2:#3A3018;--na:#34424B;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6)}}
-:root[data-theme="dark"]{--bg:#0E171E;--surface:#16222B;--surface2:#1C2A35;--ink:#E7EEF2;--mut:#9AAAB6;--line:#26363F;--pri:#8CB8E4;--pri2:#1D3246;--chalk:#F5C451;--chalk2:#3A3018;--na:#34424B;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tagp:38%;--bg:#0E171E;--surface:#16222B;--surface2:#1C2A35;--ink:#E7EEF2;--mut:#9AAAB6;--line:#26363F;--pri:#8CB8E4;--pri2:#1D3246;--chalk:#F5C451;--chalk2:#3A3018;--na:#34424B;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6)}}
+:root[data-theme="dark"]{--tagp:38%;--bg:#0E171E;--surface:#16222B;--surface2:#1C2A35;--ink:#E7EEF2;--mut:#9AAAB6;--line:#26363F;--pri:#8CB8E4;--pri2:#1D3246;--chalk:#F5C451;--chalk2:#3A3018;--na:#34424B;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Nunito Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
@@ -50,7 +50,7 @@ main{padding-block:20px 48px}
 .label{font:800 11.5px "Nunito Sans";letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
 /* faixas */
 .f-OT{--f:var(--ot)}.f-BO{--f:var(--bo)}.f-RE{--f:var(--re)}.f-IN{--f:var(--in)}.f-NA{--f:var(--na)}
-.tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:999px;font:800 12.5px "Nunito Sans";background:color-mix(in srgb,var(--f) 16%,transparent);color:color-mix(in srgb,var(--f) 75%,var(--ink));white-space:nowrap}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:999px;font:800 12.5px "Nunito Sans";background:color-mix(in srgb,var(--f) 16%,transparent);color:color-mix(in srgb,var(--f) var(--tagp),var(--ink));white-space:nowrap}
 .tag::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--f)}
 .num{font:800 clamp(24px,2.6vw,32px)/1 Sora,sans-serif;letter-spacing:-.02em}
 .bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
@@ -130,7 +130,7 @@ svg text{fill:var(--mut);font:600 12px "Nunito Sans",sans-serif}
 .pb .b .trk{height:16px;border-radius:99px;background:var(--surface);overflow:hidden}
 .pb .b .trk i{display:block;height:100%;border-radius:99px;background:var(--c)}
 .pb .b b{text-align:right;font-size:15px}
-.venc{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font:800 12.5px "Nunito Sans";white-space:nowrap;background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c) 80%,var(--ink))}
+.venc{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font:800 12.5px "Nunito Sans";white-space:nowrap;background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c) var(--tagp),var(--ink))}
 .qrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .qrow:last-child{border-bottom:0}
 @media (max-width:720px){.qrow{grid-template-columns:1fr}}

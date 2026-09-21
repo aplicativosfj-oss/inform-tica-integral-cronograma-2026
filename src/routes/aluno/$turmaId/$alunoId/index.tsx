@@ -36,6 +36,7 @@ import {
 import { useConfirmar } from "@/lib/confirm-store";
 import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
 import { cn } from "@/lib/utils";
+import { simuladoDoAluno } from "@/lib/simulados";
 import { idadeEmAnos } from "@/lib/profissional-acesso";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, AtividadeStatus, Presenca } from "@/lib/types";
@@ -92,6 +93,15 @@ function AlunoPainel() {
   const sessao = lerAlunoSessao();
   const pin = sessao?.pin;
   const idade = idadeEmAnos(aluno?.nascimento);
+  const [simuladoAberto, setSimuladoAberto] = useState<{ titulo: string; feito: boolean } | null>(null);
+
+  // Há simulado aberto para a turma? Mostra o aviso no topo da área.
+  useEffect(() => {
+    if (!pin) return;
+    simuladoDoAluno({ alunoId, pin, turmaId })
+      .then((s) => setSimuladoAberto(s ? { titulo: s.titulo, feito: s.minha?.status === "finalizado" } : null))
+      .catch(() => setSimuladoAberto(null));
+  }, [alunoId, turmaId, pin]);
 
   useEffect(() => {
     if (!sessao || sessao.alunoId !== alunoId || sessao.turmaId !== turmaId) {
@@ -307,6 +317,22 @@ function AlunoPainel() {
 
         {/* Ferramentas e exercícios */}
         <section className="mx-auto flex max-w-6xl flex-col gap-3 px-4 pb-2 sm:px-6">
+          {simuladoAberto && !simuladoAberto.feito ? (
+            <Link
+              to="/aluno/$turmaId/$alunoId/simulado"
+              params={{ turmaId, alunoId }}
+              className={cn(
+                CLASSES_BARRA_FERRAMENTAS,
+                "from-sky-800 via-blue-800 to-indigo-800 shadow-sky-500/20 hover:shadow-sky-500/30",
+              )}
+            >
+              <BarraFerramentas
+                titulo={`Simulado aberto: ${simuladoAberto.titulo}`}
+                descricao="O professor iniciou um simulado para a sua turma. Entre quando ele pedir."
+                acao="Fazer agora →"
+              />
+            </Link>
+          ) : null}
           <Link
             to="/aluno/$turmaId/$alunoId/trilha"
             params={{ turmaId, alunoId }}

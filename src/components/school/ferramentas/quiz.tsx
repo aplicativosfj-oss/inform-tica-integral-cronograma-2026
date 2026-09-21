@@ -1,6 +1,7 @@
 import { CheckCircle2, Clock3, Lock, RotateCcw, Trophy, XCircle } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 
+import { Cronometro, formatarTempo, useSegundosDesde } from "@/components/school/cronometro";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -63,6 +64,8 @@ export function Quiz({
   const [concluidas, setConcluidas] = useState(0);
   const [finalizado, setFinalizado] = useState(false);
   const [segundosRestantes, setSegundosRestantes] = useState(TEMPO_LEITURA_SEGUNDOS);
+  const [inicio, setInicio] = useState(() => Date.now());
+  const tempo = useSegundosDesde(inicio, finalizado);
 
   const questao = questoes[indice];
   const liberada = segundosRestantes <= 0;
@@ -126,6 +129,7 @@ export function Quiz({
     setAcertosDeUmaVez(0);
     setDeUmaVez([]);
     setConcluidas(0);
+    setInicio(Date.now());
     setFinalizado(false);
   }
 
@@ -147,7 +151,7 @@ export function Quiz({
           </span>
           <p className="text-lg font-semibold text-foreground">Atividade concluída!</p>
           <p className="text-sm text-muted-foreground">
-            Você acertou {acertosDeUmaVez} de {questoes.length} de primeira.
+            Você acertou {acertosDeUmaVez} de {questoes.length} de primeira, em {formatarTempo(tempo)}.
             {percentual >= 80
               ? " Mandou muito bem! 🎉"
               : percentual >= 50
@@ -176,6 +180,7 @@ export function Quiz({
         <span className="shrink-0 text-xs text-muted-foreground">
           {indice + 1}/{questoes.length}
         </span>
+        <Cronometro segundos={tempo} tamanho={56} className="shrink-0" />
       </div>
 
       <Card>
