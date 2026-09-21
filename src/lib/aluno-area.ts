@@ -47,6 +47,20 @@ export async function obterOuCriarPin(alunoId: string, turmaId: string): Promise
   return pin;
 }
 
+/**
+ * Sorteia um PIN novo para o aluno (o antigo para de valer na hora). Usado
+ * quando o PIN vaza para a turma inteira ou a criança esquece e o professor
+ * prefere recomeçar. Só o professor autenticado chega aqui.
+ */
+export async function redefinirPin(alunoId: string, turmaId: string): Promise<string> {
+  const pin = gerarPin();
+  const { error } = await supabase
+    .from("aluno_pins")
+    .upsert({ aluno_id: alunoId, turma_id: turmaId, pin }, { onConflict: "aluno_id" });
+  if (error) throw error;
+  return pin;
+}
+
 /** Confere o PIN sem nunca trazer o valor guardado para o navegador. */
 export async function verificarPin(alunoId: string, pinDigitado: string): Promise<boolean> {
   const { data, error } = await supabase.rpc("verificar_pin_aluno", {

@@ -18,6 +18,7 @@ import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TvRouteImport } from './routes/tv'
 import { Route as AlunoIndexRouteImport } from './routes/aluno/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardAcessosRouteImport } from './routes/dashboard/acessos'
 import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
 import { Route as DashboardAtividadesRouteImport } from './routes/dashboard/atividades'
 import { Route as DashboardAulasRouteImport } from './routes/dashboard/aulas'
@@ -85,6 +86,11 @@ const AlunoIndexRoute = AlunoIndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardAcessosRoute = DashboardAcessosRouteImport.update({
+  id: '/dashboard/acessos',
+  path: '/dashboard/acessos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardAlunosRoute = DashboardAlunosRouteImport.update({
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
+  '/dashboard/acessos': typeof DashboardAcessosRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
+  '/dashboard/acessos': typeof DashboardAcessosRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
@@ -289,6 +297,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
+  '/dashboard/acessos': typeof DashboardAcessosRoute
   '/dashboard/alunos': typeof DashboardAlunosRoute
   '/dashboard/atividades': typeof DashboardAtividadesRoute
   '/dashboard/aulas': typeof DashboardAulasRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/sobre'
     | '/tv'
+    | '/dashboard/acessos'
     | '/dashboard/alunos'
     | '/dashboard/atividades'
     | '/dashboard/aulas'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/sobre'
     | '/tv'
+    | '/dashboard/acessos'
     | '/dashboard/alunos'
     | '/dashboard/atividades'
     | '/dashboard/aulas'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/sobre'
     | '/tv'
+    | '/dashboard/acessos'
     | '/dashboard/alunos'
     | '/dashboard/atividades'
     | '/dashboard/aulas'
@@ -428,6 +440,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SobreRoute: typeof SobreRoute
   TvRoute: typeof TvRoute
+  DashboardAcessosRoute: typeof DashboardAcessosRoute
   DashboardAlunosRoute: typeof DashboardAlunosRoute
   DashboardAtividadesRoute: typeof DashboardAtividadesRoute
   DashboardAulasRoute: typeof DashboardAulasRoute
@@ -518,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/acessos': {
+      id: '/dashboard/acessos'
+      path: '/dashboard/acessos'
+      fullPath: '/dashboard/acessos'
+      preLoaderRoute: typeof DashboardAcessosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/alunos': {
@@ -692,6 +712,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SobreRoute: SobreRoute,
   TvRoute: TvRoute,
+  DashboardAcessosRoute: DashboardAcessosRoute,
   DashboardAlunosRoute: DashboardAlunosRoute,
   DashboardAtividadesRoute: DashboardAtividadesRoute,
   DashboardAulasRoute: DashboardAulasRoute,

@@ -5,6 +5,7 @@ import {
   CalendarSearch,
   ClipboardCheck,
   GraduationCap,
+  KeyRound,
   Layers,
   LayoutDashboard,
   Settings2,
@@ -43,7 +44,10 @@ const NAV_GROUPS = [
   },
   {
     label: "Sistema",
-    items: [{ to: "/dashboard/configuracoes", label: "Configurações", icon: Settings2 }],
+    items: [
+      { to: "/dashboard/acessos", label: "Senhas de acesso", icon: KeyRound },
+      { to: "/dashboard/configuracoes", label: "Configurações", icon: Settings2 },
+    ],
   },
 ] as const;
 
