@@ -7,6 +7,7 @@ import {
   KeyRound,
   Loader2,
   Presentation,
+  ShieldCheck,
   Printer,
   RefreshCw,
   Users2,
@@ -27,7 +28,7 @@ import {
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
 import { obterOuCriarPin, redefinirPin } from "@/lib/aluno-area";
-import { senhaApoio, senhaProfessor } from "@/lib/profissional-acesso";
+import { senhaApoio, senhaCoordenacaoAEE, senhaProfessor } from "@/lib/profissional-acesso";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Turma } from "@/lib/types";
 
@@ -289,7 +290,7 @@ function PinsDosAlunos({ turma }: { turma: Turma }) {
 }
 
 function AcessosPage() {
-  const { turmas } = useAppStore();
+  const { turmas, config } = useAppStore();
   const [turmaId, setTurmaId] = useState<string>(turmas[0]?.id ?? "");
   const turma = turmas.find((t) => t.id === turmaId) ?? turmas[0];
 
@@ -331,6 +332,32 @@ function AcessosPage() {
           </SelectContent>
         </Select>
       </div>
+
+      {config.coordenacaoAEE?.nome ? (
+        <Card className="mb-4 border-emerald-500/40 bg-emerald-500/5">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <ShieldCheck className="size-5 shrink-0 text-emerald-500" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground">
+                  Senha mestra · Coordenação do AEE
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {config.coordenacaoAEE.nome} — abre a área de todos os mediadores e cuidadores
+                  (/mediador).
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Senha valor={senhaCoordenacaoAEE(config.coordenacaoAEE.nome)} />
+              <BotaoCopiar
+                valor={senhaCoordenacaoAEE(config.coordenacaoAEE.nome)}
+                rotulo={config.coordenacaoAEE.nome}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span

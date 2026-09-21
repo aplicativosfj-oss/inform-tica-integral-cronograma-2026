@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
 import { NovaAtividadeDialog } from "@/components/school/nova-atividade-dialog";
+import { FaleComProfessor } from "@/components/school/fale-com-professor";
 import { HeroProfissional } from "@/components/school/hero-profissional";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
@@ -191,6 +192,12 @@ function ProfessorPainel() {
               </Button>
             }
           />
+
+          <div className="mt-4">
+            <FaleComProfessor
+              remetente={`Prof(a). ${turma.professorRegente} — ${turma.serie} "${turma.letra}"`}
+            />
+          </div>
 
           <Link
             to="/professor/$turmaId/ferramentas"

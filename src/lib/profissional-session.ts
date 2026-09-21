@@ -27,7 +27,31 @@ export interface ProfissionalSessao {
    */
   alunoAtendidoId?: string;
   alunoAtendidoNome?: string;
+  /** Entrou pela senha mestra da coordenação do AEE, não pela própria senha. */
+  viaCoordenacaoAEE?: string;
   entrouEm: string;
+}
+
+const CHAVE_AEE = "informatica:coordenacao-aee";
+
+/** Coordenação do AEE autenticada nesta aba: abre qualquer área de apoio sem pedir senha de novo. */
+export function lerSessaoAEE(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.sessionStorage.getItem(CHAVE_AEE);
+  } catch {
+    return null;
+  }
+}
+
+export function iniciarSessaoAEE(nome: string): void {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(CHAVE_AEE, nome);
+}
+
+export function encerrarSessaoAEE(): void {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(CHAVE_AEE);
 }
 
 export function lerProfissionalSessao(): ProfissionalSessao | null {

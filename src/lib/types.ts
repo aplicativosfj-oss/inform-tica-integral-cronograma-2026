@@ -156,6 +156,12 @@ export interface ScheduleConfig {
    * aparece no Diário das aulas, aberto ao público.
    */
   observacoesAula?: Record<string, string> | undefined;
+  /**
+   * Coordenação do Atendimento Educacional Especializado (AEE). Quem ocupa
+   * o cargo recebe uma senha mestra que abre a área de qualquer mediador ou
+   * cuidador da escola.
+   */
+  coordenacaoAEE?: { nome: string } | undefined;
 }
 
 export interface Slot {

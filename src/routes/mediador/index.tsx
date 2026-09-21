@@ -1,8 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, HandHeart, HeartHandshake, KeyRound, Users2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import {
+  ChevronRight,
+  HandHeart,
+  HeartHandshake,
+  KeyRound,
+  ShieldCheck,
+  Users2,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HeroProfissional } from "@/components/school/hero-profissional";
 import { NavBar } from "@/components/school/nav-bar";
@@ -13,11 +21,17 @@ import { useAppStore } from "@/lib/app-store";
 import {
   alunosDoApoio,
   conferirSenhaApoio,
+  conferirSenhaCoordenacaoAEE,
   idApoio,
   listarApoios,
   type ApoioComTurma,
 } from "@/lib/profissional-acesso";
-import { iniciarProfissionalSessao } from "@/lib/profissional-session";
+import {
+  encerrarSessaoAEE,
+  iniciarProfissionalSessao,
+  iniciarSessaoAEE,
+  lerSessaoAEE,
+} from "@/lib/profissional-session";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 
 export const Route = createFileRoute("/mediador/")({
@@ -36,10 +50,32 @@ export const Route = createFileRoute("/mediador/")({
 });
 
 function MediadorPicker() {
-  const { turmas } = useAppStore();
+  const { turmas, config } = useAppStore();
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [escolhido, setEscolhido] = useState<ApoioComTurma | null>(null);
+  const coordenadora = config.coordenacaoAEE?.nome;
+  // Coordenação do AEE já autenticada nesta aba: abre qualquer área direto.
+  const [sessaoAEE, setSessaoAEE] = useState<string | null>(null);
+  const [pedindoSenhaAEE, setPedindoSenhaAEE] = useState(false);
+  const entrouComMestra = useRef(false);
+  useEffect(() => setSessaoAEE(lerSessaoAEE()), []);
+
+  function abrirArea(item: ApoioComTurma, via?: string) {
+    iniciarProfissionalSessao({
+      tipo: "apoio",
+      id: idApoio(item.turma, item.indice),
+      nome: item.apoio.nome,
+      turmaId: item.turma.id,
+      apoioIndice: item.indice,
+      funcao: item.apoio.funcao,
+      ...(via ? { viaCoordenacaoAEE: via } : {}),
+    });
+    navigate({
+      to: "/mediador/$turmaId/$apoioIndex",
+      params: { turmaId: item.turma.id, apoioIndex: String(item.indice) },
+    });
+  }
 
   const apoios = useMemo(() => listarApoios(turmas), [turmas]);
   const filtrados = useMemo(() => {
@@ -79,6 +115,44 @@ function MediadorPicker() {
             ]}
           />
 
+          {coordenadora ? (
+            <div className="mt-6 flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-cyan-700 p-5 text-white shadow-lg ring-1 ring-white/15 sm:flex-row sm:items-center">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/25">
+                <ShieldCheck className="size-6" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-100">
+                  Coordenação do AEE
+                </p>
+                <p className="text-lg font-bold">{coordenadora}</p>
+                <p className="text-sm text-white/85">
+                  {sessaoAEE
+                    ? "Acesso liberado: clique em qualquer profissional abaixo para abrir a área dele(a)."
+                    : "Com a senha mestra, a coordenação abre a área de todos os mediadores e cuidadores."}
+                </p>
+              </div>
+              {sessaoAEE ? (
+                <Button
+                  variant="outline"
+                  className="border-white/40 bg-transparent text-white hover:bg-white/15 hover:text-white"
+                  onClick={() => {
+                    encerrarSessaoAEE();
+                    setSessaoAEE(null);
+                  }}
+                >
+                  Sair da coordenação
+                </Button>
+              ) : (
+                <Button
+                  className="bg-white text-emerald-800 hover:bg-white/90"
+                  onClick={() => setPedindoSenhaAEE(true)}
+                >
+                  <KeyRound className="size-4" /> Entrar com a senha mestra
+                </Button>
+              )}
+            </div>
+          ) : null}
+
           <h2 className="mb-1 mt-8 text-lg font-semibold text-foreground">Encontre seu nome</h2>
           <p className="mb-3 text-sm text-muted-foreground">
             Clique em você e digite a senha que a coordenação entregou.
@@ -105,7 +179,7 @@ function MediadorPicker() {
                   <button
                     key={`${item.turma.id}-${item.indice}`}
                     type="button"
-                    onClick={() => setEscolhido(item)}
+                    onClick={() => (sessaoAEE ? abrirArea(item, sessaoAEE) : setEscolhido(item))}
                     className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 text-left shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                   >
                     <span
@@ -141,23 +215,36 @@ function MediadorPicker() {
           aoFechar={() => setEscolhido(null)}
           nome={escolhido.apoio.nome}
           contexto={`${escolhido.apoio.funcao} · ${escolhido.turma.serie} "${escolhido.turma.letra}"`}
-          verificar={(senha) => conferirSenhaApoio(escolhido.turma, escolhido.indice, senha)}
+          verificar={(senha) => {
+            // A senha mestra da coordenação do AEE também abre qualquer área.
+            entrouComMestra.current = conferirSenhaCoordenacaoAEE(coordenadora, senha);
+            return (
+              entrouComMestra.current ||
+              conferirSenhaApoio(escolhido.turma, escolhido.indice, senha)
+            );
+          }}
           aoEntrar={() => {
-            iniciarProfissionalSessao({
-              tipo: "apoio",
-              id: idApoio(escolhido.turma, escolhido.indice),
-              nome: escolhido.apoio.nome,
-              turmaId: escolhido.turma.id,
-              apoioIndice: escolhido.indice,
-              funcao: escolhido.apoio.funcao,
-            });
-            navigate({
-              to: "/mediador/$turmaId/$apoioIndex",
-              params: {
-                turmaId: escolhido.turma.id,
-                apoioIndex: String(escolhido.indice),
-              },
-            });
+            if (entrouComMestra.current && coordenadora) {
+              iniciarSessaoAEE(coordenadora);
+              abrirArea(escolhido, coordenadora);
+            } else {
+              abrirArea(escolhido);
+            }
+          }}
+        />
+      ) : null}
+
+      {pedindoSenhaAEE && coordenadora ? (
+        <SenhaProfissionalDialog
+          aberto
+          aoFechar={() => setPedindoSenhaAEE(false)}
+          nome={coordenadora}
+          contexto="Coordenação do AEE · senha mestra"
+          verificar={(senha) => conferirSenhaCoordenacaoAEE(coordenadora, senha)}
+          aoEntrar={() => {
+            iniciarSessaoAEE(coordenadora);
+            setSessaoAEE(coordenadora);
+            setPedindoSenhaAEE(false);
           }}
         />
       ) : null}

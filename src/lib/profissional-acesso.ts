@@ -58,6 +58,23 @@ export function senhaApoio(turma: Turma, indice: number): string {
   return senhaDe(`${idApoio(turma, indice)}|${apoio?.nome ?? ""}`);
 }
 
+/**
+ * Senha mestra da coordenação do AEE: abre a área de qualquer mediador ou
+ * cuidador. Mesma regra das outras senhas — derivada do nome, sempre igual.
+ */
+export function senhaCoordenacaoAEE(nomeCoordenadora: string): string {
+  return senhaDe(`coordenacao-aee|${nomeCoordenadora}`);
+}
+
+export function conferirSenhaCoordenacaoAEE(
+  nomeCoordenadora: string | undefined,
+  digitada: string,
+): boolean {
+  return (
+    Boolean(nomeCoordenadora) && digitada.trim() === senhaCoordenacaoAEE(nomeCoordenadora ?? "")
+  );
+}
+
 export function conferirSenhaProfessor(turma: Turma, digitada: string): boolean {
   return digitada.trim() === senhaProfessor(turma);
 }
