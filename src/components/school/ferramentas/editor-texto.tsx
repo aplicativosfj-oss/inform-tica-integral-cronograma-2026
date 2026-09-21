@@ -185,7 +185,12 @@ interface EstadoArraste {
   startHeight: number;
   startLeft: number;
   startTop: number;
+  /** Arraste iniciado no corpo da imagem, ainda esperando o primeiro movimento. */
+  aguardandoMovimento?: boolean;
 }
+
+/** Folga antes de um clique na imagem virar arraste (evita mover sem querer). */
+const PIXELS_ATE_ARRASTAR = 4;
 
 /**
  * Deixa uma caixa de texto pronta para ser arrastada/redimensionada.
@@ -322,7 +327,7 @@ export function EditorTexto() {
       const src = leitor.result as string;
       const html =
         `<span class="editor-img-wrap" contenteditable="false" draggable="false" data-align="inline" ` +
-        `style="display:inline-block;position:relative;max-width:100%;margin:0 4px;vertical-align:middle;">` +
+        `style="display:inline-block;position:relative;max-width:100%;margin:0 4px;vertical-align:middle;cursor:grab;">` +
         `<button type="button" class="editor-img-delete" contenteditable="false" title="Remover imagem" ` +
         `style="position:absolute;left:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;background:#dc2626;` +
         `color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;">×</button>` +
@@ -378,6 +383,7 @@ export function EditorTexto() {
   function prepararImagens() {
     areaRef.current?.querySelectorAll<HTMLElement>(".editor-img-wrap").forEach((wrap) => {
       wrap.setAttribute("draggable", "false");
+      wrap.style.cursor = wrap.dataset["align"] === "livre" ? "move" : "grab";
       if (wrap.querySelector(".editor-img-move")) return;
       const alca = document.createElement("span");
       alca.className = "editor-img-move";
@@ -441,6 +447,9 @@ export function EditorTexto() {
     wrap.style.display = "inline-block";
     wrap.style.position = "absolute";
     wrap.style.zIndex = "5";
+    // No modo livre o ponteiro vira a cruz de arrasto sobre a imagem inteira,
+    // mostrando que ali se pega e se move.
+    wrap.style.cursor = "move";
     wrap.style.left = `${Math.round(retanguloImagem.left - retanguloArea.left + area.scrollLeft)}px`;
     wrap.style.top = `${Math.round(retanguloImagem.top - retanguloArea.top + area.scrollTop)}px`;
   }
@@ -451,6 +460,9 @@ export function EditorTexto() {
     wrap.style.left = "";
     wrap.style.top = "";
     wrap.style.zIndex = "";
+    // Presa ao texto, volta a mão: dá para pegar e soltar na folha, mas a
+    // posição ainda é a do parágrafo.
+    wrap.style.cursor = "grab";
   }
 
   /**
@@ -534,6 +546,12 @@ export function EditorTexto() {
     }
   }
 
+  /** Cursor da folha inteira — vira a cruz enquanto a imagem está sendo arrastada. */
+  function definirCursorDaFolha(cursor: string) {
+    const folha = areaRef.current;
+    if (folha) folha.style.cursor = cursor;
+  }
+
   // Arraste das alcinhas (imagem e caixa de texto).
   //
   // Os eventos são de *ponteiro* (mouse, dedo ou caneta) e presos direto na
@@ -551,10 +569,16 @@ export function EditorTexto() {
       if (!alvo) return;
 
       const alcaImagem = alvo.closest(".editor-img-handle");
-      const alcaMoverImagem = alvo.closest(".editor-img-move");
       const alcaMoverCaixa = alvo.closest(".editor-textbox-handle");
       const alcaRedimensionarCaixa = alvo.closest(".editor-textbox-resize");
-      if (!alcaImagem && !alcaMoverImagem && !alcaMoverCaixa && !alcaRedimensionarCaixa) return;
+      // O corpo da imagem também arrasta: pegar em qualquer ponto dela move a
+      // imagem, como em qualquer editor. A alcinha azul continua existindo
+      // como pista visual de que dá para arrastar.
+      const corpoDaImagem =
+        !alcaImagem && !alvo.closest(".editor-img-delete")
+          ? alvo.closest<HTMLElement>(".editor-img-wrap")
+          : null;
+      if (!alcaImagem && !corpoDaImagem && !alcaMoverCaixa && !alcaRedimensionarCaixa) return;
 
       // Impede a seleção de texto e o drag-and-drop nativo do bloco.
       e.preventDefault();
@@ -579,16 +603,17 @@ export function EditorTexto() {
           startLeft: 0,
           startTop: 0,
         };
-      } else if (alcaMoverImagem) {
-        const wrap = alcaMoverImagem.closest<HTMLElement>(".editor-img-wrap");
-        if (!wrap) return;
-        // Na primeira vez que o aluno arrasta, a imagem sai do texto e passa
-        // a flutuar sobre a folha — daí em diante ela anda livre.
-        soltarImagemNaFolha(wrap);
+      } else if (corpoDaImagem) {
+        const wrap = corpoDaImagem;
+        selecionarImagem(wrap);
+        // Ainda não solta a imagem do texto: só um clique (sem andar) deve
+        // apenas selecionar. O arraste começa de verdade no primeiro
+        // movimento — ver `PIXELS_ATE_ARRASTAR` lá embaixo.
         arrastandoRef.current = {
           ...base,
           tipo: "imagem-mover",
           elemento: wrap,
+          aguardandoMovimento: wrap.dataset["align"] !== "livre",
           startWidth: 0,
           startHeight: 0,
           startLeft: wrap.offsetLeft,
@@ -626,6 +651,8 @@ export function EditorTexto() {
         };
       }
 
+      if (arrastandoRef.current?.tipo === "imagem-mover") definirCursorDaFolha("move");
+
       try {
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       } catch {
@@ -647,6 +674,15 @@ export function EditorTexto() {
         const wrap = estado.elemento.closest<HTMLElement>(".editor-img-wrap");
         if (wrap) atualizarPosicaoBarraImagem(wrap);
       } else if (estado.tipo === "imagem-mover") {
+        // Clique parado não deve tirar a imagem do texto — só arrasta depois
+        // de andar alguns pixels.
+        if (estado.aguardandoMovimento) {
+          if (Math.abs(dx) < PIXELS_ATE_ARRASTAR && Math.abs(dy) < PIXELS_ATE_ARRASTAR) return;
+          soltarImagemNaFolha(estado.elemento);
+          estado.aguardandoMovimento = false;
+          estado.startLeft = estado.elemento.offsetLeft - dx;
+          estado.startTop = estado.elemento.offsetTop - dy;
+        }
         estado.elemento.style.left = `${Math.round(estado.startLeft + dx)}px`;
         estado.elemento.style.top = `${Math.round(estado.startTop + dy)}px`;
         atualizarPosicaoBarraImagem(estado.elemento);
@@ -663,6 +699,7 @@ export function EditorTexto() {
       const estado = arrastandoRef.current;
       if (!estado || e.pointerId !== estado.ponteiro) return;
       arrastandoRef.current = null;
+      definirCursorDaFolha("");
       salvarRascunhoLocal();
       atualizarContagem();
       setSujo(true);
