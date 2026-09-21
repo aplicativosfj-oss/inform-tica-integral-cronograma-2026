@@ -27,6 +27,8 @@ import { Route as DashboardFaltasRouteImport } from './routes/dashboard/faltas'
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
+import { Route as FerramentasIndexRouteImport } from './routes/ferramentas/index'
+import { Route as FerramentasFerramentaRouteImport } from './routes/ferramentas/$ferramenta'
 import { Route as MediadorIndexRouteImport } from './routes/mediador/index'
 import { Route as ProfessorIndexRouteImport } from './routes/professor/index'
 import { Route as AlunoTurmaIdIndexRouteImport } from './routes/aluno/$turmaId/index'
@@ -133,6 +135,16 @@ const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
   path: '/dashboard/programacao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FerramentasIndexRoute = FerramentasIndexRouteImport.update({
+  id: '/ferramentas/',
+  path: '/ferramentas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FerramentasFerramentaRoute = FerramentasFerramentaRouteImport.update({
+  id: '/ferramentas/$ferramenta',
+  path: '/ferramentas/$ferramenta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediadorIndexRoute = MediadorIndexRouteImport.update({
   id: '/mediador/',
   path: '/mediador/',
@@ -235,8 +247,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/ferramentas/': typeof FerramentasIndexRoute
   '/mediador/': typeof MediadorIndexRoute
   '/professor/': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
@@ -270,8 +284,10 @@ export interface FileRoutesByTo {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
   '/aluno': typeof AlunoIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/ferramentas': typeof FerramentasIndexRoute
   '/mediador': typeof MediadorIndexRoute
   '/professor': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
@@ -306,8 +322,10 @@ export interface FileRoutesById {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/ferramentas/': typeof FerramentasIndexRoute
   '/mediador/': typeof MediadorIndexRoute
   '/professor/': typeof ProfessorIndexRoute
   '/dashboard/turmas/$turmaId': typeof DashboardTurmasTurmaIdRoute
@@ -343,8 +361,10 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/ferramentas/$ferramenta'
     | '/aluno/'
     | '/dashboard/'
+    | '/ferramentas/'
     | '/mediador/'
     | '/professor/'
     | '/dashboard/turmas/$turmaId'
@@ -378,8 +398,10 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/ferramentas/$ferramenta'
     | '/aluno'
     | '/dashboard'
+    | '/ferramentas'
     | '/mediador'
     | '/professor'
     | '/dashboard/turmas/$turmaId'
@@ -413,8 +435,10 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/programacao'
+    | '/ferramentas/$ferramenta'
     | '/aluno/'
     | '/dashboard/'
+    | '/ferramentas/'
     | '/mediador/'
     | '/professor/'
     | '/dashboard/turmas/$turmaId'
@@ -449,8 +473,10 @@ export interface RootRouteChildren {
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
+  FerramentasFerramentaRoute: typeof FerramentasFerramentaRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  FerramentasIndexRoute: typeof FerramentasIndexRoute
   MediadorIndexRoute: typeof MediadorIndexRoute
   ProfessorIndexRoute: typeof ProfessorIndexRoute
   DashboardTurmasTurmaIdRoute: typeof DashboardTurmasTurmaIdRoute
@@ -596,6 +622,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProgramacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ferramentas/': {
+      id: '/ferramentas/'
+      path: '/ferramentas'
+      fullPath: '/ferramentas/'
+      preLoaderRoute: typeof FerramentasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ferramentas/$ferramenta': {
+      id: '/ferramentas/$ferramenta'
+      path: '/ferramentas/$ferramenta'
+      fullPath: '/ferramentas/$ferramenta'
+      preLoaderRoute: typeof FerramentasFerramentaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mediador/': {
       id: '/mediador/'
       path: '/mediador'
@@ -721,8 +761,10 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
+  FerramentasFerramentaRoute: FerramentasFerramentaRoute,
   AlunoIndexRoute: AlunoIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  FerramentasIndexRoute: FerramentasIndexRoute,
   MediadorIndexRoute: MediadorIndexRoute,
   ProfessorIndexRoute: ProfessorIndexRoute,
   DashboardTurmasTurmaIdRoute: DashboardTurmasTurmaIdRoute,

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Brain,
   Download,
@@ -15,10 +15,12 @@ import type { LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
+import { listarFerramentasPublicas } from "@/lib/ferramentas-publicas";
 import infotecaHeroImg from "@/assets/feature-kids-learning.jpg";
 
 export const Route = createFileRoute("/infoteca")({
@@ -101,12 +103,14 @@ const CATEGORIAS: Categoria[] = [
       {
         nome: "Nuvito",
         url: "https://nuvito.com.br/",
-        descricao: "Mais de 24 jogos leves de português, matemática e raciocínio, direto no navegador.",
+        descricao:
+          "Mais de 24 jogos leves de português, matemática e raciocínio, direto no navegador.",
       },
       {
         nome: "Smart Tales",
         url: "https://smarttales.app/",
-        descricao: "Histórias animadas e jogos de leitura e matemática para crianças de 2 a 11 anos.",
+        descricao:
+          "Histórias animadas e jogos de leitura e matemática para crianças de 2 a 11 anos.",
       },
     ],
   },
@@ -121,12 +125,14 @@ const CATEGORIAS: Categoria[] = [
       {
         nome: "Escola Games",
         url: "https://www.escolagames.com.br/",
-        descricao: "Referência brasileira: português, matemática, ciências, história e geografia por ano.",
+        descricao:
+          "Referência brasileira: português, matemática, ciências, história e geografia por ano.",
       },
       {
         nome: "ANTON",
         url: "https://anton.app/pt/",
-        descricao: "Plataforma gratuita e sem anúncios, da Educação Infantil ao Ensino Fundamental.",
+        descricao:
+          "Plataforma gratuita e sem anúncios, da Educação Infantil ao Ensino Fundamental.",
       },
       {
         nome: "Educa Jogos",
@@ -191,7 +197,8 @@ const CATEGORIAS: Categoria[] = [
       {
         nome: "Escola Digital (Governo do Paraná)",
         url: "https://aluno.escoladigital.pr.gov.br/games",
-        descricao: "Catálogo público de jogos educativos por área — lógica, idiomas, ciências e mais.",
+        descricao:
+          "Catálogo público de jogos educativos por área — lógica, idiomas, ciências e mais.",
       },
     ],
   },
@@ -205,6 +212,8 @@ function faviconUrl(url: string) {
 }
 
 function InfotecaPage() {
+  const publicas = listarFerramentasPublicas();
+
   return (
     <div className="relative min-h-screen bg-background">
       <PageBackground />
@@ -245,7 +254,11 @@ function InfotecaPage() {
                   alunos com necessidades especiais.
                 </p>
                 <div className="mt-1 flex flex-wrap gap-2.5">
-                  <Button asChild size="sm" className="gap-1.5 bg-white text-slate-900 hover:bg-white/90">
+                  <Button
+                    asChild
+                    size="sm"
+                    className="gap-1.5 bg-white text-slate-900 hover:bg-white/90"
+                  >
                     <a href="#gcompris">
                       <Download className="size-4" /> Baixar o GCompris
                     </a>
@@ -296,6 +309,42 @@ function InfotecaPage() {
           </div>
         </nav>
 
+        {/* Ferramentas da própria escola, abertas a qualquer visitante.
+          Vêm antes dos links externos de propósito: são as que a escola
+          mantém, funcionam sem login e sem instalar nada. */}
+        <section className="mx-auto max-w-6xl px-4 pt-2 sm:px-6">
+          <Link to="/ferramentas" className={CLASSES_BARRA_FERRAMENTAS}>
+            <BarraFerramentas
+              titulo="Ferramentas abertas da escola"
+              descricao={`${publicas.length === 1 ? "Comece pela calculadora" : `${publicas.length} ferramentas`} — sem login, sem instalar, direto no navegador.`}
+              acao="Abrir →"
+            />
+          </Link>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {publicas.map((ferramenta) => (
+              <Link
+                key={ferramenta.slug}
+                to="/ferramentas/$ferramenta"
+                params={{ ferramenta: ferramenta.slug }}
+                className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              >
+                <span
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${ferramenta.cor}`}
+                >
+                  <ferramenta.icon className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground group-hover:text-primary">
+                    {ferramenta.titulo}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{ferramenta.descricao}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* GCompris + Acessibilidade, lado a lado */}
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
@@ -338,9 +387,8 @@ function InfotecaPage() {
                   Alunos com necessidades especiais
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Priorizamos ferramentas simples, visuais e com pouco texto. O GCompris ao lado é
-                  o ponto de partida mais indicado — mas cada criança é diferente, vale testar
-                  junto.
+                  Priorizamos ferramentas simples, visuais e com pouco texto. O GCompris ao lado é o
+                  ponto de partida mais indicado — mas cada criança é diferente, vale testar junto.
                 </p>
               </div>
             </div>
