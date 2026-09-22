@@ -1,4 +1,4 @@
-import { Equal, PieChart, Scale, Shapes } from "lucide-react";
+import { Equal, Gamepad2, Percent, PieChart, PuzzleIcon, Scale, Shapes } from "lucide-react";
 
 import {
   CompararFracoes,
@@ -9,7 +9,10 @@ import {
   JanelaFerramenta,
   voltarDaFerramenta,
 } from "@/components/school/ferramentas/janela-ferramenta";
+import { JogoOperacoes } from "@/components/school/ferramentas/jogo-operacoes";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
+import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
+import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
 
 /**
  * As ferramentas de manipular abrem como a calculadora: uma janelinha que a
@@ -81,6 +84,57 @@ export function FracoesEquivalentesJanela() {
       iconeBotao={Equal}
     >
       <FracoesEquivalentes />
+    </JanelaFerramenta>
+  );
+}
+
+/** Estas três precisam de mais espaço: têm ilustração e texto lado a lado. */
+const LARGA = "w-[min(34rem,calc(100vw-24px))]";
+
+export function PorcentagemJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Laboratório de porcentagem"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Porcentagem"
+      iconeBotao={Percent}
+    >
+      <Porcentagem />
+    </JanelaFerramenta>
+  );
+}
+
+export function JogoOperacoesJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Desafio das 4 operações"
+      subtitulo={CREDITO}
+      largura={LARGURA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Desafio"
+      iconeBotao={Gamepad2}
+    >
+      <JogoOperacoes />
+    </JanelaFerramenta>
+  );
+}
+
+export function ProblemasInteligentesJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Fábrica de problemas"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Problemas"
+      iconeBotao={PuzzleIcon}
+    >
+      <ProblemasInteligentes />
     </JanelaFerramenta>
   );
 }

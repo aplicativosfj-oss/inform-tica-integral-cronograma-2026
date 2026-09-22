@@ -7,11 +7,14 @@ import {
   GraduationCap,
   Hash,
   Equal,
+  Gamepad2,
   Landmark,
   type LucideIcon,
   PartyPopper,
+  Percent,
   PenLine,
   PieChart,
+  PuzzleIcon,
   Scale,
   ScrollText,
   Shapes,
@@ -31,7 +34,10 @@ import {
   CompararFracoesJanela,
   FracaoNaMesaJanela,
   FracoesEquivalentesJanela,
+  JogoOperacoesJanela,
   MesaFormasJanela,
+  PorcentagemJanela,
+  ProblemasInteligentesJanela,
 } from "@/components/school/ferramentas/janelas-manipular";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
 import { Folclore } from "@/components/school/ferramentas/folclore";
@@ -51,7 +57,8 @@ export interface FerramentaInfo {
   slug: string;
   titulo: string;
   descricao: string;
-  categoria: "Recomposição" | "Ferramentas" | "Matemática" | "Alfabetização e Leitura" | "Nossa região";
+  categoria:
+    "Recomposição" | "Ferramentas" | "Matemática" | "Alfabetização e Leitura" | "Nossa região";
   icon: LucideIcon;
   cor: string;
   Componente: ComponentType;
@@ -61,7 +68,8 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   {
     slug: "atividades-por-habilidade",
     titulo: "Atividades por habilidade",
-    descricao: "Treine o que a Avaliação Diagnóstica mostrou que precisa melhorar, por série e nível.",
+    descricao:
+      "Treine o que a Avaliação Diagnóstica mostrou que precisa melhorar, por série e nível.",
     categoria: "Recomposição",
     icon: Target,
     cor: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300",
@@ -111,6 +119,33 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: Equal,
     cor: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
     Componente: FracoesEquivalentesJanela,
+  },
+  {
+    slug: "porcentagem",
+    titulo: "Laboratório de porcentagem",
+    descricao: "Veja a mesma porcentagem em quatro desenhos, em fração e em decimal.",
+    categoria: "Matemática",
+    icon: Percent,
+    cor: "bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300",
+    Componente: PorcentagemJanela,
+  },
+  {
+    slug: "desafio-operacoes",
+    titulo: "Desafio das 4 operações",
+    descricao: "Jogo contra o relógio, com seis níveis e ranking da escola.",
+    categoria: "Matemática",
+    icon: Gamepad2,
+    cor: "bg-fuchsia-500/10 text-fuchsia-600 dark:bg-fuchsia-500/20 dark:text-fuchsia-300",
+    Componente: JogoOperacoesJanela,
+  },
+  {
+    slug: "fabrica-problemas",
+    titulo: "Fábrica de problemas",
+    descricao: "Problemas do dia a dia com dica e resolução passo a passo.",
+    categoria: "Matemática",
+    icon: PuzzleIcon,
+    cor: "bg-lime-500/10 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300",
+    Componente: ProblemasInteligentesJanela,
   },
   {
     slug: "editor-texto",

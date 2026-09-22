@@ -19,6 +19,9 @@ export const FERRAMENTAS_PUBLICAS = [
   "montar-fracoes",
   "comparar-fracoes",
   "fracoes-equivalentes",
+  "porcentagem",
+  "desafio-operacoes",
+  "fabrica-problemas",
 ] as const;
 
 export function listarFerramentasPublicas(): FerramentaInfo[] {
