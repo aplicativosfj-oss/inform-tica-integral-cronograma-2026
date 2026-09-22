@@ -7,6 +7,7 @@ import {
   PieChart,
   PuzzleIcon,
   BookMarked,
+  Baby,
   PenTool,
   Ruler,
   Scale,
@@ -30,6 +31,7 @@ import { JogoOperacoes } from "@/components/school/ferramentas/jogo-operacoes";
 import { MedidasMundo } from "@/components/school/ferramentas/medidas-mundo";
 import { CREDITO } from "@/components/school/ferramentas/credito";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
+import { ParqueLetras } from "@/components/school/ferramentas/parque-letras";
 import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
 import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
 import { ProducaoTextual } from "@/components/school/ferramentas/producao-textual";
@@ -251,6 +253,22 @@ export function GenerosTextuaisJanela() {
       iconeBotao={BookMarked}
     >
       <GenerosTextuais />
+    </JanelaFerramenta>
+  );
+}
+
+export function ParqueLetrasJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Parque das Letras"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Letras"
+      iconeBotao={Baby}
+    >
+      <ParqueLetras />
     </JanelaFerramenta>
   );
 }

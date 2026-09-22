@@ -1,4 +1,5 @@
 import {
+  Baby,
   BookMarked,
   BookOpenText,
   Blocks,
@@ -45,6 +46,7 @@ import {
   JogoOperacoesJanela,
   MedidasMundoJanela,
   MesaFormasJanela,
+  ParqueLetrasJanela,
   PorcentagemJanela,
   GenerosTextuaisJanela,
   ProblemasInteligentesJanela,
@@ -301,6 +303,15 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: BookMarked,
     cor: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
     Componente: GenerosTextuaisJanela,
+  },
+  {
+    slug: "parque-letras",
+    titulo: "Parque das Letras",
+    descricao: "Seis jogos de alfabetização com figuras grandes e voz em português.",
+    categoria: "Alfabetização e Leitura",
+    icon: Baby,
+    cor: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-300",
+    Componente: ParqueLetrasJanela,
   },
   {
     slug: "datas-comemorativas",

@@ -130,9 +130,19 @@ export function ProducaoTextual() {
     const titulo = genero ? genero.nome : "Meu texto";
     janela.document.write(
       `<!doctype html><meta charset="utf-8"><title>${titulo}</title>` +
-        `<style>body{font:16px/1.7 Georgia,serif;margin:3cm;white-space:pre-wrap}` +
-        `h1{font-size:18px;border-bottom:1px solid #999;padding-bottom:6px}</style>` +
-        `<h1>${titulo}</h1>${texto.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!)}`,
+        `<style>body{font:16px/1.8 Georgia,serif;margin:3cm;color:#23231f}` +
+        `h1{font-size:19px;border-bottom:1px solid #999;padding-bottom:6px;margin-bottom:18px}` +
+        `p{text-indent:2em;text-align:justify;margin:0 0 .6em;white-space:pre-line}</style>` +
+        `<h1>${titulo}</h1>` +
+        texto
+          .split(/\n{2,}/)
+          .map(
+            (par) =>
+              `<p>${par
+                .trim()
+                .replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!)}</p>`,
+          )
+          .join(""),
     );
     janela.document.close();
     janela.print();
@@ -332,19 +342,30 @@ export function ProducaoTextual() {
       <div className="flex flex-col gap-2">
         {cabecalho}
 
-        <textarea
-          ref={areaRef}
-          value={texto}
-          onChange={(e) => setTexto(e.target.value)}
-          placeholder={`Escreva seu ${genero.nome.toLowerCase()} aqui...`}
-          aria-label="Seu texto"
-          className="min-h-[150px] w-full resize-y rounded-xl border border-border bg-background p-2.5 text-sm leading-relaxed text-foreground"
-        />
+        {/* A folha: papel claro, letra serifada e entrelinha larga. Escrever
+          numa caixinha apertada de formulário faz o texto parecer recado;
+          escrever numa folha faz a criança tratar aquilo como texto. */}
+        <div className="overflow-hidden rounded-xl border border-border bg-[#fdfcf7] shadow-sm dark:bg-[#f5f2ea]">
+          <div className="flex items-center justify-between border-b border-[#e7e2d6] bg-[#f6f2e8] px-3 py-1">
+            <span className="truncate text-[11px] font-semibold text-[#6b6a63]">
+              {genero.emoji} {genero.nome}
+            </span>
+            <span className="text-[10px] text-[#8a887e]">
+              {contarPalavras(texto)} {contarPalavras(texto) === 1 ? "palavra" : "palavras"}
+            </span>
+          </div>
+          <textarea
+            ref={areaRef}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder={`Escreva seu ${genero.nome.toLowerCase()} aqui...`}
+            aria-label="Seu texto"
+            spellCheck
+            className="min-h-[136px] w-full resize-y border-0 bg-transparent px-4 py-3 font-serif text-[15px] leading-[1.75] text-[#23231f] outline-none placeholder:text-[#a8a69c] focus:ring-0"
+          />
+        </div>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-          <span>
-            {contarPalavras(texto)} {contarPalavras(texto) === 1 ? "palavra" : "palavras"}
-          </span>
           <span>
             {contarParagrafos(texto)} {contarParagrafos(texto) === 1 ? "parágrafo" : "parágrafos"}
           </span>
@@ -384,7 +405,7 @@ export function ProducaoTextual() {
             Serve para {CATEGORIAS.find((c) => c.id === abaAtual)?.paraQue}. Toque numa palavra para
             pôr no texto.
           </p>
-          <div className="flex max-h-[128px] flex-col gap-1 overflow-auto">
+          <div className="flex max-h-[112px] flex-col gap-1 overflow-auto">
             {palavras.map((p) => (
               <button
                 key={p.palavra}
@@ -433,10 +454,26 @@ export function ProducaoTextual() {
     <div className="flex flex-col gap-3">
       {cabecalho}
 
-      <div className="max-h-[120px] overflow-auto rounded-xl border border-border bg-muted/30 p-2.5">
-        <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
-          {texto || <span className="text-muted-foreground">Você ainda não escreveu nada.</span>}
-        </p>
+      {/* Na revisão o texto deixa de ser rascunho e aparece como sairia no
+        papel: parágrafos separados, primeira linha recuada, justificado. */}
+      <div className="max-h-[150px] overflow-auto rounded-xl border border-border bg-[#fdfcf7] px-4 py-3 shadow-sm dark:bg-[#f5f2ea]">
+        {texto.trim() ? (
+          <div className="space-y-2">
+            {texto.split(/\n{2,}/).map((par, i) => (
+              <p
+                key={i}
+                className="whitespace-pre-line indent-6 text-justify font-serif text-[13px] leading-[1.7] text-[#23231f] hyphens-auto"
+                lang="pt-BR"
+              >
+                {par.trim()}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center font-serif text-xs text-[#8a887e]">
+            Você ainda não escreveu nada.
+          </p>
+        )}
       </div>
 
       <div>
