@@ -62,8 +62,8 @@ function SobrePage() {
             className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_-10%,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_100%_15%,color-mix(in_oklch,var(--primary)_12%,transparent),transparent_50%)]"
           />
           <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6 lg:py-12">
-            <Badge variant="secondary" className="mb-3 gap-1.5">
-              <Sparkles className="size-3.5" /> Sobre a plataforma
+            <Badge className="mb-3 gap-1.5 rounded-full border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
+              <Sparkles className="size-4" /> Sobre a plataforma
             </Badge>
             <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               Agenda de Informática
@@ -98,9 +98,9 @@ function SobrePage() {
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Card>
+            <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-400/40 hover:shadow-md">
               <CardHeader className="p-4 pb-1.5">
-                <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
                   <MonitorSmartphone className="size-4" />
                 </span>
                 <CardTitle className="text-base">Cronograma automático</CardTitle>
@@ -112,9 +112,9 @@ function SobrePage() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-400/40 hover:shadow-md">
               <CardHeader className="p-4 pb-1.5">
-                <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-violet-400/25 bg-violet-500/10 text-violet-600 dark:border-violet-400/20 dark:bg-violet-400/10 dark:text-violet-300">
                   <RefreshCcw className="size-4" />
                 </span>
                 <CardTitle className="text-base">Revezamento justo</CardTitle>
@@ -127,9 +127,9 @@ function SobrePage() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/40 hover:shadow-md">
               <CardHeader className="p-4 pb-1.5">
-                <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
                   <ShieldCheck className="size-4" />
                 </span>
                 <CardTitle className="text-base">Transparência pública</CardTitle>
@@ -141,9 +141,9 @@ function SobrePage() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-400/40 hover:shadow-md">
               <CardHeader className="p-4 pb-1.5">
-                <span className="mb-1.5 flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
                   <GraduationCap className="size-4" />
                 </span>
                 <CardTitle className="text-base">Frequência e reprogramação</CardTitle>
@@ -180,8 +180,8 @@ function SobrePage() {
           <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div>
-                <Badge variant="secondary" className="mb-3 gap-1.5">
-                  <BookOpen className="size-3.5" /> Ferramenta pedagógica
+                <Badge className="mb-3 gap-1.5 rounded-full border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-700 shadow-sm backdrop-blur-md dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
+                  <BookOpen className="size-4" /> Ferramenta pedagógica
                 </Badge>
                 <h2 className="text-xl font-semibold text-foreground">
                   As aulas de informática usam o GCompris
@@ -226,8 +226,8 @@ function SobrePage() {
         <section className="border-t border-border/60 bg-muted/30">
           <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
             <div className="mb-4 text-center">
-              <Badge variant="secondary" className="mb-3 gap-1.5">
-                <Puzzle className="size-3.5" /> Novidade
+              <Badge className="mb-3 gap-1.5 rounded-full border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-700 shadow-sm backdrop-blur-md dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
+                <Puzzle className="size-4" /> Novidade
               </Badge>
               <h2 className="text-2xl font-semibold text-foreground">Conheça a Infoteca</h2>
             </div>
@@ -236,9 +236,9 @@ function SobrePage() {
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   Além da agenda das aulas, o site tem um espaço próprio chamado{" "}
                   <strong className="text-foreground">Infoteca</strong>: uma seleção de jogos e
-                  ferramentas educativas gratuitas, organizadas por área (alfabetização,
-                  matemática, digitação, raciocínio lógico e mais), pensada para alunos,
-                  professores, pais e também para alunos com necessidades especiais.
+                  ferramentas educativas gratuitas, organizadas por área (alfabetização, matemática,
+                  digitação, raciocínio lógico e mais), pensada para alunos, professores, pais e
+                  também para alunos com necessidades especiais.
                 </p>
                 <Button asChild className="mt-4 gap-1.5">
                   <Link to="/infoteca">
@@ -253,8 +253,8 @@ function SobrePage() {
         {/* Professor */}
         <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
           <div className="mb-4 text-center">
-            <Badge variant="secondary" className="mb-3 gap-1.5">
-              <UserRound className="size-3.5" /> Quem leciona
+            <Badge className="mb-3 gap-1.5 rounded-full border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-700 shadow-sm backdrop-blur-md dark:border-cyan-400/25 dark:bg-cyan-400/10 dark:text-cyan-200">
+              <UserRound className="size-4" /> Quem leciona
             </Badge>
             <h2 className="text-2xl font-semibold text-foreground">
               Professor {config.professorInformatica}
@@ -302,8 +302,8 @@ function SobrePage() {
         {/* Contato */}
         <section className="border-t border-border/60 bg-muted/30">
           <div className="mx-auto max-w-4xl px-4 py-8 text-center sm:px-6">
-            <Badge variant="secondary" className="mb-3 gap-1.5">
-              <Mail className="size-3.5" /> Contato
+            <Badge className="mb-3 gap-1.5 rounded-full border-rose-400/30 bg-rose-500/10 px-3 py-1.5 text-sm text-rose-700 shadow-sm backdrop-blur-md dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-300">
+              <Mail className="size-4" /> Contato
             </Badge>
             <h2 className="text-2xl font-semibold text-foreground">Fale conosco</h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
