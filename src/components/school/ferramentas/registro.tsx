@@ -5,6 +5,7 @@ import {
   Blocks,
   Boxes,
   Calculator,
+  Dices,
   FileText,
   Ghost,
   Globe2,
@@ -51,6 +52,7 @@ import {
   GenerosTextuaisJanela,
   ProblemasInteligentesJanela,
   ProducaoTextualJanela,
+  SalaDeJogosJanela,
   ValorPosicionalJanela,
 } from "@/components/school/ferramentas/janelas-manipular";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
@@ -344,6 +346,16 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: Baby,
     cor: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-300",
     Componente: ParqueLetrasJanela,
+  },
+  {
+    slug: "sala-de-jogos",
+    titulo: "Sala de Jogos",
+    serieMinima: 1,
+    descricao: "Damas, dominó, velha, memória e quebra-cabeça — contra o computador ou um colega.",
+    categoria: "Ferramentas",
+    icon: Dices,
+    cor: "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
+    Componente: SalaDeJogosJanela,
   },
   {
     slug: "datas-comemorativas",

@@ -29,6 +29,7 @@ export const FERRAMENTAS_PUBLICAS = [
   "producao-textual",
   "generos-textuais",
   "parque-letras",
+  "sala-de-jogos",
 ] as const;
 
 export function listarFerramentasPublicas(): FerramentaInfo[] {

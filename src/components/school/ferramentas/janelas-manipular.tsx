@@ -8,6 +8,7 @@ import {
   PuzzleIcon,
   BookMarked,
   Baby,
+  Dices,
   PenTool,
   Ruler,
   Scale,
@@ -32,6 +33,7 @@ import { MedidasMundo } from "@/components/school/ferramentas/medidas-mundo";
 import { CREDITO } from "@/components/school/ferramentas/credito";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
 import { ParqueLetras } from "@/components/school/ferramentas/parque-letras";
+import { SalaDeJogos } from "@/components/school/jogos/sala-de-jogos";
 import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
 import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
 import { ProducaoTextual } from "@/components/school/ferramentas/producao-textual";
@@ -269,6 +271,22 @@ export function ParqueLetrasJanela() {
       iconeBotao={Baby}
     >
       <ParqueLetras />
+    </JanelaFerramenta>
+  );
+}
+
+export function SalaDeJogosJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Sala de Jogos"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Jogos"
+      iconeBotao={Dices}
+    >
+      <SalaDeJogos />
     </JanelaFerramenta>
   );
 }
