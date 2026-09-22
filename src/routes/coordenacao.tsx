@@ -174,8 +174,8 @@ function CoordenacaoPage() {
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
+                <div className="flex items-center gap-2.5 rounded-xl border border-violet-400/25 bg-card p-3 shadow-sm dark:border-violet-400/15 dark:bg-card/60 dark:backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400">
                     <Users2 className="size-4" />
                   </span>
                   <div>
@@ -183,8 +183,8 @@ function CoordenacaoPage() {
                     <p className="text-sm font-semibold text-foreground">{turmas.length}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <div className="flex items-center gap-2.5 rounded-xl border border-blue-400/25 bg-card p-3 shadow-sm dark:border-blue-400/15 dark:bg-card/60 dark:backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
                     <GraduationCap className="size-4" />
                   </span>
                   <div>
@@ -217,7 +217,7 @@ function CoordenacaoPage() {
             to="/agenda"
             className="group mb-4 flex cursor-pointer items-center gap-3 rounded-xl border border-border/60 bg-card p-4 transition-colors hover:border-primary/40"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <CalendarDays className="size-5" />
             </span>
             <span className="min-w-0 flex-1">
@@ -255,33 +255,39 @@ function CoordenacaoPage() {
           <DiarioAulas registros={registros} mes={mes} />
 
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
-            <Card>
+            <Card className="border-emerald-400/25 bg-emerald-500/[0.04] dark:border-emerald-400/15">
               <CardHeader className="p-4 pb-1.5">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <UserCheck className="size-4 text-primary" />✅ Sessões com Participação
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    <UserCheck className="size-4" />
+                  </span>
+                  Sessões com participação
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-2xl font-semibold text-foreground">{participacoes}</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="mt-1 text-xs text-muted-foreground">
                   número de registros de presença
                 </p>
-                <p className="text-xs text-primary/70 mt-2 font-medium">
-                  (Soma de todos os alunos que compareceram)
+                <p className="mt-2 text-xs font-medium text-emerald-700/80 dark:text-emerald-300/80">
+                  Soma de todos os alunos que compareceram
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-rose-400/25 bg-rose-500/[0.04] dark:border-rose-400/15">
               <CardHeader className="p-4 pb-1.5">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <UserX className="size-4 text-destructive" />❌ Registros de Ausência
+                <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-300">
+                    <UserX className="size-4" />
+                  </span>
+                  Registros de ausência
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-2xl font-semibold text-foreground">{faltas.length}</p>
-                <p className="text-xs text-muted-foreground mt-1">número de registros de falta</p>
-                <p className="text-xs text-destructive/70 mt-2 font-medium">
-                  (Soma de todos os alunos que faltaram)
+                <p className="mt-1 text-xs text-muted-foreground">número de registros de falta</p>
+                <p className="mt-2 text-xs font-medium text-rose-600/80 dark:text-rose-300/80">
+                  Soma de todos os alunos que faltaram
                 </p>
               </CardContent>
             </Card>
@@ -290,7 +296,10 @@ function CoordenacaoPage() {
           <Card className="mb-4">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
-                <ClipboardList className="size-4" /> Presença por turma e grupo
+                <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <ClipboardList className="size-4" />
+                </span>
+                Presença por turma e grupo
               </CardTitle>
             </CardHeader>
             <CardContent>
