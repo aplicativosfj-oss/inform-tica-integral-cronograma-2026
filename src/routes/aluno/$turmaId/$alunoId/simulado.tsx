@@ -41,14 +41,19 @@ function SimuladoAluno() {
   const { turmas } = useAppStore();
   const sessao = lerAlunoSessao();
   const aluno = turmas.find((t) => t.id === turmaId)?.alunos.find((a) => a.id === alunoId);
-  const cred = useMemo(() => (sessao?.pin ? { alunoId, pin: sessao.pin, turmaId } : null), [alunoId, turmaId, sessao?.pin]);
+  const cred = useMemo(
+    () => (sessao?.pin ? { alunoId, pin: sessao.pin, turmaId } : null),
+    [alunoId, turmaId, sessao?.pin],
+  );
 
   const [dados, setDados] = useState<SimuladoDoAluno | null | undefined>(undefined);
   const [respostas, setRespostas] = useState<Record<string, number>>({});
   const [escolha, setEscolha] = useState<number | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [resultado, setResultado] = useState<Resultado | null>(null);
-  const [historico, setHistorico] = useState<{ titulo: string; acertos: number; total: number }[]>([]);
+  const [historico, setHistorico] = useState<{ titulo: string; acertos: number; total: number }[]>(
+    [],
+  );
   const desvio = useRef(0); // diferença entre o relógio do servidor e o do aparelho
 
   useEffect(() => {
@@ -70,7 +75,9 @@ function SimuladoAluno() {
           acertos: s.minha.acertos,
           total: s.minha.total,
           respondidas: Object.keys(s.minha.respostas).length,
-          tempo_seg: s.minha.finalizado_em ? (Date.parse(s.minha.finalizado_em) - Date.parse(s.minha.iniciado_em)) / 1000 : 0,
+          tempo_seg: s.minha.finalizado_em
+            ? (Date.parse(s.minha.finalizado_em) - Date.parse(s.minha.iniciado_em)) / 1000
+            : 0,
         });
       }
       setHistorico(await meusResultados(cred));
@@ -92,7 +99,9 @@ function SimuladoAluno() {
   const inicioAluno = dados?.minha ? Date.parse(dados.minha.iniciado_em) - desvio.current : null;
   const tempoAluno = useSegundosDesde(inicioAluno, !!resultado || !fazendo);
 
-  const indice = dados ? dados.questoes.findIndex((_, i) => respostas[String(i)] === undefined) : -1;
+  const indice = dados
+    ? dados.questoes.findIndex((_, i) => respostas[String(i)] === undefined)
+    : -1;
   const questao = dados && indice >= 0 ? dados.questoes[indice] : undefined;
 
   const finalizando = useRef(false);
@@ -170,12 +179,19 @@ function SimuladoAluno() {
               <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
           ) : resultado ? (
-            <ResultadoAluno r={resultado} historico={historico} turmaId={turmaId} alunoId={alunoId} />
+            <ResultadoAluno
+              r={resultado}
+              historico={historico}
+              turmaId={turmaId}
+              alunoId={alunoId}
+            />
           ) : !dados ? (
             <Card>
               <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
                 <ClipboardList className="size-10 text-muted-foreground" />
-                <p className="text-lg font-semibold text-foreground">Nenhum simulado aberto agora</p>
+                <p className="text-lg font-semibold text-foreground">
+                  Nenhum simulado aberto agora
+                </p>
                 <p className="max-w-md text-sm text-muted-foreground">
                   Quando o professor iniciar um simulado para a sua turma, ele aparece aqui.
                 </p>
@@ -186,7 +202,9 @@ function SimuladoAluno() {
             <Card>
               <CardContent className="flex flex-col gap-5 p-6">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wide text-primary">Simulado</p>
+                  <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+                    Simulado
+                  </p>
                   <h1 className="text-2xl font-bold text-foreground">{dados.titulo}</h1>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-3">
@@ -198,9 +216,16 @@ function SimuladoAluno() {
                   <li>Leia cada questão com calma e escolha uma resposta.</li>
                   <li>Depois de confirmar, não dá para voltar nem trocar a resposta.</li>
                   <li>Quando o tempo acabar, a prova fecha sozinha.</li>
-                  <li>O resultado é só seu. Ele ajuda o professor a saber o que treinar com a turma.</li>
+                  <li>
+                    O resultado é só seu. Ele ajuda o professor a saber o que treinar com a turma.
+                  </li>
                 </ul>
-                <Button size="lg" onClick={comecar} disabled={enviando || esgotou} className="w-fit">
+                <Button
+                  size="lg"
+                  onClick={comecar}
+                  disabled={enviando || esgotou}
+                  className="w-fit"
+                >
                   {esgotou ? "O tempo do simulado acabou" : "Começar o simulado"}
                 </Button>
               </CardContent>
@@ -212,10 +237,14 @@ function SimuladoAluno() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-foreground">{dados.titulo}</p>
                   <p className="text-xs text-muted-foreground">
-                    Questão {indice + 1} de {total} · {respondidas} respondida(s) · seu tempo {formatarTempo(tempoAluno)}
+                    Questão {indice + 1} de {total} · {respondidas} respondida(s) · seu tempo{" "}
+                    {formatarTempo(tempoAluno)}
                   </p>
                   <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted" aria-hidden>
-                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(100 * respondidas) / total}%` }} />
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: `${(100 * respondidas) / total}%` }}
+                    />
                   </div>
                 </div>
               </div>
@@ -223,7 +252,9 @@ function SimuladoAluno() {
               {questao.texto?.paragrafos.length ? (
                 <Card>
                   <CardContent className="flex flex-col gap-2 p-5">
-                    {questao.texto.titulo ? <p className="font-semibold text-foreground">{questao.texto.titulo}</p> : null}
+                    {questao.texto.titulo ? (
+                      <p className="font-semibold text-foreground">{questao.texto.titulo}</p>
+                    ) : null}
                     {questao.texto.paragrafos.map((p, i) => (
                       <p key={i} className="text-base leading-relaxed text-foreground">
                         {p}
@@ -240,7 +271,10 @@ function SimuladoAluno() {
                   </p>
                   {questao.ilustracaoHtml ? (
                     // HTML gerado pelo próprio site no momento da criação do simulado (figuras, tabelas, malhas).
-                    <div className="flex justify-center" dangerouslySetInnerHTML={{ __html: questao.ilustracaoHtml }} />
+                    <div
+                      className="flex justify-center"
+                      dangerouslySetInnerHTML={{ __html: questao.ilustracaoHtml }}
+                    />
                   ) : null}
                   <p className="text-lg font-medium text-foreground">{questao.enunciado}</p>
                   <div className="flex flex-col gap-2" role="radiogroup" aria-label="Opções">
@@ -253,13 +287,17 @@ function SimuladoAluno() {
                         onClick={() => setEscolha(i)}
                         className={cn(
                           "flex cursor-pointer items-center gap-3 rounded-xl border-2 p-3 text-left text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                          escolha === i ? "border-primary bg-primary/10 text-foreground" : "border-border text-foreground hover:bg-muted",
+                          escolha === i
+                            ? "border-primary bg-primary/10 text-foreground"
+                            : "border-border text-foreground hover:bg-muted",
                         )}
                       >
                         <span
                           className={cn(
                             "flex size-7 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold",
-                            escolha === i ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/50 text-foreground",
+                            escolha === i
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-muted-foreground/50 text-foreground",
                           )}
                         >
                           {"ABCDE"[i]}
@@ -268,8 +306,17 @@ function SimuladoAluno() {
                       </button>
                     ))}
                   </div>
-                  <Button size="lg" disabled={escolha === null || enviando} onClick={confirmar} className="w-fit gap-2">
-                    {enviando ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+                  <Button
+                    size="lg"
+                    disabled={escolha === null || enviando}
+                    onClick={confirmar}
+                    className="w-fit gap-2"
+                  >
+                    {enviando ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="size-4" />
+                    )}
                     Confirmar resposta
                   </Button>
                 </CardContent>
@@ -302,7 +349,10 @@ function Historico({ lista }: { lista: { titulo: string; acertos: number; total:
       <p className="mb-2 text-sm font-semibold text-foreground">Meus simulados</p>
       <ul className="flex flex-col gap-1.5 text-sm">
         {lista.slice(0, 6).map((h, i) => (
-          <li key={i} className="flex justify-between gap-3 rounded-lg bg-muted/50 px-3 py-2 text-foreground">
+          <li
+            key={i}
+            className="flex justify-between gap-3 rounded-lg bg-muted/50 px-3 py-2 text-foreground"
+          >
             <span className="truncate">{h.titulo}</span>
             <b className="tabular-nums">
               {h.acertos}/{h.total}
@@ -338,12 +388,15 @@ function ResultadoAluno({
         <p className="text-2xl font-bold text-foreground">Simulado concluído!</p>
         <span className={cn("rounded-full px-4 py-1 text-sm font-bold", s.cls)}>{s.nome}</span>
         <p className="text-4xl font-bold tabular-nums text-foreground">
-          {r.acertos} <span className="text-xl font-medium text-muted-foreground">de {r.total}</span>
+          {r.acertos}{" "}
+          <span className="text-xl font-medium text-muted-foreground">de {r.total}</span>
         </p>
         <p className="max-w-md text-sm text-foreground">{s.frase}</p>
         <p className="text-xs text-muted-foreground">
           Tempo: {formatarTempo(r.tempo_seg)}
-          {r.respondidas < r.total ? ` · ${r.total - r.respondidas} questão(ões) ficaram sem resposta` : ""}
+          {r.respondidas < r.total
+            ? ` · ${r.total - r.respondidas} questão(ões) ficaram sem resposta`
+            : ""}
         </p>
         {melhorAntes != null ? (
           <p className="text-sm font-medium text-foreground">

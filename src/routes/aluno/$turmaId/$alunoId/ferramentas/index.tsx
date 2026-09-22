@@ -5,7 +5,12 @@ import { useEffect } from "react";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
-import { FERRAMENTAS, type FerramentaInfo } from "@/components/school/ferramentas/registro";
+import {
+  ferramentasAteSerie,
+  numeroDaSerie,
+  type FerramentaInfo,
+} from "@/components/school/ferramentas/registro";
+import { useAppStore } from "@/lib/app-store";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 
 export const Route = createFileRoute("/aluno/$turmaId/$alunoId/ferramentas/")({
@@ -29,6 +34,13 @@ const CATEGORIAS = [
 function FerramentasHub() {
   const { turmaId, alunoId } = Route.useParams();
   const navigate = useNavigate();
+  const { turmas } = useAppStore();
+  // A lista cresce com a série: o 1º ano vê o essencial e, a cada ano, mais
+  // ferramentas aparecem. Mostrar porcentagem para quem está aprendendo a
+  // contar não ensina nada — só faz a criança desistir da tela.
+  const serie = numeroDaSerie(turmas.find((t) => t.id === turmaId)?.serie);
+  const disponiveis = ferramentasAteSerie(serie);
+  const novasNoProximoAno = 31 - disponiveis.length;
 
   useEffect(() => {
     const sessao = lerAlunoSessao();
@@ -54,12 +66,19 @@ function FerramentasHub() {
           </Link>
 
           <h1 className="mb-1 text-xl font-semibold text-foreground">Ferramentas e exercícios</h1>
-          <p className="mb-6 text-sm text-muted-foreground">
+          <p className="mb-2 text-sm text-muted-foreground">
             Pratique no seu ritmo. Escolha uma atividade abaixo para começar.
+          </p>
+          <p className="mb-6 text-xs text-muted-foreground">
+            <b className="text-foreground">{disponiveis.length} ferramentas</b> liberadas para o{" "}
+            {serie}º ano
+            {novasNoProximoAno > 0 && (
+              <> · mais {novasNoProximoAno} aparecem conforme você avança de ano</>
+            )}
           </p>
 
           {CATEGORIAS.map((categoria) => {
-            const itens = FERRAMENTAS.filter((f) => f.categoria === categoria);
+            const itens = disponiveis.filter((f) => f.categoria === categoria);
             if (itens.length === 0) return null;
             return (
               <div key={categoria} className="mb-8">

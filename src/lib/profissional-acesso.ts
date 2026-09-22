@@ -151,6 +151,14 @@ export function idadeEmAnos(nascimento: string | undefined): number | null {
  * quando fizer sentido.
  */
 export const FERRAMENTAS_ADAPTADAS = [
+  // As de figura grande, voz e ritmo próprio vêm primeiro: são as que mais
+  // servem ao atendimento especializado.
+  "parque-letras",
+  "mesa-formas",
+  "valor-posicional",
+  "jogo-numeros",
+  "montar-fracoes",
+  "quanto-mede",
   "alfabetizacao",
   "leitura",
   "acervo-leitura",

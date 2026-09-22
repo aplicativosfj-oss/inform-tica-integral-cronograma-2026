@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import { useAppStore } from "@/lib/app-store";
-import { NIVEIS, NOME_DISC, usePrioridades, type Nivel, type Serie } from "@/lib/recomposicao/catalogo";
+import {
+  NIVEIS,
+  NOME_DISC,
+  usePrioridades,
+  type Nivel,
+  type Serie,
+} from "@/lib/recomposicao/catalogo";
 import {
   PROXIMO_NIVEL,
   estrelasDe,
@@ -40,7 +46,10 @@ function Estrelas({ n, tamanho = "size-4" }: { n: number; tamanho?: string }) {
       {[1, 2, 3].map((i) => (
         <Star
           key={i}
-          className={cn(tamanho, i <= n ? "fill-amber-400 text-amber-500" : "text-muted-foreground/40")}
+          className={cn(
+            tamanho,
+            i <= n ? "fill-amber-400 text-amber-500" : "text-muted-foreground/40",
+          )}
         />
       ))}
     </span>
@@ -88,7 +97,11 @@ function MinhaTrilha() {
   /** Nível a jogar agora: sobe quando o anterior já tem 3 estrelas. */
   const nivelAtual = (p: PassoTrilha): Nivel => {
     let n: Nivel = p.nivel;
-    while (estrelas(p.entrada.id, n) === 3 && PROXIMO_NIVEL[n] && p.entrada.niveis.includes(PROXIMO_NIVEL[n]!))
+    while (
+      estrelas(p.entrada.id, n) === 3 &&
+      PROXIMO_NIVEL[n] &&
+      p.entrada.niveis.includes(PROXIMO_NIVEL[n]!)
+    )
       n = PROXIMO_NIVEL[n]!;
     return n;
   };
@@ -141,7 +154,9 @@ function MinhaTrilha() {
 
               <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-bold tracking-tight text-foreground">Minha trilha</h1>
+                  <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                    Minha trilha
+                  </h1>
                   <p className="text-sm text-muted-foreground">
                     {trilha?.personalizada
                       ? "Atividades escolhidas para você, a partir das questões da Avaliação Diagnóstica que você pode melhorar."
@@ -152,7 +167,9 @@ function MinhaTrilha() {
                   <CardContent className="flex items-center gap-3 px-4 py-3">
                     <Trophy className="size-7 text-amber-600" />
                     <div>
-                      <p className="text-2xl font-bold leading-none text-foreground">{totalEstrelas}</p>
+                      <p className="text-2xl font-bold leading-none text-foreground">
+                        {totalEstrelas}
+                      </p>
                       <p className="text-xs text-muted-foreground">estrelas ganhas</p>
                     </div>
                   </CardContent>
@@ -170,12 +187,16 @@ function MinhaTrilha() {
                       <span className="font-semibold text-foreground">
                         {concluidos} de {passos.length} atividades concluídas
                       </span>
-                      <span className="text-muted-foreground">2 estrelas ou mais conta como concluída</span>
+                      <span className="text-muted-foreground">
+                        2 estrelas ou mais conta como concluída
+                      </span>
                     </div>
                     <div className="h-3 overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-lime-500 transition-all"
-                        style={{ width: `${passos.length ? (100 * concluidos) / passos.length : 0}%` }}
+                        style={{
+                          width: `${passos.length ? (100 * concluidos) / passos.length : 0}%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -215,7 +236,11 @@ function MinhaTrilha() {
                               <div className="flex flex-col items-end gap-2">
                                 <Estrelas n={est} />
                                 <Button size="sm" onClick={() => setAberto({ passo: p, nivel: n })}>
-                                  {est === 0 ? "Começar" : est === 3 ? "Jogar de novo" : "Tentar de novo"}
+                                  {est === 0
+                                    ? "Começar"
+                                    : est === 3
+                                      ? "Jogar de novo"
+                                      : "Tentar de novo"}
                                 </Button>
                               </div>
                             </CardContent>
@@ -225,7 +250,8 @@ function MinhaTrilha() {
                     })}
                   </ol>
                   <p className="mt-6 text-center text-xs text-muted-foreground">
-                    Com 3 estrelas, a atividade sobe de nível: 🌱 Retomada → 🌿 Prática → 🌳 Desafio.
+                    Com 3 estrelas, a atividade sobe de nível: 🌱 Retomada → 🌿 Prática → 🌳
+                    Desafio.
                   </p>
                 </>
               )}

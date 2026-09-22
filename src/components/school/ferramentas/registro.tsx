@@ -68,6 +68,12 @@ import { Trilhas } from "@/components/school/ferramentas/trilhas";
 
 export interface FerramentaInfo {
   slug: string;
+  /**
+   * Ano em que a escola começa a trabalhar esse conteúdo. A Área do Aluno
+   * mostra só o que é da série dele ou de séries anteriores: um 1º ano
+   * diante de "porcentagem" não aprende nada, só desiste.
+   */
+  serieMinima: 1 | 2 | 3 | 4 | 5;
   titulo: string;
   descricao: string;
   categoria:
@@ -80,6 +86,7 @@ export interface FerramentaInfo {
 export const FERRAMENTAS: FerramentaInfo[] = [
   {
     slug: "atividades-por-habilidade",
+    serieMinima: 1,
     titulo: "Atividades por habilidade",
     descricao:
       "Treine o que a Avaliação Diagnóstica mostrou que precisa melhorar, por série e nível.",
@@ -90,6 +97,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "calculadora",
+    serieMinima: 1,
     titulo: "Calculadora",
     descricao: "Faça as quatro operações rapidinho.",
     categoria: "Ferramentas",
@@ -99,6 +107,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "mesa-formas",
+    serieMinima: 1,
     titulo: "Mesa de formas",
     descricao: "Monte desenhos arrastando figuras geométricas coloridas pela mesa.",
     categoria: "Ferramentas",
@@ -108,6 +117,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "montar-fracoes",
+    serieMinima: 3,
     titulo: "Montar frações",
     descricao: "Escolha os números e veja a fração virar pizza, chocolate ou litros.",
     categoria: "Matemática",
@@ -117,6 +127,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "comparar-fracoes",
+    serieMinima: 3,
     titulo: "Comparar frações",
     descricao: "Duas frações lado a lado para descobrir qual é a maior.",
     categoria: "Matemática",
@@ -126,6 +137,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "fracoes-equivalentes",
+    serieMinima: 4,
     titulo: "Frações equivalentes",
     descricao: "Veja a mesma quantidade escrita de vários jeitos diferentes.",
     categoria: "Matemática",
@@ -135,6 +147,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "porcentagem",
+    serieMinima: 5,
     titulo: "Laboratório de porcentagem",
     descricao: "Veja a mesma porcentagem em quatro desenhos, em fração e em decimal.",
     categoria: "Matemática",
@@ -144,6 +157,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "desafio-operacoes",
+    serieMinima: 2,
     titulo: "Desafio das 4 operações",
     descricao: "Jogo contra o relógio, com seis níveis e ranking da escola.",
     categoria: "Matemática",
@@ -153,6 +167,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "fabrica-problemas",
+    serieMinima: 2,
     titulo: "Fábrica de problemas",
     descricao: "Problemas do dia a dia com dica e resolução passo a passo.",
     categoria: "Matemática",
@@ -162,6 +177,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "conversor-medidas",
+    serieMinima: 4,
     titulo: "Conversor de medidas",
     descricao: "Comprimento, capacidade e massa na escadinha das unidades.",
     categoria: "Matemática",
@@ -171,6 +187,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "quanto-mede",
+    serieMinima: 3,
     titulo: "Quanto mede cada coisa",
     descricao: "Objetos do dia a dia para saber quando usar mm, m, L ou kg.",
     categoria: "Matemática",
@@ -180,6 +197,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "valor-posicional",
+    serieMinima: 1,
     titulo: "Unidade, dezena, centena e milhar",
     descricao: "Monte números com material dourado e veja a troca do vai um.",
     categoria: "Matemática",
@@ -189,6 +207,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "jogo-numeros",
+    serieMinima: 1,
     titulo: "Jogo dos números",
     descricao: "Monte o número com as peças ou descubra que número elas formam.",
     categoria: "Matemática",
@@ -198,6 +217,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "producao-textual",
+    serieMinima: 1,
     titulo: "Assistente de produção textual",
     descricao: "Planeje, escreva e revise bilhete, conto, lenda, notícia ou opinião.",
     categoria: "Alfabetização e Leitura",
@@ -207,6 +227,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "editor-texto",
+    serieMinima: 3,
     titulo: "Editor de texto",
     descricao: "Escreva, formate e baixe seus textos.",
     categoria: "Ferramentas",
@@ -216,6 +237,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "planilha",
+    serieMinima: 4,
     titulo: "Planilha",
     descricao: "Organize números e use fórmulas simples.",
     categoria: "Ferramentas",
@@ -225,6 +247,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "tabuada",
+    serieMinima: 2,
     titulo: "Tabuada",
     descricao: "Treine a tabuada de multiplicação.",
     categoria: "Matemática",
@@ -234,6 +257,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "problemas-matematica",
+    serieMinima: 2,
     titulo: "Problemas de matemática",
     descricao: "Some, subtraia, multiplique e divida com problemas do dia a dia.",
     categoria: "Matemática",
@@ -243,6 +267,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "fracoes",
+    serieMinima: 3,
     titulo: "Frações",
     descricao: "Aprenda frações vendo e comparando partes.",
     categoria: "Matemática",
@@ -252,6 +277,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "geometria",
+    serieMinima: 2,
     titulo: "Figuras geométricas",
     descricao: "Reconheça formas, lados e ângulos.",
     categoria: "Matemática",
@@ -261,6 +287,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "alfabetizacao",
+    serieMinima: 1,
     titulo: "Alfabetização",
     descricao: "Vogais, sílabas, maiúsculas e minúsculas, rimas.",
     categoria: "Alfabetização e Leitura",
@@ -270,6 +297,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "atividades-portugues",
+    serieMinima: 1,
     titulo: "Atividades de Português (1º ao 5º)",
     descricao: "Atividades por série, com versão adaptada para inclusão.",
     categoria: "Alfabetização e Leitura",
@@ -279,6 +307,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "acervo-leitura",
+    serieMinima: 1,
     titulo: "Acervo de leitura",
     descricao: "Contos, poemas e textos para ler com calma, sem pressa.",
     categoria: "Alfabetização e Leitura",
@@ -288,6 +317,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "leitura",
+    serieMinima: 1,
     titulo: "Leitura e interpretação",
     descricao: "Leia textos e responda perguntas sobre eles.",
     categoria: "Alfabetização e Leitura",
@@ -297,6 +327,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "generos-textuais",
+    serieMinima: 2,
     titulo: "Gêneros textuais",
     descricao: "Trinta textos de verdade — do bilhete à bula — para reconhecer e aprender.",
     categoria: "Alfabetização e Leitura",
@@ -306,6 +337,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "parque-letras",
+    serieMinima: 1,
     titulo: "Parque das Letras",
     descricao: "Seis jogos de alfabetização com figuras grandes e voz em português.",
     categoria: "Alfabetização e Leitura",
@@ -315,6 +347,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "datas-comemorativas",
+    serieMinima: 2,
     titulo: "Datas comemorativas",
     descricao: "Quando é o quê no calendário brasileiro.",
     categoria: "Nossa região",
@@ -324,6 +357,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "historia-brasil",
+    serieMinima: 4,
     titulo: "História do Brasil",
     descricao: "Fatos importantes da nossa história.",
     categoria: "Nossa região",
@@ -333,6 +367,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "historia-acre-feijo",
+    serieMinima: 4,
     titulo: "História do Acre e de Feijó",
     descricao: "Como nasceu nosso estado e nosso município.",
     categoria: "Nossa região",
@@ -342,6 +377,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "geografia",
+    serieMinima: 3,
     titulo: "Geografia",
     descricao: "Brasil, Acre e Feijó no mapa.",
     categoria: "Nossa região",
@@ -351,6 +387,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   },
   {
     slug: "folclore",
+    serieMinima: 3,
     titulo: "Folclore",
     descricao: "Lendas do Brasil e da nossa região amazônica.",
     categoria: "Nossa região",
@@ -359,6 +396,21 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     Componente: Folclore,
   },
 ];
+
+/**
+ * Lê o número da série a partir do rótulo da turma ("3º Ano" → 3). Volta 5
+ * quando não reconhece: na dúvida é melhor mostrar tudo do que esconder algo
+ * de quem precisa.
+ */
+export function numeroDaSerie(serie: string | undefined): number {
+  const m = (serie ?? "").match(/(\d)/);
+  return m ? Number(m[1]) : 5;
+}
+
+/** O que a criança daquela série já pode usar — dela e das séries anteriores. */
+export function ferramentasAteSerie(serie: number): FerramentaInfo[] {
+  return FERRAMENTAS.filter((f) => f.serieMinima <= serie);
+}
 
 export function encontrarFerramenta(slug: string): FerramentaInfo | undefined {
   return FERRAMENTAS.find((f) => f.slug === slug);

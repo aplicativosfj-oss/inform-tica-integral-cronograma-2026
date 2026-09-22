@@ -9,6 +9,7 @@ import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
 import { encontrarFerramenta } from "@/components/school/ferramentas/registro";
 import { lerAlunoSessao } from "@/lib/aluno-session";
+import { registrarPasso } from "@/lib/trilha-aluno";
 
 export const Route = createFileRoute("/aluno/$turmaId/$alunoId/ferramentas/$ferramenta")({
   component: FerramentaPage,
@@ -29,9 +30,30 @@ function FerramentaPage() {
     const sessao = lerAlunoSessao();
     if (!sessao || sessao.alunoId !== alunoId || sessao.turmaId !== turmaId) {
       navigate({ to: "/aluno/$turmaId", params: { turmaId } });
+      return;
     }
+    // Um passo por abertura, e quanto tempo a criança ficou. O tempo é o que
+    // diferencia "abriu e fechou" de "ficou vinte minutos montando palavras".
+    if (!info) return;
+    const entrou = Date.now();
+    void registrarPasso(alunoId, turmaId, sessao.pin, {
+      ferramenta: ferramenta,
+      titulo: info.titulo,
+      tipo: "abriu",
+    });
+    return () => {
+      const segundos = Math.round((Date.now() - entrou) / 1000);
+      // Menos de 10 segundos é clique errado, não uso: não vale registrar.
+      if (segundos < 10) return;
+      void registrarPasso(alunoId, turmaId, sessao.pin, {
+        ferramenta: ferramenta,
+        titulo: info.titulo,
+        tipo: "concluiu",
+        segundos,
+      });
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alunoId, turmaId]);
+  }, [alunoId, turmaId, ferramenta]);
 
   return (
     <div className="relative min-h-screen bg-background">

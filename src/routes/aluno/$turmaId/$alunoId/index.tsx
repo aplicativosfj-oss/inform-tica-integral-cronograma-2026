@@ -19,11 +19,12 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MinhaTrilha } from "@/components/school/minha-trilha";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
-import { FERRAMENTAS } from "@/components/school/ferramentas/registro";
+import { ferramentasAteSerie, numeroDaSerie } from "@/components/school/ferramentas/registro";
 import { useAppStore } from "@/lib/app-store";
 import { fetchAvaliacoesDoAluno, selo, type Avaliacao } from "@/lib/avaliacoes";
 import {
@@ -79,6 +80,8 @@ function AlunoPainel() {
   const navigate = useNavigate();
   const confirmar = useConfirmar();
   const turma = turmas.find((t) => t.id === turmaId);
+  // A lista de ferramentas cresce com a série do aluno.
+  const liberadas = ferramentasAteSerie(numeroDaSerie(turma?.serie)).length;
   const aluno = turma?.alunos.find((a) => a.id === alunoId);
 
   const [carregando, setCarregando] = useState(true);
@@ -93,13 +96,17 @@ function AlunoPainel() {
   const sessao = lerAlunoSessao();
   const pin = sessao?.pin;
   const idade = idadeEmAnos(aluno?.nascimento);
-  const [simuladoAberto, setSimuladoAberto] = useState<{ titulo: string; feito: boolean } | null>(null);
+  const [simuladoAberto, setSimuladoAberto] = useState<{ titulo: string; feito: boolean } | null>(
+    null,
+  );
 
   // Há simulado aberto para a turma? Mostra o aviso no topo da área.
   useEffect(() => {
     if (!pin) return;
     simuladoDoAluno({ alunoId, pin, turmaId })
-      .then((s) => setSimuladoAberto(s ? { titulo: s.titulo, feito: s.minha?.status === "finalizado" } : null))
+      .then((s) =>
+        setSimuladoAberto(s ? { titulo: s.titulo, feito: s.minha?.status === "finalizado" } : null),
+      )
       .catch(() => setSimuladoAberto(null));
   }, [alunoId, turmaId, pin]);
 
@@ -354,7 +361,7 @@ function AlunoPainel() {
           >
             <BarraFerramentas
               titulo="Ferramentas e exercícios"
-              descricao={`Calculadora, editor de texto, tabuada, leitura, história do Acre e mais ${FERRAMENTAS.length - 6} atividades.`}
+              descricao={`${liberadas} atividades liberadas para o seu ano: jogos, leitura, matemática e escrita.`}
               acao="Explorar →"
             />
           </Link>
@@ -404,6 +411,19 @@ function AlunoPainel() {
             </div>
           </section>
         ) : null}
+
+        {/* Minha trilha — o que a criança já fez por conta própria */}
+        {pin && (
+          <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+            {/* Nome diferente de "Minha trilha", que já é a trilha de
+              recomposição vinda da Avaliação Diagnóstica. */}
+            <h2 className="mb-1 text-lg font-semibold text-foreground">O que eu já pratiquei</h2>
+            <p className="mb-3 text-sm text-muted-foreground">
+              Tudo o que você fez sozinho nas ferramentas fica guardado aqui.
+            </p>
+            <MinhaTrilha alunoId={alunoId} pin={pin} />
+          </section>
+        )}
 
         {/* Atividades */}
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">

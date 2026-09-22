@@ -212,6 +212,18 @@ function faviconUrl(url: string) {
   return `https://www.google.com/s2/favicons?sz=64&domain=${dominio}`;
 }
 
+/**
+ * A ordem em que as ferramentas da escola aparecem na Infoteca. Alfabetização
+ * primeiro porque é o que a criança mais usa sozinha; recomposição por último
+ * porque é trabalho dirigido pelo professor.
+ */
+const GRUPOS_ESCOLA = [
+  { categoria: "Alfabetização e Leitura", titulo: "Ler e escrever" },
+  { categoria: "Matemática", titulo: "Matemática" },
+  { categoria: "Ferramentas", titulo: "Ferramentas do dia a dia" },
+  { categoria: "Recomposição", titulo: "Recomposição da aprendizagem" },
+] as const;
+
 function InfotecaPage() {
   const publicas = listarFerramentasPublicas();
 
@@ -270,20 +282,23 @@ function InfotecaPage() {
                     variant="outline"
                     className="gap-1.5 border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20"
                   >
-                    <a href="#ferramentas">Ver ferramentas</a>
+                    <a href="#da-escola">Ver as ferramentas</a>
                   </Button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Chips com o resumo do que tem aqui embaixo */}
+          {/* Chips com o resumo do que tem aqui embaixo. Separa o que é da
+            escola do que é link de fora: são coisas diferentes e a criança
+            precisa saber onde vai parar ao clicar. */}
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
-              <strong className="text-foreground">{TOTAL_FERRAMENTAS}</strong> ferramentas
+            <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+              <Sparkles className="mr-1 inline size-3.5" />
+              <strong>{publicas.length}</strong> ferramentas da escola
             </span>
             <span className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
-              <strong className="text-foreground">{CATEGORIAS.length}</strong> categorias
+              <strong className="text-foreground">{TOTAL_FERRAMENTAS}</strong> sites selecionados
             </span>
             <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
               <HeartHandshake className="mr-1 inline size-3.5" /> Com opções acessíveis
@@ -291,10 +306,82 @@ function InfotecaPage() {
           </div>
         </section>
 
-        {/* Navegação rápida por categoria */}
+        {/* O que a escola mantém vem primeiro e com mais destaque: funciona
+          sem login, sem instalar e sem sair do site. A faixa-anúncio que
+          ficava aqui repetia a contagem que já aparece nos cards logo
+          abaixo — virou um cabeçalho de seção comum. */}
+        <section id="da-escola" className="mx-auto max-w-6xl scroll-mt-20 px-4 pt-4 sm:px-6">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
+                <Sparkles className="size-5 text-primary" /> Ferramentas da escola
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Feitas aqui, para alunos e professores. Abrem no navegador, sem login e sem instalar
+                nada.
+              </p>
+            </div>
+            <Button asChild size="sm" variant="outline" className="gap-1.5">
+              <Link to="/ferramentas">Ver todas as {publicas.length} →</Link>
+            </Button>
+          </div>
+
+          {GRUPOS_ESCOLA.map((grupo) => {
+            const itens = publicas.filter((f) => f.categoria === grupo.categoria);
+            if (!itens.length) return null;
+            return (
+              <div key={grupo.categoria} className="mb-5">
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {grupo.titulo}
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {itens.map((ferramenta) => (
+                    <Link
+                      key={ferramenta.slug}
+                      to="/ferramentas/$ferramenta"
+                      params={{ ferramenta: ferramenta.slug }}
+                      className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                    >
+                      <span
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${ferramenta.cor}`}
+                      >
+                        <ferramenta.icon className="size-5" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground group-hover:text-primary">
+                          {ferramenta.titulo}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{ferramenta.descricao}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        {/* A partir daqui é material de fora. A divisão é explícita para
+          ninguém clicar achando que continua na escola. */}
+        <section id="ferramentas" className="mx-auto max-w-6xl scroll-mt-20 px-4 pt-6 sm:px-6">
+          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
+            <div>
+              <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
+                <ExternalLink className="size-5 text-muted-foreground" /> Sites e plataformas de
+                fora
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {TOTAL_FERRAMENTAS} endereços escolhidos pela escola, em {CATEGORIAS.length}{" "}
+                categorias. Abrem em outro site, numa aba nova.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Navegação rápida pelas categorias de fora */}
         <nav
-          aria-label="Ir direto para uma categoria"
-          className="sticky top-16 z-30 border-b border-border/60 bg-background/85 py-2.5 backdrop-blur-lg sm:top-14"
+          aria-label="Ir direto para uma categoria de sites"
+          className="sticky top-16 z-30 mt-3 border-y border-border/60 bg-background/85 py-2.5 backdrop-blur-lg sm:top-14"
         >
           <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 sm:px-6 [&::-webkit-scrollbar]:hidden">
             {CATEGORIAS.map((categoria) => (
@@ -309,42 +396,6 @@ function InfotecaPage() {
             ))}
           </div>
         </nav>
-
-        {/* Ferramentas da própria escola, abertas a qualquer visitante.
-          Vêm antes dos links externos de propósito: são as que a escola
-          mantém, funcionam sem login e sem instalar nada. */}
-        <section className="mx-auto max-w-6xl px-4 pt-2 sm:px-6">
-          <Link to="/ferramentas" className={CLASSES_BARRA_FERRAMENTAS}>
-            <BarraFerramentas
-              titulo="Ferramentas abertas da escola"
-              descricao={`${publicas.length === 1 ? "Comece pela calculadora" : `${publicas.length} ferramentas`} — sem login, sem instalar, direto no navegador.`}
-              acao="Abrir →"
-            />
-          </Link>
-
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {publicas.map((ferramenta) => (
-              <Link
-                key={ferramenta.slug}
-                to="/ferramentas/$ferramenta"
-                params={{ ferramenta: ferramenta.slug }}
-                className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-              >
-                <span
-                  className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${ferramenta.cor}`}
-                >
-                  <ferramenta.icon className="size-5" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground group-hover:text-primary">
-                    {ferramenta.titulo}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{ferramenta.descricao}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
 
         {/* GCompris + Acessibilidade, lado a lado */}
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -397,7 +448,7 @@ function InfotecaPage() {
         </section>
 
         {/* Categorias */}
-        <section id="ferramentas" className="mx-auto max-w-6xl scroll-mt-24 px-4 pb-14 sm:px-6">
+        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
           <div className="flex flex-col gap-10">
             {CATEGORIAS.map((categoria) => (
               <div key={categoria.id} id={categoria.id} className="scroll-mt-32">
