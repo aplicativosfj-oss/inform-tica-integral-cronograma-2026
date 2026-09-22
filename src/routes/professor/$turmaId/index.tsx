@@ -233,8 +233,11 @@ function ProfessorPainel() {
           {turma.apoioEspecial && turma.apoioEspecial.length > 0 ? (
             <Card className="mt-4 border-primary/30 bg-primary/5">
               <CardContent className="flex flex-col gap-2 py-4">
-                <p className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                  <HeartHandshake className="size-4 text-primary" /> Apoio especializado da turma
+                <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <HeartHandshake className="size-4" />
+                  </span>
+                  Apoio especializado da turma
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {turma.apoioEspecial.map((apoio, index) => (

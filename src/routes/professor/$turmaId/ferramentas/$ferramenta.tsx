@@ -50,7 +50,9 @@ function FerramentaProfessorPage() {
           {info ? (
             <>
               <div className="mb-5 flex items-center gap-3">
-                <span className={`flex size-11 items-center justify-center rounded-xl ${info.cor}`}>
+                <span
+                  className={`flex size-11 items-center justify-center rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10 ${info.cor}`}
+                >
                   <info.icon className="size-5" />
                 </span>
                 <div>

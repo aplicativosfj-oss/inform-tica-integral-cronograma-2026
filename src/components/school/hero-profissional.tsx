@@ -1,8 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { Badge } from "@/components/ui/badge";
-
 interface Indicador {
   rotulo: string;
   valor: ReactNode;
@@ -37,13 +35,13 @@ export function HeroProfissional({
   acoes,
 }: HeroProfissionalProps) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+    <section className="overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm">
       <div className="flex flex-col gap-4 p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <Badge className="mb-2 w-fit gap-1.5">
+            <span className="mb-2 inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary shadow-sm backdrop-blur-md dark:border-primary/25 dark:bg-primary/15">
               <EtiquetaIcon className="size-3.5" /> {etiqueta}
-            </Badge>
+            </span>
             <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               {titulo}
             </h1>
@@ -57,14 +55,17 @@ export function HeroProfissional({
             {indicadores.map((indicador) => (
               <div
                 key={indicador.rotulo}
-                className="rounded-xl border border-border/60 bg-card/80 px-3 py-2.5 backdrop-blur-sm"
+                className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card/80 px-3 py-2.5 backdrop-blur-sm"
               >
-                <dt className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <indicador.icon className="size-3.5 text-primary" /> {indicador.rotulo}
-                </dt>
-                <dd className="mt-0.5 text-lg font-semibold leading-none text-foreground">
-                  {indicador.valor}
-                </dd>
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <indicador.icon className="size-3.5" />
+                </span>
+                <div className="min-w-0">
+                  <dt className="text-[11px] text-muted-foreground">{indicador.rotulo}</dt>
+                  <dd className="text-lg font-semibold leading-none text-foreground">
+                    {indicador.valor}
+                  </dd>
+                </div>
               </div>
             ))}
           </dl>

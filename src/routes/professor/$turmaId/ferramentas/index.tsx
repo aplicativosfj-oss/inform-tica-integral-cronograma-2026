@@ -87,7 +87,9 @@ function CardFerramenta({ item, turmaId }: { item: FerramentaInfo; turmaId: stri
       params={{ turmaId, ferramenta: item.slug }}
       className="group flex cursor-pointer flex-col gap-2 rounded-xl border border-border/60 bg-card p-3.5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
     >
-      <span className={`flex size-10 items-center justify-center rounded-lg ${item.cor}`}>
+      <span
+        className={`flex size-10 items-center justify-center rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10 ${item.cor}`}
+      >
         <item.icon className="size-5" />
       </span>
       <div>
