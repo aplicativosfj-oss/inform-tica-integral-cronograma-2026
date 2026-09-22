@@ -22,6 +22,10 @@ export const FERRAMENTAS_PUBLICAS = [
   "porcentagem",
   "desafio-operacoes",
   "fabrica-problemas",
+  "conversor-medidas",
+  "quanto-mede",
+  "valor-posicional",
+  "jogo-numeros",
 ] as const;
 
 export function listarFerramentasPublicas(): FerramentaInfo[] {

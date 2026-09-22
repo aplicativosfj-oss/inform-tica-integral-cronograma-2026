@@ -1,4 +1,16 @@
-import { Equal, Gamepad2, Percent, PieChart, PuzzleIcon, Scale, Shapes } from "lucide-react";
+import {
+  Blocks,
+  Boxes,
+  Equal,
+  Gamepad2,
+  Percent,
+  PieChart,
+  PuzzleIcon,
+  Ruler,
+  Scale,
+  Shapes,
+  Weight,
+} from "lucide-react";
 
 import {
   CompararFracoes,
@@ -9,10 +21,14 @@ import {
   JanelaFerramenta,
   voltarDaFerramenta,
 } from "@/components/school/ferramentas/janela-ferramenta";
+import { ConversorMedidas } from "@/components/school/ferramentas/conversor-medidas";
+import { JogoNumeros } from "@/components/school/ferramentas/jogo-numeros";
 import { JogoOperacoes } from "@/components/school/ferramentas/jogo-operacoes";
+import { MedidasMundo } from "@/components/school/ferramentas/medidas-mundo";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
 import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
 import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
+import { ValorPosicional } from "@/components/school/ferramentas/valor-posicional";
 
 /**
  * As ferramentas de manipular abrem como a calculadora: uma janelinha que a
@@ -135,6 +151,70 @@ export function ProblemasInteligentesJanela() {
       iconeBotao={PuzzleIcon}
     >
       <ProblemasInteligentes />
+    </JanelaFerramenta>
+  );
+}
+
+export function ConversorMedidasJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Conversor de medidas"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Medidas"
+      iconeBotao={Ruler}
+    >
+      <ConversorMedidas />
+    </JanelaFerramenta>
+  );
+}
+
+export function MedidasMundoJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Quanto mede cada coisa"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Quanto mede"
+      iconeBotao={Weight}
+    >
+      <MedidasMundo />
+    </JanelaFerramenta>
+  );
+}
+
+export function ValorPosicionalJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Unidade, dezena, centena e milhar"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Valor posicional"
+      iconeBotao={Boxes}
+    >
+      <ValorPosicional />
+    </JanelaFerramenta>
+  );
+}
+
+export function JogoNumerosJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Jogo dos números"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Jogo dos números"
+      iconeBotao={Blocks}
+    >
+      <JogoNumeros />
     </JanelaFerramenta>
   );
 }

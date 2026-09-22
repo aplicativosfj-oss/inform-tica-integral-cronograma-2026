@@ -1,5 +1,7 @@
 import {
   BookOpenText,
+  Blocks,
+  Boxes,
   Calculator,
   FileText,
   Ghost,
@@ -16,11 +18,13 @@ import {
   PieChart,
   PuzzleIcon,
   Scale,
+  Ruler,
   ScrollText,
   Shapes,
   SpellCheck2,
   Table2,
   Target,
+  Weight,
   TreePine,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -32,12 +36,16 @@ import { CalculadoraJanela } from "@/components/school/ferramentas/calculadora-f
 import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemorativas";
 import {
   CompararFracoesJanela,
+  ConversorMedidasJanela,
   FracaoNaMesaJanela,
   FracoesEquivalentesJanela,
+  JogoNumerosJanela,
   JogoOperacoesJanela,
+  MedidasMundoJanela,
   MesaFormasJanela,
   PorcentagemJanela,
   ProblemasInteligentesJanela,
+  ValorPosicionalJanela,
 } from "@/components/school/ferramentas/janelas-manipular";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
 import { Folclore } from "@/components/school/ferramentas/folclore";
@@ -146,6 +154,42 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: PuzzleIcon,
     cor: "bg-lime-500/10 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300",
     Componente: ProblemasInteligentesJanela,
+  },
+  {
+    slug: "conversor-medidas",
+    titulo: "Conversor de medidas",
+    descricao: "Comprimento, capacidade e massa na escadinha das unidades.",
+    categoria: "Matemática",
+    icon: Ruler,
+    cor: "bg-sky-500/10 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300",
+    Componente: ConversorMedidasJanela,
+  },
+  {
+    slug: "quanto-mede",
+    titulo: "Quanto mede cada coisa",
+    descricao: "Objetos do dia a dia para saber quando usar mm, m, L ou kg.",
+    categoria: "Matemática",
+    icon: Weight,
+    cor: "bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
+    Componente: MedidasMundoJanela,
+  },
+  {
+    slug: "valor-posicional",
+    titulo: "Unidade, dezena, centena e milhar",
+    descricao: "Monte números com material dourado e veja a troca do vai um.",
+    categoria: "Matemática",
+    icon: Boxes,
+    cor: "bg-violet-500/10 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
+    Componente: ValorPosicionalJanela,
+  },
+  {
+    slug: "jogo-numeros",
+    titulo: "Jogo dos números",
+    descricao: "Monte o número com as peças ou descubra que número elas formam.",
+    categoria: "Matemática",
+    icon: Blocks,
+    cor: "bg-rose-500/10 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300",
+    Componente: JogoNumerosJanela,
   },
   {
     slug: "editor-texto",
