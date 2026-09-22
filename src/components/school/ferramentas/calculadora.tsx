@@ -114,20 +114,28 @@ export function Calculadora({
           : null,
       )}
     >
-      <div className={cn("rounded-xl bg-muted/60 text-right", compacta ? "px-3 py-2.5" : "px-4 py-6")}>
+      <div
+        className={cn(
+          "rounded-xl bg-muted/60 text-right",
+          compacta ? "px-3 py-[clamp(0.25rem,1.2vh,0.625rem)]" : "px-4 py-6",
+        )}
+      >
         <p
           className={cn(
             "truncate font-mono font-semibold text-foreground",
-            compacta ? "text-xl" : "text-3xl",
+            compacta ? "text-[clamp(1rem,2.6vh,1.25rem)]" : "text-3xl",
           )}
         >
           {visor}
         </p>
-        {operador ? (
-          <p className="mt-1 text-xs text-muted-foreground">
-            {formatar(acumulado ?? 0)} {operador}
-          </p>
-        ) : null}
+        {/* A linha do operador ocupa espaço mesmo vazia: sem isso a caixa
+          mudava de altura a cada operação e a borda de baixo ficava pulando. */}
+        <p
+          className={cn("mt-1 truncate text-xs text-muted-foreground", !operador && "invisible")}
+          aria-hidden={!operador}
+        >
+          {operador ? `${formatar(acumulado ?? 0)} ${operador}` : " "}
+        </p>
       </div>
       <div className={cn("grid grid-cols-4", compacta ? "gap-1.5" : "gap-2")}>
         {TECLAS.flat().map((tecla, i) => (
@@ -137,7 +145,10 @@ export function Calculadora({
             onClick={() => pressionar(tecla)}
             className={cn(
               "flex cursor-pointer items-center justify-center rounded-xl font-medium transition-colors active:scale-95",
-              compacta ? "h-9 text-sm" : "h-14 text-lg",
+              // Na versão compacta as teclas encolhem junto com a altura da
+              // tela, para a calculadora caber inteira em telas baixas sem
+              // precisar de barra de rolagem.
+              compacta ? "h-[clamp(1.75rem,4vh,2.25rem)] text-[clamp(0.75rem,1.9vh,0.875rem)]" : "h-14 text-lg",
               tecla === "="
                 ? "col-span-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 : ["+", "−", "×", "÷"].includes(tecla)

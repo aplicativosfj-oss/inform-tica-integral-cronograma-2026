@@ -171,8 +171,11 @@ export function CalculadoraFlutuante() {
         top: pos?.y ?? 0,
         // Enquanto a posição não foi calculada, não pisca no canto errado.
         visibility: pos ? "visible" : "hidden",
+        // Garantia: por mais baixa que seja a tela, a janela nunca passa dela
+        // (as teclas já encolhem sozinhas, então isto quase nunca entra em ação).
+        maxHeight: `calc(100dvh - ${MARGEM * 2}px)`,
       }}
-      className="fixed z-50 w-[15rem] rounded-2xl border border-border bg-card shadow-2xl"
+      className="fixed z-50 w-[15rem] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
     >
       <div
         onPointerDown={iniciarArrasto}
