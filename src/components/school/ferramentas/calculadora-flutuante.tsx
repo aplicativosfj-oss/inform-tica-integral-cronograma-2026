@@ -220,7 +220,15 @@ export function CalculadoraFlutuante({
         className="flex items-center gap-1.5 rounded-t-2xl border-b border-border/60 px-3 py-2"
       >
         <GripHorizontal className="size-4 shrink-0 text-muted-foreground" />
-        <span className="flex-1 text-xs font-medium text-muted-foreground">Calculadora</span>
+        <span className="flex-1 leading-tight">
+          <span className="block text-xs font-medium text-muted-foreground">Calculadora</span>
+          {/* Crédito de quem fez a ferramenta; no balão do canto não cabe. */}
+          {abertaInicial && (
+            <span className="block text-[11px] text-muted-foreground/70">
+              Calculadora criada pelo professor Franc D&apos;nis
+            </span>
+          )}
+        </span>
         <button
           type="button"
           onClick={fechar}
