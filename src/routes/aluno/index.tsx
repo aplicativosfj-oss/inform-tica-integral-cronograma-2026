@@ -103,9 +103,6 @@ function AlunoTurmaPicker() {
               })}
             </div>
           )}
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Professor de informática: {config.professorInformatica}
-          </p>
         </section>
 
         <SiteFooter />

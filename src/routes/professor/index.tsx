@@ -119,9 +119,6 @@ function ProfessorPicker() {
           )}
 
           <div className="mt-8 flex flex-col items-center gap-2 text-center">
-            <p className="text-xs text-muted-foreground">
-              Professor de informática: {config.professorInformatica}
-            </p>
             <Button asChild variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
               <a href="/mediador">
                 <HeartHandshake className="size-4" /> Sou mediador(a) ou cuidador(a)

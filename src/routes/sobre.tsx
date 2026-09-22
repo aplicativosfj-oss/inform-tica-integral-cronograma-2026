@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  BarChart3,
   BookOpen,
+  Compass,
+  Dices,
   ExternalLink,
   GraduationCap,
   Mail,
@@ -9,6 +12,7 @@ import {
   RefreshCcw,
   ShieldCheck,
   Sparkles,
+  Target,
   UserRound,
 } from "lucide-react";
 
@@ -69,8 +73,9 @@ function SobrePage() {
               Agenda de Informática
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-balance text-base text-muted-foreground sm:text-lg">
-              Uma plataforma criada para organizar, com transparência e justiça, as aulas de
-              informática da {config.nomeEscola}.
+              Começou para organizar, com transparência e justiça, as aulas de informática da{" "}
+              {config.nomeEscola}. Hoje também mostra o que a escola aprendeu e devolve isso em
+              atividade para a criança treinar.
             </p>
             <div className="mx-auto mt-6 max-w-3xl overflow-hidden rounded-2xl border border-border/60 shadow-xl">
               <SiteImage
@@ -158,6 +163,120 @@ function SobrePage() {
           </div>
         </section>
 
+        {/* Aprendizagem — o que a plataforma passou a fazer além da agenda.
+          Esta parte nasceu depois: a agenda continua sendo o começo, mas
+          quem chega hoje precisa saber que o site também publica o
+          resultado da avaliação e transforma esse resultado em atividade. */}
+        <section className="border-t border-border/60 bg-muted/30">
+          <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+            <div className="mb-5 text-center">
+              <Badge className="mb-3 gap-1.5 rounded-full border-indigo-400/30 bg-indigo-500/10 px-3 py-1.5 text-sm text-indigo-700 shadow-sm backdrop-blur-md dark:border-indigo-400/25 dark:bg-indigo-400/10 dark:text-indigo-200">
+                <Target className="size-4" /> Novo na plataforma
+              </Badge>
+              <h2 className="text-2xl font-semibold text-foreground">
+                Da avaliação para a sala de aula
+              </h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
+                Duas vezes por ano, todos os alunos do 1º ao 5º ano fazem a mesma prova da
+                Secretaria de Educação. O site passou a publicar esse resultado em linguagem simples
+                — e, a partir dele, a oferecer atividade para treinar o que ainda não foi aprendido.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-400/40 hover:shadow-md">
+                <CardHeader className="p-4 pb-1.5">
+                  <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
+                    <BarChart3 className="size-4" />
+                  </span>
+                  <CardTitle className="text-base">Resultado da escola, aberto a todos</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <p className="text-sm text-muted-foreground">
+                    Quanto cada turma acertou na 1ª e na 2ª avaliação, o que melhorou e o que ainda
+                    precisa de atenção — sem jargão e sem login. Para quem quiser ir a fundo, há um
+                    observatório com o detalhe por turma, questão e habilidade.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-indigo-400/40 hover:shadow-md">
+                <CardHeader className="p-4 pb-1.5">
+                  <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-indigo-400/25 bg-indigo-500/10 text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">
+                    <Compass className="size-4" />
+                  </span>
+                  <CardTitle className="text-base">Guia de habilidades</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <p className="text-sm text-muted-foreground">
+                    As 120 habilidades cobradas na avaliação, explicadas uma a uma: o que se espera
+                    de quem já aprendeu, como perceber isso na prática e o que fazer com quem ainda
+                    está no caminho. Serve ao professor regente e também a quem acompanha em casa.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-400/40 hover:shadow-md">
+                <CardHeader className="p-4 pb-1.5">
+                  <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-rose-400/25 bg-rose-500/10 text-rose-600 dark:border-rose-400/20 dark:bg-rose-400/10 dark:text-rose-300">
+                    <Target className="size-4" />
+                  </span>
+                  <CardTitle className="text-base">Atividades para recompor</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <p className="text-sm text-muted-foreground">
+                    O que a escola errou mais vem primeiro. Cada atividade tem três níveis, o nível
+                    indicado já vem sugerido pelo resultado, e há um mini-teste para ver se a
+                    criança avançou. Tudo pode ser impresso como folha, para quem prefere papel.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/40 hover:shadow-md">
+                <CardHeader className="p-4 pb-1.5">
+                  <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
+                    <Dices className="size-4" />
+                  </span>
+                  <CardTitle className="text-base">Sala de Jogos</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <p className="text-sm text-muted-foreground">
+                    Damas, dominó, jogo da velha, memória e quebra-cabeça — contra o computador ou
+                    contra um colega da turma. Cada partida ganha vale estrelas no ranking da
+                    escola.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              <Button asChild className="gap-1.5">
+                <Link to="/avaliacao">
+                  <BarChart3 className="size-4" /> Ver o resultado da escola
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="gap-1.5">
+                <Link to="/avaliacao" search={{ aba: "descritores" as const }}>
+                  <Compass className="size-4" /> Abrir o guia de habilidades
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="gap-1.5">
+                <Link
+                  to="/ferramentas/$ferramenta"
+                  params={{ ferramenta: "atividades-por-habilidade" }}
+                >
+                  <Target className="size-4" /> Treinar com as atividades
+                </Link>
+              </Button>
+            </div>
+
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              Os percentuais dizem quantas questões os alunos acertaram em cada 100 — não são nota
+              de boletim, e nenhum nome de aluno aparece nas páginas públicas.
+            </p>
+          </div>
+        </section>
+
         {/* Foto real do laboratório */}
         <section className="mx-auto max-w-4xl px-4 pb-4 sm:px-6">
           <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
@@ -226,7 +345,7 @@ function SobrePage() {
         <section className="border-t border-border/60 bg-muted/30">
           <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
             <div className="mb-4 text-center">
-              <Badge className="mb-3 gap-1.5 rounded-full border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-700 shadow-sm backdrop-blur-md dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
+              <Badge className="mb-3 gap-1.5 rounded-full border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-800 shadow-sm backdrop-blur-md dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
                 <Puzzle className="size-4" /> Novidade
               </Badge>
               <h2 className="text-2xl font-semibold text-foreground">Conheça a Infoteca</h2>
@@ -253,7 +372,7 @@ function SobrePage() {
         {/* Professor */}
         <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
           <div className="mb-4 text-center">
-            <Badge className="mb-3 gap-1.5 rounded-full border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-700 shadow-sm backdrop-blur-md dark:border-cyan-400/25 dark:bg-cyan-400/10 dark:text-cyan-200">
+            <Badge className="mb-3 gap-1.5 rounded-full border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-800 shadow-sm backdrop-blur-md dark:border-cyan-400/25 dark:bg-cyan-400/10 dark:text-cyan-200">
               <UserRound className="size-4" /> Quem leciona
             </Badge>
             <h2 className="text-2xl font-semibold text-foreground">
