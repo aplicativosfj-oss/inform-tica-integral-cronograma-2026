@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Settings2,
   Target,
+  TrendingUp,
   UserX,
   Users2,
 } from "lucide-react";
@@ -52,6 +53,7 @@ const NAV_GROUPS = [
     label: "Pedagógico",
     items: [
       { to: "/dashboard/avaliacao", label: "Avaliação diagnóstica", icon: BarChart3 },
+      { to: "/dashboard/evolucao", label: "Evolução diagnóstica", icon: TrendingUp },
       { to: "/dashboard/trilhas", label: "Progresso das trilhas", icon: Target },
       { to: "/dashboard/simulados", label: "Simulados", icon: ClipboardList },
       { to: "/dashboard/indicadores", label: "Indicadores das turmas", icon: Gauge },

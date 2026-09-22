@@ -25,6 +25,7 @@ import { Route as DashboardAtividadesRouteImport } from './routes/dashboard/ativ
 import { Route as DashboardAulasRouteImport } from './routes/dashboard/aulas'
 import { Route as DashboardAvaliacaoRouteImport } from './routes/dashboard/avaliacao'
 import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
+import { Route as DashboardEvolucaoRouteImport } from './routes/dashboard/evolucao'
 import { Route as DashboardFaltasRouteImport } from './routes/dashboard/faltas'
 import { Route as DashboardFichasAcessoRouteImport } from './routes/dashboard/fichas-acesso'
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
@@ -133,6 +134,11 @@ const DashboardAvaliacaoRoute = DashboardAvaliacaoRouteImport.update({
 const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
   id: '/dashboard/configuracoes',
   path: '/dashboard/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardEvolucaoRoute = DashboardEvolucaoRouteImport.update({
+  id: '/dashboard/evolucao',
+  path: '/dashboard/evolucao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardFaltasRoute = DashboardFaltasRouteImport.update({
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/avaliacao': typeof DashboardAvaliacaoRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/evolucao': typeof DashboardEvolucaoRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/fichas-acesso': typeof DashboardFichasAcessoRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
@@ -355,6 +362,7 @@ export interface FileRoutesByTo {
   '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/avaliacao': typeof DashboardAvaliacaoRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/evolucao': typeof DashboardEvolucaoRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/fichas-acesso': typeof DashboardFichasAcessoRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
@@ -403,6 +411,7 @@ export interface FileRoutesById {
   '/dashboard/aulas': typeof DashboardAulasRoute
   '/dashboard/avaliacao': typeof DashboardAvaliacaoRoute
   '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/evolucao': typeof DashboardEvolucaoRoute
   '/dashboard/faltas': typeof DashboardFaltasRoute
   '/dashboard/fichas-acesso': typeof DashboardFichasAcessoRoute
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
@@ -452,6 +461,7 @@ export interface FileRouteTypes {
     | '/dashboard/aulas'
     | '/dashboard/avaliacao'
     | '/dashboard/configuracoes'
+    | '/dashboard/evolucao'
     | '/dashboard/faltas'
     | '/dashboard/fichas-acesso'
     | '/dashboard/frequencia'
@@ -499,6 +509,7 @@ export interface FileRouteTypes {
     | '/dashboard/aulas'
     | '/dashboard/avaliacao'
     | '/dashboard/configuracoes'
+    | '/dashboard/evolucao'
     | '/dashboard/faltas'
     | '/dashboard/fichas-acesso'
     | '/dashboard/frequencia'
@@ -546,6 +557,7 @@ export interface FileRouteTypes {
     | '/dashboard/aulas'
     | '/dashboard/avaliacao'
     | '/dashboard/configuracoes'
+    | '/dashboard/evolucao'
     | '/dashboard/faltas'
     | '/dashboard/fichas-acesso'
     | '/dashboard/frequencia'
@@ -594,6 +606,7 @@ export interface RootRouteChildren {
   DashboardAulasRoute: typeof DashboardAulasRoute
   DashboardAvaliacaoRoute: typeof DashboardAvaliacaoRoute
   DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
+  DashboardEvolucaoRoute: typeof DashboardEvolucaoRoute
   DashboardFaltasRoute: typeof DashboardFaltasRoute
   DashboardFichasAcessoRoute: typeof DashboardFichasAcessoRoute
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
@@ -739,6 +752,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard/configuracoes'
       fullPath: '/dashboard/configuracoes'
       preLoaderRoute: typeof DashboardConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/evolucao': {
+      id: '/dashboard/evolucao'
+      path: '/dashboard/evolucao'
+      fullPath: '/dashboard/evolucao'
+      preLoaderRoute: typeof DashboardEvolucaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/faltas': {
@@ -962,6 +982,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardAulasRoute: DashboardAulasRoute,
   DashboardAvaliacaoRoute: DashboardAvaliacaoRoute,
   DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
+  DashboardEvolucaoRoute: DashboardEvolucaoRoute,
   DashboardFaltasRoute: DashboardFaltasRoute,
   DashboardFichasAcessoRoute: DashboardFichasAcessoRoute,
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
