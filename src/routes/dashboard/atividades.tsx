@@ -26,7 +26,7 @@ import {
   removerAtividade,
 } from "@/lib/aluno-area";
 import { useConfirmar } from "@/lib/confirm-store";
-import { toDateKey } from "@/lib/schedule-engine";
+import { toDateKey, agoraNaEscola } from "@/lib/schedule-engine";
 import type { Atividade, AtividadeStatus } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/atividades")({
@@ -89,7 +89,7 @@ function AtividadesDaTurma({ turma }: { turma: ReturnType<typeof useAppStore>["t
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [url, setUrl] = useState("");
-  const [data, setData] = useState(toDateKey(new Date()));
+  const [data, setData] = useState(toDateKey(agoraNaEscola()));
   const [salvando, setSalvando] = useState(false);
   const [statusAberto, setStatusAberto] = useState<string | null>(null);
   const [statusPorAtividade, setStatusPorAtividade] = useState<Record<string, AtividadeStatus[]>>(

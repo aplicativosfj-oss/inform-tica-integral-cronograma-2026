@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppStore } from "@/lib/app-store";
-import { encontrarHorariosParaReprogramar, toDateKey } from "@/lib/schedule-engine";
+import { encontrarHorariosParaReprogramar, toDateKey, agoraNaEscola } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +64,7 @@ export function SuspenderAulaDialog({
     // passou (registro feito depois do horário) — para nunca sugerir o passado.
     const [h, m] = assignment.slot.fim.split(":").map(Number);
     const fimDaAula = new Date(data.getFullYear(), data.getMonth(), data.getDate(), h ?? 0, m ?? 0);
-    const agora = new Date();
+    const agora = agoraNaEscola();
     const desde = fimDaAula > agora ? fimDaAula : agora;
     return encontrarHorariosParaReprogramar(turmas, config, turma.id, desde);
   }, [open, turmas, config, turma.id, data, assignment.slot.fim]);

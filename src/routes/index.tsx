@@ -48,6 +48,7 @@ import {
   suspensaoKey,
   reprogramacoesParaData,
   toDateKey,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Assignment } from "@/lib/types";
@@ -457,7 +458,7 @@ function ProximasTurmasPanel() {
   useEffect(() => setMontado(true), []);
 
   const proximo = useMemo(
-    () => (montado ? proximoDiaLetivo(config, new Date()) : null),
+    () => (montado ? proximoDiaLetivo(config, agoraNaEscola()) : null),
     [config, montado],
   );
   const assignmentsDoProximoDia = useMemo(() => {
@@ -621,14 +622,14 @@ function ProgramacaoSemanalDestaque() {
   const [todayLabel, setTodayLabel] = useState("");
   const [diaSelecionado, setDiaSelecionado] = useState(config.diasSemana[0] ?? "");
   useEffect(() => {
-    const label = currentWeekdayLabel(new Date());
+    const label = currentWeekdayLabel(agoraNaEscola());
     setTodayLabel(label);
     if (config.diasSemana.includes(label)) setDiaSelecionado(label);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
-  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
+  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, agoraNaEscola()), [diaSelecionado]);
   const assignments = useMemo(
     () =>
       aplicarExcecoesDeData(
@@ -806,7 +807,7 @@ function ProgramacaoSemanalDestaque() {
 
       <PreviaAlunosDialog
         assignment={assignmentSelecionado}
-        data={proximaDataDoDia(diaSelecionado, new Date())}
+        data={proximaDataDoDia(diaSelecionado, agoraNaEscola())}
         onOpenChange={(open) => {
           if (!open) setAssignmentSelecionado(null);
         }}

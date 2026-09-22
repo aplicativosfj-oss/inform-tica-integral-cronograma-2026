@@ -8,6 +8,31 @@ import type {
   Turma,
 } from "@/lib/types";
 
+/** Fuso da escola (Rio Branco, AC). */
+export const FUSO_ESCOLA = "America/Rio_Branco";
+
+/**
+ * "Agora" no relógio da escola, independente do fuso configurado no
+ * computador. Um PC no horário de Brasília ficaria 2h adiantado e mostraria
+ * outra turma na faixa "aula agora". O Date devolvido tem hora/dia locais
+ * iguais à hora de parede de Rio Branco — é o que o resto do código lê.
+ */
+export function agoraNaEscola(): Date {
+  const agora = new Date();
+  const partes = new Intl.DateTimeFormat("en-US", {
+    timeZone: FUSO_ESCOLA,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hourCycle: "h23",
+  }).formatToParts(agora);
+  const v = (t: string) => Number(partes.find((p) => p.type === t)?.value ?? 0);
+  return new Date(v("year"), v("month") - 1, v("day"), v("hour"), v("minute"), v("second"), agora.getMilliseconds());
+}
+
 function toMinutes(hhmm: string): number {
   const parts = hhmm.split(":");
   const h = Number(parts[0] ?? 0);

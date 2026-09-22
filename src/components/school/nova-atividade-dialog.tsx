@@ -15,9 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { criarAtividade } from "@/lib/aluno-area";
+import { agoraNaEscola } from "@/lib/schedule-engine";
 
 function hojeISO(): string {
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(
     hoje.getDate(),
   ).padStart(2, "0")}`;

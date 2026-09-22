@@ -22,6 +22,7 @@ import {
   reprogramacoesParaData,
   suspensaoKey,
   toDateKey,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 import type { Assignment, Presenca, ScheduleConfig, Turma } from "@/lib/types";
 import { Paginacao } from "@/components/school/paginacao";
@@ -260,7 +261,7 @@ export function DiarioAulas({ registros, mes }: { registros: Presenca[] | null; 
   useEffect(() => setPagina(1), [filtro, mes]);
 
   const dias = useMemo(
-    () => (registros ? montarDiario(turmas, config, registros, mes, new Date()) : null),
+    () => (registros ? montarDiario(turmas, config, registros, mes, agoraNaEscola()) : null),
     [turmas, config, registros, mes],
   );
 

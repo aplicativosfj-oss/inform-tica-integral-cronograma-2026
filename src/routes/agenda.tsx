@@ -30,6 +30,7 @@ import {
   reprogramacoesParaData,
   suspensaoKey,
   toDateKey,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import agendaHeroImg from "@/assets/laboratorio-informatica-turma.jpg";
@@ -55,13 +56,13 @@ export const Route = createFileRoute("/agenda")({
 
 function AgendaPage() {
   const { turmas, config } = useAppStore();
-  const semanaAtualIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const semanaAtualIndex = useMemo(() => getWeekIndex(agoraNaEscola()), []);
   const [weekIndex, setWeekIndex] = useState(semanaAtualIndex);
   const assignments = useMemo(
     () => buildWeeklySchedule(turmas, config, weekIndex),
     [turmas, config, weekIndex],
   );
-  const todayLabel = useMemo(() => currentWeekdayLabel(new Date()), []);
+  const todayLabel = useMemo(() => currentWeekdayLabel(agoraNaEscola()), []);
   const isCurrentWeek = weekIndex === semanaAtualIndex;
   const semanasAnterioresBloqueadas = weekIndex <= semanaAtualIndex;
   const [diaSelecionado, setDiaSelecionado] = useState(
@@ -69,7 +70,7 @@ function AgendaPage() {
   );
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
-  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, new Date()), [diaSelecionado]);
+  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, agoraNaEscola()), [diaSelecionado]);
   const dataDoDiaKey = toDateKey(dataDoDia);
   const reprogramadasDoDia = useMemo(
     () => reprogramacoesParaData(turmas, config, dataDoDia),
@@ -88,7 +89,7 @@ function AgendaPage() {
     month: "long",
   });
   const dataCurta = (dia: string) =>
-    proximaDataDoDia(dia, new Date()).toLocaleDateString("pt-BR", {
+    proximaDataDoDia(dia, agoraNaEscola()).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
     });

@@ -27,7 +27,7 @@ import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { exportarFrequenciaPdf } from "@/lib/relatorio-frequencia";
-import { toDateKey } from "@/lib/schedule-engine";
+import { toDateKey, agoraNaEscola } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/frequencia")({
@@ -47,7 +47,7 @@ const STATUS_LABEL: Record<Presenca["status"], string> = {
 };
 
 function defaultRange() {
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   const inicio = new Date(hoje);
   inicio.setDate(inicio.getDate() - 6);
   return { inicio: toDateKey(inicio), fim: toDateKey(hoje) };

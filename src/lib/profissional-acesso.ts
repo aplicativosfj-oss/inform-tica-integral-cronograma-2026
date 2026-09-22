@@ -18,6 +18,7 @@
  */
 
 import type { Aluno, ApoioEspecial, Turma } from "@/lib/types";
+import { agoraNaEscola } from "@/lib/schedule-engine";
 
 /** Tempera a conta para o número não sair de um hash "de prateleira" do nome. */
 const TEMPERO = "informatica-integral-2026";
@@ -134,7 +135,7 @@ export function idadeEmAnos(nascimento: string | undefined): number | null {
   if (!nascimento) return null;
   const data = new Date(`${nascimento}T12:00:00`);
   if (Number.isNaN(data.getTime())) return null;
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   let idade = hoje.getFullYear() - data.getFullYear();
   const passouAniversario =
     hoje.getMonth() > data.getMonth() ||

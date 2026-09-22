@@ -13,6 +13,7 @@ import {
   findSessaoAtual,
   getWeekIndex,
   toDateKey,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 
 export const Route = createFileRoute("/tv")({
@@ -46,8 +47,8 @@ function hhmmToSeconds(hhmm: string): number {
 function useNow() {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
-    setNow(new Date());
-    const id = window.setInterval(() => setNow(new Date()), 1000);
+    setNow(agoraNaEscola());
+    const id = window.setInterval(() => setNow(agoraNaEscola()), 1000);
     return () => window.clearInterval(id);
   }, []);
   return now;

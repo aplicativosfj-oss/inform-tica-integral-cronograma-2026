@@ -25,6 +25,7 @@ import {
   reprogramacoesParaData,
   suspensaoKey,
   toDateKey,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 import { serieClasses } from "@/lib/serie-colors";
 import type { Assignment, ScheduleConfig } from "@/lib/types";
@@ -83,8 +84,8 @@ export function WeeklySchedule() {
   const [agora, setAgora] = useState<Date | null>(null);
   const [semanaOffset, setSemanaOffset] = useState(0);
   useEffect(() => {
-    setAgora(new Date());
-    const id = window.setInterval(() => setAgora(new Date()), 60_000);
+    setAgora(agoraNaEscola());
+    const id = window.setInterval(() => setAgora(agoraNaEscola()), 60_000);
     return () => window.clearInterval(id);
   }, []);
 
@@ -523,7 +524,7 @@ export function WeeklySchedule() {
 
       <PreviaAlunosDialog
         assignment={previsto}
-        data={dataSelecionada ?? new Date()}
+        data={dataSelecionada ?? agoraNaEscola()}
         onOpenChange={(open) => {
           if (!open) setPrevisto(null);
         }}

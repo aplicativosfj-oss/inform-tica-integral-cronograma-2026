@@ -23,7 +23,7 @@ import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange } from "@/lib/presencas";
-import { toDateKey } from "@/lib/schedule-engine";
+import { toDateKey, agoraNaEscola } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 import coordenacaoHeroImg from "@/assets/alunos-hero.jpg";
 
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/coordenacao")({
 });
 
 function mesAtual(): string {
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
 }
 

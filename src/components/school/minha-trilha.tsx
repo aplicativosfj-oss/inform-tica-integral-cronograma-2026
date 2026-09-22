@@ -8,6 +8,7 @@ import {
   resumirPorFerramenta,
   type Passo,
 } from "@/lib/trilha-aluno";
+import { agoraNaEscola } from "@/lib/schedule-engine";
 
 /**
  * "Minha trilha": o que a criança já fez, mostrado para ela mesma.
@@ -21,7 +22,7 @@ import {
 
 function quando(iso: string): string {
   const d = new Date(iso);
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   const dias = Math.floor((hoje.getTime() - d.getTime()) / 86400000);
   if (dias <= 0) return "hoje";
   if (dias === 1) return "ontem";

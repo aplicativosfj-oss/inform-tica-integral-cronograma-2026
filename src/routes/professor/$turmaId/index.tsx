@@ -32,7 +32,7 @@ import { fetchAtividadesDaTurma } from "@/lib/aluno-area";
 import { useConfirmar } from "@/lib/confirm-store";
 import { fetchPresencasRange } from "@/lib/presencas";
 import { encerrarProfissionalSessao, temSessaoDeProfessor } from "@/lib/profissional-session";
-import { buildGrupos } from "@/lib/schedule-engine";
+import { buildGrupos, agoraNaEscola } from "@/lib/schedule-engine";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, Presenca } from "@/lib/types";
 
@@ -85,7 +85,7 @@ function ProfessorPainel() {
 
   useEffect(() => {
     let cancelado = false;
-    const hoje = new Date();
+    const hoje = agoraNaEscola();
     async function carregar() {
       setCarregando(true);
       try {

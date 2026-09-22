@@ -27,6 +27,7 @@ import { temSessaoDeApoio } from "@/lib/profissional-session";
 import type { Aluno } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import fundoInclusaoImg from "@/assets/feature-kids-learning.jpg";
+import { agoraNaEscola } from "@/lib/schedule-engine";
 
 export const Route = createFileRoute("/mediador/$turmaId/$apoioIndex/relatorio")({
   validateSearch: (search: Record<string, unknown>): { aluno?: string } =>
@@ -111,7 +112,7 @@ interface Relatorio {
 }
 
 function relatorioVazio(aluno: Aluno | undefined): Relatorio {
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   return {
     periodo: `${hoje.toLocaleDateString("pt-BR", { month: "long" })} de ${hoje.getFullYear()}`,
     especialidadeId: especialidadeDoCadastro(aluno?.especialidade)?.id ?? "",
@@ -695,7 +696,7 @@ function Documento({
         <div className="border-t border-slate-400 pt-1">
           Coordenação pedagógica
           <br />
-          <span className="text-slate-500">{new Date().toLocaleDateString("pt-BR")}</span>
+          <span className="text-slate-500">{agoraNaEscola().toLocaleDateString("pt-BR")}</span>
         </div>
       </footer>
       <p className="mt-6 text-center text-[10px] text-slate-500">

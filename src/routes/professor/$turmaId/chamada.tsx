@@ -22,7 +22,7 @@ import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { fetchPresencasRange, marcarFalta, registrarPresencasIniciais } from "@/lib/presencas";
 import { temSessaoDeProfessor } from "@/lib/profissional-session";
-import { buildGrupos } from "@/lib/schedule-engine";
+import { buildGrupos, agoraNaEscola } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 
 export const Route = createFileRoute("/professor/$turmaId/chamada")({
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/professor/$turmaId/chamada")({
 });
 
 function hojeISO(): string {
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(
     hoje.getDate(),
   ).padStart(2, "0")}`;

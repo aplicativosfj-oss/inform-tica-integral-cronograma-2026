@@ -9,6 +9,7 @@ import { obterOuCriarPin } from "@/lib/aluno-area";
 import { alunosDoApoio, senhaApoio, senhaProfessor } from "@/lib/profissional-acesso";
 import { supabase } from "@/lib/supabase-client";
 import type { Aluno, Turma } from "@/lib/types";
+import { agoraNaEscola } from "@/lib/schedule-engine";
 
 export const Route = createFileRoute("/dashboard/fichas-acesso")({
   validateSearch: (search: Record<string, unknown>): { turma?: string } =>
@@ -240,7 +241,7 @@ function AcessosPage() {
                 <footer className="mt-6 border-t border-slate-200 pt-2 text-[10.5px] leading-snug text-slate-500">
                   Não compartilhe estas senhas. Entregue a cada aluno apenas o próprio PIN. Se um
                   PIN vazar ou for esquecido, a coordenação gera outro no painel. Emitido em{" "}
-                  {new Date().toLocaleDateString("pt-BR")}.
+                  {agoraNaEscola().toLocaleDateString("pt-BR")}.
                 </footer>
               </article>
             ))}

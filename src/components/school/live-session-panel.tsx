@@ -83,6 +83,7 @@ import {
   suspensaoKey,
   toDateKey,
   type SubBloco,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 import type { Aluno, Presenca, ScheduleConfig, Turma } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -143,8 +144,8 @@ function useNow(enabled: boolean) {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     if (!enabled) return;
-    setNow(new Date());
-    const id = window.setInterval(() => setNow(new Date()), 1000);
+    setNow(agoraNaEscola());
+    const id = window.setInterval(() => setNow(agoraNaEscola()), 1000);
     return () => window.clearInterval(id);
   }, [enabled]);
   return now;

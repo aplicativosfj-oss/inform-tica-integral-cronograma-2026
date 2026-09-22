@@ -42,6 +42,7 @@ import { idadeEmAnos } from "@/lib/profissional-acesso";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import type { Atividade, AtividadeStatus, Presenca } from "@/lib/types";
 import alunoPainelBgImg from "@/assets/feature-kids-learning.jpg";
+import { agoraNaEscola } from "@/lib/schedule-engine";
 
 export const Route = createFileRoute("/aluno/$turmaId/$alunoId/")({
   component: AlunoPainel,
@@ -218,7 +219,7 @@ function AlunoPainel() {
   }
 
   const cor = serieClasses(serieIndexPorNumero(turma.serie));
-  const anoAtual = new Date().getFullYear();
+  const anoAtual = agoraNaEscola().getFullYear();
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -293,7 +294,7 @@ function AlunoPainel() {
                 <CalendarDays className="size-4 text-primary" />
                 <p className="text-[11px] text-muted-foreground">Hoje</p>
                 <p className="text-xs font-semibold text-foreground sm:text-sm">
-                  {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                  {agoraNaEscola().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
                 </p>
               </CardContent>
             </Card>

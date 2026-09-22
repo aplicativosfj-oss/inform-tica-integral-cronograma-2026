@@ -38,6 +38,7 @@ import {
   proximaDataDoDia,
   suspensaoKey,
   toDateKey,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 import type { Assignment, Presenca } from "@/lib/types";
 
@@ -52,7 +53,7 @@ export const Route = createFileRoute("/dashboard/faltas")({
 });
 
 function mesAtual(): string {
-  const hoje = new Date();
+  const hoje = agoraNaEscola();
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
 }
 
@@ -102,7 +103,7 @@ function FaltasPage() {
   } | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
-  const weekIndex = useMemo(() => getWeekIndex(new Date()), []);
+  const weekIndex = useMemo(() => getWeekIndex(agoraNaEscola()), []);
   const assignments = useMemo(
     () => buildWeeklySchedule(turmas, config, weekIndex),
     [turmas, config, weekIndex],
@@ -111,7 +112,7 @@ function FaltasPage() {
   // Aulas de hoje e dos últimos dias letivos que ainda aconteceram
   // normalmente — é daqui que se registra "a turma não pôde participar".
   const aulasRecentes = useMemo(() => {
-    const hoje = new Date();
+    const hoje = agoraNaEscola();
     const lista: { data: Date; dataKey: string; assignment: Assignment }[] = [];
     for (let i = 0; i < 7; i += 1) {
       const data = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - i);

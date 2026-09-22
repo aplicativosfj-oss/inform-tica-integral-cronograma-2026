@@ -11,6 +11,7 @@ import {
   reprogramacoesParaData,
   suspensaoKey,
   toDateKey,
+  agoraNaEscola,
 } from "@/lib/schedule-engine";
 
 export type EstadoLaboratorio = "em-aula" | "encerrando" | "suspensa" | "livre";
@@ -46,8 +47,8 @@ export function useAulaAgora(): AulaAgora | null {
   const [agora, setAgora] = useState<Date | null>(null);
 
   useEffect(() => {
-    setAgora(new Date());
-    const id = window.setInterval(() => setAgora(new Date()), 15_000);
+    setAgora(agoraNaEscola());
+    const id = window.setInterval(() => setAgora(agoraNaEscola()), 15_000);
     return () => window.clearInterval(id);
   }, []);
 
