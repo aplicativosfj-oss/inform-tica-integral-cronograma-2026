@@ -9,7 +9,7 @@ import {
   Target,
   Users2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,26 +45,38 @@ const DISC_OPCOES: { id: Disciplina; nome: string }[] = [
 ];
 const SERIES: Serie[] = [1, 2, 3, 4, 5];
 
+/** Faixa de acerto que cada nível representa, escrita no próprio botão para
+ *  ninguém precisar adivinhar o que "Retomada" recorta. */
+const ROTULO_FAIXA: Record<Nivel, string> = {
+  retomada: "· abaixo de 50%",
+  pratica: "· 50 a 74%",
+  desafio: "· 75% ou mais",
+};
+
 function PillFiltro<T extends string>({
   valor,
   atual,
   rotulo,
   onClick,
+  desativado,
 }: {
   valor: T | "";
   atual: string;
   rotulo: string;
   onClick: () => void;
+  desativado?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={desativado}
       className={cn(
         "rounded-full border px-3 py-1.5 text-xs font-semibold transition sm:text-sm",
         atual === valor
           ? "border-transparent bg-foreground text-background"
           : "border-border text-muted-foreground hover:text-foreground",
+        desativado && "cursor-not-allowed opacity-50 hover:text-muted-foreground",
       )}
     >
       {rotulo}
@@ -79,15 +91,45 @@ export function GuiaDescritores() {
   const [nivel, setNivel] = useState<Nivel | "">("");
   const [turma, setTurma] = useState("");
 
+  /**
+   * "Nível" aqui é o desempenho real, não a dificuldade da atividade: como
+   * toda habilidade acaba ligada a atividades dos três níveis, filtrar por
+   * `d.niveis` devolvia sempre as 120 — o botão não fazia nada. O que o
+   * professor quer saber nesta tela é outra coisa: o que a turma já domina
+   * e o que precisa ser retomado.
+   */
+  const FAIXA_NIVEL: Record<Nivel, [number, number]> = {
+    retomada: [0, 0.5],
+    pratica: [0.5, 0.75],
+    desafio: [0.75, Infinity],
+  };
+
+  const acertoDe = useCallback(
+    (d: Descritor): number | null => {
+      if (!desempenho) return null;
+      const pct = turma ? desempenho.porTurma.get(turma)?.get(d.id) : desempenho.rede.get(d.id);
+      return pct == null ? null : pct / 100;
+    },
+    [desempenho, turma],
+  );
+
+  const temDesempenho = desempenho != null;
+
   const filtrados = useMemo(
     () =>
-      DESCRITORES_CATALOGO.filter(
-        (d) =>
-          (!disc || d.disc === disc) &&
-          (!serie || d.series.includes(serie)) &&
-          (!nivel || d.niveis.includes(nivel)),
-      ),
-    [disc, serie, nivel],
+      DESCRITORES_CATALOGO.filter((d) => {
+        if (disc && d.disc !== disc) return false;
+        if (serie && !d.series.includes(serie)) return false;
+        if (nivel) {
+          const acerto = acertoDe(d);
+          if (acerto == null) return false;
+          const [min, max] = FAIXA_NIVEL[nivel];
+          if (acerto < min || acerto >= max) return false;
+        }
+        return true;
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [disc, serie, nivel, acertoDe],
   );
 
   const porDominio = useMemo(() => {
@@ -103,12 +145,6 @@ export function GuiaDescritores() {
   const dominiosComItens = DOMINIOS_USADOS.filter(
     (dom) => (porDominio.get(dom.id)?.length ?? 0) > 0,
   );
-
-  function acertoDe(d: Descritor): number | null {
-    if (!desempenho) return null;
-    const pct = turma ? desempenho.porTurma.get(turma)?.get(d.id) : desempenho.rede.get(d.id);
-    return pct == null ? null : pct / 100;
-  }
 
   return (
     <div>
@@ -167,18 +203,24 @@ export function GuiaDescritores() {
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Nível
+              Como a turma foi
             </span>
-            <PillFiltro valor="" atual={nivel} rotulo="Todos" onClick={() => setNivel("")} />
+            <PillFiltro valor="" atual={nivel} rotulo="Tudo" onClick={() => setNivel("")} />
             {NIVEIS.map((n) => (
               <PillFiltro
                 key={n.id}
                 valor={n.id}
                 atual={nivel}
-                rotulo={`${n.emoji} ${n.nome}`}
+                rotulo={`${n.emoji} ${n.nome} ${ROTULO_FAIXA[n.id]}`}
                 onClick={() => setNivel(n.id)}
+                desativado={!temDesempenho}
               />
             ))}
+            {!temDesempenho ? (
+              <span className="text-xs text-muted-foreground">
+                — disponível quando os resultados da avaliação forem publicados
+              </span>
+            ) : null}
             {desempenho && desempenho.turmas.length > 0 ? (
               <div className="ml-auto flex items-center gap-1.5">
                 <Users2 className="size-4 shrink-0 text-muted-foreground" />
@@ -263,36 +305,49 @@ export function GuiaDescritores() {
                     </div>
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="mt-4 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
                     {itens.map((d) => {
                       const acerto = acertoDe(d);
                       const dicasEmSala = d.atividades.find((a) => a.emSala)?.emSala;
                       return (
                         <Card key={d.id} className="flex h-full flex-col">
-                          <CardContent className="flex flex-1 flex-col gap-3 p-4">
+                          <CardContent className="flex flex-1 flex-col gap-3 p-5">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
                                 {d.codigo ? (
-                                  <span className="mb-1 inline-block rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] font-semibold text-muted-foreground">
+                                  <span className="mb-1.5 inline-block rounded bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-muted-foreground">
                                     {d.codigo}
                                   </span>
                                 ) : null}
-                                <p className="text-sm font-medium leading-snug text-foreground">
+                                <p className="text-base font-semibold leading-snug text-foreground">
                                   {d.texto}
                                 </p>
                                 <div className="mt-1.5 flex flex-wrap gap-1">
                                   {d.series.map((s) => (
                                     <span
                                       key={s}
-                                      className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
+                                      className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
                                     >
                                       {s}º ano
                                     </span>
                                   ))}
                                 </div>
                               </div>
-                              {acerto != null ? (
-                                <AnelPercentual valor={acerto} tamanho={52} espessura={6} />
+                              {/* Vaga fixa para o anel: sem ela, trocar de turma
+                                reflui todos os cards, porque o anel aparece em
+                                umas habilidades e some em outras. */}
+                              {temDesempenho ? (
+                                <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center">
+                                  {acerto != null ? (
+                                    <AnelPercentual valor={acerto} tamanho={52} espessura={6} />
+                                  ) : (
+                                    <span className="text-center text-[11px] leading-tight text-muted-foreground">
+                                      sem
+                                      <br />
+                                      dado
+                                    </span>
+                                  )}
+                                </div>
                               ) : null}
                             </div>
 
@@ -301,7 +356,7 @@ export function GuiaDescritores() {
                                 {d.atividades.slice(0, 4).map((a) => (
                                   <span
                                     key={a.titulo}
-                                    className="rounded-full border border-border/60 bg-card px-2 py-0.5 text-[11px] font-medium text-foreground"
+                                    className="rounded-full border border-border/60 bg-card px-2.5 py-1 text-xs font-medium text-foreground"
                                     title={a.titulo}
                                   >
                                     {a.emoji} {a.titulo}
@@ -311,7 +366,7 @@ export function GuiaDescritores() {
                             ) : null}
 
                             {dicasEmSala && dicasEmSala.length > 0 ? (
-                              <ul className="list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
+                              <ul className="list-disc space-y-1 pl-4 text-sm text-muted-foreground">
                                 {dicasEmSala.slice(0, 2).map((dica) => (
                                   <li key={dica}>{dica}</li>
                                 ))}

@@ -101,8 +101,11 @@ function NavLinkAvaliacoes() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
+        {/* `DropdownMenuItem` vem com `cursor-default` (convenção de menu de
+          ação). Aqui os itens são navegação — levam a outra tela —, então a
+          mãozinha é o que a pessoa espera. */}
         {SUB_AVALIACOES.map((sub) => (
-          <DropdownMenuItem key={sub.rotulo} asChild className="gap-2.5 py-2.5">
+          <DropdownMenuItem key={sub.rotulo} asChild className="cursor-pointer gap-2.5 py-2.5">
             <Link to="/avaliacao" search={sub.aba ? { aba: sub.aba } : {}}>
               <sub.icon className="size-4 shrink-0 text-muted-foreground" />
               <span>{sub.rotulo}</span>
