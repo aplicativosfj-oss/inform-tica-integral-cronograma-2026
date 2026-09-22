@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   Brain,
   Calculator,
+  ChevronDown,
   Download,
   ExternalLink,
   Gamepad2,
@@ -11,6 +13,7 @@ import {
   Puzzle,
   Sparkles,
   Users2,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -213,6 +216,79 @@ function faviconUrl(url: string) {
   return `https://www.google.com/s2/favicons?sz=64&domain=${dominio}`;
 }
 
+const CHAVE_CALCULADORA = "infoteca:calculadora-aberta";
+
+/**
+ * Calculadora embutida na Infoteca, que pode ser fechada. Fica aberta por
+ * padrão (é a ferramenta mais procurada de quem chega de fora), mas quem
+ * fechar não precisa fechar de novo: a escolha fica no navegador.
+ */
+function CartaoCalculadora() {
+  const [aberta, setAberta] = useState(true);
+
+  // Só lê o navegador depois de montar: no SSR não existe localStorage, e ler
+  // direto no useState faria o HTML do servidor divergir do da tela.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(CHAVE_CALCULADORA) === "0") setAberta(false);
+    } catch {
+      // Navegador sem acesso a storage (aba anônima, cookies bloqueados):
+      // segue com o padrão aberto.
+    }
+  }, []);
+
+  function alternar() {
+    setAberta((v) => {
+      try {
+        window.localStorage.setItem(CHAVE_CALCULADORA, v ? "0" : "1");
+      } catch {
+        // Sem storage, a escolha vale só para esta visita.
+      }
+      return !v;
+    });
+  }
+
+  return (
+    <div className="mt-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+      <div className="flex items-center gap-2.5">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-300">
+          <Calculator className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground">Calculadora</p>
+          <p className="text-xs text-muted-foreground">
+            {aberta
+              ? "Use aqui mesmo — as quatro operações, sem sair da página."
+              : "Fechada. Abra quando precisar somar alguma coisa."}
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={alternar}
+          aria-expanded={aberta}
+          className="shrink-0 gap-1.5 text-muted-foreground hover:text-foreground"
+        >
+          {aberta ? (
+            <>
+              <X className="size-4" /> Fechar
+            </>
+          ) : (
+            <>
+              <ChevronDown className="size-4" /> Abrir
+            </>
+          )}
+        </Button>
+      </div>
+      {aberta ? (
+        <div className="mt-3">
+          <Calculadora compacta />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function InfotecaPage() {
   const publicas = listarFerramentasPublicas();
 
@@ -325,21 +401,9 @@ function InfotecaPage() {
 
           {/* A calculadora fica aberta na própria página: é a ferramenta mais
             procurada por quem cai aqui de fora, e obrigar um clique a mais
-            para somar dois números seria atrito à toa. */}
-          <div className="mt-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
-            <div className="mb-3 flex items-center gap-2.5">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-300">
-                <Calculator className="size-4" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Calculadora</p>
-                <p className="text-xs text-muted-foreground">
-                  Use aqui mesmo — as quatro operações, sem sair da página.
-                </p>
-              </div>
-            </div>
-            <Calculadora />
-          </div>
+            para somar dois números seria atrito à toa. Mas ela pode ser
+            fechada — e a escolha fica guardada para as próximas visitas. */}
+          <CartaoCalculadora />
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {publicas.map((ferramenta) => (

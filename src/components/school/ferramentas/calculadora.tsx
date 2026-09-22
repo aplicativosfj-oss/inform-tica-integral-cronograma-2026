@@ -31,7 +31,7 @@ function formatar(valor: number): string {
   return arredondado.toLocaleString("pt-BR", { maximumFractionDigits: 10 });
 }
 
-export function Calculadora() {
+export function Calculadora({ compacta = false }: { compacta?: boolean } = {}) {
   const [visor, setVisor] = useState("0");
   const [acumulado, setAcumulado] = useState<number | null>(null);
   const [operador, setOperador] = useState<string | null>(null);
@@ -96,23 +96,38 @@ export function Calculadora() {
   }
 
   return (
-    <div className="mx-auto flex max-w-xs flex-col gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
-      <div className="rounded-xl bg-muted/60 px-4 py-6 text-right">
-        <p className="truncate font-mono text-3xl font-semibold text-foreground">{visor}</p>
+    <div
+      className={cn(
+        "mx-auto flex flex-col rounded-2xl border border-border/60 bg-card shadow-sm",
+        // A versão compacta é usada onde a calculadora fica embutida numa
+        // página maior (Infoteca): ocupa bem menos altura sem perder o toque.
+        compacta ? "max-w-[15rem] gap-2 p-2.5" : "max-w-xs gap-3 p-4",
+      )}
+    >
+      <div className={cn("rounded-xl bg-muted/60 text-right", compacta ? "px-3 py-2.5" : "px-4 py-6")}>
+        <p
+          className={cn(
+            "truncate font-mono font-semibold text-foreground",
+            compacta ? "text-xl" : "text-3xl",
+          )}
+        >
+          {visor}
+        </p>
         {operador ? (
           <p className="mt-1 text-xs text-muted-foreground">
             {formatar(acumulado ?? 0)} {operador}
           </p>
         ) : null}
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className={cn("grid grid-cols-4", compacta ? "gap-1.5" : "gap-2")}>
         {TECLAS.flat().map((tecla, i) => (
           <button
             key={`${tecla}-${i}`}
             type="button"
             onClick={() => pressionar(tecla)}
             className={cn(
-              "flex h-14 cursor-pointer items-center justify-center rounded-xl text-lg font-medium transition-colors active:scale-95",
+              "flex cursor-pointer items-center justify-center rounded-xl font-medium transition-colors active:scale-95",
+              compacta ? "h-9 text-sm" : "h-14 text-lg",
               tecla === "="
                 ? "col-span-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 : ["+", "−", "×", "÷"].includes(tecla)

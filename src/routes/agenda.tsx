@@ -199,19 +199,23 @@ function AgendaPage() {
                 <TabsTrigger
                   key={dia}
                   value={dia}
-                  className={`flex-col gap-0 rounded-xl border px-4 py-1.5 leading-tight data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground ${
+                  className={`group flex-col gap-0 rounded-xl border px-4 py-1.5 leading-tight text-foreground data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground ${
                     dia === todayLabel
-                      ? "border-blue-400/50 bg-blue-500/10 dark:bg-blue-500/15"
+                      ? // Só destaca "hoje" enquanto o dia NÃO está selecionado: quando
+                        // está, vale o fundo sólido do estado ativo. Sem isso, o azul
+                        // translúcido vencia o fundo primário e sobrava texto escuro
+                        // sobre fundo escuro.
+                        "border-blue-400/50 data-[state=inactive]:bg-blue-500/10 dark:data-[state=inactive]:bg-blue-500/15"
                       : "border-border/60"
                   }`}
                 >
                   <span className="flex items-center gap-1">
                     {dia}
                     {dia === todayLabel ? (
-                      <span className="size-1.5 rounded-full bg-blue-500 data-[state=active]:bg-primary-foreground" />
+                      <span className="size-1.5 rounded-full bg-blue-500 group-data-[state=active]:bg-primary-foreground" />
                     ) : null}
                   </span>
-                  <span className="font-mono text-xs opacity-70">{dataCurta(dia)}</span>
+                  <span className="font-mono text-xs opacity-80">{dataCurta(dia)}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
