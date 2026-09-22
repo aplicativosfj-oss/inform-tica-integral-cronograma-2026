@@ -112,7 +112,7 @@ function AlunoPicker() {
 
           <div className="mb-6 flex items-center gap-3">
             <span
-              className={`flex size-12 items-center justify-center rounded-xl text-lg font-bold ${corTurma.bg} ${corTurma.text}`}
+              className={`flex size-12 items-center justify-center rounded-full text-lg font-bold ring-1 ring-inset ring-black/5 dark:ring-white/10 ${corTurma.bg} ${corTurma.text}`}
             >
               {turma.letra}
             </span>
@@ -144,7 +144,7 @@ function AlunoPicker() {
                   className="group flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-border/60 bg-card p-3.5 text-center shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                 >
                   <span
-                    className={`flex size-10 items-center justify-center rounded-full text-sm font-bold ${corTurma.bg} ${corTurma.text}`}
+                    className={`flex size-10 items-center justify-center rounded-full text-sm font-bold ring-1 ring-inset ring-black/5 dark:ring-white/10 ${corTurma.bg} ${corTurma.text}`}
                   >
                     {aluno.nome.charAt(0).toUpperCase()}
                   </span>

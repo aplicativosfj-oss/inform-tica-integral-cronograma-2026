@@ -26,7 +26,7 @@ interface BarraFerramentasProps {
 export function BarraFerramentas({ titulo, descricao, acao }: BarraFerramentasProps) {
   return (
     <>
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white ring-1 ring-white/30">
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/20 text-white ring-1 ring-white/30">
         <Sparkles className="size-6" />
       </span>
       <span className="min-w-0 flex-1">

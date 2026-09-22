@@ -83,7 +83,7 @@ function AlunoTurmaPicker() {
                     className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                   >
                     <span
-                      className={`flex size-11 items-center justify-center rounded-xl text-base font-bold ${cor.bg} ${cor.text}`}
+                      className={`flex size-11 items-center justify-center rounded-full text-base font-bold ring-1 ring-inset ring-black/5 dark:ring-white/10 ${cor.bg} ${cor.text}`}
                     >
                       {turma.letra}
                     </span>

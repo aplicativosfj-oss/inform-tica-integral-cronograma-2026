@@ -289,18 +289,25 @@ function AlunoPainel() {
 
           {/* Chips de resumo */}
           <div className="mt-4 grid grid-cols-3 gap-2.5">
-            <Card>
+            <Card className="border-violet-400/25 bg-violet-500/[0.05] dark:border-violet-400/15">
               <CardContent className="flex flex-col items-center gap-1 p-3 text-center">
-                <CalendarDays className="size-4 text-primary" />
+                <span className="flex size-7 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:bg-violet-400/10 dark:text-violet-300">
+                  <CalendarDays className="size-4" />
+                </span>
                 <p className="text-[11px] text-muted-foreground">Hoje</p>
                 <p className="text-xs font-semibold text-foreground sm:text-sm">
-                  {agoraNaEscola().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                  {agoraNaEscola().toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })}
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-blue-400/25 bg-blue-500/[0.05] dark:border-blue-400/15">
               <CardContent className="flex flex-col items-center gap-1 p-3 text-center">
-                <Clock3 className="size-4 text-blue-600 dark:text-blue-400" />
+                <span className="flex size-7 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-300">
+                  <Clock3 className="size-4" />
+                </span>
                 <p className="text-[11px] text-muted-foreground">Último acesso</p>
                 <p className="text-xs font-semibold text-foreground sm:text-sm">
                   {carregando
@@ -311,9 +318,11 @@ function AlunoPainel() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-rose-400/25 bg-rose-500/[0.05] dark:border-rose-400/15">
               <CardContent className="flex flex-col items-center gap-1 p-3 text-center">
-                <UserX className="size-4 text-destructive" />
+                <span className="flex size-7 items-center justify-center rounded-full bg-rose-500/10 text-rose-600 dark:bg-rose-400/10 dark:text-rose-300">
+                  <UserX className="size-4" />
+                </span>
                 <p className="text-[11px] text-muted-foreground">Faltas</p>
                 <p className="text-xs font-semibold text-foreground sm:text-sm">
                   {carregando ? "..." : totalFaltas}

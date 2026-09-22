@@ -382,7 +382,7 @@ function ResultadoAluno({
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-        <span className="flex size-16 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300">
+        <span className="flex size-16 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 ring-1 ring-inset ring-amber-500/25 dark:text-amber-300">
           <Trophy className="size-8" />
         </span>
         <p className="text-2xl font-bold text-foreground">Simulado concluído!</p>

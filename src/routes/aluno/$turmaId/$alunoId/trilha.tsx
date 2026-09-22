@@ -213,8 +213,10 @@ function MinhaTrilha() {
                             <CardContent className="flex flex-wrap items-center gap-4 p-4">
                               <span
                                 className={cn(
-                                  "flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold",
-                                  feito ? "bg-emerald-700 text-white" : "bg-muted text-foreground",
+                                  "flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-1 ring-inset",
+                                  feito
+                                    ? "bg-emerald-700 text-white ring-emerald-800/30"
+                                    : "bg-muted text-foreground ring-black/5 dark:ring-white/10",
                                 )}
                               >
                                 {feito ? "✓" : i + 1}
