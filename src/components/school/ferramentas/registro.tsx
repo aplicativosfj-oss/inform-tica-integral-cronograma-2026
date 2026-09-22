@@ -23,7 +23,7 @@ import type { ComponentType } from "react";
 import { AcervoLeitura } from "@/components/school/ferramentas/acervo-leitura";
 import { Alfabetizacao } from "@/components/school/ferramentas/alfabetizacao";
 import { AtividadesLP } from "@/components/school/ferramentas/atividades-lp";
-import { Calculadora } from "@/components/school/ferramentas/calculadora";
+import { CalculadoraJanela } from "@/components/school/ferramentas/calculadora-flutuante";
 import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemorativas";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
 import { Folclore } from "@/components/school/ferramentas/folclore";
@@ -66,7 +66,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     categoria: "Ferramentas",
     icon: Calculator,
     cor: "bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-300",
-    Componente: Calculadora,
+    Componente: CalculadoraJanela,
   },
   {
     slug: "editor-texto",

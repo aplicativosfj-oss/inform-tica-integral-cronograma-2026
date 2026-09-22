@@ -32,8 +32,16 @@ function limitar(p: Posicao, largura: number, altura: number): Posicao {
   };
 }
 
-export function CalculadoraFlutuante() {
-  const [aberta, setAberta] = useState(false);
+export function CalculadoraFlutuante({
+  abertaInicial = false,
+  aoFechar,
+}: {
+  /** Abre já na frente, centralizada (usado na página própria da ferramenta). */
+  abertaInicial?: boolean;
+  /** Quando informado, fechar chama isto em vez de voltar ao botão do canto. */
+  aoFechar?: () => void;
+} = {}) {
+  const [aberta, setAberta] = useState(abertaInicial);
   const [pos, setPos] = useState<Posicao | null>(null);
   const [arrastando, setArrastando] = useState(false);
   const painelRef = useRef<HTMLDivElement>(null);
@@ -63,15 +71,18 @@ export function CalculadoraFlutuante() {
     }
     setPos(
       limitar(
-        inicial ?? {
-          x: window.innerWidth - largura - MARGEM * 2,
-          y: window.innerHeight - altura - MARGEM * 2,
-        },
+        inicial ??
+          (abertaInicial
+            ? { x: (window.innerWidth - largura) / 2, y: (window.innerHeight - altura) / 2 }
+            : {
+                x: window.innerWidth - largura - MARGEM * 2,
+                y: window.innerHeight - altura - MARGEM * 2,
+              }),
         largura,
         altura,
       ),
     );
-  }, [aberta, tamanho]);
+  }, [aberta, tamanho, abertaInicial]);
 
   // Se a janela do navegador encolher, traz a calculadora de volta para dentro.
   useEffect(() => {
@@ -95,6 +106,7 @@ export function CalculadoraFlutuante() {
   });
 
   function fechar() {
+    if (aoFechar) return aoFechar();
     setAberta(false);
     // Devolve o foco a quem abriu, para quem navega pelo teclado não se perder.
     window.setTimeout(() => abrirRef.current?.focus(), 0);
@@ -103,6 +115,9 @@ export function CalculadoraFlutuante() {
   function iniciarArrasto(e: React.PointerEvent<HTMLDivElement>) {
     // Só o botão principal do mouse arrasta; toque e caneta entram aqui também.
     if (e.button !== 0 || !pos) return;
+    // Teclas e o botão fechar continuam clicáveis: sem isto a captura do
+    // ponteiro "engolia" o clique e o X não fechava.
+    if ((e.target as HTMLElement).closest("button")) return;
     e.preventDefault();
     pegada.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
     setArrastando(true);
@@ -175,20 +190,20 @@ export function CalculadoraFlutuante() {
         // (as teclas já encolhem sozinhas, então isto quase nunca entra em ação).
         maxHeight: `calc(100dvh - ${MARGEM * 2}px)`,
       }}
-      className="fixed z-50 w-[15rem] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+      onPointerDown={iniciarArrasto}
+      onPointerMove={arrastar}
+      onPointerUp={soltar}
+      onPointerCancel={soltar}
+      className={`fixed z-50 w-[15rem] touch-none overflow-hidden rounded-2xl border border-border bg-card shadow-2xl select-none ${
+        arrastando ? "cursor-grabbing" : "cursor-grab"
+      }`}
     >
       <div
-        onPointerDown={iniciarArrasto}
-        onPointerMove={arrastar}
-        onPointerUp={soltar}
-        onPointerCancel={soltar}
         onKeyDown={moverPorTeclado}
         role="button"
         tabIndex={0}
         aria-label="Arraste para mover a calculadora; use as setas do teclado para ajustar"
-        className={`flex touch-none items-center gap-1.5 rounded-t-2xl border-b border-border/60 px-2.5 py-1.5 select-none ${
-          arrastando ? "cursor-grabbing" : "cursor-grab"
-        }`}
+        className="flex items-center gap-1.5 rounded-t-2xl border-b border-border/60 px-2.5 py-1.5"
       >
         <GripHorizontal className="size-4 shrink-0 text-muted-foreground" />
         <span className="flex-1 text-xs font-medium text-muted-foreground">Calculadora</span>
@@ -205,5 +220,22 @@ export function CalculadoraFlutuante() {
         <Calculadora compacta moldura={false} />
       </div>
     </div>
+  );
+}
+
+/**
+ * Versão usada na página da ferramenta: a calculadora já abre como uma única
+ * janela (sem rolagem), pode ser arrastada pela tela e o X volta à página
+ * anterior.
+ */
+export function CalculadoraJanela() {
+  return (
+    <CalculadoraFlutuante
+      abertaInicial
+      aoFechar={() => {
+        if (window.history.length > 1) window.history.back();
+        else window.location.assign("/ferramentas");
+      }}
+    />
   );
 }
