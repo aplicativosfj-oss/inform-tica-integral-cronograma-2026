@@ -108,7 +108,7 @@ export function Calculadora({
         "mx-auto flex flex-col",
         // A versão compacta é usada onde o espaço é curto (a janela
         // flutuante): ocupa bem menos altura sem perder o toque.
-        compacta ? "max-w-[15rem] gap-2" : "max-w-xs gap-3",
+        compacta ? "max-w-[15rem] gap-2" : "w-full max-w-sm gap-3",
         moldura
           ? cn("rounded-2xl border border-border/60 bg-card shadow-sm", compacta ? "p-2.5" : "p-4")
           : null,
@@ -117,13 +117,13 @@ export function Calculadora({
       <div
         className={cn(
           "rounded-xl bg-muted/60 text-right",
-          compacta ? "px-3 py-[clamp(0.25rem,1.2vh,0.625rem)]" : "px-4 py-6",
+          compacta ? "px-3 py-[clamp(0.25rem,1.2vh,0.625rem)]" : "px-4 py-[clamp(0.5rem,1.6vh,0.875rem)]",
         )}
       >
         <p
           className={cn(
             "truncate font-mono font-semibold text-foreground",
-            compacta ? "text-[clamp(1rem,2.6vh,1.25rem)]" : "text-3xl",
+            compacta ? "text-[clamp(1rem,2.6vh,1.25rem)]" : "text-[clamp(1.5rem,3.6vh,1.875rem)]",
           )}
         >
           {visor}
@@ -148,7 +148,7 @@ export function Calculadora({
               // Na versão compacta as teclas encolhem junto com a altura da
               // tela, para a calculadora caber inteira em telas baixas sem
               // precisar de barra de rolagem.
-              compacta ? "h-[clamp(1.75rem,4vh,2.25rem)] text-[clamp(0.75rem,1.9vh,0.875rem)]" : "h-14 text-lg",
+              compacta ? "h-[clamp(1.75rem,4vh,2.25rem)] text-[clamp(0.75rem,1.9vh,0.875rem)]" : "h-[clamp(2.5rem,7.5vh,3.5rem)] text-lg",
               tecla === "="
                 ? "col-span-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 : ["+", "−", "×", "÷"].includes(tecla)

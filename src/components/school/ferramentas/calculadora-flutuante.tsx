@@ -13,6 +13,10 @@ import { Calculadora } from "@/components/school/ferramentas/calculadora";
  * propósito: o site nunca deve abrir com a calculadora já na frente.
  */
 
+/**
+ * Guarda só a posição do balão do canto. A janela da página da ferramenta tem
+ * outro tamanho e abre sempre centralizada, então não lê nem grava aqui.
+ */
 const CHAVE_POSICAO = "infoteca:calculadora-posicao";
 /** Folga mínima até a borda da tela, para a janela nunca sumir. */
 const MARGEM = 12;
@@ -59,15 +63,20 @@ export function CalculadoraFlutuante({
   useEffect(() => {
     if (!aberta) return;
     const { largura, altura } = tamanho();
+    // Na página da ferramenta a janela é o conteúdo principal: abre sempre
+    // centralizada. Arrastar vale para a visita, mas não vira o novo padrão —
+    // era isso que fazia a calculadora reaparecer torta num canto qualquer.
     let inicial: Posicao | null = null;
-    try {
-      const salvo = window.localStorage.getItem(CHAVE_POSICAO);
-      if (salvo) {
-        const p = JSON.parse(salvo) as Partial<Posicao>;
-        if (typeof p.x === "number" && typeof p.y === "number") inicial = { x: p.x, y: p.y };
+    if (!abertaInicial) {
+      try {
+        const salvo = window.localStorage.getItem(CHAVE_POSICAO);
+        if (salvo) {
+          const p = JSON.parse(salvo) as Partial<Posicao>;
+          if (typeof p.x === "number" && typeof p.y === "number") inicial = { x: p.x, y: p.y };
+        }
+      } catch {
+        // Sem storage ou valor corrompido: cai no padrão do canto.
       }
-    } catch {
-      // Sem storage ou valor corrompido: cai no padrão do canto.
     }
     setPos(
       limitar(
@@ -135,7 +144,7 @@ export function CalculadoraFlutuante({
     setArrastando(false);
     e.currentTarget.releasePointerCapture(e.pointerId);
     try {
-      if (pos) window.localStorage.setItem(CHAVE_POSICAO, JSON.stringify(pos));
+      if (pos && !abertaInicial) window.localStorage.setItem(CHAVE_POSICAO, JSON.stringify(pos));
     } catch {
       // Sem storage: a posição vale só para esta visita.
     }
@@ -156,7 +165,7 @@ export function CalculadoraFlutuante({
     const novo = limitar({ x: pos.x + passo.x, y: pos.y + passo.y }, largura, altura);
     setPos(novo);
     try {
-      window.localStorage.setItem(CHAVE_POSICAO, JSON.stringify(novo));
+      if (!abertaInicial) window.localStorage.setItem(CHAVE_POSICAO, JSON.stringify(novo));
     } catch {
       // idem
     }
@@ -177,6 +186,11 @@ export function CalculadoraFlutuante({
   }
 
   return (
+    <>
+    {abertaInicial && (
+      // Na página própria, a janela é a única coisa em foco: cobre o resto.
+      <div aria-hidden className="fixed inset-0 z-40 bg-background/70 backdrop-blur-sm" />
+    )}
     <div
       ref={painelRef}
       role="dialog"
@@ -194,7 +208,7 @@ export function CalculadoraFlutuante({
       onPointerMove={arrastar}
       onPointerUp={soltar}
       onPointerCancel={soltar}
-      className={`fixed z-50 w-[15rem] touch-none overflow-hidden rounded-2xl border border-border bg-card shadow-2xl select-none ${
+      className={`fixed z-50 touch-none ${abertaInicial ? "w-[min(22rem,calc(100vw-24px))]" : "w-[15rem]"} overflow-hidden rounded-2xl border border-border bg-card shadow-2xl select-none ${
         arrastando ? "cursor-grabbing" : "cursor-grab"
       }`}
     >
@@ -203,7 +217,7 @@ export function CalculadoraFlutuante({
         role="button"
         tabIndex={0}
         aria-label="Arraste para mover a calculadora; use as setas do teclado para ajustar"
-        className="flex items-center gap-1.5 rounded-t-2xl border-b border-border/60 px-2.5 py-1.5"
+        className="flex items-center gap-1.5 rounded-t-2xl border-b border-border/60 px-3 py-2"
       >
         <GripHorizontal className="size-4 shrink-0 text-muted-foreground" />
         <span className="flex-1 text-xs font-medium text-muted-foreground">Calculadora</span>
@@ -216,10 +230,11 @@ export function CalculadoraFlutuante({
           <X className="size-4" />
         </button>
       </div>
-      <div className="p-2.5">
-        <Calculadora compacta moldura={false} />
+      <div className={abertaInicial ? "p-4" : "p-2.5"}>
+        <Calculadora compacta={!abertaInicial} moldura={false} />
       </div>
     </div>
+    </>
   );
 }
 
