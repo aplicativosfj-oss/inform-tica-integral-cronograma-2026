@@ -70,7 +70,10 @@ function AgendaPage() {
   );
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
-  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, agoraNaEscola()), [diaSelecionado]);
+  const dataDoDia = useMemo(
+    () => proximaDataDoDia(diaSelecionado, agoraNaEscola()),
+    [diaSelecionado],
+  );
   const dataDoDiaKey = toDateKey(dataDoDia);
   const reprogramadasDoDia = useMemo(
     () => reprogramacoesParaData(turmas, config, dataDoDia),
@@ -108,8 +111,8 @@ function AgendaPage() {
           />
           <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
             <div className="flex flex-col gap-4">
-              <Badge variant="secondary" className="w-fit gap-1.5">
-                <CalendarDays className="size-3.5" /> Agenda semanal
+              <Badge className="w-fit gap-1.5 rounded-full border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
+                <CalendarDays className="size-4" /> Agenda semanal
               </Badge>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Cronograma de aulas de informática
@@ -121,8 +124,8 @@ function AgendaPage() {
               </p>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400">
+                <div className="flex items-center gap-2.5 rounded-xl border border-amber-400/25 bg-card p-3 shadow-sm dark:border-amber-400/15 dark:bg-card/60 dark:backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400">
                     <Clock3 className="size-4" />
                   </span>
                   <div>
@@ -132,8 +135,8 @@ function AgendaPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 shadow-sm dark:border-white/15 dark:bg-card/60 dark:backdrop-blur-xl">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                <div className="flex items-center gap-2.5 rounded-xl border border-emerald-400/25 bg-card p-3 shadow-sm dark:border-emerald-400/15 dark:bg-card/60 dark:backdrop-blur-xl">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <MonitorSmartphone className="size-4" />
                   </span>
                   <div>
@@ -249,11 +252,11 @@ function AgendaPage() {
                         <img
                           src={assignment.turma.imagem}
                           alt=""
-                          className="size-11 shrink-0 rounded-lg object-cover"
+                          className="size-11 shrink-0 rounded-full object-cover ring-1 ring-inset ring-black/5 dark:ring-white/10"
                         />
                       ) : (
                         <span
-                          className={`flex size-11 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg} ${serieClasses(serieIndexPorNumero(assignment.turma.serie)).text}`}
+                          className={`flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ring-1 ring-inset ring-black/5 dark:ring-white/10 ${serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg} ${serieClasses(serieIndexPorNumero(assignment.turma.serie)).text}`}
                         >
                           {assignment.turma.letra}
                         </span>
