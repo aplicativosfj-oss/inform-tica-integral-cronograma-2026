@@ -8,6 +8,7 @@ import {
   raioXTurma,
   type PerfilAluno,
 } from "@/lib/diagnostica/analise";
+import { AnelPercentual } from "@/components/school/diagnostica/graficos";
 import { atividadesParaHabilidade } from "@/lib/diagnostica/sugestoes";
 import { NOME_DISC, type ProvaII } from "@/lib/diagnostica/tipos";
 import { cn } from "@/lib/utils";
@@ -60,15 +61,18 @@ export function RaioXTurmaDialog({
           <Bloco titulo="Onde a turma está">
             <div className="grid gap-3 sm:grid-cols-3">
               {dados.disciplinas.map((d) => (
-                <div key={d.disc} className="rounded-lg border border-border p-3">
-                  <p className="font-semibold">{NOME_DISC[d.disc] ?? d.disc}</p>
-                  <p className="text-xs text-muted-foreground">
-                    1ª avaliação: <b>{porcento(d.i)}</b>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    2ª avaliação: <b>{porcento(d.ii)}</b>
-                  </p>
-                  <Diferenca delta={d.delta} />
+                <div
+                  key={d.disc}
+                  className="flex items-center gap-3 rounded-lg border border-border p-3"
+                >
+                  <AnelPercentual valor={d.ii} tamanho={52} espessura={6} />
+                  <div className="min-w-0">
+                    <p className="font-semibold">{NOME_DISC[d.disc] ?? d.disc}</p>
+                    <p className="text-xs text-muted-foreground">
+                      1ª avaliação: <b>{porcento(d.i)}</b>
+                    </p>
+                    <Diferenca delta={d.delta} />
+                  </div>
                 </div>
               ))}
             </div>
@@ -218,14 +222,19 @@ export function RaioXAlunoDialog({
         <div className="space-y-6 text-sm">
           <div className="grid gap-3 sm:grid-cols-3">
             {perfil.porDisciplina.map((d) => (
-              <div key={d.disc} className="rounded-lg border border-border p-3">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                  {NOME_DISC[d.disc] ?? d.disc}
-                </p>
-                <p className="text-2xl font-bold tabular-nums">{porcento(d.acerto)}</p>
-                <p className="text-xs text-muted-foreground">
-                  {d.acertos} de {d.total} questões
-                </p>
+              <div
+                key={d.disc}
+                className="flex items-center gap-3 rounded-lg border border-border p-3"
+              >
+                <AnelPercentual valor={d.acerto} tamanho={56} espessura={6} />
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {NOME_DISC[d.disc] ?? d.disc}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {d.acertos} de {d.total} questões
+                  </p>
+                </div>
               </div>
             ))}
           </div>

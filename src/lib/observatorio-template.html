@@ -17,23 +17,28 @@ h1,h2,h3,h4{font-family:Sora,system-ui,sans-serif;margin:0;text-wrap:balance;let
 p{margin:0}
 .wrap{max-width:1220px;margin:0 auto;padding-inline:clamp(16px,3vw,32px)}
 /* topo */
-.top{background:var(--pri);color:#fff;padding-block:18px 16px;position:relative;overflow:hidden}
-:root:not([data-theme="light"]) .top{background:var(--pri)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .top{background:#12304B}}
-:root[data-theme="dark"] .top{background:#12304B}
+.top{background:linear-gradient(155deg,var(--pri),color-mix(in srgb,var(--pri) 78%,#000));color:#fff;padding-block:24px 20px;position:relative;overflow:hidden}
+:root:not([data-theme="light"]) .top{background:linear-gradient(155deg,var(--pri),color-mix(in srgb,var(--pri) 78%,#000))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .top{background:linear-gradient(155deg,#12304B,#0B1E30)}}
+:root[data-theme="dark"] .top{background:linear-gradient(155deg,#12304B,#0B1E30)}
+.top::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 1px,transparent 1px);background-size:18px 18px;-webkit-mask-image:linear-gradient(to bottom,#000,transparent 85%);mask-image:linear-gradient(to bottom,#000,transparent 85%);pointer-events:none}
+.top .wrap{position:relative;display:flex;align-items:flex-start;gap:14px}
+.top .ic{flex-shrink:0;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18)}
 .top .eyebrow{font:700 12px/1 "Nunito Sans";letter-spacing:.14em;text-transform:uppercase;color:#FFD877}
 .top h1{font-size:clamp(20px,2.6vw,28px);font-weight:800;margin-top:6px;max-width:40ch}
 .top p.lead{color:#D6E4F1;margin-top:4px;max-width:80ch;font-size:14px}
 .tabbar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);box-shadow:0 4px 14px -10px rgba(0,0,0,.25)}
-.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-block:6px}
 .tabs::-webkit-scrollbar{display:none}
-.tabs button{all:unset;cursor:pointer;padding:12px 14px;font:700 14px "Nunito Sans";color:var(--mut);white-space:nowrap;border-bottom:3px solid transparent}
-.tabs button:hover{color:var(--ink)}
-.tabs button[aria-selected=true]{color:var(--pri);border-bottom-color:var(--chalk)}
+.tabs button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:999px;font:700 13.5px "Nunito Sans";color:var(--mut);white-space:nowrap;transition:background .15s,color .15s}
+.tabs button svg{opacity:.75}
+.tabs button:hover{color:var(--ink);background:var(--surface2)}
+.tabs button[aria-selected=true]{color:var(--pri);background:color-mix(in srgb,var(--pri) 12%,transparent)}
+.tabs button[aria-selected=true] svg{opacity:1}
 .tabs button:focus-visible{outline:2px solid var(--chalk);outline-offset:-2px}
-main{padding-block:20px 48px}
-.stack{display:grid;gap:16px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(14px,1.8vw,20px);box-shadow:var(--shadow);min-width:0}
+main{padding-block:24px 56px}
+.stack{display:grid;gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,1.9vw,22px);box-shadow:var(--shadow);min-width:0;transition:box-shadow .15s,border-color .15s}
 .card.flat{box-shadow:none}
 .card h2{font-size:clamp(16px,1.7vw,19px);font-weight:700}
 .card h3{font-size:16px;font-weight:700}
@@ -76,8 +81,9 @@ main{padding-block:20px 48px}
 .seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
 select,input{font:600 15px "Nunito Sans";background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:9px 12px;max-width:100%}
 /* cartões de turma */
-.tcard{cursor:pointer;display:grid;gap:12px;transition:transform .15s,border-color .15s}
-.tcard:hover{transform:translateY(-2px);border-color:var(--pri)}
+.tcard{cursor:pointer;display:grid;gap:12px;transition:transform .15s,border-color .15s,box-shadow .15s}
+.tcard:hover{transform:translateY(-3px);border-color:var(--pri);box-shadow:0 14px 30px -14px rgba(19,35,47,.28)}
+.tcard:focus-visible{transform:translateY(-3px);border-color:var(--pri)}
 .discline{display:grid;grid-template-columns:92px 1fr 42px;gap:10px;align-items:center;font-size:13.5px}
 /* tabela */
 .scroll{overflow-x:auto}
@@ -161,10 +167,13 @@ dialog::backdrop{background:rgba(9,20,30,.55);backdrop-filter:blur(3px)}
 
 <header class="top">
  <div class="wrap">
-  <div class="eyebrow">II Avaliação Diagnóstica · Anos iniciais · junho de 2026</div>
-  <h1>Como estão aprendendo os alunos da Escola Dr. Eiraldo</h1>
-  <p class="lead">Resultados de 10 turmas do 1º ao 5º ano em Português, Matemática e Ciências, explicados de forma simples, com sugestões do que fazer a seguir.</p>
+  <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg></span>
+  <div>
+   <div class="eyebrow">II Avaliação Diagnóstica · Anos iniciais · junho de 2026</div>
+   <h1>Como estão aprendendo os alunos da Escola Dr. Eiraldo</h1>
+   <p class="lead">Resultados de 10 turmas do 1º ao 5º ano em Português, Matemática e Ciências, explicados de forma simples, com sugestões do que fazer a seguir.</p>
   </div>
+ </div>
 </header>
 <div class="tabbar"><nav class="wrap tabs" id="tabs" role="tablist" aria-label="Seções"></nav></div>
 <main class="wrap" id="main"></main>
@@ -256,8 +265,18 @@ const dica=h=>{for(const [re,t] of DICAS)if(re.test(norm(h)))return t;return "Re
 const nivelAcao=p=>p<25?"Retomar do início, com material concreto e acompanhamento próximo.":p<50?"Retomada direcionada: 2 a 3 aulas dedicadas e atividades em grupo.":p<70?"Revisão rápida e exercícios de fixação.":"Manter e aprofundar com desafios.";
 /* ---------------- navegação ---------------- */
 const TABS=[["resumo","Resumo"],["turmas","Turmas"],["habilidades","O que precisa melhorar"],["plano","Plano de ação"],["comparar","Comparar"],["alunos","Alunos"],["como","Como ler"]];
+const ICON_SVG=p=>`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const TAB_ICONS={
+ resumo:ICON_SVG('<path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/>'),
+ turmas:ICON_SVG('<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>'),
+ habilidades:ICON_SVG('<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'),
+ plano:ICON_SVG('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 11h6M9 15h6"/>'),
+ comparar:ICON_SVG('<path d="M8 3v14"/><path d="M4 7l4-4 4 4"/><path d="M16 21V7"/><path d="M12 17l4 4 4-4"/>'),
+ alunos:ICON_SVG('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>'),
+ como:ICON_SVG('<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.8 1c0 1.7-2.3 2-2.3 3.5"/><path d="M12 17h.01"/>'),
+};
 const tabs=document.getElementById("tabs"),main=document.getElementById("main");
-tabs.innerHTML=TABS.map(([k,l])=>`<button role="tab" data-t="${k}">${l}</button>`).join("");
+tabs.innerHTML=TABS.map(([k,l])=>`<button role="tab" data-t="${k}">${TAB_ICONS[k]||""}<span>${l}</span></button>`).join("");
 let cur="resumo";try{cur=sessionStorage.getItem("obs.tab")||"resumo"}catch(e){}
 tabs.onclick=e=>{const b=e.target.closest("[data-t]");if(b)go(b.dataset.t)};
 function go(t){cur=t;try{sessionStorage.setItem("obs.tab",t)}catch(e){}tabs.querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t==t));V[t]();window.scrollTo({top:0})}

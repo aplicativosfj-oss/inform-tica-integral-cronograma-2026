@@ -19,6 +19,70 @@ export function corDoAcerto(v: number): string {
   return "#10b981";
 }
 
+/**
+ * Anel de percentual em SVG — o "número grande" da página em forma de
+ * gauge, colorido pela mesma régua de `corDoAcerto`. Usado nos destaques
+ * (média da escola, de uma turma, de um aluno) para que a informação mais
+ * importante de cada cartão seja lida de relance, não só em texto.
+ */
+export function AnelPercentual({
+  valor,
+  tamanho = 96,
+  espessura = 10,
+  rotulo,
+}: {
+  valor: number | null;
+  tamanho?: number;
+  espessura?: number;
+  rotulo?: string;
+}) {
+  const v = Math.max(0, Math.min(1, valor ?? 0));
+  const r = (tamanho - espessura) / 2;
+  const c = 2 * Math.PI * r;
+  const cor = corDoAcerto(v);
+  return (
+    <svg
+      width={tamanho}
+      height={tamanho}
+      viewBox={`0 0 ${tamanho} ${tamanho}`}
+      role="img"
+      aria-label={rotulo ? `${rotulo}: ${pct(valor)}` : pct(valor)}
+    >
+      <circle
+        cx={tamanho / 2}
+        cy={tamanho / 2}
+        r={r}
+        fill="none"
+        className="stroke-muted"
+        strokeWidth={espessura}
+      />
+      {valor != null && (
+        <circle
+          cx={tamanho / 2}
+          cy={tamanho / 2}
+          r={r}
+          fill="none"
+          stroke={cor}
+          strokeWidth={espessura}
+          strokeLinecap="round"
+          strokeDasharray={`${c * v} ${c}`}
+          transform={`rotate(-90 ${tamanho / 2} ${tamanho / 2})`}
+        />
+      )}
+      <text
+        x="50%"
+        y="50%"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="fill-foreground"
+        style={{ font: `800 ${tamanho * 0.22}px ui-sans-serif, system-ui` }}
+      >
+        {pct(valor)}
+      </text>
+    </svg>
+  );
+}
+
 /** Barras horizontais de acerto por habilidade, pintadas pela faixa. */
 export function BarrasHabilidades({
   itens,

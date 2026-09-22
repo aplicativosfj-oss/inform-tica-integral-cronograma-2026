@@ -1,8 +1,10 @@
 import {
   ArrowRight,
   BookOpenCheck,
+  ClipboardList,
   Info,
   Minus,
+  Scale,
   Search,
   TrendingDown,
   TrendingUp,
@@ -21,25 +23,28 @@ import {
   type DesempenhoTurma,
 } from "@/lib/diagnostica/analise";
 import { RaioXAlunoDialog, RaioXTurmaDialog } from "@/components/school/diagnostica/raio-x";
+import { AnelPercentual, BarrasHabilidades } from "@/components/school/diagnostica/graficos";
 import type { PerfilAluno } from "@/lib/diagnostica/analise";
 import type { ProvaII } from "@/lib/diagnostica/tipos";
+import { serieClasses } from "@/lib/serie-colors";
 import { cn } from "@/lib/utils";
 
 /**
  * Área única das avaliações diagnósticas, escrita para quem não trabalha com
  * dados: pai, mãe, professor regente, conselho escolar.
  *
- * Três decisões guiam o desenho:
+ * Decisões que guiam o desenho:
  *
  * 1. **Uma régua só.** Tudo é "de cada 100 questões, quantas a turma
- *    acertou". A nota de 0 a 100 da SEME, os percentuais de faixa e o nível
- *    de escrita ficam para o painel de gestão; aqui atrapalhariam.
- * 2. **Antes e agora, lado a lado.** Cada turma aparece com duas barras
- *    empilhadas e uma frase dizendo o que aconteceu, em vez de um gráfico
- *    que exige legenda para ser lido.
- * 3. **Cor com pouco significado.** Cinza é a 1ª avaliação, azul é a 2ª,
- *    verde e vermelho aparecem só para dizer "subiu" ou "caiu". Sem escala
- *    de cor para decifrar.
+ *    acertou". A nota de 0 a 100 da SEME e os percentuais de faixa ficam
+ *    para o painel de gestão; aqui atrapalhariam.
+ * 2. **Antes e agora, lado a lado.** Cada turma aparece com um anel de
+ *    percentual (a mesma régua de cor de `corDoAcerto` em toda a página) e
+ *    uma frase dizendo o que aconteceu, em vez de um gráfico que exige
+ *    legenda para ser lido.
+ * 3. **Todo card de turma abre o raio-X.** Turma por turma, alfabetização e
+ *    escrita — qualquer card com o nome de uma turma é clicável e, de
+ *    dentro do raio-X, dá para abrir a ficha de um aluno específico.
  */
 
 const DISCIPLINAS = [
@@ -56,10 +61,16 @@ const nomeTurma = (ano: number, turma: string) => `${ano}º ano ${turma}`;
 export function PainelAvaliacoes({
   provas,
   comAlunos = false,
+  aoAbrirDetalhes,
 }: {
   provas: ProvaII[];
-  /** Só no painel de gestão: abre a lista de alunos dentro do raio-X. */
+  /** Mostra a lista de alunos dentro do raio-X da turma (e permite abrir a
+   *  ficha de cada um) — liberado também na página pública. */
   comAlunos?: boolean;
+  /** Leva para a aba "Detalhes da 2ª avaliação", opcionalmente já numa
+   *  sub-aba específica (plano de ação, comparar). Só existe quando este
+   *  painel roda dentro da página que tem as duas abas. */
+  aoAbrirDetalhes?: (subAba?: string) => void;
 }) {
   const [disc, setDisc] = useState<DiscId>("LP");
   const [turmaAberta, setTurmaAberta] = useState<{ ano: number; turma: string } | null>(null);
@@ -102,7 +113,7 @@ export function PainelAvaliacoes({
 
       <Secao
         titulo="Turma por turma"
-        explicacao="A barra cinza é a 1ª avaliação e a azul é a 2ª. Quanto mais cheia, melhor o resultado."
+        explicacao="O anel mostra o acerto na 2ª avaliação; a frase abaixo compara com a 1ª. Toque num card para abrir o raio-X."
       >
         <div className="mb-4 flex flex-wrap gap-2">
           {DISCIPLINAS.map((d) => (
@@ -132,17 +143,25 @@ export function PainelAvaliacoes({
       {dados.alfab.length > 0 && (
         <Secao
           titulo="Alfabetização no 1º e no 2º ano"
-          explicacao="Parte da turma que já escreve de forma alfabética, ou seja, escrevendo as palavras com as letras certas, mesmo com erros de ortografia."
+          explicacao="Parte da turma que já escreve de forma alfabética, ou seja, escrevendo as palavras com as letras certas, mesmo com erros de ortografia. Toque num card para ver o raio-X da turma."
         >
           <div className="grid gap-3 sm:grid-cols-2">
             {dados.alfab.map((a) => (
-              <Card key={`${a.ano}${a.turma}`}>
-                <CardContent className="space-y-3 py-4">
-                  <p className="font-semibold">{nomeTurma(a.ano, a.turma)}</p>
-                  <BarraDupla i={a.i} ii={a.ii} />
-                  <Veredito delta={a.delta} sufixo="de alunos alfabéticos" />
-                </CardContent>
-              </Card>
+              <button
+                key={`${a.ano}${a.turma}`}
+                type="button"
+                onClick={() => setTurmaAberta({ ano: a.ano, turma: a.turma })}
+                className="text-left"
+                aria-label={`Abrir o raio-X do ${nomeTurma(a.ano, a.turma)}`}
+              >
+                <Card className="h-full transition hover:border-primary hover:shadow-md">
+                  <CardContent className="space-y-3 py-4">
+                    <p className="font-semibold">{nomeTurma(a.ano, a.turma)}</p>
+                    <BarraDupla i={a.i} ii={a.ii} />
+                    <Veredito delta={a.delta} sufixo="de alunos alfabéticos" />
+                  </CardContent>
+                </Card>
+              </button>
             ))}
           </div>
         </Secao>
@@ -151,17 +170,25 @@ export function PainelAvaliacoes({
       {dados.ortografia.length > 0 && (
         <Secao
           titulo="Escrita do 3º ao 5º ano"
-          explicacao="Parte da turma que escreveu o texto da prova com no máximo quatro erros de ortografia."
+          explicacao="Parte da turma que escreveu o texto da prova com no máximo quatro erros de ortografia. Toque num card para ver o raio-X da turma."
         >
           <div className="grid gap-3 sm:grid-cols-2">
             {dados.ortografia.map((o) => (
-              <Card key={`orto-${o.ano}${o.turma}`}>
-                <CardContent className="space-y-3 py-4">
-                  <p className="font-semibold">{nomeTurma(o.ano, o.turma)}</p>
-                  <BarraDupla i={o.i} ii={o.ii} />
-                  <Veredito delta={o.delta} sufixo="de alunos que escrevem com poucos erros" />
-                </CardContent>
-              </Card>
+              <button
+                key={`orto-${o.ano}${o.turma}`}
+                type="button"
+                onClick={() => setTurmaAberta({ ano: o.ano, turma: o.turma })}
+                className="text-left"
+                aria-label={`Abrir o raio-X do ${nomeTurma(o.ano, o.turma)}`}
+              >
+                <Card className="h-full transition hover:border-primary hover:shadow-md">
+                  <CardContent className="space-y-3 py-4">
+                    <p className="font-semibold">{nomeTurma(o.ano, o.turma)}</p>
+                    <BarraDupla i={o.i} ii={o.ii} />
+                    <Veredito delta={o.delta} sufixo="de alunos que escrevem com poucos erros" />
+                  </CardContent>
+                </Card>
+              </button>
             ))}
           </div>
         </Secao>
@@ -176,22 +203,62 @@ export function PainelAvaliacoes({
             titulo="Já está bem aprendido"
             cor="emerald"
             itens={dados.fortes.map((h) => ({
-              texto: h.texto,
-              turma: nomeTurma(h.ano, h.turma),
+              rotulo: h.texto,
               valor: h.acerto,
+              detalhe: nomeTurma(h.ano, h.turma),
             }))}
           />
           <QuadroHabilidades
             titulo="Precisa ser retomado"
             cor="rose"
             itens={dados.frageis.map((h) => ({
-              texto: h.texto,
-              turma: nomeTurma(h.ano, h.turma),
+              rotulo: h.texto,
               valor: h.acerto,
+              detalhe: nomeTurma(h.ano, h.turma),
             }))}
           />
         </div>
       </Secao>
+
+      {aoAbrirDetalhes && (
+        <Secao
+          titulo="Ferramentas de apoio"
+          explicacao="Recursos mais avançados, na aba Detalhes da 2ª avaliação: monte um plano de retomada ou compare turmas e alunos lado a lado."
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <button type="button" onClick={() => aoAbrirDetalhes("plano")} className="text-left">
+              <Card className="h-full border-violet-400/30 bg-violet-500/[0.06] transition hover:border-violet-400/60 hover:shadow-md dark:border-violet-400/20 dark:bg-violet-400/[0.06]">
+                <CardContent className="flex items-start gap-3 py-5">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-700 dark:bg-violet-400/15 dark:text-violet-300">
+                    <ClipboardList className="size-5" />
+                  </span>
+                  <span>
+                    <span className="block font-semibold">Montar plano de ação por turma</span>
+                    <span className="block text-sm text-muted-foreground">
+                      Agrupa os alunos pela mesma dificuldade e sugere quem pode ajudar quem.
+                    </span>
+                  </span>
+                </CardContent>
+              </Card>
+            </button>
+            <button type="button" onClick={() => aoAbrirDetalhes("comparar")} className="text-left">
+              <Card className="h-full border-amber-400/30 bg-amber-500/[0.06] transition hover:border-amber-400/60 hover:shadow-md dark:border-amber-400/20 dark:bg-amber-400/[0.06]">
+                <CardContent className="flex items-start gap-3 py-5">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
+                    <Scale className="size-5" />
+                  </span>
+                  <span>
+                    <span className="block font-semibold">Comparar turmas ou alunos</span>
+                    <span className="block text-sm text-muted-foreground">
+                      Lado a lado, questão por questão — útil para reunião de pais e conselho.
+                    </span>
+                  </span>
+                </CardContent>
+              </Card>
+            </button>
+          </div>
+        </Secao>
+      )}
 
       <Rodape />
 
@@ -231,45 +298,55 @@ function Abertura({
 }) {
   const delta = mediaII - mediaI;
   return (
-    <header className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-      <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Avaliações diagnósticas 2026
-      </p>
-      <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
-        Como está a aprendizagem na escola
-      </h1>
-      <p className="mt-3 max-w-3xl text-base text-muted-foreground">
-        Duas vezes por ano, todos os alunos do 1º ao 5º ano fazem a mesma prova da Secretaria de
-        Educação. Esta página compara a <b className="text-foreground">1ª avaliação</b> com a{" "}
-        <b className="text-foreground">2ª</b> para mostrar, sem enrolação, o que melhorou e o que
-        ainda precisa de atenção.
-      </p>
-      <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-lg">
-        <span className="inline-flex items-center gap-2">
-          <b className="text-2xl tabular-nums">{porcento(mediaI)}</b>
-          <span className="text-muted-foreground">na 1ª</span>
-        </span>
-        <ArrowRight className="size-5 text-muted-foreground" />
-        <span className="inline-flex items-center gap-2">
-          <b className="text-2xl tabular-nums text-sky-600 dark:text-sky-400">
-            {porcento(mediaII)}
-          </b>
-          <span className="text-muted-foreground">na 2ª</span>
-        </span>
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold",
-            delta >= 0
-              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
-              : "bg-rose-500/15 text-rose-700 dark:text-rose-400",
-          )}
-        >
-          {delta >= 0 ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
-          {delta >= 0 ? "Subiu" : "Caiu"} {Math.abs(Math.round(delta * 100))} pontos
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {subiram} de {total} provas melhoraram
-        </span>
+    <header className="overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card to-muted/30 p-6 sm:p-8">
+      <div className="flex flex-col-reverse items-center gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="w-full sm:max-w-2xl">
+          <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            Avaliações diagnósticas 2026
+          </p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">
+            Como está a aprendizagem na escola
+          </h1>
+          <p className="mt-3 max-w-3xl text-base text-muted-foreground">
+            Duas vezes por ano, todos os alunos do 1º ao 5º ano fazem a mesma prova da Secretaria de
+            Educação. Esta página compara a <b className="text-foreground">1ª avaliação</b> com a{" "}
+            <b className="text-foreground">2ª</b> para mostrar, sem enrolação, o que melhorou e o
+            que ainda precisa de atenção.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-lg">
+            <span className="inline-flex items-center gap-2">
+              <b className="text-2xl tabular-nums">{porcento(mediaI)}</b>
+              <span className="text-muted-foreground">na 1ª</span>
+            </span>
+            <ArrowRight className="size-5 text-muted-foreground" />
+            <span className="inline-flex items-center gap-2">
+              <b className="text-2xl tabular-nums text-sky-600 dark:text-sky-400">
+                {porcento(mediaII)}
+              </b>
+              <span className="text-muted-foreground">na 2ª</span>
+            </span>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold backdrop-blur-md",
+                delta >= 0
+                  ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+                  : "bg-rose-500/15 text-rose-700 dark:text-rose-400",
+              )}
+            >
+              {delta >= 0 ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
+              {delta >= 0 ? "Subiu" : "Caiu"} {Math.abs(Math.round(delta * 100))} pontos
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {subiram} de {total} provas melhoraram
+            </span>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col items-center gap-1.5">
+          <AnelPercentual valor={mediaII} tamanho={140} espessura={12} rotulo="2ª avaliação" />
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Escola · 2ª avaliação
+          </p>
+        </div>
       </div>
     </header>
   );
@@ -304,28 +381,22 @@ function CartaoComparacao({
 }) {
   return (
     <Card>
-      <CardContent className="space-y-3 py-5">
-        <p className="text-sm font-semibold text-muted-foreground">{rotulo}</p>
-        <p
-          className={cn(
-            "text-4xl font-bold tabular-nums",
-            tom === "agora" && "text-sky-600 dark:text-sky-400",
-          )}
-        >
-          {porcento(valor)}
-        </p>
-        <div className="h-3 overflow-hidden rounded-full bg-muted">
-          <div
+      <CardContent className="flex items-center gap-4 py-5">
+        <AnelPercentual valor={valor} tamanho={72} espessura={8} rotulo={rotulo} />
+        <div className="min-w-0 flex-1 space-y-2">
+          <p className="text-sm font-semibold text-muted-foreground">{rotulo}</p>
+          <p
             className={cn(
-              "h-full rounded-full",
-              tom === "agora" ? "bg-sky-500" : "bg-muted-foreground/50",
+              "text-3xl font-bold tabular-nums",
+              tom === "agora" && "text-sky-600 dark:text-sky-400",
             )}
-            style={{ width: `${Math.max(2, valor * 100)}%` }}
-          />
+          >
+            {porcento(valor)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            de cada 100 questões, {Math.round(valor * 100)} foram acertadas
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          de cada 100 questões, {Math.round(valor * 100)} foram acertadas
-        </p>
       </CardContent>
     </Card>
   );
@@ -372,10 +443,11 @@ function ListaDeTurmas({
   }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       {daDisc.map((d) => {
         const antes = desI.find((x) => x.ano === d.ano && x.turma === d.turma && x.disc === disc);
         const delta = antes ? d.acerto - antes.acerto : null;
+        const cores = serieClasses(d.ano - 1);
         return (
           <button
             key={`${d.ano}${d.turma}`}
@@ -384,14 +456,17 @@ function ListaDeTurmas({
             className="text-left"
             aria-label={`Abrir o raio-X do ${nomeTurma(d.ano, d.turma)}`}
           >
-            <Card className="h-full transition hover:border-primary hover:shadow-md">
-              <CardContent className="space-y-3 py-4">
-                <div className="flex items-baseline justify-between gap-2">
-                  <p className="font-semibold">{nomeTurma(d.ano, d.turma)}</p>
-                  <p className="text-sm text-muted-foreground">{d.participantes} alunos fizeram</p>
-                </div>
-                <BarraDupla i={antes?.acerto ?? null} ii={d.acerto} />
-                <div className="flex items-center justify-between gap-2">
+            <Card className="h-full overflow-hidden transition hover:border-primary hover:shadow-md">
+              <div className={cn("h-1.5 w-full", cores.bg)} aria-hidden />
+              <CardContent className="flex items-center gap-3 py-4">
+                <AnelPercentual valor={d.acerto} tamanho={60} espessura={7} />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="font-semibold">{nomeTurma(d.ano, d.turma)}</p>
+                    <p className="shrink-0 text-xs text-muted-foreground">
+                      {d.participantes} alunos
+                    </p>
+                  </div>
                   <Veredito delta={delta} sufixo="de acerto" />
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
                     <Search className="size-3.5" /> Ver raio-X
@@ -472,7 +547,7 @@ function QuadroHabilidades({
 }: {
   titulo: string;
   cor: "emerald" | "rose";
-  itens: { texto: string; turma: string; valor: number }[];
+  itens: { rotulo: string; valor: number; detalhe: string }[];
 }) {
   return (
     <Card>
@@ -487,27 +562,7 @@ function QuadroHabilidades({
         >
           <BookOpenCheck className="size-4" /> {titulo}
         </p>
-        <ul className="space-y-3">
-          {itens.map((item) => (
-            <li key={item.texto + item.turma} className="space-y-1">
-              <p className="text-sm leading-snug">{item.texto}</p>
-              <div className="flex items-center gap-3">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={cn(
-                      "h-full rounded-full",
-                      cor === "emerald" ? "bg-emerald-500" : "bg-rose-500",
-                    )}
-                    style={{ width: `${Math.max(2, item.valor * 100)}%` }}
-                  />
-                </div>
-                <span className="w-28 shrink-0 text-right text-xs text-muted-foreground">
-                  {porcento(item.valor)} · {item.turma}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <BarrasHabilidades itens={itens} />
       </CardContent>
     </Card>
   );
@@ -533,8 +588,12 @@ function Rodape() {
           leitura é feita pelo nível de escrita, e não por questões.
         </li>
         <li>
+          Toque em qualquer card de turma para abrir o raio-X, e dentro dele em um aluno para ver a
+          ficha individual — o que já domina e o que precisa retomar, habilidade por habilidade.
+        </li>
+        <li>
           Fonte: tabulação da I e da II Avaliação Diagnóstica 2026 da Secretaria Municipal de
-          Educação. Nenhum nome de aluno aparece nesta página.
+          Educação.
         </li>
       </ul>
     </section>
