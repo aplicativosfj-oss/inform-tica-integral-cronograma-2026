@@ -2,7 +2,9 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   BarChart3,
   CalendarDays,
+  ChevronDown,
   ChevronRight,
+  Compass,
   ClipboardList,
   GraduationCap,
   HandHeart,
@@ -10,6 +12,7 @@ import {
   Info,
   LayoutDashboard,
   LogIn,
+  ListChecks,
   LogOut,
   Menu,
   Presentation,
@@ -19,6 +22,12 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetClose,
@@ -62,6 +71,56 @@ function NavLink({ to, label }: { to: string; label: string }) {
     </Button>
   );
 }
+
+/**
+ * "Avaliações" no topo abre as três abas da área em vez de só levar ao
+ * Resumo — sem isso o guia de habilidades fica invisível para quem não
+ * entra na página primeiro.
+ */
+function NavLinkAvaliacoes() {
+  const location = useLocation();
+  const isActive = location.pathname === "/avaliacao";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`relative hidden items-center gap-1 whitespace-nowrap px-2 text-[15px] transition-all duration-300 xl:inline-flex ${
+            isActive
+              ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
+              : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
+          }`}
+        >
+          Avaliações
+          <ChevronDown className="size-3.5 opacity-70" />
+          {isActive && (
+            <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50 dark:from-blue-400 dark:to-cyan-400 dark:shadow-blue-400/50" />
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        {SUB_AVALIACOES.map((sub) => (
+          <DropdownMenuItem key={sub.rotulo} asChild className="gap-2.5 py-2.5">
+            <Link to="/avaliacao" search={sub.aba ? { aba: sub.aba } : {}}>
+              <sub.icon className="size-4 shrink-0 text-muted-foreground" />
+              <span>{sub.rotulo}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** As abas de /avaliacao, repetidas no menu para quem procura o guia de
+ *  habilidades sem saber que ele mora dentro das Avaliações. */
+const SUB_AVALIACOES = [
+  { rotulo: "Resumo", aba: undefined, icon: BarChart3 },
+  { rotulo: "Detalhes da 2ª avaliação", aba: "detalhes" as const, icon: ListChecks },
+  { rotulo: "Guia de habilidades", aba: "descritores" as const, icon: Compass },
+] as const;
 
 const LINKS = [
   { to: "/", label: "Início" },
@@ -217,7 +276,7 @@ export function NavBar() {
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/infoteca" label="Infoteca" />
-          <NavLink to="/avaliacao" label="Avaliações" />
+          <NavLinkAvaliacoes />
           <NavLink to="/aluno" label="Área do Aluno" />
           <NavLink to="/professor" label="Professor" />
           <NavLink to="/mediador" label="Mediadores" />
@@ -304,30 +363,48 @@ export function NavBar() {
                       (link.to === "/" && location.pathname === "");
                     const Icone = LINK_ICONS[link.to] ?? Home;
                     return (
-                      <SheetClose key={link.to} asChild>
-                        <Link
-                          to={link.to}
-                          className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
-                            isActive
-                              ? "bg-primary/12 text-primary font-semibold ring-1 ring-primary/25"
-                              : "text-foreground hover:bg-muted"
-                          }`}
-                        >
-                          <span
-                            className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                      <div key={link.to} className="flex flex-col gap-1">
+                        <SheetClose asChild>
+                          <Link
+                            to={link.to}
+                            className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
                               isActive
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-muted-foreground group-hover:text-foreground"
+                                ? "bg-primary/12 text-primary font-semibold ring-1 ring-primary/25"
+                                : "text-foreground hover:bg-muted"
                             }`}
                           >
-                            <Icone className="size-4" />
-                          </span>
-                          <span className="flex-1">{link.label}</span>
-                          <ChevronRight
-                            className={`size-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground/60"}`}
-                          />
-                        </Link>
-                      </SheetClose>
+                            <span
+                              className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                                isActive
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground group-hover:text-foreground"
+                              }`}
+                            >
+                              <Icone className="size-4" />
+                            </span>
+                            <span className="flex-1">{link.label}</span>
+                            <ChevronRight
+                              className={`size-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground/60"}`}
+                            />
+                          </Link>
+                        </SheetClose>
+                        {/* As abas das Avaliações ficam à vista: senão o guia de
+                        habilidades só aparece depois de entrar na área. */}
+                        {link.to === "/avaliacao"
+                          ? SUB_AVALIACOES.filter((sub) => sub.aba).map((sub) => (
+                              <SheetClose key={sub.rotulo} asChild>
+                                <Link
+                                  to="/avaliacao"
+                                  search={sub.aba ? { aba: sub.aba } : {}}
+                                  className="ml-6 flex items-center gap-3 rounded-xl border-l border-border/60 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                >
+                                  <sub.icon className="size-4 shrink-0" />
+                                  <span className="flex-1">{sub.rotulo}</span>
+                                </Link>
+                              </SheetClose>
+                            ))
+                          : null}
+                      </div>
                     );
                   })}
                 </div>
