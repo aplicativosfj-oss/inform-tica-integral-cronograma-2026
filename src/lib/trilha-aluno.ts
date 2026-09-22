@@ -142,7 +142,7 @@ export interface Trilha {
 export async function fetchTrilha(alunoId: string, pin: string, limite = 200): Promise<Trilha> {
   const locais = lerLocais(alunoId).slice(0, limite);
   try {
-    const { data, error } = await supabase.rpc("trilha_aluno", {
+    const { data, error } = await supabase.rpc("ler_trilha_aluno", {
       p_aluno_id: alunoId,
       p_pin: pin,
       p_limite: limite,
