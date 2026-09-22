@@ -104,6 +104,8 @@ tbody tr.click:hover td{background:var(--surface2)}
 .group{border-radius:14px;padding:14px;border:1px dashed var(--line);display:grid;gap:8px;background:var(--surface)}
 .names{display:flex;flex-wrap:wrap;gap:6px}
 .names span{padding:3px 10px;border-radius:8px;background:var(--surface2);font-size:13.5px;font-weight:600}
+.names button{all:unset;cursor:pointer;padding:3px 10px;border-radius:8px;background:var(--surface2);font-size:13.5px;font-weight:600;transition:background .15s,color .15s}
+.names button:hover,.names button:focus-visible{background:var(--pri);color:#fff}
 svg text{fill:var(--mut);font:600 12px "Nunito Sans",sans-serif}
 .scat svg text{font-size:15px}
 /* barras horizontais */
@@ -298,11 +300,21 @@ V.resumo=()=>{
    <h2>Em média, os alunos acertaram <span class="hl">${pct(escola)}</span> das questões</h2>
    <p class="sub">Em ${pct(bom)} das provas o aluno ficou nas faixas <b>Bom</b> ou <b>Ótimo</b>. ${atenc} alunos precisam de atenção especial (média abaixo de 40%).</p></div>
   </div>
-  <div class="card" style="display:grid;gap:16px">
+  <div class="card" style="display:grid;gap:18px">
    <div class="label">Por área do conhecimento</div>
-   ${hbars(DS.map(d=>({l:DN[d],v:discM(d)})),{lw:120})}
-   <div style="display:grid;gap:8px">${DS.map(d=>{const c=discDist(d);return `<div class="row" style="gap:6px;flex-wrap:wrap"><span class="sm" style="min-width:110px;font-weight:700">${DN[d]}</span>${["OT","BO","RE","IN"].map(k=>c[k]?`<span class="tag f-${k}">${c[k]} ${F[k].p}</span>`:"").join("")}</div>`}).join("")}</div>
-   <p class="xs mut">A barra mostra a média de acertos da escola em cada área; os selos ao lado indicam quantos alunos estão em cada faixa.</p>
+   <div style="display:grid;gap:16px">${DS.map(d=>{
+    const c=discDist(d),tot=Object.values(c).reduce((a,b)=>a+b,0)||1;
+    const partes=["OT","BO","RE","IN"].filter(k=>c[k]).map(k=>`${c[k]} ${F[k].p.toLowerCase()}`).join(" · ");
+    return `<div style="display:grid;gap:7px">
+     <div class="row between" style="flex-wrap:nowrap;gap:10px">
+      <b style="font-size:15px">${DN[d]}</b>
+      <span class="tag f-${fx(discM(d))}">${pct(discM(d))} de acerto</span>
+     </div>
+     ${distBar(c)}
+     <p class="xs mut">${tot} aluno(s) avaliados · ${partes}</p>
+    </div>`;
+   }).join("")}</div>
+   <p class="xs mut">Cada barra mostra a proporção de alunos em cada faixa de desempenho nesta área — as cores estão explicadas logo abaixo. O selo ao lado do nome da área é a média de acertos da escola toda.</p>
   </div>
  </section>
  <section class="card flat" style="display:grid;gap:12px"><div class="label">O que significa cada cor</div><div class="scale">${["OT","BO","RE","IN"].map(k=>`<div class="f-${k}"><b>${F[k].p}</b><span class="sm mut">${F[k].d}</span></div>`).join("")}</div></section>
@@ -373,6 +385,7 @@ V.plano=()=>{
   const monit=t.feitos.filter(a=>a.p>=80).sort((a,b)=>b.p-a.p);
   const grupos=prio.map(h=>({h,al:t.feitos.filter(a=>a.r[h.i]=="E"),mon:monit.filter(a=>a.r[h.i]=="C").slice(0,3)}));
   const intensivo=t.feitos.filter(a=>a.p<25);
+  const alId=a=>`${t.key}|${norm(a.nome.replace(/\s*\(Especial\)/i,""))}`;
   document.getElementById("plink").innerHTML=linkAtiv(t.ano,plano.d,"Atividades no site →");
   document.getElementById("pbody").innerHTML=`
   <section class="grid g3">
@@ -386,8 +399,9 @@ V.plano=()=>{
    <li><div><b>Acompanhamento individual.</b> <span class="sub">${intensivo.length?`${intensivo.length} aluno(s) com menos de 25% de acertos: ${intensivo.map(nm).join(", ")}. Sugere-se apoio no contraturno e conversa com a família.`:"Nenhum aluno abaixo de 25% nesta disciplina."}</span></div></li>
    <li><div><b>Semana 4: nova verificação.</b> <span class="sub">Aplicar 1 ou 2 questões por habilidade trabalhada e comparar com este resultado.</span></div></li>
   </ol></section>
-  <section class="grid g2">${grupos.map((g,i)=>`<div class="card" style="display:grid;gap:10px"><div class="row between" style="flex-wrap:nowrap"><span class="tag f-${fx(g.h.p)}">Grupo ${i+1} · ${pct(g.h.p)} de acertos</span><span class="xs mut">Questão ${g.h.q}</span></div><h3>${esc(g.h.txt)}</h3><p class="sm">${nivelAcao(g.h.p)} ${dica(g.h.txt)}</p><div class="label">Alunos que erraram (${g.al.length})</div><div class="names">${g.al.map(a=>`<span>${nm(a)}</span>`).join("")||'<span class="mut">nenhum</span>'}</div>${g.mon.length?`<div class="label">Podem ajudar como monitores</div><div class="names">${g.mon.map(a=>`<span style="background:color-mix(in srgb,var(--ot) 15%,transparent)">${nm(a)}</span>`).join("")}</div>`:""}</div>`).join("")}</section>`
+  <section class="grid g2">${grupos.map((g,i)=>`<div class="card" style="display:grid;gap:10px"><div class="row between" style="flex-wrap:nowrap"><span class="tag f-${fx(g.h.p)}">Grupo ${i+1} · ${pct(g.h.p)} de acertos</span><span class="xs mut">Questão ${g.h.q}</span></div><h3>${esc(g.h.txt)}</h3><p class="sm">${nivelAcao(g.h.p)} ${dica(g.h.txt)}</p><div class="label">Alunos que erraram (${g.al.length}) · toque no nome para ver a ficha</div><div class="names">${g.al.map(a=>`<button type="button" data-al="${alId(a)}">${nm(a)}</button>`).join("")||'<span class="mut">nenhum</span>'}</div>${g.mon.length?`<div class="label">Podem ajudar como monitores</div><div class="names">${g.mon.map(a=>`<button type="button" data-al="${alId(a)}" style="background:color-mix(in srgb,var(--ot) 15%,transparent)">${nm(a)}</button>`).join("")}</div>`:""}</div>`).join("")}</section>`
   :`<div class="insight f-OT"><div class="ic">✓</div><p>Nesta disciplina a turma acertou 70% ou mais em todas as habilidades. Sugestão: projetos de aprofundamento e desafios.</p></div>`}`};
+ document.getElementById("pbody").onclick=e=>{const b=e.target.closest("[data-al]");if(b)ficha(b.dataset.al)};
  document.getElementById("pk").onchange=e=>{plano.k=e.target.value;draw()};bindSeg("pd",v=>{plano.d=v;draw()});draw()};
 /* ================= COMPARAR ================= */
 const cmp={a:"5º A",b:"5º B",d:"LP",mode:"turmas"};let selA=[];
