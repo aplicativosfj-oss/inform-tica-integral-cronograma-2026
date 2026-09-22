@@ -293,14 +293,14 @@ function InfotecaPage() {
             escola do que é link de fora: são coisas diferentes e a criança
             precisa saber onde vai parar ao clicar. */}
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+            <span className="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
               <Sparkles className="mr-1 inline size-3.5" />
               <strong>{publicas.length}</strong> ferramentas da escola
             </span>
-            <span className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">
+            <span className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm">
               <strong className="text-foreground">{TOTAL_FERRAMENTAS}</strong> sites selecionados
             </span>
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm backdrop-blur-md dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-300">
               <HeartHandshake className="mr-1 inline size-3.5" /> Com opções acessíveis
             </span>
           </div>
@@ -343,7 +343,7 @@ function InfotecaPage() {
                       className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                     >
                       <span
-                        className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${ferramenta.cor}`}
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10 ${ferramenta.cor}`}
                       >
                         <ferramenta.icon className="size-5" />
                       </span>
@@ -405,7 +405,7 @@ function InfotecaPage() {
               className="scroll-mt-32 flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5 sm:flex-row sm:items-center"
             >
               <div className="flex items-start gap-3">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
                   <Download className="size-5" />
                 </span>
                 <div>
@@ -431,7 +431,7 @@ function InfotecaPage() {
             </div>
 
             <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-700 ring-1 ring-inset ring-emerald-500/20 dark:text-emerald-400">
                 <HeartHandshake className="size-5" />
               </span>
               <div>
@@ -453,9 +453,9 @@ function InfotecaPage() {
             {CATEGORIAS.map((categoria) => (
               <div key={categoria.id} id={categoria.id} className="scroll-mt-32">
                 <div
-                  className={`mb-4 flex items-center gap-3 rounded-2xl bg-gradient-to-r ${categoria.faixa} px-4 py-3`}
+                  className={`mb-4 flex items-center gap-3 rounded-2xl border border-border/40 bg-gradient-to-r ${categoria.faixa} px-4 py-3`}
                 >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-card shadow-sm">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-inset ring-black/5 dark:ring-white/10">
                     <categoria.icon className={`size-5 ${categoria.cor}`} />
                   </span>
                   <div>
