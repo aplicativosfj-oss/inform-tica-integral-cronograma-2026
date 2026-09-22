@@ -82,7 +82,7 @@ function FerramentasAdaptadas() {
                 className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
                 <span
-                  className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${ferramenta.cor}`}
+                  className={`flex size-10 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10 ${ferramenta.cor}`}
                 >
                   <ferramenta.icon className="size-5" />
                 </span>

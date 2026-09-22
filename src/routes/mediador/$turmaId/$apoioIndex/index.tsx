@@ -510,7 +510,7 @@ function MediadorPainel() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-br from-violet-950/95 via-fuchsia-900/85 to-rose-800/70" />
                 <div className="relative flex flex-col gap-3 p-5">
-                  <span className="flex size-11 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/30">
+                  <span className="flex size-11 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/30">
                     <BookHeart className="size-6" />
                   </span>
                   <div>
