@@ -14,17 +14,17 @@ import { cn } from "@/lib/utils";
 function Espectro({ ativo }: { ativo: boolean }) {
   const atrasos = [0, 0.12, 0.24, 0.08, 0.18];
   return (
-    <div className="flex h-4 items-end gap-[2.5px]" aria-hidden>
+    <div className="flex h-3.5 items-end gap-[2px]" aria-hidden>
       {atrasos.map((atraso, i) => (
         <span
           key={i}
           className={cn(
-            "w-[2.5px] rounded-full bg-gradient-to-t from-blue-500 dark:from-cyan-400 to-emerald-500 dark:to-fuchsia-400",
+            "w-[2px] rounded-full bg-gradient-to-t from-blue-500 dark:from-cyan-400 to-emerald-500 dark:to-fuchsia-400",
             ativo ? "animate-radio-eq" : "animate-radio-idle",
           )}
           style={
             {
-              height: "16px",
+              height: "14px",
               "--eq-duration": ativo ? `${0.55 + atraso}s` : `${2.1 + atraso}s`,
               "--eq-delay": `${atraso}s`,
             } as React.CSSProperties
@@ -99,7 +99,7 @@ export function HeaderRadioPlayer() {
               onClick={alternarReproducao}
               aria-label={tocando ? "Parar Jovem Pan News" : "Ouvir Jovem Pan News ao vivo"}
               className={cn(
-                "group cursor-pointer relative flex items-center gap-1.5 overflow-hidden rounded-full border px-2.5 py-1.5 text-xs font-medium transition-all sm:gap-2 sm:px-3",
+                "group cursor-pointer relative flex items-center gap-1 overflow-hidden rounded-full border px-2 py-1 text-xs font-medium transition-all sm:gap-1.5 sm:px-2.5",
                 "border-blue-400/30 dark:border-transparent bg-gradient-to-r from-blue-500/10 dark:from-cyan-500/15 via-emerald-500/10 dark:via-blue-500/10 to-emerald-500/10 dark:to-fuchsia-500/15",
                 "before:absolute before:inset-0 before:-z-10 before:rounded-full before:bg-gradient-to-r before:from-blue-400 dark:before:from-cyan-400 before:via-emerald-500 dark:before:via-blue-500 before:to-emerald-500 dark:before:to-fuchsia-500 before:opacity-20 dark:before:opacity-30 before:blur-[6px]",
                 tocando
@@ -109,27 +109,27 @@ export function HeaderRadioPlayer() {
             >
               <span
                 className={cn(
-                  "flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40 sm:size-7",
+                  "flex size-7 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-neutral-900 text-blue-600 dark:text-cyan-300 ring-1 ring-blue-300/60 dark:ring-cyan-400/40 sm:size-6",
                   tocando && "ring-2 ring-blue-400/80 dark:ring-cyan-300/80",
                   status === "parado" && "animate-radio-idle-glow",
                 )}
               >
                 {status === "carregando" ? (
-                  <Loader2 className="size-[18px] animate-spin sm:size-4" />
+                  <Loader2 className="size-4 animate-spin sm:size-3.5" />
                 ) : status === "erro" ? (
-                  <AlertTriangle className="size-[18px] text-amber-400 sm:size-4" />
+                  <AlertTriangle className="size-4 text-amber-400 sm:size-3.5" />
                 ) : tocando ? (
-                  <Pause className="size-[18px] sm:size-4" />
+                  <Pause className="size-4 sm:size-3.5" />
                 ) : (
-                  <Play className="size-[18px] translate-x-0.5 sm:size-4" />
+                  <Play className="size-4 translate-x-0.5 sm:size-3.5" />
                 )}
               </span>
 
               <span className="hidden flex-col items-start leading-none sm:flex">
-                <span className="flex items-center gap-1 font-mono text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-cyan-400">
+                <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-cyan-400">
                   <Radio className="size-2.5" /> JP News
                 </span>
-                <span className="text-xs text-blue-700/70 dark:text-foreground/75">
+                <span className="text-[10px] text-blue-700/70 dark:text-foreground/75">
                   {status === "erro" ? "sinal indisponível" : tocando ? "ao vivo" : "ouvir agora"}
                 </span>
               </span>

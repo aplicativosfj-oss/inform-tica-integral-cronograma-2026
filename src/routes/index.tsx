@@ -149,8 +149,8 @@ function Index() {
           />
           <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
-              <Badge variant="secondary" className="mb-3 gap-1.5">
-                <MonitorSmartphone className="size-3.5" /> Agenda online
+              <Badge variant="secondary" className="mb-3 gap-1.5 px-3 py-1 text-sm">
+                <MonitorSmartphone className="size-4" /> Agenda online
               </Badge>
               <h1 className="text-[2rem] font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                 Informática na <span className="text-primary">Escola</span>
@@ -399,8 +399,8 @@ function Index() {
 
         <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
           <div className="mb-4 max-w-2xl">
-            <Badge variant="secondary" className="mb-2 gap-1.5">
-              <CalendarDays className="size-3.5" /> Grade completa
+            <Badge variant="secondary" className="mb-2 gap-1.5 px-3 py-1 text-sm">
+              <CalendarDays className="size-4" /> Grade completa
             </Badge>
             <h2 className="text-2xl font-semibold text-foreground">
               A semana inteira, num só olhar
@@ -834,17 +834,17 @@ function CanalYoutubeSection() {
     <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
-          <Badge variant="secondary" className="mb-2 gap-1.5">
-            <Youtube className="size-3.5" /> Canal da escola
+          <Badge variant="secondary" className="mb-2 gap-1.5 px-3 py-1 text-sm">
+            <Youtube className="size-4" /> Canal da escola
           </Badge>
           <h2 className="text-xl font-semibold text-foreground">Acompanhe no YouTube</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Bastidores das aulas de informática e da rotina da escola, em vídeo.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="w-fit shrink-0">
+        <Button asChild variant="outline" size="sm" className="w-fit shrink-0 text-sm">
           <a href={CANAL_YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-            Ver canal completo <ExternalLink className="size-3.5" />
+            Ver canal completo <ExternalLink className="size-4" />
           </a>
         </Button>
       </div>
@@ -898,7 +898,7 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
               fill="currentColor"
             />
           </span>
-          <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-xs font-medium leading-tight text-white">
+          <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-[13px] font-medium leading-tight text-white">
             {video.titulo}
           </span>
         </>
