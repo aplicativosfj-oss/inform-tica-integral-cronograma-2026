@@ -713,8 +713,16 @@ export interface Gerador {
   titulo: string;
   emoji: string;
   conteudo: string;
-  /** Séries atendidas e os descritores (códigos da prova) de cada uma. */
+  /** Disciplina do gerador; Matemática quando não informada. */
+  disc?: "MAT" | "LP" | "CN";
+  /**
+   * Séries atendidas e os descritores (códigos da prova) de cada uma. Em
+   * Português e Ciências a avaliação não traz código: a lista fica vazia e o
+   * vínculo é feito por `habilidades`.
+   */
   descritores: Partial<Record<Serie, string[]>>;
+  /** Textos das habilidades da avaliação (Português e Ciências). */
+  habilidades?: string[];
   gerar: (serie: Serie, nivel: Nivel) => Questao;
 }
 

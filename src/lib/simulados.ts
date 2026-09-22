@@ -23,11 +23,25 @@ export const AREAS: { id: Area; nome: string; descricao: string }[] = [
 ];
 
 /** Atividades de Português que trabalham escrita e funcionamento da língua (o resto é leitura). */
-const LP_ESCRITA = new Set(["lp-conectivos", "lp-pontuacao", "lp-rimas-sons", "lp-letras-frases", "lp-referencia"]);
+const LP_ESCRITA = new Set([
+  "lp-conectivos",
+  "lp-pontuacao",
+  "lp-rimas-sons",
+  "lp-letras-frases",
+  "lp-referencia",
+  // geradores de Português (geradores-lpcn.ts)
+  "g-rimas",
+  "g-silabas",
+  "g-pontuacao",
+  "g-alfabetica",
+  "g-concordancia",
+  "g-conectivos",
+]);
 
 export function areaDe(e: Entrada): Area {
   if (e.disc === "MAT" || e.disc === "CN") return e.disc;
-  const base = e.fonte.tipo === "banco" ? e.fonte.atividade.id : "";
+  const base =
+    e.fonte.tipo === "banco" ? e.fonte.atividade.id : e.fonte.tipo === "gerador" ? e.fonte.gerador.id : "";
   return LP_ESCRITA.has(base) ? "escrita" : "leitura";
 }
 

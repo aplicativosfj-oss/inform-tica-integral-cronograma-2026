@@ -4,6 +4,7 @@ import { ATIVIDADES_LP, type AtividadeLP } from "@/components/school/ferramentas
 import { BANCO_CN } from "@/lib/recomposicao/banco-cn";
 import { BANCO_LP } from "@/lib/recomposicao/banco-lp";
 import type { AtividadeBanco } from "@/lib/recomposicao/banco-tipos";
+import { GERADORES_CN, GERADORES_LP } from "@/lib/recomposicao/geradores-lpcn";
 import { GERADORES, type Gerador, type Nivel, type Serie } from "@/lib/recomposicao/geradores";
 import { supabase } from "@/lib/supabase-client";
 
@@ -89,16 +90,16 @@ export interface Entrada {
 }
 
 export const CATALOGO: Entrada[] = [
-  ...GERADORES.flatMap((g) =>
+  ...[...GERADORES, ...GERADORES_LP, ...GERADORES_CN].flatMap((g) =>
     (Object.entries(g.descritores) as [string, string[]][]).map(([s, cods]) => ({
       id: `${g.id}-${s}`,
-      disc: "MAT" as const,
+      disc: (g.disc ?? "MAT") as Disciplina,
       serie: Number(s) as Serie,
       titulo: g.titulo,
       emoji: g.emoji,
       conteudo: g.conteudo,
       descritores: cods,
-      habilidades: [] as string[],
+      habilidades: g.habilidades ?? [],
       niveis: ["retomada", "pratica", "desafio"] as Nivel[],
       fonte: { tipo: "gerador" as const, gerador: g },
     })),
