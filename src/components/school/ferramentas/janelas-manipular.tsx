@@ -6,6 +6,7 @@ import {
   Percent,
   PieChart,
   PuzzleIcon,
+  PenTool,
   Ruler,
   Scale,
   Shapes,
@@ -28,6 +29,7 @@ import { MedidasMundo } from "@/components/school/ferramentas/medidas-mundo";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
 import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
 import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
+import { ProducaoTextual } from "@/components/school/ferramentas/producao-textual";
 import { ValorPosicional } from "@/components/school/ferramentas/valor-posicional";
 
 /**
@@ -215,6 +217,22 @@ export function JogoNumerosJanela() {
       iconeBotao={Blocks}
     >
       <JogoNumeros />
+    </JanelaFerramenta>
+  );
+}
+
+export function ProducaoTextualJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Assistente de produção textual"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Escrever"
+      iconeBotao={PenTool}
+    >
+      <ProducaoTextual />
     </JanelaFerramenta>
   );
 }

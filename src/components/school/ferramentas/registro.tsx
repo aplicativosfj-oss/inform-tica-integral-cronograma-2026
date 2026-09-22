@@ -15,6 +15,7 @@ import {
   PartyPopper,
   Percent,
   PenLine,
+  PenTool,
   PieChart,
   PuzzleIcon,
   Scale,
@@ -45,6 +46,7 @@ import {
   MesaFormasJanela,
   PorcentagemJanela,
   ProblemasInteligentesJanela,
+  ProducaoTextualJanela,
   ValorPosicionalJanela,
 } from "@/components/school/ferramentas/janelas-manipular";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
@@ -190,6 +192,15 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: Blocks,
     cor: "bg-rose-500/10 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300",
     Componente: JogoNumerosJanela,
+  },
+  {
+    slug: "producao-textual",
+    titulo: "Assistente de produção textual",
+    descricao: "Planeje, escreva e revise bilhete, conto, lenda, notícia ou opinião.",
+    categoria: "Alfabetização e Leitura",
+    icon: PenTool,
+    cor: "bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300",
+    Componente: ProducaoTextualJanela,
   },
   {
     slug: "editor-texto",
