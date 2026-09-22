@@ -27,6 +27,7 @@ export const FERRAMENTAS_PUBLICAS = [
   "valor-posicional",
   "jogo-numeros",
   "producao-textual",
+  "generos-textuais",
 ] as const;
 
 export function listarFerramentasPublicas(): FerramentaInfo[] {

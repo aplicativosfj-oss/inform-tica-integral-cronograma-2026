@@ -1,4 +1,5 @@
 import {
+  BookMarked,
   BookOpenText,
   Blocks,
   Boxes,
@@ -45,6 +46,7 @@ import {
   MedidasMundoJanela,
   MesaFormasJanela,
   PorcentagemJanela,
+  GenerosTextuaisJanela,
   ProblemasInteligentesJanela,
   ProducaoTextualJanela,
   ValorPosicionalJanela,
@@ -54,7 +56,6 @@ import { Folclore } from "@/components/school/ferramentas/folclore";
 import { Fracoes } from "@/components/school/ferramentas/fracoes";
 import { Geografia } from "@/components/school/ferramentas/geografia";
 import { Geometria } from "@/components/school/ferramentas/geometria";
-import { GenerosTextuais } from "@/components/school/ferramentas/generos-textuais";
 import { HistoriaAcreFeijo } from "@/components/school/ferramentas/historia-acre-feijo";
 import { HistoriaBrasil } from "@/components/school/ferramentas/historia-brasil";
 import { Leitura } from "@/components/school/ferramentas/leitura";
@@ -295,11 +296,11 @@ export const FERRAMENTAS: FerramentaInfo[] = [
   {
     slug: "generos-textuais",
     titulo: "Gêneros textuais",
-    descricao: "Descubra se é receita, poema, notícia ou bilhete.",
+    descricao: "Trinta textos de verdade — do bilhete à bula — para reconhecer e aprender.",
     categoria: "Alfabetização e Leitura",
-    icon: FileText,
+    icon: BookMarked,
     cor: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
-    Componente: GenerosTextuais,
+    Componente: GenerosTextuaisJanela,
   },
   {
     slug: "datas-comemorativas",

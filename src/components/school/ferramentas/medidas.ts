@@ -276,3 +276,126 @@ export const REFERENCIAS: Referencia[] = [
     opcoesErradas: ["g", "mg"],
   },
 ];
+
+/* ------------------------------------------------------------------ */
+/* Situações prontas                                                   */
+/* ------------------------------------------------------------------ */
+
+export interface Situacao {
+  familia: Familia;
+  /** O que a criança quer descobrir, em uma frase. */
+  pergunta: string;
+  valor: number;
+  de: string;
+  para: string;
+  objeto: Objeto;
+  /** Por que essa conversão aparece na vida real. */
+  porque: string;
+}
+
+/**
+ * As conversões que aparecem de verdade — na receita, na farmácia, na
+ * estrada, no mercado. Servem de atalho e, principalmente, mostram para que
+ * serve converter: ninguém converte por esporte.
+ */
+export const SITUACOES: Situacao[] = [
+  {
+    familia: "comprimento",
+    pergunta: "Quantos centímetros tem a porta da sala?",
+    valor: 2,
+    de: "m",
+    para: "cm",
+    objeto: "porta",
+    porque: "A fita métrica marca em centímetros, mas a gente fala em metros.",
+  },
+  {
+    familia: "comprimento",
+    pergunta: "Quantos metros tem da escola até a praça?",
+    valor: 1.5,
+    de: "km",
+    para: "m",
+    objeto: "quarteirao",
+    porque: "A placa da estrada fala em quilômetro; o passo da gente conta metro.",
+  },
+  {
+    familia: "comprimento",
+    pergunta: "Quantos milímetros tem uma borracha de 4 cm?",
+    valor: 4,
+    de: "cm",
+    para: "mm",
+    objeto: "borracha",
+    porque: "A régua tem os dois: os números grandes são cm e os risquinhos, mm.",
+  },
+  {
+    familia: "capacidade",
+    pergunta: "Quantos mililitros tem uma garrafa de 2 litros?",
+    valor: 2,
+    de: "L",
+    para: "mL",
+    objeto: "garrafa",
+    porque: "O rótulo diz 2 L, mas a receita pede em mL.",
+  },
+  {
+    familia: "capacidade",
+    pergunta: "Quantos litros são 250 mL de suco?",
+    valor: 250,
+    de: "mL",
+    para: "L",
+    objeto: "copo",
+    porque: "Para saber quantos copos saem de uma garrafa.",
+  },
+  {
+    familia: "capacidade",
+    pergunta: "Quantos litros cabem na caixa d'água de 1 kL?",
+    valor: 1,
+    de: "kL",
+    para: "L",
+    objeto: "caixadagua",
+    porque: "A caixa vem marcada em litros, e a conta da água, em metros cúbicos.",
+  },
+  {
+    familia: "massa",
+    pergunta: "Quantos gramas tem um pacote de 5 kg de arroz?",
+    valor: 5,
+    de: "kg",
+    para: "g",
+    objeto: "pacotearroz",
+    porque: "A balança do mercado mostra gramas.",
+  },
+  {
+    familia: "massa",
+    pergunta: "Quantos quilos tem uma melancia de 8000 g?",
+    valor: 8000,
+    de: "g",
+    para: "kg",
+    objeto: "melancia",
+    porque: "Ninguém diz que a melancia tem oito mil gramas.",
+  },
+  {
+    familia: "massa",
+    pergunta: "Quantos miligramas tem um clipe de 1 g?",
+    valor: 1,
+    de: "g",
+    para: "mg",
+    objeto: "clipe",
+    porque: "A bula do remédio fala em miligramas.",
+  },
+];
+
+export function situacoesDe(f: Familia): Situacao[] {
+  return SITUACOES.filter((s) => s.familia === f);
+}
+
+/**
+ * O objeto do mundo real mais perto de um valor — o que dá tamanho ao número.
+ * "300 cm" não diz nada; "mais ou menos como a quadra da escola" diz.
+ */
+export function referenciaMaisProxima(valorBase: number, f: Familia): Referencia | null {
+  const candidatos = REFERENCIAS.filter((r) => r.familia === f);
+  if (!candidatos.length || valorBase <= 0) return null;
+  return candidatos.reduce((melhor, r) =>
+    Math.abs(Math.log10(r.valor / valorBase)) < Math.abs(Math.log10(melhor.valor / valorBase))
+      ? r
+      : melhor,
+  );
+}

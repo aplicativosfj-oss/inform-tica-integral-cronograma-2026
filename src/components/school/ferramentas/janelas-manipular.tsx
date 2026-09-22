@@ -6,6 +6,7 @@ import {
   Percent,
   PieChart,
   PuzzleIcon,
+  BookMarked,
   PenTool,
   Ruler,
   Scale,
@@ -23,6 +24,7 @@ import {
   voltarDaFerramenta,
 } from "@/components/school/ferramentas/janela-ferramenta";
 import { ConversorMedidas } from "@/components/school/ferramentas/conversor-medidas";
+import { GenerosTextuais } from "@/components/school/ferramentas/generos-textuais";
 import { JogoNumeros } from "@/components/school/ferramentas/jogo-numeros";
 import { JogoOperacoes } from "@/components/school/ferramentas/jogo-operacoes";
 import { MedidasMundo } from "@/components/school/ferramentas/medidas-mundo";
@@ -233,6 +235,22 @@ export function ProducaoTextualJanela() {
       iconeBotao={PenTool}
     >
       <ProducaoTextual />
+    </JanelaFerramenta>
+  );
+}
+
+export function GenerosTextuaisJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Museu dos gêneros textuais"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Gêneros"
+      iconeBotao={BookMarked}
+    >
+      <GenerosTextuais />
     </JanelaFerramenta>
   );
 }
