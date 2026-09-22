@@ -47,7 +47,7 @@ function NavLink({ to, label }: { to: string; label: string }) {
       asChild
       variant="ghost"
       size="sm"
-      className={`relative hidden whitespace-nowrap px-2.5 transition-all duration-300 xl:inline-flex ${
+      className={`relative hidden whitespace-nowrap px-2 text-[15px] transition-all duration-300 xl:inline-flex ${
         isActive
           ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
           : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
@@ -212,7 +212,7 @@ export function NavBar() {
           </span>
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5">
+        <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5 xl:gap-1">
           <NavLink to="/" label="Início" />
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
