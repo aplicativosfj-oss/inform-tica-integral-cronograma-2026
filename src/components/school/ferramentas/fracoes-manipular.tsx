@@ -6,6 +6,7 @@ import {
   REPRESENTACOES,
   type Representacao,
 } from "@/components/school/ferramentas/figuras-fracao";
+import { CampoNumero } from "@/components/school/ferramentas/controles";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -72,39 +73,15 @@ function Contador({
   return (
     <div className="flex items-center gap-1.5">
       <span className="w-24 text-xs text-muted-foreground">{rotulo}</span>
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-7 cursor-pointer"
-        aria-label={`Diminuir ${rotulo}`}
-        disabled={valor <= min}
-        onClick={() => aoMudar(valor - 1)}
-      >
-        <Minus className="size-3.5" />
-      </Button>
-      <input
-        type="number"
-        inputMode="numeric"
-        aria-label={rotulo}
-        value={valor}
+      <CampoNumero
+        valor={valor}
+        aoMudar={(v) => aoMudar(Number.isNaN(v) ? min : v)}
         min={min}
         max={max}
-        onChange={(e) => {
-          const v = Number(e.target.value);
-          if (Number.isFinite(v)) aoMudar(Math.min(Math.max(Math.round(v), min), max));
-        }}
-        className="h-7 w-12 rounded-md border border-border bg-background text-center text-sm font-semibold text-foreground"
+        rotulo={rotulo}
+        tamanho="sm"
+        largura="w-12"
       />
-      <Button
-        variant="outline"
-        size="icon"
-        className="size-7 cursor-pointer"
-        aria-label={`Aumentar ${rotulo}`}
-        disabled={valor >= max}
-        onClick={() => aoMudar(valor + 1)}
-      >
-        <Plus className="size-3.5" />
-      </Button>
     </div>
   );
 }

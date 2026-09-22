@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { CreditoFerramenta } from "@/components/school/ferramentas/credito";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -76,6 +77,7 @@ function FerramentaAdaptadaPage() {
                 </div>
               </div>
               <info.Componente />
+              <CreditoFerramenta />
             </>
           ) : (
             <div className="py-10 text-center">

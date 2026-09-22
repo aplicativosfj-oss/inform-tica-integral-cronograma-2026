@@ -45,7 +45,11 @@ function prioridade(p: number | null) {
 function embaralhar(questoes: Questao[]): Questao[] {
   return questoes.map((q) => {
     const ordem = q.opcoes.map((_, i) => i).sort(() => Math.random() - 0.5);
-    return { ...q, opcoes: ordem.map((i) => q.opcoes[i]!), respostaCorreta: ordem.indexOf(q.respostaCorreta) };
+    return {
+      ...q,
+      opcoes: ordem.map((i) => q.opcoes[i]!),
+      respostaCorreta: ordem.indexOf(q.respostaCorreta),
+    };
   });
 }
 
@@ -89,13 +93,16 @@ export function Trilhas() {
   const mapa = usePrioridades();
 
   const lista = useMemo(() => {
-    const itens = CATALOGO.filter((e) => e.serie === serie && (disc === "todas" || e.disc === disc));
+    const itens = CATALOGO.filter(
+      (e) => e.serie === serie && (disc === "todas" || e.disc === disc),
+    );
     return itens
       .map((e) => ({ e, p: acertoDaEntrada(e, mapa) }))
       .sort((a, b) => (a.p ?? 101) - (b.p ?? 101));
   }, [serie, disc, mapa]);
 
-  if (aberta) return <Jogar e={aberta.e} nivelInicial={aberta.nivel} voltar={() => setAberta(null)} />;
+  if (aberta)
+    return <Jogar e={aberta.e} nivelInicial={aberta.nivel} voltar={() => setAberta(null)} />;
 
   return (
     <div className="flex flex-col gap-5">
@@ -103,10 +110,10 @@ export function Trilhas() {
         <CardContent className="flex gap-3 p-4 text-sm">
           <Info className="mt-0.5 size-5 shrink-0 text-primary" />
           <p className="text-foreground">
-            Atividades pensadas a partir da <b>II Avaliação Diagnóstica 2026</b>. Escolha a série: as
-            habilidades em que a escola teve mais dificuldade aparecem primeiro. Cada atividade tem
-            níveis, e o nível <b>recomendado</b> vem marcado. Na Matemática, as questões mudam toda
-            vez que você joga.
+            Atividades pensadas a partir da <b>II Avaliação Diagnóstica 2026</b>. Escolha a série:
+            as habilidades em que a escola teve mais dificuldade aparecem primeiro. Cada atividade
+            tem níveis, e o nível <b>recomendado</b> vem marcado. Na Matemática, as questões mudam
+            toda vez que você joga.
           </p>
         </CardContent>
       </Card>
@@ -166,70 +173,87 @@ export function Trilhas() {
       </div>
 
       {modo === "verificacao" ? (
-        <Verificacao key={`${serie}-${disc}`} serie={serie} disc={disc === "todas" ? "MAT" : disc} />
+        <Verificacao
+          key={`${serie}-${disc}`}
+          serie={serie}
+          disc={disc === "todas" ? "MAT" : disc}
+        />
       ) : (
-      <div className="grid gap-3 sm:grid-cols-2">
-        {lista.map(({ e, p }) => {
-          const pr = prioridade(p);
-          const rec = nivelRecomendado(p);
-          return (
-            <Card key={e.id} className="flex flex-col">
-              <CardContent className="flex flex-1 flex-col gap-3 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl leading-none" aria-hidden>
-                    {e.emoji}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-foreground">{e.titulo}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {NOME_DISC[e.disc]} · {e.conteudo}
-                    </p>
-                  </div>
-                  {pr ? (
-                    <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold", pr.cls)}>
-                      {pr.txt}
+        <div className="grid gap-3 sm:grid-cols-2">
+          {lista.map(({ e, p }) => {
+            const pr = prioridade(p);
+            const rec = nivelRecomendado(p);
+            return (
+              <Card key={e.id} className="flex flex-col">
+                <CardContent className="flex flex-1 flex-col gap-3 p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-3xl leading-none" aria-hidden>
+                      {e.emoji}
                     </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground">{e.titulo}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {NOME_DISC[e.disc]} · {e.conteudo}
+                      </p>
+                    </div>
+                    {pr ? (
+                      <span
+                        className={cn(
+                          "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold",
+                          pr.cls,
+                        )}
+                      >
+                        {pr.txt}
+                      </span>
+                    ) : null}
+                  </div>
+                  {e.descritores.length ? (
+                    <ul className="flex flex-col gap-1 text-xs">
+                      {e.descritores.map((d) => (
+                        <li key={d} className="text-muted-foreground">
+                          <Badge
+                            variant="outline"
+                            className="mr-1.5 px-1.5 py-0 font-mono text-[10px]"
+                          >
+                            {d}
+                          </Badge>
+                          {DESCRITORES[d] ?? ""}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : e.fonte.tipo === "lp" ? (
+                    <p className="text-xs text-muted-foreground">{e.fonte.atividade.objetivo}</p>
                   ) : null}
-                </div>
-                {e.descritores.length ? (
-                  <ul className="flex flex-col gap-1 text-xs">
-                    {e.descritores.map((d) => (
-                      <li key={d} className="text-muted-foreground">
-                        <Badge variant="outline" className="mr-1.5 px-1.5 py-0 font-mono text-[10px]">
-                          {d}
-                        </Badge>
-                        {DESCRITORES[d] ?? ""}
-                      </li>
+                  {p != null ? (
+                    <p className="text-xs text-muted-foreground">
+                      Na avaliação, o {e.serie}º ano acertou{" "}
+                      <b className="text-foreground">{Math.round(p)}%</b>
+                      {e.descritores.length || e.habilidades.length
+                        ? " nesta habilidade."
+                        : ` em ${NOME_DISC[e.disc]}, em média.`}
+                    </p>
+                  ) : null}
+                  <div className="mt-auto flex flex-wrap gap-2">
+                    {NIVEIS.filter((n) => e.niveis.includes(n.id)).map((n) => (
+                      <Button
+                        key={n.id}
+                        size="sm"
+                        variant={n.id === rec ? "default" : "outline"}
+                        onClick={() => setAberta({ e, nivel: n.id })}
+                        className="gap-1"
+                      >
+                        {n.emoji} {n.nome}
+                        {n.id === rec ? (
+                          <span className="text-[10px] opacity-80">· recomendado</span>
+                        ) : null}
+                      </Button>
                     ))}
-                  </ul>
-                ) : e.fonte.tipo === "lp" ? (
-                  <p className="text-xs text-muted-foreground">{e.fonte.atividade.objetivo}</p>
-                ) : null}
-                {p != null ? (
-                  <p className="text-xs text-muted-foreground">
-                    Na avaliação, o {e.serie}º ano acertou <b className="text-foreground">{Math.round(p)}%</b>
-                    {e.descritores.length || e.habilidades.length ? " nesta habilidade." : ` em ${NOME_DISC[e.disc]}, em média.`}
-                  </p>
-                ) : null}
-                <div className="mt-auto flex flex-wrap gap-2">
-                  {NIVEIS.filter((n) => e.niveis.includes(n.id)).map((n) => (
-                    <Button
-                      key={n.id}
-                      size="sm"
-                      variant={n.id === rec ? "default" : "outline"}
-                      onClick={() => setAberta({ e, nivel: n.id })}
-                      className="gap-1"
-                    >
-                      {n.emoji} {n.nome}
-                      {n.id === rec ? <span className="text-[10px] opacity-80">· recomendado</span> : null}
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -264,7 +288,13 @@ export function Jogar({
         ? lp.adaptada.textoCurto
         : lp.texto?.paragrafos
       : null;
-  const dicas = banco ? banco.emSala : lp ? (nivel === "retomada" ? lp.adaptada.dicasMediador : lp.emSala) : null;
+  const dicas = banco
+    ? banco.emSala
+    : lp
+      ? nivel === "retomada"
+        ? lp.adaptada.dicasMediador
+        : lp.emSala
+      : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -279,7 +309,9 @@ export function Jogar({
           <h2 className="text-lg font-semibold text-foreground">{e.titulo}</h2>
           <p className="text-sm text-muted-foreground">
             {e.serie}º ano · {NOME_DISC[e.disc]}
-            {e.descritores.length ? ` · ${e.descritores.map((d) => DESCRITORES[d] ?? d).join(" · ")}` : ""}
+            {e.descritores.length
+              ? ` · ${e.descritores.map((d) => DESCRITORES[d] ?? d).join(" · ")}`
+              : ""}
           </p>
         </div>
       </div>
@@ -299,7 +331,12 @@ export function Jogar({
           </Button>
         ))}
         {e.fonte.tipo === "gerador" ? (
-          <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => setRodada((r) => r + 1)}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5"
+            onClick={() => setRodada((r) => r + 1)}
+          >
             <RefreshCw className="size-4" /> Novas questões
           </Button>
         ) : null}
@@ -314,8 +351,11 @@ export function Jogar({
               [
                 {
                   titulo: `${NOME_DISC[e.disc]} · ${info.emoji} ${info.nome}`,
-                  subtitulo: e.descritores.map((d) => DESCRITORES[d] ?? d).join(" · ") || e.conteudo,
-                  texto: texto?.length ? { ...(tituloTexto ? { titulo: tituloTexto } : {}), paragrafos: texto } : undefined,
+                  subtitulo:
+                    e.descritores.map((d) => DESCRITORES[d] ?? d).join(" · ") || e.conteudo,
+                  texto: texto?.length
+                    ? { ...(tituloTexto ? { titulo: tituloTexto } : {}), paragrafos: texto }
+                    : undefined,
                   questoes,
                 },
               ],
@@ -375,7 +415,9 @@ function Verificacao({ serie, disc }: { serie: Serie; disc: Disciplina }) {
   const [treinar, setTreinar] = useState<{ e: Entrada; nivel: Nivel } | null>(null);
 
   const itens = useMemo(() => {
-    const entradas = CATALOGO.filter((e) => e.serie === serie && e.disc === disc && e.fonte.tipo !== "lp");
+    const entradas = CATALOGO.filter(
+      (e) => e.serie === serie && e.disc === disc && e.fonte.tipo !== "lp",
+    );
     return entradas
       .map((e) => {
         const q =
@@ -393,7 +435,12 @@ function Verificacao({ serie, disc }: { serie: Serie; disc: Disciplina }) {
 
   if (treinar)
     return (
-      <Jogar e={treinar.e} nivelInicial={treinar.nivel} voltar={() => setTreinar(null)} rotuloVoltar="Voltar ao resultado" />
+      <Jogar
+        e={treinar.e}
+        nivelInicial={treinar.nivel}
+        voltar={() => setTreinar(null)}
+        rotuloVoltar="Voltar ao resultado"
+      />
     );
 
   if (fase === "inicio")
@@ -471,12 +518,22 @@ function Verificacao({ serie, disc }: { serie: Serie; disc: Disciplina }) {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground">{x.e.titulo}</p>
-                    <p className={ok ? "text-xs text-emerald-700 dark:text-emerald-400" : "text-xs text-amber-700 dark:text-amber-400"}>
+                    <p
+                      className={
+                        ok
+                          ? "text-xs text-emerald-700 dark:text-emerald-400"
+                          : "text-xs text-amber-700 dark:text-amber-400"
+                      }
+                    >
                       {ok ? "✓ Já domina" : "↻ Precisa treinar"}
                     </p>
                   </div>
                   {!ok ? (
-                    <Button size="sm" variant="outline" onClick={() => setTreinar({ e: x.e, nivel: "retomada" })}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setTreinar({ e: x.e, nivel: "retomada" })}
+                    >
                       Treinar agora
                     </Button>
                   ) : null}

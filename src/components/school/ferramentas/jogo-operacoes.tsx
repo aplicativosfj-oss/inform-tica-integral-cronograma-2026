@@ -1,6 +1,8 @@
 import { Flame, Loader2, Play, RotateCcw, Trophy } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { BancadaCalculo } from "@/components/school/ferramentas/bancada-calculo";
+import { Seletor } from "@/components/school/ferramentas/controles";
 import { Button } from "@/components/ui/button";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import { fetchRanking, salvarPlacar, type Placar } from "@/lib/placares";
@@ -423,7 +425,7 @@ export function JogoOperacoes() {
   if (fase === "jogando" && pergunta) {
     const errou = escolhida !== null && escolhida !== pergunta.resposta;
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
           <Relogio restante={restante} total={nivel.tempo} />
           <div className="min-w-0 flex-1">
@@ -439,7 +441,7 @@ export function JogoOperacoes() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-muted/50 py-6 text-center">
+        <div className="rounded-2xl bg-muted/50 py-3 text-center">
           <p className="text-4xl font-bold tracking-tight text-foreground">
             {pergunta.a} {pergunta.op} {pergunta.b}
           </p>
@@ -471,6 +473,14 @@ export function JogoOperacoes() {
             );
           })}
         </div>
+
+        {/* Apoio para quem ainda não faz de cabeça — com os números da conta. */}
+        <BancadaCalculo
+          numeros={[pergunta.a, pergunta.b]}
+          operacao={
+            pergunta.op === "×" ? "multiplicacao" : pergunta.op === "÷" ? "divisao" : "soma"
+          }
+        />
 
         <p className="h-4 text-center text-xs font-medium">
           {escolhida === null ? (
@@ -517,22 +527,16 @@ export function JogoOperacoes() {
                   maxLength={40}
                   className="h-9 min-w-[140px] flex-1 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
                 />
-                <select
-                  value={turma}
-                  onChange={(e) => setTurma(e.target.value)}
-                  aria-label="Sua turma"
-                  className="h-9 rounded-lg border border-border bg-background px-2 text-sm text-foreground"
-                >
-                  <option value="">Sua turma</option>
-                  {SEED_TURMAS.map((t) => {
+                <Seletor
+                  valor={turma}
+                  aoMudar={setTurma}
+                  rotulo="Sua turma"
+                  largura="w-[7rem]"
+                  opcoes={SEED_TURMAS.map((t) => {
                     const r = `${t.serie.replace(" Ano", "")} ${t.letra}`;
-                    return (
-                      <option key={t.id} value={r}>
-                        {r}
-                      </option>
-                    );
+                    return { valor: r, rotulo: r };
                   })}
-                </select>
+                />
               </div>
               <Button
                 size="sm"

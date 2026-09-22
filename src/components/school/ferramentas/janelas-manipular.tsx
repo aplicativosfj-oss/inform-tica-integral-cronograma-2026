@@ -26,6 +26,7 @@ import { ConversorMedidas } from "@/components/school/ferramentas/conversor-medi
 import { JogoNumeros } from "@/components/school/ferramentas/jogo-numeros";
 import { JogoOperacoes } from "@/components/school/ferramentas/jogo-operacoes";
 import { MedidasMundo } from "@/components/school/ferramentas/medidas-mundo";
+import { CREDITO } from "@/components/school/ferramentas/credito";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
 import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
 import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
@@ -38,7 +39,6 @@ import { ValorPosicional } from "@/components/school/ferramentas/valor-posiciona
  * ferramenta só precisar montar o componente.
  */
 
-const CREDITO = "Ferramenta criada pelo professor Franc D'nis";
 /** Um pouco mais larga que a calculadora: as figuras precisam de espaço. */
 const LARGURA = "w-[min(27rem,calc(100vw-24px))]";
 

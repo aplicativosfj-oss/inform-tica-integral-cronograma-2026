@@ -8,6 +8,8 @@ import {
   type Operacao,
   type Problema,
 } from "@/components/school/ferramentas/problemas-enunciados";
+import { BancadaCalculo, numerosDoTexto } from "@/components/school/ferramentas/bancada-calculo";
+import { CampoResposta } from "@/components/school/ferramentas/controles";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -188,7 +190,9 @@ export function ProblemasInteligentes() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    // gap menor: com a caixa de ferramentas aberta, cada respiro conta para
+    // tudo caber numa janela só.
+    <div className="flex flex-col gap-2">
       {/* Controles */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-1.5">
@@ -241,7 +245,7 @@ export function ProblemasInteligentes() {
 
       {/* Problema */}
       <div className="flex gap-3 rounded-xl border border-border bg-background p-3">
-        <div className="size-[86px] shrink-0 rounded-lg bg-muted/50 p-1">
+        <div className="size-[76px] shrink-0 rounded-lg bg-muted/50 p-1">
           <Ilustracao cenario={problema.cenario} />
         </div>
         <div className="min-w-0 flex-1">
@@ -252,22 +256,20 @@ export function ProblemasInteligentes() {
         </div>
       </div>
 
+      {/* A caixa de ferramentas já vem com os números deste problema. */}
+      <BancadaCalculo numeros={numerosDoTexto(problema.enunciado)} operacao={problema.operacao} />
+
       {/* Resposta */}
       <div className="flex flex-wrap items-center gap-2">
-        <input
-          type="number"
-          inputMode="decimal"
-          value={resposta}
-          onChange={(e) => {
-            setResposta(e.target.value);
+        <CampoResposta
+          valor={resposta}
+          aoMudar={(v) => {
+            setResposta(v);
             if (conferido === false) setConferido(null);
           }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") conferir();
-          }}
+          aoTeclarEnter={conferir}
+          rotulo="Sua resposta"
           placeholder="Sua resposta"
-          aria-label="Sua resposta"
-          className="h-10 w-32 rounded-lg border border-border bg-background px-3 text-base font-semibold text-foreground"
         />
         <span className="text-sm text-muted-foreground">{problema.unidade}</span>
         <Button size="sm" className="cursor-pointer" onClick={conferir} disabled={!resposta.trim()}>

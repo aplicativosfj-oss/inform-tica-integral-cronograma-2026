@@ -117,7 +117,9 @@ export function Calculadora({
       <div
         className={cn(
           "rounded-xl bg-muted/60 text-right",
-          compacta ? "px-3 py-[clamp(0.25rem,1.2vh,0.625rem)]" : "px-4 py-[clamp(0.5rem,1.6vh,0.875rem)]",
+          compacta
+            ? "px-3 py-[clamp(0.25rem,1.2vh,0.625rem)]"
+            : "px-4 py-[clamp(0.5rem,1.6vh,0.875rem)]",
         )}
       >
         <p
@@ -148,7 +150,9 @@ export function Calculadora({
               // Na versão compacta as teclas encolhem junto com a altura da
               // tela, para a calculadora caber inteira em telas baixas sem
               // precisar de barra de rolagem.
-              compacta ? "h-[clamp(1.75rem,4vh,2.25rem)] text-[clamp(0.75rem,1.9vh,0.875rem)]" : "h-[clamp(2.5rem,7.5vh,3.5rem)] text-lg",
+              compacta
+                ? "h-[clamp(1.75rem,4vh,2.25rem)] text-[clamp(0.75rem,1.9vh,0.875rem)]"
+                : "h-[clamp(2.5rem,7.5vh,3.5rem)] text-lg",
               tecla === "="
                 ? "col-span-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 : ["+", "−", "×", "÷"].includes(tecla)

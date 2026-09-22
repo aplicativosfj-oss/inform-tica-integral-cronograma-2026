@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
+import { CreditoFerramenta } from "@/components/school/ferramentas/credito";
 import { ferramentaPublica } from "@/lib/ferramentas-publicas";
 
 export const Route = createFileRoute("/ferramentas/$ferramenta")({
@@ -52,6 +53,7 @@ function FerramentaPublicaPage() {
                 </div>
               </div>
               <info.Componente />
+              <CreditoFerramenta />
             </>
           ) : (
             <div className="py-10 text-center">

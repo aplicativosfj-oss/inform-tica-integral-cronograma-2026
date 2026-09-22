@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { CampoNumero } from "@/components/school/ferramentas/controles";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -276,14 +277,14 @@ export function Porcentagem() {
                 className="h-2 min-w-[180px] flex-1 cursor-pointer accent-primary"
               />
               <div className="flex items-center gap-1">
-                <input
-                  type="number"
+                <CampoNumero
+                  valor={p}
+                  aoMudar={(v) => setP(Number.isNaN(v) ? 0 : v)}
                   min={0}
                   max={100}
-                  value={p}
-                  onChange={(e) => setP(Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
-                  aria-label="Porcentagem em número"
-                  className="h-9 w-16 rounded-lg border border-border bg-background text-center text-base font-bold text-foreground"
+                  rotulo="Porcentagem em número"
+                  largura="w-14"
+                  comBotoes={false}
                 />
                 <span className="text-base font-bold text-foreground">%</span>
               </div>
@@ -367,13 +368,15 @@ export function Porcentagem() {
           <section className="flex flex-col gap-2">
             <h3 className="text-sm font-semibold text-foreground">
               Quanto é {Math.round(p)}% de{" "}
-              <input
-                type="number"
+              <CampoNumero
+                valor={total}
+                aoMudar={(v) => setTotal(Number.isNaN(v) ? 1 : v)}
                 min={1}
-                value={total}
-                onChange={(e) => setTotal(Math.max(1, Number(e.target.value) || 1))}
-                aria-label="Número inteiro"
-                className="mx-1 h-7 w-20 rounded-md border border-border bg-background text-center font-bold text-foreground"
+                max={100000}
+                rotulo="Número inteiro"
+                tamanho="sm"
+                largura="w-16"
+                comBotoes={false}
               />
               ?
             </h3>
@@ -444,25 +447,26 @@ export function Porcentagem() {
               <p className="text-xs font-semibold text-foreground">🏷️ Desconto na loja</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 Preço
-                <input
-                  type="number"
+                <CampoNumero
+                  valor={preco}
+                  aoMudar={(v) => setPreco(Number.isNaN(v) ? 0 : v)}
                   min={0}
-                  value={preco}
-                  onChange={(e) => setPreco(Math.max(0, Number(e.target.value) || 0))}
-                  aria-label="Preço"
-                  className="h-8 w-20 rounded-md border border-border bg-background text-center font-semibold text-foreground"
+                  max={100000}
+                  rotulo="Preço"
+                  tamanho="sm"
+                  largura="w-16"
+                  comBotoes={false}
                 />
                 com
-                <input
-                  type="number"
+                <CampoNumero
+                  valor={desconto}
+                  aoMudar={(v) => setDesconto(Number.isNaN(v) ? 0 : v)}
                   min={0}
                   max={100}
-                  value={desconto}
-                  onChange={(e) =>
-                    setDesconto(Math.min(100, Math.max(0, Number(e.target.value) || 0)))
-                  }
-                  aria-label="Desconto"
-                  className="h-8 w-16 rounded-md border border-border bg-background text-center font-semibold text-foreground"
+                  rotulo="Desconto"
+                  tamanho="sm"
+                  largura="w-14"
+                  comBotoes={false}
                 />
                 % de desconto
               </div>
@@ -507,29 +511,30 @@ export function Porcentagem() {
               <p className="text-xs font-semibold text-foreground">📝 Nota da prova</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 Acertou
-                <input
-                  type="number"
+                <CampoNumero
+                  valor={acertos}
+                  aoMudar={(v) => setAcertos(Number.isNaN(v) ? 0 : v)}
                   min={0}
                   max={questoes}
-                  value={acertos}
-                  onChange={(e) =>
-                    setAcertos(Math.min(questoes, Math.max(0, Number(e.target.value) || 0)))
-                  }
-                  aria-label="Acertos"
-                  className="h-8 w-16 rounded-md border border-border bg-background text-center font-semibold text-foreground"
+                  rotulo="Acertos"
+                  tamanho="sm"
+                  largura="w-14"
+                  comBotoes={false}
                 />
                 de
-                <input
-                  type="number"
-                  min={1}
-                  value={questoes}
-                  onChange={(e) => {
-                    const q = Math.max(1, Number(e.target.value) || 1);
+                <CampoNumero
+                  valor={questoes}
+                  aoMudar={(v) => {
+                    const q = Number.isNaN(v) ? 1 : v;
                     setQuestoes(q);
                     if (acertos > q) setAcertos(q);
                   }}
-                  aria-label="Total de questões"
-                  className="h-8 w-16 rounded-md border border-border bg-background text-center font-semibold text-foreground"
+                  min={1}
+                  max={1000}
+                  rotulo="Total de questões"
+                  tamanho="sm"
+                  largura="w-14"
+                  comBotoes={false}
                 />
                 questões
               </div>

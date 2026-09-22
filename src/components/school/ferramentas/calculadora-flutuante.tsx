@@ -1,6 +1,7 @@
 import { Calculator } from "lucide-react";
 
 import { Calculadora } from "@/components/school/ferramentas/calculadora";
+import { CREDITO } from "@/components/school/ferramentas/credito";
 import {
   JanelaFerramenta,
   voltarDaFerramenta,
@@ -28,7 +29,7 @@ export function CalculadoraFlutuante({
   return (
     <JanelaFerramenta
       titulo="Calculadora"
-      subtitulo="Calculadora criada pelo professor Franc D'nis"
+      subtitulo={CREDITO}
       abertaInicial={abertaInicial}
       aoFechar={aoFechar}
       chavePosicao={CHAVE_POSICAO}

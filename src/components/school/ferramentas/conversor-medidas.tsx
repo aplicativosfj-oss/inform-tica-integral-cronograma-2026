@@ -10,6 +10,7 @@ import {
   type Familia,
   type Unidade,
 } from "@/components/school/ferramentas/medidas";
+import { CampoNumero, Seletor } from "@/components/school/ferramentas/controles";
 import { cn } from "@/lib/utils";
 
 /**
@@ -166,41 +167,33 @@ export function ConversorMedidas() {
 
       {/* A conta */}
       <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl border border-border bg-background p-3">
-        <input
-          type="number"
-          value={valor}
-          onChange={(e) => setValor(Number(e.target.value) || 0)}
-          aria-label="Valor a converter"
-          className="h-10 w-24 rounded-lg border border-border bg-background text-center text-lg font-bold text-foreground"
+        <CampoNumero
+          valor={Number.isNaN(valor) ? "" : valor}
+          aoMudar={(v) => setValor(Number.isNaN(v) ? 0 : v)}
+          min={0}
+          max={100000}
+          rotulo="Valor a converter"
+          largura="w-16"
+          comBotoes={false}
         />
-        <select
-          value={iDe}
-          onChange={(e) => setIDe(Number(e.target.value))}
-          aria-label="Unidade de origem"
-          className="h-10 rounded-lg border border-border bg-background px-2 text-sm font-semibold text-foreground"
-        >
-          {info.unidades.map((u, i) => (
-            <option key={u.simbolo} value={i}>
-              {u.simbolo}
-            </option>
-          ))}
-        </select>
+        <Seletor
+          valor={String(iDe)}
+          aoMudar={(v) => setIDe(Number(v))}
+          rotulo="Unidade de origem"
+          largura="w-[5.5rem]"
+          opcoes={info.unidades.map((u, i) => ({ valor: String(i), rotulo: u.simbolo }))}
+        />
         <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
         <span className="min-w-[70px] text-center text-lg font-bold text-primary">
           {formatar(resultado)}
         </span>
-        <select
-          value={iPara}
-          onChange={(e) => setIPara(Number(e.target.value))}
-          aria-label="Unidade de destino"
-          className="h-10 rounded-lg border border-border bg-background px-2 text-sm font-semibold text-foreground"
-        >
-          {info.unidades.map((u, i) => (
-            <option key={u.simbolo} value={i}>
-              {u.simbolo}
-            </option>
-          ))}
-        </select>
+        <Seletor
+          valor={String(iPara)}
+          aoMudar={(v) => setIPara(Number(v))}
+          rotulo="Unidade de destino"
+          largura="w-[5.5rem]"
+          opcoes={info.unidades.map((u, i) => ({ valor: String(i), rotulo: u.simbolo }))}
+        />
       </div>
 
       <Escada

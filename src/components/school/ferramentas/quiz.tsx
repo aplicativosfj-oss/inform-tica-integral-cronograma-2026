@@ -151,7 +151,8 @@ export function Quiz({
           </span>
           <p className="text-lg font-semibold text-foreground">Atividade concluída!</p>
           <p className="text-sm text-muted-foreground">
-            Você acertou {acertosDeUmaVez} de {questoes.length} de primeira, em {formatarTempo(tempo)}.
+            Você acertou {acertosDeUmaVez} de {questoes.length} de primeira, em{" "}
+            {formatarTempo(tempo)}.
             {percentual >= 80
               ? " Mandou muito bem! 🎉"
               : percentual >= 50

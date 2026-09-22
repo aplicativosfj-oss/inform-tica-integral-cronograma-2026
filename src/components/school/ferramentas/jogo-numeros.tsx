@@ -7,6 +7,7 @@ import {
   porExtenso,
   type Ordem,
 } from "@/components/school/ferramentas/material-dourado";
+import { CampoResposta } from "@/components/school/ferramentas/controles";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -203,20 +204,19 @@ export function JogoNumeros() {
               </div>
             ))}
           </div>
-          <input
-            type="number"
-            value={digitado}
-            onChange={(e) => {
-              setDigitado(e.target.value);
-              if (conferido === false) setConferido(null);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") conferir();
-            }}
-            placeholder="Escreva o número"
-            aria-label="Escreva o número"
-            className="mx-auto h-11 w-40 rounded-lg border border-border bg-background text-center text-xl font-bold text-foreground"
-          />
+          <div className="flex justify-center">
+            <CampoResposta
+              valor={digitado}
+              aoMudar={(v) => {
+                setDigitado(v);
+                if (conferido === false) setConferido(null);
+              }}
+              aoTeclarEnter={conferir}
+              rotulo="Escreva o número"
+              placeholder="Escreva o número"
+              largura="w-40"
+            />
+          </div>
         </>
       )}
 
