@@ -149,7 +149,7 @@ function Index() {
           />
           <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
-              <Badge variant="secondary" className="mb-3 gap-1.5 px-3 py-1 text-sm">
+              <Badge className="mb-3 gap-1.5 rounded-full border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
                 <MonitorSmartphone className="size-4" /> Agenda online
               </Badge>
               <h1 className="text-[2rem] font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -399,7 +399,7 @@ function Index() {
 
         <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
           <div className="mb-4 max-w-2xl">
-            <Badge variant="secondary" className="mb-2 gap-1.5 px-3 py-1 text-sm">
+            <Badge className="mb-2 gap-1.5 rounded-full border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-700 shadow-sm backdrop-blur-md dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
               <CalendarDays className="size-4" /> Grade completa
             </Badge>
             <h2 className="text-2xl font-semibold text-foreground">
@@ -682,8 +682,8 @@ function ProgramacaoSemanalDestaque() {
 
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-5 max-w-2xl">
-          <Badge className="mb-3 gap-1.5 border-white/20 bg-white/10 text-white backdrop-blur">
-            <Sparkles className="size-3.5" /> Programação da semana
+          <Badge className="mb-3 gap-1.5 rounded-full border-cyan-300/30 bg-cyan-400/15 px-3 py-1.5 text-sm text-cyan-100 shadow-sm backdrop-blur-md">
+            <Sparkles className="size-4" /> Programação da semana
           </Badge>
           <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
             Veja quem usa o laboratório em cada dia
@@ -834,7 +834,7 @@ function CanalYoutubeSection() {
     <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="max-w-xl">
-          <Badge variant="secondary" className="mb-2 gap-1.5 px-3 py-1 text-sm">
+          <Badge className="mb-2 gap-1.5 rounded-full border-red-400/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-700 shadow-sm backdrop-blur-md dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">
             <Youtube className="size-4" /> Canal da escola
           </Badge>
           <h2 className="text-xl font-semibold text-foreground">Acompanhe no YouTube</h2>
