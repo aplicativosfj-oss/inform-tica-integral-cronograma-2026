@@ -19,6 +19,7 @@ import {
   corDoAcerto,
 } from "@/components/school/diagnostica/graficos";
 import { PainelAvaliacoes } from "@/components/school/diagnostica/painel-avaliacoes";
+import { RaioXAlunoDialog } from "@/components/school/diagnostica/raio-x";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,6 +33,7 @@ import {
   maisFrageis,
   pct,
   perfisDosAlunos,
+  type PerfilAluno,
   prioridadeDeAtendimento,
 } from "@/lib/diagnostica/analise";
 import { DADOS_I } from "@/lib/diagnostica/dados-i";
@@ -116,7 +118,7 @@ export function PainelEvolucao({ publico = false }: { publico?: boolean }) {
         </TabsList>
 
         <TabsContent value="geral" className="space-y-4">
-          {provas && <PainelAvaliacoes provas={provas} />}
+          {provas && <PainelAvaliacoes provas={provas} comAlunos />}
         </TabsContent>
         <TabsContent value="turmas" className="space-y-4">
           <Turmas />
@@ -126,7 +128,7 @@ export function PainelEvolucao({ publico = false }: { publico?: boolean }) {
         </TabsContent>
         {!publico && (
           <TabsContent value="alunos" className="space-y-4">
-            <Alunos perfis={analise.perfis} />
+            <Alunos perfis={analise.perfis} provas={provas ?? []} />
           </TabsContent>
         )}
         {!publico && (
@@ -262,8 +264,15 @@ function Habilidades({ analise }: { analise: Analise }) {
   );
 }
 
-function Alunos({ perfis }: { perfis: ReturnType<typeof perfisDosAlunos> }) {
+function Alunos({
+  perfis,
+  provas,
+}: {
+  perfis: ReturnType<typeof perfisDosAlunos>;
+  provas: ProvaII[];
+}) {
   const [busca, setBusca] = useState("");
+  const [aberto, setAberto] = useState<PerfilAluno | null>(null);
   const prioridade = prioridadeDeAtendimento(perfis, 15);
   const filtrados = busca
     ? perfis.filter((p) => p.nome.toLowerCase().includes(busca.toLowerCase()))
@@ -294,9 +303,11 @@ function Alunos({ perfis }: { perfis: ReturnType<typeof perfisDosAlunos> }) {
           </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {prioridade.map((p) => (
-              <div
+              <button
                 key={`${p.ano}${p.turma}-${p.nome}`}
-                className="rounded-lg border border-border p-3"
+                type="button"
+                onClick={() => setAberto(p)}
+                className="rounded-lg border border-border p-3 text-left transition hover:border-primary hover:bg-muted/50"
               >
                 <p className="font-semibold leading-tight">{p.nome}</p>
                 <p className="text-xs text-muted-foreground">
@@ -308,7 +319,8 @@ function Alunos({ perfis }: { perfis: ReturnType<typeof perfisDosAlunos> }) {
                 >
                   {pct(p.acerto)}
                 </p>
-              </div>
+                <p className="text-xs font-semibold text-primary">Ver raio-X</p>
+              </button>
             ))}
           </div>
         </CardContent>
@@ -368,6 +380,13 @@ function Alunos({ perfis }: { perfis: ReturnType<typeof perfisDosAlunos> }) {
                       ))}
                     </ul>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setAberto(p)}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-semibold transition hover:border-primary hover:bg-muted/50"
+                  >
+                    <Target className="size-3.5" /> Abrir raio-X com comparação da turma
+                  </button>
                   <div>
                     <p className="mb-1 font-semibold text-emerald-600">
                       Já domina ({p.dominios.length})
@@ -384,6 +403,8 @@ function Alunos({ perfis }: { perfis: ReturnType<typeof perfisDosAlunos> }) {
           </div>
         </CardContent>
       </Card>
+
+      <RaioXAlunoDialog perfil={aberto} provas={provas} aoFechar={() => setAberto(null)} />
     </>
   );
 }

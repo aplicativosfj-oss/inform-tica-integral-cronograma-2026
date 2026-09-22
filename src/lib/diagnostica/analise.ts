@@ -389,3 +389,133 @@ export function ortografiaComparada(provas: ProvaII[]): Ortografia[] {
   }
   return saida.sort((x, y) => x.ano - y.ano || x.turma.localeCompare(y.turma));
 }
+
+export interface QuestaoComRegua {
+  q: number;
+  texto: string;
+  acerto: number;
+  feijo: number | null;
+  acre: number | null;
+  /** Diferença para o Acre (positiva: a escola foi melhor que a rede). */
+  vsRede: number | null;
+}
+
+export interface RaioXTurma {
+  ano: number;
+  turma: string;
+  /** Uma entrada por disciplina, com os dois momentos quando existirem. */
+  disciplinas: {
+    disc: string;
+    i: number | null;
+    ii: number | null;
+    delta: number | null;
+    participantesI: number | null;
+    participantesII: number | null;
+  }[];
+  /** Turma na I: faixas, escrita e ortografia, por disciplina. */
+  linhasI: TurmaI[];
+  /** Questões da I com a régua da rede, da mais frágil para a mais forte. */
+  questoesI: (QuestaoComRegua & { disc: string })[];
+  /** Habilidades da II, da mais frágil para a mais forte. */
+  habilidadesII: { disc: string; texto: string; acerto: number; erraram: number }[];
+  /** Alunos da turma (só com dados da II). */
+  alunos: PerfilAluno[];
+}
+
+/**
+ * Reúne tudo que se sabe sobre uma turma nas duas avaliações. É o que
+ * sustenta a tela de raio-X: em vez de o professor cruzar três abas, a turma
+ * chega inteira — evolução, faixas, escrita, questão a questão com a régua da
+ * rede e, quando há login, os alunos.
+ */
+export function raioXTurma(provas: ProvaII[], ano: number, turma: string): RaioXTurma {
+  const linhasI = DADOS_I.turmas.filter(
+    (t) => t.turno === "INTEGRAL" && t.ano === ano && t.turma === turma,
+  );
+  const desI = desempenhoI().filter((d) => d.ano === ano && d.turma === turma);
+  const desII = desempenhoII(provas).filter((d) => d.ano === ano && d.turma === turma);
+  const discs = [...new Set([...desI.map((d) => d.disc), ...desII.map((d) => d.disc)])];
+
+  return {
+    ano,
+    turma,
+    disciplinas: discs.map((disc) => {
+      const a = desI.find((d) => d.disc === disc);
+      const b = desII.find((d) => d.disc === disc);
+      return {
+        disc,
+        i: a?.acerto ?? null,
+        ii: b?.acerto ?? null,
+        delta: a && b ? b.acerto - a.acerto : null,
+        participantesI: a?.participantes ?? null,
+        participantesII: b?.participantes ?? null,
+      };
+    }),
+    linhasI,
+    questoesI: linhasI
+      .flatMap((t) =>
+        t.questoes.map((q) => ({
+          disc: t.disc,
+          q: q.q,
+          texto: q.hab,
+          acerto: q.acerto,
+          feijo: q.feijo,
+          acre: q.acre,
+          vsRede: q.acre == null ? null : q.acerto - q.acre,
+        })),
+      )
+      .sort((a, b) => a.acerto - b.acerto),
+    habilidadesII: desII
+      .flatMap((d) =>
+        d.habilidades.map((h) => ({
+          disc: d.disc,
+          texto: h.texto,
+          acerto: h.acerto,
+          erraram: Math.round((1 - h.acerto) * d.participantes),
+        })),
+      )
+      .sort((a, b) => a.acerto - b.acerto),
+    alunos: perfisDosAlunos(provas).filter((p) => p.ano === ano && p.turma === turma),
+  };
+}
+
+/** Turmas que aparecem em alguma das duas avaliações, para montar a lista clicável. */
+export function turmasDisponiveis(provas: ProvaII[]): { ano: number; turma: string }[] {
+  const chaves = new Set<string>();
+  for (const t of DADOS_I.turmas) if (t.turno === "INTEGRAL") chaves.add(`${t.ano}|${t.turma}`);
+  for (const p of provas) chaves.add(`${p.ano}|${p.turma}`);
+  return [...chaves]
+    .map((c) => {
+      const [ano, turma] = c.split("|");
+      return { ano: Number(ano), turma: turma ?? "" };
+    })
+    .sort((a, b) => a.ano - b.ano || a.turma.localeCompare(b.turma));
+}
+
+/**
+ * Como o aluno está em relação à própria turma, habilidade por habilidade.
+ * Serve para separar dificuldade individual de conteúdo que a turma inteira
+ * não viu: se metade da turma errou, o caminho é aula; se só ele errou, é
+ * apoio direto.
+ */
+export function lacunasComparadas(
+  perfil: PerfilAluno,
+  provas: ProvaII[],
+): { disc: string; texto: string; turmaErrou: number; soDele: boolean }[] {
+  const daTurma = provas.filter((p) => p.ano === perfil.ano && p.turma === perfil.turma);
+  return perfil.lacunas.map((l) => {
+    const prova = daTurma.find((p) => p.disc === l.disc);
+    let turmaErrou = 0;
+    if (prova) {
+      const indice = Object.keys(prova.hab)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .indexOf(l.q);
+      const presentes = prova.alunos.filter((a) => fezAProva(a.r));
+      const responderam = presentes.filter((a) => respondeu(a.r[indice]));
+      const erraram = responderam.filter((a) => a.r[indice] !== "C").length;
+      turmaErrou = responderam.length > 0 ? erraram / responderam.length : 0;
+    }
+    return { disc: l.disc, texto: l.texto, turmaErrou, soDele: turmaErrou <= 0.35 };
+  });
+}

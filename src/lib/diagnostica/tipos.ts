@@ -35,7 +35,17 @@ export interface TurmaI {
   /** Erros de ortografia (3º ao 5º ano): A sem erros … E escrita não alfabética. */
   ortografia: Record<"A" | "B" | "C" | "D" | "E", number | null>;
   redacao: Record<"pouco" | "mediano" | "adequado", number | null>;
-  questoes: { q: number; acerto: number; hab: string }[];
+  /**
+   * Acerto da turma em cada questão, com a média de Feijó e do Acre na
+   * mesma questão — a régua que diz se o resultado é da turma ou da prova.
+   */
+  questoes: {
+    q: number;
+    acerto: number;
+    hab: string;
+    feijo: number | null;
+    acre: number | null;
+  }[];
 }
 
 export interface MediaRede {

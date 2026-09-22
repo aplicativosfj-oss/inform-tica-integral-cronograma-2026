@@ -1,4 +1,12 @@
-import { ArrowRight, BookOpenCheck, Info, Minus, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpenCheck,
+  Info,
+  Minus,
+  Search,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +20,8 @@ import {
   ortografiaComparada,
   type DesempenhoTurma,
 } from "@/lib/diagnostica/analise";
+import { RaioXAlunoDialog, RaioXTurmaDialog } from "@/components/school/diagnostica/raio-x";
+import type { PerfilAluno } from "@/lib/diagnostica/analise";
 import type { ProvaII } from "@/lib/diagnostica/tipos";
 import { cn } from "@/lib/utils";
 
@@ -43,8 +53,17 @@ type DiscId = (typeof DISCIPLINAS)[number]["id"];
 const porcento = (v: number | null | undefined) => (v == null ? "—" : `${Math.round(v * 100)}%`);
 const nomeTurma = (ano: number, turma: string) => `${ano}º ano ${turma}`;
 
-export function PainelAvaliacoes({ provas }: { provas: ProvaII[] }) {
+export function PainelAvaliacoes({
+  provas,
+  comAlunos = false,
+}: {
+  provas: ProvaII[];
+  /** Só no painel de gestão: abre a lista de alunos dentro do raio-X. */
+  comAlunos?: boolean;
+}) {
   const [disc, setDisc] = useState<DiscId>("LP");
+  const [turmaAberta, setTurmaAberta] = useState<{ ano: number; turma: string } | null>(null);
+  const [alunoAberto, setAlunoAberto] = useState<PerfilAluno | null>(null);
 
   const dados = useMemo(() => {
     const i = desempenhoI();
@@ -102,7 +121,12 @@ export function PainelAvaliacoes({ provas }: { provas: ProvaII[] }) {
             </button>
           ))}
         </div>
-        <ListaDeTurmas disc={disc} desI={dados.i} desII={dados.ii} />
+        <ListaDeTurmas
+          disc={disc}
+          desI={dados.i}
+          desII={dados.ii}
+          aoAbrir={(ano, turma) => setTurmaAberta({ ano, turma })}
+        />
       </Secao>
 
       {dados.alfab.length > 0 && (
@@ -170,6 +194,26 @@ export function PainelAvaliacoes({ provas }: { provas: ProvaII[] }) {
       </Secao>
 
       <Rodape />
+
+      {turmaAberta && (
+        <RaioXTurmaDialog
+          aberto
+          aoFechar={() => setTurmaAberta(null)}
+          provas={provas}
+          ano={turmaAberta.ano}
+          turma={turmaAberta.turma}
+          mostrarAlunos={comAlunos}
+          aoAbrirAluno={(p) => {
+            setTurmaAberta(null);
+            setAlunoAberto(p);
+          }}
+        />
+      )}
+      <RaioXAlunoDialog
+        perfil={alunoAberto}
+        provas={provas}
+        aoFechar={() => setAlunoAberto(null)}
+      />
     </div>
   );
 }
@@ -312,10 +356,12 @@ function ListaDeTurmas({
   disc,
   desI,
   desII,
+  aoAbrir,
 }: {
   disc: DiscId;
   desI: DesempenhoTurma[];
   desII: DesempenhoTurma[];
+  aoAbrir: (ano: number, turma: string) => void;
 }) {
   const daDisc = desII
     .filter((d) => d.disc === disc)
@@ -331,16 +377,29 @@ function ListaDeTurmas({
         const antes = desI.find((x) => x.ano === d.ano && x.turma === d.turma && x.disc === disc);
         const delta = antes ? d.acerto - antes.acerto : null;
         return (
-          <Card key={`${d.ano}${d.turma}`}>
-            <CardContent className="space-y-3 py-4">
-              <div className="flex items-baseline justify-between gap-2">
-                <p className="font-semibold">{nomeTurma(d.ano, d.turma)}</p>
-                <p className="text-sm text-muted-foreground">{d.participantes} alunos fizeram</p>
-              </div>
-              <BarraDupla i={antes?.acerto ?? null} ii={d.acerto} />
-              <Veredito delta={delta} sufixo="de acerto" />
-            </CardContent>
-          </Card>
+          <button
+            key={`${d.ano}${d.turma}`}
+            type="button"
+            onClick={() => aoAbrir(d.ano, d.turma)}
+            className="text-left"
+            aria-label={`Abrir o raio-X do ${nomeTurma(d.ano, d.turma)}`}
+          >
+            <Card className="h-full transition hover:border-primary hover:shadow-md">
+              <CardContent className="space-y-3 py-4">
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="font-semibold">{nomeTurma(d.ano, d.turma)}</p>
+                  <p className="text-sm text-muted-foreground">{d.participantes} alunos fizeram</p>
+                </div>
+                <BarraDupla i={antes?.acerto ?? null} ii={d.acerto} />
+                <div className="flex items-center justify-between gap-2">
+                  <Veredito delta={delta} sufixo="de acerto" />
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                    <Search className="size-3.5" /> Ver raio-X
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </button>
         );
       })}
     </div>
