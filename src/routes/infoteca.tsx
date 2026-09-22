@@ -426,7 +426,8 @@ function InfotecaPage() {
           {/* Vizinho temático da Recomposição: explica o que cada habilidade
             cobrada na avaliação espera da criança. */}
           <Link
-            to="/descritores"
+            to="/avaliacao"
+            search={{ aba: "descritores" as const }}
             className="group mb-2 flex items-center gap-3 rounded-2xl border border-indigo-400/25 bg-gradient-to-r from-indigo-500/10 via-indigo-500/[0.03] to-transparent p-4 transition-colors hover:border-indigo-400/50 dark:border-indigo-400/15"
           >
             <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-indigo-400/25 bg-indigo-500/10 text-indigo-600 shadow-sm dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">

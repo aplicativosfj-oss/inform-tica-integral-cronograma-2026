@@ -258,7 +258,7 @@ export function PainelAvaliacoes({
                 </CardContent>
               </Card>
             </button>
-            <Link to="/descritores" className="text-left">
+            <Link to="/avaliacao" search={{ aba: "descritores" as const }} className="text-left">
               <Card className="h-full border-indigo-400/30 bg-indigo-500/[0.06] transition hover:border-indigo-400/60 hover:shadow-md dark:border-indigo-400/20 dark:bg-indigo-400/[0.06]">
                 <CardContent className="flex items-start gap-3 py-5">
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-600 dark:bg-indigo-400/15 dark:text-indigo-300">

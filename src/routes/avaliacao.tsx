@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, ListChecks, Loader2 } from "lucide-react";
+import { BarChart3, Compass, ListChecks, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { NavBar } from "@/components/school/nav-bar";
+import { GuiaDescritores } from "@/components/school/diagnostica/guia-descritores";
 import { PainelAvaliacoes } from "@/components/school/diagnostica/painel-avaliacoes";
 import { ObservatorioFrame } from "@/components/school/observatorio-frame";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +11,16 @@ import type { ProvaII } from "@/lib/diagnostica/tipos";
 import { supabase } from "@/lib/supabase-client";
 import { cn } from "@/lib/utils";
 
+const ABAS = ["resumo", "detalhes", "descritores"] as const;
+type AbaAvaliacao = (typeof ABAS)[number];
+
+function abaValida(v: unknown): v is AbaAvaliacao {
+  return typeof v === "string" && (ABAS as readonly string[]).includes(v);
+}
+
 export const Route = createFileRoute("/avaliacao")({
+  validateSearch: (search: Record<string, unknown>): { aba?: AbaAvaliacao } =>
+    abaValida(search["aba"]) ? { aba: search["aba"] } : {},
   component: AvaliacaoPublica,
   head: () => ({
     meta: [
@@ -29,13 +39,21 @@ export const Route = createFileRoute("/avaliacao")({
  * lugar. A aba "Resumo" é a leitura para qualquer pessoa — famílias,
  * professores regentes, conselho — e a aba "Detalhes" guarda o observatório
  * completo da II, para quem quiser destrinchar turma, questão e habilidade.
+ * A aba "Guia de habilidades" fecha o conjunto: o que cada descritor cobrado
+ * espera da criança, como avaliar e o que fazer com quem ainda não chegou lá.
  */
-type AbaAvaliacao = "resumo" | "detalhes";
-
 function AvaliacaoPublica() {
+  const { aba: abaUrl } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [provas, setProvas] = useState<ProvaII[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
-  const [aba, setAba] = useState<AbaAvaliacao>("resumo");
+  const aba: AbaAvaliacao = abaUrl ?? "resumo";
+
+  /** A aba fica na URL para poder ser linkada de fora (Infoteca, cards do
+   *  Resumo) e sobreviver a um refresh. */
+  function setAba(proxima: AbaAvaliacao) {
+    void navigate({ search: proxima === "resumo" ? {} : { aba: proxima }, replace: true });
+  }
 
   useEffect(() => {
     supabase
@@ -97,6 +115,17 @@ function AvaliacaoPublica() {
             >
               <ListChecks className="size-4" /> Detalhes da 2ª avaliação
             </TabsTrigger>
+            <TabsTrigger
+              value="descritores"
+              className={cn(
+                "gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground",
+                "data-[state=active]:border-indigo-400/30 data-[state=active]:bg-indigo-500/10 data-[state=active]:text-indigo-700",
+                "dark:data-[state=active]:border-indigo-400/25 dark:data-[state=active]:bg-indigo-400/10 dark:data-[state=active]:text-indigo-200",
+                "data-[state=active]:shadow-sm data-[state=active]:backdrop-blur-md",
+              )}
+            >
+              <Compass className="size-4" /> Guia de habilidades
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="resumo">
             <PainelAvaliacoes provas={provas} comAlunos aoAbrirDetalhes={abrirDetalhes} />
@@ -106,6 +135,9 @@ function AvaliacaoPublica() {
               dados={provas}
               className="h-[calc(100dvh-12rem)] min-h-[520px] w-full rounded-xl border border-border bg-background"
             />
+          </TabsContent>
+          <TabsContent value="descritores">
+            <GuiaDescritores />
           </TabsContent>
         </Tabs>
       ) : (
