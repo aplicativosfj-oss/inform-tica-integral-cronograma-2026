@@ -264,7 +264,7 @@ export function NavBar() {
               Agenda{" "}
               <span className="font-medium text-blue-600 dark:text-blue-400">de Informática</span>
             </span>
-            <span className="whitespace-nowrap text-[9.5px] font-semibold uppercase leading-none tracking-[0.12em] text-slate-500 dark:text-white/60 sm:text-[10.5px]">
+            <span className="whitespace-nowrap text-[9.5px] font-semibold uppercase leading-none tracking-[0.12em] text-slate-600 dark:text-white/70 sm:text-[10.5px]">
               <span className="sm:hidden">E.M. Dr. Eiraldo</span>
               <span className="hidden sm:inline">Escola Dr. Eiraldo Carneiro</span>
             </span>

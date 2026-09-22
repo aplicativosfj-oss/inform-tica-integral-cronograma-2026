@@ -4,6 +4,7 @@ import {
   Brain,
   Calculator,
   Compass,
+  Dices,
   Download,
   ExternalLink,
   Gamepad2,
@@ -12,6 +13,7 @@ import {
   Layers,
   Puzzle,
   Sparkles,
+  Star,
   Target,
   Users2,
   Wrench,
@@ -379,8 +381,49 @@ function InfotecaPage() {
             </Button>
           </div>
 
+          {/* A Sala de Jogos é a ferramenta que as crianças mais procuram e
+            estava perdida no meio da grade de "Ferramentas", do mesmo
+            tamanho de uma calculadora. Sobe para um card largo, antes dos
+            grupos, e sai da grade abaixo para não aparecer duas vezes. */}
+          <Link
+            to="/ferramentas/$ferramenta"
+            params={{ ferramenta: "sala-de-jogos" }}
+            className="group mb-6 flex flex-col gap-4 overflow-hidden rounded-3xl border-2 border-emerald-400/45 bg-gradient-to-br from-emerald-500/20 via-emerald-500/[0.07] to-transparent p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-emerald-400/70 hover:shadow-lg dark:border-emerald-400/35 sm:flex-row sm:items-center sm:gap-5 sm:p-6"
+          >
+            <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-500/15 text-emerald-700 shadow-sm dark:border-emerald-400/30 dark:bg-emerald-400/15 dark:text-emerald-300 sm:size-20">
+              <Dices className="size-8 sm:size-10" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/15 dark:text-emerald-300">
+                <Star className="size-3" /> Destaque da Infoteca
+              </span>
+              <h3 className="text-xl font-bold tracking-tight text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-300 sm:text-2xl">
+                Sala de Jogos
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+                Cinco jogos de mesa contra o computador ou um colega da turma — e cada partida ganha
+                vale estrelas no ranking da escola.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {["Damas", "Dominó", "Jogo da velha", "Memória", "Quebra-cabeça"].map((jogo) => (
+                  <span
+                    key={jogo}
+                    className="rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground"
+                  >
+                    {jogo}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors group-hover:bg-emerald-800 dark:bg-emerald-500 dark:text-emerald-950 dark:group-hover:bg-emerald-400">
+              Abrir a sala →
+            </span>
+          </Link>
+
           {GRUPOS_ESCOLA.map((grupo) => {
-            const itens = publicas.filter((f) => f.categoria === grupo.categoria);
+            const itens = publicas.filter(
+              (f) => f.categoria === grupo.categoria && f.slug !== "sala-de-jogos",
+            );
             if (!itens.length) return null;
             return (
               <div key={grupo.categoria} className="mb-6">
