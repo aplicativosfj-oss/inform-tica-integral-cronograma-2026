@@ -1,7 +1,9 @@
+import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   BookOpenCheck,
   ClipboardList,
+  Compass,
   Info,
   Minus,
   Scale,
@@ -223,9 +225,9 @@ export function PainelAvaliacoes({
       {aoAbrirDetalhes && (
         <Secao
           titulo="Ferramentas de apoio"
-          explicacao="Recursos mais avançados, na aba Detalhes da 2ª avaliação: monte um plano de retomada ou compare turmas e alunos lado a lado."
+          explicacao="Recursos mais avançados, na aba Detalhes da 2ª avaliação, e o guia de habilidades da escola inteira."
         >
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             <button type="button" onClick={() => aoAbrirDetalhes("plano")} className="text-left">
               <Card className="h-full border-violet-400/30 bg-violet-500/[0.06] transition hover:border-violet-400/60 hover:shadow-md dark:border-violet-400/20 dark:bg-violet-400/[0.06]">
                 <CardContent className="flex items-start gap-3 py-5">
@@ -256,6 +258,21 @@ export function PainelAvaliacoes({
                 </CardContent>
               </Card>
             </button>
+            <Link to="/descritores" className="text-left">
+              <Card className="h-full border-indigo-400/30 bg-indigo-500/[0.06] transition hover:border-indigo-400/60 hover:shadow-md dark:border-indigo-400/20 dark:bg-indigo-400/[0.06]">
+                <CardContent className="flex items-start gap-3 py-5">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-600 dark:bg-indigo-400/15 dark:text-indigo-300">
+                    <Compass className="size-5" />
+                  </span>
+                  <span>
+                    <span className="block font-semibold">Guia de habilidades</span>
+                    <span className="block text-sm text-muted-foreground">
+                      O que cada habilidade espera da criança, como avaliar e estratégias de apoio.
+                    </span>
+                  </span>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </Secao>
       )}

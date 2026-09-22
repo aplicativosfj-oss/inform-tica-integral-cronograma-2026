@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+  BookOpen,
   Brain,
+  Calculator,
+  Compass,
   Download,
   ExternalLink,
   Gamepad2,
@@ -9,13 +12,16 @@ import {
   Layers,
   Puzzle,
   Sparkles,
+  Target,
   Users2,
+  Wrench,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
+import { CategoriaHero, type CorCategoria } from "@/components/school/categoria-hero";
 import { CalculadoraFlutuante } from "@/components/school/ferramentas/calculadora-flutuante";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
@@ -207,6 +213,16 @@ const CATEGORIAS: Categoria[] = [
 
 const TOTAL_FERRAMENTAS = CATEGORIAS.reduce((soma, c) => soma + c.ferramentas.length, 0);
 
+/** Cor de identidade de cada categoria externa, para o banner (CategoriaHero). */
+const COR_CATEGORIA_EXTERNA: Record<string, CorCategoria> = {
+  digitacao: "blue",
+  alfabetizacao: "violet",
+  plataformas: "emerald",
+  raciocinio: "amber",
+  diversao: "pink",
+  professores: "cyan",
+};
+
 function faviconUrl(url: string) {
   const dominio = new URL(url).hostname;
   return `https://www.google.com/s2/favicons?sz=64&domain=${dominio}`;
@@ -217,12 +233,49 @@ function faviconUrl(url: string) {
  * primeiro porque é o que a criança mais usa sozinha; recomposição por último
  * porque é trabalho dirigido pelo professor.
  */
-const GRUPOS_ESCOLA = [
-  { categoria: "Alfabetização e Leitura", titulo: "Ler e escrever" },
-  { categoria: "Matemática", titulo: "Matemática" },
-  { categoria: "Ferramentas", titulo: "Ferramentas do dia a dia" },
-  { categoria: "Recomposição", titulo: "Recomposição da aprendizagem" },
-] as const;
+const GRUPOS_ESCOLA: {
+  id: string;
+  categoria: string;
+  titulo: string;
+  descricao: string;
+  icon: LucideIcon;
+  cor: CorCategoria;
+}[] = [
+  {
+    id: "ler-escrever",
+    categoria: "Alfabetização e Leitura",
+    titulo: "Ler e escrever",
+    descricao: "Alfabeto, sílabas, gêneros e produção de texto — para praticar leitura e escrita.",
+    icon: BookOpen,
+    cor: "rose",
+  },
+  {
+    id: "matematica-escola",
+    categoria: "Matemática",
+    titulo: "Matemática",
+    descricao: "Números, frações, medidas e desafios de cálculo, num jeito visual e sem pressa.",
+    icon: Calculator,
+    cor: "blue",
+  },
+  {
+    id: "ferramentas-dia-a-dia",
+    categoria: "Ferramentas",
+    titulo: "Ferramentas do dia a dia",
+    descricao:
+      "Calculadora, formas geométricas e jogos de mesa — utilidades rápidas para qualquer aula.",
+    icon: Wrench,
+    cor: "teal",
+  },
+  {
+    id: "recomposicao",
+    categoria: "Recomposição",
+    titulo: "Recomposição da aprendizagem",
+    descricao:
+      "Atividades geradas a partir do que a Avaliação Diagnóstica mostrou que cada série precisa treinar.",
+    icon: Target,
+    cor: "amber",
+  },
+];
 
 function InfotecaPage() {
   const publicas = listarFerramentasPublicas();
@@ -330,10 +383,20 @@ function InfotecaPage() {
             const itens = publicas.filter((f) => f.categoria === grupo.categoria);
             if (!itens.length) return null;
             return (
-              <div key={grupo.categoria} className="mb-5">
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {grupo.titulo}
-                </h3>
+              <div key={grupo.categoria} className="mb-6">
+                <CategoriaHero
+                  id={grupo.id}
+                  icon={grupo.icon}
+                  cor={grupo.cor}
+                  titulo={grupo.titulo}
+                  descricao={grupo.descricao}
+                  className="mb-3"
+                  extra={
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {itens.length} {itens.length === 1 ? "ferramenta" : "ferramentas"}
+                    </span>
+                  }
+                />
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {itens.map((ferramenta) => (
                     <Link
@@ -359,6 +422,27 @@ function InfotecaPage() {
               </div>
             );
           })}
+
+          {/* Vizinho temático da Recomposição: explica o que cada habilidade
+            cobrada na avaliação espera da criança. */}
+          <Link
+            to="/descritores"
+            className="group mb-2 flex items-center gap-3 rounded-2xl border border-indigo-400/25 bg-gradient-to-r from-indigo-500/10 via-indigo-500/[0.03] to-transparent p-4 transition-colors hover:border-indigo-400/50 dark:border-indigo-400/15"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-indigo-400/25 bg-indigo-500/10 text-indigo-600 shadow-sm dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">
+              <Compass className="size-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-foreground group-hover:text-primary sm:text-base">
+                O que cada habilidade da avaliação espera da criança
+              </p>
+              <p className="text-xs text-muted-foreground sm:text-sm">
+                Guia por série, disciplina e nível: o que se espera, como avaliar e estratégias de
+                apoio — e as atividades do site ligadas a cada uma.
+              </p>
+            </div>
+            <ExternalLink className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+          </Link>
         </section>
 
         {/* A partir daqui é material de fora. A divisão é explícita para
@@ -378,12 +462,25 @@ function InfotecaPage() {
           </div>
         </section>
 
-        {/* Navegação rápida pelas categorias de fora */}
+        {/* Navegação rápida — agora com as duas metades da página (escola e
+          de fora) na mesma lista de âncoras, pra ficar fácil pular pra
+          qualquer área direto. */}
         <nav
-          aria-label="Ir direto para uma categoria de sites"
+          aria-label="Ir direto para uma área"
           className="sticky top-16 z-30 mt-3 border-y border-border/60 bg-background/85 py-2.5 backdrop-blur-lg sm:top-14"
         >
           <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 sm:px-6 [&::-webkit-scrollbar]:hidden">
+            {GRUPOS_ESCOLA.map((grupo) => (
+              <a
+                key={grupo.id}
+                href={`#${grupo.id}`}
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+              >
+                <grupo.icon className="size-3.5" />
+                {grupo.titulo}
+              </a>
+            ))}
+            <span className="mx-0.5 h-4 w-px shrink-0 self-center bg-border" aria-hidden />
             {CATEGORIAS.map((categoria) => (
               <a
                 key={categoria.id}
@@ -451,18 +548,21 @@ function InfotecaPage() {
         <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
           <div className="flex flex-col gap-10">
             {CATEGORIAS.map((categoria) => (
-              <div key={categoria.id} id={categoria.id} className="scroll-mt-32">
-                <div
-                  className={`mb-4 flex items-center gap-3 rounded-2xl border border-border/40 bg-gradient-to-r ${categoria.faixa} px-4 py-3`}
-                >
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-inset ring-black/5 dark:ring-white/10">
-                    <categoria.icon className={`size-5 ${categoria.cor}`} />
-                  </span>
-                  <div>
-                    <h2 className="text-lg font-semibold text-foreground">{categoria.titulo}</h2>
-                    <p className="text-xs text-muted-foreground">{categoria.descricao}</p>
-                  </div>
-                </div>
+              <div key={categoria.id} className="scroll-mt-32">
+                <CategoriaHero
+                  id={categoria.id}
+                  icon={categoria.icon}
+                  cor={COR_CATEGORIA_EXTERNA[categoria.id] ?? "blue"}
+                  titulo={categoria.titulo}
+                  descricao={categoria.descricao}
+                  className="mb-4"
+                  extra={
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {categoria.ferramentas.length}{" "}
+                      {categoria.ferramentas.length === 1 ? "site" : "sites"}
+                    </span>
+                  }
+                />
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {categoria.ferramentas.map((ferramenta) => (
                     <a
