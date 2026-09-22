@@ -6,11 +6,13 @@ import {
   Globe2,
   GraduationCap,
   Hash,
+  Equal,
   Landmark,
   type LucideIcon,
   PartyPopper,
   PenLine,
   PieChart,
+  Scale,
   ScrollText,
   Shapes,
   SpellCheck2,
@@ -25,6 +27,12 @@ import { Alfabetizacao } from "@/components/school/ferramentas/alfabetizacao";
 import { AtividadesLP } from "@/components/school/ferramentas/atividades-lp";
 import { CalculadoraJanela } from "@/components/school/ferramentas/calculadora-flutuante";
 import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemorativas";
+import {
+  CompararFracoesJanela,
+  FracaoNaMesaJanela,
+  FracoesEquivalentesJanela,
+  MesaFormasJanela,
+} from "@/components/school/ferramentas/janelas-manipular";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
 import { Folclore } from "@/components/school/ferramentas/folclore";
 import { Fracoes } from "@/components/school/ferramentas/fracoes";
@@ -67,6 +75,42 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: Calculator,
     cor: "bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-300",
     Componente: CalculadoraJanela,
+  },
+  {
+    slug: "mesa-formas",
+    titulo: "Mesa de formas",
+    descricao: "Monte desenhos arrastando figuras geométricas coloridas pela mesa.",
+    categoria: "Ferramentas",
+    icon: Shapes,
+    cor: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300",
+    Componente: MesaFormasJanela,
+  },
+  {
+    slug: "montar-fracoes",
+    titulo: "Montar frações",
+    descricao: "Escolha os números e veja a fração virar pizza, chocolate ou litros.",
+    categoria: "Matemática",
+    icon: PieChart,
+    cor: "bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-300",
+    Componente: FracaoNaMesaJanela,
+  },
+  {
+    slug: "comparar-fracoes",
+    titulo: "Comparar frações",
+    descricao: "Duas frações lado a lado para descobrir qual é a maior.",
+    categoria: "Matemática",
+    icon: Scale,
+    cor: "bg-teal-500/10 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300",
+    Componente: CompararFracoesJanela,
+  },
+  {
+    slug: "fracoes-equivalentes",
+    titulo: "Frações equivalentes",
+    descricao: "Veja a mesma quantidade escrita de vários jeitos diferentes.",
+    categoria: "Matemática",
+    icon: Equal,
+    cor: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
+    Componente: FracoesEquivalentesJanela,
   },
   {
     slug: "editor-texto",
