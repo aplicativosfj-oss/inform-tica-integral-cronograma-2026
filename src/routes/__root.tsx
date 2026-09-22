@@ -146,6 +146,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.webmanifest" },
       // Resource hints for performance optimization
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Sora (títulos) + Nunito Sans (corpo) — mesma dupla já usada no
+      // observatório de Avaliações (src/lib/observatorio-template.html),
+      // aqui carregada pro site inteiro falar a mesma tipografia.
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap",
+      },
       { rel: "dns-prefetch", href: "https://cdn.example.com" },
       // Prefetch next likely routes
       { rel: "prefetch", href: "/agenda", as: "fetch" },

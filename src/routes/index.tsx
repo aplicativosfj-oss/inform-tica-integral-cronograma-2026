@@ -138,14 +138,11 @@ function Index() {
             aria-hidden
             className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-sky-50/85 via-white/55 to-background dark:from-muted/35 dark:via-background/60 dark:to-background"
           />
+          {/* Dois respiros radiais de cor por cima do véu — a "tira" âmbar
+              decorativa que existia aqui antes saiu por não somar nada. */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_-10%,rgba(56,130,246,0.16),transparent_55%),radial-gradient(circle_at_100%_8%,rgba(14,165,233,0.13),transparent_50%)]"
-          />
-          {/* Yellow accent stripe, echoing the school's brand colors from the printed materials. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-12 -top-12 -z-10 size-32 rotate-45 bg-amber-400/20 sm:-right-16 sm:-top-16 sm:size-56 sm:bg-amber-400/25"
           />
           <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
@@ -181,68 +178,56 @@ function Index() {
                 </Button>
               </div>
 
-              <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4">
-                <div>
-                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-violet-500/10 text-violet-600 dark:text-violet-400">
-                      <BookOpen className="size-3" />
-                    </span>
-                    <span>
-                      Total de
-                      <br />
-                      Turmas
-                    </span>
-                  </dt>
-                  {isReady ? (
-                    <StatCounter valor={turmas.length} />
-                  ) : (
-                    <div className="mt-1 h-7 w-8 animate-pulse rounded bg-muted-foreground/20" />
-                  )}
+              <dl className="mt-5 grid grid-cols-2 gap-2.5 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4 sm:gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-violet-400/25 bg-violet-500/10 text-violet-600 dark:border-violet-400/20 dark:bg-violet-400/10 dark:text-violet-300">
+                    <BookOpen className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <dt className="text-[13px] leading-none text-muted-foreground">Turmas</dt>
+                    {isReady ? (
+                      <StatCounter valor={turmas.length} />
+                    ) : (
+                      <div className="mt-1.5 h-6 w-8 animate-pulse rounded bg-muted-foreground/20" />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                      <Users2 className="size-3" />
-                    </span>
-                    <span>
-                      Total de
-                      <br />
-                      Alunos
-                    </span>
-                  </dt>
-                  {isReady ? (
-                    <StatCounter valor={totalAlunos} />
-                  ) : (
-                    <div className="mt-1 h-7 w-10 animate-pulse rounded bg-muted-foreground/20" />
-                  )}
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
+                    <Users2 className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <dt className="text-[13px] leading-none text-muted-foreground">Alunos</dt>
+                    {isReady ? (
+                      <StatCounter valor={totalAlunos} />
+                    ) : (
+                      <div className="mt-1.5 h-6 w-10 animate-pulse rounded bg-muted-foreground/20" />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
-                      <MonitorSmartphone className="size-3" />
-                    </span>
-                    <span>
-                      Máquinas
-                      <br />
-                      Disponíveis
-                    </span>
-                  </dt>
-                  {isReady ? (
-                    <StatCounter valor={config.numeroComputadores} />
-                  ) : (
-                    <div className="mt-1 h-7 w-8 animate-pulse rounded bg-muted-foreground/20" />
-                  )}
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
+                    <MonitorSmartphone className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <dt className="text-[13px] leading-none text-muted-foreground">Máquinas</dt>
+                    {isReady ? (
+                      <StatCounter valor={config.numeroComputadores} />
+                    ) : (
+                      <div className="mt-1.5 h-6 w-8 animate-pulse rounded bg-muted-foreground/20" />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400">
-                      <Clock3 className="size-3" />
-                    </span>
-                    Horário das aulas
-                  </dt>
-                  <dd className="text-2xl font-semibold text-foreground">
-                    {config.horaInicio}–{config.horaFim}
-                  </dd>
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
+                    <Clock3 className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <dt className="text-[13px] leading-none text-muted-foreground">Horário</dt>
+                    <dd className="text-lg font-semibold leading-tight text-foreground">
+                      {config.horaInicio}–{config.horaFim}
+                    </dd>
+                  </div>
                 </div>
               </dl>
             </div>
@@ -298,7 +283,10 @@ function Index() {
           </div>
         </section>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
+        <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <MonitorSmartphone className="size-3.5 text-primary" /> Nosso laboratório
+          </p>
           <div className="group overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl">
             <SiteImage
               src={laboratorioTurmaFotoImg}
@@ -372,45 +360,47 @@ function Index() {
           <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
             <FeatureCard
               icon={<Gamepad2 className="size-5" />}
-              iconClassName="bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300"
+              iconClassName="border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-500/20 dark:text-blue-300"
               title="Aprendizado digital"
               description="Tecnologia que estimula o raciocínio e a criatividade."
             />
             <FeatureCard
               icon={<CalendarClock className="size-5" />}
-              iconClassName="bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300"
+              iconClassName="border-violet-400/25 bg-violet-500/10 text-violet-600 dark:border-violet-400/20 dark:bg-violet-500/20 dark:text-violet-300"
               title="Rodízio automático"
               description="O sistema distribui e gira os grupos sozinho, sem favorecer ninguém."
             />
             <FeatureCard
               icon={<Timer className="size-5" />}
-              iconClassName="bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+              iconClassName="border-amber-400/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/20 dark:text-amber-300"
               title="Cronômetro ao vivo"
               description="Contagem regressiva em tempo real de quando o grupo troca."
             />
             <FeatureCard
               icon={<ShieldCheck className="size-5" />}
-              iconClassName="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+              iconClassName="border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/20 dark:text-emerald-300"
               title="Painel de gestão"
               description="Turmas, professores, fotos e alunos com acesso restrito por login."
             />
           </div>
         </RevealSection>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-          <div className="mb-4 max-w-2xl">
-            <Badge className="mb-2 gap-1.5 rounded-full border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-700 shadow-sm backdrop-blur-md dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
-              <CalendarDays className="size-4" /> Grade completa
-            </Badge>
-            <h2 className="text-2xl font-semibold text-foreground">
-              A semana inteira, num só olhar
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Cada cor representa uma série (do 1º ao 5º ano) — quanto mais escura, mais adiantada a
-              turma. Gerado automaticamente a partir da agenda cadastrada no sistema.
-            </p>
+        <RevealSection className="bg-gradient-to-b from-transparent via-transparent to-slate-900/[0.03] dark:to-slate-950/20">
+          <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+            <div className="mb-4 max-w-2xl">
+              <Badge className="mb-2 gap-1.5 rounded-full border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-700 shadow-sm backdrop-blur-md dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
+                <CalendarDays className="size-4" /> Grade completa
+              </Badge>
+              <h2 className="text-2xl font-semibold text-foreground">
+                A semana inteira, num só olhar
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Cada cor representa uma série (do 1º ao 5º ano) — quanto mais escura, mais adiantada
+                a turma. Gerado automaticamente a partir da agenda cadastrada no sistema.
+              </p>
+            </div>
+            <WeeklySchedule />
           </div>
-          <WeeklySchedule />
         </RevealSection>
 
         <ProgramacaoSemanalDestaque />
@@ -419,7 +409,7 @@ function Index() {
 
         <section className="border-t border-border/60 bg-gradient-to-b from-muted/50 to-background">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-5 text-center sm:px-6">
-            <span className="flex size-9 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
+            <span className="flex size-9 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 shadow-sm dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
               <GraduationCap className="size-5" />
             </span>
             <h2 className="text-base font-semibold text-foreground">{config.nomeEscola}</h2>
@@ -629,7 +619,10 @@ function ProgramacaoSemanalDestaque() {
   }, []);
   const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
 
-  const dataDoDia = useMemo(() => proximaDataDoDia(diaSelecionado, agoraNaEscola()), [diaSelecionado]);
+  const dataDoDia = useMemo(
+    () => proximaDataDoDia(diaSelecionado, agoraNaEscola()),
+    [diaSelecionado],
+  );
   const assignments = useMemo(
     () =>
       aplicarExcecoesDeData(
@@ -832,27 +825,29 @@ const VIDEOS_DESTAQUE = [
 function CanalYoutubeSection() {
   return (
     <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-xl">
-          <Badge className="mb-2 gap-1.5 rounded-full border-red-400/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-700 shadow-sm backdrop-blur-md dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">
-            <Youtube className="size-4" /> Canal da escola
-          </Badge>
-          <h2 className="text-xl font-semibold text-foreground">Acompanhe no YouTube</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Bastidores das aulas de informática e da rotina da escola, em vídeo.
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm" className="w-fit shrink-0 text-sm">
-          <a href={CANAL_YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-            Ver canal completo <ExternalLink className="size-4" />
-          </a>
-        </Button>
-      </div>
+      <div className="overflow-hidden rounded-3xl border border-red-400/20 bg-gradient-to-br from-red-500/[0.06] via-transparent to-transparent p-4 dark:border-red-400/15 dark:from-red-400/[0.05] sm:p-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:items-center">
+          <div>
+            <Badge className="mb-2 gap-1.5 rounded-full border-red-400/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-700 shadow-sm backdrop-blur-md dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">
+              <Youtube className="size-4" /> Canal da escola
+            </Badge>
+            <h2 className="text-xl font-semibold text-foreground">Acompanhe no YouTube</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Bastidores das aulas de informática e da rotina da escola, em vídeo.
+            </p>
+            <Button asChild variant="outline" size="sm" className="mt-4 w-fit text-sm">
+              <a href={CANAL_YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
+                Ver canal completo <ExternalLink className="size-4" />
+              </a>
+            </Button>
+          </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:max-w-xl sm:grid-cols-3">
-        {VIDEOS_DESTAQUE.map((video) => (
-          <VideoThumb key={video.id} video={video} />
-        ))}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {VIDEOS_DESTAQUE.map((video) => (
+              <VideoThumb key={video.id} video={video} />
+            ))}
+          </div>
+        </div>
       </div>
     </RevealSection>
   );
@@ -939,10 +934,10 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <Card className="group flex h-full flex-col">
+    <Card className="group flex h-full flex-col transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
       <CardHeader className="p-3.5 pb-1.5 sm:p-6 sm:pb-2">
         <span
-          className={`group-hover-hop mb-2 flex size-9 items-center justify-center rounded-lg sm:size-10 ${iconClassName ?? "bg-primary/10 text-primary"}`}
+          className={`group-hover-hop mb-2 flex size-9 items-center justify-center rounded-full border sm:size-11 ${iconClassName ?? "border-primary/20 bg-primary/10 text-primary"}`}
         >
           {icon}
         </span>

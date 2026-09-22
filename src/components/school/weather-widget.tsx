@@ -1,7 +1,6 @@
 import { CloudDrizzle, CloudFog, CloudLightning, Cloudy, MapPin, Sun, Wind } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { gravarCache, lerCache } from "@/lib/offline-queue";
 import { categoriaClima, descricaoClima, fetchClima, type Clima } from "@/lib/weather";
@@ -167,7 +166,7 @@ export function WeatherWidget() {
     : null;
 
   return (
-    <Card className="overflow-hidden border-sky-500/20 bg-gradient-to-br from-sky-500/5 via-card to-card">
+    <Card className="overflow-hidden border-sky-400/30 bg-gradient-to-br from-sky-500/10 via-card to-card shadow-sm dark:border-sky-400/20 dark:from-sky-400/10">
       <CardContent className="flex flex-wrap items-center gap-5 py-5">
         <Termometro temperatura={clima?.temperatura ?? null} carregando={carregando && !clima} />
 
@@ -175,9 +174,9 @@ export function WeatherWidget() {
           <div className="mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             <MapPin className="size-3.5 text-primary" /> Feijó, Acre
             {horaAtualizada ? (
-              <Badge variant="secondary" className="ml-1 font-normal">
+              <span className="ml-1 inline-flex items-center rounded-full border border-sky-400/30 bg-sky-500/10 px-2 py-0.5 text-[11px] font-normal normal-case text-sky-700 backdrop-blur-md dark:border-sky-400/25 dark:bg-sky-400/10 dark:text-sky-200">
                 atualizado {horaAtualizada}
-              </Badge>
+              </span>
             ) : null}
           </div>
 

@@ -19,6 +19,13 @@
  */
 
 @theme inline {
+  /* Mesma dupla de fontes já carregada pelo observatório de Avaliações
+     (src/lib/observatorio-template.html) — reaproveitada aqui para o site
+     inteiro falar a mesma língua tipográfica: Sora nos títulos (geométrica,
+     confiante em tamanho grande), Nunito Sans no corpo (mais arredondada e
+     legível que a pilha padrão do sistema). */
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Sora", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -348,6 +355,19 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  /* Sora nos títulos em todo o site — mesmo tratamento do observatório de
+     Avaliações (peso mais alto, leve aperto no tracking, quebra de linha
+     equilibrada em vez de deixar uma palavra solta sozinha). */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
   /* Botão nativo do navegador (<button>) não vem com o cursor de "mãozinha"
