@@ -1,4 +1,5 @@
-import { ArrowDown, ArrowUp, Minus, Users2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowDown, ArrowUp, Minus, Sparkles, Users2 } from "lucide-react";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -7,6 +8,7 @@ import {
   raioXTurma,
   type PerfilAluno,
 } from "@/lib/diagnostica/analise";
+import { atividadesParaHabilidade } from "@/lib/diagnostica/sugestoes";
 import { NOME_DISC, type ProvaII } from "@/lib/diagnostica/tipos";
 import { cn } from "@/lib/utils";
 
@@ -125,6 +127,7 @@ export function RaioXTurmaDialog({
                         {Math.round((q.vsRede ?? 0) * 100)} pontos abaixo da rede
                       </span>
                     </p>
+                    <Atividades serie={ano} disc={q.disc} habilidade={q.texto} daPrimeira />
                   </li>
                 ))}
               </ul>
@@ -149,6 +152,7 @@ export function RaioXTurmaDialog({
                         {NOME_DISC[h.disc]} · acerto <b>{porcento(h.acerto)}</b> · {h.erraram}{" "}
                         alunos erraram · <span className="font-semibold">{como.rotulo}</span>
                       </p>
+                      <Atividades serie={ano} disc={h.disc} habilidade={h.texto} />
                     </li>
                   );
                 })}
@@ -248,6 +252,7 @@ export function RaioXAlunoDialog({
                     <p className="text-xs text-muted-foreground">
                       {NOME_DISC[l.disc]} · só {porcento(l.turmaErrou)} da turma errou
                     </p>
+                    <Atividades serie={perfil.ano} disc={l.disc} habilidade={l.texto} />
                   </li>
                 ))}
               </ul>
@@ -268,6 +273,7 @@ export function RaioXAlunoDialog({
                     <p className="text-xs text-muted-foreground">
                       {NOME_DISC[l.disc]} · {porcento(l.turmaErrou)} da turma errou o mesmo
                     </p>
+                    <Atividades serie={perfil.ano} disc={l.disc} habilidade={l.texto} />
                   </li>
                 ))}
               </ul>
@@ -290,6 +296,46 @@ export function RaioXAlunoDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * Atividades do site que tratam a habilidade — o fim da linha do raio-X.
+ * Sem encaixe no catálogo, nada é mostrado: mandar a criança para uma
+ * atividade que não trata da dificuldade dela é pior do que não sugerir.
+ */
+function Atividades({
+  serie,
+  disc,
+  habilidade,
+  daPrimeira = false,
+}: {
+  serie: number;
+  disc: string;
+  habilidade: string;
+  /** Habilidade vinda da I Avaliação: os códigos dela não valem no catálogo. */
+  daPrimeira?: boolean;
+}) {
+  const sugestoes = atividadesParaHabilidade(serie, disc, habilidade, 3, !daPrimeira);
+  if (sugestoes.length === 0) return null;
+  return (
+    <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+      <span className="inline-flex items-center gap-1 font-semibold text-primary">
+        <Sparkles className="size-3.5" /> Atividades:
+      </span>
+      {sugestoes.map((s) => (
+        <Link
+          key={s.entrada.id}
+          to="/ferramentas/$ferramenta"
+          params={{ ferramenta: "atividades-por-habilidade" }}
+          search={{ serie, disc }}
+          className="rounded-full border border-border px-2 py-0.5 transition hover:border-primary hover:bg-muted/50"
+          title={s.entrada.conteudo}
+        >
+          {s.entrada.emoji} {s.entrada.titulo}
+        </Link>
+      ))}
+    </p>
   );
 }
 
