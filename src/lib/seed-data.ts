@@ -40,6 +40,12 @@ export const SEED_CONFIG: ScheduleConfig = {
   // antes dela (testes feitos durante a configuração) fica oculta dos
   // relatórios de frequência.
   dataInicioOperacao: "2026-09-21",
+  // 5º anos não vêm ao laboratório às terças e quartas: nesses dias estão
+  // trabalhando o caderno do IDEB com o(a) regente.
+  diasIndisponiveis: {
+    "t-5a": { dias: ["Terça", "Quarta"], motivo: "Caderno do IDEB", aPartirDe: "2026-09-28" },
+    "t-5b": { dias: ["Terça", "Quarta"], motivo: "Caderno do IDEB", aPartirDe: "2026-09-28" },
+  },
   conteudoPorDia: {
     Segunda: "Introdução ao computador: partes, ligar/desligar e cuidados com os equipamentos",
     Terça: "Digitação e edição de texto: teclado, maiúsculas, acentos e formatação básica",

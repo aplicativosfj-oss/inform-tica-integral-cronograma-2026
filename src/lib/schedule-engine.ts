@@ -152,6 +152,7 @@ export function buildWeeklySchedule(
     const turma = turmasById.get(overrideId);
     if (turma) pending.push({ dia: p.dia, diaIndex: p.diaIndex, slot: p.slot, turma });
   }
+  const qtdTrocasManuais = pending.length;
   const livresFixas = posicoesComIndice.filter((p) => !overriddenIndices.has(p.index));
 
   // Rodízio de horários (opcional): gira a grade inteira a cada semana. O
@@ -234,6 +235,14 @@ export function buildWeeklySchedule(
   // Qualquer posição além dessas fica mesmo livre (célula vazia na grade) —
   // não sobra nenhuma neste ponto, mas o corte acima é sempre seguro.
 
+  // Dias indisponíveis (`config.diasIndisponiveis`): se o rodízio pôs uma
+  // turma num dia em que ela não pode vir ao laboratório (ex.: 5º anos às
+  // terças e quartas, por causa do caderno do IDEB), troca o horário inteiro
+  // com o de outro dia que sirva para as duas turmas envolvidas. Só mexe em
+  // posições automáticas — trocas manuais continuam valendo como estão.
+  const automaticos = pending.slice(qtdTrocasManuais);
+  repararDiasIndisponiveis(automaticos, config, weekIndex);
+
   // Aulas cadastradas manualmente na tela "Aulas" têm prioridade: substituem
   // o horário equivalente do rodízio automático ou entram como horário novo.
   for (const aula of config.aulas ?? []) {
@@ -275,6 +284,81 @@ export function buildWeeklySchedule(
   const mistosFinal = mistos.map((p) => ({ ...p, ocorrenciaIndex: 0, sessoesPorSemana: 1 }));
 
   return [...normaisFinal, ...mistosFinal];
+}
+
+/** Dias configurados em `config.diasIndisponiveis` em que a turma não pode ter aula. */
+export function turmaIndisponivelNoDia(
+  config: ScheduleConfig,
+  turmaId: string,
+  dia: string,
+  weekIndex?: number,
+): boolean {
+  const regra = config.diasIndisponiveis?.[turmaId];
+  if (!regra?.dias.includes(dia)) return false;
+  if (!regra.aPartirDe || weekIndex === undefined) return true;
+  return weekIndex >= getWeekIndex(new Date(`${regra.aPartirDe}T12:00:00`));
+}
+
+interface PosicaoTrocavel {
+  dia: string;
+  turma: Turma;
+  misto?: GrupoMisto[] | undefined;
+}
+
+function turmasDaPosicao(p: PosicaoTrocavel): Turma[] {
+  return p.misto ? p.misto.map((m) => m.turma) : [p.turma];
+}
+
+function cabeNoDia(
+  p: PosicaoTrocavel,
+  dia: string,
+  config: ScheduleConfig,
+  weekIndex: number,
+): boolean {
+  return turmasDaPosicao(p).every((t) => !turmaIndisponivelNoDia(config, t.id, dia, weekIndex));
+}
+
+/**
+ * Troca o conteúdo (turma ou horário misto) de posições que caíram num dia
+ * indisponível com o de outra posição, de outro dia, onde as duas turmas
+ * possam ficar. Prefere trocas que não deixem a mesma turma duas vezes no
+ * mesmo dia. Mexe nos objetos da lista in-place.
+ */
+function repararDiasIndisponiveis(
+  posicoes: PosicaoTrocavel[],
+  config: ScheduleConfig,
+  weekIndex: number,
+): void {
+  if (!config.diasIndisponiveis) return;
+  const repeteNoDia = (turmas: Turma[], dia: string, ignorar: PosicaoTrocavel[]) =>
+    posicoes.some(
+      (o) =>
+        !ignorar.includes(o) &&
+        o.dia === dia &&
+        turmasDaPosicao(o).some((t) => turmas.some((x) => x.id === t.id)),
+    );
+  for (const p of posicoes) {
+    if (cabeNoDia(p, p.dia, config, weekIndex)) continue;
+    const candidatos = posicoes.filter(
+      (o) =>
+        o !== p &&
+        o.dia !== p.dia &&
+        cabeNoDia(p, o.dia, config, weekIndex) &&
+        cabeNoDia(o, p.dia, config, weekIndex),
+    );
+    const semRepetir = candidatos.find(
+      (o) =>
+        !repeteNoDia(turmasDaPosicao(p), o.dia, [p, o]) &&
+        !repeteNoDia(turmasDaPosicao(o), p.dia, [p, o]),
+    );
+    const alvo = semRepetir ?? candidatos[0];
+    if (!alvo) continue;
+    const { turma, misto } = p;
+    p.turma = alvo.turma;
+    p.misto = alvo.misto;
+    alvo.turma = turma;
+    alvo.misto = misto;
+  }
 }
 
 export interface GrupoRevezamento {
@@ -502,6 +586,50 @@ export function escolherSubstituto(
   return candidatos[0] ?? null;
 }
 
+export interface MovimentoCascata {
+  alunoId: string;
+  alunoNome: string;
+  /** Grupo para onde o aluno vai. */
+  grupoIndice: number;
+  /** Grupo em que estava antes (null: entrou de fora da chamada do dia). */
+  grupoOriginal: number | null;
+}
+
+/**
+ * Substituição em cascata: quem faltou no grupo `g` é substituído pelo 1º
+ * aluno do grupo seguinte; o buraco que ele deixa é tapado pelo 1º do grupo
+ * depois dele, e assim por diante. O último buraco fica com `deFora` (o
+ * próximo da fila, ainda não chamado hoje). O primeiro movimento é quem
+ * entra no lugar de quem faltou.
+ */
+export function planejarCascata(
+  presencas: Presenca[],
+  grupoIndice: number,
+  deFora: Aluno | null,
+): MovimentoCascata[] {
+  const ativos = presencas.filter((p) => p.status !== "faltou");
+  const gruposSeguintes = [...new Set(ativos.map((p) => p.grupoIndice))]
+    .filter((g) => g > grupoIndice)
+    .sort((a, b) => a - b);
+  const movimentos: MovimentoCascata[] = [];
+  let buraco = grupoIndice;
+  for (const g of gruposSeguintes) {
+    const primeiro = ativos.find((p) => p.grupoIndice === g);
+    if (!primeiro) continue;
+    movimentos.push({
+      alunoId: primeiro.alunoId,
+      alunoNome: primeiro.alunoNome,
+      grupoIndice: buraco,
+      grupoOriginal: g,
+    });
+    buraco = g;
+  }
+  if (deFora) {
+    movimentos.push({ alunoId: deFora.id, alunoNome: deFora.nome, grupoIndice: buraco, grupoOriginal: null });
+  }
+  return movimentos;
+}
+
 /**
  * Como `buildSubBlocos`, mas usa os grupos já definidos pela chamada do dia
  * (seleção justa + eventuais substituições) em vez de recalculá-los pelo
@@ -725,6 +853,7 @@ export function encontrarHorariosParaReprogramar(
     const data = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate() + i);
     const dia = currentWeekdayLabel(data);
     if (!config.diasSemana.includes(dia)) continue;
+    if (turmaIndisponivelNoDia(config, turmaId, dia, getWeekIndex(data))) continue;
     const dataKey = toDateKey(data);
     const semana = aplicarExcecoesDeData(
       buildWeeklySchedule(turmas, config, getWeekIndex(data)),

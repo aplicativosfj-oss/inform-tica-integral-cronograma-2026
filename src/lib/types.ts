@@ -146,6 +146,16 @@ export interface ScheduleConfig {
    * passar. Chave: `${data ISO}|${dia}|${slot.inicio}`, valor: id da turma.
    */
   excecoesPorData?: Record<string, string> | undefined;
+  /**
+   * Dias da semana em que uma turma não pode vir ao laboratório (ex.: 5º
+   * anos às terças e quartas, trabalhando o caderno do IDEB). Chave: id da
+   * turma. O rodízio automático e a busca de horários para reprogramação
+   * evitam esses dias a partir da semana de `aPartirDe` (YYYY-MM-DD) —
+   * semanas anteriores continuam como foram.
+   */
+  diasIndisponiveis?:
+    | Record<string, { dias: string[]; motivo?: string | undefined; aPartirDe?: string | undefined }>
+    | undefined;
   /** Sessões reprogramadas a partir da tela "Faltas do mês". */
   reprogramacoes?: Reprogramacao[] | undefined;
   /** Motivo de uma aula suspensa sem reprogramação. Mesma chave de `suspensoes`. */

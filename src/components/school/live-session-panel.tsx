@@ -63,6 +63,7 @@ import {
   fetchUltimaParticipacao,
   desfazerFalta,
   marcarFalta,
+  marcarFaltaEmCascata,
   registrarPresencasIniciais,
 } from "@/lib/presencas";
 import {
@@ -71,6 +72,7 @@ import {
   buildWeeklySchedule,
   currentWeekdayLabel,
   escolherSubstituto,
+  planejarCascata,
   findSessaoAtual,
   getWeekIndex,
   gruposFromPresencas,
@@ -240,10 +242,24 @@ function useChamadaDoDia(
     // Quem já está na chamada de hoje — inclusive quem faltou — não pode ser
     // chamado de novo como substituto: evita o mesmo aluno duas vezes no dia.
     const jaChamadosHojeIds = new Set(presencas.map((p) => p.alunoId));
-    const substituto =
-      substitutoEscolhido !== undefined
-        ? substitutoEscolhido
-        : escolherSubstituto(turma, ultimaParticipacao, jaChamadosHojeIds);
+    // Sem escolha manual: cascata — o 1º do grupo seguinte entra no lugar,
+    // e cada grupo depois dele cede o seu 1º para o grupo anterior.
+    if (substitutoEscolhido === undefined) {
+      const deFora = escolherSubstituto(turma, ultimaParticipacao, jaChamadosHojeIds);
+      const movimentos = planejarCascata(presencas, grupoIndice, deFora);
+      await marcarFaltaEmCascata(
+        turma.id,
+        dateKey,
+        { id: aluno.id, nome: aluno.nome },
+        grupoIndice,
+        movimentos,
+        motivo,
+      );
+      setPresencas(await fetchPresencasDoDia(turma.id, dateKey));
+      const quem = movimentos[0];
+      return quem ? (turma.alunos.find((a) => a.id === quem.alunoId) ?? null) : null;
+    }
+    const substituto = substitutoEscolhido;
     await marcarFalta(
       turma.id,
       dateKey,

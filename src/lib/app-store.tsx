@@ -91,6 +91,16 @@ registrarExecutor("app_state", async (payload) => {
   await enviarAppState(payload as AppStatePayload);
 });
 
+/**
+ * Regras que entraram no código depois de a configuração já estar salva no
+ * banco (ex.: dias indisponíveis dos 5º anos). Valem até o administrador
+ * salvar a configuração com a sua própria versão delas.
+ */
+function comRegrasPadrao(config: ScheduleConfig): ScheduleConfig {
+  if (config.diasIndisponiveis) return config;
+  return { ...config, diasIndisponiveis: SEED_CONFIG.diasIndisponiveis };
+}
+
 function generateId(prefix: string) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -126,7 +136,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const emCache = lerCache<{ turmas: Turma[]; config: ScheduleConfig }>("app_state");
     if (emCache) {
       setTurmas(emCache.turmas);
-      setConfig(emCache.config);
+      setConfig(comRegrasPadrao(emCache.config));
     }
     supabase
       .from("app_state")
@@ -139,7 +149,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (!emCache) toast.error(`Não foi possível carregar os dados: ${error.message}`);
         } else if (data) {
           const proximasTurmas = (data.turmas as Turma[] | null) ?? SEED_TURMAS;
-          const proximaConfig = (data.config as ScheduleConfig | null) ?? SEED_CONFIG;
+          const proximaConfig = comRegrasPadrao((data.config as ScheduleConfig | null) ?? SEED_CONFIG);
           setTurmas(proximasTurmas);
           setConfig(proximaConfig);
           gravarCache("app_state", { turmas: proximasTurmas, config: proximaConfig });

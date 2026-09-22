@@ -373,3 +373,21 @@ describe("reposição em horário cedido", () => {
     expect(sessao?.suspensa).toBe(false);
   });
 });
+
+describe("diasIndisponiveis", () => {
+  test("turma nunca cai num dia indisponível, em nenhuma semana", () => {
+    const turmas = Array.from({ length: 10 }, (_, i) => makeTurma(`t${i}`, 20 + i));
+    const regra = { dias: ["Terça", "Quarta"] };
+    const config = makeConfig({ diasIndisponiveis: { t8: regra, t9: regra } });
+    for (let semana = 0; semana < 12; semana += 1) {
+      const aulas = buildWeeklySchedule(turmas, config, semana);
+      for (const a of aulas) {
+        const ids = a.misto ? a.misto.map((m) => m.turma.id) : [a.turma.id];
+        if (a.dia === "Terça" || a.dia === "Quarta") {
+          expect(ids).not.toContain("t8");
+          expect(ids).not.toContain("t9");
+        }
+      }
+    }
+  });
+});

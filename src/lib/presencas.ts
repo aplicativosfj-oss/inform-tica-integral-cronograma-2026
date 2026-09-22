@@ -1,3 +1,4 @@
+import type { MovimentoCascata } from "@/lib/schedule-engine";
 import {
   enfileirar,
   gravarCache,
@@ -291,6 +292,72 @@ async function enviarFalta(
   }
 }
 
+/**
+ * Marca a falta e aplica a substituição em cascata (ver `planejarCascata`).
+ * Sem internet, cai no fluxo simples de `marcarFalta` com quem entra no lugar.
+ */
+export async function marcarFaltaEmCascata(
+  turmaId: string,
+  data: string,
+  aluno: { id: string; nome: string },
+  grupoIndice: number,
+  movimentos: MovimentoCascata[],
+  motivo: "ausente" | "nao_quis_participar" | "limitacao",
+): Promise<void> {
+  const senha = await senhaParaRpc(turmaId);
+  if (senha) {
+    const { error } = await supabase.rpc("professor_marcar_falta_cascata", {
+      p_turma_id: turmaId,
+      p_senha: senha,
+      p_data: data,
+      p_aluno_id: aluno.id,
+      p_motivo: motivo,
+      p_movimentos: movimentos.map((m) => ({
+        aluno_id: m.alunoId,
+        aluno_nome: m.alunoNome,
+        grupo_indice: m.grupoIndice,
+        grupo_original: m.grupoOriginal,
+      })),
+    });
+    if (error) throw error;
+    return;
+  }
+  try {
+    const { error: updateError } = await supabase
+      .from("presencas")
+      .update({ status: "faltou", motivo })
+      .eq("turma_id", turmaId)
+      .eq("data", data)
+      .eq("aluno_id", aluno.id);
+    if (updateError) throw updateError;
+    if (movimentos.length === 0) return;
+    const { error } = await supabase.from("presencas").upsert(
+      movimentos.map((m) => ({
+        data,
+        turma_id: turmaId,
+        aluno_id: m.alunoId,
+        aluno_nome: m.alunoNome,
+        grupo_indice: m.grupoIndice,
+        status: "substituido" as const,
+        substituto_de_aluno_id: aluno.id,
+        grupo_indice_original: m.grupoOriginal,
+      })),
+      { onConflict: "data,turma_id,aluno_id" },
+    );
+    if (error) throw error;
+  } catch {
+    const primeiro = movimentos[0];
+    await marcarFalta(
+      turmaId,
+      data,
+      aluno,
+      grupoIndice,
+      primeiro ? { id: primeiro.alunoId, nome: primeiro.alunoNome } : null,
+      motivo,
+    );
+  }
+}
+
 /** Histórico de frequência num intervalo de datas (inclusive), opcionalmente filtrado por turma. */
 export async function fetchPresencasRange(
   inicio: string,
@@ -342,6 +409,29 @@ export async function desfazerFalta(turmaId: string, data: string, alunoId: stri
     .eq("aluno_id", alunoId)
     .eq("status", "faltou");
   if (e1) throw e1;
+  // Quem só tinha subido de grupo na cascata volta ao grupo de origem.
+  const { data: movidos, error: e3 } = await supabase
+    .from("presencas")
+    .select("aluno_id, grupo_indice_original")
+    .eq("turma_id", turmaId)
+    .eq("data", data)
+    .eq("substituto_de_aluno_id", alunoId)
+    .not("grupo_indice_original", "is", null);
+  if (e3) throw e3;
+  for (const m of movidos ?? []) {
+    const { error } = await supabase
+      .from("presencas")
+      .update({
+        status: "presente",
+        grupo_indice: m.grupo_indice_original,
+        substituto_de_aluno_id: null,
+        grupo_indice_original: null,
+      })
+      .eq("turma_id", turmaId)
+      .eq("data", data)
+      .eq("aluno_id", m.aluno_id);
+    if (error) throw error;
+  }
   const { error: e2 } = await supabase
     .from("presencas")
     .delete()
