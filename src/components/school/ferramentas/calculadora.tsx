@@ -31,7 +31,14 @@ function formatar(valor: number): string {
   return arredondado.toLocaleString("pt-BR", { maximumFractionDigits: 10 });
 }
 
-export function Calculadora({ compacta = false }: { compacta?: boolean } = {}) {
+export function Calculadora({
+  compacta = false,
+  moldura = true,
+}: {
+  compacta?: boolean;
+  /** Desligue quando quem chama já desenha a caixa (ex.: a janela flutuante). */
+  moldura?: boolean;
+} = {}) {
   const [visor, setVisor] = useState("0");
   const [acumulado, setAcumulado] = useState<number | null>(null);
   const [operador, setOperador] = useState<string | null>(null);
@@ -98,10 +105,13 @@ export function Calculadora({ compacta = false }: { compacta?: boolean } = {}) {
   return (
     <div
       className={cn(
-        "mx-auto flex flex-col rounded-2xl border border-border/60 bg-card shadow-sm",
-        // A versão compacta é usada onde a calculadora fica embutida numa
-        // página maior (Infoteca): ocupa bem menos altura sem perder o toque.
-        compacta ? "max-w-[15rem] gap-2 p-2.5" : "max-w-xs gap-3 p-4",
+        "mx-auto flex flex-col",
+        // A versão compacta é usada onde o espaço é curto (a janela
+        // flutuante): ocupa bem menos altura sem perder o toque.
+        compacta ? "max-w-[15rem] gap-2" : "max-w-xs gap-3",
+        moldura
+          ? cn("rounded-2xl border border-border/60 bg-card shadow-sm", compacta ? "p-2.5" : "p-4")
+          : null,
       )}
     >
       <div className={cn("rounded-xl bg-muted/60 text-right", compacta ? "px-3 py-2.5" : "px-4 py-6")}>
