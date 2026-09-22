@@ -418,12 +418,12 @@ function Index() {
         <CanalYoutubeSection />
 
         <section className="border-t border-border/60 bg-gradient-to-b from-muted/50 to-background">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 py-10 text-center sm:px-6">
-            <span className="flex size-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
-              <GraduationCap className="size-6" />
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-5 text-center sm:px-6">
+            <span className="flex size-9 items-center justify-center rounded-full bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-300">
+              <GraduationCap className="size-5" />
             </span>
-            <h2 className="text-xl font-semibold text-foreground">{config.nomeEscola}</h2>
-            <p className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-muted-foreground">
+            <h2 className="text-base font-semibold text-foreground">{config.nomeEscola}</h2>
+            <p className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-muted-foreground">
               <span className="font-medium text-foreground/80">INEP {config.inep}</span>
               <span aria-hidden className="text-border">
                 ·

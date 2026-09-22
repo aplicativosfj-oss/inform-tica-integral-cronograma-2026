@@ -11,7 +11,7 @@ const ANO_ATUAL = new Date().getFullYear();
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/60 bg-background">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-6 text-center sm:px-6">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-1.5 px-4 py-4 text-center sm:px-6">
         <p className="flex flex-wrap items-center justify-center gap-1.5 text-sm text-muted-foreground">
           <Code2 className="size-4 text-primary" />
           Desenvolvido por <span className="font-medium text-foreground">Franc D&apos;nis</span>
