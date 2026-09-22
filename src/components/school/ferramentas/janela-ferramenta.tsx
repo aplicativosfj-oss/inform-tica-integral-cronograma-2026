@@ -151,6 +151,9 @@ export function JanelaFerramenta({
   function iniciarArrasto(e: React.PointerEvent<HTMLDivElement>) {
     // Só o botão principal do mouse arrasta; toque e caneta entram aqui também.
     if (e.button !== 0 || !pos) return;
+    // O X fica dentro do cabeçalho: sem esta saída, a captura do ponteiro
+    // engole o clique e o botão de fechar não fecha nada.
+    if ((e.target as HTMLElement).closest("button")) return;
     e.preventDefault();
     pegada.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
     setArrastando(true);

@@ -1,4 +1,4 @@
-import { Equal, Minus, Plus, RotateCcw } from "lucide-react";
+import { Equal, Minus, Plus } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -400,16 +400,16 @@ export function FracoesEquivalentes() {
           <div
             key={f}
             className={cn(
-              "flex items-center gap-3 rounded-xl border p-2",
+              "flex items-center gap-3 rounded-xl border p-1.5",
               f === 1 ? "border-primary/50 bg-primary/5" : "border-border bg-muted/30",
             )}
           >
-            <div className="flex w-[116px] shrink-0 justify-center">
+            <div className="flex w-[92px] shrink-0 justify-center">
               <Figura
                 tipo={figura}
                 total={d * f}
                 pintadas={n * f}
-                tamanho={figura === "chocolate" ? 116 : figura === "litros" ? 64 : 84}
+                tamanho={figura === "chocolate" ? 92 : figura === "litros" ? 46 : 62}
               />
             </div>
             <FracaoEscrita n={n * f} d={d * f} />
@@ -436,18 +436,6 @@ export function FracoesEquivalentes() {
           Multiplicar o número de cima e o de baixo pelo mesmo número não muda o tanto.
         </p>
       </div>
-
-      <Button
-        variant="outline"
-        size="sm"
-        className="cursor-pointer self-center"
-        onClick={() => {
-          setN(1);
-          setD(2);
-        }}
-      >
-        <RotateCcw className="size-3.5" /> Começar de 1/2
-      </Button>
     </div>
   );
 }

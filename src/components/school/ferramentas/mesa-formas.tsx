@@ -208,7 +208,7 @@ export function MesaFormas() {
         <p className="mb-1.5 text-xs text-muted-foreground">
           Toque numa forma para colocar na mesa:
         </p>
-        <div className="grid grid-cols-6 gap-1.5">
+        <div className="grid grid-cols-9 gap-1">
           {FORMAS.map((f) => (
             <button
               key={f.id}
@@ -216,7 +216,7 @@ export function MesaFormas() {
               onClick={() => acrescentar(f.id)}
               title={f.nome}
               aria-label={`Colocar ${f.nome} na mesa`}
-              className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border border-border bg-muted/40 p-1 transition-colors hover:border-primary/60 hover:bg-primary/10"
+              className="flex aspect-square cursor-pointer items-center justify-center rounded-md border border-border bg-muted/40 p-0.5 transition-colors hover:border-primary/60 hover:bg-primary/10"
             >
               <svg viewBox="-52 -52 104 104" className="size-full">
                 {f.desenho(cor)}
