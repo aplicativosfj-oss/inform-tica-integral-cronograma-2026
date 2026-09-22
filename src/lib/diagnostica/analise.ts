@@ -309,3 +309,83 @@ function media(valores: number[]): number {
 
 export const pct = (v: number | null | undefined, casas = 0) =>
   v == null ? "—" : `${(v * 100).toFixed(casas)}%`;
+
+export interface Alfabetizacao {
+  ano: number;
+  turma: string;
+  /** Parte da turma com escrita alfabética na I e na II (0 a 1). */
+  i: number | null;
+  ii: number | null;
+  delta: number | null;
+}
+
+/**
+ * Alfabetização do 1º e do 2º ano — a única leitura que atravessa as duas
+ * aplicações nessas turmas, já que em Português elas não têm questões de
+ * acerto, e sim nível de escrita. Conta como alfabética a criança nos níveis
+ * A (alfabética com ortografia regular) e B (alfabética).
+ *
+ * Vale só até o 2º ano de propósito: da 3ª série em diante a mesma coluna
+ * `esc` deixa de ser psicogênese e passa a ser faixa de erro ortográfico
+ * (A sem erros, B de 1 a 4 erros…). Misturar as duas escalas compararia
+ * coisas diferentes e daria uma "queda" que não existe.
+ */
+export function alfabetizacao(provas: ProvaII[]): Alfabetizacao[] {
+  const saida: Alfabetizacao[] = [];
+  for (const t of DADOS_I.turmas) {
+    if (t.turno !== "INTEGRAL" || t.disc !== "LP" || t.ano > 2 || t.alfabeticos == null) continue;
+    const prova = provas.find((p) => p.ano === t.ano && p.turma === t.turma && p.disc === "LP");
+    const comNivel = prova?.alunos.filter((a) => a.esc) ?? [];
+    const ii =
+      comNivel.length > 0
+        ? comNivel.filter((a) => a.esc === "A" || a.esc === "B").length / comNivel.length
+        : null;
+    saida.push({
+      ano: t.ano,
+      turma: t.turma,
+      i: t.alfabeticos,
+      ii,
+      delta: ii != null ? ii - t.alfabeticos : null,
+    });
+  }
+  return saida.sort((a, b) => a.ano - b.ano || a.turma.localeCompare(b.turma));
+}
+
+export interface Ortografia {
+  ano: number;
+  turma: string;
+  /** Parte da turma que escreve com no máximo 4 erros de ortografia. */
+  i: number | null;
+  ii: number | null;
+  delta: number | null;
+}
+
+/**
+ * Ortografia do 3º ao 5º ano: parte da turma que escreveu o texto com no
+ * máximo quatro erros (faixas A e B da escala da SEME). É a leitura de
+ * escrita que existe nas duas aplicações para essas turmas.
+ */
+export function ortografiaComparada(provas: ProvaII[]): Ortografia[] {
+  const saida: Ortografia[] = [];
+  for (const t of DADOS_I.turmas) {
+    if (t.turno !== "INTEGRAL" || t.disc !== "LP" || t.ano < 3) continue;
+    const a = t.ortografia.A;
+    const b = t.ortografia.B;
+    const i = a == null && b == null ? null : (a ?? 0) + (b ?? 0);
+    const prova = provas.find((p) => p.ano === t.ano && p.turma === t.turma && p.disc === "LP");
+    const comNivel = prova?.alunos.filter((x) => x.esc) ?? [];
+    const ii =
+      comNivel.length > 0
+        ? comNivel.filter((x) => x.esc === "A" || x.esc === "B").length / comNivel.length
+        : null;
+    if (i == null && ii == null) continue;
+    saida.push({
+      ano: t.ano,
+      turma: t.turma,
+      i,
+      ii,
+      delta: i != null && ii != null ? ii - i : null,
+    });
+  }
+  return saida.sort((x, y) => x.ano - y.ano || x.turma.localeCompare(y.turma));
+}

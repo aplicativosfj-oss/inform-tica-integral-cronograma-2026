@@ -15,11 +15,10 @@ import { toast } from "sonner";
 import {
   BarrasHabilidades,
   FaixasEmpilhadas,
-  Haltere,
-  LegendaAplicacoes,
   ReguaRede,
   corDoAcerto,
 } from "@/components/school/diagnostica/graficos";
+import { PainelAvaliacoes } from "@/components/school/diagnostica/painel-avaliacoes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -109,15 +108,15 @@ export function PainelEvolucao({ publico = false }: { publico?: boolean }) {
 
       <Tabs defaultValue="geral">
         <TabsList className="print:hidden">
-          <TabsTrigger value="geral">Visão geral</TabsTrigger>
-          <TabsTrigger value="turmas">Turmas</TabsTrigger>
+          <TabsTrigger value="geral">Resumo</TabsTrigger>
+          <TabsTrigger value="turmas">Turmas em detalhe</TabsTrigger>
           <TabsTrigger value="habilidades">Habilidades</TabsTrigger>
           {!publico && <TabsTrigger value="alunos">Alunos</TabsTrigger>}
           {!publico && <TabsTrigger value="intervencao">Intervenção</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="geral" className="space-y-4">
-          <VisaoGeral analise={analise} />
+          {provas && <PainelAvaliacoes provas={provas} />}
         </TabsContent>
         <TabsContent value="turmas" className="space-y-4">
           <Turmas />
@@ -151,102 +150,6 @@ interface Analise {
   fortesII: ReturnType<typeof maisFortes>;
   perfis: ReturnType<typeof perfisDosAlunos>;
   grupos: ReturnType<typeof gruposDeIntervencao>;
-}
-
-function VisaoGeral({ analise }: { analise: Analise }) {
-  const evolucao = analise.evolucao;
-  const comparaveis = evolucao.filter((e) => e.delta != null);
-  const mediaDelta =
-    comparaveis.length > 0
-      ? comparaveis.reduce((s, e) => s + (e.delta ?? 0), 0) / comparaveis.length
-      : null;
-  const subiram = comparaveis.filter((e) => (e.delta ?? 0) > 0).length;
-  const desceram = comparaveis.filter((e) => (e.delta ?? 0) < 0).length;
-  const mediaI =
-    analise.i.length > 0 ? analise.i.reduce((s, d) => s + d.acerto, 0) / analise.i.length : 0;
-  const mediaII =
-    analise.ii.length > 0 ? analise.ii.reduce((s, d) => s + d.acerto, 0) / analise.ii.length : 0;
-
-  return (
-    <>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Indicador titulo="Acerto médio · I Avaliação" valor={pct(mediaI)} />
-        <Indicador
-          titulo="Acerto médio · II Avaliação"
-          valor={pct(mediaII)}
-          cor={corDoAcerto(mediaII)}
-        />
-        <Indicador
-          titulo="Evolução média das turmas"
-          valor={
-            mediaDelta == null
-              ? "—"
-              : `${mediaDelta >= 0 ? "+" : ""}${Math.round(mediaDelta * 100)} p.p.`
-          }
-          cor={mediaDelta != null && mediaDelta >= 0 ? "#10b981" : "#e11d48"}
-        />
-        <Indicador
-          titulo="Turmas que subiram"
-          valor={`${subiram} de ${comparaveis.length}`}
-          detalhe={`${desceram} caíram`}
-        />
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Da I para a II Avaliação, turma por turma</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Haltere
-            itens={evolucao.map((e) => ({
-              rotulo: `${nomeTurma(e.ano, e.turma)} ${e.disc}`,
-              i: e.i,
-              ii: e.ii,
-            }))}
-          />
-          <LegendaAplicacoes />
-          <p className="text-xs text-muted-foreground">
-            As duas aplicações são comparadas pelo <b>percentual de acerto nas questões</b>, que
-            existe igual nas duas. A &ldquo;média global&rdquo; da I usa pesos próprios da SEME e
-            aparece só na aba Turmas.
-          </p>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base text-emerald-600">
-              Pontos fortes (II Avaliação)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <BarrasHabilidades
-              itens={analise.fortesII.map((h) => ({
-                rotulo: h.texto,
-                valor: h.acerto,
-                detalhe: `${nomeTurma(h.ano, h.turma)} · ${NOME_DISC[h.disc]}`,
-              }))}
-            />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base text-rose-600">Pontos frágeis (II Avaliação)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <BarrasHabilidades
-              itens={analise.frageisII.map((h) => ({
-                rotulo: h.texto,
-                valor: h.acerto,
-                detalhe: `${nomeTurma(h.ano, h.turma)} · ${NOME_DISC[h.disc]} · ${h.erraram} alunos erraram`,
-              }))}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  );
 }
 
 function Turmas() {

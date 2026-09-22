@@ -11,127 +11,12 @@ import { cn } from "@/lib/utils";
  * cada marca para quem navega com leitor de tela.
  */
 
-const COR_I = "var(--color-amber-500, #f59e0b)";
-const COR_II = "var(--color-sky-500, #0ea5e9)";
-
 /** Escala de cor por faixa de acerto — mesma régua em todos os gráficos. */
 export function corDoAcerto(v: number): string {
   if (v < 0.3) return "#e11d48";
   if (v < 0.5) return "#f97316";
   if (v < 0.7) return "#eab308";
   return "#10b981";
-}
-
-/**
- * Gráfico "haltere": uma linha por turma ligando o resultado da I ao da II.
- * A distância entre as duas bolinhas é a evolução — o olho pega antes de
- * ler qualquer número.
- */
-export function Haltere({
-  itens,
-  className,
-}: {
-  itens: { rotulo: string; i: number | null; ii: number | null }[];
-  className?: string;
-}) {
-  const alturaLinha = 34;
-  const altura = itens.length * alturaLinha + 34;
-  const x0 = 96;
-  const largura = 640;
-  const esc = (v: number) => x0 + v * (largura - x0 - 56);
-
-  return (
-    <svg
-      viewBox={`0 0 ${largura} ${altura}`}
-      className={cn("w-full", className)}
-      role="img"
-      aria-label="Comparação entre a I e a II Avaliação Diagnóstica por turma"
-    >
-      {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-        <g key={t}>
-          <line
-            x1={esc(t)}
-            y1={22}
-            x2={esc(t)}
-            y2={altura - 12}
-            stroke="currentColor"
-            strokeOpacity={0.12}
-          />
-          <text
-            x={esc(t)}
-            y={14}
-            textAnchor="middle"
-            fontSize={11}
-            fill="currentColor"
-            opacity={0.6}
-          >
-            {pct(t)}
-          </text>
-        </g>
-      ))}
-      {itens.map((item, idx) => {
-        const y = 34 + idx * alturaLinha;
-        const a = item.i != null ? esc(item.i) : null;
-        const b = item.ii != null ? esc(item.ii) : null;
-        const subiu = item.i != null && item.ii != null && item.ii >= item.i;
-        return (
-          <g key={item.rotulo}>
-            <text x={0} y={y + 4} fontSize={12} fill="currentColor" fontWeight={600}>
-              {item.rotulo}
-            </text>
-            {a != null && b != null && (
-              <line
-                x1={a}
-                y1={y}
-                x2={b}
-                y2={y}
-                stroke={subiu ? "#10b981" : "#e11d48"}
-                strokeWidth={3}
-                strokeLinecap="round"
-                opacity={0.55}
-              />
-            )}
-            {a != null && (
-              <circle cx={a} cy={y} r={6} fill={COR_I}>
-                <title>{`I Avaliação: ${pct(item.i)}`}</title>
-              </circle>
-            )}
-            {b != null && (
-              <circle cx={b} cy={y} r={6} fill={COR_II}>
-                <title>{`II Avaliação: ${pct(item.ii)}`}</title>
-              </circle>
-            )}
-            {a != null && b != null && (
-              <text
-                x={Math.max(a, b) + 12}
-                y={y + 4}
-                fontSize={11}
-                fontWeight={700}
-                fill={subiu ? "#10b981" : "#e11d48"}
-              >
-                {`${item.ii! >= item.i! ? "+" : ""}${Math.round((item.ii! - item.i!) * 100)} p.p.`}
-              </text>
-            )}
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-/** Legenda das bolinhas do gráfico de haltere. */
-export function LegendaAplicacoes() {
-  return (
-    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-      <span className="inline-flex items-center gap-1.5">
-        <span className="size-3 rounded-full" style={{ background: COR_I }} /> I Avaliação
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <span className="size-3 rounded-full" style={{ background: COR_II }} /> II Avaliação
-      </span>
-      <span>p.p. = pontos percentuais de diferença</span>
-    </div>
-  );
 }
 
 /** Barras horizontais de acerto por habilidade, pintadas pela faixa. */
