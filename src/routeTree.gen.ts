@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AvaliacaoRouteImport } from './routes/avaliacao'
 import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
+import { Route as EvolucaoRouteImport } from './routes/evolucao'
 import { Route as InfotecaRouteImport } from './routes/infoteca'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SobreRouteImport } from './routes/sobre'
@@ -74,6 +75,11 @@ const AvaliacaoRoute = AvaliacaoRouteImport.update({
 const CoordenacaoRoute = CoordenacaoRouteImport.update({
   id: '/coordenacao',
   path: '/coordenacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EvolucaoRoute = EvolucaoRouteImport.update({
+  id: '/evolucao',
+  path: '/evolucao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InfotecaRoute = InfotecaRouteImport.update({
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/agenda': typeof AgendaRoute
   '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
+  '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/agenda': typeof AgendaRoute
   '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
+  '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
@@ -401,6 +409,7 @@ export interface FileRoutesById {
   '/agenda': typeof AgendaRoute
   '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
+  '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/sobre': typeof SobreRoute
@@ -451,6 +460,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/avaliacao'
     | '/coordenacao'
+    | '/evolucao'
     | '/infoteca'
     | '/login'
     | '/sobre'
@@ -499,6 +509,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/avaliacao'
     | '/coordenacao'
+    | '/evolucao'
     | '/infoteca'
     | '/login'
     | '/sobre'
@@ -547,6 +558,7 @@ export interface FileRouteTypes {
     | '/agenda'
     | '/avaliacao'
     | '/coordenacao'
+    | '/evolucao'
     | '/infoteca'
     | '/login'
     | '/sobre'
@@ -596,6 +608,7 @@ export interface RootRouteChildren {
   AgendaRoute: typeof AgendaRoute
   AvaliacaoRoute: typeof AvaliacaoRoute
   CoordenacaoRoute: typeof CoordenacaoRoute
+  EvolucaoRoute: typeof EvolucaoRoute
   InfotecaRoute: typeof InfotecaRoute
   LoginRoute: typeof LoginRoute
   SobreRoute: typeof SobreRoute
@@ -668,6 +681,13 @@ declare module '@tanstack/react-router' {
       path: '/coordenacao'
       fullPath: '/coordenacao'
       preLoaderRoute: typeof CoordenacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/evolucao': {
+      id: '/evolucao'
+      path: '/evolucao'
+      fullPath: '/evolucao'
+      preLoaderRoute: typeof EvolucaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/infoteca': {
@@ -972,6 +992,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgendaRoute: AgendaRoute,
   AvaliacaoRoute: AvaliacaoRoute,
   CoordenacaoRoute: CoordenacaoRoute,
+  EvolucaoRoute: EvolucaoRoute,
   InfotecaRoute: InfotecaRoute,
   LoginRoute: LoginRoute,
   SobreRoute: SobreRoute,

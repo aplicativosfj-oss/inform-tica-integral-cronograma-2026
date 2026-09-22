@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   Presentation,
+  TrendingUp,
   Puzzle,
   type LucideIcon,
 } from "lucide-react";
@@ -69,6 +70,7 @@ const LINKS = [
   { to: "/coordenacao", label: "Coordenação" },
   { to: "/infoteca", label: "Infoteca" },
   { to: "/avaliacao", label: "Avaliação" },
+  { to: "/evolucao", label: "Evolução" },
   { to: "/aluno", label: "Área do Aluno" },
   { to: "/professor", label: "Professor" },
   { to: "/mediador", label: "Mediadores" },
@@ -81,6 +83,7 @@ const LINK_ICONS: Record<string, LucideIcon> = {
   "/coordenacao": ClipboardList,
   "/infoteca": Puzzle,
   "/avaliacao": BarChart3,
+  "/evolucao": TrendingUp,
   "/aluno": GraduationCap,
   "/professor": Presentation,
   "/mediador": HandHeart,
@@ -218,6 +221,7 @@ export function NavBar() {
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/infoteca" label="Infoteca" />
           <NavLink to="/avaliacao" label="Avaliação" />
+          <NavLink to="/evolucao" label="Evolução" />
           <NavLink to="/aluno" label="Área do Aluno" />
           <NavLink to="/professor" label="Professor" />
           <NavLink to="/mediador" label="Mediadores" />
