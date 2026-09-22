@@ -5,7 +5,7 @@
 :root{
  --bg:#F4F6F3;--surface:#FFFFFF;--surface2:#EEF2F0;--ink:#13232F;--mut:#586878;--line:#DDE4E0;
  --pri:#1F4E79;--pri2:#DCE8F3;--chalk:#F2B632;--chalk2:#FFF3D1;
- --ot:#17744A;--bo:#4A7A26;--re:#A35A00;--in:#B3344A;--tagp:62%;--na:#CBD3CF;
+ --ot:#15803D;--bo:#2563EB;--re:#D97706;--in:#DC2626;--tagp:62%;--na:#CBD3CF;
  --shadow:0 1px 2px rgba(19,35,47,.06),0 8px 24px -12px rgba(19,35,47,.18);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tagp:38%;--bg:#0E171E;--surface:#16222B;--surface2:#1C2A35;--ink:#E7EEF2;--mut:#9AAAB6;--line:#26363F;--pri:#8CB8E4;--pri2:#1D3246;--chalk:#F5C451;--chalk2:#3A3018;--na:#34424B;--shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6)}}
@@ -21,7 +21,6 @@ p{margin:0}
 :root:not([data-theme="light"]) .top{background:var(--pri)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .top{background:#12304B}}
 :root[data-theme="dark"] .top{background:#12304B}
-.top::after{content:"";position:absolute;inset:auto -10% -60% 45%;height:260px;background:radial-gradient(closest-side,rgba(242,182,50,.35),transparent);pointer-events:none}
 .top .eyebrow{font:700 12px/1 "Nunito Sans";letter-spacing:.14em;text-transform:uppercase;color:#FFD877}
 .top h1{font-size:clamp(20px,2.6vw,28px);font-weight:800;margin-top:6px;max-width:40ch}
 .top p.lead{color:#D6E4F1;margin-top:4px;max-width:80ch;font-size:14px}
@@ -280,10 +279,11 @@ V.resumo=()=>{
    <h2>Em média, os alunos acertaram <span class="hl">${pct(escola)}</span> das questões</h2>
    <p class="sub">Em ${pct(bom)} das provas o aluno ficou nas faixas <b>Bom</b> ou <b>Ótimo</b>. ${atenc} alunos precisam de atenção especial (média abaixo de 40%).</p></div>
   </div>
-  <div class="card" style="display:grid;gap:14px">
+  <div class="card" style="display:grid;gap:16px">
    <div class="label">Por área do conhecimento</div>
-   ${DS.map(d=>`<div style="display:grid;grid-template-columns:120px 1fr 48px;gap:12px;align-items:center"><b>${DN[d]}</b><div style="display:grid;gap:5px">${bar(discM(d))}${distBar(discDist(d))}</div><b style="text-align:right">${pct(discM(d))}</b></div>`).join("")}
-   <p class="xs mut">A barra de cima é a média de acertos; a de baixo mostra quantos alunos estão em cada faixa (cores abaixo).</p>
+   ${hbars(DS.map(d=>({l:DN[d],v:discM(d)})),{lw:120})}
+   <div style="display:grid;gap:8px">${DS.map(d=>{const c=discDist(d);return `<div class="row" style="gap:6px;flex-wrap:wrap"><span class="sm" style="min-width:110px;font-weight:700">${DN[d]}</span>${["OT","BO","RE","IN"].map(k=>c[k]?`<span class="tag f-${k}">${c[k]} ${F[k].p}</span>`:"").join("")}</div>`}).join("")}</div>
+   <p class="xs mut">A barra mostra a média de acertos da escola em cada área; os selos ao lado indicam quantos alunos estão em cada faixa.</p>
   </div>
  </section>
  <section class="card flat" style="display:grid;gap:12px"><div class="label">O que significa cada cor</div><div class="scale">${["OT","BO","RE","IN"].map(k=>`<div class="f-${k}"><b>${F[k].p}</b><span class="sm mut">${F[k].d}</span></div>`).join("")}</div></section>
