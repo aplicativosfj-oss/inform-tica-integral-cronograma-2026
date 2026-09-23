@@ -39,8 +39,6 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-import cadernoMesa from "@/assets/caderno-mesa.webp";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -324,25 +322,47 @@ export function EditorTexto() {
   }
 
   /**
-   * `execCommand("fontSize")` só aceita os números 1-7 (a escala antiga do
-   * HTML), não um tamanho em pixels de verdade. O truque padrão é aplicar o
-   * tamanho "7" (o maior da escala) e depois trocar a tag <font size="7">
-   * gerada por um <span style="font-size:...px">, que aceita qualquer valor.
+   * `execCommand("fontSize")` já foi usado aqui (aplicando o tamanho "7" da
+   * escala antiga do HTML e trocando a tag `<font size="7">` gerada por um
+   * `<span style="font-size:...px">`). O problema é que o `execCommand`
+   * decide sozinho onde por a tag: quando a seleção fica dentro de um trecho
+   * que já tinha outro tamanho — como um emoji sozinho no meio do texto —,
+   * o Chrome costuma "arredondar" a marcação para o `<span>` inteiro que já
+   * existia ali, aumentando ou diminuindo o texto vizinho junto com o que
+   * foi selecionado. Envolver a própria seleção (via `Range`) num `<span>`
+   * novo é preciso: só o que está selecionado — nem mais, nem menos — ganha
+   * o tamanho escolhido.
    */
   function aplicarTamanhoFonte(tamanhoPx: string) {
-    areaRef.current?.focus();
+    const area = areaRef.current;
+    area?.focus();
     const selecao = window.getSelection();
     if (selecao && selecaoSalvaRef.current) {
       selecao.removeAllRanges();
       selecao.addRange(selecaoSalvaRef.current);
     }
-    document.execCommand("fontSize", false, "7");
-    areaRef.current?.querySelectorAll('font[size="7"]').forEach((el) => {
-      const span = document.createElement("span");
-      span.style.fontSize = `${tamanhoPx}px`;
-      while (el.firstChild) span.appendChild(el.firstChild);
-      el.replaceWith(span);
-    });
+    if (!area || !selecao || selecao.rangeCount === 0 || selecao.isCollapsed) return;
+
+    const intervalo = selecao.getRangeAt(0);
+    if (!area.contains(intervalo.commonAncestorContainer)) return;
+
+    const span = document.createElement("span");
+    span.style.fontSize = `${tamanhoPx}px`;
+    try {
+      // Funciona quando a seleção não atravessa a borda de outro elemento.
+      intervalo.surroundContents(span);
+    } catch {
+      // Seleção espalhada por mais de um elemento (ex.: metade em negrito,
+      // metade não): extrai o conteúdo selecionado e o envolve à parte.
+      span.appendChild(intervalo.extractContents());
+      intervalo.insertNode(span);
+    }
+
+    const novoIntervalo = document.createRange();
+    novoIntervalo.selectNodeContents(span);
+    selecao.removeAllRanges();
+    selecao.addRange(novoIntervalo);
+
     salvarSelecaoAtual();
     salvarRascunhoLocal();
     atualizarContagem();
@@ -561,6 +581,53 @@ export function EditorTexto() {
     setSujo(true);
   }
 
+  /**
+   * Clique no vazio da folha, abaixo do texto: num `contenteditable` o
+   * cursor pularia para o fim da última linha escrita. Numa folha de
+   * caderno isso frustra — a pessoa mira a quinta linha e escreve na
+   * primeira. Aqui a folha ganha linhas em branco até a altura clicada e o
+   * cursor fica onde o dedo encostou.
+   */
+  function escreverOndeClicou(e: ReactMouseEvent<HTMLDivElement>): boolean {
+    const area = areaRef.current;
+    if (!area || e.target !== area) return false;
+
+    const estilo = window.getComputedStyle(area);
+    const passo = parseFloat(estilo.lineHeight);
+    if (!Number.isFinite(passo) || passo <= 0) return false;
+
+    // Onde o conteúdo termina hoje, em coordenadas da folha.
+    const caixa = area.getBoundingClientRect();
+    const ultimo = area.lastElementChild as HTMLElement | null;
+    const fimDoTexto = ultimo
+      ? ultimo.getBoundingClientRect().bottom - caixa.top
+      : parseFloat(estilo.paddingTop);
+    const clique = e.clientY - caixa.top;
+    const faltam = Math.floor((clique - fimDoTexto) / passo);
+    if (faltam < 0) return false;
+
+    for (let i = 0; i <= faltam; i += 1) {
+      const linha = document.createElement("p");
+      linha.appendChild(document.createElement("br"));
+      area.appendChild(linha);
+    }
+
+    const alvo = area.lastElementChild;
+    if (alvo) {
+      const intervalo = document.createRange();
+      intervalo.setStart(alvo, 0);
+      intervalo.collapse(true);
+      const selecao = window.getSelection();
+      selecao?.removeAllRanges();
+      selecao?.addRange(intervalo);
+      area.focus();
+      salvarSelecaoAtual();
+    }
+    salvarRascunhoLocal();
+    setSujo(true);
+    return true;
+  }
+
   /** Clique dentro da folha: seleciona/deseleciona imagem ou apaga um item. */
   function aoClicarNaArea(e: ReactMouseEvent<HTMLDivElement>) {
     const alvo = e.target as HTMLElement;
@@ -589,9 +656,10 @@ export function EditorTexto() {
     const wrap = alvo.closest<HTMLElement>(".editor-img-wrap");
     if (wrap) {
       selecionarImagem(wrap);
-    } else if (imagemSelecionada) {
-      desselecionarImagem();
+      return;
     }
+    if (imagemSelecionada) desselecionarImagem();
+    escreverOndeClicou(e);
   }
 
   /** Cursor da folha inteira — vira a cruz enquanto a imagem está sendo arrastada. */
@@ -1508,21 +1576,10 @@ export function EditorTexto() {
           tema escuro a mesa era quase preta (zinc-900) e, em volta da folha
           branca, virava uma moldura preta forte em torno da página — aqui
           ela é só um véu claro sobre o fundo da própria página. */}
-        <div
-          className={cn(
-            "relative overflow-hidden rounded-lg p-4 sm:p-8",
-            papel === "pautado" ? "bg-cover bg-center" : "bg-[#e7e5e2] dark:bg-white/5",
-          )}
-          style={papel === "pautado" ? { backgroundImage: `url(${cadernoMesa})` } : undefined}
-        >
-          {/* Véu sobre a foto: sem ele, a mesa de madeira e a planta disputam
-            atenção com o texto e o contraste da folha cai. */}
-          {papel === "pautado" && (
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-slate-950/45 backdrop-blur-[1px]"
-            />
-          )}
+        {/* A foto do caderno saiu daqui: numa folha longa ela repetia, e o
+          que interessa é a página pautada, não a mesa em volta. Fica só uma
+          superfície neutra, como a mesa cinza do modo folha lisa. */}
+        <div className="relative rounded-lg bg-[#e7e5e2] p-4 dark:bg-white/5 sm:p-8">
           <div
             ref={areaRef}
             contentEditable
