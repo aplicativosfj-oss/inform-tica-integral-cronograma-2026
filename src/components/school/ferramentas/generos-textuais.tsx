@@ -11,6 +11,35 @@ import {
 import { MolduraExemplo } from "@/components/school/ferramentas/generos-molduras";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import bannerMuseu from "@/assets/generos/museu-banner.webp";
+import figBilhete from "@/assets/generos/bilhete.webp";
+import figCarta from "@/assets/generos/carta.webp";
+import figConvite from "@/assets/generos/convite.webp";
+import figDiario from "@/assets/generos/diario.webp";
+import figEmail from "@/assets/generos/email.webp";
+import figLista from "@/assets/generos/lista.webp";
+import figMensagem from "@/assets/generos/mensagem.webp";
+import figRecado from "@/assets/generos/recado.webp";
+import figSms from "@/assets/generos/sms.webp";
+
+/**
+ * Ilustração de cada gênero. Por enquanto só os nove do "dia a dia" têm
+ * quadro próprio — os outros 24 seguem com o emoji, que continua sendo a
+ * identidade deles na ficha e no jogo. Quando chegarem as ilustrações dos
+ * demais, é só acrescentar a chave aqui: a galeria já cai no quadro quando
+ * existe e no emoji quando não existe.
+ */
+const FIGURA: Record<string, string> = {
+  bilhete: figBilhete,
+  recado: figRecado,
+  carta: figCarta,
+  mensagem: figMensagem,
+  sms: figSms,
+  email: figEmail,
+  lista: figLista,
+  convite: figConvite,
+  diario: figDiario,
+};
 
 /**
  * Museu dos gêneros textuais, com duas portas:
@@ -46,9 +75,23 @@ function Ficha({ genero, aoVoltar }: { genero: GeneroTexto; aoVoltar: () => void
         <ArrowLeft className="size-3.5" /> todos os gêneros
       </button>
 
+      {FIGURA[genero.id] ? (
+        <img
+          src={FIGURA[genero.id]}
+          alt=""
+          width={320}
+          height={185}
+          className="w-full rounded-xl border border-border object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : null}
+
       <div>
         <p className="text-sm font-bold text-foreground">
-          <span aria-hidden>{genero.emoji}</span> {genero.nome}
+          {/* Com o quadro logo acima, o emoji só repetiria o assunto. */}
+          {FIGURA[genero.id] ? null : <span aria-hidden>{genero.emoji} </span>}
+          {genero.nome}
         </p>
         <p className="text-[11px] leading-tight text-muted-foreground">
           {genero.paraQue} <b>Onde aparece:</b> {genero.ondeAparece}
@@ -196,6 +239,17 @@ export function GenerosTextuais() {
 
   return (
     <div className="flex flex-col gap-2">
+      {/* A fachada do museu abre a ferramenta: é o que diz, sem texto, que
+        ali dentro tem uma coleção para folhear. */}
+      <img
+        src={bannerMuseu}
+        alt=""
+        width={720}
+        height={290}
+        className="w-full rounded-xl border border-border object-cover"
+        loading="eager"
+        decoding="async"
+      />
       <div className="flex gap-1 rounded-lg bg-muted/60 p-1">
         {(
           [
@@ -251,12 +305,28 @@ export function GenerosTextuais() {
                 key={g.id}
                 type="button"
                 onClick={() => setAberto(g)}
-                className="flex cursor-pointer flex-col gap-0.5 rounded-xl border border-border bg-background p-2 text-left transition-colors hover:border-primary/60 hover:bg-primary/5"
+                className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-colors hover:border-primary/60 hover:bg-primary/5"
               >
-                <span className="text-xs font-semibold text-foreground">
-                  <span aria-hidden>{g.emoji}</span> {g.nome}
+                {FIGURA[g.id] ? (
+                  <img
+                    src={FIGURA[g.id]}
+                    alt=""
+                    width={320}
+                    height={185}
+                    className="w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : null}
+                <span className="flex flex-col gap-0.5 p-2">
+                  <span className="text-xs font-semibold text-foreground">
+                    {FIGURA[g.id] ? null : <span aria-hidden>{g.emoji} </span>}
+                    {g.nome}
+                  </span>
+                  <span className="text-[10px] leading-tight text-muted-foreground">
+                    {g.paraQue}
+                  </span>
                 </span>
-                <span className="text-[10px] leading-tight text-muted-foreground">{g.paraQue}</span>
               </button>
             ))}
           </div>
