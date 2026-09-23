@@ -268,40 +268,40 @@ export function NavBar() {
   // sem competir com a atividade.
   if (location.pathname !== "/") {
     return (
-      <header className="sticky top-0 z-40 flex h-11 shrink-0 items-center gap-1 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 px-2 text-slate-900 shadow-sm backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white sm:px-3">
+      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-1.5 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 px-2 text-slate-900 shadow-sm backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white sm:px-3">
         <Button
           variant="ghost"
           size="icon"
           aria-label="Voltar"
           onClick={() => window.history.back()}
-          className="size-8 text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+          className="size-10 text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white [&_svg]:size-5"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft />
         </Button>
         <Button
           variant="ghost"
           size="icon"
           aria-label="Avançar"
           onClick={() => window.history.forward()}
-          className="size-8 text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+          className="size-10 text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white [&_svg]:size-5"
         >
-          <ArrowRight className="size-4" />
+          <ArrowRight />
         </Button>
-        <span className="mx-0.5 h-5 w-px bg-slate-900/15 dark:bg-white/15" />
+        <span className="mx-1 h-6 w-px bg-slate-900/15 dark:bg-white/15" />
         <Button
           asChild
           variant="ghost"
           size="sm"
-          className="h-8 gap-1.5 px-2 text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+          className="h-10 gap-2 px-3 text-base text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
         >
           <Link to="/">
             <img
               src={logoIcon}
               alt=""
               aria-hidden
-              className="size-5 shrink-0 rounded bg-slate-100 object-contain p-0.5 dark:bg-white"
+              className="size-6 shrink-0 rounded bg-slate-100 object-contain p-0.5 dark:bg-white"
             />
-            <span className="hidden sm:inline">Início</span>
+            <span className="hidden font-medium sm:inline">Início</span>
           </Link>
         </Button>
       </header>
