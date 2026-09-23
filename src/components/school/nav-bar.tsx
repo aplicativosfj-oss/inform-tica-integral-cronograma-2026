@@ -192,7 +192,13 @@ export function NavBar() {
     }
 
     return (
-      <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-background/75 dark:text-white dark:shadow-black/20">
+      <header className="relative sticky top-0 z-40 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 text-slate-900 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white dark:shadow-black/40">
+        {/* Filete da marca rente à base: é o que separa a barra do
+          conteúdo sem precisar escurecer o cabeçalho inteiro. */}
+        <span
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 dark:from-blue-500 dark:via-cyan-400 dark:to-blue-500"
+        />
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:h-14 sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
             <img
@@ -254,7 +260,13 @@ export function NavBar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/30 bg-slate-50/85 text-slate-900 shadow-md shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-background/75 dark:text-white dark:shadow-black/20">
+    <header className="relative sticky top-0 z-40 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 text-slate-900 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white dark:shadow-black/40">
+      {/* Filete da marca rente à base: é o que separa a barra do
+          conteúdo sem precisar escurecer o cabeçalho inteiro. */}
+      <span
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 dark:from-blue-500 dark:via-cyan-400 dark:to-blue-500"
+      />
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-3 sm:gap-4 sm:px-6">
         <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
           <img
