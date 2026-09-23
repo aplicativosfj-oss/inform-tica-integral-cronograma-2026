@@ -11,6 +11,7 @@ import { Quiz, type Questao } from "@/components/school/ferramentas/quiz";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { falar } from "@/lib/voz";
 import { cn } from "@/lib/utils";
 
 /** Embaralha as opções mantendo a resposta certa — no banco ela fica sempre na 1ª posição. */
@@ -25,13 +26,11 @@ function embaralhar(questoes: Questao[]): Questao[] {
   });
 }
 
+// A leitura usa a mesma escolha de voz do resto da alfabetização (ver
+// lib/voz.ts): sem isso, esta tela caía na voz padrão do sistema — em geral
+// a mais robótica das instaladas — em vez da voz mais natural disponível.
 function ouvir(linhas: string[]) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const fala = new SpeechSynthesisUtterance(linhas.join(" "));
-  fala.lang = "pt-BR";
-  fala.rate = 0.85;
-  window.speechSynthesis.speak(fala);
+  falar(linhas.join(" "));
 }
 
 function Secao({

@@ -4,7 +4,8 @@
  * Usa a síntese de fala do próprio navegador (Web Speech API): não precisa
  * baixar áudio nenhum, funciona sem internet depois que a voz do sistema
  * está instalada e fala qualquer palavra — inclusive as que a criança
- * monta. Gravar 70 arquivos de áudio resolveria só as 70 palavras previstas.
+ * monta. Gravar dezenas de arquivos de áudio resolveria só as palavras
+ * previstas, e não a que o aluno digitar.
  *
  * Quando o computador não tem voz em português, nada quebra: a ferramenta
  * simplesmente não fala, e todos os jogos continuam jogáveis sem som.
@@ -13,15 +14,51 @@
 let vozPt: SpeechSynthesisVoice | null = null;
 let procurou = false;
 
+/**
+ * Nem toda voz "pt-BR" instalada soa bem: o Windows, por exemplo, costuma
+ * trazer vozes robóticas antigas (Maria, Helena) junto com vozes muito mais
+ * naturais (as "Online (Natural)" do Edge, ou as do Google no Chrome). Sem
+ * escolher a dedo, o navegador pode pegar a pior — e é isso que deixava a
+ * leitura de letra e sílaba com aquele som "feio". A pontuação abaixo
+ * favorece as vozes conhecidas por soar mais natural; o nome de cada voz
+ * varia por navegador/SO, então a lista cobre os termos mais comuns.
+ */
+const PISTAS_VOZ_BOA = [
+  "natural",
+  "neural",
+  "online",
+  "google",
+  "francisca",
+  "luciana",
+  "fernanda",
+  "thalita",
+  "multilingual",
+];
+
+function pontuarVoz(v: SpeechSynthesisVoice): number {
+  const lang = v.lang.toLowerCase();
+  const nome = v.name.toLowerCase();
+  let pontos = 0;
+  if (lang.startsWith("pt-br")) pontos += 10;
+  else if (lang.startsWith("pt")) pontos += 5;
+  else return -1;
+  if (PISTAS_VOZ_BOA.some((pista) => nome.includes(pista))) pontos += 5;
+  // Vozes "não locais" (a maioria das de nuvem, tipo Google/Microsoft
+  // Online) tendem a soar bem mais naturais que a voz local do sistema.
+  if (!v.localService) pontos += 2;
+  return pontos;
+}
+
 function escolherVoz(): SpeechSynthesisVoice | null {
   if (procurou) return vozPt;
   procurou = true;
   try {
     const vozes = window.speechSynthesis.getVoices();
-    vozPt =
-      vozes.find((v) => v.lang.toLowerCase().startsWith("pt-br")) ??
-      vozes.find((v) => v.lang.toLowerCase().startsWith("pt")) ??
-      null;
+    const candidatas = vozes
+      .map((v) => ({ v, pontos: pontuarVoz(v) }))
+      .filter((c) => c.pontos >= 0)
+      .sort((a, b) => b.pontos - a.pontos);
+    vozPt = candidatas[0]?.v ?? null;
   } catch {
     vozPt = null;
   }
@@ -42,10 +79,31 @@ export function falar(texto: string, devagar = false): void {
     window.speechSynthesis.cancel();
     const fala = new SpeechSynthesisUtterance(texto);
     const voz = escolherVoz();
-    if (voz) fala.voice = voz;
-    fala.lang = "pt-BR";
-    fala.rate = devagar ? 0.6 : 0.9;
-    fala.pitch = 1.1;
+    if (voz) {
+      fala.voice = voz;
+      fala.lang = voz.lang;
+    } else {
+      fala.lang = "pt-BR";
+    }
+    // Devagar demais (0.6) soava arrastado e robótico nas vozes boas; 0.72
+    // ainda dá pra criança acompanhar sílaba por sílaba sem esticar o som.
+    fala.rate = devagar ? 0.72 : 0.95;
+    // Pitch alterado (1.1) deixava a voz com um tom fino/artificial por
+    // cima da voz natural do sistema — 1 é o tom original da própria voz.
+    fala.pitch = 1;
+    // Se a voz escolhida falhar (ex.: precisa de internet e ela caiu), cai
+    // para a voz padrão do navegador em vez de ficar muda.
+    fala.onerror = () => {
+      if (!voz) return;
+      try {
+        const tentativa = new SpeechSynthesisUtterance(texto);
+        tentativa.lang = "pt-BR";
+        tentativa.rate = fala.rate;
+        window.speechSynthesis.speak(tentativa);
+      } catch {
+        // idem: segue mudo.
+      }
+    };
     window.speechSynthesis.speak(fala);
   } catch {
     // Sem voz instalada ou bloqueada: o jogo segue mudo.
