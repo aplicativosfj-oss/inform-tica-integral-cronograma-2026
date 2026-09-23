@@ -3,7 +3,9 @@ import {
   Boxes,
   Equal,
   Gamepad2,
+  Grid3x3,
   Lightbulb,
+  PenLine,
   Percent,
   PieChart,
   PuzzleIcon,
@@ -35,6 +37,11 @@ import { CREDITO } from "@/components/school/ferramentas/credito";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
 import { ParqueLetras } from "@/components/school/ferramentas/parque-letras";
 import { SalaDeJogos } from "@/components/school/jogos/sala-de-jogos";
+import {
+  CompletarTabuada,
+  MemoriaTabuada,
+  TabuadaIlustrada,
+} from "@/components/school/ferramentas/tabuada-treino";
 import { DiaADia } from "@/components/school/ferramentas/dia-a-dia";
 import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
 import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
@@ -151,6 +158,57 @@ export function DiaADiaJanela() {
       cor="bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
     >
       <DiaADia />
+    </JanelaFerramenta>
+  );
+}
+
+export function TabuadaIlustradaJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Tabuada ilustrada"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Tabuada ilustrada"
+      iconeBotao={Grid3x3}
+      cor="bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300"
+    >
+      <TabuadaIlustrada />
+    </JanelaFerramenta>
+  );
+}
+
+export function CompletarTabuadaJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Complete a tabuada"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Complete a tabuada"
+      iconeBotao={PenLine}
+      cor="bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300"
+    >
+      <CompletarTabuada />
+    </JanelaFerramenta>
+  );
+}
+
+export function MemoriaTabuadaJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Memória da tabuada"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Memória da tabuada"
+      iconeBotao={Dices}
+      cor="bg-teal-500/10 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300"
+    >
+      <MemoriaTabuada />
     </JanelaFerramenta>
   );
 }

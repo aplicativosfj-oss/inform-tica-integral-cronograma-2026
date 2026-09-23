@@ -13,6 +13,7 @@ import {
   Hash,
   Equal,
   Gamepad2,
+  Grid3x3,
   Landmark,
   Lightbulb,
   type LucideIcon,
@@ -41,6 +42,7 @@ import { CalculadoraJanela } from "@/components/school/ferramentas/calculadora-f
 import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemorativas";
 import {
   CompararFracoesJanela,
+  CompletarTabuadaJanela,
   ConversorMedidasJanela,
   DiaADiaJanela,
   FracaoNaMesaJanela,
@@ -48,6 +50,7 @@ import {
   JogoNumerosJanela,
   JogoOperacoesJanela,
   MedidasMundoJanela,
+  MemoriaTabuadaJanela,
   MesaFormasJanela,
   ParqueLetrasJanela,
   PorcentagemJanela,
@@ -55,6 +58,7 @@ import {
   ProblemasInteligentesJanela,
   ProducaoTextualJanela,
   SalaDeJogosJanela,
+  TabuadaIlustradaJanela,
   ValorPosicionalJanela,
 } from "@/components/school/ferramentas/janelas-manipular";
 import { EditorTexto } from "@/components/school/ferramentas/editor-texto";
@@ -169,6 +173,36 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: Lightbulb,
     cor: "bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
     Componente: DiaADiaJanela,
+  },
+  {
+    slug: "tabuada-ilustrada",
+    serieMinima: 2,
+    titulo: "Tabuada ilustrada",
+    descricao: "Veja cada conta em bolinhas e aprenda os truques de cada tabuada.",
+    categoria: "Matemática",
+    icon: Grid3x3,
+    cor: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/20 dark:text-rose-300",
+    Componente: TabuadaIlustradaJanela,
+  },
+  {
+    slug: "completar-tabuada",
+    serieMinima: 2,
+    titulo: "Complete a tabuada",
+    descricao: "Descubra o resultado, o número que falta ou a divisão, com dicas quando errar.",
+    categoria: "Matemática",
+    icon: PenLine,
+    cor: "bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300",
+    Componente: CompletarTabuadaJanela,
+  },
+  {
+    slug: "memoria-tabuada",
+    serieMinima: 2,
+    titulo: "Memória da tabuada",
+    descricao: "Jogo da memória: junte cada conta ao seu resultado.",
+    categoria: "Matemática",
+    icon: Dices,
+    cor: "bg-teal-500/10 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300",
+    Componente: MemoriaTabuadaJanela,
   },
   {
     slug: "desafio-operacoes",

@@ -172,13 +172,13 @@ export function gerarPergunta(nivel: Nivel): Pergunta {
   } else if (op === "×") {
     // Nas faixas grandes, um dos fatores continua pequeno: senão viraria
     // conta de papel, não de cabeça.
-    a = max > 100 ? sorteio(2, 20) : sorteio(min, max);
-    b = sorteio(2, max > 100 ? 12 : max);
+    a = max > 100 ? sorteio(2, 20) : sorteio(Math.min(min, 12), Math.min(max, 12));
+    b = sorteio(2, max > 100 ? 12 : Math.min(max, 12));
     resposta = a * b;
   } else {
     // Monta a divisão a partir da multiplicação: assim ela é sempre exata.
-    b = sorteio(2, max > 100 ? 12 : max);
-    resposta = sorteio(2, max > 100 ? 20 : max);
+    b = sorteio(2, max > 100 ? 12 : Math.min(max, 12));
+    resposta = sorteio(2, max > 100 ? 20 : Math.min(max, 12));
     a = b * resposta;
   }
 
@@ -252,8 +252,26 @@ function Medalha({ acertos, total }: { acertos: number; total: number }) {
 
 type Fase = "escolha" | "jogando" | "fim";
 
+type FiltroOp = "todas" | Op;
+
+const FILTROS: { id: FiltroOp; nome: string; cor: string }[] = [
+  { id: "todas", nome: "Como o nível pede", cor: "#6366f1" },
+  { id: "+", nome: "➕ Só soma", cor: "#10b981" },
+  { id: "−", nome: "➖ Só subtração", cor: "#f97316" },
+  { id: "×", nome: "✖️ Só multiplicação", cor: "#a855f7" },
+  { id: "÷", nome: "➗ Só divisão", cor: "#0ea5e9" },
+];
+
+const NOME_OP: Record<Op, string> = {
+  "+": "soma",
+  "−": "subtração",
+  "×": "multiplicação",
+  "÷": "divisão",
+};
+
 export function JogoOperacoes() {
   const [fase, setFase] = useState<Fase>("escolha");
+  const [filtro, setFiltro] = useState<FiltroOp>("todas");
   const [nivel, setNivel] = useState<Nivel>(NIVEIS[0]!);
   const [pergunta, setPergunta] = useState<Pergunta | null>(null);
   const [indice, setIndice] = useState(0);
@@ -284,7 +302,16 @@ export function JogoOperacoes() {
     setRestante(n.tempo);
   }, []);
 
-  function comecar(n: Nivel) {
+  function comecar(base: Nivel) {
+    // Escolher uma operação treina só ela, na faixa de números do nível.
+    const n: Nivel =
+      filtro === "todas"
+        ? base
+        : {
+            ...base,
+            ops: [filtro],
+            nome: `${base.nome} · só ${NOME_OP[filtro]}`,
+          };
     setNivel(n);
     setFase("jogando");
     setIndice(0);
@@ -386,6 +413,28 @@ export function JogoOperacoes() {
             pontos.
           </p>
         </div>
+        <div>
+          <p className="mb-1.5 text-xs font-semibold text-foreground">
+            Qual operação você quer treinar?
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {FILTROS.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                aria-pressed={filtro === f.id}
+                onClick={() => setFiltro(f.id)}
+                style={filtro === f.id ? { backgroundColor: f.cor } : { borderColor: f.cor }}
+                className={cn(
+                  "cursor-pointer rounded-full border-2 px-3 py-1 text-xs font-semibold transition-transform hover:scale-105",
+                  filtro === f.id ? "border-transparent text-white" : "text-foreground",
+                )}
+              >
+                {f.nome}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-col gap-2">
           {NIVEIS.map((n) => (
             <button
@@ -399,7 +448,11 @@ export function JogoOperacoes() {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-medium text-foreground">{n.nome}</span>
-                <span className="block text-xs text-muted-foreground">{n.descricao}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {filtro === "todas"
+                    ? n.descricao
+                    : `Só ${NOME_OP[filtro]}, com os números deste nível`}
+                </span>
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">{n.tempo}s</span>
               <Play className="size-4 shrink-0 text-primary" />
