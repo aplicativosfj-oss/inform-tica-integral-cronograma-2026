@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BarChart3,
   CalendarDays,
-  ChevronDown,
   ChevronRight,
   Compass,
   ClipboardList,
@@ -25,12 +24,6 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetClose,
@@ -80,54 +73,26 @@ function NavLink({ to, label }: { to: string; label: string }) {
  * Resumo — sem isso o guia de habilidades fica invisível para quem não
  * entra na página primeiro.
  */
-function NavLinkAvaliacoes() {
-  const location = useLocation();
-  const isActive = location.pathname === "/avaliacao";
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`relative hidden items-center gap-0.5 whitespace-nowrap px-1.5 text-[15px] transition-all duration-300 xl:inline-flex ${
-            isActive
-              ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
-              : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
-          }`}
-        >
-          Avaliações
-          <ChevronDown className="size-3 opacity-70" />
-          {isActive && (
-            <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50 dark:from-blue-400 dark:to-cyan-400 dark:shadow-blue-400/50" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
-        {/* `DropdownMenuItem` vem com `cursor-default` (convenção de menu de
-          ação). Aqui os itens são navegação — levam a outra tela —, então a
-          mãozinha é o que a pessoa espera. */}
-        {SUB_AVALIACOES.map((sub) => (
-          <DropdownMenuItem key={sub.rotulo} asChild className="cursor-pointer gap-2.5 py-2.5">
-            <Link to="/avaliacao" search={sub.aba ? { aba: sub.aba } : {}}>
-              <sub.icon className="size-4 shrink-0 text-muted-foreground" />
-              <span>{sub.rotulo}</span>
-            </Link>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+/** Título da página mostrado na barra mínima (fora da home). */
+function tituloDaPagina(pathname: string): string {
+  const mapa: Record<string, string> = {
+    "/agenda": "Agenda da semana",
+    "/coordenacao": "Coordenação",
+    "/infoteca": "Infoteca",
+    "/avaliacao": "Avaliações diagnósticas",
+    "/descritores": "Guia de habilidades",
+    "/sobre": "Sobre o projeto",
+    "/login": "Entrar no painel",
+    "/tv": "Modo TV",
+  };
+  if (mapa[pathname]) return mapa[pathname];
+  if (pathname.startsWith("/aluno")) return "Área do Aluno";
+  if (pathname.startsWith("/professor")) return "Espaço do Professor";
+  if (pathname.startsWith("/mediador")) return "Espaço do Mediador";
+  if (pathname.startsWith("/ferramentas")) return "Ferramentas";
+  if (pathname.startsWith("/dashboard")) return "Painel de gestão";
+  return "Agenda de Informática";
 }
-
-/** As abas de /avaliacao, repetidas no menu para quem procura o guia de
- *  habilidades sem saber que ele mora dentro das Avaliações. */
-const SUB_AVALIACOES = [
-  { rotulo: "Resumo", aba: undefined, icon: BarChart3 },
-  { rotulo: "Mapa da turma", aba: "mapa" as const, icon: Users2 },
-  { rotulo: "Detalhes da 2ª avaliação", aba: "detalhes" as const, icon: ListChecks },
-  { rotulo: "Guia de habilidades", aba: "descritores" as const, icon: Compass },
-] as const;
 
 const LINKS = [
   { to: "/", label: "Início" },
@@ -304,6 +269,22 @@ export function NavBar() {
             <span className="hidden font-medium sm:inline">Início</span>
           </Link>
         </Button>
+
+        {/* O miolo da barra mínima não pode ficar vazio: mostra em que página
+            a pessoa está (e a escola), sem repetir o menu da home. */}
+        <div className="mx-1 flex min-w-0 flex-1 flex-col justify-center sm:mx-3">
+          <span className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-white">
+            {tituloDaPagina(location.pathname)}
+          </span>
+          <span className="hidden truncate text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-slate-600 dark:text-white/60 sm:block">
+            Escola Dr. Eiraldo Carneiro de França
+          </span>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <ShareButton />
+          <ThemeToggle />
+        </div>
       </header>
     );
   }
@@ -342,7 +323,7 @@ export function NavBar() {
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/infoteca" label="Infoteca" />
-          <NavLinkAvaliacoes />
+          <NavLink to="/avaliacao" label="Avaliações" />
           <NavLink to="/aluno" label="Área do Aluno" />
           <NavLink to="/professor" label="Professor" />
           <NavLink to="/mediador" label="Mediadores" />
@@ -454,22 +435,6 @@ export function NavBar() {
                             />
                           </Link>
                         </SheetClose>
-                        {/* As abas das Avaliações ficam à vista: senão o guia de
-                        habilidades só aparece depois de entrar na área. */}
-                        {link.to === "/avaliacao"
-                          ? SUB_AVALIACOES.filter((sub) => sub.aba).map((sub) => (
-                              <SheetClose key={sub.rotulo} asChild>
-                                <Link
-                                  to="/avaliacao"
-                                  search={sub.aba ? { aba: sub.aba } : {}}
-                                  className="ml-6 flex items-center gap-3 rounded-xl border-l border-border/60 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                                >
-                                  <sub.icon className="size-4 shrink-0" />
-                                  <span className="flex-1">{sub.rotulo}</span>
-                                </Link>
-                              </SheetClose>
-                            ))
-                          : null}
                       </div>
                     );
                   })}
