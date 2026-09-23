@@ -18,33 +18,39 @@ import { cn } from "@/lib/utils";
  */
 
 /** Pares de cores (início/fim do degradê) por nome de cor Tailwind. */
-const PALETAS: Record<string, [string, string]> = {
-  rose: ["#f43f5e", "#be123c"],
-  pink: ["#ec4899", "#be185d"],
-  fuchsia: ["#d946ef", "#a21caf"],
-  purple: ["#a855f7", "#7e22ce"],
-  violet: ["#8b5cf6", "#6d28d9"],
-  indigo: ["#6366f1", "#4338ca"],
-  blue: ["#3b82f6", "#1d4ed8"],
-  sky: ["#0ea5e9", "#0369a1"],
-  cyan: ["#06b6d4", "#0e7490"],
-  teal: ["#14b8a6", "#0f766e"],
-  emerald: ["#10b981", "#047857"],
-  green: ["#22c55e", "#15803d"],
-  lime: ["#84cc16", "#4d7c0f"],
-  amber: ["#f59e0b", "#b45309"],
-  orange: ["#f97316", "#c2410c"],
-  red: ["#ef4444", "#b91c1c"],
+const MATIZES: Record<string, number> = {
+  rose: 345,
+  pink: 328,
+  fuchsia: 295,
+  purple: 272,
+  violet: 258,
+  indigo: 236,
+  blue: 216,
+  sky: 200,
+  cyan: 188,
+  teal: 172,
+  emerald: 156,
+  green: 140,
+  lime: 100,
+  amber: 38,
+  orange: 22,
+  red: 6,
 };
+
+/** Cores suaves e escuras (pouca saturação) a partir do matiz, para não cansar a vista. */
+function paletaDoMatiz(h: number): [string, string] {
+  return [`hsl(${h} 38% 42%)`, `hsl(${h} 42% 30%)`];
+}
 
 /** Cor da janela: a mesma do card que a abriu; sem `cor`, sorteia pelo título. */
 function paletaDaJanela(cor: string | undefined, titulo: string): [string, string] {
   const nome = cor?.match(/(?:bg|text)-([a-z]+)-\d+/)?.[1];
-  if (nome && PALETAS[nome]) return PALETAS[nome];
-  const nomes = Object.keys(PALETAS);
+  const conhecido = nome ? MATIZES[nome] : undefined;
+  if (conhecido !== undefined) return paletaDoMatiz(conhecido);
+  const matizes = Object.values(MATIZES);
   let h = 0;
   for (const c of titulo) h = (h * 31 + c.charCodeAt(0)) % 997;
-  return PALETAS[nomes[h % nomes.length]!]!;
+  return paletaDoMatiz(matizes[h % matizes.length]!);
 }
 
 /** Folga mínima até a borda da tela, para a janela nunca sumir. */
