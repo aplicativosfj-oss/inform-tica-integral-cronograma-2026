@@ -11,6 +11,8 @@
  * interface (posição, volta, velocidade, fim) por callbacks.
  */
 
+import type { SomCorrida } from "@/components/school/jogos/corrida-som";
+
 export type IdPista = "cidade" | "montanha" | "praia" | "deserto" | "neve";
 
 export interface CarroInfo {
@@ -183,6 +185,8 @@ export interface Entrada {
   direita: boolean;
   acelerar: boolean;
   frear: boolean;
+  /** Direção analógica de -1 (esquerda) a 1 (direita): volante de toque e inclinação. */
+  volante: number;
 }
 
 export interface Hud {
@@ -200,6 +204,7 @@ export interface OpcoesCorrida {
   nivel: number;
   aoMudarHud: (h: Hud) => void;
   aoTerminar: (posicao: number, segundos: number) => void;
+  som?: SomCorrida | null;
 }
 
 // ------------------------------------------------------------------ utilidades
@@ -249,7 +254,7 @@ function novoPonto(): Ponto {
 
 // ----------------------------------------------------------------- desenho
 
-/** Carro visto de trás. `w` é a largura total em pixels; (cx, base) é o meio da base. */
+/** Carro esportivo visto de trás. `w` é a largura total; (cx, base) é o meio da base. */
 export function desenharCarro(
   ctx: CanvasRenderingContext2D,
   cx: number,
@@ -258,87 +263,212 @@ export function desenharCarro(
   cor: string,
   opcoes: { inclinacao?: number; freando?: boolean } = {},
 ) {
-  const h = w * 0.5;
+  const h = w * 0.48;
+  const claro = tom(cor, 0.5);
+  const escuro = tom(cor, -0.5);
+  const traco = Math.max(1, w * 0.008);
   ctx.save();
   ctx.translate(cx, base);
   if (opcoes.inclinacao) ctx.rotate(opcoes.inclinacao);
 
-  // sombra
-  ctx.fillStyle = "rgba(0,0,0,0.35)";
+  // sombra no asfalto
+  ctx.save();
+  ctx.scale(1, 0.16);
+  const sombra = ctx.createRadialGradient(0, 0, w * 0.05, 0, 0, w * 0.62);
+  sombra.addColorStop(0, "rgba(0,0,0,0.7)");
+  sombra.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = sombra;
   ctx.beginPath();
-  ctx.ellipse(0, 0, w * 0.52, h * 0.1, 0, 0, Math.PI * 2);
+  ctx.arc(0, 0, w * 0.62, 0, Math.PI * 2);
   ctx.fill();
+  ctx.restore();
 
-  // rodas
-  ctx.fillStyle = "#0b0f14";
-  const rw = w * 0.17;
-  const rh = h * 0.42;
+  // pneus traseiros largos, com sulcos
+  for (const lado of [-1, 1]) {
+    const x = lado * w * 0.4;
+    const tw = w * 0.2;
+    const th = h * 0.52;
+    const g = ctx.createLinearGradient(x - tw / 2, 0, x + tw / 2, 0);
+    g.addColorStop(0, "#04060a");
+    g.addColorStop(0.5, "#252c37");
+    g.addColorStop(1, "#04060a");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.roundRect(x - tw / 2, -th, tw, th, w * 0.035);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.09)";
+    ctx.lineWidth = traco;
+    for (let i = 1; i < 5; i++) {
+      ctx.beginPath();
+      ctx.moveTo(x - tw / 2 + 1, -th + (th / 5) * i);
+      ctx.lineTo(x + tw / 2 - 1, -th + (th / 5) * i);
+      ctx.stroke();
+    }
+  }
+
+  // difusor de carbono com aletas
+  ctx.fillStyle = "#0a0d12";
   ctx.beginPath();
-  ctx.roundRect(-w * 0.49, -rh, rw, rh, w * 0.03);
-  ctx.roundRect(w * 0.49 - rw, -rh, rw, rh, w * 0.03);
+  ctx.moveTo(-w * 0.36, -h * 0.2);
+  ctx.lineTo(w * 0.36, -h * 0.2);
+  ctx.lineTo(w * 0.3, -h * 0.02);
+  ctx.lineTo(-w * 0.3, -h * 0.02);
+  ctx.closePath();
   ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.lineWidth = traco;
+  for (let i = -3; i <= 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * w * 0.09, -h * 0.19);
+    ctx.lineTo(i * w * 0.075, -h * 0.03);
+    ctx.stroke();
+  }
+  // escapamentos cromados
+  for (const lado of [-1, 1]) {
+    const ex = lado * w * 0.19;
+    const g = ctx.createRadialGradient(ex - w * 0.01, -h * 0.11, 1, ex, -h * 0.1, w * 0.05);
+    g.addColorStop(0, "#f8fafc");
+    g.addColorStop(0.6, "#94a3b8");
+    g.addColorStop(1, "#475569");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(ex, -h * 0.1, w * 0.048, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#020305";
+    ctx.beginPath();
+    ctx.arc(ex, -h * 0.1, w * 0.032, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
-  // carroceria
-  const corpo = ctx.createLinearGradient(0, -h * 0.75, 0, -h * 0.1);
-  corpo.addColorStop(0, tom(cor, 0.25));
-  corpo.addColorStop(0.5, cor);
-  corpo.addColorStop(1, tom(cor, -0.4));
+  // carroceria: ombros largos e traseira que afina para a tampa
+  const corpo = ctx.createLinearGradient(0, -h * 0.66, 0, -h * 0.16);
+  corpo.addColorStop(0, claro);
+  corpo.addColorStop(0.35, cor);
+  corpo.addColorStop(1, escuro);
   ctx.fillStyle = corpo;
+  ctx.strokeStyle = "rgba(0,0,0,0.5)";
+  ctx.lineWidth = traco;
   ctx.beginPath();
-  ctx.moveTo(-w * 0.46, -h * 0.1);
-  ctx.lineTo(-w * 0.5, -h * 0.4);
-  ctx.quadraticCurveTo(-w * 0.5, -h * 0.58, -w * 0.4, -h * 0.6);
-  ctx.lineTo(w * 0.4, -h * 0.6);
-  ctx.quadraticCurveTo(w * 0.5, -h * 0.58, w * 0.5, -h * 0.4);
-  ctx.lineTo(w * 0.46, -h * 0.1);
+  ctx.moveTo(-w * 0.4, -h * 0.17);
+  ctx.bezierCurveTo(-w * 0.5, -h * 0.2, -w * 0.5, -h * 0.4, -w * 0.46, -h * 0.5);
+  ctx.bezierCurveTo(-w * 0.44, -h * 0.6, -w * 0.4, -h * 0.64, -w * 0.32, -h * 0.66);
+  ctx.lineTo(w * 0.32, -h * 0.66);
+  ctx.bezierCurveTo(w * 0.4, -h * 0.64, w * 0.44, -h * 0.6, w * 0.46, -h * 0.5);
+  ctx.bezierCurveTo(w * 0.5, -h * 0.4, w * 0.5, -h * 0.2, w * 0.4, -h * 0.17);
   ctx.closePath();
   ctx.fill();
+  ctx.stroke();
 
-  // cabine e vidro traseiro
-  ctx.fillStyle = tom(cor, -0.15);
+  // brilho do ombro e vinco central
+  ctx.strokeStyle = "rgba(255,255,255,0.35)";
+  ctx.lineWidth = traco * 1.6;
+  for (const lado of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(lado * w * 0.3, -h * 0.64);
+    ctx.quadraticCurveTo(lado * w * 0.43, -h * 0.6, lado * w * 0.45, -h * 0.48);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = "rgba(0,0,0,0.25)";
+  ctx.lineWidth = traco;
   ctx.beginPath();
-  ctx.moveTo(-w * 0.36, -h * 0.58);
-  ctx.lineTo(-w * 0.27, -h * 0.98);
-  ctx.lineTo(w * 0.27, -h * 0.98);
-  ctx.lineTo(w * 0.36, -h * 0.58);
+  ctx.moveTo(0, -h * 0.66);
+  ctx.lineTo(0, -h * 0.36);
+  ctx.stroke();
+
+  // faixa escura das lanternas
+  ctx.fillStyle = "#0b0e14";
+  ctx.beginPath();
+  ctx.roundRect(-w * 0.43, -h * 0.55, w * 0.86, h * 0.17, w * 0.03);
+  ctx.fill();
+  // lanternas de LED: aglomerado de cada lado + barra central
+  const acesa = opcoes.freando === true;
+  for (const lado of [-1, 1]) {
+    const x0 = lado === -1 ? -w * 0.42 : w * 0.12;
+    const g = ctx.createLinearGradient(x0, 0, x0 + w * 0.3, 0);
+    g.addColorStop(0, acesa ? "#ff5a5a" : "#b91c1c");
+    g.addColorStop(1, acesa ? "#ff2020" : "#7f1d1d");
+    if (acesa) {
+      ctx.shadowColor = "#ff3030";
+      ctx.shadowBlur = w * 0.09;
+    }
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.roundRect(x0, -h * 0.54, w * 0.3, h * 0.15, w * 0.025);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = acesa ? "#fff1f1" : "#fca5a5";
+    for (let i = 0; i < 5; i++) {
+      ctx.fillRect(x0 + w * 0.025 + i * w * 0.055, -h * 0.51, w * 0.03, h * 0.09);
+    }
+  }
+  ctx.fillStyle = acesa ? "#ff3a3a" : "#991b1b";
+  ctx.fillRect(-w * 0.12, -h * 0.485, w * 0.24, h * 0.035);
+
+  // para-choque com a placa
+  ctx.fillStyle = "#0b0e14";
+  ctx.beginPath();
+  ctx.roundRect(-w * 0.14, -h * 0.36, w * 0.28, h * 0.13, w * 0.02);
+  ctx.fill();
+  ctx.fillStyle = "#f8fafc";
+  ctx.fillRect(-w * 0.11, -h * 0.34, w * 0.22, h * 0.09);
+  ctx.fillStyle = "#1e3a8a";
+  ctx.fillRect(-w * 0.11, -h * 0.34, w * 0.22, h * 0.02);
+
+  // cabine: teto, colunas e vidro traseiro com reflexo
+  const teto = ctx.createLinearGradient(0, -h * 1.02, 0, -h * 0.64);
+  teto.addColorStop(0, claro);
+  teto.addColorStop(1, cor);
+  ctx.fillStyle = teto;
+  ctx.strokeStyle = "rgba(0,0,0,0.45)";
+  ctx.lineWidth = traco;
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.35, -h * 0.64);
+  ctx.bezierCurveTo(-w * 0.32, -h * 0.85, -w * 0.28, -h * 0.98, -w * 0.2, -h * 1.02);
+  ctx.lineTo(w * 0.2, -h * 1.02);
+  ctx.bezierCurveTo(w * 0.28, -h * 0.98, w * 0.32, -h * 0.85, w * 0.35, -h * 0.64);
   ctx.closePath();
   ctx.fill();
-  const vidro = ctx.createLinearGradient(0, -h * 0.95, 0, -h * 0.62);
-  vidro.addColorStop(0, "#94a3b8");
-  vidro.addColorStop(1, "#0f172a");
+  ctx.stroke();
+  const vidro = ctx.createLinearGradient(0, -h * 0.98, 0, -h * 0.68);
+  vidro.addColorStop(0, "#cbd5e1");
+  vidro.addColorStop(0.45, "#334155");
+  vidro.addColorStop(1, "#020617");
   ctx.fillStyle = vidro;
   ctx.beginPath();
-  ctx.moveTo(-w * 0.31, -h * 0.62);
-  ctx.lineTo(-w * 0.235, -h * 0.9);
-  ctx.lineTo(w * 0.235, -h * 0.9);
-  ctx.lineTo(w * 0.31, -h * 0.62);
+  ctx.moveTo(-w * 0.29, -h * 0.68);
+  ctx.bezierCurveTo(-w * 0.27, -h * 0.83, -w * 0.24, -h * 0.93, -w * 0.18, -h * 0.97);
+  ctx.lineTo(w * 0.18, -h * 0.97);
+  ctx.bezierCurveTo(w * 0.24, -h * 0.93, w * 0.27, -h * 0.83, w * 0.29, -h * 0.68);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.22)";
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.2, -h * 0.94);
+  ctx.lineTo(-w * 0.08, -h * 0.94);
+  ctx.lineTo(-w * 0.17, -h * 0.7);
+  ctx.lineTo(-w * 0.27, -h * 0.7);
   ctx.closePath();
   ctx.fill();
 
-  // aerofólio
-  ctx.fillStyle = tom(cor, -0.5);
-  ctx.fillRect(-w * 0.5, -h * 0.72, w, h * 0.07);
-  ctx.fillRect(-w * 0.34, -h * 0.66, w * 0.05, h * 0.08);
-  ctx.fillRect(w * 0.29, -h * 0.66, w * 0.05, h * 0.08);
-
-  // lanternas
-  const luz = opcoes.freando ? "#ff2a2a" : "#b91c1c";
-  if (opcoes.freando) {
-    ctx.shadowColor = "#ff3b3b";
-    ctx.shadowBlur = w * 0.12;
-  }
-  ctx.fillStyle = luz;
+  // aerofólio: asa de carbono, suportes e placas laterais
+  ctx.fillStyle = "#0a0d12";
+  ctx.fillRect(-w * 0.27, -h * 0.68, w * 0.045, h * 0.1);
+  ctx.fillRect(w * 0.225, -h * 0.68, w * 0.045, h * 0.1);
+  const asa = ctx.createLinearGradient(0, -h * 0.8, 0, -h * 0.7);
+  asa.addColorStop(0, "#2a313d");
+  asa.addColorStop(1, "#05070a");
+  ctx.fillStyle = asa;
   ctx.beginPath();
-  ctx.roundRect(-w * 0.44, -h * 0.5, w * 0.22, h * 0.1, w * 0.02);
-  ctx.roundRect(w * 0.22, -h * 0.5, w * 0.22, h * 0.1, w * 0.02);
+  ctx.roundRect(-w * 0.49, -h * 0.79, w * 0.98, h * 0.1, w * 0.02);
   ctx.fill();
-  ctx.shadowBlur = 0;
-
-  // placa e para-choque
-  ctx.fillStyle = "#f8fafc";
-  ctx.fillRect(-w * 0.09, -h * 0.36, w * 0.18, h * 0.1);
-  ctx.fillStyle = "#0b0f14";
-  ctx.fillRect(-w * 0.46, -h * 0.2, w * 0.92, h * 0.1);
+  ctx.fillStyle = cor;
+  ctx.fillRect(-w * 0.49, -h * 0.79, w * 0.98, h * 0.018);
+  for (const lado of [-1, 1]) {
+    ctx.fillStyle = escuro;
+    ctx.beginPath();
+    ctx.roundRect(lado * w * 0.49 - w * 0.018, -h * 0.86, w * 0.036, h * 0.2, w * 0.012);
+    ctx.fill();
+  }
   ctx.restore();
 }
 
@@ -568,7 +698,10 @@ export class Corrida {
   private raf = 0;
   private ultimo = 0;
   private parado = true;
-  entrada: Entrada = { esquerda: false, direita: false, acelerar: false, frear: false };
+  entrada: Entrada = { esquerda: false, direita: false, acelerar: false, frear: false, volante: 0 };
+  private fumaca: { x: number; y: number; r: number; vx: number; vy: number; vida: number }[] = [];
+  private derrapando = false;
+  private foraDaPista = false;
 
   constructor(private op: OpcoesCorrida) {
     op.canvas.width = LARGURA;
@@ -735,19 +868,25 @@ export class Corrida {
     // Volante
     const dx = dt * 2 * razao;
     const anda = this.aceso && !this.terminou;
-    if (anda && e.esquerda) this.x -= dx;
-    else if (anda && e.direita) this.x += dx;
+    const dir = e.volante !== 0 ? e.volante : (e.direita ? 1 : 0) - (e.esquerda ? 1 : 0);
+    if (anda) this.x += dx * limitar(dir, -1, 1);
     this.x -= dx * razao * seg.curva * CENTRIFUGA;
 
     // Pedais. Depois da chegada o carro perde velocidade sozinho.
     this.freando = false;
-    if (anda && e.acelerar) this.vel += ACEL * dt;
-    else if (anda && e.frear) {
+    if (anda && e.frear) {
       this.vel += FREIO * dt;
       this.freando = true;
-    } else this.vel += (this.terminou ? FREIO / 2 : DESACEL) * dt;
+    } else if (anda && e.acelerar) this.vel += ACEL * dt;
+    else this.vel += (this.terminou ? FREIO / 2 : DESACEL) * dt;
 
-    if ((this.x < -1 || this.x > 1) && this.vel > LIMITE_FORA) this.vel += FORA * dt;
+    this.foraDaPista = this.x < -1 || this.x > 1;
+    if (this.foraDaPista && this.vel > LIMITE_FORA) this.vel += FORA * dt;
+    // Derrapagem: curva fechada em alta, ou freada forte em velocidade.
+    this.derrapando =
+      anda &&
+      ((Math.abs(dir) > 0.4 && razao > 0.55 && Math.abs(seg.curva) > 2.2) ||
+        (this.freando && razao > 0.45));
 
     // Cones na pista: derrubam o cone e tiram velocidade.
     for (const s of seg.sprites) {
@@ -755,11 +894,13 @@ export class Corrida {
         s.batido = true;
         this.vel *= 0.4;
         this.piscar = 0.5;
+        this.op.som?.batida();
       }
     }
     // Encostar em outro carro
     for (const r of seg.carros) {
       if (this.vel > r.vel && sobrepoe(this.x, r.offset)) {
+        if (this.vel > r.vel * 1.15) this.op.som?.batida();
         this.vel = r.vel * 0.85;
         this.x += this.x > r.offset ? 0.04 : -0.04;
       }
@@ -770,7 +911,16 @@ export class Corrida {
     this.piscar = Math.max(0, this.piscar - dt);
 
     this.atualizarRivais(dt);
+    this.atualizarFumaca(dt);
     this.enviarHud(dt);
+    this.op.som?.atualizar({
+      razao: this.vel / VEL_MAX,
+      acelerando: anda && e.acelerar,
+      freando: this.freando,
+      derrapando: this.derrapando,
+      foraDaPista: this.foraDaPista,
+      andando: this.aceso,
+    });
   }
 
   private atualizarRivais(dt: number) {
@@ -819,6 +969,29 @@ export class Corrida {
     return 0;
   }
 
+  /** Fumaça branca saindo dos pneus traseiros quando o carro derrapa. */
+  private atualizarFumaca(dt: number) {
+    if (this.derrapando) {
+      for (const lado of [-1, 1]) {
+        this.fumaca.push({
+          x: LARGURA / 2 + lado * LARGURA * 0.12 + (Math.random() - 0.5) * 8,
+          y: ALTURA - 10,
+          r: 5 + Math.random() * 4,
+          vx: (Math.random() - 0.5) * 40 - lado * 12,
+          vy: -(14 + Math.random() * 26),
+          vida: 1,
+        });
+      }
+    }
+    for (const f of this.fumaca) {
+      f.x += f.vx * dt;
+      f.y += f.vy * dt;
+      f.r += 34 * dt;
+      f.vida -= 1.5 * dt;
+    }
+    this.fumaca = this.fumaca.filter((f) => f.vida > 0).slice(-60);
+  }
+
   private terminarJogador() {
     this.terminou = true;
     const total = this.comprimento * VOLTAS;
@@ -828,6 +1001,7 @@ export class Corrida {
       if (r.terminou || prog >= total) posicao += 1;
     }
     const segundos = this.tempo;
+    this.op.som?.fim(posicao <= 3);
     this.op.aoTerminar(posicao, segundos);
   }
 
@@ -1021,10 +1195,24 @@ export class Corrida {
       }
     }
 
+    // Fumaça dos pneus (atrás do carro)
+    for (const f of this.fumaca) {
+      const g = c.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r);
+      g.addColorStop(0, `rgba(235,235,235,${0.5 * f.vida})`);
+      g.addColorStop(1, "rgba(235,235,235,0)");
+      c.fillStyle = g;
+      c.beginPath();
+      c.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      c.fill();
+    }
+
     // Jogador
     const trepida = this.vel > 0 ? Math.sin(this.distancia / 90) * (this.vel / VEL_MAX) * 1.5 : 0;
-    const dir = this.entrada.direita ? 1 : this.entrada.esquerda ? -1 : 0;
-    const inclina = dir * 0.045 * (this.vel / VEL_MAX);
+    const dirVisual =
+      this.entrada.volante !== 0
+        ? this.entrada.volante
+        : (this.entrada.direita ? 1 : 0) - (this.entrada.esquerda ? 1 : 0);
+    const inclina = dirVisual * 0.045 * (this.vel / VEL_MAX);
     if (this.piscar <= 0 || Math.floor(this.piscar * 20) % 2 === 0) {
       desenharCarro(c, LARGURA / 2, ALTURA - 12 + trepida, LARGURA * 0.3, this.op.corJogador, {
         inclinacao: inclina,

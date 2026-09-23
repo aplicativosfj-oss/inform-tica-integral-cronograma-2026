@@ -237,6 +237,9 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
   const [fim, setFim] = useState<Cor | "empate" | null>(null);
   const [estrelas, setEstrelas] = useState<number | null>(null);
   const inicio = useRef(Date.now());
+  const arraste = useRef<{ de: number; x: number; y: number; moveu: boolean } | null>(null);
+  const ignorarClique = useRef(false);
+  const [puxando, setPuxando] = useState<{ de: number; dx: number; dy: number } | null>(null);
 
   const legais = jogadasDe(tab, vez);
   const destinos = sel === null ? [] : legais.filter((j) => j.de === sel);
@@ -271,6 +274,16 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
       return;
     }
     setVez(proxima);
+  }
+
+  /** Soltar a peça arrastada sobre uma casa de destino. */
+  function soltar(de: number, x: number, y: number) {
+    if (fim || (adversario === "computador" && vez === "p")) return;
+    const alvo = document.elementFromPoint(x, y)?.closest("[data-casa]");
+    const para = alvo ? Number(alvo.getAttribute("data-casa")) : -1;
+    const jogada = legais.find((j) => j.de === de && j.para === para);
+    if (jogada) executar(jogada);
+    else setSel(null);
   }
 
   function tocar(i: number) {
@@ -332,7 +345,7 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
         </p>
       )}
 
-      <div className="grid grid-cols-8 overflow-hidden rounded-xl border-4 border-[#5b3a24] shadow-lg">
+      <div className="grid w-[min(92vw,calc(100dvh-12rem),32rem)] grid-cols-8 overflow-hidden rounded-xl border-4 border-[#5b3a24] shadow-lg">
         {tab.map((c, i) => {
           const podeIr = destinos.some((j) => j.para === i);
           const ehOrigem = origens.includes(i);
@@ -340,17 +353,69 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
             <button
               key={i}
               type="button"
-              onClick={() => tocar(i)}
+              data-casa={i}
+              onClick={() => {
+                if (ignorarClique.current) {
+                  ignorarClique.current = false;
+                  return;
+                }
+                tocar(i);
+              }}
+              onPointerDown={(e) => {
+                if (fim || !c || !origens.includes(i)) return;
+                if (adversario === "computador" && vez === "p") return;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                arraste.current = { de: i, x: e.clientX, y: e.clientY, moveu: false };
+              }}
+              onPointerMove={(e) => {
+                const a = arraste.current;
+                if (!a || a.de !== i) return;
+                const dx = e.clientX - a.x;
+                const dy = e.clientY - a.y;
+                if (!a.moveu && Math.hypot(dx, dy) > 6) {
+                  a.moveu = true;
+                  setSel(i);
+                }
+                if (a.moveu) setPuxando({ de: i, dx, dy });
+              }}
+              onPointerUp={(e) => {
+                const a = arraste.current;
+                arraste.current = null;
+                setPuxando(null);
+                if (!a || !(a.moveu || Math.hypot(e.clientX - a.x, e.clientY - a.y) > 6)) return;
+                ignorarClique.current = true;
+                soltar(a.de, e.clientX, e.clientY);
+              }}
+              onPointerCancel={() => {
+                arraste.current = null;
+                setPuxando(null);
+              }}
               aria-label={`Casa ${linha(i) + 1},${coluna(i) + 1}`}
               className={cn(
-                "relative size-[42px] transition-colors",
+                "relative aspect-square w-full touch-none transition-colors",
+                puxando?.de === i && "z-20",
                 escura(i) ? "bg-[#8a5a34]" : "bg-[#e8d5b7]",
                 sel === i && "ring-4 ring-inset ring-primary",
                 podeIr && "cursor-pointer",
                 ehOrigem && !fim && "cursor-pointer",
               )}
             >
-              {c && <Disco peca={c} />}
+              {c && (
+                <span
+                  className="block size-full"
+                  style={
+                    puxando?.de === i
+                      ? {
+                          transform: `translate(${puxando.dx}px, ${puxando.dy}px) scale(1.15)`,
+                          filter: "drop-shadow(0 6px 6px rgba(0,0,0,.45))",
+                          pointerEvents: "none",
+                        }
+                      : undefined
+                  }
+                >
+                  <Disco peca={c} />
+                </span>
+              )}
               {podeIr && (
                 <span className="absolute inset-0 m-auto size-4 rounded-full bg-emerald-400/90 shadow" />
               )}

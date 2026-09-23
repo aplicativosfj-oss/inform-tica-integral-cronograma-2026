@@ -1,4 +1,4 @@
-import { ArrowLeft, Bot, Loader2, Star, Trophy, Users } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Maximize2, Star, Trophy, Users } from "lucide-react";
 import { useEffect, useState, type ComponentType } from "react";
 
 import { Corrida } from "@/components/school/jogos/corrida";
@@ -7,6 +7,7 @@ import { Digitacao } from "@/components/school/jogos/digitacao";
 import { Domino } from "@/components/school/jogos/domino";
 import { JogoDaVelha } from "@/components/school/jogos/jogo-da-velha";
 import { Memoria } from "@/components/school/jogos/memoria";
+import { CaixaJogo } from "@/components/school/jogos/tela-cheia";
 import { QuebraCabeca } from "@/components/school/jogos/quebra-cabeca";
 import { TabuleiroMatematica } from "@/components/school/jogos/tabuleiro-matematica";
 import { lerAlunoSessao } from "@/lib/aluno-session";
@@ -96,16 +97,16 @@ const JOGOS: JogoInfo[] = [
     id: "digitacao",
     nome: "Digitação",
     emoji: "⌨️",
-    descricao: "Digite as frases antes do robô, seguindo a cor de cada dedo.",
+    descricao: "Escola com tutor, fases por ano, lições e desafio contra o robô.",
     Componente: Digitacao,
     modos: ["computador"],
-    niveis: ["Iniciante", "Intermediário", "Avançado"],
+    niveis: ["Fácil", "Médio", "Difícil"],
   },
   {
     id: "corrida",
     nome: "Corrida",
     emoji: "🏎️",
-    descricao: "Três voltas contra cinco pilotos em cinco pistas.",
+    descricao: "Três voltas, cinco pistas, som e música. Volante de arrastar no celular.",
     Componente: Corrida,
     modos: ["computador"],
     niveis: ["Fácil", "Médio", "Difícil"],
@@ -175,6 +176,7 @@ export function SalaDeJogos() {
   const [adversario, setAdversario] = useState<Adversario>("computador");
   const [nivel, setNivel] = useState(2);
   const [verRanking, setVerRanking] = useState(false);
+  const [cheia, setCheia] = useState(false);
   const [carteira, setCarteira] = useState(() => lerCarteira());
   const sessao = lerAlunoSessao();
 
@@ -190,21 +192,38 @@ export function SalaDeJogos() {
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={() => setJogo(null)}
+            onClick={() => {
+              setJogo(null);
+              setCheia(false);
+            }}
             className="flex h-9 cursor-pointer items-center gap-1 rounded-lg px-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-4" /> sala de jogos
           </button>
-          <span className="text-xs font-bold text-foreground">
+          <span className="hidden text-xs font-bold text-foreground sm:block">
             {jogo.emoji} {jogo.nome} · {jogo.niveis[nivel - 1]} ·{" "}
             {adversario === "computador" ? "contra o computador" : "contra um colega"}
           </span>
+          <button
+            type="button"
+            onClick={() => setCheia(true)}
+            className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-semibold text-foreground hover:border-primary"
+          >
+            <Maximize2 className="size-4" /> Tela cheia
+          </button>
         </div>
-        <Componente
-          key={`${jogo.id}-${adversario}-${nivel}`}
-          adversario={adversario}
-          nivel={nivel}
-        />
+        <CaixaJogo
+          cheia={cheia}
+          aoSair={() => setCheia(false)}
+          titulo={`${jogo.emoji} ${jogo.nome}`}
+          horizontal={jogo.id === "corrida"}
+        >
+          <Componente
+            key={`${jogo.id}-${adversario}-${nivel}`}
+            adversario={adversario}
+            nivel={nivel}
+          />
+        </CaixaJogo>
       </div>
     );
   }
@@ -287,7 +306,11 @@ export function SalaDeJogos() {
               key={j.id}
               type="button"
               disabled={!serve}
-              onClick={() => setJogo(j)}
+              onClick={() => {
+                setJogo(j);
+                // No celular o jogo já abre em tela cheia (o toque é o gesto que o navegador exige).
+                setCheia(window.matchMedia("(pointer: coarse)").matches);
+              }}
               className={cn(
                 "flex flex-col items-start gap-0.5 rounded-2xl border-2 p-2.5 text-left transition-colors",
                 serve

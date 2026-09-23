@@ -27,7 +27,11 @@ const TAMANHOS = [
   { lado: 5, nome: "5 × 5" },
 ];
 
-const LADO_PX = 270;
+/** Tamanho do quebra-cabeça: cabe na tela do aparelho, entre 240 e 460 pixels. */
+function ladoInicial(): number {
+  if (typeof window === "undefined") return 270;
+  return Math.round(Math.max(240, Math.min(460, window.innerWidth - 56, window.innerHeight - 300)));
+}
 
 function vizinhas(i: number, lado: number): number[] {
   const l = Math.floor(i / lado);
@@ -70,7 +74,11 @@ export function QuebraCabeca({ adversario, nivel }: { adversario: Adversario; ni
   const inicio = useRef(Date.now());
 
   const pronto = pecas.every((p, i) => p === i);
+  const [LADO_PX] = useState(ladoInicial);
   const tamPeca = LADO_PX / lado;
+  const arraste = useRef<{ pos: number; x: number; y: number; moveu: boolean } | null>(null);
+  const [puxando, setPuxando] = useState<{ pos: number; dx: number; dy: number } | null>(null);
+  const ignorarClique = useRef(false);
 
   function mover(pos: number) {
     if (pronto) return;
@@ -111,7 +119,7 @@ export function QuebraCabeca({ adversario, nivel }: { adversario: Adversario; ni
       <p className="text-sm font-semibold text-foreground">
         {pronto && movimentos > 0
           ? `Pronto! Era ${palavra.texto}, em ${movimentos} movimentos.`
-          : "Deslize as peças para montar a figura"}
+          : "Arraste (ou toque) as peças para montar a figura"}
       </p>
 
       <div
@@ -126,17 +134,60 @@ export function QuebraCabeca({ adversario, nivel }: { adversario: Adversario; ni
             <button
               key={pos}
               type="button"
-              onClick={() => mover(pos)}
+              onClick={() => {
+                if (ignorarClique.current) {
+                  ignorarClique.current = false;
+                  return;
+                }
+                mover(pos);
+              }}
+              onPointerDown={(e) => {
+                if (vazia || pronto) return;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                arraste.current = { pos, x: e.clientX, y: e.clientY, moveu: false };
+              }}
+              onPointerMove={(e) => {
+                const a = arraste.current;
+                if (!a || a.pos !== pos) return;
+                const dx = e.clientX - a.x;
+                const dy = e.clientY - a.y;
+                if (Math.hypot(dx, dy) > 6) a.moveu = true;
+                // A peça só acompanha o dedo na direção do espaço vazio, e no máximo uma peça.
+                const vazioPos = pecas.indexOf(total - 1);
+                const alvoX = ((vazioPos % lado) - (pos % lado)) * tamPeca;
+                const alvoY = (Math.floor(vazioPos / lado) - Math.floor(pos / lado)) * tamPeca;
+                const ehVizinha = vizinhas(vazioPos, lado).includes(pos);
+                const lim = (v: number, alvo: number) =>
+                  ehVizinha && alvo !== 0
+                    ? Math.max(Math.min(v, Math.max(alvo, 0)), Math.min(alvo, 0))
+                    : 0;
+                setPuxando({ pos, dx: lim(dx, alvoX), dy: lim(dy, alvoY) });
+              }}
+              onPointerUp={(e) => {
+                const a = arraste.current;
+                arraste.current = null;
+                setPuxando(null);
+                if (!a || !(a.moveu || Math.hypot(e.clientX - a.x, e.clientY - a.y) > 6)) return;
+                ignorarClique.current = true;
+                const dx = e.clientX - a.x;
+                const dy = e.clientY - a.y;
+                if (Math.hypot(dx, dy) > tamPeca * 0.3) mover(pos);
+              }}
+              onPointerCancel={() => {
+                arraste.current = null;
+                setPuxando(null);
+              }}
               aria-label={vazia ? "Espaço vazio" : `Peça ${peca + 1}`}
               className={cn(
-                "absolute overflow-hidden transition-all duration-150",
+                "absolute touch-none overflow-hidden",
+                puxando?.pos === pos ? "z-10 shadow-xl" : "transition-all duration-150",
                 vazia ? "bg-muted/60" : "cursor-pointer border border-white/40",
               )}
               style={{
                 width: tamPeca,
                 height: tamPeca,
-                left: (pos % lado) * tamPeca,
-                top: Math.floor(pos / lado) * tamPeca,
+                left: (pos % lado) * tamPeca + (puxando?.pos === pos ? puxando.dx : 0),
+                top: Math.floor(pos / lado) * tamPeca + (puxando?.pos === pos ? puxando.dy : 0),
               }}
             >
               {!vazia && (

@@ -130,6 +130,9 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
   const [fim, setFim] = useState<string | null>(null);
   const [estrelas, setEstrelas] = useState<number | null>(null);
   const [aviso, setAviso] = useState("");
+  const arraste = useRef<{ id: string; x: number; y: number; moveu: boolean } | null>(null);
+  const ignorarClique = useRef(false);
+  const [puxando, setPuxando] = useState<{ id: string; dx: number; dy: number } | null>(null);
   const inicio = useRef(Date.now());
 
   const distribuir = useCallback(() => {
@@ -196,9 +199,10 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
     else setMaoAdv((m) => m.filter((x) => x.id !== p.id));
   }
 
-  function jogarNaPonta(lado: Lado) {
-    if (fim || vez !== 1 || !sel) return;
-    const p = maoJogador.find((x) => x.id === sel);
+  function jogarNaPonta(lado: Lado, idPedra?: string) {
+    const escolhida = idPedra ?? sel;
+    if (fim || vez !== 1 || !escolhida) return;
+    const p = maoJogador.find((x) => x.id === escolhida);
     if (!p) return;
     const ponta = lado === "esquerda" ? pontas[0] : pontas[1];
     if (mesa.length && !encaixa(p, ponta)) {
@@ -293,9 +297,13 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
       </p>
 
       {/* Mesa */}
-      <div className="flex w-full items-center gap-1.5 overflow-x-auto rounded-xl bg-[#2f6f4e]/20 p-2 [&::-webkit-scrollbar]:h-1.5">
+      <div
+        data-mesa
+        className="flex w-full items-center gap-1.5 overflow-x-auto rounded-xl bg-[#2f6f4e]/20 p-2 [&::-webkit-scrollbar]:h-1.5"
+      >
         <button
           type="button"
+          data-ponta="esquerda"
           onClick={() => jogarNaPonta("esquerda")}
           disabled={!minhaVez || !sel || !mesa.length}
           className={cn(
@@ -309,13 +317,14 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
         </button>
         {mesa.length === 0 ? (
           <span className="px-3 text-xs text-muted-foreground">
-            Mesa vazia — escolha uma pedra e toque num lado.
+            Mesa vazia — arraste uma pedra até aqui (ou toque nela e num lado).
           </span>
         ) : (
           mesa.map((p, i) => <PedraSVG key={`${p.id}-${i}`} p={p} deitada />)
         )}
         <button
           type="button"
+          data-ponta="direita"
           onClick={() => jogarNaPonta("direita")}
           disabled={!minhaVez || !sel}
           className={cn(
@@ -339,10 +348,65 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
             <button
               key={p.id}
               type="button"
-              onClick={() => setSel(sel === p.id ? null : p.id)}
+              onClick={() => {
+                if (ignorarClique.current) {
+                  ignorarClique.current = false;
+                  return;
+                }
+                setSel(sel === p.id ? null : p.id);
+              }}
+              onPointerDown={(e) => {
+                if (!minhaVez) return;
+                e.currentTarget.setPointerCapture(e.pointerId);
+                arraste.current = { id: p.id, x: e.clientX, y: e.clientY, moveu: false };
+              }}
+              onPointerMove={(e) => {
+                const a = arraste.current;
+                if (!a || a.id !== p.id) return;
+                const dx = e.clientX - a.x;
+                const dy = e.clientY - a.y;
+                if (!a.moveu && Math.hypot(dx, dy) > 6) {
+                  a.moveu = true;
+                  setSel(p.id);
+                }
+                if (a.moveu) setPuxando({ id: p.id, dx, dy });
+              }}
+              onPointerUp={(e) => {
+                const a = arraste.current;
+                arraste.current = null;
+                setPuxando(null);
+                if (!a || !(a.moveu || Math.hypot(e.clientX - a.x, e.clientY - a.y) > 6)) return;
+                ignorarClique.current = true;
+                // Soltar sobre uma ponta (ou sobre a mesa vazia) joga a pedra ali.
+                const alvo = document
+                  .elementFromPoint(e.clientX, e.clientY)
+                  ?.closest("[data-ponta]");
+                const lado = alvo?.getAttribute("data-ponta");
+                if (lado === "esquerda" || lado === "direita") jogarNaPonta(lado, a.id);
+                else if (
+                  !mesa.length &&
+                  document.elementFromPoint(e.clientX, e.clientY)?.closest("[data-mesa]")
+                )
+                  jogarNaPonta("direita", a.id);
+              }}
+              onPointerCancel={() => {
+                arraste.current = null;
+                setPuxando(null);
+              }}
+              style={
+                puxando?.id === p.id
+                  ? {
+                      transform: `translate(${puxando.dx}px, ${puxando.dy}px) scale(1.1)`,
+                      zIndex: 30,
+                      pointerEvents: "none",
+                      position: "relative",
+                    }
+                  : undefined
+              }
               disabled={!minhaVez}
               className={cn(
-                "rounded-lg border-2 transition-all",
+                "touch-none rounded-lg border-2",
+                puxando?.id !== p.id && "transition-all",
                 sel === p.id
                   ? "-translate-y-1 border-primary shadow-lg"
                   : serve && minhaVez
