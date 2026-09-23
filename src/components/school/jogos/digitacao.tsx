@@ -92,16 +92,32 @@ function Estrelas({ n, tamanho = "size-4" }: { n: number; tamanho?: string }) {
   return (
     <span className="flex gap-0.5" aria-label={`${n} de 3 estrelas`}>
       {[1, 2, 3].map((i) => (
-        <Star
+        <img
           key={i}
-          className={cn(
-            tamanho,
-            i <= n ? "fill-amber-400 text-amber-300" : "fill-white/5 text-white/25",
-          )}
-          aria-hidden
+          src="/images/jogos/estrela-ouro.png"
+          alt=""
+          className={cn(tamanho, "object-contain", i > n && "opacity-25 grayscale")}
         />
       ))}
     </span>
+  );
+}
+
+/** Troféu de verdade (ouro, prata ou bronze) conforme as estrelas ganhas. */
+function Trofeu({ estrelas, ganhou }: { estrelas: number; ganhou: boolean }) {
+  const arquivo = !ganhou
+    ? "trofeu-prata"
+    : estrelas >= 3
+      ? "trofeu-ouro"
+      : estrelas === 2
+        ? "trofeu-prata"
+        : "trofeu-bronze";
+  return (
+    <img
+      src={`/images/jogos/${arquivo}.png`}
+      alt=""
+      className={cn("size-20 object-contain drop-shadow-lg", !ganhou && "opacity-40 grayscale")}
+    />
   );
 }
 
@@ -457,10 +473,7 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
         : "Ainda não foi. Tente de novo, com calma: precisão vem antes de velocidade.";
     return (
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-slate-950 p-4 text-center text-white">
-        <Trophy
-          className={cn("size-14", passou ? "text-amber-400" : "text-slate-500")}
-          aria-hidden
-        />
+        <Trofeu estrelas={r.estrelas} ganhou={passou} />
         <h4 className="text-xl font-black">
           {sess.tipo === "desafio"
             ? fim.venceu

@@ -44,10 +44,10 @@ interface Props {
 }
 
 function tamanhoAlvo(t: string): string {
-  if (t.length <= 3) return "text-6xl sm:text-7xl";
-  if (t.length <= 8) return "text-5xl sm:text-6xl";
-  if (t.length <= 14) return "text-3xl sm:text-4xl";
-  return "text-xl sm:text-2xl";
+  if (t.length <= 3) return "text-5xl sm:text-6xl";
+  if (t.length <= 8) return "text-4xl sm:text-5xl";
+  if (t.length <= 14) return "text-2xl sm:text-3xl";
+  return "text-lg sm:text-xl";
 }
 
 function relogio(s: number): string {
@@ -199,7 +199,7 @@ export function PraticaDigitacao({
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950 text-white"
+      className="relative overflow-hidden rounded-xl border border-white/10 bg-slate-950 text-white"
       onClick={() => entrada.current?.focus()}
     >
       {cenario && (
@@ -211,130 +211,127 @@ export function PraticaDigitacao({
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/75 to-slate-950/95" />
 
-      <div className="relative flex flex-col gap-3 p-3 sm:p-4">
+      <div className="relative mx-auto flex max-w-4xl flex-col gap-2 p-2 sm:p-3">
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={aoSair}
-            className="flex h-8 cursor-pointer items-center gap-1 rounded-lg px-2 text-xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white"
+            className="flex h-7 cursor-pointer items-center gap-1 rounded-lg px-2 text-xs font-semibold text-slate-300 hover:bg-white/10 hover:text-white"
           >
-            <ArrowLeft className="size-4" /> voltar
+            <ArrowLeft className="size-3.5" /> voltar
           </button>
-          <span className="truncate text-xs font-bold uppercase tracking-wide text-sky-300">
+          <span className="truncate text-[11px] font-bold uppercase tracking-wide text-sky-300">
             {titulo}
           </span>
         </div>
 
         {fase === "pronto" && (
-          <div className="flex flex-col items-center gap-3 py-2">
+          <div className="flex flex-col items-center gap-2 py-1">
             <TutorFala
+              compacto
               texto={
                 abertura ??
                 "Olá! Eu sou o Teco. Vou acender a tecla certa e mostrar qual dedo usar. É só seguir a cor!"
               }
               humor="animado"
             />
-            <Maos ativos={[]} className="max-w-xs" />
-            <p className="text-xs text-slate-400">
+            <Maos ativos={[]} className="max-w-[230px]" />
+            <p className="text-[11px] text-slate-400">
               {prompts.length} {prompts.length === 1 ? "item" : "itens"} para digitar
               {robo ? ` · robô: ${robo} palavras por minuto` : ""}
             </p>
             <button
               type="button"
               onClick={comecar}
-              className="flex h-12 cursor-pointer items-center gap-2 rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-600 px-6 text-base font-bold text-white shadow-lg shadow-emerald-900/50 transition-transform hover:scale-105 active:scale-95"
+              className="flex h-10 cursor-pointer items-center gap-2 rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-600 px-6 text-sm font-bold text-white shadow-lg shadow-emerald-900/50 transition-transform hover:scale-105 active:scale-95"
             >
-              <Play className="size-5 fill-current" /> Começar
+              <Play className="size-4 fill-current" /> Começar
             </button>
           </div>
         )}
 
         {fase === "jogando" && atual && (
           <>
-            {/* progresso */}
-            <div className="flex flex-col gap-1">
-              <div className="h-3 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/15">
+            <div className="flex flex-col gap-0.5">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/15">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-sky-400 to-cyan-300 transition-[width] duration-150"
                   style={{ width: `${progresso * 100}%` }}
                 />
               </div>
               {robo ? (
-                <>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/10">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400 transition-[width] duration-200"
-                      style={{ width: `${progressoRobo * 100}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] font-semibold uppercase tracking-wide">
-                    <span className="text-sky-300">Você</span>
-                    <span className="text-orange-300">Robô</span>
-                  </div>
-                </>
+                <div className="h-1 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400 transition-[width] duration-200"
+                    style={{ width: `${progressoRobo * 100}%` }}
+                  />
+                </div>
               ) : null}
             </div>
 
-            <div className="grid grid-cols-[1fr_auto] gap-2 sm:gap-3">
-              {/* o que digitar */}
-              <div className="flex min-h-[8.5rem] flex-col items-center justify-center gap-1 rounded-xl border border-sky-400/40 bg-slate-900/80 p-3 text-center shadow-inner shadow-sky-500/10">
+            <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+              <div className="flex min-h-[5.5rem] flex-col items-center justify-center gap-1 rounded-xl border border-sky-400/40 bg-slate-900/80 px-3 py-2 text-center shadow-inner shadow-sky-500/10">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-300/80">
                   {idx + 1} de {prompts.length}
                 </p>
-                {atual.figura && (
-                  <div className="rounded-xl bg-white/90 p-1">
-                    <Figura nome={atual.figura} tamanho={72} />
-                  </div>
-                )}
-                <p
-                  className={cn(
-                    "max-w-full whitespace-pre-wrap break-words font-bold leading-tight",
-                    modo === "alvo"
-                      ? tamanhoAlvo(alvoAtual)
-                      : "text-lg font-medium leading-relaxed sm:text-2xl",
-                    modo === "alvo" && "tracking-wider",
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {atual.figura && (
+                    <div className="rounded-lg bg-white/90 p-0.5">
+                      <Figura nome={atual.figura} tamanho={52} />
+                    </div>
                   )}
-                  aria-label={alvoAtual}
-                >
-                  {[...alvoAtual].map((c, i) => (
-                    <span
-                      key={i}
-                      className={cn(
-                        i < pos && "text-emerald-300",
-                        i === pos &&
-                          "rounded bg-sky-400/30 text-white underline decoration-sky-300 decoration-4 underline-offset-8",
-                        i > pos && "text-slate-400",
-                        i === pos && erroTecla !== null && "bg-red-500/50",
-                      )}
-                    >
-                      {c === " " ? " " : c}
-                    </span>
-                  ))}
-                </p>
-                {atual.legenda && <p className="text-xs text-slate-400">{atual.legenda}</p>}
+                  <p
+                    className={cn(
+                      "max-w-full whitespace-pre-wrap break-words font-bold leading-tight",
+                      modo === "alvo"
+                        ? tamanhoAlvo(alvoAtual)
+                        : "text-base font-medium leading-relaxed sm:text-xl",
+                      modo === "alvo" && "tracking-wider",
+                    )}
+                    aria-label={alvoAtual}
+                  >
+                    {[...alvoAtual].map((c, i) => (
+                      <span
+                        key={i}
+                        className={cn(
+                          i < pos && "text-emerald-300",
+                          i === pos &&
+                            "rounded bg-sky-400/30 text-white underline decoration-sky-300 decoration-[3px] underline-offset-4",
+                          i > pos && "text-slate-400",
+                          i === pos && erroTecla !== null && "bg-red-500/50",
+                        )}
+                      >
+                        {c === " " ? "\u00a0" : c}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+                {atual.legenda && <p className="text-[11px] text-slate-400">{atual.legenda}</p>}
               </div>
 
-              <div className="grid w-20 grid-rows-3 gap-1.5 sm:w-24">
+              <div className="grid grid-cols-3 gap-1.5 sm:w-24 sm:grid-cols-1">
                 {[
                   ["Tempo", relogio(decorrido)],
                   ["Erros", String(erros)],
                   ["Acertos", String(acertos)],
-                ].map(([r, v]) => (
+                ].map(([r, val]) => (
                   <div
                     key={r}
-                    className="flex flex-col items-center justify-center rounded-lg border border-sky-400/40 bg-slate-900/80 px-1"
+                    className="flex items-center justify-between gap-1 rounded-lg border border-sky-400/40 bg-slate-900/80 px-2 py-1"
                   >
                     <span className="text-[10px] text-slate-400">{r}</span>
-                    <span className="text-base font-bold tabular-nums">{v}</span>
+                    <span className="text-sm font-bold tabular-nums">{val}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <TutorFala texto={fala.texto} humor={fala.humor} />
+            <TutorFala compacto texto={fala.texto} humor={fala.humor} />
 
-            <Teclado alvo={proximo} erro={erroTecla} {...(foco !== undefined ? { foco } : {})} />
-            <Maos ativos={dedo === null ? [] : [dedo]} className="mx-auto max-w-sm" />
+            <div className="grid items-center gap-2 sm:grid-cols-[1fr_200px]">
+              <Teclado alvo={proximo} erro={erroTecla} {...(foco !== undefined ? { foco } : {})} />
+              <Maos ativos={dedo === null ? [] : [dedo]} className="mx-auto max-w-[200px]" />
+            </div>
 
             <input
               ref={entrada}

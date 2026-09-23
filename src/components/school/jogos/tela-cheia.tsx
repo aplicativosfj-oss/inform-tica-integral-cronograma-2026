@@ -1,4 +1,4 @@
-import { Minimize2 } from "lucide-react";
+import { ArrowLeft, Minimize2 } from "lucide-react";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
@@ -19,13 +19,15 @@ import { createPortal } from "react-dom";
 interface Props {
   cheia: boolean;
   aoSair: () => void;
+  /** Fecha o jogo e volta à sala de jogos. */
+  aoFechar?: () => void;
   titulo: string;
   /** Tenta deixar o aparelho na horizontal (corrida, tabuleiro). */
   horizontal?: boolean;
   children: ReactNode;
 }
 
-export function CaixaJogo({ cheia, aoSair, titulo, horizontal, children }: Props) {
+export function CaixaJogo({ cheia, aoSair, aoFechar, titulo, horizontal, children }: Props) {
   const lugar = useRef<HTMLDivElement>(null);
   const hospedeiro = useMemo(
     () => (typeof document === "undefined" ? null : document.createElement("div")),
@@ -95,14 +97,25 @@ export function CaixaJogo({ cheia, aoSair, titulo, horizontal, children }: Props
           <div className={cheia ? "flex min-h-full flex-1 flex-col" : ""}>
             {cheia && (
               <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-slate-950/95 px-3 py-1.5 backdrop-blur">
-                <span className="truncate text-xs font-bold text-slate-200">{titulo}</span>
-                <button
-                  type="button"
-                  onClick={aoSair}
-                  className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-white/20 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
-                >
-                  <Minimize2 className="size-4" /> Sair da tela cheia
-                </button>
+                <span className="min-w-0 truncate text-xs font-bold text-slate-200">{titulo}</span>
+                <div className="flex shrink-0 gap-1.5">
+                  {aoFechar && (
+                    <button
+                      type="button"
+                      onClick={aoFechar}
+                      className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-white/20 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
+                    >
+                      <ArrowLeft className="size-4" /> Fechar jogo
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={aoSair}
+                    className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-white/20 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
+                  >
+                    <Minimize2 className="size-4" /> Modo normal
+                  </button>
+                </div>
               </div>
             )}
             <div className={cheia ? "flex-1 p-2 sm:p-4" : ""}>{children}</div>

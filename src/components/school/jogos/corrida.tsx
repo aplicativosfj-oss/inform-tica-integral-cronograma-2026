@@ -8,7 +8,6 @@ import {
   Smartphone,
   Star,
   Timer,
-  Trophy,
   Volume2,
   VolumeX,
   Zap,
@@ -18,7 +17,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CARROS,
   Corrida as MotorCorrida,
-  desenharCarro,
   TEMAS,
   VOLTAS,
   type Entrada,
@@ -59,26 +57,6 @@ function tempoFmt(s: number): string {
   const m = Math.floor(s / 60);
   const resto = s - m * 60;
   return `${m}:${resto.toFixed(1).padStart(4, "0")}`;
-}
-
-function CarroMiniatura({ cor, ativo }: { cor: string; ativo: boolean }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const c = ref.current;
-    const ctx = c?.getContext("2d");
-    if (!c || !ctx) return;
-    ctx.clearRect(0, 0, c.width, c.height);
-    desenharCarro(ctx, c.width / 2, c.height - 6, c.width * 0.78, cor);
-  }, [cor]);
-  return (
-    <canvas
-      ref={ref}
-      width={160}
-      height={90}
-      className={cn("h-14 w-full transition-transform", ativo && "scale-110")}
-      aria-hidden
-    />
-  );
 }
 
 function Velocimetro({ kmh }: { kmh: number }) {
@@ -257,6 +235,7 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
   const [auto, setAuto] = useState(true);
   const [inclinar, setInclinar] = useState(false);
   const [musica, setMusica] = useState(true);
+  const [somOk, setSomOk] = useState(true);
   const [efeitos, setEfeitos] = useState(true);
   const canvas = useRef<HTMLCanvasElement>(null);
   const som = useRef<SomCorrida | null>(null);
@@ -367,6 +346,16 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
     // Só recria quando começa outra corrida ou quando se entra/sai do menu.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rodada, ativo]);
+
+  // Celulares costumam deixar o áudio suspenso até um toque: vigia o estado e mostra um botão.
+  useEffect(() => {
+    if (fase === "menu") return;
+    const t = window.setInterval(() => {
+      const st = som.current?.estado();
+      setSomOk(!st || st === "running");
+    }, 500);
+    return () => window.clearInterval(t);
+  }, [fase]);
 
   // Ao sair da tela (ou voltar ao menu), o som para.
   useEffect(() => {
@@ -522,7 +511,14 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
                       : "border-white/10 text-slate-400 hover:border-white/40",
                   )}
                 >
-                  <CarroMiniatura cor={c.cor} ativo={carro === i} />
+                  <img
+                    src={`/images/jogos/carro-${i + 1}.jpg`}
+                    alt=""
+                    className={cn(
+                      "h-14 w-full rounded-lg object-cover transition-transform",
+                      carro === i && "scale-105",
+                    )}
+                  />
                   {c.nome}
                 </button>
               ))}
@@ -580,209 +576,220 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
     );
   }
 
-  const controles = (
-    <>
-      <VolanteToque entrada={entrada} className={retrato ? "size-32" : "size-24 sm:size-28"} />
-      <div className="flex flex-col items-end gap-1.5">
-        <div className="flex gap-1.5">
-          <button
-            type="button"
-            onClick={() => void alternarInclinar()}
-            aria-pressed={inclinar}
-            aria-label="Inclinar o celular para virar"
-            className={cn(
-              "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
-              inclinar
-                ? "border-sky-300 bg-sky-500/60 text-white"
-                : "border-white/30 bg-black/40 text-slate-200",
-            )}
-          >
-            <Smartphone className="size-3.5" /> inclinar
-          </button>
-          <button
-            type="button"
-            onClick={() => setAuto((a) => !a)}
-            aria-pressed={auto}
-            aria-label="Acelerador automático"
-            className={cn(
-              "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
-              auto
-                ? "border-emerald-300 bg-emerald-500/60 text-white"
-                : "border-white/30 bg-black/40 text-slate-200",
-            )}
-          >
-            <Zap className="size-3.5" /> auto
-          </button>
-        </div>
-        <div className="flex items-end gap-2">
-          <BotaoToque
-            rotulo="Frear"
-            entrada={entrada}
-            chave="frear"
-            className="h-14 w-16 border-red-300/60 bg-red-700/50 text-[11px] sm:h-16 sm:w-20"
-          >
-            Frear
-          </BotaoToque>
-          {!auto && (
-            <BotaoToque
-              rotulo="Acelerar"
-              entrada={entrada}
-              chave="acelerar"
-              className="h-20 w-20 border-emerald-300/60 sm:h-24 sm:w-24 bg-emerald-600/60 text-xs"
-            >
-              Acelerar
-            </BotaoToque>
-          )}
-        </div>
-      </div>
-    </>
+  const volanteEl = (
+    <VolanteToque entrada={entrada} className={retrato ? "size-32" : "size-24 sm:size-28"} />
   );
 
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="relative mx-auto aspect-video w-full max-w-[calc((100dvh-4.5rem)*1.7778)] select-none overflow-hidden rounded-2xl border border-white/10 bg-black">
-        <canvas
-          ref={canvas}
-          className="block size-full touch-none"
-          aria-label={`Pista de ${TEMAS[pista].nome}. Posição ${hud.posicao} de ${hud.total}, volta ${hud.volta} de ${VOLTAS}.`}
-          {...pistaPointer}
-        />
-
-        {/* Painel */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-2 text-white">
-          <div className="rounded-lg border border-white/20 bg-slate-950/70 px-2 py-0.5 backdrop-blur sm:px-2.5 sm:py-1">
-            <span className="block text-[8px] font-semibold uppercase tracking-wider text-slate-400 sm:text-[9px]">
-              Posição
-            </span>
-            <b className="text-base leading-none tabular-nums sm:text-2xl">
-              {hud.posicao}
-              <span className="text-xs text-slate-400 sm:text-sm">/{hud.total}</span>
-            </b>
-          </div>
-          <div className="pointer-events-auto flex gap-1">
-            <button
-              type="button"
-              aria-label={musica ? "Desligar a música" : "Ligar a música"}
-              aria-pressed={musica}
-              onClick={() => setMusica(som.current?.alternarMusica() ?? false)}
-              className={cn(
-                "flex size-9 cursor-pointer items-center justify-center rounded-lg border border-white/20 bg-slate-950/70 backdrop-blur",
-                musica ? "text-emerald-300" : "text-slate-500",
-              )}
-            >
-              <Music className="size-4" />
-            </button>
-            <button
-              type="button"
-              aria-label={efeitos ? "Desligar os efeitos sonoros" : "Ligar os efeitos sonoros"}
-              aria-pressed={efeitos}
-              onClick={() => setEfeitos(som.current?.alternarEfeitos() ?? false)}
-              className={cn(
-                "flex size-9 cursor-pointer items-center justify-center rounded-lg border border-white/20 bg-slate-950/70 backdrop-blur",
-                efeitos ? "text-emerald-300" : "text-slate-500",
-              )}
-            >
-              {efeitos ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
-            </button>
-          </div>
-          <div className="rounded-lg border border-white/20 bg-slate-950/70 px-2 py-0.5 text-right backdrop-blur sm:px-2.5 sm:py-1">
-            <span className="block text-[8px] font-semibold uppercase tracking-wider text-slate-400 sm:text-[9px]">
-              Volta
-            </span>
-            <b className="text-base leading-none tabular-nums sm:text-2xl">
-              {hud.volta}
-              <span className="text-xs text-slate-400 sm:text-sm">/{VOLTAS}</span>
-            </b>
-          </div>
-        </div>
-        <div
+  const pedaisEl = (
+    <div className="flex flex-col items-end gap-1.5">
+      <div className={cn("flex gap-1.5", !retrato && "flex-col items-end")}>
+        <button
+          type="button"
+          onClick={() => void alternarInclinar()}
+          aria-pressed={inclinar}
+          aria-label="Inclinar o celular para virar"
           className={cn(
-            "pointer-events-none absolute bottom-2",
-            toque && !retrato ? "left-1/2 -translate-x-1/2" : "right-2",
+            "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
+            inclinar
+              ? "border-sky-300 bg-sky-500/60 text-white"
+              : "border-white/30 bg-black/40 text-slate-200",
           )}
         >
-          <Velocimetro kmh={hud.kmh} />
-        </div>
+          <Smartphone className="size-3.5" /> inclinar
+        </button>
+        <button
+          type="button"
+          onClick={() => setAuto((a) => !a)}
+          aria-pressed={auto}
+          aria-label="Acelerador automático"
+          className={cn(
+            "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
+            auto
+              ? "border-emerald-300 bg-emerald-500/60 text-white"
+              : "border-white/30 bg-black/40 text-slate-200",
+          )}
+        >
+          <Zap className="size-3.5" /> auto
+        </button>
+      </div>
+      <div className={cn("flex items-end gap-2", !retrato && "flex-col-reverse items-end")}>
+        <BotaoToque
+          rotulo="Frear"
+          entrada={entrada}
+          chave="frear"
+          className="h-14 w-16 border-red-300/60 bg-red-700/50 text-[11px] sm:h-16 sm:w-20"
+        >
+          Frear
+        </BotaoToque>
+        {!auto && (
+          <BotaoToque
+            rotulo="Acelerar"
+            entrada={entrada}
+            chave="acelerar"
+            className="h-20 w-20 border-emerald-300/60 sm:h-24 sm:w-24 bg-emerald-600/60 text-xs"
+          >
+            Acelerar
+          </BotaoToque>
+        )}
+      </div>
+    </div>
+  );
 
-        {/* Contagem regressiva */}
-        {contagem !== null && fase !== "fim" && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <span
-              key={contagem}
-              className={cn(
-                "animate-in zoom-in-50 fade-in text-7xl font-black italic drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] duration-300 sm:text-8xl",
-                contagem === 0 ? "text-emerald-400" : "text-white",
-              )}
-            >
-              {contagem === 0 ? "VAI!" : contagem}
-            </span>
+  const lateral = toque && !retrato;
+
+  return (
+    <div className="flex flex-col gap-2" onPointerDown={() => som.current?.retomar()}>
+      <div className={cn("flex gap-2", lateral ? "items-center" : "flex-col")}>
+        {lateral && (
+          <div className="flex w-28 shrink-0 items-center justify-center overflow-hidden">
+            {volanteEl}
           </div>
         )}
+        <div className="relative mx-auto aspect-video w-full max-w-[calc((100dvh-4.5rem)*1.7778)] select-none overflow-hidden rounded-2xl border border-white/10 bg-black">
+          <canvas
+            ref={canvas}
+            className="block size-full touch-none"
+            aria-label={`Pista de ${TEMAS[pista].nome}. Posição ${hud.posicao} de ${hud.total}, volta ${hud.volta} de ${VOLTAS}.`}
+            {...pistaPointer}
+          />
 
-        {/* Controles de toque: sobre a pista na horizontal */}
-        {toque && !retrato && (fase === "correndo" || fase === "contagem") && (
-          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-2">
-            {controles}
-          </div>
-        )}
-
-        {/* Resultado */}
-        {fase === "fim" && fim && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm">
-            <div className="flex w-full max-w-sm flex-col items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 p-4 text-center text-white shadow-2xl">
-              <Trophy
+          {/* Painel */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-2 text-white">
+            <div className="rounded-lg border border-white/20 bg-slate-950/70 px-2 py-0.5 backdrop-blur sm:px-2.5 sm:py-1">
+              <span className="block text-[8px] font-semibold uppercase tracking-wider text-slate-400 sm:text-[9px]">
+                Posição
+              </span>
+              <b className="text-base leading-none tabular-nums sm:text-2xl">
+                {hud.posicao}
+                <span className="text-xs text-slate-400 sm:text-sm">/{hud.total}</span>
+              </b>
+            </div>
+            <div className="pointer-events-auto flex gap-1">
+              <button
+                type="button"
+                aria-label={musica ? "Desligar a música" : "Ligar a música"}
+                aria-pressed={musica}
+                onClick={() => setMusica(som.current?.alternarMusica() ?? false)}
                 className={cn(
-                  "size-12",
-                  fim.posicao === 1
-                    ? "text-amber-400"
-                    : fim.posicao === 2
-                      ? "text-slate-300"
-                      : fim.posicao === 3
-                        ? "text-orange-400"
-                        : "text-slate-600",
+                  "flex size-9 cursor-pointer items-center justify-center rounded-lg border border-white/20 bg-slate-950/70 backdrop-blur",
+                  musica ? "text-emerald-300" : "text-slate-500",
                 )}
-                aria-hidden
-              />
-              <h4 className="text-xl font-black">
-                {fim.posicao === 1 ? "Campeão!" : `Você chegou em ${fim.posicao}º lugar`}
-              </h4>
-              <p className="flex items-center gap-1.5 text-sm text-slate-300">
-                <Timer className="size-4" aria-hidden /> {tempoFmt(fim.segundos)}
-                <Flag className="ml-2 size-4" aria-hidden /> {VOLTAS} voltas
-              </p>
-              {fim.estrelas !== null && fim.estrelas > 0 && (
-                <p className="flex items-center gap-1 text-sm font-bold text-amber-300">
-                  <Star className="size-4 fill-current" /> +{fim.estrelas}{" "}
-                  {fim.estrelas === 1 ? "estrela" : "estrelas"}
+              >
+                <Music className="size-4" />
+              </button>
+              <button
+                type="button"
+                aria-label={efeitos ? "Desligar os efeitos sonoros" : "Ligar os efeitos sonoros"}
+                aria-pressed={efeitos}
+                onClick={() => setEfeitos(som.current?.alternarEfeitos() ?? false)}
+                className={cn(
+                  "flex size-9 cursor-pointer items-center justify-center rounded-lg border border-white/20 bg-slate-950/70 backdrop-blur",
+                  efeitos ? "text-emerald-300" : "text-slate-500",
+                )}
+              >
+                {efeitos ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+              </button>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-slate-950/70 px-2 py-0.5 text-right backdrop-blur sm:px-2.5 sm:py-1">
+              <span className="block text-[8px] font-semibold uppercase tracking-wider text-slate-400 sm:text-[9px]">
+                Volta
+              </span>
+              <b className="text-base leading-none tabular-nums sm:text-2xl">
+                {hud.volta}
+                <span className="text-xs text-slate-400 sm:text-sm">/{VOLTAS}</span>
+              </b>
+            </div>
+          </div>
+          <div className={cn("pointer-events-none absolute bottom-2", "right-2")}>
+            <Velocimetro kmh={hud.kmh} />
+          </div>
+
+          {!somOk && fase !== "fim" && (
+            <button
+              type="button"
+              onClick={() => som.current?.retomar()}
+              className="absolute left-1/2 top-12 z-10 flex h-9 -translate-x-1/2 cursor-pointer items-center gap-1.5 rounded-full border border-amber-300 bg-amber-500/90 px-3 text-xs font-bold text-amber-950 shadow-lg"
+            >
+              <VolumeX className="size-4" /> Toque para ligar o som
+            </button>
+          )}
+
+          {/* Contagem regressiva */}
+          {contagem !== null && fase !== "fim" && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span
+                key={contagem}
+                className={cn(
+                  "animate-in zoom-in-50 fade-in text-7xl font-black italic drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)] duration-300 sm:text-8xl",
+                  contagem === 0 ? "text-emerald-400" : "text-white",
+                )}
+              >
+                {contagem === 0 ? "VAI!" : contagem}
+              </span>
+            </div>
+          )}
+
+          {/* Resultado */}
+          {fase === "fim" && fim && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm">
+              <div className="flex w-full max-w-sm flex-col items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 p-4 text-center text-white shadow-2xl">
+                <img
+                  src={`/images/jogos/trofeu-${fim.posicao === 1 ? "ouro" : fim.posicao === 2 ? "prata" : "bronze"}.png`}
+                  alt=""
+                  className={cn(
+                    "size-16 object-contain drop-shadow-lg",
+                    fim.posicao > 3 && "opacity-40 grayscale",
+                  )}
+                />
+                <h4 className="text-xl font-black">
+                  {fim.posicao === 1 ? "Campeão!" : `Você chegou em ${fim.posicao}º lugar`}
+                </h4>
+                <p className="flex items-center gap-1.5 text-sm text-slate-300">
+                  <Timer className="size-4" aria-hidden /> {tempoFmt(fim.segundos)}
+                  <Flag className="ml-2 size-4" aria-hidden /> {VOLTAS} voltas
                 </p>
-              )}
-              {fim.posicao > 3 && (
-                <p className="text-xs text-slate-400">
-                  Desvie dos cones e não saia da pista: quem chega ao pódio ganha estrelas.
-                </p>
-              )}
-              <div className="mt-1 flex flex-wrap justify-center gap-2">
-                <button
-                  type="button"
-                  onClick={correr}
-                  className="flex h-10 cursor-pointer items-center gap-1.5 rounded-xl bg-gradient-to-b from-red-500 to-red-700 px-4 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
-                >
-                  <RotateCcw className="size-4" /> Correr de novo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFase("menu")}
-                  className="h-10 cursor-pointer rounded-xl border border-white/20 px-4 text-sm font-semibold text-slate-200 hover:bg-white/10"
-                >
-                  Trocar carro/pista
-                </button>
+                {fim.estrelas !== null && fim.estrelas > 0 && (
+                  <p className="flex items-center gap-1 text-sm font-bold text-amber-300">
+                    <Star className="size-4 fill-current" /> +{fim.estrelas}{" "}
+                    {fim.estrelas === 1 ? "estrela" : "estrelas"}
+                  </p>
+                )}
+                {fim.posicao > 3 && (
+                  <p className="text-xs text-slate-400">
+                    Desvie dos cones e não saia da pista: quem chega ao pódio ganha estrelas.
+                  </p>
+                )}
+                <div className="mt-1 flex flex-wrap justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={correr}
+                    className="flex h-10 cursor-pointer items-center gap-1.5 rounded-xl bg-gradient-to-b from-red-500 to-red-700 px-4 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+                  >
+                    <RotateCcw className="size-4" /> Correr de novo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFase("menu")}
+                    className="h-10 cursor-pointer rounded-xl border border-white/20 px-4 text-sm font-semibold text-slate-200 hover:bg-white/10"
+                  >
+                    Trocar carro/pista
+                  </button>
+                </div>
               </div>
             </div>
+          )}
+        </div>
+        {lateral && (
+          <div className="flex w-28 shrink-0 items-center justify-center overflow-hidden">
+            {pedaisEl}
           </div>
         )}
       </div>
       {toque && retrato && (fase === "correndo" || fase === "contagem") && (
-        <div className="flex items-end justify-between gap-3 px-2 py-3">{controles}</div>
+        <div className="flex items-end justify-between gap-3 px-2 py-3">
+          {volanteEl}
+          {pedaisEl}
+        </div>
       )}
       {!toque && (
         <p className="hidden text-center text-[11px] text-muted-foreground sm:block">

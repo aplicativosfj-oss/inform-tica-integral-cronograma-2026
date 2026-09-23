@@ -11,6 +11,16 @@
  * interface (posição, volta, velocidade, fim) por callbacks.
  */
 
+import {
+  desenharAcabamento,
+  desenharCeu,
+  desenharFundo,
+  desenharNevoa,
+  desenharObjeto,
+  misturar,
+  type TipoObjeto,
+  type VisualCenario,
+} from "@/components/school/jogos/corrida-cenario";
 import type { SomCorrida } from "@/components/school/jogos/corrida-som";
 
 export type IdPista = "cidade" | "montanha" | "praia" | "deserto" | "neve";
@@ -30,15 +40,10 @@ export const CARROS: CarroInfo[] = [
   { id: "verde", nome: "Carro 6", cor: "#22c55e" },
 ];
 
-type TipoSprite = "cone" | "pneus" | "palmeira" | "pinheiro" | "cacto" | "predio" | "placa";
+type TipoSprite = TipoObjeto;
 
-interface Tema {
+interface Tema extends VisualCenario {
   nome: string;
-  ceuTopo: string;
-  ceuBase: string;
-  sol?: { x: number; cor: string };
-  longe: { tipo: "predios" | "montanhas" | "mesas" | "mar"; cor: string };
-  perto: { tipo: "predios" | "montanhas" | "mesas" | "mar"; cor: string };
   chao: [string, string];
   zebra: [string, string];
   asfalto: [string, string];
@@ -46,81 +51,124 @@ interface Tema {
   lateral: TipoSprite[];
   curvas: number;
   morros: number;
+  /** Guard-rail metálico dos dois lados da pista. */
+  guarda: boolean;
+  /** Foto panorâmica de fundo; `horizonte` é a fração da altura onde o chão começa. */
+  foto?: { arquivo: string; horizonte: number };
 }
 
 export const TEMAS: Record<IdPista, Tema> = {
   cidade: {
     nome: "Cidade",
-    ceuTopo: "#2b1b5a",
-    ceuBase: "#f59e6b",
-    sol: { x: 0.72, cor: "#fde68a" },
+    ceuTopo: "#0f0a2e",
+    ceuMeio: "#4a2a80",
+    ceuBase: "#f2895a",
+    nevoa: "#c4677e",
+    sol: { x: 0.72, y: 150, cor: "#ffd08a", tamanho: 13 },
     longe: { tipo: "predios", cor: "#3b2a6b" },
-    perto: { tipo: "predios", cor: "#1f1747" },
-    chao: ["#3a3a4a", "#33333f"],
+    perto: { tipo: "predios", cor: "#1d1544" },
+    nuvens: 3,
+    nuvemCor: "#d8a7c8",
+    estrelas: true,
+    estilo: "noite",
+    chao: ["#2f2f3d", "#292935"],
     zebra: ["#e5e7eb", "#ef4444"],
-    asfalto: ["#4b5563", "#454f5c"],
+    asfalto: ["#3d4450", "#373e49"],
     faixa: "#fde047",
-    lateral: ["predio", "predio", "placa", "pneus"],
+    lateral: ["predio", "predio", "poste", "poste", "placa", "pneus"],
     curvas: 2,
     morros: 1,
+    guarda: true,
   },
   montanha: {
     nome: "Montanha",
-    ceuTopo: "#3b82c4",
-    ceuBase: "#cfe8fb",
+    ceuTopo: "#5aa7e0",
+    ceuMeio: "#a9d1f0",
+    ceuBase: "#dbe8f2",
+    nevoa: "#c9dcea",
     longe: { tipo: "montanhas", cor: "#7c93ad" },
     perto: { tipo: "montanhas", cor: "#3f6b4a" },
-    chao: ["#3f8a3c", "#397d37"],
+    nuvens: 4,
+    nuvemCor: "#ffffff",
+    estrelas: false,
+    estilo: "dia",
+    chao: ["#5f8560", "#577b58"],
     zebra: ["#f8fafc", "#dc2626"],
-    asfalto: ["#5b6470", "#535c68"],
+    asfalto: ["#565e69", "#4f5761"],
     faixa: "#f8fafc",
-    lateral: ["pinheiro", "pinheiro", "pinheiro", "placa"],
+    lateral: ["pinheiro", "pinheiro", "pinheiro", "arbusto", "rocha", "placa"],
     curvas: 4,
     morros: 2,
+    guarda: true,
+    foto: { arquivo: "cenario-montanha.jpg", horizonte: 0.86 },
   },
   praia: {
     nome: "Praia",
-    ceuTopo: "#38a3e8",
-    ceuBase: "#e0f5ff",
-    sol: { x: 0.25, cor: "#fff7c2" },
+    ceuTopo: "#3f9be0",
+    ceuMeio: "#8ec8ee",
+    ceuBase: "#dcecf3",
+    nevoa: "#e3eef2",
+    sol: { x: 0.25, y: 120, cor: "#fff7c2", tamanho: 12 },
     longe: { tipo: "mar", cor: "#22b8cf" },
     perto: { tipo: "montanhas", cor: "#5aa876" },
-    chao: ["#f1d9a0", "#e9cf92"],
+    nuvens: 5,
+    nuvemCor: "#ffffff",
+    estrelas: false,
+    estilo: "dia",
+    chao: ["#e2cc9f", "#d9c193"],
     zebra: ["#ffffff", "#f97316"],
-    asfalto: ["#5d6570", "#555d68"],
+    asfalto: ["#5c636d", "#555c66"],
     faixa: "#facc15",
-    lateral: ["palmeira", "palmeira", "palmeira", "pneus"],
+    lateral: ["palmeira", "palmeira", "palmeira", "arbusto", "pneus"],
     curvas: 3,
     morros: 1,
+    guarda: false,
+    foto: { arquivo: "cenario-praia.jpg", horizonte: 0.5 },
   },
   deserto: {
     nome: "Deserto",
-    ceuTopo: "#d9622b",
-    ceuBase: "#fcd9a0",
-    sol: { x: 0.5, cor: "#fff1c1" },
+    ceuTopo: "#e8964b",
+    ceuMeio: "#f2b866",
+    ceuBase: "#f7d08a",
+    nevoa: "#f0c07a",
+    sol: { x: 0.5, y: 140, cor: "#fff1c1", tamanho: 14 },
     longe: { tipo: "mesas", cor: "#b5532a" },
-    perto: { tipo: "mesas", cor: "#8f3d1f" },
-    chao: ["#d9a066", "#cf9659"],
+    perto: { tipo: "dunas", cor: "#c98a4d" },
+    nuvens: 2,
+    nuvemCor: "#f3c48a",
+    estrelas: false,
+    estilo: "deserto",
+    chao: ["#c98a4d", "#bf8145"],
     zebra: ["#f8fafc", "#b91c1c"],
-    asfalto: ["#6b6259", "#635b52"],
+    asfalto: ["#6a6058", "#625950"],
     faixa: "#fde68a",
-    lateral: ["cacto", "cacto", "pneus", "placa"],
+    lateral: ["cacto", "cacto", "rocha", "rocha", "arbusto", "placa"],
     curvas: 3,
     morros: 2,
+    guarda: false,
+    foto: { arquivo: "cenario-deserto.jpg", horizonte: 0.66 },
   },
   neve: {
     nome: "Neve",
-    ceuTopo: "#8fb7d8",
-    ceuBase: "#f1f7fc",
-    longe: { tipo: "montanhas", cor: "#b9cde0" },
-    perto: { tipo: "montanhas", cor: "#8aa5bd" },
-    chao: ["#f4f8fb", "#e6eef4"],
+    ceuTopo: "#9fc3e0",
+    ceuMeio: "#cfe1f0",
+    ceuBase: "#eaf1f6",
+    nevoa: "#e6eef4",
+    longe: { tipo: "montanhas", cor: "#b9cde0", neve: true },
+    perto: { tipo: "montanhas", cor: "#8aa5bd", neve: true },
+    nuvens: 3,
+    nuvemCor: "#ffffff",
+    estrelas: false,
+    estilo: "neve",
+    chao: ["#f2f7fb", "#e4edf3"],
     zebra: ["#f8fafc", "#2563eb"],
-    asfalto: ["#6f7a86", "#67717d"],
+    asfalto: ["#6b7480", "#646d79"],
     faixa: "#e0f2fe",
-    lateral: ["pinheiro", "pinheiro", "pinheiro", "placa"],
+    lateral: ["pinheiro", "pinheiro", "pinheiro", "arbusto", "rocha", "placa"],
     curvas: 4,
     morros: 2,
+    guarda: true,
+    foto: { arquivo: "cenario-neve.jpg", horizonte: 0.8 },
   },
 };
 
@@ -155,6 +203,8 @@ interface Ponto {
 interface Sprite {
   tipo: TipoSprite;
   offset: number;
+  /** Semente estável (0 a 1): cada objeto tem tamanho e detalhes próprios. */
+  sem: number;
   batido?: boolean;
 }
 
@@ -472,213 +522,26 @@ export function desenharCarro(
   ctx.restore();
 }
 
-function desenharSprite(
-  ctx: CanvasRenderingContext2D,
-  tipo: TipoSprite,
-  x: number,
-  y: number,
-  larg: number,
-) {
-  const w = Math.max(larg, 1);
-  ctx.save();
-  ctx.translate(x, y);
-  switch (tipo) {
-    case "cone": {
-      const h = w * 1.1;
-      ctx.fillStyle = "#f97316";
-      ctx.beginPath();
-      ctx.moveTo(-w * 0.4, 0);
-      ctx.lineTo(0, -h);
-      ctx.lineTo(w * 0.4, 0);
-      ctx.fill();
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.moveTo(-w * 0.24, -h * 0.4);
-      ctx.lineTo(w * 0.24, -h * 0.4);
-      ctx.lineTo(w * 0.14, -h * 0.65);
-      ctx.lineTo(-w * 0.14, -h * 0.65);
-      ctx.fill();
-      ctx.fillStyle = "#1f2937";
-      ctx.fillRect(-w * 0.5, -h * 0.06, w, h * 0.06);
-      break;
-    }
-    case "pneus": {
-      ctx.fillStyle = "#111827";
-      for (let i = 0; i < 3; i++) {
-        ctx.beginPath();
-        ctx.roundRect(-w * 0.4, -w * 0.3 * (i + 1), w * 0.8, w * 0.3, w * 0.12);
-        ctx.fill();
-      }
-      ctx.fillStyle = "#e5e7eb";
-      ctx.fillRect(-w * 0.4, -w * 0.62, w * 0.8, w * 0.05);
-      break;
-    }
-    case "palmeira": {
-      const h = w * 2.4;
-      ctx.strokeStyle = "#7c4a1e";
-      ctx.lineWidth = Math.max(w * 0.12, 1);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(w * 0.15, -h * 0.5, 0, -h);
-      ctx.stroke();
-      ctx.fillStyle = "#16a34a";
-      for (const a of [-2.6, -2.0, -1.4, -0.9, -0.4]) {
-        ctx.save();
-        ctx.translate(0, -h);
-        ctx.rotate(a + Math.PI / 2);
-        ctx.beginPath();
-        ctx.ellipse(w * 0.45, 0, w * 0.5, w * 0.11, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-      break;
-    }
-    case "pinheiro": {
-      const h = w * 2.6;
-      ctx.fillStyle = "#5b3a1e";
-      ctx.fillRect(-w * 0.07, -h * 0.2, w * 0.14, h * 0.2);
-      for (let i = 0; i < 3; i++) {
-        const top = -h * (0.32 + i * 0.28);
-        const baseY = -h * (0.15 + i * 0.28);
-        const meia = w * (0.5 - i * 0.1);
-        ctx.fillStyle = i === 0 ? "#166534" : i === 1 ? "#15803d" : "#16a34a";
-        ctx.beginPath();
-        ctx.moveTo(-meia, baseY);
-        ctx.lineTo(0, top - h * 0.16);
-        ctx.lineTo(meia, baseY);
-        ctx.fill();
-        ctx.fillStyle = "rgba(255,255,255,0.55)";
-        ctx.beginPath();
-        ctx.moveTo(-meia * 0.45, baseY - h * 0.09);
-        ctx.lineTo(0, top - h * 0.16);
-        ctx.lineTo(meia * 0.45, baseY - h * 0.09);
-        ctx.fill();
-      }
-      break;
-    }
-    case "cacto": {
-      const h = w * 1.9;
-      ctx.fillStyle = "#2f8f4e";
-      ctx.beginPath();
-      ctx.roundRect(-w * 0.12, -h, w * 0.24, h, w * 0.12);
-      ctx.roundRect(-w * 0.5, -h * 0.62, w * 0.16, h * 0.3, w * 0.08);
-      ctx.roundRect(-w * 0.5, -h * 0.4, w * 0.4, w * 0.14, w * 0.07);
-      ctx.roundRect(w * 0.34, -h * 0.75, w * 0.16, h * 0.32, w * 0.08);
-      ctx.roundRect(w * 0.1, -h * 0.5, w * 0.4, w * 0.14, w * 0.07);
-      ctx.fill();
-      break;
-    }
-    case "predio": {
-      const h = w * 3.4;
-      ctx.fillStyle = "#1e2440";
-      ctx.fillRect(-w * 0.55, -h, w * 1.1, h);
-      ctx.fillStyle = "#2a3159";
-      ctx.fillRect(-w * 0.55, -h, w * 0.18, h);
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 3; c++) {
-          const acesa = ruido(r * 7 + c * 3 + Math.round(w)) > 0.45;
-          ctx.fillStyle = acesa ? "#fde68a" : "#3a4272";
-          ctx.fillRect(-w * 0.4 + c * w * 0.32, -h * 0.95 + r * h * 0.115, w * 0.2, h * 0.06);
-        }
-      }
-      break;
-    }
-    case "placa": {
-      ctx.fillStyle = "#374151";
-      ctx.fillRect(-w * 0.04, -w * 1.5, w * 0.08, w * 1.5);
-      ctx.fillStyle = "#facc15";
-      ctx.beginPath();
-      ctx.moveTo(0, -w * 1.95);
-      ctx.lineTo(w * 0.42, -w * 1.5);
-      ctx.lineTo(0, -w * 1.05);
-      ctx.lineTo(-w * 0.42, -w * 1.5);
-      ctx.fill();
-      ctx.strokeStyle = "#111827";
-      ctx.lineWidth = Math.max(w * 0.05, 1);
-      ctx.beginPath();
-      ctx.moveTo(-w * 0.18, -w * 1.6);
-      ctx.lineTo(w * 0.1, -w * 1.5);
-      ctx.lineTo(-w * 0.18, -w * 1.4);
-      ctx.stroke();
-      break;
-    }
-  }
-  ctx.restore();
-}
-
 const LARGURA_SPRITE: Record<TipoSprite, number> = {
   cone: 0.11,
   pneus: 0.2,
-  palmeira: 0.35,
-  pinheiro: 0.5,
+  palmeira: 0.42,
+  pinheiro: 0.52,
   cacto: 0.3,
-  predio: 0.75,
+  predio: 0.85,
   placa: 0.28,
+  poste: 0.16,
+  rocha: 0.34,
+  arbusto: 0.38,
 };
-
-function desenharHorizonte(ctx: CanvasRenderingContext2D, tema: Tema, deslocamento: number) {
-  const hz = ALTURA * 0.5;
-  const ceu = ctx.createLinearGradient(0, 0, 0, hz);
-  ceu.addColorStop(0, tema.ceuTopo);
-  ceu.addColorStop(1, tema.ceuBase);
-  ctx.fillStyle = ceu;
-  ctx.fillRect(0, 0, LARGURA, hz + 2);
-
-  if (tema.sol) {
-    const sx = tema.sol.x * LARGURA - deslocamento * 0.05;
-    const halo = ctx.createRadialGradient(sx, hz - 46, 4, sx, hz - 46, 70);
-    halo.addColorStop(0, tema.sol.cor);
-    halo.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = halo;
-    ctx.fillRect(sx - 80, hz - 130, 160, 160);
-  }
-
-  const camada = (
-    tipo: Tema["longe"]["tipo"],
-    cor: string,
-    fator: number,
-    altMax: number,
-    ajuste: number,
-  ) => {
-    const passo = LARGURA / 7;
-    const off = deslocamento * fator;
-    const i0 = Math.floor(off / passo) - 1;
-    ctx.fillStyle = cor;
-    if (tipo === "mar") {
-      ctx.fillRect(0, hz - 14, LARGURA, 16);
-      ctx.fillStyle = "rgba(255,255,255,0.35)";
-      ctx.fillRect(0, hz - 14, LARGURA, 2);
-      return;
-    }
-    for (let i = i0; i < i0 + 10; i++) {
-      const x = i * passo - off + ajuste;
-      const a = altMax * (0.35 + ruido(i + ajuste) * 0.65);
-      ctx.beginPath();
-      if (tipo === "predios") {
-        const l = passo * (0.5 + ruido(i * 3) * 0.4);
-        ctx.rect(x, hz - a, l, a + 2);
-      } else if (tipo === "mesas") {
-        ctx.moveTo(x - passo * 0.2, hz + 2);
-        ctx.lineTo(x + passo * 0.05, hz - a);
-        ctx.lineTo(x + passo * 0.75, hz - a);
-        ctx.lineTo(x + passo * 1.0, hz + 2);
-      } else {
-        ctx.moveTo(x - passo * 0.3, hz + 2);
-        ctx.lineTo(x + passo * 0.5, hz - a);
-        ctx.lineTo(x + passo * 1.3, hz + 2);
-      }
-      ctx.fill();
-    }
-  };
-  camada(tema.longe.tipo, tema.longe.cor, 0.25, 70, 0);
-  camada(tema.perto.tipo, tema.perto.cor, 0.5, 38, 7);
-}
 
 // ------------------------------------------------------------------- motor
 
 export class Corrida {
   private ctx: CanvasRenderingContext2D;
   private tema: Tema;
+  private foto: HTMLImageElement | null = null;
+  private tempoCena = 0;
   private segs: Segmento[] = [];
   private comprimento = 0;
   private rivais: Rival[] = [];
@@ -708,6 +571,10 @@ export class Corrida {
     op.canvas.height = ALTURA;
     this.ctx = op.canvas.getContext("2d")!;
     this.tema = TEMAS[op.pista];
+    if (this.tema.foto && typeof Image !== "undefined") {
+      this.foto = new Image();
+      this.foto.src = `/images/jogos/${this.tema.foto.arquivo}`;
+    }
     this.montarPista();
     this.montarRivais();
     this.desenhar();
@@ -789,11 +656,12 @@ export class Corrida {
       const lado = n % 6 === 0 ? -1 : 1;
       const tipo = t.lateral[Math.floor(rnd() * t.lateral.length)]!;
       const dist = tipo === "predio" ? 1.9 + rnd() * 1.2 : 1.35 + rnd() * 1.6;
-      this.segs[n]!.sprites.push({ tipo, offset: lado * dist });
-      if (rnd() < 0.35) this.segs[n]!.sprites.push({ tipo, offset: -lado * (1.4 + rnd() * 1.6) });
+      this.segs[n]!.sprites.push({ tipo, offset: lado * dist, sem: rnd() });
+      if (rnd() < 0.35)
+        this.segs[n]!.sprites.push({ tipo, offset: -lado * (1.4 + rnd() * 1.6), sem: rnd() });
     }
     for (let n = 60; n < this.segs.length - 20; n += 45 + Math.floor(rnd() * 40)) {
-      this.segs[n]!.sprites.push({ tipo: "cone", offset: (rnd() - 0.5) * 1.3 });
+      this.segs[n]!.sprites.push({ tipo: "cone", offset: (rnd() - 0.5) * 1.3, sem: rnd() });
     }
   }
 
@@ -864,6 +732,7 @@ export class Corrida {
     if (this.posicao < antes && this.volta > VOLTAS && !this.terminou) this.terminarJogador();
     this.distancia += dt * this.vel;
     this.ceuOff += seg.curva * razao * dt * 40;
+    this.tempoCena += dt;
 
     // Volante
     const dx = dt * 2 * razao;
@@ -1065,6 +934,131 @@ export class Corrida {
     c.fill();
   }
 
+  /** Faixas laterais brancas, marcas de pneu no asfalto e guard-rail. */
+  private detalhesPista(seg: Segmento, n: number, nev: number) {
+    const { p1, p2 } = seg;
+    const borda = misturar("#f1f5f9", this.tema.nevoa, nev);
+    for (const lado of [-1, 1]) {
+      const a1 = p1.tela.x + lado * p1.tela.w * 0.93;
+      const a2 = p2.tela.x + lado * p2.tela.w * 0.93;
+      const l1 = p1.tela.w / 40;
+      const l2 = p2.tela.w / 40;
+      this.poligono(
+        a1 - l1,
+        p1.tela.y,
+        a1 + l1,
+        p1.tela.y,
+        a2 + l2,
+        p2.tela.y,
+        a2 - l2,
+        p2.tela.y,
+        borda,
+      );
+    }
+    if (n < 55) {
+      for (const lado of [-1, 1]) {
+        const a1 = p1.tela.x + lado * p1.tela.w * 0.32;
+        const a2 = p2.tela.x + lado * p2.tela.w * 0.32;
+        const l1 = p1.tela.w * 0.1;
+        const l2 = p2.tela.w * 0.1;
+        this.poligono(
+          a1 - l1,
+          p1.tela.y,
+          a1 + l1,
+          p1.tela.y,
+          a2 + l2,
+          p2.tela.y,
+          a2 - l2,
+          p2.tela.y,
+          "rgba(0,0,0,0.11)",
+        );
+      }
+    }
+    if (this.tema.guarda) {
+      const metal = misturar("#c5ccd6", this.tema.nevoa, nev);
+      const sombra = misturar("#7b8594", this.tema.nevoa, nev);
+      for (const lado of [-1, 1]) {
+        const o = 1.3;
+        const x1 = p1.tela.x + lado * p1.tela.w * o;
+        const x2 = p2.tela.x + lado * p2.tela.w * o;
+        const h1 = p1.tela.w * 0.085;
+        const h2 = p2.tela.w * 0.085;
+        this.poligono(
+          x1,
+          p1.tela.y - h1 * 0.5,
+          x1,
+          p1.tela.y - h1,
+          x2,
+          p2.tela.y - h2,
+          x2,
+          p2.tela.y - h2 * 0.5,
+          metal,
+        );
+        this.poligono(
+          x1,
+          p1.tela.y,
+          x1,
+          p1.tela.y - h1 * 0.5,
+          x2,
+          p2.tela.y - h2 * 0.5,
+          x2,
+          p2.tela.y,
+          sombra,
+        );
+        if (seg.index % 4 === 0) {
+          const pw = p1.tela.w * 0.02;
+          this.poligono(
+            x1 - pw,
+            p1.tela.y,
+            x1 + pw,
+            p1.tela.y,
+            x1 + pw,
+            p1.tela.y - h1 * 1.25,
+            x1 - pw,
+            p1.tela.y - h1 * 1.25,
+            sombra,
+          );
+        }
+      }
+    }
+  }
+
+  /** Fundo: foto panorâmica (espelhada nas emendas) ou, sem ela, o céu desenhado em código. */
+  private desenharFundoCena(c: CanvasRenderingContext2D) {
+    const img = this.foto;
+    const f = this.tema.foto;
+    if (img && f && img.complete && img.naturalWidth > 0) {
+      const larg = 1100;
+      const alt = (larg * img.naturalHeight) / img.naturalWidth;
+      const topo = ALTURA / 2 - f.horizonte * alt;
+      const volta = larg * 2;
+      const off = (((this.ceuOff * 0.6) % volta) + volta) % volta;
+      const t0 = Math.floor(off / larg);
+      c.save();
+      c.beginPath();
+      c.rect(0, 0, LARGURA, ALTURA / 2 + 2);
+      c.clip();
+      for (let k = 0; k < 3; k++) {
+        const t = t0 + k;
+        const x = t * larg - off;
+        if (x > LARGURA || x + larg < 0) continue;
+        if (t % 2 !== 0) {
+          c.save();
+          c.translate(x + larg, 0);
+          c.scale(-1, 1);
+          c.drawImage(img, 0, topo, larg, alt);
+          c.restore();
+        } else {
+          c.drawImage(img, x, topo, larg, alt);
+        }
+      }
+      c.restore();
+      return;
+    }
+    desenharCeu(c, this.tema, this.ceuOff, this.tempoCena);
+    desenharFundo(c, this.tema, this.ceuOff, this.tempoCena);
+  }
+
   private desenhar() {
     const c = this.ctx;
     const base = this.achar(this.posicao);
@@ -1074,7 +1068,7 @@ export class Corrida {
     const jogY = interpolar(segJog.p1.mundo.y, segJog.p2.mundo.y, jogPct);
 
     c.clearRect(0, 0, LARGURA, ALTURA);
-    desenharHorizonte(c, this.tema, this.ceuOff);
+    this.desenharFundoCena(c);
     // Chão até o horizonte; os segmentos pintam por cima.
     c.fillStyle = this.tema.chao[0]!;
     c.fillRect(0, ALTURA / 2, LARGURA, ALTURA / 2);
@@ -1097,8 +1091,13 @@ export class Corrida {
         continue;
 
       const { p1, p2 } = seg;
+      // Perspectiva atmosférica: quanto mais longe, mais a cor se mistura com o horizonte.
+      const nev = Math.min(0.92, Math.pow(n / VISAO, 1.5) * 1.05);
+      const corChao = misturar(seg.cores.chao, this.tema.nevoa, nev);
+      const corZebra = misturar(seg.cores.zebra, this.tema.nevoa, nev);
+      const corAsfalto = misturar(seg.cores.asfalto, this.tema.nevoa, nev);
       // chão
-      c.fillStyle = seg.cores.chao;
+      c.fillStyle = corChao;
       c.fillRect(0, p2.tela.y, LARGURA, p1.tela.y - p2.tela.y);
       // zebra
       const z1 = p1.tela.w / 6;
@@ -1112,7 +1111,7 @@ export class Corrida {
         p2.tela.y,
         p2.tela.x - p2.tela.w - z2,
         p2.tela.y,
-        seg.cores.zebra,
+        corZebra,
       );
       this.poligono(
         p1.tela.x + p1.tela.w + z1,
@@ -1123,7 +1122,7 @@ export class Corrida {
         p2.tela.y,
         p2.tela.x + p2.tela.w + z2,
         p2.tela.y,
-        seg.cores.zebra,
+        corZebra,
       );
       // asfalto
       this.poligono(
@@ -1135,8 +1134,9 @@ export class Corrida {
         p2.tela.y,
         p2.tela.x - p2.tela.w,
         p2.tela.y,
-        seg.cores.asfalto,
+        corAsfalto,
       );
+      this.detalhesPista(seg, n, nev);
       // faixas
       if (seg.cores.faixa) {
         const l1 = p1.tela.w / 32;
@@ -1153,12 +1153,14 @@ export class Corrida {
             p2.tela.y,
             a2 - l2 / 2,
             p2.tela.y,
-            seg.cores.faixa,
+            misturar(seg.cores.faixa, this.tema.nevoa, nev),
           );
         }
       }
       maxY = p1.tela.y;
     }
+
+    desenharNevoa(c, this.tema);
 
     // Objetos, de trás para a frente.
     for (let n = VISAO - 1; n > 0; n--) {
@@ -1174,7 +1176,16 @@ export class Corrida {
           c.beginPath();
           c.rect(0, 0, LARGURA, seg.clip);
           c.clip();
-          desenharSprite(c, s.tipo, sx, sy, larg);
+          desenharObjeto(
+            c,
+            s.tipo,
+            sx,
+            sy,
+            larg,
+            s.sem,
+            Math.min(1, Math.pow(n / VISAO, 1.35)),
+            this.tema,
+          );
           c.restore();
         }
       }
@@ -1219,6 +1230,8 @@ export class Corrida {
         freando: this.freando,
       });
     }
+
+    desenharAcabamento(c, this.tema, this.vel / VEL_MAX);
 
     // Linhas de velocidade nas bordas quando está rápido.
     const razao = this.vel / VEL_MAX;

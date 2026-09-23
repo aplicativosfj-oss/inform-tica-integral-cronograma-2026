@@ -114,10 +114,31 @@ export class SomCorrida {
       if (!Ctor) return null;
       const ctx = new Ctor();
       void ctx.resume();
-      return new SomCorrida(ctx);
+      const som = new SomCorrida(ctx);
+      // Truque do iOS/Android: tocar um instante de silêncio dentro do toque libera o áudio.
+      const mudo = ctx.createBuffer(1, 1, 22050);
+      const fonte = ctx.createBufferSource();
+      fonte.buffer = mudo;
+      fonte.connect(ctx.destination);
+      fonte.start(0);
+      // Se a aba for escondida e voltar, o navegador suspende o áudio: retoma.
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) som.retomar();
+      });
+      return som;
     } catch {
       return null;
     }
+  }
+
+  /** Estado do áudio do navegador: "running" quando está tocando de verdade. */
+  estado(): AudioContextState {
+    return this.ctx.state;
+  }
+
+  /** Reativa o áudio depois de um toque (chamado a cada toque na tela do jogo). */
+  retomar() {
+    if (this.ctx.state !== "running") void this.ctx.resume();
   }
 
   private criarRuido(freq: number, q: number, tipo: BiquadFilterType) {

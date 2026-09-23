@@ -215,6 +215,10 @@ export function SalaDeJogos() {
         <CaixaJogo
           cheia={cheia}
           aoSair={() => setCheia(false)}
+          aoFechar={() => {
+            setJogo(null);
+            setCheia(false);
+          }}
           titulo={`${jogo.emoji} ${jogo.nome}`}
           horizontal={jogo.id === "corrida"}
         >
@@ -308,8 +312,9 @@ export function SalaDeJogos() {
               disabled={!serve}
               onClick={() => {
                 setJogo(j);
-                // No celular o jogo já abre em tela cheia (o toque é o gesto que o navegador exige).
-                setCheia(window.matchMedia("(pointer: coarse)").matches);
+                // Todo jogo abre em tela cheia (o clique é o gesto que o navegador exige):
+                // a partida não fica redimensionando com a janela.
+                setCheia(true);
               }}
               className={cn(
                 "flex flex-col items-start gap-0.5 rounded-2xl border-2 p-2.5 text-left transition-colors",
