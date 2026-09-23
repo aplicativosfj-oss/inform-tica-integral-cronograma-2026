@@ -48,6 +48,11 @@ export function estrelasDe(p: Partida): number {
   return nivel >= 3 ? 5 : nivel === 2 ? 3 : 2;
 }
 
+// `sessionStorage`, não `localStorage`: num computador compartilhado do
+// laboratório, a carteira de estrelas de um aluno não pode continuar
+// aparecendo pro próximo que abrir a Sala de Jogos sem estar logado — quem
+// está logado já tem o total de verdade gravado no servidor (trilha e
+// ranking); esta cópia local é só de exibição, e dura o tempo da aba.
 const CHAVE_LOCAL = "infoteca:estrelas";
 
 interface Carteira {
@@ -61,7 +66,7 @@ function vazia(): Carteira {
 
 export function lerCarteira(): Carteira {
   try {
-    const bruto = window.localStorage.getItem(CHAVE_LOCAL);
+    const bruto = window.sessionStorage.getItem(CHAVE_LOCAL);
     return bruto ? (JSON.parse(bruto) as Carteira) : vazia();
   } catch {
     return vazia();
@@ -70,7 +75,7 @@ export function lerCarteira(): Carteira {
 
 function gravarCarteira(c: Carteira) {
   try {
-    window.localStorage.setItem(CHAVE_LOCAL, JSON.stringify(c));
+    window.sessionStorage.setItem(CHAVE_LOCAL, JSON.stringify(c));
   } catch {
     // Sem storage: as estrelas valem só para esta visita.
   }

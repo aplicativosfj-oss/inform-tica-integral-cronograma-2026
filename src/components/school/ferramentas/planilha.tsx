@@ -6,6 +6,10 @@ import { useConfirmar } from "@/lib/confirm-store";
 
 const COLUNAS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const LINHAS = 15;
+// `sessionStorage`, não `localStorage`: num computador compartilhado do
+// laboratório, a planilha de um aluno não pode continuar visível pro
+// próximo que abrir a ferramenta sem estar logado — sessão de cada um dura
+// só enquanto a aba dele estiver aberta.
 const CHAVE = "informatica:planilha";
 
 type Celulas = Record<string, string>;
@@ -132,7 +136,7 @@ export function Planilha() {
   const confirmar = useConfirmar();
   const [celulas, setCelulas] = useState<Celulas>(() => {
     try {
-      const salvo = localStorage.getItem(CHAVE);
+      const salvo = sessionStorage.getItem(CHAVE);
       return salvo ? (JSON.parse(salvo) as Celulas) : {};
     } catch {
       return {};
@@ -143,7 +147,7 @@ export function Planilha() {
 
   function salvar(novas: Celulas) {
     setCelulas(novas);
-    localStorage.setItem(CHAVE, JSON.stringify(novas));
+    sessionStorage.setItem(CHAVE, JSON.stringify(novas));
   }
 
   function iniciarEdicao(id: string) {

@@ -110,6 +110,15 @@ import {
   type ArquivoAlunoResumo,
 } from "@/lib/aluno-area";
 
+/**
+ * Rascunho local do que ainda não foi salvo na pasta do aluno. Fica em
+ * `sessionStorage`, não em `localStorage`, de propósito: num computador
+ * compartilhado do laboratório, `localStorage` continuaria visível pro
+ * próximo aluno que abrisse o editor — inclusive sem estar logado, já que
+ * este rascunho existe para servir de rede de segurança justamente quando
+ * não há sessão. `sessionStorage` some ao fechar a aba, então cada
+ * aluno tem o rascunho só enquanto a própria aba dele estiver aberta.
+ */
 const CHAVE_RASCUNHO = "informatica:editor-texto-rascunho";
 
 const FONTES = [
@@ -942,7 +951,7 @@ export function EditorTexto() {
   }
 
   useEffect(() => {
-    const salvo = localStorage.getItem(CHAVE_RASCUNHO);
+    const salvo = sessionStorage.getItem(CHAVE_RASCUNHO);
     if (salvo && areaRef.current) {
       areaRef.current.innerHTML = salvo;
       prepararCaixasTexto();
@@ -1020,7 +1029,7 @@ export function EditorTexto() {
 
   function salvarRascunhoLocal() {
     if (!areaRef.current) return;
-    localStorage.setItem(CHAVE_RASCUNHO, areaRef.current.innerHTML);
+    sessionStorage.setItem(CHAVE_RASCUNHO, areaRef.current.innerHTML);
     atualizarContagem();
   }
 
@@ -1031,7 +1040,7 @@ export function EditorTexto() {
     areaRef.current.innerHTML = "";
     setArquivoAtualId(null);
     setTitulo("Sem título");
-    localStorage.removeItem(CHAVE_RASCUNHO);
+    sessionStorage.removeItem(CHAVE_RASCUNHO);
     setContagem(0);
     setSujo(false);
   }
@@ -1058,7 +1067,7 @@ export function EditorTexto() {
     areaRef.current.innerHTML = "";
     setArquivoAtualId(null);
     setTitulo("Sem título");
-    localStorage.removeItem(CHAVE_RASCUNHO);
+    sessionStorage.removeItem(CHAVE_RASCUNHO);
     setContagem(0);
     setSujo(false);
   }
