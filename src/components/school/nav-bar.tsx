@@ -442,22 +442,6 @@ export function NavBar() {
                             />
                           </Link>
                         </SheetClose>
-                        {/* As abas das Avaliações ficam à vista: senão o guia de
-                        habilidades só aparece depois de entrar na área. */}
-                        {link.to === "/avaliacao"
-                          ? SUB_AVALIACOES.filter((sub) => sub.aba).map((sub) => (
-                              <SheetClose key={sub.rotulo} asChild>
-                                <Link
-                                  to="/avaliacao"
-                                  search={sub.aba ? { aba: sub.aba } : {}}
-                                  className="ml-6 flex items-center gap-3 rounded-xl border-l border-border/60 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                                >
-                                  <sub.icon className="size-4 shrink-0" />
-                                  <span className="flex-1">{sub.rotulo}</span>
-                                </Link>
-                              </SheetClose>
-                            ))
-                          : null}
                       </div>
                     );
                   })}
