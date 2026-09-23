@@ -2,6 +2,8 @@ import { ArrowLeft, Minimize2 } from "lucide-react";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
+import { ANO_CRIACAO, AUTOR } from "@/components/school/ferramentas/credito";
+
 /**
  * Caixa de jogo que pode ocupar a tela toda sem perder a partida.
  *
@@ -97,7 +99,12 @@ export function CaixaJogo({ cheia, aoSair, aoFechar, titulo, horizontal, childre
           <div className={cheia ? "flex min-h-full flex-1 flex-col" : ""}>
             {cheia && (
               <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-slate-950/95 px-3 py-1.5 backdrop-blur">
-                <span className="min-w-0 truncate text-xs font-bold text-slate-200">{titulo}</span>
+                <span className="min-w-0 truncate text-xs font-bold text-slate-200">
+                  {titulo}
+                  <span className="ml-2 hidden font-normal text-slate-400 md:inline">
+                    · criado pelo {AUTOR}
+                  </span>
+                </span>
                 <div className="flex shrink-0 gap-1.5">
                   {aoFechar && (
                     <button
@@ -119,6 +126,16 @@ export function CaixaJogo({ cheia, aoSair, aoFechar, titulo, horizontal, childre
               </div>
             )}
             <div className={cheia ? "flex-1 p-2 sm:p-4" : ""}>{children}</div>
+            <p
+              className={
+                cheia
+                  ? "border-t border-white/10 px-3 py-2 text-center text-[10px] text-slate-400"
+                  : "mt-2 text-center text-[10px] text-muted-foreground"
+              }
+            >
+              Jogo criado pelo {AUTOR} · {ANO_CRIACAO} · Escola Municipal em Tempo Integral Dr.
+              Eiraldo Carneiro de França
+            </p>
           </div>,
           hospedeiro,
         )}
