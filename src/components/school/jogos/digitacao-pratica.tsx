@@ -331,7 +331,14 @@ export function PraticaDigitacao({
 
             <div className="grid items-center gap-2 sm:grid-cols-[1fr_200px]">
               <Teclado alvo={proximo} erro={erroTecla} {...(foco !== undefined ? { foco } : {})} />
-              <Maos ativos={dedo === null ? [] : [dedo]} className="mx-auto max-w-[200px]" />
+              <div className="rounded-xl border border-white/10 bg-slate-950/75 p-2 text-center">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-sky-300">
+                  {dedo === null
+                    ? "Mãos na posição inicial"
+                    : `${dedo <= 4 ? "Mão esquerda" : "Mão direita"} · ${NOME_DEDO[dedo]}`}
+                </p>
+                <Maos ativos={dedo === null ? [] : [dedo]} className="mx-auto max-w-[200px]" />
+              </div>
             </div>
 
             <input

@@ -190,6 +190,16 @@ function Teoria({ aoFim, aoSair }: { aoFim: () => void; aoSair: () => void }) {
         )}
         {i === 1 && (
           <div className="flex flex-col gap-3">
+            <figure className="overflow-hidden rounded-xl border border-sky-400/30 bg-slate-950 shadow-lg shadow-sky-950/40">
+              <img
+                src="/images/jogos/digitacao-maos-guia-pro.webp"
+                alt="Posição correta das mãos no teclado: dedos da mão esquerda em A, S, D e F; dedos da mão direita em J, K, L e Ç; polegares sobre a barra de espaço."
+                className="aspect-video w-full object-cover"
+              />
+              <figcaption className="border-t border-white/10 bg-slate-900/95 px-3 py-2 text-center text-xs font-semibold text-sky-100">
+                Posição inicial: punhos retos, mãos relaxadas e dedos na fileira central.
+              </figcaption>
+            </figure>
             <Teclado foco="asdfjklç" />
             <Maos ativos={[0, 1, 2, 3, 6, 7, 8, 9]} className="mx-auto max-w-sm" />
             <ul className="grid gap-1 text-sm sm:grid-cols-2">
