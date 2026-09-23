@@ -17,6 +17,7 @@ import { ConfirmProvider } from "../lib/confirm-store";
 import { JovemPanRadioProvider } from "../lib/jovem-pan-radio-store";
 import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
+import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 
 /**
@@ -210,6 +211,7 @@ function RootComponent() {
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                 <Outlet />
                 <Toaster />
+                <AvisoAulaEmBreve />
               </JovemPanRadioProvider>
             </ConfirmProvider>
           </AppProvider>
