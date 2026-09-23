@@ -304,6 +304,22 @@ export function NavBar() {
             <span className="hidden font-medium sm:inline">Início</span>
           </Link>
         </Button>
+
+        {/* O miolo da barra mínima não pode ficar vazio: mostra em que página
+            a pessoa está (e a escola), sem repetir o menu da home. */}
+        <div className="mx-1 flex min-w-0 flex-1 flex-col justify-center sm:mx-3">
+          <span className="truncate text-sm font-semibold leading-tight text-slate-900 dark:text-white">
+            {tituloDaPagina(location.pathname)}
+          </span>
+          <span className="hidden truncate text-[10px] font-semibold uppercase leading-tight tracking-[0.12em] text-slate-600 dark:text-white/60 sm:block">
+            Escola Dr. Eiraldo Carneiro de França
+          </span>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <ShareButton />
+          <ThemeToggle />
+        </div>
       </header>
     );
   }
@@ -342,7 +358,7 @@ export function NavBar() {
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/infoteca" label="Infoteca" />
-          <NavLinkAvaliacoes />
+          <NavLink to="/avaliacao" label="Avaliações" />
           <NavLink to="/aluno" label="Área do Aluno" />
           <NavLink to="/professor" label="Professor" />
           <NavLink to="/mediador" label="Mediadores" />
