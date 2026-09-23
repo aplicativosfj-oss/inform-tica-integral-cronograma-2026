@@ -182,7 +182,18 @@ export function JanelaFerramenta({
       setPos((p) => (p ? limitar(p, l, a) : p));
     };
     window.addEventListener("resize", aoRedimensionar);
-    return () => window.removeEventListener("resize", aoRedimensionar);
+    // Quando o conteúdo cresce (caixa de ferramentas aberta, resposta do
+    // aluno, resolução passo a passo), a janela sobe para caber inteira na
+    // tela em vez de ficar com o fim cortado embaixo.
+    const observador =
+      typeof ResizeObserver !== "undefined" && painelRef.current
+        ? new ResizeObserver(aoRedimensionar)
+        : null;
+    if (observador && painelRef.current) observador.observe(painelRef.current);
+    return () => {
+      window.removeEventListener("resize", aoRedimensionar);
+      observador?.disconnect();
+    };
   }, [aberta, tamanho]);
 
   const fechar = useCallback(() => {
