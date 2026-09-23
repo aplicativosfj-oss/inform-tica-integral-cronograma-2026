@@ -184,6 +184,14 @@ export interface ScheduleConfig {
    * rodada para. Mesma chave de `suspensoes`.
    */
   rodadasSuspensas?: Record<string, { rodadas: number[]; motivo?: string | undefined }> | undefined;
+  /**
+   * Rodadas marcadas manualmente como "já participou" pelo professor(a) —
+   * usado quando o relógio da aula não bate com a realidade (ex.: a aula
+   * começou atrasada e o sistema ainda mostra o grupo 1 como "agora" quando
+   * já estão no grupo 2). Mesma chave de `suspensoes`; o painel ao vivo usa
+   * isso para adiantar qual grupo aparece como atual na lista de grupos.
+   */
+  rodadasConcluidas?: Record<string, number[]> | undefined;
 }
 
 export interface Slot {

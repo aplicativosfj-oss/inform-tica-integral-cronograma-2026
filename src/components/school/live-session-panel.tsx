@@ -4,6 +4,7 @@ import {
   Ban,
   BookOpen,
   CalendarX2,
+  CheckCircle2,
   Clock3,
   HeartHandshake,
   Lock,
@@ -680,24 +681,39 @@ function ListaAlunos({
 function OrdemDosGruposSection({
   subBlocos,
   indiceAtual,
+  rodadasConcluidasManual,
+  podeGerenciar,
+  onAlternarConcluida,
 }: {
   subBlocos: SubBloco[];
   indiceAtual: number;
+  rodadasConcluidasManual: number[];
+  podeGerenciar: boolean;
+  onAlternarConcluida: (indice: number) => void;
 }) {
   return (
     <section className="overflow-hidden rounded-xl border border-border/60 bg-background/40">
       <header className="flex items-center gap-1.5 border-b border-border/60 px-3 py-2">
         <Users className="size-4 text-muted-foreground" />
         <p className="text-sm font-semibold text-foreground">Ordem dos grupos nesta aula</p>
+        {podeGerenciar ? (
+          <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+            Toque em &ldquo;já participou&rdquo; para corrigir se o horário não bater
+          </span>
+        ) : null}
       </header>
       <div className="flex flex-col divide-y divide-border/50">
         {subBlocos.map((sb) => {
+          const marcadoManualmente = rodadasConcluidasManual.includes(sb.indice);
           const status =
             sb.indice < indiceAtual ? "concluido" : sb.indice === indiceAtual ? "atual" : "espera";
           return (
             <div
               key={sb.indice}
-              className={cn("flex flex-col gap-1.5 px-3 py-2.5", status === "atual" && "bg-primary/5")}
+              className={cn(
+                "flex flex-col gap-1.5 px-3 py-2.5",
+                status === "atual" && "bg-primary/5",
+              )}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -714,16 +730,30 @@ function OrdemDosGruposSection({
                     <Badge className="bg-primary text-primary-foreground">agora</Badge>
                   ) : status === "concluido" ? (
                     <Badge variant="outline" className="text-muted-foreground">
-                      já participou
+                      já participou{marcadoManualmente ? " · marcado" : ""}
                     </Badge>
                   ) : (
                     <Badge variant="secondary">aguardando</Badge>
                   )}
                 </div>
-                <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                  <Clock3 className="size-3" />
-                  {sb.inicio}–{sb.fim}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                    <Clock3 className="size-3" />
+                    {sb.inicio}–{sb.fim}
+                  </span>
+                  {podeGerenciar ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={marcadoManualmente ? "secondary" : "outline"}
+                      className="h-7 gap-1 px-2 text-[11px]"
+                      onClick={() => onAlternarConcluida(sb.indice)}
+                    >
+                      <CheckCircle2 className="size-3" />
+                      {marcadoManualmente ? "Desfazer" : "Já participou"}
+                    </Button>
+                  ) : null}
+                </div>
               </div>
               {sb.grupo.alunos.length > 0 ? (
                 <p
@@ -905,7 +935,7 @@ function ChamadaDoDiaCard({ turma, chamada }: { turma: Turma; chamada: Chamada }
 }
 
 export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
-  const { turmas, config, setSessaoSuspensa, isReady } = useAppStore();
+  const { turmas, config, setSessaoSuspensa, updateConfig, isReady } = useAppStore();
   const confirmar = useConfirmar();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -1133,6 +1163,31 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   // saber a ordem completa (quem já passou, quem está na vez e quem espera).
   const todosSubBlocos: SubBloco[] =
     subBlocosEfetivos ?? buildSubBlocos(assignment, config, getWeekIndex(now));
+
+  // Quando o relógio da aula não bate com a realidade (ex.: aula começou
+  // atrasada), o professor pode marcar manualmente que um grupo já
+  // participou — a lista de grupos abaixo adianta o "agora" para o próximo
+  // grupo ainda não marcado, sem mexer no cronômetro em si.
+  const progressoKey = suspensaoKey(dateKey, assignment.dia, assignment.slot.inicio);
+  const rodadasConcluidasManual = config.rodadasConcluidas?.[progressoKey] ?? [];
+  const indiceAtualNaLista = Math.min(
+    todosSubBlocos.length - 1,
+    Math.max(subBloco.indice, 0, ...rodadasConcluidasManual.map((i) => i + 1)),
+  );
+  function alternarRodadaConcluida(indice: number) {
+    const atuais = new Set(config.rodadasConcluidas?.[progressoKey] ?? []);
+    if (atuais.has(indice)) {
+      atuais.delete(indice);
+    } else {
+      atuais.add(indice);
+    }
+    updateConfig({
+      rodadasConcluidas: {
+        ...(config.rodadasConcluidas ?? {}),
+        [progressoKey]: [...atuais].sort((a, b) => a - b),
+      },
+    });
+  }
 
   const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = totalSegundos - segundosRestantes;
@@ -1378,7 +1433,13 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
           </div>
 
           {todosSubBlocos.length > 1 ? (
-            <OrdemDosGruposSection subBlocos={todosSubBlocos} indiceAtual={subBloco.indice} />
+            <OrdemDosGruposSection
+              subBlocos={todosSubBlocos}
+              indiceAtual={indiceAtualNaLista}
+              rodadasConcluidasManual={rodadasConcluidasManual}
+              podeGerenciar={podeEditar}
+              onAlternarConcluida={alternarRodadaConcluida}
+            />
           ) : null}
 
           {podeGerenciar && chamada.presencas ? (
