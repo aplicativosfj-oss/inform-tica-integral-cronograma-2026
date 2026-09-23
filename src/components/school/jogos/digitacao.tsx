@@ -704,23 +704,29 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
     },
   ];
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950 text-white">
+    <div className="relative overflow-hidden rounded-2xl border border-sky-300/20 bg-slate-950 text-white shadow-2xl shadow-sky-950/30">
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-35"
-        style={{ backgroundImage: "url(/images/jogos/digitacao-capa.jpg)" }}
+        className="absolute inset-0 scale-[1.02] bg-cover bg-[68%_center] opacity-55"
+        style={{ backgroundImage: "url(/images/jogos/digitacao-capa-pro.webp)" }}
         aria-hidden
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/80 to-slate-950" />
-      <div className="relative flex flex-col gap-3 p-3 sm:p-4">
-        <div className="flex items-center gap-3">
-          <Teco humor="animado" className="size-16 shrink-0" />
-          <div>
-            <h3 className="text-2xl font-black uppercase italic leading-none tracking-tight sm:text-3xl">
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/35" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/35 to-slate-950" />
+      <div className="relative flex min-h-[390px] flex-col gap-3 p-3 sm:min-h-[420px] sm:p-5">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <span className="rounded-2xl border border-cyan-300/20 bg-slate-950/55 p-1.5 shadow-lg shadow-cyan-950/50 backdrop-blur-md">
+            <Teco humor="animado" className="size-11 shrink-0 sm:size-16" />
+          </span>
+          <div className="min-w-0">
+            <span className="mb-1 inline-flex max-w-full whitespace-nowrap rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.07em] text-cyan-200 sm:text-[9px] sm:tracking-[0.18em]">
+              Treinamento interativo
+            </span>
+            <h3 className="text-xl font-black uppercase italic leading-none tracking-tight sm:text-3xl">
               <span className="bg-gradient-to-b from-white to-sky-300 bg-clip-text text-transparent">
                 Escola de Digitação
               </span>
             </h3>
-            <p className="mt-1 text-xs text-slate-300">
+            <p className="mt-1 text-[11px] leading-snug text-slate-300 sm:text-xs">
               {primeiroNome
                 ? `Oi, ${primeiroNome}! Vamos aprender a digitar direitinho?`
                 : "Digite, aprenda, evolua! Eu sou o Teco, seu tutor."}
@@ -754,18 +760,18 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
           </p>
         )}
 
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="mt-auto grid gap-2 sm:grid-cols-2">
           {cartoes.map((c) => (
             <button
               key={c.titulo}
               type="button"
               onClick={c.acao}
               className={cn(
-                "flex cursor-pointer items-center gap-3 rounded-xl bg-gradient-to-br p-3 text-left shadow-lg transition-transform hover:scale-[1.02] active:scale-95",
+                "group flex cursor-pointer items-center gap-3 rounded-xl border border-white/15 bg-gradient-to-br p-3 text-left shadow-lg ring-1 ring-black/10 backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-white/30 hover:shadow-xl active:scale-[.98]",
                 c.cor,
               )}
             >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/20">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/20 ring-1 ring-white/20 transition-transform group-hover:scale-105">
                 <c.icone className="size-6" aria-hidden />
               </span>
               <span className="min-w-0">

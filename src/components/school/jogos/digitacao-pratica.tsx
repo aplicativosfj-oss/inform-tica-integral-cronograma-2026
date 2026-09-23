@@ -204,12 +204,13 @@ export function PraticaDigitacao({
     >
       {cenario && (
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-30"
-          style={{ backgroundImage: `url(/images/jogos/${cenario}.jpg)` }}
+          className="absolute inset-0 scale-[1.02] bg-cover bg-center opacity-40"
+          style={{ backgroundImage: `url(/images/jogos/${cenario}.webp)` }}
           aria-hidden
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/75 to-slate-950/95" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,transparent_0%,rgba(2,6,23,.3)_38%,rgba(2,6,23,.94)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/45 via-slate-950/72 to-slate-950/95" />
 
       <div className="relative mx-auto flex max-w-4xl flex-col gap-2 p-2 sm:p-3">
         <div className="flex items-center justify-between gap-2">

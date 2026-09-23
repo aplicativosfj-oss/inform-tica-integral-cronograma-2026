@@ -538,10 +538,10 @@ export function desafioDaSerie(serie: Serie): { prompts: Prompt[]; modo: "alvo" 
 }
 
 export const CENARIOS = [
-  "digitacao-cenario-1",
-  "digitacao-cenario-2",
-  "digitacao-cenario-3",
-  "digitacao-cenario-4",
-  "digitacao-cenario-5",
-  "digitacao-cenario-6",
+  "digitacao-cenario-1-pro",
+  "digitacao-cenario-2-pro",
+  "digitacao-cenario-3-pro",
+  "digitacao-cenario-4-pro",
+  "digitacao-cenario-5-pro",
+  "digitacao-cenario-6-pro",
 ];
