@@ -19,7 +19,9 @@ import { cn } from "@/lib/utils";
 
 const ANTECEDENCIA_SEGUNDOS = 120;
 
-type TipoAviso = "inicio" | "fim";
+type TipoAviso = "inicio" | "fim" | "troca-fim" | "troca-inicio";
+
+const TROCA_RECEM_INICIADA_SEGUNDOS = 45;
 
 interface Aviso {
   chave: string;
@@ -28,6 +30,7 @@ interface Aviso {
   turmaNome: string;
   horario: string;
   segundos: number;
+  rodada?: number;
 }
 
 function paraSegundos(hhmm: string): number {
@@ -42,7 +45,7 @@ function nomeDaAula(a: Assignment): string {
 /** Selo em SVG: sino no início da aula, ampulheta no fim. */
 function Selo({ tipo }: { tipo: TipoAviso }) {
   const id = `selo-${tipo}`;
-  const inicio = tipo === "inicio";
+  const inicio = tipo === "inicio" || tipo === "troca-inicio";
   return (
     <svg viewBox="0 0 64 64" className="size-14 shrink-0" role="img" aria-hidden>
       <defs>
@@ -154,6 +157,39 @@ export function AvisoAulaEmBreve() {
       };
       break;
     }
+    const passo = Math.max(1, config.duracaoGrupoMinutos) * 60;
+    if (faltaInicio <= 0 && faltaFim > 0) {
+      const decorridos = agoraSeg - paraSegundos(a.slot.inicio);
+      const rodadaAtual = Math.floor(decorridos / passo) + 1;
+      const proximaTroca = rodadaAtual * passo;
+      const faltaTroca = proximaTroca - decorridos;
+      const totalRodadas = Math.max(1, Math.round((faltaInicio * -1 + faltaFim) / passo));
+      const desdeTroca = decorridos - (rodadaAtual - 1) * passo;
+      if (rodadaAtual < totalRodadas && faltaTroca > 0 && faltaTroca <= ANTECEDENCIA_SEGUNDOS) {
+        aviso = {
+          chave: `${dateKey}|troca-fim|${rodadaAtual}|${a.slot.inicio}|${a.turma.id}`,
+          tipo: "troca-fim",
+          turmaId,
+          turmaNome: nomeDaAula(a),
+          horario: a.slot.inicio,
+          segundos: faltaTroca,
+          rodada: rodadaAtual,
+        };
+        break;
+      }
+      if (rodadaAtual > 1 && desdeTroca < TROCA_RECEM_INICIADA_SEGUNDOS) {
+        aviso = {
+          chave: `${dateKey}|troca-inicio|${rodadaAtual}|${a.slot.inicio}|${a.turma.id}`,
+          tipo: "troca-inicio",
+          turmaId,
+          turmaNome: nomeDaAula(a),
+          horario: a.slot.inicio,
+          segundos: 0,
+          rodada: rodadaAtual,
+        };
+        break;
+      }
+    }
     if (faltaFim > 0 && faltaFim <= ANTECEDENCIA_SEGUNDOS && faltaInicio <= 0) {
       aviso = {
         chave: `${dateKey}|fim|${a.slot.fim}|${a.turma.id}`,
@@ -172,23 +208,32 @@ export function AvisoAulaEmBreve() {
   if (aluno && aluno.turmaId !== aviso.turmaId) return null;
   const primeiroNome = aluno ? aluno.nome.trim().split(/\s+/)[0] : null;
 
-  const inicio = aviso.tipo === "inicio";
+  const inicio = aviso.tipo === "inicio" || aviso.tipo === "troca-inicio";
+  const troca = aviso.tipo === "troca-fim" || aviso.tipo === "troca-inicio";
   const minutos = Math.max(1, Math.ceil(aviso.segundos / 60));
   const quando = `em ${minutos} ${minutos === 1 ? "minuto" : "minutos"}`;
-  const titulo = primeiroNome
-    ? inicio
-      ? `${primeiroNome}, sua aula de informática começa ${quando}`
-      : `${primeiroNome}, sua aula termina ${quando}`
-    : inicio
-      ? `Aula de informática começa ${quando}`
-      : `Aula de informática termina ${quando}`;
-  const texto = primeiroNome
-    ? inicio
-      ? "Prepare-se e dirija-se ao laboratório com calma."
-      : "Vá salvando seu trabalho e organize seu lugar."
-    : inicio
-      ? `${aviso.turmaNome} entra no laboratório às ${aviso.horario}.`
-      : `${aviso.turmaNome} encerra a aula às ${aviso.horario}.`;
+  const titulo = troca
+    ? aviso.tipo === "troca-fim"
+      ? `Grupo ${aviso.rodada} termina ${quando}`
+      : `Começa agora o grupo ${aviso.rodada}`
+    : primeiroNome
+      ? inicio
+        ? `${primeiroNome}, sua aula de informática começa ${quando}`
+        : `${primeiroNome}, sua aula termina ${quando}`
+      : inicio
+        ? `Aula de informática começa ${quando}`
+        : `Aula de informática termina ${quando}`;
+  const texto = troca
+    ? aviso.tipo === "troca-fim"
+      ? `${aviso.turmaNome}: salve o trabalho e prepare a troca. O próximo grupo já pode se levantar.`
+      : `${aviso.turmaNome}: os alunos do novo grupo assumem os computadores.`
+    : primeiroNome
+      ? inicio
+        ? "Prepare-se e dirija-se ao laboratório com calma."
+        : "Vá salvando seu trabalho e organize seu lugar."
+      : inicio
+        ? `${aviso.turmaNome} entra no laboratório às ${aviso.horario}.`
+        : `${aviso.turmaNome} encerra a aula às ${aviso.horario}.`;
 
   return (
     <div
@@ -216,8 +261,8 @@ export function AvisoAulaEmBreve() {
         <Selo tipo={aviso.tipo} />
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {inicio ? "Aviso de início" : "Aviso de encerramento"}
-            {primeiroNome ? ` · ${aviso.turmaNome}` : ""}
+            {troca ? "Troca de grupo" : inicio ? "Aviso de início" : "Aviso de encerramento"}
+            {primeiroNome && !troca ? ` · ${aviso.turmaNome}` : ""}
           </p>
           <p className="text-sm font-bold leading-snug text-foreground">{titulo}</p>
           <p className="mt-0.5 text-xs text-muted-foreground">{texto}</p>

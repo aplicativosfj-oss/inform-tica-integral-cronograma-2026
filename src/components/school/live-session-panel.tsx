@@ -672,12 +672,20 @@ function ListaAlunos({
             <span className="min-w-0 flex-1 text-sm font-medium leading-snug text-foreground">
               {aluno.nome}
             </span>
-            {destacar ? <HeartHandshake className="size-3.5 shrink-0 text-primary" /> : null}
+            {destacar ? (
+              <span title="Aluno com necessidade especial: precisa de atendimento especializado">
+                <HeartHandshake className="size-3.5 shrink-0 text-primary" />
+              </span>
+            ) : null}
             {aluno.impedido ? (
-              <Ban
-                className="size-3.5 shrink-0 text-amber-700 dark:text-amber-400"
-                aria-label="Impedido"
-              />
+              <span
+                title={`Impedido(a) de participar${aluno.motivoImpedimento ? `: ${aluno.motivoImpedimento}` : ""}`}
+              >
+                <Ban
+                  className="size-3.5 shrink-0 text-amber-700 dark:text-amber-400"
+                  aria-label="Impedido de participar"
+                />
+              </span>
             ) : null}
             {podeGerenciar && chamada ? (
               <AcoesAluno aluno={aluno} grupoIndice={grupoIndice} turma={turma} chamada={chamada} />
