@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BarChart3,
   CalendarDays,
-  ChevronDown,
   ChevronRight,
   Compass,
   ClipboardList,
@@ -26,10 +25,6 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
