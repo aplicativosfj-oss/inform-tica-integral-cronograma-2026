@@ -1,15 +1,57 @@
 /**
  * Voz da alfabetização.
  *
- * Usa a síntese de fala do próprio navegador (Web Speech API): não precisa
- * baixar áudio nenhum, funciona sem internet depois que a voz do sistema
- * está instalada e fala qualquer palavra — inclusive as que a criança
- * monta. Gravar dezenas de arquivos de áudio resolveria só as palavras
- * previstas, e não a que o aluno digitar.
+ * Duas camadas, nessa ordem:
  *
- * Quando o computador não tem voz em português, nada quebra: a ferramenta
+ * 1. Nuvem (Google Cloud Text-to-Speech, voz "Wavenet" pt-BR) — som bem mais
+ *    natural, quase humano. Passa por uma Edge Function do Supabase
+ *    (`supabase/functions/tts`) para a chave da API nunca aparecer no
+ *    navegador. Precisa de internet e da função configurada (ver o README
+ *    dentro da pasta da função); enquanto isso não estiver pronto, ou se a
+ *    conexão cair, cai sozinho na camada 2 sem travar o jogo.
+ * 2. Navegador (Web Speech API) — a voz do próprio sistema, sem precisar de
+ *    internet depois de instalada. Fica como rede de segurança: fala
+ *    qualquer palavra, inclusive as que a criança monta, mesmo offline.
+ *
+ * Quando nenhuma das duas está disponível, nada quebra: a ferramenta
  * simplesmente não fala, e todos os jogos continuam jogáveis sem som.
  */
+import { supabase } from "@/lib/supabase-client";
+
+// Guarda o áudio já pedido à nuvem nesta visita (chave = "devagar?texto"):
+// letra e sílaba se repetem várias vezes num único jogo, e reouvir não deve
+// gastar cota da API nem esperar a rede de novo.
+const cacheAudioNuvem = new Map<string, string>();
+let ultimoAudioTocando: HTMLAudioElement | null = null;
+
+/** Pede o áudio à Edge Function e toca; `false` se falhar por qualquer motivo. */
+async function falarNaNuvem(texto: string, devagar: boolean): Promise<boolean> {
+  const chave = `${devagar ? "1" : "0"}:${texto}`;
+  try {
+    let base64 = cacheAudioNuvem.get(chave);
+    if (!base64) {
+      // A função pode não estar configurada ainda (sem chave da API) ou a
+      // rede pode estar fora — 5s é tempo de sobra numa conexão normal sem
+      // deixar a criança esperando caso esteja mesmo indisponível.
+      const resultado = await Promise.race([
+        supabase.functions.invoke<{ audioBase64?: string; error?: string }>("tts", {
+          body: { texto, devagar },
+        }),
+        new Promise<never>((_, rejeitar) => setTimeout(() => rejeitar(new Error("tempo")), 5000)),
+      ]);
+      if (resultado.error || !resultado.data?.audioBase64) return false;
+      base64 = resultado.data.audioBase64;
+      cacheAudioNuvem.set(chave, base64);
+    }
+    ultimoAudioTocando?.pause();
+    const audio = new Audio(`data:audio/mp3;base64,${base64}`);
+    ultimoAudioTocando = audio;
+    await audio.play();
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 let vozPt: SpeechSynthesisVoice | null = null;
 let procurou = false;
@@ -72,8 +114,21 @@ export function vozDisponivel(): boolean {
 /**
  * Fala um texto. `devagar` é para letra e sílaba, que a criança precisa ouvir
  * separado; palavra e frase saem em velocidade quase normal.
+ *
+ * Tenta a voz de nuvem primeiro (mais natural) e só usa a do navegador se
+ * aquela falhar — por isso é assíncrona por dentro mas continua podendo ser
+ * chamada como `falar("oi")`, sem `await`, nos lugares que já usavam assim.
  */
 export function falar(texto: string, devagar = false): void {
+  if (!texto.trim()) return;
+  falarNaNuvem(texto, devagar)
+    .then((tocou) => {
+      if (!tocou) falarNoNavegador(texto, devagar);
+    })
+    .catch(() => falarNoNavegador(texto, devagar));
+}
+
+function falarNoNavegador(texto: string, devagar: boolean): void {
   if (!vozDisponivel() || !texto.trim()) return;
   try {
     window.speechSynthesis.cancel();
