@@ -1,11 +1,14 @@
 import { ArrowLeft, Bot, Loader2, Star, Trophy, Users } from "lucide-react";
 import { useEffect, useState, type ComponentType } from "react";
 
+import { Corrida } from "@/components/school/jogos/corrida";
 import { Damas } from "@/components/school/jogos/damas";
+import { Digitacao } from "@/components/school/jogos/digitacao";
 import { Domino } from "@/components/school/jogos/domino";
 import { JogoDaVelha } from "@/components/school/jogos/jogo-da-velha";
 import { Memoria } from "@/components/school/jogos/memoria";
 import { QuebraCabeca } from "@/components/school/jogos/quebra-cabeca";
+import { TabuleiroMatematica } from "@/components/school/jogos/tabuleiro-matematica";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import { lerCarteira, somarPorAluno, type Adversario, type LinhaRanking } from "@/lib/estrelas";
 import { fetchRanking } from "@/lib/placares";
@@ -79,6 +82,33 @@ const JOGOS: JogoInfo[] = [
     Componente: QuebraCabeca,
     modos: ["computador"],
     niveis: ["3 × 3", "4 × 4", "5 × 5"],
+  },
+  {
+    id: "tabuleiro-matematica",
+    nome: "Matemática em Ação",
+    emoji: "🎲",
+    descricao: "Tabuleiro com dado e cartas de conta, desafio e pense rápido.",
+    Componente: TabuleiroMatematica,
+    modos: ["computador", "colega"],
+    niveis: ["Fácil", "Médio", "Difícil"],
+  },
+  {
+    id: "digitacao",
+    nome: "Digitação",
+    emoji: "⌨️",
+    descricao: "Digite as frases antes do robô, seguindo a cor de cada dedo.",
+    Componente: Digitacao,
+    modos: ["computador"],
+    niveis: ["Iniciante", "Intermediário", "Avançado"],
+  },
+  {
+    id: "corrida",
+    nome: "Corrida",
+    emoji: "🏎️",
+    descricao: "Três voltas contra cinco pilotos em cinco pistas.",
+    Componente: Corrida,
+    modos: ["computador"],
+    niveis: ["Fácil", "Médio", "Difícil"],
   },
 ];
 

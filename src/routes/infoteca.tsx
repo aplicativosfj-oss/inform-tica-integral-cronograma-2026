@@ -401,11 +401,20 @@ function InfotecaPage() {
                 Sala de Jogos
               </h3>
               <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-                Cinco jogos de mesa contra o computador ou um colega da turma — e cada partida ganha
-                vale estrelas no ranking da escola.
+                Oito jogos de mesa, matemática, digitação e corrida, contra o computador ou um
+                colega da turma — e cada partida ganha vale estrelas no ranking da escola.
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {["Damas", "Dominó", "Jogo da velha", "Memória", "Quebra-cabeça"].map((jogo) => (
+                {[
+                  "Damas",
+                  "Dominó",
+                  "Jogo da velha",
+                  "Memória",
+                  "Quebra-cabeça",
+                  "Matemática em Ação",
+                  "Digitação",
+                  "Corrida",
+                ].map((jogo) => (
                   <span
                     key={jogo}
                     className="rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground"

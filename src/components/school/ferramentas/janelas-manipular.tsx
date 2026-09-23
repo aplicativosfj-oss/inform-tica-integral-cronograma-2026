@@ -371,7 +371,7 @@ export function SalaDeJogosJanela() {
     <JanelaFerramenta
       titulo="Sala de Jogos"
       subtitulo={CREDITO}
-      largura={LARGA}
+      largura="w-[min(46rem,calc(100vw-24px))]"
       abertaInicial
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Jogos"
