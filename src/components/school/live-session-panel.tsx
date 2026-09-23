@@ -225,8 +225,19 @@ function useChamadaDoDia(
       }
     }
     ensure();
+    // Aba aberta há horas: relê a chamada a cada minuto para acompanhar faltas
+    // e substituições registradas por outra pessoa.
+    const releitura = window.setInterval(async () => {
+      try {
+        const atuais = await fetchPresencasDoDia(turma.id, dateKey);
+        if (!cancelled && atuais.length > 0) setPresencas(atuais);
+      } catch {
+        // sem rede: mantém a última chamada conhecida
+      }
+    }, 60_000);
     return () => {
       cancelled = true;
+      window.clearInterval(releitura);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ativo, turmaId, dateKey, config.numeroComputadores, podeRegistrar]);
