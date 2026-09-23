@@ -68,6 +68,7 @@ import {
 } from "@/lib/presencas";
 import {
   aplicarExcecoesDeData,
+  buildSubBlocos,
   buildSubBlocosComGrupos,
   buildWeeklySchedule,
   currentWeekdayLabel,
@@ -671,6 +672,80 @@ function ListaAlunos({
 }
 
 /**
+ * Ordem completa dos grupos da rodada — não só "agora" e "a seguir", mas
+ * todos os grupos que já passaram e todos os que ainda esperam, cada um com
+ * horário e nomes, para o público saber exatamente quando é a vez de cada
+ * grupo/turma.
+ */
+function OrdemDosGruposSection({
+  subBlocos,
+  indiceAtual,
+}: {
+  subBlocos: SubBloco[];
+  indiceAtual: number;
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-border/60 bg-background/40">
+      <header className="flex items-center gap-1.5 border-b border-border/60 px-3 py-2">
+        <Users className="size-4 text-muted-foreground" />
+        <p className="text-sm font-semibold text-foreground">Ordem dos grupos nesta aula</p>
+      </header>
+      <div className="flex flex-col divide-y divide-border/50">
+        {subBlocos.map((sb) => {
+          const status =
+            sb.indice < indiceAtual ? "concluido" : sb.indice === indiceAtual ? "atual" : "espera";
+          return (
+            <div
+              key={sb.indice}
+              className={cn("flex flex-col gap-1.5 px-3 py-2.5", status === "atual" && "bg-primary/5")}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "text-sm font-medium",
+                      status === "atual" ? "text-primary" : "text-foreground",
+                    )}
+                  >
+                    Grupo {sb.grupo.indice + 1}
+                    {sb.turma ? ` · ${sb.turma.serie} "${sb.turma.letra}"` : ""}
+                  </span>
+                  {status === "atual" ? (
+                    <Badge className="bg-primary text-primary-foreground">agora</Badge>
+                  ) : status === "concluido" ? (
+                    <Badge variant="outline" className="text-muted-foreground">
+                      já participou
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">aguardando</Badge>
+                  )}
+                </div>
+                <span className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                  <Clock3 className="size-3" />
+                  {sb.inicio}–{sb.fim}
+                </span>
+              </div>
+              {sb.grupo.alunos.length > 0 ? (
+                <p
+                  className={cn(
+                    "text-xs",
+                    status === "concluido" ? "text-muted-foreground/70" : "text-muted-foreground",
+                  )}
+                >
+                  {sb.grupo.alunos.map((a) => a.nome).join(", ")}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground/70">Nenhum aluno neste grupo.</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/**
  * Resumo do que já foi alterado hoje na chamada (faltas, impedimentos e
  * substituições), com "Desfazer" para corrigir um toque errado. Para o
  * professor regente, traz também as regras de uso, para a programação não
@@ -1054,6 +1129,10 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const turmaAtual = subBloco.turma ?? assignment.turma;
   const turmaProxima = proximoSubBloco?.turma ?? assignment.turma;
   const podeGerenciar = podeEditar && Boolean(gruposChamada);
+  // Todos os grupos da rodada, não só o atual e o próximo — para o público
+  // saber a ordem completa (quem já passou, quem está na vez e quem espera).
+  const todosSubBlocos: SubBloco[] =
+    subBlocosEfetivos ?? buildSubBlocos(assignment, config, getWeekIndex(now));
 
   const totalSegundos = Math.max(1, hhmmToSeconds(subBloco.fim) - hhmmToSeconds(subBloco.inicio));
   const decorridos = totalSegundos - segundosRestantes;
@@ -1297,6 +1376,10 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
               )}
             </section>
           </div>
+
+          {todosSubBlocos.length > 1 ? (
+            <OrdemDosGruposSection subBlocos={todosSubBlocos} indiceAtual={subBloco.indice} />
+          ) : null}
 
           {podeGerenciar && chamada.presencas ? (
             <RegistrosDoDia
