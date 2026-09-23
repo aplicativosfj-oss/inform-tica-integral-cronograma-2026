@@ -27,6 +27,11 @@ import {
   type Faixa,
 } from "@/lib/diagnostica/mapa";
 import type { ProvaII } from "@/lib/diagnostica/tipos";
+import carteiraAmarela from "@/assets/carteira-amarela.webp";
+import carteiraAzul from "@/assets/carteira-azul.webp";
+import carteiraCinza from "@/assets/carteira-cinza.webp";
+import carteiraVerde from "@/assets/carteira-verde.webp";
+import carteiraVermelha from "@/assets/carteira-vermelha.webp";
 import { cn } from "@/lib/utils";
 
 /**
@@ -40,40 +45,47 @@ import { cn } from "@/lib/utils";
  * aluno, só o fechamento da turma).
  */
 
-const CORES_FAIXA: Record<
-  Faixa,
-  { carteira: string; texto: string; barra: string; ponto: string }
-> = {
+const CORES_FAIXA: Record<Faixa, { papel: string; texto: string; barra: string; ponto: string }> = {
   apoio: {
-    carteira: "fill-rose-500/15 stroke-rose-500/60 dark:fill-rose-400/15 dark:stroke-rose-400/50",
+    papel: "text-rose-700",
     texto: "text-rose-700 dark:text-rose-300",
     barra: "bg-rose-500 dark:bg-rose-400",
     ponto: "bg-rose-500",
   },
   atencao: {
-    carteira:
-      "fill-amber-500/15 stroke-amber-500/60 dark:fill-amber-400/15 dark:stroke-amber-400/50",
+    papel: "text-amber-800",
     texto: "text-amber-800 dark:text-amber-300",
     barra: "bg-amber-500 dark:bg-amber-400",
     ponto: "bg-amber-500",
   },
   bom: {
-    carteira: "fill-blue-500/15 stroke-blue-500/60 dark:fill-blue-400/15 dark:stroke-blue-400/50",
+    papel: "text-blue-700",
     texto: "text-blue-700 dark:text-blue-300",
     barra: "bg-blue-500 dark:bg-blue-400",
     ponto: "bg-blue-500",
   },
   otimo: {
-    carteira:
-      "fill-emerald-500/15 stroke-emerald-500/60 dark:fill-emerald-400/15 dark:stroke-emerald-400/50",
+    papel: "text-emerald-700",
     texto: "text-emerald-700 dark:text-emerald-300",
     barra: "bg-emerald-500 dark:bg-emerald-400",
     ponto: "bg-emerald-500",
   },
 };
 
+/**
+ * A carteira de cada faixa. As fotos vieram da folha de carteiras enviada
+ * pela escola, recortadas no mesmo enquadramento e com o fundo branco
+ * removido, para todas ocuparem a mesma moldura na grade da sala.
+ */
+const FOTO_CARTEIRA: Record<Faixa, string> = {
+  apoio: carteiraVermelha,
+  atencao: carteiraAmarela,
+  bom: carteiraAzul,
+  otimo: carteiraVerde,
+};
+
 const SEM_DADO = {
-  carteira: "fill-muted stroke-border",
+  papel: "text-slate-600",
   texto: "text-muted-foreground",
   barra: "bg-muted-foreground/40",
   ponto: "bg-muted-foreground/40",
@@ -83,35 +95,43 @@ const pct = (v: number | null) => (v == null ? "—" : `${Math.round(v * 100)}%`
 const primeiroNome = (nome: string) => nome.trim().split(/\s+/)[0] ?? nome;
 
 /**
- * Uma carteira da sala: o desenho é o mesmo para todo mundo, só a cor muda.
- * O tampo leva o percentual porque a cor sozinha não serve a quem não
- * distingue vermelho de verde.
+ * Uma carteira da sala. A carteira é a foto de uma carteira de verdade,
+ * uma por faixa de desempenho; o percentual fica num papel sobre o tampo,
+ * porque a cor sozinha não serve a quem não distingue vermelho de verde —
+ * e porque, numa foto, a cor da cadeira some no meio da imagem.
  */
 function Carteira({ aluno, valor }: { aluno: AlunoNoMapa; valor: number | null }) {
   const faixa = faixaDe(valor);
   const c = faixa ? CORES_FAIXA[faixa.id] : SEM_DADO;
+  const foto = faixa ? FOTO_CARTEIRA[faixa.id] : carteiraCinza;
   const rotulo = `${aluno.nome}: ${valor == null ? "não fez esta prova" : `${Math.round(valor * 100)}% de acerto`}`;
 
   return (
-    <li className="flex flex-col items-center gap-1" title={rotulo}>
-      <svg viewBox="0 0 72 56" className="w-full max-w-[86px]" role="img" aria-label={rotulo}>
-        {/* cadeira, atrás da carteira */}
-        <rect x="26" y="2" width="20" height="12" rx="4" className={cn("stroke-2", c.carteira)} />
-        {/* tampo */}
-        <rect x="4" y="16" width="64" height="28" rx="6" className={cn("stroke-2", c.carteira)} />
-        {/* pés */}
-        <rect x="12" y="44" width="5" height="10" rx="2" className={cn("stroke-0", c.carteira)} />
-        <rect x="55" y="44" width="5" height="10" rx="2" className={cn("stroke-0", c.carteira)} />
-        <text
-          x="36"
-          y="34"
-          textAnchor="middle"
-          className={cn("fill-current text-[15px] font-bold", c.texto)}
+    <li className="flex flex-col items-center gap-0.5" title={rotulo}>
+      <div className="relative w-full max-w-[112px]">
+        <img
+          src={foto}
+          alt=""
+          width={488}
+          height={460}
+          loading="lazy"
+          decoding="async"
+          className="w-full select-none"
+          draggable={false}
+        />
+        {/* O tampo de madeira ocupa a faixa dos 19% aos 31% da altura da
+          foto — é onde o papelzinho com o percentual se apoia. */}
+        <span
+          aria-label={rotulo}
+          className={cn(
+            "absolute left-1/2 top-[17%] -translate-x-1/2 rounded-md border border-black/10 bg-white/95 px-1.5 py-0.5 text-sm font-bold leading-none shadow-sm",
+            c.papel,
+          )}
         >
           {valor == null ? "—" : Math.round(valor * 100)}
-        </text>
-      </svg>
-      <span className="w-full truncate text-center text-[11px] font-medium text-muted-foreground">
+        </span>
+      </div>
+      <span className="w-full truncate text-center text-xs font-medium text-foreground">
         {primeiroNome(aluno.nome)}
       </span>
     </li>

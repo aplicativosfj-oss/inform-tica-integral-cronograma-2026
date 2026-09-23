@@ -4,10 +4,12 @@ import { FERRAMENTAS, type FerramentaInfo } from "@/components/school/ferramenta
  * Ferramentas abertas a qualquer visitante, sem PIN e sem cadastro — a parte
  * de domínio público da Infoteca.
  *
- * O critério para entrar aqui é não depender de conta: a ferramenta precisa
- * funcionar inteira no navegador de quem abriu, sem salvar nada em nome de
- * um aluno. É por isso que o editor de texto fica de fora por enquanto: ele
- * grava os documentos na pasta do aluno, o que só faz sentido com sessão.
+ * O critério para entrar aqui é não depender de conta para funcionar. O
+ * editor de texto entrou mesmo guardando documentos na pasta do aluno:
+ * escrever, formatar, usar o papel pautado e baixar o arquivo funcionam
+ * sem sessão nenhuma, e a própria tela avisa que é preciso entrar na área
+ * do aluno para salvar. Deixá-lo fora só escondia a ferramenta de quem
+ * queria usá-la para escrever na hora.
  *
  * A lista começa com a calculadora e cresce conforme a escola quiser abrir
  * mais — basta acrescentar o slug.
@@ -15,6 +17,7 @@ import { FERRAMENTAS, type FerramentaInfo } from "@/components/school/ferramenta
 export const FERRAMENTAS_PUBLICAS = [
   "atividades-por-habilidade",
   "calculadora",
+  "editor-texto",
   "mesa-formas",
   "montar-fracoes",
   "comparar-fracoes",
