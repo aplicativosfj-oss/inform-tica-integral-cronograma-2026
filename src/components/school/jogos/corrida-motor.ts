@@ -189,8 +189,18 @@ const FORA = -VEL_MAX / 2;
 const LIMITE_FORA = VEL_MAX / 4;
 const CENTRIFUGA = 0.22;
 const POS_JOGADOR = CAMERA_ALTURA * CAMERA_PROF;
-export const VOLTAS = 3;
 const KMH_MAX = 220;
+/** Meia-largura de acerto de cada obstáculo, em metades de pista. */
+const ALCANCE: Partial<Record<TipoSprite, number>> = {
+  cone: 0.22,
+  caixa: 0.3,
+  pneus: 0.28,
+  barreira: 0.5,
+  buraco: 0.3,
+  poca: 0.45,
+  turbo: 0.35,
+};
+
 /** Largura de um carro, em metades de pista. */
 const ANCHO_CARRO = 0.34;
 
@@ -239,11 +249,22 @@ export interface Entrada {
   volante: number;
 }
 
+export interface FimExtra {
+  voltasFeitas: number;
+  metros: number;
+}
+
 export interface Hud {
   posicao: number;
   total: number;
   volta: number;
   kmh: number;
+  /** Segundos que faltam no modo tempo (null no modo voltas). */
+  tempoRestante: number | null;
+  /** Total de voltas do modo voltas (0 no modo tempo). */
+  voltasTotal: number;
+  /** Voltas completas até agora. */
+  voltasFeitas: number;
 }
 
 export interface OpcoesCorrida {
@@ -253,7 +274,11 @@ export interface OpcoesCorrida {
   /** 1 fácil, 2 médio, 3 difícil */
   nivel: number;
   aoMudarHud: (h: Hud) => void;
-  aoTerminar: (posicao: number, segundos: number) => void;
+  aoTerminar: (posicao: number, segundos: number, extra: FimExtra) => void;
+  /** "voltas": termina ao completar N voltas; "tempo": termina quando o relógio zera. */
+  modo: "voltas" | "tempo";
+  voltas: number;
+  tempoLimite: number;
   som?: SomCorrida | null;
 }
 
@@ -523,6 +548,11 @@ export function desenharCarro(
 }
 
 const LARGURA_SPRITE: Record<TipoSprite, number> = {
+  barreira: 0.3,
+  caixa: 0.13,
+  poca: 0.3,
+  buraco: 0.2,
+  turbo: 0.26,
   cone: 0.11,
   pneus: 0.2,
   palmeira: 0.42,
@@ -564,6 +594,10 @@ export class Corrida {
   entrada: Entrada = { esquerda: false, direita: false, acelerar: false, frear: false, volante: 0 };
   private fumaca: { x: number; y: number; r: number; vx: number; vy: number; vida: number }[] = [];
   private derrapando = false;
+  private escorregaAte = 0;
+  private turboAte = 0;
+  private solavanco = 0;
+  private voltasTotal: number;
   private foraDaPista = false;
 
   constructor(private op: OpcoesCorrida) {
@@ -571,6 +605,7 @@ export class Corrida {
     op.canvas.height = ALTURA;
     this.ctx = op.canvas.getContext("2d")!;
     this.tema = TEMAS[op.pista];
+    this.voltasTotal = op.modo === "voltas" ? op.voltas : 9999;
     if (this.tema.foto && typeof Image !== "undefined") {
       this.foto = new Image();
       this.foto.src = `/images/jogos/${this.tema.foto.arquivo}`;
@@ -660,8 +695,32 @@ export class Corrida {
       if (rnd() < 0.35)
         this.segs[n]!.sprites.push({ tipo, offset: -lado * (1.4 + rnd() * 1.6), sem: rnd() });
     }
-    for (let n = 60; n < this.segs.length - 20; n += 45 + Math.floor(rnd() * 40)) {
-      this.segs[n]!.sprites.push({ tipo: "cone", offset: (rnd() - 0.5) * 1.3, sem: rnd() });
+    // Obstáculos: quanto maior o nível, mais frequentes e mais variados.
+    const nivel = Math.min(Math.max(this.op.nivel, 1), 3);
+    const [de, ate] = nivel === 1 ? [60, 95] : nivel === 2 ? [40, 70] : [24, 46];
+    const tipos: TipoSprite[] =
+      nivel === 1
+        ? ["cone", "caixa", "buraco"]
+        : nivel === 2
+          ? ["cone", "caixa", "buraco", "pneus", "poca", "barreira"]
+          : ["cone", "caixa", "buraco", "pneus", "poca", "barreira", "barreira", "poca"];
+    for (let n = 60; n < this.segs.length - 20; n += de + Math.floor(rnd() * (ate - de))) {
+      const tipo = tipos[Math.floor(rnd() * tipos.length)]!;
+      const off = (rnd() - 0.5) * 1.3;
+      this.segs[n]!.sprites.push({ tipo, offset: off, sem: rnd() });
+      // No difícil, às vezes vem um segundo obstáculo do outro lado da pista.
+      if (nivel === 3 && rnd() < 0.3) {
+        const outro: TipoSprite = rnd() < 0.5 ? "cone" : "pneus";
+        this.segs[n]!.sprites.push({
+          tipo: outro,
+          offset: off > 0 ? off - 0.75 : off + 0.75,
+          sem: rnd(),
+        });
+      }
+    }
+    // Faixas de turbo: uma vantagem espalhada pela pista.
+    for (let n = 110; n < this.segs.length - 20; n += 120 + Math.floor(rnd() * 50)) {
+      this.segs[n]!.sprites.push({ tipo: "turbo", offset: (rnd() - 0.5) * 1.1, sem: rnd() });
     }
   }
 
@@ -729,7 +788,16 @@ export class Corrida {
       this.posicao -= this.comprimento;
       if (!this.terminou && this.aceso) this.volta += 1;
     }
-    if (this.posicao < antes && this.volta > VOLTAS && !this.terminou) this.terminarJogador();
+    if (this.posicao < antes) this.reabrirObstaculos();
+    if (this.posicao < antes && this.volta > this.voltasTotal && !this.terminou)
+      this.terminarJogador();
+    if (
+      this.op.modo === "tempo" &&
+      this.aceso &&
+      !this.terminou &&
+      this.tempo >= this.op.tempoLimite
+    )
+      this.terminarPorTempo();
     this.distancia += dt * this.vel;
     this.ceuOff += seg.curva * razao * dt * 40;
     this.tempoCena += dt;
@@ -737,7 +805,11 @@ export class Corrida {
     // Volante
     const dx = dt * 2 * razao;
     const anda = this.aceso && !this.terminou;
-    const dir = e.volante !== 0 ? e.volante : (e.direita ? 1 : 0) - (e.esquerda ? 1 : 0);
+    const escorrega = this.tempoCena < this.escorregaAte;
+    const turbo = this.tempoCena < this.turboAte;
+    const dirBruta = e.volante !== 0 ? e.volante : (e.direita ? 1 : 0) - (e.esquerda ? 1 : 0);
+    // Na poça o volante quase não responde e o carro balança sozinho.
+    const dir = escorrega ? dirBruta * 0.35 + Math.sin(this.tempoCena * 9) * 0.7 : dirBruta;
     if (anda) this.x += dx * limitar(dir, -1, 1);
     this.x -= dx * razao * seg.curva * CENTRIFUGA;
 
@@ -746,7 +818,7 @@ export class Corrida {
     if (anda && e.frear) {
       this.vel += FREIO * dt;
       this.freando = true;
-    } else if (anda && e.acelerar) this.vel += ACEL * dt;
+    } else if (anda && (e.acelerar || turbo)) this.vel += ACEL * (turbo ? 2.6 : 1) * dt;
     else this.vel += (this.terminou ? FREIO / 2 : DESACEL) * dt;
 
     this.foraDaPista = this.x < -1 || this.x > 1;
@@ -754,17 +826,17 @@ export class Corrida {
     // Derrapagem: curva fechada em alta, ou freada forte em velocidade.
     this.derrapando =
       anda &&
-      ((Math.abs(dir) > 0.4 && razao > 0.55 && Math.abs(seg.curva) > 2.2) ||
+      (escorrega ||
+        (Math.abs(dir) > 0.4 && razao > 0.55 && Math.abs(seg.curva) > 2.2) ||
         (this.freando && razao > 0.45));
 
-    // Cones na pista: derrubam o cone e tiram velocidade.
+    // Obstáculos e faixas de turbo na pista: cada um faz uma coisa diferente.
     for (const s of seg.sprites) {
-      if (s.tipo === "cone" && !s.batido && Math.abs(this.x - s.offset) < 0.22) {
-        s.batido = true;
-        this.vel *= 0.4;
-        this.piscar = 0.5;
-        this.op.som?.batida();
-      }
+      if (s.batido) continue;
+      const alcance = ALCANCE[s.tipo];
+      if (alcance === undefined || Math.abs(this.x - s.offset) >= alcance) continue;
+      s.batido = true;
+      this.aplicarEfeito(s.tipo);
     }
     // Encostar em outro carro
     for (const r of seg.carros) {
@@ -776,7 +848,8 @@ export class Corrida {
     }
 
     this.x = limitar(this.x, -2.4, 2.4);
-    this.vel = limitar(this.vel, 0, VEL_MAX);
+    this.vel = limitar(this.vel, 0, turbo ? VEL_MAX * 1.3 : VEL_MAX);
+    this.solavanco = Math.max(0, this.solavanco - dt);
     this.piscar = Math.max(0, this.piscar - dt);
 
     this.atualizarRivais(dt);
@@ -811,7 +884,7 @@ export class Corrida {
         r.z -= this.comprimento;
         r.volta += 1;
       }
-      if (r.z < antes && r.volta > VOLTAS) r.terminou = true;
+      if (r.z < antes && r.volta > this.voltasTotal) r.terminou = true;
       this.achar(r.z).carros.push(r);
     }
   }
@@ -861,9 +934,50 @@ export class Corrida {
     this.fumaca = this.fumaca.filter((f) => f.vida > 0).slice(-60);
   }
 
+  private aplicarEfeito(tipo: TipoSprite) {
+    const som = this.op.som;
+    switch (tipo) {
+      case "cone":
+        this.vel *= 0.45;
+        this.piscar = 0.5;
+        som?.batida();
+        break;
+      case "caixa":
+        this.vel *= 0.5;
+        this.piscar = 0.5;
+        som?.batida();
+        break;
+      case "pneus":
+        this.vel *= 0.3;
+        this.piscar = 0.7;
+        som?.batida();
+        break;
+      case "barreira":
+        this.vel *= 0.2;
+        this.piscar = 0.9;
+        this.x += this.x > 0 ? -0.15 : 0.15;
+        som?.batida();
+        break;
+      case "buraco":
+        this.vel *= 0.7;
+        this.solavanco = 0.45;
+        som?.batida();
+        break;
+      case "poca":
+        this.vel *= 0.85;
+        this.escorregaAte = this.tempoCena + 1.4;
+        break;
+      case "turbo":
+        this.turboAte = this.tempoCena + 1.8;
+        this.vel = Math.min(VEL_MAX * 1.3, this.vel + VEL_MAX * 0.2);
+        som?.turbo();
+        break;
+    }
+  }
+
   private terminarJogador() {
     this.terminou = true;
-    const total = this.comprimento * VOLTAS;
+    const total = this.comprimento * this.voltasTotal;
     let posicao = 1;
     for (const r of this.rivais) {
       const prog = (r.volta - 1) * this.comprimento + r.z;
@@ -871,7 +985,26 @@ export class Corrida {
     }
     const segundos = this.tempo;
     this.op.som?.fim(posicao <= 3);
-    this.op.aoTerminar(posicao, segundos);
+    this.op.aoTerminar(posicao, segundos, {
+      voltasFeitas: Math.min(this.volta - 1, this.voltasTotal),
+      metros: Math.round(this.distancia / 20),
+    });
+  }
+
+  /** Modo tempo: o relógio zerou; quem estiver mais à frente na corrida ganha. */
+  private terminarPorTempo() {
+    this.terminou = true;
+    const posicao = this.classificacao();
+    this.op.som?.fim(posicao <= 3);
+    this.op.aoTerminar(posicao, this.op.tempoLimite, {
+      voltasFeitas: this.volta - 1,
+      metros: Math.round(this.distancia / 20),
+    });
+  }
+
+  /** Cada volta novas as caixas, cones e poças voltam ao lugar. */
+  private reabrirObstaculos() {
+    for (const seg of this.segs) for (const s of seg.sprites) s.batido = false;
   }
 
   private classificacao(): number {
@@ -891,10 +1024,14 @@ export class Corrida {
     const hud: Hud = {
       posicao: this.classificacao(),
       total: this.rivais.length + 1,
-      volta: Math.min(this.volta, VOLTAS),
+      volta: Math.min(this.volta, this.op.modo === "voltas" ? this.op.voltas : this.volta),
       kmh: Math.round((this.vel / VEL_MAX) * KMH_MAX),
+      tempoRestante:
+        this.op.modo === "tempo" ? Math.max(0, Math.ceil(this.op.tempoLimite - this.tempo)) : null,
+      voltasTotal: this.op.modo === "voltas" ? this.op.voltas : 0,
+      voltasFeitas: Math.max(0, this.volta - 1),
     };
-    const chave = `${hud.posicao}|${hud.volta}|${hud.kmh}`;
+    const chave = `${hud.posicao}|${hud.volta}|${hud.kmh}|${hud.tempoRestante}`;
     if (chave === this.ultimoHud) return;
     this.ultimoHud = chave;
     this.op.aoMudarHud(hud);
@@ -1218,7 +1355,9 @@ export class Corrida {
     }
 
     // Jogador
-    const trepida = this.vel > 0 ? Math.sin(this.distancia / 90) * (this.vel / VEL_MAX) * 1.5 : 0;
+    const trepida =
+      (this.vel > 0 ? Math.sin(this.distancia / 90) * (this.vel / VEL_MAX) * 1.5 : 0) +
+      (this.solavanco > 0 ? (Math.random() - 0.5) * 14 * (this.solavanco / 0.45) : 0);
     const dirVisual =
       this.entrada.volante !== 0
         ? this.entrada.volante

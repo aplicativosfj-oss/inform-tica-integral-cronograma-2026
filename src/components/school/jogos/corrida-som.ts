@@ -40,9 +40,12 @@ export class SomCorrida {
   private busMusica: GainNode;
   private busEfeitos: GainNode;
   private ruido: AudioBuffer;
+  private medidor: AnalyserNode;
+  private silencio: HTMLAudioElement | null = null;
   private motor: {
     o1: OscillatorNode;
     o2: OscillatorNode;
+    o3: OscillatorNode;
     filtro: BiquadFilterNode;
     ganho: GainNode;
   };
@@ -58,8 +61,19 @@ export class SomCorrida {
   private constructor(ctx: AudioContext) {
     this.ctx = ctx;
     this.mestre = ctx.createGain();
-    this.mestre.gain.value = 0.9;
-    this.mestre.connect(ctx.destination);
+    this.mestre.gain.value = 1;
+    // Compressor: deixa o som alto e parelho sem estourar no alto-falante pequeno do celular.
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -20;
+    compressor.knee.value = 12;
+    compressor.ratio.value = 4;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.2;
+    this.medidor = ctx.createAnalyser();
+    this.medidor.fftSize = 512;
+    this.mestre.connect(compressor);
+    compressor.connect(this.medidor);
+    compressor.connect(ctx.destination);
     this.busMusica = ctx.createGain();
     this.busEfeitos = ctx.createGain();
     this.busMusica.connect(this.mestre);
@@ -85,20 +99,44 @@ export class SomCorrida {
     // Motor: serra + quadrada uma oitava abaixo, filtradas.
     const o1 = ctx.createOscillator();
     const o2 = ctx.createOscillator();
+    const o3 = ctx.createOscillator();
     o1.type = "sawtooth";
     o2.type = "square";
+    o3.type = "sawtooth";
+    // Distorção leve: gera harmônicos que aparecem até no alto-falante do celular.
+    const distorce = ctx.createWaveShaper();
+    const curva = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+      const x = (i / 255) * 2 - 1;
+      curva[i] = Math.tanh(x * 3.2);
+    }
+    distorce.curve = curva;
     const filtro = ctx.createBiquadFilter();
     filtro.type = "lowpass";
-    filtro.frequency.value = 500;
+    filtro.frequency.value = 900;
+    const graves = ctx.createBiquadFilter();
+    graves.type = "peaking";
+    graves.frequency.value = 420;
+    graves.gain.value = 9;
     const ganho = ctx.createGain();
     ganho.gain.value = 0;
-    o1.connect(filtro);
-    o2.connect(filtro);
-    filtro.connect(ganho);
+    const g1 = ctx.createGain();
+    const g3 = ctx.createGain();
+    g1.gain.value = 0.6;
+    g3.gain.value = 0.5;
+    o1.connect(g1);
+    o3.connect(g3);
+    g1.connect(distorce);
+    g3.connect(distorce);
+    o2.connect(distorce);
+    distorce.connect(filtro);
+    filtro.connect(graves);
+    graves.connect(ganho);
     ganho.connect(this.busEfeitos);
     o1.start();
     o2.start();
-    this.motor = { o1, o2, filtro, ganho };
+    o3.start();
+    this.motor = { o1, o2, o3, filtro, ganho };
 
     // Chiado de pneu
     this.pneu = this.criarRuido(1900, 1.4, "bandpass");
@@ -115,6 +153,34 @@ export class SomCorrida {
       const ctx = new Ctor();
       void ctx.resume();
       const som = new SomCorrida(ctx);
+      // iPhone: o interruptor de silêncio muta o WebAudio, mas não um <audio>. Tocar um
+      // <audio> mudo em loop coloca a página na "categoria de reprodução" e libera o som.
+      try {
+        const wav = new Uint8Array(44 + 800);
+        const dv = new DataView(wav.buffer);
+        const txt = (o: number, t: string) =>
+          [...t].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
+        txt(0, "RIFF");
+        dv.setUint32(4, 36 + 800, true);
+        txt(8, "WAVEfmt ");
+        dv.setUint32(16, 16, true);
+        dv.setUint16(20, 1, true);
+        dv.setUint16(22, 1, true);
+        dv.setUint32(24, 8000, true);
+        dv.setUint32(28, 8000, true);
+        dv.setUint16(32, 1, true);
+        dv.setUint16(34, 8, true);
+        txt(36, "data");
+        dv.setUint32(40, 800, true);
+        wav.fill(128, 44);
+        const audio = new Audio(URL.createObjectURL(new Blob([wav], { type: "audio/wav" })));
+        audio.loop = true;
+        audio.setAttribute("playsinline", "");
+        void audio.play().catch(() => undefined);
+        som.silencio = audio;
+      } catch {
+        // Sem <audio>: segue só com WebAudio.
+      }
       // Truque do iOS/Android: tocar um instante de silêncio dentro do toque libera o áudio.
       const mudo = ctx.createBuffer(1, 1, 22050);
       const fonte = ctx.createBufferSource();
@@ -159,8 +225,8 @@ export class SomCorrida {
   }
 
   private aplicarVolumes() {
-    this.busMusica.gain.value = this.musicaLigada ? 0.16 : 0;
-    this.busEfeitos.gain.value = this.efeitosLigados ? 0.55 : 0;
+    this.busMusica.gain.value = this.musicaLigada ? 0.34 : 0;
+    this.busEfeitos.gain.value = this.efeitosLigados ? 0.95 : 0;
     try {
       window.localStorage.setItem(
         CHAVE,
@@ -193,17 +259,19 @@ export class SomCorrida {
     const freq = e.andando ? 48 + rpm * 120 + marcha * 26 + e.razao * 40 : 42;
     this.motor.o1.frequency.setTargetAtTime(freq, t, 0.05);
     this.motor.o2.frequency.setTargetAtTime(freq / 2, t, 0.05);
+    // Terceira voz duas oitavas acima: é ela que o alto-falante do celular realmente toca.
+    this.motor.o3.frequency.setTargetAtTime(freq * 3, t, 0.05);
     this.motor.filtro.frequency.setTargetAtTime(
       380 + e.razao * 1500 + (e.acelerando ? 500 : 0),
       t,
       0.08,
     );
     this.motor.ganho.gain.setTargetAtTime(
-      e.andando ? 0.16 + (e.acelerando ? 0.1 : 0) + e.razao * 0.05 : 0.07,
+      e.andando ? 0.32 + (e.acelerando ? 0.16 : 0) + e.razao * 0.1 : 0.14,
       t,
       0.08,
     );
-    const derrapa = e.derrapando ? 0.22 : 0;
+    const derrapa = e.derrapando ? 0.4 : 0;
     this.pneu.ganho.gain.setTargetAtTime(derrapa, t, 0.04);
     this.pneu.filtro.frequency.setTargetAtTime(1500 + e.razao * 900, t, 0.1);
     this.cascalho.ganho.gain.setTargetAtTime(e.foraDaPista ? 0.18 * (0.3 + e.razao) : 0, t, 0.05);
@@ -230,6 +298,32 @@ export class SomCorrida {
   /** Bipe da contagem: agudo na largada. */
   bipe(largada: boolean) {
     this.nota(largada ? 880 : 440, largada ? 0.55 : 0.18, "square", 0.25);
+  }
+
+  /** Faixa de turbo: varredura ascendente com chiado. */
+  turbo() {
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(260, t);
+    o.frequency.exponentialRampToValueAtTime(1500, t + 0.5);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.45, t + 0.08);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+    o.connect(g);
+    g.connect(this.busEfeitos);
+    o.start(t);
+    o.stop(t + 0.75);
+  }
+
+  /** Intensidade atual da saída (0 a 1): serve para conferir que há som de verdade. */
+  pico(): number {
+    const dados = new Uint8Array(this.medidor.fftSize);
+    this.medidor.getByteTimeDomainData(dados);
+    let max = 0;
+    for (const d of dados) max = Math.max(max, Math.abs(d - 128));
+    return max / 128;
   }
 
   batida() {
@@ -310,10 +404,24 @@ export class SomCorrida {
 
   private percussao(t: number, tipo: "bumbo" | "caixa" | "chimbal") {
     if (tipo === "bumbo") {
+      // estalo curto e agudo no começo: é o que se ouve no celular
+      const clique = this.ctx.createBufferSource();
+      clique.buffer = this.ruido;
+      const fc = this.ctx.createBiquadFilter();
+      fc.type = "bandpass";
+      fc.frequency.value = 1800;
+      const gc = this.ctx.createGain();
+      gc.gain.setValueAtTime(0.5, t);
+      gc.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+      clique.connect(fc);
+      fc.connect(gc);
+      gc.connect(this.busMusica);
+      clique.start(t, Math.random());
+      clique.stop(t + 0.04);
       const o = this.ctx.createOscillator();
       const g = this.ctx.createGain();
-      o.frequency.setValueAtTime(150, t);
-      o.frequency.exponentialRampToValueAtTime(42, t + 0.14);
+      o.frequency.setValueAtTime(240, t);
+      o.frequency.exponentialRampToValueAtTime(55, t + 0.14);
       g.gain.setValueAtTime(1, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
       o.connect(g);
@@ -348,7 +456,22 @@ export class SomCorrida {
     // baixo em colcheias, com oitava no contratempo
     if (p % 2 === 0) {
       const oitava = p % 4 === 2 ? 12 : 0;
-      this.tocarMusica(midiParaHz(acorde.baixo + oitava), t, PASSO * 1.8, "sawtooth", 0.5, 700);
+      this.tocarMusica(
+        midiParaHz(acorde.baixo + 12 + oitava),
+        t,
+        PASSO * 1.8,
+        "sawtooth",
+        0.55,
+        900,
+      );
+      this.tocarMusica(
+        midiParaHz(acorde.baixo + 24 + oitava),
+        t,
+        PASSO * 1.2,
+        "square",
+        0.12,
+        1800,
+      );
     }
     // arpejo do sintetizador
     const ordem = [0, 1, 2, 3, 2, 1, 2, 3];
@@ -366,6 +489,10 @@ export class SomCorrida {
       this.motor.o2.stop();
     } catch {
       // Já parado.
+    }
+    if (this.silencio) {
+      this.silencio.pause();
+      this.silencio = null;
     }
     void this.ctx.close();
   }

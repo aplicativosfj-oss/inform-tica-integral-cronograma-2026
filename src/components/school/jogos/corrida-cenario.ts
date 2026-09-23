@@ -39,7 +39,12 @@ export type TipoObjeto =
   | "placa"
   | "poste"
   | "rocha"
-  | "arbusto";
+  | "arbusto"
+  | "barreira"
+  | "caixa"
+  | "poca"
+  | "buraco"
+  | "turbo";
 
 // ------------------------------------------------------------------- cores
 
@@ -479,7 +484,8 @@ export function desenharObjeto(
   ctx.save();
   ctx.translate(x, y);
   ctx.globalAlpha = 1 - neblina * 0.55;
-  sombraChao(ctx, w, tipo === "predio" ? 0.7 : 0.55);
+  const chato = tipo === "poca" || tipo === "buraco" || tipo === "turbo";
+  if (!chato) sombraChao(ctx, w, tipo === "predio" ? 0.7 : 0.55);
 
   switch (tipo) {
     case "cone": {
@@ -823,6 +829,139 @@ export function desenharObjeto(
         ctx.closePath();
         ctx.fill();
       }
+      break;
+    }
+    case "barreira": {
+      const h = w * 0.34;
+      const g = ctx.createLinearGradient(0, -h, 0, 0);
+      g.addColorStop(0, "#f8fafc");
+      g.addColorStop(1, "#cbd5e1");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.roundRect(-w * 0.5, -h, w, h, w * 0.04);
+      ctx.fill();
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(-w * 0.5, -h, w, h, w * 0.04);
+      ctx.clip();
+      ctx.fillStyle = "#dc2626";
+      for (let i = -6; i < 8; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.5 + i * w * 0.16, 0);
+        ctx.lineTo(-w * 0.5 + i * w * 0.16 + w * 0.08, 0);
+        ctx.lineTo(-w * 0.5 + i * w * 0.16 + w * 0.08 + h, -h);
+        ctx.lineTo(-w * 0.5 + i * w * 0.16 + h, -h);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+      ctx.fillStyle = "#1f2937";
+      ctx.fillRect(-w * 0.44, 0, w * 0.06, h * 0.22);
+      ctx.fillRect(w * 0.38, 0, w * 0.06, h * 0.22);
+      const pisca = Math.floor(performance.now() / 350) % 2 === 0;
+      for (const lx of [-0.36, 0.36]) {
+        ctx.save();
+        if (pisca) {
+          ctx.shadowColor = "#fbbf24";
+          ctx.shadowBlur = w * 0.14;
+        }
+        ctx.fillStyle = pisca ? "#fde047" : "#a16207";
+        ctx.beginPath();
+        ctx.arc(lx * w, -h - w * 0.05, w * 0.05, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      break;
+    }
+    case "caixa": {
+      const l = w * 0.9;
+      const g = ctx.createLinearGradient(-l / 2, 0, l / 2, 0);
+      g.addColorStop(0, "#c58a4a");
+      g.addColorStop(0.6, "#a5692f");
+      g.addColorStop(1, "#6f4520");
+      ctx.fillStyle = g;
+      ctx.fillRect(-l / 2, -l, l, l);
+      ctx.strokeStyle = "#5a3413";
+      ctx.lineWidth = Math.max(1, w * 0.06);
+      ctx.strokeRect(-l / 2, -l, l, l);
+      ctx.beginPath();
+      ctx.moveTo(-l / 2, -l);
+      ctx.lineTo(l / 2, 0);
+      ctx.moveTo(l / 2, -l);
+      ctx.lineTo(-l / 2, 0);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(0,0,0,0.25)";
+      ctx.lineWidth = Math.max(0.6, w * 0.02);
+      for (let i = 1; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-l / 2, -(l * i) / 4);
+        ctx.lineTo(l / 2, -(l * i) / 4);
+        ctx.stroke();
+      }
+      break;
+    }
+    case "poca": {
+      const g = ctx.createRadialGradient(-w * 0.1, -w * 0.02, 1, 0, 0, w * 0.5);
+      g.addColorStop(0, "rgba(20,24,40,0.95)");
+      g.addColorStop(0.7, "rgba(10,14,28,0.9)");
+      g.addColorStop(1, "rgba(10,14,28,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, w * 0.5, w * 0.11, 0, 0, Math.PI * 2);
+      ctx.fill();
+      const arco = ctx.createLinearGradient(-w * 0.4, 0, w * 0.4, 0);
+      arco.addColorStop(0, "rgba(56,189,248,0.5)");
+      arco.addColorStop(0.5, "rgba(217,70,239,0.45)");
+      arco.addColorStop(1, "rgba(250,204,21,0.45)");
+      ctx.fillStyle = arco;
+      ctx.beginPath();
+      ctx.ellipse(-w * 0.08, -w * 0.015, w * 0.32, w * 0.05, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case "buraco": {
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, w * 0.46, w * 0.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#05070a";
+      ctx.beginPath();
+      ctx.ellipse(0, w * 0.01, w * 0.36, w * 0.075, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = Math.max(0.6, w * 0.02);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, w * 0.4, w * 0.09, 0, Math.PI * 1.05, Math.PI * 1.9);
+      ctx.stroke();
+      break;
+    }
+    case "turbo": {
+      ctx.save();
+      ctx.fillStyle = "rgba(14,165,233,0.35)";
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.5, 0);
+      ctx.lineTo(w * 0.5, 0);
+      ctx.lineTo(w * 0.42, -w * 0.2);
+      ctx.lineTo(-w * 0.42, -w * 0.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalCompositeOperation = "lighter";
+      const anima = (performance.now() / 260) % 1;
+      for (let i = 0; i < 3; i++) {
+        const t = (i + anima) / 3;
+        const y = -w * 0.02 - t * w * 0.16;
+        const meia = w * (0.34 - t * 0.06);
+        ctx.strokeStyle = `rgba(125,211,252,${0.95 - t * 0.5})`;
+        ctx.lineWidth = Math.max(1, w * 0.045);
+        ctx.shadowColor = "#38bdf8";
+        ctx.shadowBlur = w * 0.15;
+        ctx.beginPath();
+        ctx.moveTo(-meia, y);
+        ctx.lineTo(0, y - w * 0.06);
+        ctx.lineTo(meia, y);
+        ctx.stroke();
+      }
+      ctx.restore();
       break;
     }
     case "arbusto": {

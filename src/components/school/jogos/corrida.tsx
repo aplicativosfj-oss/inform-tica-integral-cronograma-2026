@@ -18,7 +18,6 @@ import {
   CARROS,
   Corrida as MotorCorrida,
   TEMAS,
-  VOLTAS,
   type Entrada,
   type Hud,
   type IdPista,
@@ -51,6 +50,8 @@ interface Fim {
   posicao: number;
   segundos: number;
   estrelas: number | null;
+  voltasFeitas: number;
+  metros: number;
 }
 
 function tempoFmt(s: number): string {
@@ -222,13 +223,27 @@ function BotaoToque({
   );
 }
 
+const semHud: Hud = {
+  posicao: 6,
+  total: 6,
+  volta: 1,
+  kmh: 0,
+  tempoRestante: null,
+  voltasTotal: 0,
+  voltasFeitas: 0,
+};
+
 export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
   const [fase, setFase] = useState<Fase>("menu");
+  const [nivelEsc, setNivelEsc] = useState(Math.min(Math.max(nivel, 1), 3));
+  const [modo, setModo] = useState<"voltas" | "tempo">("voltas");
+  const [voltasEsc, setVoltasEsc] = useState(3);
+  const [tempoEsc, setTempoEsc] = useState(90);
   const [carro, setCarro] = useState(0);
   const [pista, setPista] = useState<IdPista>("praia");
   const [rodada, setRodada] = useState(0);
   const [contagem, setContagem] = useState<number | null>(null);
-  const [hud, setHud] = useState<Hud>({ posicao: 6, total: 6, volta: 1, kmh: 0 });
+  const [hud, setHud] = useState<Hud>(semHud);
   const [fim, setFim] = useState<Fim | null>(null);
   const [toque, setToque] = useState(false);
   const [retrato, setRetrato] = useState(false);
@@ -273,12 +288,16 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
       setMusica(som.current.musicaLigada);
       setEfeitos(som.current.efeitosLigados);
     }
-    setHud({ posicao: 6, total: 6, volta: 1, kmh: 0 });
+    setHud({
+      ...semHud,
+      tempoRestante: modo === "tempo" ? tempoEsc : null,
+      voltasTotal: modo === "voltas" ? voltasEsc : 0,
+    });
     setFim(null);
     setContagem(3);
     setFase("contagem");
     setRodada((r) => r + 1);
-  }, []);
+  }, [modo, tempoEsc, voltasEsc]);
 
   // Cria o motor quando a corrida começa e o destrói ao voltar ao menu.
   const ativo = fase !== "menu";
@@ -294,18 +313,24 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
       canvas: canvas.current,
       pista,
       corJogador: cor,
-      nivel,
+      nivel: nivelEsc,
+      modo,
+      voltas: voltasEsc,
+      tempoLimite: tempoEsc,
       som: som.current,
       aoMudarHud: setHud,
-      aoTerminar: (posicao, segundos) => {
-        setFim({ posicao, segundos, estrelas: null });
+      aoTerminar: (posicao, segundos, extra) => {
+        setFim({ posicao, segundos, estrelas: null, ...extra });
         setFase("fim");
         void registrarPartida({
           jogo: "corrida",
-          titulo: "Jogo de corrida",
+          titulo:
+            modo === "tempo"
+              ? `Corrida contra o tempo (${tempoEsc}s)`
+              : `Corrida de ${voltasEsc} voltas`,
           resultado: posicao === 1 ? "vitoria" : posicao <= 3 ? "empate" : "derrota",
           adversario,
-          nivel,
+          nivel: nivelEsc,
           segundos: Math.round(segundos),
         }).then((estrelas) => setFim((f) => (f ? { ...f, estrelas } : f)));
       },
@@ -557,11 +582,101 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
             </div>
           </section>
 
+          <section className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-300">
+                3. Modo de corrida
+              </h4>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(
+                  [
+                    ["voltas", "🏁 Voltas", "Termine primeiro"],
+                    ["tempo", "⏱️ Tempo", "Vá o mais longe"],
+                  ] as const
+                ).map(([id, nome, desc]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setModo(id)}
+                    aria-pressed={modo === id}
+                    className={cn(
+                      "flex cursor-pointer flex-col items-start rounded-xl border-2 px-3 py-2 text-left transition-colors",
+                      modo === id
+                        ? "border-amber-400 bg-amber-400/10 text-white"
+                        : "border-white/10 bg-slate-900/60 text-slate-300 hover:border-white/40",
+                    )}
+                  >
+                    <b className="text-sm">{nome}</b>
+                    <span className="text-[10px] text-slate-400">{desc}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {(modo === "voltas" ? [1, 3, 5] : [60, 90, 120]).map((v) => {
+                  const ativoV = modo === "voltas" ? voltasEsc === v : tempoEsc === v;
+                  return (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => (modo === "voltas" ? setVoltasEsc(v) : setTempoEsc(v))}
+                      aria-pressed={ativoV}
+                      className={cn(
+                        "h-8 cursor-pointer rounded-full border px-3 text-xs font-bold transition-colors",
+                        ativoV
+                          ? "border-amber-300 bg-amber-400 text-amber-950"
+                          : "border-white/20 bg-white/5 text-slate-200 hover:bg-white/10",
+                      )}
+                    >
+                      {modo === "voltas" ? `${v} ${v === 1 ? "volta" : "voltas"}` : `${v} s`}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <h4 className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-300">
+                4. Dificuldade
+              </h4>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(
+                  [
+                    [1, "Fácil", "🟢"],
+                    [2, "Médio", "🟡"],
+                    [3, "Difícil", "🔴"],
+                  ] as const
+                ).map(([n, nome, ic]) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setNivelEsc(n)}
+                    aria-pressed={nivelEsc === n}
+                    className={cn(
+                      "flex cursor-pointer flex-col items-center rounded-xl border-2 px-2 py-2 text-xs font-bold transition-colors",
+                      nivelEsc === n
+                        ? "border-amber-400 bg-amber-400/10 text-white"
+                        : "border-white/10 bg-slate-900/60 text-slate-300 hover:border-white/40",
+                    )}
+                  >
+                    <span aria-hidden>{ic}</span>
+                    {nome}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1.5 text-[10px] leading-snug text-slate-400">
+                {nivelEsc === 1
+                  ? "Rivais mais lentos e poucos obstáculos: cones, caixas e buracos."
+                  : nivelEsc === 2
+                    ? "Mais obstáculos: pilhas de pneus, poças de óleo e barreiras."
+                    : "Rivais rápidos e pista cheia de obstáculos, até em dupla."}
+              </p>
+            </div>
+          </section>
+
           <div className="flex flex-col items-center gap-2">
             <p className="text-center text-[11px] text-slate-400">
               {toque
-                ? `${VOLTAS} voltas contra 5 pilotos. O carro acelera sozinho: gire o volante da tela, arraste o dedo pela pista ou incline o celular. Cones tiram velocidade!`
-                : `${VOLTAS} voltas contra 5 pilotos. Setas ou WASD para dirigir · cones na pista fazem você perder velocidade. Com som e música: ligue o volume!`}
+                ? "Contra 5 pilotos. O carro acelera sozinho: gire o volante da tela, arraste o dedo pela pista ou incline o celular. Passe nas faixas azuis para ganhar turbo e desvie dos obstáculos!"
+                : "Contra 5 pilotos. Setas ou WASD para dirigir. Passe nas faixas azuis para ganhar turbo e desvie de cones, caixas, buracos, pneus, poças e barreiras. Ligue o volume!"}
             </p>
             <button
               type="button"
@@ -649,7 +764,7 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
           <canvas
             ref={canvas}
             className="block size-full touch-none"
-            aria-label={`Pista de ${TEMAS[pista].nome}. Posição ${hud.posicao} de ${hud.total}, volta ${hud.volta} de ${VOLTAS}.`}
+            aria-label={`Pista de ${TEMAS[pista].nome}. Posição ${hud.posicao} de ${hud.total}, volta ${hud.volta}.`}
             {...pistaPointer}
           />
 
@@ -692,11 +807,23 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
             </div>
             <div className="rounded-lg border border-white/20 bg-slate-950/70 px-2 py-0.5 text-right backdrop-blur sm:px-2.5 sm:py-1">
               <span className="block text-[8px] font-semibold uppercase tracking-wider text-slate-400 sm:text-[9px]">
-                Volta
+                {modo === "tempo" ? "Tempo" : "Volta"}
               </span>
               <b className="text-base leading-none tabular-nums sm:text-2xl">
-                {hud.volta}
-                <span className="text-xs text-slate-400 sm:text-sm">/{VOLTAS}</span>
+                {modo === "tempo" ? (
+                  <>
+                    {Math.floor((hud.tempoRestante ?? 0) / 60)}:
+                    {String((hud.tempoRestante ?? 0) % 60).padStart(2, "0")}
+                    <span className="ml-1 text-xs text-slate-400 sm:text-sm">
+                      · {hud.voltasFeitas} {hud.voltasFeitas === 1 ? "volta" : "voltas"}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    {hud.volta}
+                    <span className="text-xs text-slate-400 sm:text-sm">/{voltasEsc}</span>
+                  </>
+                )}
               </b>
             </div>
           </div>
@@ -746,7 +873,10 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
                 </h4>
                 <p className="flex items-center gap-1.5 text-sm text-slate-300">
                   <Timer className="size-4" aria-hidden /> {tempoFmt(fim.segundos)}
-                  <Flag className="ml-2 size-4" aria-hidden /> {VOLTAS} voltas
+                  <Flag className="ml-2 size-4" aria-hidden />{" "}
+                  {modo === "tempo"
+                    ? `${fim.voltasFeitas} ${fim.voltasFeitas === 1 ? "volta" : "voltas"} · ${fim.metros} m`
+                    : `${voltasEsc} ${voltasEsc === 1 ? "volta" : "voltas"}`}
                 </p>
                 {fim.estrelas !== null && fim.estrelas > 0 && (
                   <p className="flex items-center gap-1 text-sm font-bold text-amber-300">
