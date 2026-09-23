@@ -530,3 +530,51 @@
     }
   }
 }
+
+/* Janelas das ferramentas da Infoteca (modo página): maiores, legíveis e coloridas.
+   As cores vêm das variáveis --jf-a / --jf-b definidas pela própria janela. */
+.jf-grande .jf-corpo {
+  background-image:
+    radial-gradient(circle at 0% 0%, color-mix(in oklab, var(--jf-a) 16%, transparent), transparent 55%),
+    radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--jf-b) 14%, transparent), transparent 55%);
+  font-size: 1.125rem;
+}
+.jf-grande .jf-corpo :is(.text-xs, .text-\[11px\], .text-\[12px\], .text-\[13px\]) {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.jf-grande .jf-corpo .text-sm {
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+.jf-grande .jf-corpo .text-base {
+  font-size: 1.25rem;
+}
+.jf-grande .jf-corpo .text-lg {
+  font-size: 1.4rem;
+}
+.jf-grande .jf-corpo button {
+  min-height: 2.75rem;
+  border-width: 2px;
+  border-color: color-mix(in oklab, var(--jf-a) 55%, transparent);
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--jf-a) 22%, transparent),
+    color-mix(in oklab, var(--jf-b) 10%, transparent)
+  );
+  font-weight: 600;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.jf-grande .jf-corpo button:hover:not(:disabled) {
+  border-color: var(--jf-a);
+  box-shadow: 0 6px 16px -6px var(--jf-b);
+}
+.jf-grande .jf-corpo button[aria-pressed="true"],
+.jf-grande .jf-corpo button[aria-selected="true"],
+.jf-grande .jf-corpo button[data-state="active"] {
+  background-image: linear-gradient(135deg, var(--jf-a), var(--jf-b));
+  border-color: var(--jf-b);
+  color: #fff;
+}

@@ -17,6 +17,36 @@ import { cn } from "@/lib/utils";
  *   a criança clica, guardando onde foi deixada.
  */
 
+/** Pares de cores (início/fim do degradê) por nome de cor Tailwind. */
+const PALETAS: Record<string, [string, string]> = {
+  rose: ["#f43f5e", "#be123c"],
+  pink: ["#ec4899", "#be185d"],
+  fuchsia: ["#d946ef", "#a21caf"],
+  purple: ["#a855f7", "#7e22ce"],
+  violet: ["#8b5cf6", "#6d28d9"],
+  indigo: ["#6366f1", "#4338ca"],
+  blue: ["#3b82f6", "#1d4ed8"],
+  sky: ["#0ea5e9", "#0369a1"],
+  cyan: ["#06b6d4", "#0e7490"],
+  teal: ["#14b8a6", "#0f766e"],
+  emerald: ["#10b981", "#047857"],
+  green: ["#22c55e", "#15803d"],
+  lime: ["#84cc16", "#4d7c0f"],
+  amber: ["#f59e0b", "#b45309"],
+  orange: ["#f97316", "#c2410c"],
+  red: ["#ef4444", "#b91c1c"],
+};
+
+/** Cor da janela: a mesma do card que a abriu; sem `cor`, sorteia pelo título. */
+function paletaDaJanela(cor: string | undefined, titulo: string): [string, string] {
+  const nome = cor?.match(/(?:bg|text)-([a-z]+)-\d+/)?.[1];
+  if (nome && PALETAS[nome]) return PALETAS[nome];
+  const nomes = Object.keys(PALETAS);
+  let h = 0;
+  for (const c of titulo) h = (h * 31 + c.charCodeAt(0)) % 997;
+  return PALETAS[nomes[h % nomes.length]!]!;
+}
+
 /** Folga mínima até a borda da tela, para a janela nunca sumir. */
 const MARGEM = 12;
 
@@ -77,6 +107,13 @@ export function JanelaFerramenta({
   children,
 }: JanelaFerramentaProps) {
   const [aberta, setAberta] = useState(abertaInicial);
+  const [corA, corB] = paletaDaJanela(cor, titulo);
+  // Na página própria a janela é grande e legível; a calculadora (largura
+  // padrão) fica mais compacta que as ferramentas de figuras e textos.
+  const larguraPagina =
+    largura === "w-[min(22rem,calc(100vw-24px))]"
+      ? "w-[min(32rem,calc(100vw-24px))]"
+      : "w-[min(60rem,calc(100vw-24px))]";
   const [pos, setPos] = useState<Posicao | null>(null);
   const [arrastando, setArrastando] = useState(false);
   const painelRef = useRef<HTMLDivElement>(null);
@@ -232,10 +269,18 @@ export function JanelaFerramenta({
           visibility: pos ? "visible" : "hidden",
           // Garantia: por mais baixa que seja a tela, a janela nunca passa dela.
           maxHeight: `calc(100dvh - ${MARGEM * 2}px)`,
+          ...(abertaInicial
+            ? ({
+                "--jf-a": corA,
+                "--jf-b": corB,
+                borderColor: corA,
+              } as React.CSSProperties)
+            : {}),
         }}
-        className={`fixed z-50 flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl ${
-          abertaInicial ? largura : larguraBalao
-        }`}
+        className={cn(
+          "fixed z-50 flex flex-col overflow-hidden rounded-2xl border-2 bg-card shadow-2xl",
+          abertaInicial ? `jf-grande ${larguraPagina}` : `border-border ${larguraBalao}`,
+        )}
       >
         {/* Só o cabeçalho arrasta: dentro da janela a criança precisa clicar
           nas teclas, arrastar figuras e escrever sem mover a janela junto. */}
@@ -248,31 +293,56 @@ export function JanelaFerramenta({
           role="button"
           tabIndex={0}
           aria-label={`Arraste para mover: ${titulo}. Use as setas do teclado para ajustar`}
+          style={
+            abertaInicial
+              ? { backgroundImage: `linear-gradient(90deg, ${corA}, ${corB})` }
+              : undefined
+          }
           className={cn(
-            "flex shrink-0 touch-none select-none items-center gap-1.5 rounded-t-2xl border-b px-3 py-2",
-            cor ? `${cor} border-black/5 dark:border-white/10` : "border-border/60 text-muted-foreground",
+            "flex shrink-0 touch-none select-none items-center gap-1.5 rounded-t-2xl border-b",
+            abertaInicial
+              ? "gap-3 border-black/10 px-5 py-3.5 text-white"
+              : cn(
+                  "px-3 py-2",
+                  cor
+                    ? `${cor} border-black/5 dark:border-white/10`
+                    : "border-border/60 text-muted-foreground",
+                ),
             arrastando ? "cursor-grabbing" : "cursor-grab",
           )}
         >
-          <GripHorizontal className="size-4 shrink-0 opacity-60" />
+          <GripHorizontal
+            className={cn("shrink-0 opacity-60", abertaInicial ? "size-6" : "size-4")}
+          />
           <span className="min-w-0 flex-1 leading-tight">
-            <span className={cn("block truncate text-xs font-semibold", !cor && "font-medium")}>
+            <span
+              className={cn(
+                "block truncate font-semibold",
+                abertaInicial ? "text-xl font-bold tracking-tight" : "text-xs",
+                !cor && !abertaInicial && "font-medium",
+              )}
+            >
               {titulo}
             </span>
             {abertaInicial && subtitulo ? (
-              <span className="block text-[11px] opacity-70">{subtitulo}</span>
+              <span className="block text-sm opacity-85">{subtitulo}</span>
             ) : null}
           </span>
           <button
             type="button"
             onClick={fechar}
             aria-label={`Fechar ${titulo}`}
-            className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md opacity-80 transition-colors hover:bg-black/10 hover:opacity-100 dark:hover:bg-white/10"
+            className={cn(
+              "flex shrink-0 cursor-pointer items-center justify-center rounded-md opacity-80 transition-colors hover:opacity-100",
+              abertaInicial
+                ? "size-10 rounded-full bg-white/20 hover:bg-white/35"
+                : "size-6 hover:bg-black/10 dark:hover:bg-white/10",
+            )}
           >
-            <X className="size-4" />
+            <X className={abertaInicial ? "size-6" : "size-4"} />
           </button>
         </div>
-        <div className={`min-h-0 flex-1 overflow-auto ${abertaInicial ? "p-4" : "p-2.5"}`}>
+        <div className={`min-h-0 flex-1 overflow-auto ${abertaInicial ? "jf-corpo p-6" : "p-2.5"}`}>
           {children}
         </div>
       </div>
