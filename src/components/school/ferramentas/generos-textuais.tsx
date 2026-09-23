@@ -76,12 +76,15 @@ function Ficha({ genero, aoVoltar }: { genero: GeneroTexto; aoVoltar: () => void
       </button>
 
       {FIGURA[genero.id] ? (
+        // Altura fixa (não só a proporção da imagem): sem isso a foto
+        // dominava a janela inteira, empurrando a ficha para baixo da
+        // rolagem — aqui ela é só a "capa" da ficha, compacta.
         <img
           src={FIGURA[genero.id]}
           alt=""
           width={320}
           height={185}
-          className="w-full rounded-xl border border-border object-cover"
+          className="h-28 w-full rounded-xl border border-border object-cover sm:h-36"
           loading="lazy"
           decoding="async"
         />
@@ -240,43 +243,47 @@ export function GenerosTextuais() {
   return (
     <div className="flex flex-col gap-2">
       {/* A fachada do museu abre a ferramenta: é o que diz, sem texto, que
-        ali dentro tem uma coleção para folhear. */}
+        ali dentro tem uma coleção para folhear. Altura fixa (não a
+        proporção inteira da imagem): era ela que deixava a janela enorme e
+        alta antes até chegar ao que interessa — os gêneros. */}
       <img
         src={bannerMuseu}
         alt=""
         width={720}
         height={290}
-        className="w-full rounded-xl border border-border object-cover"
+        className="h-28 w-full rounded-xl border border-border object-cover sm:h-36"
         loading="eager"
         decoding="async"
       />
-      <div className="flex gap-1 rounded-lg bg-muted/60 p-1">
-        {(
-          [
-            ["galeria", `Ver os ${GENEROS_TEXTO.length} gêneros`],
-            ["detetive", "Jogo do detetive"],
-          ] as const
-        ).map(([id, rotulo]) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setModo(id)}
-            className={cn(
-              "flex-1 cursor-pointer rounded-md px-2 py-1 text-xs font-medium transition-colors",
-              modo === id
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {rotulo}
-          </button>
-        ))}
-      </div>
 
-      {modo === "detetive" ? (
-        <Detetive />
-      ) : (
-        <>
+      {/* Painel de navegação em destaque: é daqui que sai tudo — o modo
+        (galeria ou detetive) e, na galeria, o grupo de gêneros — por isso
+        ganha cor própria e borda, em vez de se misturar com o resto. */}
+      <div className="flex flex-col gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-2 dark:border-indigo-500/25 dark:bg-indigo-500/10">
+        <div className="flex gap-1 rounded-lg bg-card/80 p-1 shadow-sm">
+          {(
+            [
+              ["galeria", `Ver os ${GENEROS_TEXTO.length} gêneros`],
+              ["detetive", "Jogo do detetive"],
+            ] as const
+          ).map(([id, rotulo]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setModo(id)}
+              className={cn(
+                "flex-1 cursor-pointer rounded-md px-2 py-1.5 text-xs font-semibold transition-colors",
+                modo === id
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {rotulo}
+            </button>
+          ))}
+        </div>
+
+        {modo === "galeria" && (
           <div className="flex flex-wrap gap-1">
             {GRUPOS.map((g) => (
               <button
@@ -284,16 +291,23 @@ export function GenerosTextuais() {
                 type="button"
                 onClick={() => setGrupo(g.id)}
                 className={cn(
-                  "cursor-pointer rounded-full border px-2 py-0.5 text-[11px] transition-colors",
+                  "cursor-pointer rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors",
                   grupo === g.id
-                    ? "border-primary bg-primary/10 font-medium text-primary"
-                    : "border-border text-muted-foreground hover:text-foreground",
+                    ? "border-indigo-600 bg-indigo-600 text-white"
+                    : "border-indigo-500/30 bg-card/60 text-muted-foreground hover:text-foreground",
                 )}
               >
                 {g.nome}
               </button>
             ))}
           </div>
+        )}
+      </div>
+
+      {modo === "detetive" ? (
+        <Detetive />
+      ) : (
+        <>
           <p className="text-[11px] text-muted-foreground">
             {GRUPOS.find((g) => g.id === grupo)?.descricao}. Toque num gênero para ver um exemplo de
             verdade.

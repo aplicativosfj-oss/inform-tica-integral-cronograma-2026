@@ -1,6 +1,8 @@
 import { GripHorizontal, X, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
+import { cn } from "@/lib/utils";
+
 /**
  * Janela flutuante das ferramentas de manipular (calculadora, mesa de formas,
  * frações). Nasceu na calculadora e virou peça comum: todas se comportam do
@@ -50,6 +52,14 @@ export interface JanelaFerramentaProps {
   /** Texto e ícone do botão do canto, no modo balão. */
   rotuloBotao?: string;
   iconeBotao?: LucideIcon;
+  /**
+   * Cor de identidade da ferramenta, nas mesmas classes Tailwind usadas no
+   * card dela na lista de ferramentas (ex.: "bg-rose-500/10 text-rose-600
+   * dark:bg-rose-500/20 dark:text-rose-300"). Tinge o cabeçalho da janela
+   * para cada ferramenta ter uma cor própria e reconhecível — e a mesma cor
+   * do card que abriu ela — em vez de todas saírem no mesmo cinza neutro.
+   */
+  cor?: string;
   children: ReactNode;
 }
 
@@ -63,6 +73,7 @@ export function JanelaFerramenta({
   chavePosicao,
   rotuloBotao,
   iconeBotao: IconeBotao,
+  cor,
   children,
 }: JanelaFerramentaProps) {
   const [aberta, setAberta] = useState(abertaInicial);
@@ -237,24 +248,26 @@ export function JanelaFerramenta({
           role="button"
           tabIndex={0}
           aria-label={`Arraste para mover: ${titulo}. Use as setas do teclado para ajustar`}
-          className={`flex shrink-0 touch-none select-none items-center gap-1.5 rounded-t-2xl border-b border-border/60 px-3 py-2 ${
-            arrastando ? "cursor-grabbing" : "cursor-grab"
-          }`}
+          className={cn(
+            "flex shrink-0 touch-none select-none items-center gap-1.5 rounded-t-2xl border-b px-3 py-2",
+            cor ? `${cor} border-black/5 dark:border-white/10` : "border-border/60 text-muted-foreground",
+            arrastando ? "cursor-grabbing" : "cursor-grab",
+          )}
         >
-          <GripHorizontal className="size-4 shrink-0 text-muted-foreground" />
+          <GripHorizontal className="size-4 shrink-0 opacity-60" />
           <span className="min-w-0 flex-1 leading-tight">
-            <span className="block truncate text-xs font-medium text-muted-foreground">
+            <span className={cn("block truncate text-xs font-semibold", !cor && "font-medium")}>
               {titulo}
             </span>
             {abertaInicial && subtitulo ? (
-              <span className="block text-[11px] text-muted-foreground/70">{subtitulo}</span>
+              <span className="block text-[11px] opacity-70">{subtitulo}</span>
             ) : null}
           </span>
           <button
             type="button"
             onClick={fechar}
             aria-label={`Fechar ${titulo}`}
-            className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md opacity-80 transition-colors hover:bg-black/10 hover:opacity-100 dark:hover:bg-white/10"
           >
             <X className="size-4" />
           </button>

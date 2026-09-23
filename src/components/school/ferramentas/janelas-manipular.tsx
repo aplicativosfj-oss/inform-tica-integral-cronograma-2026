@@ -58,6 +58,7 @@ export function MesaFormasJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Formas"
       iconeBotao={Shapes}
+      cor="bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300"
     >
       <MesaFormas />
     </JanelaFerramenta>
@@ -74,6 +75,7 @@ export function FracaoNaMesaJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Frações"
       iconeBotao={PieChart}
+      cor="bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-300"
     >
       <FracaoNaMesa />
     </JanelaFerramenta>
@@ -90,6 +92,7 @@ export function CompararFracoesJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Comparar frações"
       iconeBotao={Scale}
+      cor="bg-teal-500/10 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300"
     >
       <CompararFracoes />
     </JanelaFerramenta>
@@ -106,6 +109,7 @@ export function FracoesEquivalentesJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Frações equivalentes"
       iconeBotao={Equal}
+      cor="bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300"
     >
       <FracoesEquivalentes />
     </JanelaFerramenta>
@@ -125,6 +129,7 @@ export function PorcentagemJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Porcentagem"
       iconeBotao={Percent}
+      cor="bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300"
     >
       <Porcentagem />
     </JanelaFerramenta>
@@ -141,6 +146,7 @@ export function JogoOperacoesJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Desafio"
       iconeBotao={Gamepad2}
+      cor="bg-fuchsia-500/10 text-fuchsia-600 dark:bg-fuchsia-500/20 dark:text-fuchsia-300"
     >
       <JogoOperacoes />
     </JanelaFerramenta>
@@ -157,6 +163,7 @@ export function ProblemasInteligentesJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Problemas"
       iconeBotao={PuzzleIcon}
+      cor="bg-lime-500/10 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300"
     >
       <ProblemasInteligentes />
     </JanelaFerramenta>
@@ -173,6 +180,7 @@ export function ConversorMedidasJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Medidas"
       iconeBotao={Ruler}
+      cor="bg-sky-500/10 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300"
     >
       <ConversorMedidas />
     </JanelaFerramenta>
@@ -189,6 +197,7 @@ export function MedidasMundoJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Quanto mede"
       iconeBotao={Weight}
+      cor="bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
     >
       <MedidasMundo />
     </JanelaFerramenta>
@@ -205,6 +214,7 @@ export function ValorPosicionalJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Valor posicional"
       iconeBotao={Boxes}
+      cor="bg-violet-500/10 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300"
     >
       <ValorPosicional />
     </JanelaFerramenta>
@@ -221,6 +231,7 @@ export function JogoNumerosJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Jogo dos números"
       iconeBotao={Blocks}
+      cor="bg-rose-500/10 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300"
     >
       <JogoNumeros />
     </JanelaFerramenta>
@@ -237,6 +248,7 @@ export function ProducaoTextualJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Escrever"
       iconeBotao={PenTool}
+      cor="bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"
     >
       <ProducaoTextual />
     </JanelaFerramenta>
@@ -253,6 +265,7 @@ export function GenerosTextuaisJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Gêneros"
       iconeBotao={BookMarked}
+      cor="bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300"
     >
       <GenerosTextuais />
     </JanelaFerramenta>
@@ -269,6 +282,7 @@ export function ParqueLetrasJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Letras"
       iconeBotao={Baby}
+      cor="bg-pink-500/10 text-pink-600 dark:bg-pink-500/20 dark:text-pink-300"
     >
       <ParqueLetras />
     </JanelaFerramenta>
@@ -285,6 +299,7 @@ export function SalaDeJogosJanela() {
       aoFechar={voltarDaFerramenta}
       rotuloBotao="Jogos"
       iconeBotao={Dices}
+      cor="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
     >
       <SalaDeJogos />
     </JanelaFerramenta>

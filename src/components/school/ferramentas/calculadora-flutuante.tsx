@@ -35,6 +35,7 @@ export function CalculadoraFlutuante({
       chavePosicao={CHAVE_POSICAO}
       rotuloBotao="Calculadora"
       iconeBotao={Calculator}
+      cor="bg-slate-500/10 text-slate-600 dark:bg-slate-500/20 dark:text-slate-300"
     >
       <Calculadora compacta={!abertaInicial} moldura={false} />
     </JanelaFerramenta>
