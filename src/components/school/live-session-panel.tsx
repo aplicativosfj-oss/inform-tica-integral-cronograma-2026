@@ -65,6 +65,7 @@ import {
   desfazerFalta,
   marcarFalta,
   marcarFaltaEmCascata,
+  registrarChamadaAutomatica,
   registrarPresencasIniciais,
 } from "@/lib/presencas";
 import {
@@ -196,7 +197,7 @@ function useChamadaDoDia(
         // Only an authenticated session may create today's roll call — an
         // anonymous visitor on the public homepage just reads whatever the
         // admin/professor has already registered.
-        if (registradas.length === 0 && podeRegistrar) {
+        if (registradas.length === 0) {
           const ultima = await fetchUltimaParticipacao(turma.id);
           const selecao = selecionarAlunosDoDia(
             turma,
@@ -204,7 +205,12 @@ function useChamadaDoDia(
             config.numeroComputadores,
             gruposPorVisita(config),
           );
-          await registrarPresencasIniciais(turma.id, dateKey, selecao.grupos);
+          if (podeRegistrar) {
+            await registrarPresencasIniciais(turma.id, dateKey, selecao.grupos);
+          } else {
+            // Sem faltas indicadas por ninguém, presume-se que os programados vieram.
+            await registrarChamadaAutomatica(turma.id, dateKey, selecao.grupos);
+          }
           registradas = await fetchPresencasDoDia(turma.id, dateKey);
         }
         const ultimaAtualizada = await fetchUltimaParticipacao(turma.id);

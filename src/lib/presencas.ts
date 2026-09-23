@@ -151,6 +151,29 @@ export async function registrarPresencasIniciais(
 }
 
 /**
+ * Chamada automática: quando a aula está em andamento e ninguém registrou a
+ * chamada, quem abre o painel (mesmo sem login) grava os alunos programados
+ * como presentes. O banco só aceita para o dia de hoje e só se ainda não
+ * existir chamada da turma — faltas continuam sendo registradas por quem tem
+ * acesso.
+ */
+export async function registrarChamadaAutomatica(
+  turmaId: string,
+  data: string,
+  grupos: { indice: number; alunos: { id: string; nome: string }[] }[],
+): Promise<void> {
+  const linhas = grupos.flatMap((grupo) =>
+    grupo.alunos.map((aluno) => ({
+      aluno_id: aluno.id,
+      aluno_nome: aluno.nome,
+      grupo_indice: grupo.indice,
+    })),
+  );
+  if (linhas.length === 0) return;
+  await supabase.rpc("chamada_automatica", { p_turma_id: turmaId, p_data: data, p_linhas: linhas });
+}
+
+/**
  * Quem não tem login do painel, mas é o professor regente da turma com a
  * sessão aberta (senha conferida), grava pelas funções do banco que conferem
  * a senha no servidor. O administrador logado continua gravando direto.
