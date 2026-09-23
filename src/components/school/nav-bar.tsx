@@ -129,6 +129,27 @@ const SUB_AVALIACOES = [
   { rotulo: "Guia de habilidades", aba: "descritores" as const, icon: Compass },
 ] as const;
 
+/** Título da página mostrado na barra mínima (fora da home). */
+function tituloDaPagina(pathname: string): string {
+  const mapa: Record<string, string> = {
+    "/agenda": "Agenda da semana",
+    "/coordenacao": "Coordenação",
+    "/infoteca": "Infoteca",
+    "/avaliacao": "Avaliações diagnósticas",
+    "/descritores": "Guia de habilidades",
+    "/sobre": "Sobre o projeto",
+    "/login": "Entrar no painel",
+    "/tv": "Modo TV",
+  };
+  if (mapa[pathname]) return mapa[pathname];
+  if (pathname.startsWith("/aluno")) return "Área do Aluno";
+  if (pathname.startsWith("/professor")) return "Espaço do Professor";
+  if (pathname.startsWith("/mediador")) return "Espaço do Mediador";
+  if (pathname.startsWith("/ferramentas")) return "Ferramentas";
+  if (pathname.startsWith("/dashboard")) return "Painel de gestão";
+  return "Agenda de Informática";
+}
+
 const LINKS = [
   { to: "/", label: "Início" },
   { to: "/agenda", label: "Agenda" },
