@@ -57,7 +57,7 @@ function NavLink({ to, label }: { to: string; label: string }) {
       asChild
       variant="ghost"
       size="sm"
-      className={`relative hidden whitespace-nowrap px-2 text-[15px] transition-all duration-300 xl:inline-flex ${
+      className={`relative hidden whitespace-nowrap px-1.5 text-[15px] transition-all duration-300 xl:inline-flex ${
         isActive
           ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
           : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
@@ -88,14 +88,14 @@ function NavLinkAvaliacoes() {
         <Button
           variant="ghost"
           size="sm"
-          className={`relative hidden items-center gap-1 whitespace-nowrap px-2 text-[15px] transition-all duration-300 xl:inline-flex ${
+          className={`relative hidden items-center gap-0.5 whitespace-nowrap px-1.5 text-[15px] transition-all duration-300 xl:inline-flex ${
             isActive
               ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
               : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
           }`}
         >
           Avaliações
-          <ChevronDown className="size-3.5 opacity-70" />
+          <ChevronDown className="size-3 opacity-70" />
           {isActive && (
             <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50 dark:from-blue-400 dark:to-cyan-400 dark:shadow-blue-400/50" />
           )}
@@ -276,7 +276,7 @@ export function NavBar() {
           </span>
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5 xl:gap-1">
+        <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5 xl:gap-0">
           <NavLink to="/" label="Início" />
           <NavLink to="/agenda" label="Agenda" />
           <NavLink to="/coordenacao" label="Coordenação" />

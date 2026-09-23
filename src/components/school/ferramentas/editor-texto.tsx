@@ -15,6 +15,7 @@ import {
   ListOrdered,
   Loader2,
   Move,
+  NotebookPen,
   PanelLeft,
   PanelRight,
   Palette,
@@ -38,6 +39,8 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import cadernoMesa from "@/assets/caderno-mesa.webp";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -58,6 +61,49 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useConfirmar } from "@/lib/confirm-store";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import { entregarTexto } from "@/lib/avaliacoes";
+import { cn } from "@/lib/utils";
+
+/**
+ * Papel pautado — medidas tiradas da foto do caderno que serve de mesa:
+ * linha azul em rgb(161,198,224), papel em rgb(233,237,242) e a margem
+ * vermelha a cerca de um quinto da largura da folha.
+ *
+ * O passo da pauta (`PAUTA_PASSO`) é, ao mesmo tempo, o `line-height` do
+ * texto. É essa igualdade que faz a escrita cair em cima da linha: cada
+ * linha digitada ocupa exatamente a altura de uma linha do caderno. Por
+ * isso, no modo pautado, o espaço entre parágrafos também vai a zero — um
+ * `margin-bottom` de 12px empurraria todo o texto seguinte para fora da
+ * pauta.
+ */
+const PAUTA_PASSO = 30;
+const PAUTA_MARGEM_ESQ = 58;
+const PAUTA_COR_LINHA = "#a1c6e0";
+const PAUTA_COR_PAPEL = "#eef1f6";
+const PAUTA_COR_MARGEM = "#e08b98";
+
+/** As camadas de fundo que desenham a folha do caderno. */
+const FUNDO_PAUTADO = {
+  backgroundColor: PAUTA_COR_PAPEL,
+  backgroundImage: [
+    // furos da espiral, na beirada esquerda
+    `radial-gradient(circle at 16px 50%, rgba(15,23,42,0.16) 0 5px, transparent 5px)`,
+    // margem vermelha
+    `linear-gradient(to right, transparent 0 ${PAUTA_MARGEM_ESQ}px, ${PAUTA_COR_MARGEM} ${PAUTA_MARGEM_ESQ}px ${PAUTA_MARGEM_ESQ + 1.5}px, transparent ${PAUTA_MARGEM_ESQ + 1.5}px)`,
+    // a pauta
+    `repeating-linear-gradient(to bottom, transparent 0 ${PAUTA_PASSO - 1}px, ${PAUTA_COR_LINHA} ${PAUTA_PASSO - 1}px ${PAUTA_PASSO}px)`,
+  ].join(","),
+  // A pauta é medida a partir do conteúdo (não do padding), senão a primeira
+  // linha azul nasceria acima da primeira linha de texto.
+  backgroundOrigin: "border-box, border-box, content-box",
+  backgroundRepeat: "repeat-y, no-repeat, repeat",
+  backgroundSize: `32px ${PAUTA_PASSO * 2}px, auto, auto`,
+  // A pauta sobe 6px dentro de cada faixa: sem isso a linha azul nasce no
+  // fundo da caixa de linha e a escrita fica flutuando sete pixels acima
+  // dela. Com o deslocamento, a linha encosta na base das letras — que é
+  // como se escreve num caderno de verdade.
+  backgroundPosition: `left top, left top, left ${-6}px`,
+  lineHeight: `${PAUTA_PASSO}px`,
+} as const;
 import {
   excluirArquivoAluno,
   listarArquivosAluno,
@@ -744,6 +790,15 @@ export function EditorTexto() {
   // na régua — quem manda de verdade no recuo é o próprio navegador via
   // indent/outdent.
   const [nivelRecuo, setNivelRecuo] = useState(0);
+  /** "pautado" (caderno) ou "liso" (folha branca, como era antes). */
+  const [papel, setPapel] = useState<"pautado" | "liso">(() => {
+    if (typeof window === "undefined") return "pautado";
+    try {
+      return window.localStorage.getItem("editor.papel") === "liso" ? "liso" : "pautado";
+    } catch {
+      return "pautado";
+    }
+  });
   // Marca se o documento aberto (novo ou existente) tem alguma mudança desde
   // que foi criado/aberto/salvo pela última vez — usado para perguntar antes
   // de trocar de texto e o aluno perder o que ainda não salvou.
@@ -1385,6 +1440,35 @@ export function EditorTexto() {
           >
             <Redo2 className="size-4" />
           </Button>
+          <span className="mx-1 h-5 w-px bg-border" />
+          {/* Caderno ou folha lisa. Fica na barra porque a pauta muda o
+            espaçamento do texto: quem vai imprimir uma redação corrida
+            costuma querer a folha limpa. */}
+          <Button
+            variant={papel === "pautado" ? "secondary" : "ghost"}
+            size="sm"
+            className="h-8 gap-1.5 px-2"
+            aria-pressed={papel === "pautado"}
+            onClick={() => {
+              const proximo = papel === "pautado" ? "liso" : "pautado";
+              setPapel(proximo);
+              try {
+                window.localStorage.setItem("editor.papel", proximo);
+              } catch {
+                /* modo anônimo: só não guarda a preferência */
+              }
+            }}
+            title={
+              papel === "pautado"
+                ? "Papel pautado ligado — clique para usar folha lisa"
+                : "Folha lisa — clique para escrever no caderno pautado"
+            }
+          >
+            <NotebookPen className="size-4" />
+            <span className="hidden text-xs sm:inline">
+              {papel === "pautado" ? "Caderno" : "Folha lisa"}
+            </span>
+          </Button>
         </div>
 
         {/* Régua horizontal, só decorativa/de referência (como a do Word), com
@@ -1424,7 +1508,21 @@ export function EditorTexto() {
           tema escuro a mesa era quase preta (zinc-900) e, em volta da folha
           branca, virava uma moldura preta forte em torno da página — aqui
           ela é só um véu claro sobre o fundo da própria página. */}
-        <div className="rounded-lg bg-[#e7e5e2] p-4 dark:bg-white/5 sm:p-8">
+        <div
+          className={cn(
+            "relative overflow-hidden rounded-lg p-4 sm:p-8",
+            papel === "pautado" ? "bg-cover bg-center" : "bg-[#e7e5e2] dark:bg-white/5",
+          )}
+          style={papel === "pautado" ? { backgroundImage: `url(${cadernoMesa})` } : undefined}
+        >
+          {/* Véu sobre a foto: sem ele, a mesa de madeira e a planta disputam
+            atenção com o texto e o contraste da folha cai. */}
+          {papel === "pautado" && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-slate-950/45 backdrop-blur-[1px]"
+            />
+          )}
           <div
             ref={areaRef}
             contentEditable
@@ -1436,8 +1534,25 @@ export function EditorTexto() {
             onMouseUp={salvarSelecaoAtual}
             onKeyUp={salvarSelecaoAtual}
             onClick={aoClicarNaArea}
-            className="relative mx-auto min-h-[500px] w-full max-w-[800px] rounded-sm bg-white p-6 text-sm text-[#1f2937] shadow-md focus:outline-none sm:p-16 [&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mb-3 [&_p]:mt-0 [&_p]:indent-[1.25cm]"
-            style={{ lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }}
+            className={cn(
+              "relative mx-auto min-h-[500px] w-full max-w-[800px] text-sm text-[#1f2937] focus:outline-none",
+              "[&_div]:mb-0 [&_div]:mt-0 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-sm [&_p]:mt-0 [&_p]:indent-[1.25cm]",
+              papel === "pautado"
+                ? // No caderno cada parágrafo tem de ocupar linhas inteiras da
+                  // pauta: qualquer margem entre eles desalinharia o resto do
+                  // texto das linhas azuis.
+                  "rounded-sm py-6 pr-6 shadow-xl ring-1 ring-black/10 sm:py-8 sm:pr-10 [&_p]:mb-0"
+                : "rounded-sm bg-white p-6 shadow-md sm:p-16 [&_p]:mb-3",
+            )}
+            style={
+              papel === "pautado"
+                ? {
+                    ...FUNDO_PAUTADO,
+                    paddingLeft: `${PAUTA_MARGEM_ESQ + 18}px`,
+                    fontFamily: "Calibri, Carlito, Arial, sans-serif",
+                  }
+                : { lineHeight: 1.6, fontFamily: "Calibri, Carlito, Arial, sans-serif" }
+            }
             suppressContentEditableWarning
           />
         </div>
