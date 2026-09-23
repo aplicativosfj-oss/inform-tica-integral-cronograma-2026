@@ -80,55 +80,6 @@ function NavLink({ to, label }: { to: string; label: string }) {
  * Resumo — sem isso o guia de habilidades fica invisível para quem não
  * entra na página primeiro.
  */
-function NavLinkAvaliacoes() {
-  const location = useLocation();
-  const isActive = location.pathname === "/avaliacao";
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`relative hidden items-center gap-0.5 whitespace-nowrap px-1.5 text-[15px] transition-all duration-300 xl:inline-flex ${
-            isActive
-              ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
-              : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
-          }`}
-        >
-          Avaliações
-          <ChevronDown className="size-3 opacity-70" />
-          {isActive && (
-            <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50 dark:from-blue-400 dark:to-cyan-400 dark:shadow-blue-400/50" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
-        {/* `DropdownMenuItem` vem com `cursor-default` (convenção de menu de
-          ação). Aqui os itens são navegação — levam a outra tela —, então a
-          mãozinha é o que a pessoa espera. */}
-        {SUB_AVALIACOES.map((sub) => (
-          <DropdownMenuItem key={sub.rotulo} asChild className="cursor-pointer gap-2.5 py-2.5">
-            <Link to="/avaliacao" search={sub.aba ? { aba: sub.aba } : {}}>
-              <sub.icon className="size-4 shrink-0 text-muted-foreground" />
-              <span>{sub.rotulo}</span>
-            </Link>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-/** As abas de /avaliacao, repetidas no menu para quem procura o guia de
- *  habilidades sem saber que ele mora dentro das Avaliações. */
-const SUB_AVALIACOES = [
-  { rotulo: "Resumo", aba: undefined, icon: BarChart3 },
-  { rotulo: "Mapa da turma", aba: "mapa" as const, icon: Users2 },
-  { rotulo: "Detalhes da 2ª avaliação", aba: "detalhes" as const, icon: ListChecks },
-  { rotulo: "Guia de habilidades", aba: "descritores" as const, icon: Compass },
-] as const;
-
 /** Título da página mostrado na barra mínima (fora da home). */
 function tituloDaPagina(pathname: string): string {
   const mapa: Record<string, string> = {
