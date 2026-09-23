@@ -107,7 +107,6 @@ tbody tr.click:hover td{background:var(--surface2)}
 .names button{all:unset;cursor:pointer;padding:3px 10px;border-radius:8px;background:var(--surface2);font-size:13.5px;font-weight:600;transition:background .15s,color .15s}
 .names button:hover,.names button:focus-visible{background:var(--pri);color:#fff}
 svg text{fill:var(--mut);font:600 12px "Nunito Sans",sans-serif}
-.scat svg text{font-size:15px}
 /* barras horizontais */
 .hb{display:grid;gap:12px}
 .hb .r{display:grid;grid-template-columns:minmax(90px,var(--lw,150px)) 1fr;gap:12px;align-items:center}
@@ -241,13 +240,6 @@ function hbars(items,{lw=150}={}){
 function dumbbell(rows,A,B){
  return `<div class="db">${rows.map(r=>{const a=cl(r.a),b=cl(r.b),lo=Math.min(a,b),hi=Math.max(a,b),d=Math.round(r.a-r.b);
   return `<div class="r"><div class="row between" style="gap:8px;flex-wrap:nowrap"><span class="l">${esc(r.l)}</span><span class="v"><b style="color:var(--pri)">${pct(r.a)}</b> × <b class="cb">${pct(r.b)}</b>${d?` <span class="mut">(${d>0?"+":""}${d})</span>`:""}</span></div><div class="t"><i style="left:${lo}%;width:${hi-lo}%"></i><u style="left:${a}%;background:var(--pri)" title="${A}: ${pct(r.a)}"></u><u style="left:${b}%;background:var(--chalk)" title="${B}: ${pct(r.b)}"></u></div></div>`}).join("")}${eixo.replace('<span></span>','')}</div>`}
-function scatter(pts,{w=600,h=400}={}){const p=46,X=v=>p+(w-p-14)*v/100,Y=v=>h-p-(h-p-14)*v/100;let s=`<svg viewBox="0 0 ${w} ${h}" width="100%" role="img">`;
- s+=`<rect x="${X(0)}" y="${Y(50)}" width="${X(50)-X(0)}" height="${Y(0)-Y(50)}" fill="var(--in)" opacity=".08"/><rect x="${X(70)}" y="${Y(100)}" width="${X(100)-X(70)}" height="${Y(70)-Y(100)}" fill="var(--ot)" opacity=".08"/>`;
- [0,25,50,75,100].forEach(v=>s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${Y(0)}" y2="${Y(100)}" stroke="var(--line)"/><line x1="${X(0)}" x2="${X(100)}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${X(v)}" y="${h-p+18}" text-anchor="middle">${v}</text><text x="${p-8}" y="${Y(v)+4}" text-anchor="end">${v}</text>`);
- s+=`<text class="lbl" x="${(X(0)+X(100))/2}" y="${h-6}" text-anchor="middle">Português (% de acertos)</text><text class="lbl" transform="translate(13 ${(Y(0)+Y(100))/2}) rotate(-90)" text-anchor="middle">Matemática (% de acertos)</text>`;
- s+=`<text x="${X(2)}" y="${Y(3)}" style="fill:var(--in);font-weight:800">Apoio nas duas</text><text x="${X(98)}" y="${Y(97)+8}" text-anchor="end" style="fill:var(--ot);font-weight:800">Bem nas duas</text>`;
- pts.forEach((q,i)=>{const j=((i*53)%9-4)*.6;s+=`<circle cx="${X(q.x)+j}" cy="${Y(q.y)-j}" r="5.5" fill="${q.c}" fill-opacity=".8" stroke="var(--surface)" stroke-width="1"><title>${esc(q.l)} · Português ${pct(q.x)} · Matemática ${pct(q.y)}</title></circle>`});
- return s+"</svg>"}
 /* ---------------- sugestões de intervenção ---------------- */
 const DICAS=[
  [/ler|leitura|palavra|frase|letras|silaba|segmenta|rima/i,"Leitura diária em voz alta com textos curtos; jogos com fichas de palavras, sílabas e rimas; ditado estruturado em pequenos grupos."],
@@ -456,18 +448,16 @@ V.alunos=()=>{
  main.innerHTML=`<div class="stack"><div class="card" style="display:grid;gap:14px"><div><h2>Todos os alunos</h2><p class="sub">Toque num aluno para ver a ficha com o que ele já domina e o que precisa retomar.</p></div>
   <div class="row noprint"><input id="lq" placeholder="Buscar pelo nome…" aria-label="Buscar" value="${esc(lf.q)}" style="flex:1;min-width:200px"><select id="lt" aria-label="Turma"><option value="">Todas as turmas</option>${T.map(k=>`<option ${k==lf.t?"selected":""}>${k}</option>`).join("")}</select><select id="lfx" aria-label="Faixa"><option value="">Todas as faixas</option>${["IN","RE","BO","OT"].map(k=>`<option value="${k}" ${k==lf.f?"selected":""}>${F[k].p}</option>`).join("")}</select></div>
   <div class="sm mut" id="lc"></div><div class="scroll"><table><thead id="lh"></thead><tbody id="lb"></tbody></table></div></div>
-  <div class="card" style="display:grid;gap:10px"><h2>Português × Matemática</h2><p class="sub">Cada ponto é um aluno. No canto vermelho estão os que precisam de apoio nas duas disciplinas; no verde, os que foram bem nas duas.</p><div id="sc" class="scat" style="max-width:680px"></div><div class="row xs">${[1,2,3,4,5].map(a=>`<span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="${SC[a]}"/></svg> ${a}º ano</span>`).join("")}</div></div></div>`;
+</div>`;
  const draw=()=>{let rows=ALS.filter(a=>(!lf.q||norm(a.nome).includes(norm(lf.q)))&&(!lf.t||a.turma==lf.t)&&(!lf.f||fx(a.media)==lf.f));
   const v=a=>lf.s=="nome"?norm(a.nome):lf.s=="turma"?a.turma:lf.s=="media"?a.media:(a.d[lf.s]??-1);rows.sort((a,b)=>(v(a)>v(b)?1:v(a)<v(b)?-1:0)*lf.dir);
   const th=(k,l,r)=>`<th class="s ${r?"r":""}" data-s="${k}">${l}${lf.s==k?(lf.dir>0?" ↑":" ↓"):""}</th>`;
   document.getElementById("lh").innerHTML=`<tr>${th("nome","Aluno")}${th("turma","Turma")}${DS.map(d=>th(d,DN[d],1)).join("")}${th("media","Média",1)}<th>Situação</th></tr>`;
   document.getElementById("lc").textContent=`${rows.length} aluno(s)`;
-  document.getElementById("lb").innerHTML=rows.map(a=>`<tr class="click" tabindex="0" data-id="${esc(a.id)}"><td><b>${esc(a.nome)}</b></td><td>${a.turma}</td>${DS.map(d=>`<td class="r">${pct(a.d[d])}</td>`).join("")}<td class="r"><b>${pct(a.media)}</b></td><td>${tag(a.media)}</td></tr>`).join("");
-  document.getElementById("sc").innerHTML=scatter(rows.filter(a=>a.d.LP!=null&&a.d.MAT!=null).map(a=>({x:a.d.LP,y:a.d.MAT,l:a.nome+" ("+a.turma+")",c:SC[a.ano]})))};
+  document.getElementById("lb").innerHTML=rows.map(a=>`<tr class="click" tabindex="0" data-id="${esc(a.id)}"><td><b>${esc(a.nome)}</b></td><td>${a.turma}</td>${DS.map(d=>`<td class="r">${pct(a.d[d])}</td>`).join("")}<td class="r"><b>${pct(a.media)}</b></td><td>${tag(a.media)}</td></tr>`).join("");};
  document.getElementById("lh").onclick=e=>{const s=e.target.closest("[data-s]");if(!s)return;lf.dir=lf.s==s.dataset.s?-lf.dir:1;lf.s=s.dataset.s;draw()};
  const lb=document.getElementById("lb");lb.onclick=e=>{const r=e.target.closest("[data-id]");if(r)ficha(r.dataset.id)};lb.onkeydown=e=>{const r=e.target.closest("[data-id]");if(r&&e.key=="Enter")ficha(r.dataset.id)};
  document.getElementById("lq").oninput=e=>{lf.q=e.target.value;draw()};document.getElementById("lt").onchange=e=>{lf.t=e.target.value;draw()};document.getElementById("lfx").onchange=e=>{lf.f=e.target.value;draw()};draw()};
-const SC={1:"#1F4E79",2:"#E39B2F",3:"#1E8A5A",4:"#8E4A9E",5:"#D1495B"};
 function ficha(id){const a=AL[id],dlg=dlgEl;
  const sabe=[],ret=[];DS.forEach(d=>{const t=get(a.turma,d);if(!a.r[d])return;t.qs.forEach((q,i)=>{const h=hsplit(t.hab[q]);(a.r[d][i]=="C"?sabe:ret).push({d,txt:h.txt,tp:t.qp[i]})})});
  document.getElementById("dlgBody").innerHTML=cab(`Ficha do aluno · ${a.turma}`,esc(a.nome),`${esc(prof(a.turma))}${a.esc?` · Escrita: nível ${a.esc}`:""}`)+`

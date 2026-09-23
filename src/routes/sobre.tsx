@@ -272,7 +272,8 @@ function SobrePage() {
 
             <p className="mt-4 text-center text-xs text-muted-foreground">
               Os percentuais dizem quantas questões os alunos acertaram em cada 100 — não são nota
-              de boletim, e nenhum nome de aluno aparece nas páginas públicas.
+              de boletim. O raio-X de cada turma lista os alunos pelo nome, para o trabalho da
+              escola.
             </p>
           </div>
         </section>

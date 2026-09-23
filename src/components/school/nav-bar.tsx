@@ -17,6 +17,7 @@ import {
   Menu,
   Presentation,
   Puzzle,
+  Users2,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -121,6 +122,7 @@ function NavLinkAvaliacoes() {
  *  habilidades sem saber que ele mora dentro das Avaliações. */
 const SUB_AVALIACOES = [
   { rotulo: "Resumo", aba: undefined, icon: BarChart3 },
+  { rotulo: "Mapa da turma", aba: "mapa" as const, icon: Users2 },
   { rotulo: "Detalhes da 2ª avaliação", aba: "detalhes" as const, icon: ListChecks },
   { rotulo: "Guia de habilidades", aba: "descritores" as const, icon: Compass },
 ] as const;

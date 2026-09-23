@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, Compass, ListChecks, Loader2 } from "lucide-react";
+import { BarChart3, Compass, ListChecks, Loader2, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { NavBar } from "@/components/school/nav-bar";
 import { GuiaDescritores } from "@/components/school/diagnostica/guia-descritores";
+import { MapaDaTurma } from "@/components/school/diagnostica/mapa-turma";
 import { PainelAvaliacoes } from "@/components/school/diagnostica/painel-avaliacoes";
 import { ObservatorioFrame } from "@/components/school/observatorio-frame";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +12,7 @@ import type { ProvaII } from "@/lib/diagnostica/tipos";
 import { supabase } from "@/lib/supabase-client";
 import { cn } from "@/lib/utils";
 
-const ABAS = ["resumo", "detalhes", "descritores"] as const;
+const ABAS = ["resumo", "mapa", "detalhes", "descritores"] as const;
 type AbaAvaliacao = (typeof ABAS)[number];
 
 function abaValida(v: unknown): v is AbaAvaliacao {
@@ -116,6 +117,17 @@ function AvaliacaoPublica() {
               <ListChecks className="size-4" /> Detalhes da 2ª avaliação
             </TabsTrigger>
             <TabsTrigger
+              value="mapa"
+              className={cn(
+                "gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground",
+                "data-[state=active]:border-emerald-400/30 data-[state=active]:bg-emerald-500/10 data-[state=active]:text-emerald-800",
+                "dark:data-[state=active]:border-emerald-400/25 dark:data-[state=active]:bg-emerald-400/10 dark:data-[state=active]:text-emerald-200",
+                "data-[state=active]:shadow-sm data-[state=active]:backdrop-blur-md",
+              )}
+            >
+              <Users2 className="size-4" /> Mapa da turma
+            </TabsTrigger>
+            <TabsTrigger
               value="descritores"
               className={cn(
                 "gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground",
@@ -135,6 +147,9 @@ function AvaliacaoPublica() {
               dados={provas}
               className="h-[calc(100dvh-12rem)] min-h-[520px] w-full rounded-xl border border-border bg-background"
             />
+          </TabsContent>
+          <TabsContent value="mapa">
+            <MapaDaTurma provas={provas} />
           </TabsContent>
           <TabsContent value="descritores">
             <GuiaDescritores />
