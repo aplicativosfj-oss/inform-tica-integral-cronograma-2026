@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle2, RefreshCw, Search, XCircle } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, CheckCircle2, RefreshCw, Search, XCircle } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -11,35 +11,6 @@ import {
 import { MolduraExemplo } from "@/components/school/ferramentas/generos-molduras";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import bannerMuseu from "@/assets/generos/museu-banner.webp";
-import figBilhete from "@/assets/generos/bilhete.webp";
-import figCarta from "@/assets/generos/carta.webp";
-import figConvite from "@/assets/generos/convite.webp";
-import figDiario from "@/assets/generos/diario.webp";
-import figEmail from "@/assets/generos/email.webp";
-import figLista from "@/assets/generos/lista.webp";
-import figMensagem from "@/assets/generos/mensagem.webp";
-import figRecado from "@/assets/generos/recado.webp";
-import figSms from "@/assets/generos/sms.webp";
-
-/**
- * Ilustração de cada gênero. Por enquanto só os nove do "dia a dia" têm
- * quadro próprio — os outros 24 seguem com o emoji, que continua sendo a
- * identidade deles na ficha e no jogo. Quando chegarem as ilustrações dos
- * demais, é só acrescentar a chave aqui: a galeria já cai no quadro quando
- * existe e no emoji quando não existe.
- */
-const FIGURA: Record<string, string> = {
-  bilhete: figBilhete,
-  recado: figRecado,
-  carta: figCarta,
-  mensagem: figMensagem,
-  sms: figSms,
-  email: figEmail,
-  lista: figLista,
-  convite: figConvite,
-  diario: figDiario,
-};
 
 /**
  * Museu dos gêneros textuais, com duas portas:
@@ -51,6 +22,10 @@ const FIGURA: Record<string, string> = {
  *
  * Reconhecer vem antes de escrever: quem nunca viu uma bula não escreve uma
  * bula, por mais que lhe expliquem a estrutura.
+ *
+ * A identidade visual é toda em tipografia e tokens do tema — nada de
+ * banner ilustrado: dentro da janela da ferramenta a imagem grande só
+ * disputava espaço com o conteúdo.
  */
 
 function embaralhar<T>(l: T[]): T[] {
@@ -66,53 +41,37 @@ function embaralhar<T>(l: T[]): T[] {
 
 function Ficha({ genero, aoVoltar }: { genero: GeneroTexto; aoVoltar: () => void }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <button
         type="button"
         onClick={aoVoltar}
-        className="flex cursor-pointer items-center gap-1 self-start text-xs text-muted-foreground hover:text-foreground"
+        className="flex cursor-pointer items-center gap-1.5 self-start rounded-md text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft className="size-3.5" /> todos os gêneros
+        <ArrowLeft className="size-3.5" /> Todos os gêneros
       </button>
 
-      {FIGURA[genero.id] ? (
-        // Altura fixa (não só a proporção da imagem): sem isso a foto
-        // dominava a janela inteira, empurrando a ficha para baixo da
-        // rolagem — aqui ela é só a "capa" da ficha, compacta.
-        <img
-          src={FIGURA[genero.id]}
-          alt=""
-          width={320}
-          height={185}
-          className="h-28 w-full rounded-xl border border-border object-cover sm:h-36"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : null}
-
-      <div>
+      <div className="rounded-xl border border-border bg-card p-3">
         <p className="text-sm font-bold text-foreground">
-          {/* Com o quadro logo acima, o emoji só repetiria o assunto. */}
-          {FIGURA[genero.id] ? null : <span aria-hidden>{genero.emoji} </span>}
+          <span aria-hidden>{genero.emoji} </span>
           {genero.nome}
         </p>
-        <p className="text-[11px] leading-tight text-muted-foreground">
-          {genero.paraQue} <b>Onde aparece:</b> {genero.ondeAparece}
+        <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+          {genero.paraQue} <b className="text-foreground">Onde aparece:</b> {genero.ondeAparece}
         </p>
       </div>
 
-      <div className="max-h-[260px] overflow-auto rounded-xl bg-muted/30 p-2">
+      <div className="max-h-[240px] overflow-auto rounded-xl border border-border/60 bg-muted/30 p-2">
         <MolduraExemplo exemplo={genero.exemplo} />
       </div>
 
-      <div className="rounded-xl border border-border bg-background p-2">
-        <p className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-foreground">
+      <div className="rounded-xl border border-border bg-card p-3">
+        <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-foreground">
           <Search className="size-3.5 text-primary" /> Como reconhecer
         </p>
-        <ul className="space-y-0.5">
+        <ul className="space-y-1">
           {genero.comoReconhecer.map((m) => (
-            <li key={m} className="flex gap-1.5 text-[11px] leading-tight text-muted-foreground">
-              <span className="text-primary">✓</span>
+            <li key={m} className="flex gap-2 text-xs leading-snug text-muted-foreground">
+              <CheckCircle2 className="mt-px size-3.5 shrink-0 text-primary" />
               {m}
             </li>
           ))}
@@ -155,12 +114,12 @@ function Detetive() {
   const certou = escolha === rodada.certo.id;
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-xs text-muted-foreground">
+    <div className="flex flex-col gap-3">
+      <p className="text-xs leading-snug text-muted-foreground">
         Leia o texto e descubra que gênero é. Olhe o formato, o tamanho e o jeito de falar.
       </p>
 
-      <div className="max-h-[210px] overflow-auto rounded-xl bg-muted/30 p-2">
+      <div className="max-h-[220px] overflow-auto rounded-xl border border-border/60 bg-muted/30 p-2">
         <MolduraExemplo exemplo={rodada.certo.exemplo} />
       </div>
 
@@ -174,14 +133,14 @@ function Detetive() {
               onClick={() => responder(o.id)}
               disabled={!!escolha}
               className={cn(
-                "cursor-pointer rounded-lg border-2 px-2 py-1.5 text-xs font-medium transition-colors",
+                "cursor-pointer rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors",
                 !escolha
-                  ? "border-border bg-background text-foreground hover:border-primary hover:bg-primary/5"
+                  ? "border-border bg-card text-foreground hover:border-primary hover:bg-primary/5"
                   : certa
-                    ? "border-emerald-600 bg-emerald-600/15 text-emerald-700 dark:text-emerald-300"
+                    ? "border-primary bg-primary/10 text-primary"
                     : o.id === escolha
                       ? "border-destructive bg-destructive/10 text-destructive"
-                      : "border-border bg-background text-muted-foreground opacity-60",
+                      : "border-border bg-card text-muted-foreground opacity-60",
               )}
             >
               <span aria-hidden>{o.emoji}</span> {o.nome}
@@ -193,14 +152,14 @@ function Detetive() {
       {escolha && (
         <p
           className={cn(
-            "flex items-start gap-1.5 rounded-lg p-2 text-[11px] leading-tight",
+            "flex items-start gap-1.5 rounded-lg border p-2 text-xs leading-snug",
             certou
-              ? "bg-emerald-600/10 text-emerald-700 dark:text-emerald-300"
-              : "bg-destructive/10 text-destructive",
+              ? "border-primary/30 bg-primary/5 text-foreground"
+              : "border-destructive/30 bg-destructive/5 text-destructive",
           )}
         >
           {certou ? (
-            <CheckCircle2 className="mt-px size-3.5 shrink-0" />
+            <CheckCircle2 className="mt-px size-3.5 shrink-0 text-primary" />
           ) : (
             <XCircle className="mt-px size-3.5 shrink-0" />
           )}
@@ -241,76 +200,73 @@ export function GenerosTextuais() {
   if (aberto) return <Ficha genero={aberto} aoVoltar={() => setAberto(null)} />;
 
   return (
-    <div className="flex flex-col gap-2">
-      {/* A fachada do museu abre a ferramenta: é o que diz, sem texto, que
-        ali dentro tem uma coleção para folhear. Altura fixa (não a
-        proporção inteira da imagem): era ela que deixava a janela enorme e
-        alta antes até chegar ao que interessa — os gêneros. */}
-      <img
-        src={bannerMuseu}
-        alt=""
-        width={720}
-        height={290}
-        className="h-28 w-full rounded-xl border border-border object-cover sm:h-36"
-        loading="eager"
-        decoding="async"
-      />
+    <div className="flex flex-col gap-3">
+      {/* Cabeçalho enxuto: diz o que é e para que serve, sem disputar
+        espaço com o conteúdo. */}
+      <div className="flex items-start gap-2.5">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <BookOpenCheck className="size-4.5" />
+        </span>
+        <div>
+          <p className="text-sm font-bold leading-tight text-foreground">Museu dos gêneros</p>
+          <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
+            {GENEROS_TEXTO.length} textos de verdade para folhear — cada um no seu suporte, com as
+            marcas que o denunciam.
+          </p>
+        </div>
+      </div>
 
-      {/* Painel de navegação em destaque: é daqui que sai tudo — o modo
-        (galeria ou detetive) e, na galeria, o grupo de gêneros — por isso
-        ganha cor própria e borda, em vez de se misturar com o resto. */}
-      <div className="flex flex-col gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-2 dark:border-indigo-500/25 dark:bg-indigo-500/10">
-        <div className="flex gap-1 rounded-lg bg-card/80 p-1 shadow-sm">
-          {(
-            [
-              ["galeria", `Ver os ${GENEROS_TEXTO.length} gêneros`],
-              ["detetive", "Jogo do detetive"],
-            ] as const
-          ).map(([id, rotulo]) => (
+      {/* Navegação: modo (galeria/detetive) e, na galeria, o grupo. */}
+      <div className="flex gap-1 rounded-lg border border-border bg-muted/50 p-1">
+        {(
+          [
+            ["galeria", `Ver os ${GENEROS_TEXTO.length} gêneros`],
+            ["detetive", "Jogo do detetive"],
+          ] as const
+        ).map(([id, rotulo]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setModo(id)}
+            className={cn(
+              "flex-1 cursor-pointer rounded-md px-2 py-1.5 text-xs font-semibold transition-colors",
+              modo === id
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {rotulo}
+          </button>
+        ))}
+      </div>
+
+      {modo === "galeria" && (
+        <div className="flex flex-wrap gap-1">
+          {GRUPOS.map((g) => (
             <button
-              key={id}
+              key={g.id}
               type="button"
-              onClick={() => setModo(id)}
+              onClick={() => setGrupo(g.id)}
               className={cn(
-                "flex-1 cursor-pointer rounded-md px-2 py-1.5 text-xs font-semibold transition-colors",
-                modo === id
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
+                "cursor-pointer rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors",
+                grupo === g.id
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground",
               )}
             >
-              {rotulo}
+              {g.nome}
             </button>
           ))}
         </div>
-
-        {modo === "galeria" && (
-          <div className="flex flex-wrap gap-1">
-            {GRUPOS.map((g) => (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => setGrupo(g.id)}
-                className={cn(
-                  "cursor-pointer rounded-full border px-2 py-0.5 text-[11px] font-medium transition-colors",
-                  grupo === g.id
-                    ? "border-indigo-600 bg-indigo-600 text-white"
-                    : "border-indigo-500/30 bg-card/60 text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {g.nome}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
 
       {modo === "detetive" ? (
         <Detetive />
       ) : (
         <>
-          <p className="text-[11px] text-muted-foreground">
-            {GRUPOS.find((g) => g.id === grupo)?.descricao}. Toque num gênero para ver um exemplo de
-            verdade.
+          <p className="text-xs leading-snug text-muted-foreground">
+            {GRUPOS.find((g) => g.id === grupo)?.descricao}. Toque num gênero para ver um exemplo
+            de verdade.
           </p>
 
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
@@ -319,28 +275,13 @@ export function GenerosTextuais() {
                 key={g.id}
                 type="button"
                 onClick={() => setAberto(g)}
-                className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-background text-left transition-colors hover:border-primary/60 hover:bg-primary/5"
+                className="group flex cursor-pointer flex-col gap-0.5 rounded-xl border border-border bg-card p-2.5 text-left transition-colors hover:border-primary/60 hover:bg-primary/5"
               >
-                {FIGURA[g.id] ? (
-                  <img
-                    src={FIGURA[g.id]}
-                    alt=""
-                    width={320}
-                    height={185}
-                    className="w-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : null}
-                <span className="flex flex-col gap-0.5 p-2">
-                  <span className="text-xs font-semibold text-foreground">
-                    {FIGURA[g.id] ? null : <span aria-hidden>{g.emoji} </span>}
-                    {g.nome}
-                  </span>
-                  <span className="text-[10px] leading-tight text-muted-foreground">
-                    {g.paraQue}
-                  </span>
+                <span className="text-xs font-semibold text-foreground">
+                  <span aria-hidden>{g.emoji} </span>
+                  {g.nome}
                 </span>
+                <span className="text-[11px] leading-snug text-muted-foreground">{g.paraQue}</span>
               </button>
             ))}
           </div>
