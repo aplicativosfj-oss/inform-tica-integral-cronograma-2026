@@ -23,6 +23,7 @@ export const FERRAMENTAS_PUBLICAS = [
   "comparar-fracoes",
   "fracoes-equivalentes",
   "porcentagem",
+  "matematica-dia-a-dia",
   "desafio-operacoes",
   "fabrica-problemas",
   "conversor-medidas",

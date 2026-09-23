@@ -3,6 +3,7 @@ import {
   Boxes,
   Equal,
   Gamepad2,
+  Lightbulb,
   Percent,
   PieChart,
   PuzzleIcon,
@@ -34,6 +35,7 @@ import { CREDITO } from "@/components/school/ferramentas/credito";
 import { MesaFormas } from "@/components/school/ferramentas/mesa-formas";
 import { ParqueLetras } from "@/components/school/ferramentas/parque-letras";
 import { SalaDeJogos } from "@/components/school/jogos/sala-de-jogos";
+import { DiaADia } from "@/components/school/ferramentas/dia-a-dia";
 import { Porcentagem } from "@/components/school/ferramentas/porcentagem";
 import { ProblemasInteligentes } from "@/components/school/ferramentas/problemas-inteligentes";
 import { ProducaoTextual } from "@/components/school/ferramentas/producao-textual";
@@ -132,6 +134,23 @@ export function PorcentagemJanela() {
       cor="bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300"
     >
       <Porcentagem />
+    </JanelaFerramenta>
+  );
+}
+
+export function DiaADiaJanela() {
+  return (
+    <JanelaFerramenta
+      titulo="Matemática no dia a dia"
+      subtitulo={CREDITO}
+      largura={LARGA}
+      abertaInicial
+      aoFechar={voltarDaFerramenta}
+      rotuloBotao="Dia a dia"
+      iconeBotao={Lightbulb}
+      cor="bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+    >
+      <DiaADia />
     </JanelaFerramenta>
   );
 }

@@ -14,6 +14,7 @@ import {
   Equal,
   Gamepad2,
   Landmark,
+  Lightbulb,
   type LucideIcon,
   PartyPopper,
   Percent,
@@ -41,6 +42,7 @@ import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemo
 import {
   CompararFracoesJanela,
   ConversorMedidasJanela,
+  DiaADiaJanela,
   FracaoNaMesaJanela,
   FracoesEquivalentesJanela,
   JogoNumerosJanela,
@@ -156,6 +158,17 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     icon: Percent,
     cor: "bg-cyan-500/10 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300",
     Componente: PorcentagemJanela,
+  },
+  {
+    slug: "matematica-dia-a-dia",
+    serieMinima: 3,
+    titulo: "Matemática no dia a dia",
+    descricao:
+      "Troco, receita, desconto, bateria do celular, piso da sala: mexa nos números e veja a conta explicada.",
+    categoria: "Matemática",
+    icon: Lightbulb,
+    cor: "bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
+    Componente: DiaADiaJanela,
   },
   {
     slug: "desafio-operacoes",
