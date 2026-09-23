@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/sheet";
 import { FaixaAulaAgora } from "@/components/school/faixa-aula-agora";
 import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
-import { ShareButton } from "@/components/school/share-button";
+import { PresencaOnline } from "@/components/school/presenca-online";
 import { ThemeToggle } from "@/components/school/theme-toggle";
 import { useAuth } from "@/lib/auth-store";
 import { useAppStore } from "@/lib/app-store";
@@ -282,7 +282,7 @@ export function NavBar() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
-          <ShareButton />
+          <PresencaOnline />
           <ThemeToggle />
         </div>
       </header>
@@ -329,7 +329,7 @@ export function NavBar() {
           <NavLink to="/mediador" label="Mediadores" />
           <NavLink to="/sobre" label="Sobre" />
           <HeaderRadioPlayer />
-          <ShareButton />
+          <PresencaOnline />
           <ThemeToggle />
           {isReady && isAuthenticated ? (
             <>

@@ -1,6 +1,10 @@
-import { GripHorizontal, X, type LucideIcon } from "lucide-react";
+import { GripHorizontal, Lock, X, type LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { lerAlunoSessao } from "@/lib/aluno-session";
 import { cn } from "@/lib/utils";
 
 /**
@@ -51,6 +55,16 @@ function paletaDaJanela(cor: string | undefined, titulo: string): [string, strin
   let h = 0;
   for (const c of titulo) h = (h * 31 + c.charCodeAt(0)) % 997;
   return paletaDoMatiz(matizes[h % matizes.length]!);
+}
+
+/** Tempo mínimo de uma atividade com o aluno logado, antes de poder sair. */
+const TRAVA_MS = 5 * 60 * 1000;
+/** Depois disso, um início antigo não vale mais (aluno voltou outro dia). */
+const TRAVA_VALIDADE_MS = 3 * 60 * 60 * 1000;
+
+function formatarRestante(ms: number): string {
+  const total = Math.ceil(ms / 1000);
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
 /** Folga mínima até a borda da tela, para a janela nunca sumir. */
@@ -123,6 +137,62 @@ export function JanelaFerramenta({
   const [pos, setPos] = useState<Posicao | null>(null);
   const [arrastando, setArrastando] = useState(false);
   const painelRef = useRef<HTMLDivElement>(null);
+
+  // Trava do aluno logado: a atividade precisa durar pelo menos 5 minutos
+  // antes de poder ser fechada. Sem aluno logado (visitante, professor), a
+  // janela funciona como sempre.
+  const chaveTrava = `informatica:atividade-inicio:${titulo}`;
+  const [aluno, setAluno] = useState<{ nome: string } | null>(null);
+  const [inicioAtividade, setInicioAtividade] = useState<number | null>(null);
+  const [agoraMs, setAgoraMs] = useState(() => Date.now());
+  useEffect(() => {
+    if (!abertaInicial) return;
+    const sessao = lerAlunoSessao();
+    if (!sessao) return;
+    setAluno({ nome: sessao.nome.split(" ")[0] ?? "" });
+    try {
+      const salvo = Number(window.localStorage.getItem(`${chaveTrava}:${sessao.alunoId}`));
+      if (salvo && Date.now() - salvo < TRAVA_VALIDADE_MS) setInicioAtividade(salvo);
+    } catch {
+      // Sem storage: a trava vale só para esta abertura.
+    }
+  }, [abertaInicial, chaveTrava]);
+  useEffect(() => {
+    if (!aluno) return;
+    const id = window.setInterval(() => {
+      setAgoraMs(Date.now());
+      // Aluno desconectado por inatividade: a trava deixa de valer.
+      if (!lerAlunoSessao()) setAluno(null);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [aluno]);
+  const aguardandoInicio = Boolean(aluno) && inicioAtividade === null;
+  const restanteTrava =
+    aluno && inicioAtividade !== null ? Math.max(0, TRAVA_MS - (agoraMs - inicioAtividade)) : 0;
+  const travada = restanteTrava > 0;
+
+  function comecarAtividade() {
+    const sessao = lerAlunoSessao();
+    const agora = Date.now();
+    setInicioAtividade(agora);
+    setAgoraMs(agora);
+    try {
+      if (sessao) window.localStorage.setItem(`${chaveTrava}:${sessao.alunoId}`, String(agora));
+    } catch {
+      // ignora
+    }
+  }
+
+  // Enquanto travada, fechar a aba ou recarregar pede confirmação.
+  useEffect(() => {
+    if (!travada) return;
+    const aviso = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", aviso);
+    return () => window.removeEventListener("beforeunload", aviso);
+  }, [travada]);
   const abrirRef = useRef<HTMLButtonElement>(null);
   // Distância entre o ponteiro e o canto da janela, travada no início do arrasto.
   const pegada = useRef<Posicao>({ x: 0, y: 0 });
@@ -197,11 +267,17 @@ export function JanelaFerramenta({
   }, [aberta, tamanho]);
 
   const fechar = useCallback(() => {
+    if (travada) {
+      toast.warning(
+        `Continue a atividade: faltam ${formatarRestante(restanteTrava)} para poder sair.`,
+      );
+      return;
+    }
     if (aoFechar) return aoFechar();
     setAberta(false);
     // Devolve o foco a quem abriu, para quem navega pelo teclado não se perder.
     window.setTimeout(() => abrirRef.current?.focus(), 0);
-  }, [aoFechar]);
+  }, [aoFechar, travada, restanteTrava]);
 
   // Esc fecha, como em qualquer janela.
   useEffect(() => {
@@ -348,19 +424,85 @@ export function JanelaFerramenta({
           <button
             type="button"
             onClick={fechar}
-            aria-label={`Fechar ${titulo}`}
+            aria-disabled={travada}
+            aria-label={
+              travada
+                ? `Fechar ${titulo} (bloqueado por mais ${formatarRestante(restanteTrava)})`
+                : `Fechar ${titulo}`
+            }
+            title={
+              travada
+                ? `Termine a atividade: você poderá sair em ${formatarRestante(restanteTrava)}`
+                : undefined
+            }
             className={cn(
-              "flex shrink-0 cursor-pointer items-center justify-center rounded-md opacity-80 transition-colors hover:opacity-100",
+              "flex shrink-0 items-center justify-center rounded-md transition-colors",
+              travada
+                ? "cursor-not-allowed opacity-70"
+                : "cursor-pointer opacity-80 hover:opacity-100",
               abertaInicial
-                ? "size-10 rounded-full bg-white/20 hover:bg-white/35"
+                ? cn(
+                    travada
+                      ? "h-10 gap-1.5 rounded-full bg-black/25 px-3.5"
+                      : "size-10 rounded-full",
+                    !travada && "bg-white/20 hover:bg-white/35",
+                  )
                 : "size-6 hover:bg-black/10 dark:hover:bg-white/10",
             )}
           >
-            <X className={abertaInicial ? "size-6" : "size-4"} />
+            {travada ? (
+              <>
+                <Lock className="size-4" />
+                <span className="font-mono text-sm font-semibold">
+                  {formatarRestante(restanteTrava)}
+                </span>
+              </>
+            ) : (
+              <X className={abertaInicial ? "size-6" : "size-4"} />
+            )}
           </button>
         </div>
         <div className={`min-h-0 flex-1 overflow-auto ${abertaInicial ? "jf-corpo p-6" : "p-2.5"}`}>
-          {children}
+          {aguardandoInicio ? (
+            <div className="mx-auto flex max-w-xl flex-col items-center gap-4 py-6 text-center">
+              <span className="flex size-16 items-center justify-center rounded-full bg-amber-500/15 text-amber-500">
+                <Lock className="size-8" />
+              </span>
+              <h3 className="text-2xl font-bold text-foreground">
+                Antes de começar, {aluno?.nome}!
+              </h3>
+              <p className="text-lg text-muted-foreground">
+                Esta atividade precisa de <b className="text-foreground">pelo menos 5 minutos</b> de
+                dedicação. Depois que você começar, a janela fica{" "}
+                <b className="text-foreground">bloqueada</b> e só poderá ser fechada quando o tempo
+                terminar. Siga a atividade passo a passo, sem pressa.
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button size="lg" className="cursor-pointer" onClick={comecarAtividade}>
+                  Estou pronto(a), vamos começar
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="cursor-pointer"
+                  onClick={() => (aoFechar ? aoFechar() : setAberta(false))}
+                >
+                  Agora não
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {travada ? (
+                <p className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-center text-sm text-foreground">
+                  <Lock className="size-4 shrink-0 text-amber-500" />
+                  Atividade em andamento: você poderá sair em{" "}
+                  <b className="font-mono">{formatarRestante(restanteTrava)}</b>.
+                </p>
+              ) : null}
+              {children}
+            </>
+          )}
         </div>
       </div>
     </>

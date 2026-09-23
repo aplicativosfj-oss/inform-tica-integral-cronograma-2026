@@ -17,6 +17,7 @@ import { ConfirmProvider } from "../lib/confirm-store";
 import { JovemPanRadioProvider } from "../lib/jovem-pan-radio-store";
 import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
+import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 
@@ -212,6 +213,7 @@ function RootComponent() {
                 <Outlet />
                 <Toaster />
                 <AvisoAulaEmBreve />
+                <AlunoSessaoGuard />
               </JovemPanRadioProvider>
             </ConfirmProvider>
           </AppProvider>
