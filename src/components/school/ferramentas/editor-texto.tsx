@@ -4,6 +4,7 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  BookOpen,
   FilePlus2,
   FileText,
   FolderOpen,
@@ -207,6 +208,42 @@ const EMOJIS_E_SIMBOLOS = [
   "★",
 ] as const;
 
+/**
+ * Vocabulário de apoio para textos mais formais (relatórios, redações,
+ * apresentações). Lista inicial pequena, pensada para ser consultada — o
+ * professor pode pedir para ampliar depois; não é (e não tenta ser) um
+ * dicionário completo.
+ */
+const VOCABULARIO_PROFISSIONAL = [
+  { termo: "Todavia", explicacao: "Mas, porém, contudo — usada para contrastar duas ideias." },
+  { termo: "Outrossim", explicacao: "Além disso, também — liga duas ideias que se reforçam." },
+  { termo: "Destarte", explicacao: "Assim sendo, dessa forma — introduz uma conclusão." },
+  { termo: "Cronograma", explicacao: "Plano com as datas e prazos de cada etapa de um trabalho." },
+  { termo: "Diretriz", explicacao: "Regra ou orientação geral que guia uma decisão ou um trabalho." },
+  { termo: "Consenso", explicacao: "Acordo em que todos concordam, sem votos contrários." },
+  { termo: "Pertinente", explicacao: "Que tem relação direta com o assunto tratado; relevante." },
+  { termo: "Executar", explicacao: "Realizar, colocar em prática um plano ou uma tarefa." },
+  { termo: "Otimizar", explicacao: "Melhorar algo para que funcione da forma mais eficiente possível." },
+  { termo: "Viabilidade", explicacao: "Possibilidade real de algo dar certo ou ser realizado." },
+  { termo: "Protocolo", explicacao: "Conjunto de regras ou passos que devem ser seguidos numa situação." },
+  { termo: "Relevante", explicacao: "Importante, que tem peso na decisão ou no assunto." },
+  { termo: "Sintetizar", explicacao: "Resumir as ideias principais de um texto ou de uma ideia." },
+  { termo: "Argumentar", explicacao: "Defender uma opinião apresentando razões que a sustentem." },
+  { termo: "Estatística", explicacao: "Conjunto de dados numéricos usados para analisar um assunto." },
+  {
+    termo: "Feedback",
+    explicacao: "Retorno dado sobre um trabalho, apontando acertos e pontos a melhorar.",
+  },
+  { termo: "Prioridade", explicacao: "O que deve ser feito primeiro, por ser mais importante ou urgente." },
+  { termo: "Colaborativo", explicacao: "Feito em conjunto, com a participação de várias pessoas." },
+  { termo: "Objetivo", explicacao: "Aquilo que se pretende alcançar com uma ação ou um projeto." },
+  { termo: "Justificativa", explicacao: "Explicação que sustenta por que uma decisão foi tomada." },
+  { termo: "Recurso", explicacao: "Meio ou ferramenta usado para realizar algo (tempo, dinheiro, material)." },
+  { termo: "Eficiente", explicacao: "Que produz um bom resultado usando pouco tempo ou esforço." },
+  { termo: "Análise", explicacao: "Exame cuidadoso de algo, separando suas partes para entender melhor." },
+  { termo: "Conclusão", explicacao: "Parte final de um texto ou raciocínio, que resume o que foi mostrado." },
+] as const;
+
 function formatarRelativo(dataIso: string): string {
   const diffMin = Math.round((Date.now() - new Date(dataIso).getTime()) / 60000);
   const rtf = new Intl.RelativeTimeFormat("pt-BR", { numeric: "auto" });
@@ -283,12 +320,30 @@ export function EditorTexto() {
   // poder devolvê-la ao documento no instante de aplicar o comando.
   const selecaoSalvaRef = useRef<Range | null>(null);
   const [contagem, setContagem] = useState(0);
+  const [caracteres, setCaracteres] = useState(0);
+  const [ppm, setPpm] = useState<number | null>(null);
+  // Marca quando o aluno começou a digitar o documento atual — é a partir
+  // daqui que a velocidade (palavras por minuto) é calculada. Zerado sempre
+  // que a folha é trocada (novo, abrir outro texto, excluir), para a
+  // velocidade não misturar tempo de um documento com o de outro.
+  const inicioDigitacaoRef = useRef<number | null>(null);
   const confirmar = useConfirmar();
 
   // Imagem atualmente selecionada na página (mostra a barrinha flutuante de
   // alinhamento/tamanho) e o que está sendo arrastado (redimensionar imagem,
   // mover ou redimensionar caixa de texto).
   const [imagemSelecionada, setImagemSelecionada] = useState<HTMLElement | null>(null);
+  // Espelha `imagemSelecionada` num ref: o arraste (mais abaixo) é lido por um
+  // listener nativo montado uma única vez, cujo closure fica "congelado" no
+  // valor que o estado tinha na primeira renderização. Sem o ref, esse
+  // listener sempre achava que nenhuma imagem estava selecionada e nunca
+  // tirava a seleção da anterior — deixando duas imagens "selecionadas" ao
+  // mesmo tempo quando o aluno clicava de uma pra outra.
+  const imagemSelecionadaRef = useRef<HTMLElement | null>(null);
+  // Ver o comentário dentro de `iniciarArraste`: marca que o pointerdown já
+  // tratou o clique (selecionou/arrastou algo), para o `onClick` do React
+  // que vem em seguida não desfazer o que acabou de ser feito.
+  const cliqueTratadoPeloPonteiroRef = useRef(false);
   const [posicaoBarraImagem, setPosicaoBarraImagem] = useState<{
     top: number;
     left: number;
@@ -406,15 +461,15 @@ export function EditorTexto() {
         `<span class="editor-img-wrap" contenteditable="false" draggable="false" data-align="inline" ` +
         `style="display:inline-block;position:relative;max-width:100%;margin:0 4px;vertical-align:middle;cursor:grab;">` +
         `<button type="button" class="editor-img-delete" contenteditable="false" title="Remover imagem" ` +
-        `style="position:absolute;left:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;background:#dc2626;` +
-        `color:#fff;border:2px solid #fff;font-size:11px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;">×</button>` +
+        `style="position:absolute;left:-10px;top:-10px;width:22px;height:22px;border-radius:9999px;background:#dc2626;` +
+        `color:#fff;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);font-size:13px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;">×</button>` +
         `<img src="${src}" draggable="false" style="width:320px;max-width:100%;height:auto;display:block;border-radius:2px;" />` +
         `<span class="editor-img-move" contenteditable="false" draggable="false" title="Arrastar a imagem pela folha" ` +
-        `style="position:absolute;right:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;background:#2563eb;` +
-        `border:2px solid #fff;cursor:move;display:none;touch-action:none;user-select:none;"></span>` +
+        `style="position:absolute;right:-10px;top:-10px;width:22px;height:22px;border-radius:9999px;background:#2563eb;` +
+        `border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);cursor:move;display:none;touch-action:none;user-select:none;"></span>` +
         `<span class="editor-img-handle" contenteditable="false" draggable="false" title="Arrastar para redimensionar" ` +
-        `style="position:absolute;right:-6px;bottom:-6px;width:14px;height:14px;border-radius:9999px;background:#2563eb;` +
-        `border:2px solid #fff;cursor:nwse-resize;display:none;touch-action:none;user-select:none;"></span></span>&nbsp;`;
+        `style="position:absolute;right:-9px;bottom:-9px;width:22px;height:22px;border-radius:9999px;background:#2563eb;` +
+        `border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);cursor:nwse-resize;display:none;touch-action:none;user-select:none;"></span></span>&nbsp;`;
       comandoComSelecao("insertHTML", html);
       salvarRascunhoLocal();
       atualizarContagem();
@@ -468,8 +523,9 @@ export function EditorTexto() {
       alca.setAttribute("draggable", "false");
       alca.title = "Arrastar a imagem pela folha";
       alca.style.cssText =
-        "position:absolute;right:-8px;top:-8px;width:18px;height:18px;border-radius:9999px;" +
-        "background:#2563eb;border:2px solid #fff;cursor:move;display:none;touch-action:none;user-select:none;";
+        "position:absolute;right:-10px;top:-10px;width:22px;height:22px;border-radius:9999px;" +
+        "background:#2563eb;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35);" +
+        "cursor:move;display:none;touch-action:none;user-select:none;";
       wrap.appendChild(alca);
     });
   }
@@ -490,18 +546,37 @@ export function EditorTexto() {
   const ALCAS_IMAGEM = ".editor-img-handle, .editor-img-delete, .editor-img-move";
 
   function selecionarImagem(wrap: HTMLElement) {
-    if (imagemSelecionada && imagemSelecionada !== wrap) desselecionarImagem();
+    if (imagemSelecionadaRef.current && imagemSelecionadaRef.current !== wrap) {
+      desselecionarImagem();
+    }
     wrap.querySelectorAll<HTMLElement>(ALCAS_IMAGEM).forEach((el) => {
       el.style.display = "flex";
     });
+    // Contorno azul bem visível: sem isso, o único sinal de que a imagem
+    // ficou selecionada eram três bolinhas de 14px no canto — fácil de não
+    // perceber, especialmente em telas pequenas ou de toque.
+    const img = wrap.querySelector("img");
+    if (img) img.style.outline = "3px solid #2563eb";
+    // Sobe a imagem selecionada acima de tudo: outra imagem/caixa de texto
+    // logo depois no HTML pode desenhar por cima e "roubar" o clique nas
+    // alcinhas de arrastar/redimensionar desta aqui.
+    wrap.style.zIndex = "30";
+    wrap.style.position = wrap.style.position || "relative";
+    imagemSelecionadaRef.current = wrap;
     setImagemSelecionada(wrap);
     atualizarPosicaoBarraImagem(wrap);
   }
 
   function desselecionarImagem() {
-    imagemSelecionada?.querySelectorAll<HTMLElement>(ALCAS_IMAGEM).forEach((el) => {
+    const wrap = imagemSelecionadaRef.current;
+    wrap?.querySelectorAll<HTMLElement>(ALCAS_IMAGEM).forEach((el) => {
       el.style.display = "none";
     });
+    const img = wrap?.querySelector("img");
+    if (img) img.style.outline = "";
+    if (wrap && wrap.dataset["align"] !== "livre") wrap.style.zIndex = "";
+    else if (wrap) wrap.style.zIndex = "5";
+    imagemSelecionadaRef.current = null;
     setImagemSelecionada(null);
     setPosicaoBarraImagem(null);
   }
@@ -639,6 +714,10 @@ export function EditorTexto() {
 
   /** Clique dentro da folha: seleciona/deseleciona imagem ou apaga um item. */
   function aoClicarNaArea(e: ReactMouseEvent<HTMLDivElement>) {
+    if (cliqueTratadoPeloPonteiroRef.current) {
+      cliqueTratadoPeloPonteiroRef.current = false;
+      return;
+    }
     const alvo = e.target as HTMLElement;
 
     const botaoExcluirImagem = alvo.closest(".editor-img-delete");
@@ -708,6 +787,14 @@ export function EditorTexto() {
       // Impede a seleção de texto e o drag-and-drop nativo do bloco.
       e.preventDefault();
       e.stopPropagation();
+      // O "click" do React que vem logo depois deste pointerdown, dentro de
+      // um contenteditable, às vezes chega com o alvo (`e.target`) trocado
+      // pela própria folha em vez da imagem — o navegador reidentifica o
+      // alvo do clique depois do preventDefault. Sem este aviso,
+      // `aoClicarNaArea` não reconhecia a imagem no clique seguinte, achava
+      // que era clique na folha vazia e desfazia a seleção que acabou de
+      // ser feita aqui — por isso a imagem "não ficava selecionada".
+      cliqueTratadoPeloPonteiroRef.current = true;
 
       const base = {
         ponteiro: e.pointerId,
@@ -861,6 +948,8 @@ export function EditorTexto() {
   const [arquivos, setArquivos] = useState<ArquivoAlunoResumo[]>([]);
   const [corAberta, setCorAberta] = useState(false);
   const [emojisAbertos, setEmojisAbertos] = useState(false);
+  const [vocabularioAberto, setVocabularioAberto] = useState(false);
+  const [buscaVocabulario, setBuscaVocabulario] = useState("");
   const [recentes, setRecentes] = useState<ArquivoAlunoResumo[]>([]);
   const [carregandoRecentes, setCarregandoRecentes] = useState(false);
   // Nível de recuo do parágrafo atual (0 a 4), só para desenhar o marcador
@@ -950,6 +1039,14 @@ export function EditorTexto() {
     setEmojisAbertos(false);
   }
 
+  /** Escreve a palavra do vocabulário no texto, no lugar do cursor. */
+  function inserirTermoVocabulario(termo: string) {
+    comandoComSelecao("insertText", termo);
+    salvarRascunhoLocal();
+    atualizarContagem();
+    setVocabularioAberto(false);
+  }
+
   useEffect(() => {
     const salvo = sessionStorage.getItem(CHAVE_RASCUNHO);
     if (salvo && areaRef.current) {
@@ -983,8 +1080,28 @@ export function EditorTexto() {
   }
 
   function atualizarContagem() {
-    const texto = areaRef.current?.innerText ?? "";
-    setContagem(texto.trim().length === 0 ? 0 : texto.trim().split(/\s+/).length);
+    const texto = (areaRef.current?.innerText ?? "").trim();
+    const palavras = texto.length === 0 ? 0 : texto.split(/\s+/).length;
+    setContagem(palavras);
+    setCaracteres(texto.length);
+
+    if (palavras === 0) {
+      inicioDigitacaoRef.current = null;
+      setPpm(null);
+      return;
+    }
+    if (inicioDigitacaoRef.current === null) inicioDigitacaoRef.current = Date.now();
+    const minutos = (Date.now() - inicioDigitacaoRef.current) / 60000;
+    // Nos primeiros segundos a conta oscila demais (poucas palavras dividido
+    // por um tempo quase zero) — só mostra a velocidade depois de passado um
+    // tempo mínimo, quando o número já significa alguma coisa.
+    setPpm(minutos >= 0.15 ? Math.round(palavras / minutos) : null);
+  }
+
+  /** Zera o relógio da velocidade de digitação — chamado ao trocar de folha. */
+  function reiniciarVelocidade() {
+    inicioDigitacaoRef.current = null;
+    setPpm(null);
   }
 
   /**
@@ -1042,6 +1159,8 @@ export function EditorTexto() {
     setTitulo("Sem título");
     sessionStorage.removeItem(CHAVE_RASCUNHO);
     setContagem(0);
+    setCaracteres(0);
+    reiniciarVelocidade();
     setSujo(false);
   }
 
@@ -1069,6 +1188,8 @@ export function EditorTexto() {
     setTitulo("Sem título");
     sessionStorage.removeItem(CHAVE_RASCUNHO);
     setContagem(0);
+    setCaracteres(0);
+    reiniciarVelocidade();
     setSujo(false);
   }
 
@@ -1135,6 +1256,7 @@ export function EditorTexto() {
       prepararImagens();
       setArquivoAtualId(arquivo.id);
       setTitulo(arquivo.titulo);
+      reiniciarVelocidade();
       atualizarContagem();
       setSujo(false);
       setDialogAbrirAberto(false);
@@ -1476,6 +1598,47 @@ export function EditorTexto() {
             )}
           </div>
 
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              onClick={() => setVocabularioAberto((v) => !v)}
+              title="Vocabulário profissional"
+            >
+              <BookOpen className="size-4" />
+            </Button>
+            {vocabularioAberto && (
+              <div className="absolute left-0 top-9 z-20 w-72 rounded-lg border border-border bg-popover p-2 shadow-lg">
+                <Input
+                  value={buscaVocabulario}
+                  onChange={(e) => setBuscaVocabulario(e.target.value)}
+                  placeholder="Buscar palavra..."
+                  className="mb-2 h-8"
+                  autoFocus
+                />
+                <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
+                  {VOCABULARIO_PROFISSIONAL.filter(({ termo, explicacao }) =>
+                    `${termo} ${explicacao}`
+                      .toLowerCase()
+                      .includes(buscaVocabulario.trim().toLowerCase()),
+                  ).map(({ termo, explicacao }) => (
+                    <button
+                      key={termo}
+                      type="button"
+                      onClick={() => inserirTermoVocabulario(termo)}
+                      title={`Escrever "${termo}" no texto`}
+                      className="rounded-md px-2 py-1.5 text-left hover:bg-muted"
+                    >
+                      <span className="block text-sm font-medium text-foreground">{termo}</span>
+                      <span className="block text-xs text-muted-foreground">{explicacao}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="mx-1 h-6 w-px bg-[#d8d6d2] dark:bg-white/10" />
 
           <Button
@@ -1592,6 +1755,8 @@ export function EditorTexto() {
           <div
             ref={areaRef}
             contentEditable
+            spellCheck
+            lang="pt-BR"
             onInput={() => {
               atualizarContagem();
               salvarRascunhoLocal();
@@ -1698,16 +1863,37 @@ export function EditorTexto() {
           </div>
         )}
 
-        <p className="text-right text-xs text-muted-foreground">
-          {contagem} {contagem === 1 ? "palavra" : "palavras"} ·{" "}
-          {sessao
-            ? "salvo na sua pasta ao clicar em Salvar"
-            : "salvo automaticamente neste computador"}{" "}
-          ·{" "}
-          <span className="text-muted-foreground/70">
-            arraste a alcinha da imagem/caixa de texto para redimensionar
+        {/* Barra de status discreta, no rodapé — como a do Word/Google Docs:
+          contagem de palavras e caracteres, e a velocidade de digitação
+          (palavras por minuto) desde que o aluno começou a escrever este
+          documento. */}
+        <div className="flex flex-wrap items-center justify-end gap-x-1.5 gap-y-0.5 text-right text-xs text-muted-foreground">
+          <span>
+            {contagem} {contagem === 1 ? "palavra" : "palavras"}
           </span>
-        </p>
+          <span className="text-muted-foreground/50">·</span>
+          <span>
+            {caracteres} {caracteres === 1 ? "caractere" : "caracteres"}
+          </span>
+          {ppm !== null && (
+            <>
+              <span className="text-muted-foreground/50">·</span>
+              <span title="Palavras por minuto, desde que você começou a escrever este texto">
+                {ppm} ppm
+              </span>
+            </>
+          )}
+          <span className="text-muted-foreground/50">·</span>
+          <span>
+            {sessao
+              ? "salvo na sua pasta ao clicar em Salvar"
+              : "salvo automaticamente neste computador"}
+          </span>
+          <span className="text-muted-foreground/50">·</span>
+          <span className="text-muted-foreground/70" title="Corretor automático do navegador">
+            palavra sublinhada em vermelho: clique com o botão direito nela para ver sugestões
+          </span>
+        </div>
       </div>
 
       <Dialog open={dialogAbrirAberto} onOpenChange={setDialogAbrirAberto}>
