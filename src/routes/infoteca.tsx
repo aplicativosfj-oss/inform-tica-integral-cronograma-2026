@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { imagemCompartilhar } from "@/lib/compartilhar";
 import {
   BookOpen,
   Brain,
@@ -24,7 +25,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
 import { CategoriaHero, type CorCategoria } from "@/components/school/categoria-hero";
-import { CalculadoraFlutuante } from "@/components/school/ferramentas/calculadora-flutuante";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
@@ -36,6 +36,7 @@ export const Route = createFileRoute("/infoteca")({
   component: InfotecaPage,
   head: () => ({
     meta: [
+      ...imagemCompartilhar("/og/secao-infoteca.jpg", "Infoteca: jogos e ferramentas educativas"),
       { title: "Infoteca · Agenda de Informática" },
       {
         name: "description",
@@ -297,7 +298,7 @@ function InfotecaPage() {
               alt="Criança sorrindo em frente a um computador com ícones coloridos de aprendizagem — teclado, mouse, alfabeto, números e jogos educativos"
               width={1600}
               height={600}
-              className="h-[300px] w-full sm:h-[280px] lg:aspect-[21/8] lg:h-auto"
+              className="h-[180px] w-full sm:h-[220px] lg:aspect-[21/8] lg:h-auto lg:max-h-[280px]"
               loading="eager"
               decoding="async"
               fetchPriority="high"
@@ -517,10 +518,13 @@ function InfotecaPage() {
 
         {/* Navegação rápida — agora com as duas metades da página (escola e
           de fora) na mesma lista de âncoras, pra ficar fácil pular pra
-          qualquer área direto. */}
+          qualquer área direto. `top-14` casa com a altura fixa (56px) da
+          barra mínima que o NavBar usa fora da home — um valor errado aqui
+          deixa uma fresta por onde o conteúdo da página aparece por trás
+          ao rolar. */}
         <nav
           aria-label="Ir direto para uma área"
-          className="sticky top-16 z-30 mt-3 border-y border-border/60 bg-background/85 py-2.5 backdrop-blur-lg sm:top-14"
+          className="sticky top-14 z-30 mt-3 border-y border-border/60 bg-background/85 py-2.5 backdrop-blur-lg"
         >
           <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 sm:px-6 [&::-webkit-scrollbar]:hidden">
             {GRUPOS_ESCOLA.map((grupo) => (
@@ -652,8 +656,6 @@ function InfotecaPage() {
         </section>
 
         <SiteFooter />
-        {/* Fica fechada quando a página abre: só um botão discreto no canto. */}
-        <CalculadoraFlutuante />
       </div>
     </div>
   );

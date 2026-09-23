@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { imagemCompartilhar } from "@/lib/compartilhar";
 import { CalendarDays, ClipboardList, GraduationCap, UserCheck, UserX, Users2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/coordenacao")({
   component: CoordenacaoPage,
   head: () => ({
     meta: [
+      ...imagemCompartilhar("/og/secao-coordenacao.jpg", "Coordenação"),
       { title: "Coordenação · Frequência das aulas de informática" },
       {
         name: "description",

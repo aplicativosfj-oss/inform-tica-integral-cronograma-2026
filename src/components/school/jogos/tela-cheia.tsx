@@ -2,6 +2,7 @@ import { ArrowLeft, Minimize2 } from "lucide-react";
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
+import { BotaoCompartilhar } from "@/components/school/botao-compartilhar";
 import { ANO_CRIACAO, AUTOR } from "@/components/school/ferramentas/credito";
 
 /**
@@ -23,13 +24,23 @@ interface Props {
   aoSair: () => void;
   /** Fecha o jogo e volta à sala de jogos. */
   aoFechar?: () => void;
+  /** Link e texto do compartilhamento deste jogo. */
+  compartilhar?: { caminho: string; titulo: string; texto?: string };
   titulo: string;
   /** Tenta deixar o aparelho na horizontal (corrida, tabuleiro). */
   horizontal?: boolean;
   children: ReactNode;
 }
 
-export function CaixaJogo({ cheia, aoSair, aoFechar, titulo, horizontal, children }: Props) {
+export function CaixaJogo({
+  cheia,
+  aoSair,
+  aoFechar,
+  compartilhar,
+  titulo,
+  horizontal,
+  children,
+}: Props) {
   const lugar = useRef<HTMLDivElement>(null);
   const hospedeiro = useMemo(
     () => (typeof document === "undefined" ? null : document.createElement("div")),
@@ -106,6 +117,12 @@ export function CaixaJogo({ cheia, aoSair, aoFechar, titulo, horizontal, childre
                   </span>
                 </span>
                 <div className="flex shrink-0 gap-1.5">
+                  {compartilhar && (
+                    <BotaoCompartilhar
+                      {...compartilhar}
+                      className="border-white/20 text-slate-100 hover:bg-white/10"
+                    />
+                  )}
                   {aoFechar && (
                     <button
                       type="button"

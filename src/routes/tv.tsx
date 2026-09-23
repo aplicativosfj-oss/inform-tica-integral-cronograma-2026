@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { imagemCompartilhar } from "@/lib/compartilhar";
 import { ArrowLeft, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/tv")({
   component: TvPage,
   head: () => ({
     meta: [
+      ...imagemCompartilhar("/og/secao-tv.jpg", "Painel da TV do laboratório"),
       { title: "Modo TV · Cronômetro do laboratório de informática" },
       {
         name: "description",

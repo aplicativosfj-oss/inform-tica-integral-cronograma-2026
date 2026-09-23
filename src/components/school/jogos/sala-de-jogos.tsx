@@ -7,6 +7,7 @@ import { Digitacao } from "@/components/school/jogos/digitacao";
 import { Domino } from "@/components/school/jogos/domino";
 import { JogoDaVelha } from "@/components/school/jogos/jogo-da-velha";
 import { Memoria } from "@/components/school/jogos/memoria";
+import { BotaoCompartilhar } from "@/components/school/botao-compartilhar";
 import { CaixaJogo } from "@/components/school/jogos/tela-cheia";
 import { QuebraCabeca } from "@/components/school/jogos/quebra-cabeca";
 import { TabuleiroMatematica } from "@/components/school/jogos/tabuleiro-matematica";
@@ -27,7 +28,7 @@ import { cn } from "@/lib/utils";
  * memória sozinho, o adversário é o próprio tabuleiro.
  */
 
-interface JogoInfo {
+export interface JogoInfo {
   id: string;
   nome: string;
   emoji: string;
@@ -38,7 +39,7 @@ interface JogoInfo {
   niveis: string[];
 }
 
-const JOGOS: JogoInfo[] = [
+export const JOGOS: JogoInfo[] = [
   {
     id: "jogo-da-velha",
     nome: "Jogo da velha",
@@ -171,8 +172,10 @@ function Ranking() {
   );
 }
 
-export function SalaDeJogos() {
-  const [jogo, setJogo] = useState<JogoInfo | null>(null);
+export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
+  const [jogo, setJogo] = useState<JogoInfo | null>(
+    () => JOGOS.find((j) => j.id === jogoInicial) ?? null,
+  );
   const [adversario, setAdversario] = useState<Adversario>("computador");
   const [nivel, setNivel] = useState(2);
   const [verRanking, setVerRanking] = useState(false);
@@ -204,6 +207,12 @@ export function SalaDeJogos() {
             {jogo.emoji} {jogo.nome} · {jogo.niveis[nivel - 1]} ·{" "}
             {adversario === "computador" ? "contra o computador" : "contra um colega"}
           </span>
+          <BotaoCompartilhar
+            caminho={`/jogos/${jogo.id}`}
+            titulo={`${jogo.nome} · Sala de Jogos`}
+            texto={jogo.descricao}
+            className="border-border bg-card text-foreground hover:border-primary"
+          />
           <button
             type="button"
             onClick={() => setCheia(true)}
@@ -220,6 +229,11 @@ export function SalaDeJogos() {
             setCheia(false);
           }}
           titulo={`${jogo.emoji} ${jogo.nome}`}
+          compartilhar={{
+            caminho: `/jogos/${jogo.id}`,
+            titulo: `${jogo.nome} · Sala de Jogos`,
+            texto: jogo.descricao,
+          }}
           horizontal={jogo.id === "corrida"}
         >
           <Componente

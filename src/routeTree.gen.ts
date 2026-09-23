@@ -38,6 +38,7 @@ import { Route as DashboardSimuladosRouteImport } from './routes/dashboard/simul
 import { Route as DashboardTrilhasRouteImport } from './routes/dashboard/trilhas'
 import { Route as FerramentasIndexRouteImport } from './routes/ferramentas/index'
 import { Route as FerramentasFerramentaRouteImport } from './routes/ferramentas/$ferramenta'
+import { Route as JogosJogoRouteImport } from './routes/jogos.$jogo'
 import { Route as MediadorIndexRouteImport } from './routes/mediador/index'
 import { Route as ProfessorIndexRouteImport } from './routes/professor/index'
 import { Route as AlunoTurmaIdIndexRouteImport } from './routes/aluno/$turmaId/index'
@@ -203,6 +204,11 @@ const FerramentasFerramentaRoute = FerramentasFerramentaRouteImport.update({
   path: '/ferramentas/$ferramenta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JogosJogoRoute = JogosJogoRouteImport.update({
+  id: '/jogos/$jogo',
+  path: '/jogos/$jogo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediadorIndexRoute = MediadorIndexRouteImport.update({
   id: '/mediador/',
   path: '/mediador/',
@@ -338,6 +344,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
+  '/jogos/$jogo': typeof JogosJogoRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/ferramentas/': typeof FerramentasIndexRoute
@@ -388,6 +395,7 @@ export interface FileRoutesByTo {
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
+  '/jogos/$jogo': typeof JogosJogoRoute
   '/aluno': typeof AlunoIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/ferramentas': typeof FerramentasIndexRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
+  '/jogos/$jogo': typeof JogosJogoRoute
   '/aluno/': typeof AlunoIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/ferramentas/': typeof FerramentasIndexRoute
@@ -491,6 +500,7 @@ export interface FileRouteTypes {
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
+    | '/jogos/$jogo'
     | '/aluno/'
     | '/dashboard/'
     | '/ferramentas/'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
+    | '/jogos/$jogo'
     | '/aluno'
     | '/dashboard'
     | '/ferramentas'
@@ -591,6 +602,7 @@ export interface FileRouteTypes {
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
+    | '/jogos/$jogo'
     | '/aluno/'
     | '/dashboard/'
     | '/ferramentas/'
@@ -642,6 +654,7 @@ export interface RootRouteChildren {
   DashboardSimuladosRoute: typeof DashboardSimuladosRoute
   DashboardTrilhasRoute: typeof DashboardTrilhasRoute
   FerramentasFerramentaRoute: typeof FerramentasFerramentaRoute
+  JogosJogoRoute: typeof JogosJogoRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   FerramentasIndexRoute: typeof FerramentasIndexRoute
@@ -871,6 +884,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FerramentasFerramentaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jogos/$jogo': {
+      id: '/jogos/$jogo'
+      path: '/jogos/$jogo'
+      fullPath: '/jogos/$jogo'
+      preLoaderRoute: typeof JogosJogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mediador/': {
       id: '/mediador/'
       path: '/mediador'
@@ -1034,6 +1054,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardSimuladosRoute: DashboardSimuladosRoute,
   DashboardTrilhasRoute: DashboardTrilhasRoute,
   FerramentasFerramentaRoute: FerramentasFerramentaRoute,
+  JogosJogoRoute: JogosJogoRoute,
   AlunoIndexRoute: AlunoIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   FerramentasIndexRoute: FerramentasIndexRoute,

@@ -7,13 +7,23 @@ import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteFooter } from "@/components/school/site-footer";
 import { CreditoFerramenta } from "@/components/school/ferramentas/credito";
+import { metaCompartilhar } from "@/lib/compartilhar";
 import { ferramentaPublica } from "@/lib/ferramentas-publicas";
 
 export const Route = createFileRoute("/ferramentas/$ferramenta")({
   component: FerramentaPublicaPage,
-  head: () => ({
-    meta: [{ title: "Ferramenta aberta · Infoteca" }],
-  }),
+  head: ({ params }) => {
+    const info = ferramentaPublica(params.ferramenta);
+    if (!info) return { meta: [{ title: "Ferramenta aberta · Infoteca" }] };
+    return {
+      meta: metaCompartilhar({
+        titulo: `${info.titulo} · Infoteca`,
+        descricao: info.descricao,
+        imagem: `/og/ferramenta-${info.slug}.jpg`,
+        alt: `${info.titulo}: ferramenta educativa da Infoteca`,
+      }),
+    };
+  },
 });
 
 function FerramentaPublicaPage() {

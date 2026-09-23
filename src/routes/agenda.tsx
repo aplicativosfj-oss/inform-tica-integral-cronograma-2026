@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imagemCompartilhar } from "@/lib/compartilhar";
 import {
   CalendarDays,
   ChevronLeft,
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
   head: () => ({
     meta: [
+      ...imagemCompartilhar("/og/secao-agenda.jpg", "Agenda de aulas de informática"),
       { title: "Agenda semanal · Agenda de Informática" },
       {
         name: "description",

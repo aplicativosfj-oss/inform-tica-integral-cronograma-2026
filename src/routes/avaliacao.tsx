@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { imagemCompartilhar } from "@/lib/compartilhar";
 import { BarChart3, Compass, ListChecks, Loader2, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/avaliacao")({
   component: AvaliacaoPublica,
   head: () => ({
     meta: [
+      ...imagemCompartilhar("/og/secao-avaliacao.jpg", "Avaliação diagnóstica"),
       { title: "Avaliações Diagnósticas · Escola Dr. Eiraldo" },
       {
         name: "description",

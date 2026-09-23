@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { imagemCompartilhar } from "@/lib/compartilhar";
 import { ArrowLeft, Unlock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/ferramentas/")({
   component: FerramentasPublicas,
   head: () => ({
     meta: [
+      ...imagemCompartilhar("/og/secao-ferramentas.jpg", "Ferramentas educativas abertas"),
       { title: "Ferramentas abertas · Infoteca" },
       {
         name: "description",

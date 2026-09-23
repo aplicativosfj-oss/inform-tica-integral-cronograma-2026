@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { imagemCompartilhar } from "@/lib/compartilhar";
 import {
   BarChart3,
   BookOpen,
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/sobre")({
   component: SobrePage,
   head: () => ({
     meta: [
+      ...imagemCompartilhar("/og/secao-sobre.jpg", "Sobre a Agenda de Informática"),
       { title: "Sobre a plataforma · Agenda de Informática" },
       {
         name: "description",
