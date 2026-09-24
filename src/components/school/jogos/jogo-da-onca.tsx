@@ -1,4 +1,4 @@
-import { BookOpen, Lightbulb, RotateCcw, Volume2, VolumeX } from "lucide-react";
+import { BookOpen, Bot, Lightbulb, RotateCcw, Users, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -94,8 +94,6 @@ const SONS = {
 type Lado = "onca" | "caes";
 type Fim = { vencedor: "onca" | "caes" | "empate" };
 
-const NOMES: Record<Vez, string> = { onca: "a Onça", caes: "os Cachorros" };
-
 interface Selecao {
   /** "onca" ou o id do cachorro. */
   peca: "onca" | number;
@@ -108,7 +106,9 @@ function atrasar(ms: number) {
 // ------------------------------------------------------------------ componente
 
 export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
-  const contraPc = adversario === "computador";
+  const [modo, setModo] = useState<Adversario>(adversario);
+  const contraPc = modo === "computador";
+  const [nomes, setNomes] = useState({ a: "Jogador 1", b: "Jogador 2" });
   const [fase, setFase] = useState<"inicio" | "jogando">("inicio");
   const [lado, setLado] = useState<Lado>("onca");
   const [estado, setEstado] = useState<Estado>(() => estadoInicial());
@@ -121,7 +121,8 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
   const [aviso, setAviso] = useState<string | null>(null);
   const [fim, setFim] = useState<Fim | null>(null);
   const [estrelas, setEstrelas] = useState<number | null>(null);
-  const [placar, setPlacar] = useState({ onca: 0, caes: 0, empates: 0 });
+  /** p1 = quem começa com o lado `lado`; p2 = o outro (o computador, se for o caso). */
+  const [placar, setPlacar] = useState({ p1: 0, p2: 0, empates: 0 });
   const [som, setSom] = useState(true);
   const [ajuda, setAjuda] = useState(false);
   const [pensando, setPensando] = useState(false);
@@ -137,6 +138,8 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
     [som],
   );
 
+  const nomeP1 = contraPc ? "Você" : nomes.a.trim() || "Jogador 1";
+  const nomeP2 = contraPc ? "Computador" : nomes.b.trim() || "Jogador 2";
   const vezDoJogador = contraPc ? estado.vez === lado : true;
   const humanoNaVez = fase === "jogando" && !fim && vezDoJogador && !pensando;
 
@@ -161,8 +164,8 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
       setSequencia(false);
       setDica(null);
       setPlacar((p) => ({
-        onca: p.onca + (r === "onca" ? 1 : 0),
-        caes: p.caes + (r === "caes" ? 1 : 0),
+        p1: p.p1 + (r === lado ? 1 : 0),
+        p2: p.p2 + (r !== "empate" && r !== lado ? 1 : 0),
         empates: p.empates + (r === "empate" ? 1 : 0),
       }));
       const ganhouHumano = contraPc ? r === lado : true;
@@ -173,14 +176,14 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
         jogo: "onca",
         titulo: "Jogo da Onça",
         resultado: r === "empate" ? "empate" : ganhouHumano ? "vitoria" : "derrota",
-        adversario,
+        adversario: modo,
         nivel,
         segundos: Math.round((Date.now() - inicio.current) / 1000),
       });
       setEstrelas(n);
       return true;
     },
-    [adversario, contraPc, lado, nivel, tocar],
+    [modo, contraPc, lado, nivel, tocar],
   );
 
   // ---- aplica um lance inteiro com animação (usado pelo computador e pela dica)
@@ -388,6 +391,22 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
     if (som) tom(440, 0.1, "triangle", 0.1, 660);
   }
 
+  // ---- muda entre computador e colega (recomeça do menu, com o placar zerado)
+  function trocarModo(novo: Adversario) {
+    if (novo === modo) return;
+    setModo(novo);
+    setFase("inicio");
+    setFim(null);
+    setEstrelas(null);
+    setSel(null);
+    setSequencia(false);
+    setDica(null);
+    setPensando(false);
+    setPlacar({ p1: 0, p2: 0, empates: 0 });
+    ocupado.current = false;
+    if (som) tom(360, 0.1, "triangle", 0.1, 520);
+  }
+
   // ---- mensagens de estado
   const mob = useMemo(() => mobilidadeOnca({ ...estado, vez: "onca" }), [estado]);
   const status = (() => {
@@ -403,7 +422,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
     if (sequencia) return "Continue pulando ou pare aqui.";
     if (contraPc)
       return estado.vez === "onca" ? "Sua vez: mova a Onça" : "Sua vez: mova um Cachorro";
-    return `Vez d${estado.vez === "onca" ? "a Onça" : "os Cachorros"}`;
+    return estado.vez === "onca" ? "mova a Onça" : "mova um Cachorro";
   })();
 
   const capturados = estado.capturados;
@@ -411,17 +430,24 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
 
   // ---------------------------------------------------------------- render
 
+  const ativoP1 = !fim && estado.vez === lado;
+  const nomeDaVez = estado.vez === lado ? nomeP1 : nomeP2;
+  const btnPrimario =
+    "cursor-pointer rounded-xl bg-[#f6c945] px-5 text-sm font-black text-[#3b2417] shadow hover:bg-[#ffd75e]";
+  const btnSecundario =
+    "cursor-pointer rounded-xl border border-[#e9c27a]/40 bg-[#3d231b] px-3 text-xs font-semibold text-[#f6e2c4] hover:bg-[#4a2b21] disabled:cursor-default disabled:opacity-40";
+
   return (
-    <div className="mx-auto flex w-full max-w-[460px] flex-col gap-2.5">
+    <div className="mx-auto flex w-full max-w-[460px] flex-col gap-2.5 rounded-3xl bg-[#241310] p-2.5 shadow-xl ring-1 ring-[#e9c27a]/25">
       {/* cabeçalho */}
-      <div className="overflow-hidden rounded-2xl border border-[#d9b58f] bg-[#fbf3e4] shadow-sm dark:border-[#5a3a2a] dark:bg-[#2a1d18]">
+      <div className="overflow-hidden rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914]">
         <FaixaPenas className="block h-[26px] w-full" />
         <div className="flex items-center justify-between gap-2 px-3 py-2">
           <div>
-            <h3 className="font-serif text-xl font-black italic leading-tight text-[#3b2417] dark:text-[#f6e2c4]">
+            <h3 className="font-serif text-xl font-black italic leading-tight text-[#f6e2c4]">
               Jogo da Onça
             </h3>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#a5482f]">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#f0a35a]">
               Adugo · jogo tradicional indígena
             </p>
           </div>
@@ -430,7 +456,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               type="button"
               onClick={() => setAjuda(true)}
               aria-label="Como jogar"
-              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#d9b58f] bg-white/70 text-[#7a3a24] hover:bg-white dark:bg-black/20 dark:text-[#f6e2c4]"
+              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#e9c27a]/40 bg-[#3d231b] text-[#f6e2c4] hover:bg-[#4a2b21]"
             >
               <BookOpen className="size-4" />
             </button>
@@ -438,52 +464,138 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               type="button"
               onClick={() => setSom((s) => !s)}
               aria-label={som ? "Desligar o som" : "Ligar o som"}
-              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#d9b58f] bg-white/70 text-[#7a3a24] hover:bg-white dark:bg-black/20 dark:text-[#f6e2c4]"
+              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#e9c27a]/40 bg-[#3d231b] text-[#f6e2c4] hover:bg-[#4a2b21]"
             >
               {som ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
             </button>
           </div>
+        </div>
+        {/* modo de jogo */}
+        <div className="flex gap-1 border-t border-[#e9c27a]/15 bg-[#241310]/60 p-1.5">
+          {(
+            [
+              ["computador", "Contra o computador", Bot],
+              ["colega", "Contra um colega", Users],
+            ] as const
+          ).map(([id, rotulo, Icone]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => trocarModo(id)}
+              aria-pressed={modo === id}
+              className={cn(
+                "flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-bold transition-colors",
+                modo === id
+                  ? "bg-[#f6c945] text-[#3b2417]"
+                  : "text-[#c9a983] hover:bg-[#3d231b] hover:text-[#f6e2c4]",
+              )}
+            >
+              <Icone className="size-3.5" />
+              {rotulo}
+            </button>
+          ))}
         </div>
       </div>
 
       {fase === "inicio" ? (
         <TelaInicial
           contraPc={contraPc}
+          nomes={nomes}
+          aoNomes={setNomes}
+          nivel={nivel}
           aoEscolher={(l) => comecar(l)}
           aoAjuda={() => setAjuda(true)}
         />
       ) : (
         <>
-          {/* placar de capturas */}
-          <div className="flex items-center justify-between gap-2 rounded-xl border border-[#d9b58f] bg-[#fbf3e4] px-3 py-2 dark:border-[#5a3a2a] dark:bg-[#2a1d18]">
-            <div className="flex items-center gap-1.5">
-              <OncaMini />
-              <div
-                className="flex gap-1"
-                aria-label={`${capturados} de ${CAPTURAS_PARA_VENCER} capturas`}
-              >
-                {Array.from({ length: CAPTURAS_PARA_VENCER }, (_, i) => (
-                  <span
-                    key={i}
+          {/* placar */}
+          <div className="rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914] p-2.5">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
+              {(
+                [
+                  { nome: nomeP1, lado: lado, vitorias: placar.p1, ativo: ativoP1 },
+                  {
+                    nome: nomeP2,
+                    lado: (lado === "onca" ? "caes" : "onca") as Lado,
+                    vitorias: placar.p2,
+                    ativo: !fim && !ativoP1,
+                  },
+                ] as const
+              ).flatMap((j, i) => {
+                const cartao = (
+                  <div
+                    key={`j${i}`}
                     className={cn(
-                      "flex size-6 items-center justify-center rounded-full border-2 transition-all",
-                      i < capturados
-                        ? "scale-100 border-[#c81f2c] bg-[#ffe1de]"
-                        : "border-dashed border-[#c9a983] opacity-60",
+                      "flex min-w-0 flex-col items-center gap-0.5 rounded-xl border-2 px-2 py-1.5 text-center transition-colors",
+                      j.ativo
+                        ? "border-[#f6c945] bg-[#4a2b21] shadow-[0_0_0_3px_rgba(246,201,69,0.15)]"
+                        : "border-transparent bg-[#3d231b]",
                     )}
                   >
-                    {i < capturados && <CaoMini tam={18} />}
-                  </span>
-                ))}
-              </div>
+                    {j.lado === "onca" ? <OncaMini tam={34} /> : <CaoMini tam={32} />}
+                    <span className="max-w-full truncate text-xs font-black text-[#f6e2c4]">
+                      {j.nome}
+                    </span>
+                    <span className="text-[10px] font-semibold text-[#c9a983]">
+                      {j.lado === "onca" ? "Onça" : "Cachorros"}
+                    </span>
+                    <span className="mt-0.5 text-2xl font-black leading-none text-[#f6c945] tabular-nums">
+                      {j.vitorias}
+                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#c9a983]">
+                      {j.vitorias === 1 ? "vitória" : "vitórias"}
+                    </span>
+                  </div>
+                );
+                return i === 0
+                  ? [
+                      cartao,
+                      <div
+                        key="vs"
+                        className="flex flex-col items-center justify-center gap-1 text-[#c9a983]"
+                      >
+                        <span className="text-[10px] font-black">VS</span>
+                        <span className="rounded-full bg-[#3d231b] px-2 py-0.5 text-[10px] font-bold">
+                          {placar.empates} emp.
+                        </span>
+                      </div>,
+                    ]
+                  : [cartao];
+              })}
             </div>
-            <span className="text-[11px] font-semibold text-[#7a5a44] dark:text-[#d9b58f]">
-              <b className="text-[#c81f2c]">{CAES_TOTAL - capturados}</b> cães na roda
-            </span>
+
+            {/* capturas da onça */}
+            <div className="mt-2 flex items-center justify-between gap-2 rounded-xl bg-[#241310] px-2.5 py-1.5">
+              <div className="flex items-center gap-1.5">
+                <OncaMini tam={22} />
+                <div
+                  className="flex gap-1"
+                  aria-label={`${capturados} de ${CAPTURAS_PARA_VENCER} capturas`}
+                >
+                  {Array.from({ length: CAPTURAS_PARA_VENCER }, (_, i) => (
+                    <span
+                      key={i}
+                      className={cn(
+                        "flex size-6 items-center justify-center rounded-full border-2 transition-all",
+                        i < capturados
+                          ? "border-[#e0303a] bg-[#5a2226]"
+                          : "border-dashed border-[#8a6a54] opacity-70",
+                      )}
+                    >
+                      {i < capturados && <CaoMini tam={18} />}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <span className="text-[11px] font-semibold text-[#c9a983]">
+                <b className="text-[#ff8a8a]">{CAES_TOTAL - capturados}</b> cães na roda ·{" "}
+                <b className="text-[#f6c945]">{capturados}</b>/{CAPTURAS_PARA_VENCER} capturas
+              </span>
+            </div>
           </div>
 
           {/* tabuleiro */}
-          <div className="relative overflow-hidden rounded-2xl bg-[#c94a56] p-2 shadow-md ring-1 ring-[#8f2a35]/40">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#b8434d] to-[#8e2f3a] p-2 shadow-md ring-1 ring-[#f6c945]/30">
             <svg
               viewBox={`0 0 ${LARGURA} ${ALTURA}`}
               className="mx-auto block w-full max-w-[420px] select-none touch-manipulation"
@@ -494,7 +606,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
 
               {/* rastro da última jogada */}
               {ultimo && (
-                <g opacity={0.55}>
+                <g opacity={0.6}>
                   <circle
                     cx={px(PONTOS[ultimo.de]!.x)}
                     cy={py(PONTOS[ultimo.de]!.y)}
@@ -518,25 +630,23 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                   >
                     <circle cx={px(p.x)} cy={py(p.y)} r={26} fill="transparent" />
                     {alvo && (
-                      <>
-                        <circle
-                          cx={px(p.x)}
-                          cy={py(p.y)}
-                          r={alvo.captura !== null ? 19 : 15}
-                          fill={
-                            alvo.captura !== null ? "rgba(220,38,38,0.28)" : "rgba(34,197,94,0.3)"
-                          }
-                          stroke={alvo.captura !== null ? "#dc2626" : "#16a34a"}
-                          strokeWidth={2.4}
-                        >
-                          <animate
-                            attributeName="r"
-                            values={alvo.captura !== null ? "17;21;17" : "13;17;13"}
-                            dur="1.1s"
-                            repeatCount="indefinite"
-                          />
-                        </circle>
-                      </>
+                      <circle
+                        cx={px(p.x)}
+                        cy={py(p.y)}
+                        r={alvo.captura !== null ? 19 : 15}
+                        fill={
+                          alvo.captura !== null ? "rgba(224,48,58,0.3)" : "rgba(246,201,69,0.4)"
+                        }
+                        stroke={alvo.captura !== null ? "#e0303a" : "#d99a00"}
+                        strokeWidth={2.4}
+                      >
+                        <animate
+                          attributeName="r"
+                          values={alvo.captura !== null ? "17;21;17" : "13;17;13"}
+                          dur="1.1s"
+                          repeatCount="indefinite"
+                        />
+                      </circle>
                     )}
                   </g>
                 );
@@ -614,50 +724,60 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
 
             {aviso && (
               <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center px-3">
-                <span className="rounded-full bg-[#3b2417]/95 px-4 py-1.5 text-center text-xs font-bold text-[#fde68a] shadow-lg">
+                <span className="rounded-full bg-[#241310]/95 px-4 py-1.5 text-center text-xs font-bold text-[#f6c945] shadow-lg">
                   {aviso}
                 </span>
               </div>
             )}
 
             {fim && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/45 p-4 backdrop-blur-[2px]">
-                <div className="w-full max-w-[300px] rounded-2xl border-2 border-[#e6c294] bg-[#fbf3e4] p-4 text-center shadow-2xl dark:bg-[#2a1d18]">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px]">
+                <div className="w-full max-w-[310px] rounded-2xl border-2 border-[#f6c945]/60 bg-[#2e1914] p-4 text-center shadow-2xl">
                   <div className="mb-1 flex justify-center">
-                    {fim.vencedor === "caes" ? <CaoMini tam={54} /> : <OncaMini tam={58} />}
+                    {fim.vencedor === "empate" ? (
+                      <span className="text-4xl">🤝</span>
+                    ) : fim.vencedor === "caes" ? (
+                      <CaoMini tam={54} />
+                    ) : (
+                      <OncaMini tam={58} />
+                    )}
                   </div>
-                  <p className="font-serif text-xl font-black italic text-[#3b2417] dark:text-[#f6e2c4]">
+                  <p className="font-serif text-xl font-black italic text-[#f6e2c4]">
                     {fim.vencedor === "empate"
                       ? "Empate!"
                       : contraPc
                         ? fim.vencedor === lado
                           ? "Você venceu!"
                           : "Não foi dessa vez"
-                        : `${NOMES[fim.vencedor]} venceu!`}
+                        : `${fim.vencedor === lado ? nomeP1 : nomeP2} venceu!`}
                   </p>
-                  <p className="mt-1 text-xs text-[#7a5a44] dark:text-[#d9b58f]">{status}</p>
+                  <p className="mt-1 text-xs text-[#c9a983]">{status}</p>
+                  <p className="mt-2 text-sm font-bold text-[#f6e2c4]">
+                    {nomeP1} <span className="text-[#f6c945]">{placar.p1}</span> ×{" "}
+                    <span className="text-[#f6c945]">{placar.p2}</span> {nomeP2}
+                  </p>
                   {estrelas !== null && estrelas > 0 && (
-                    <p className="mt-2 text-sm font-bold text-amber-600 dark:text-amber-400">
+                    <p className="mt-1 text-sm font-bold text-[#f6c945]">
                       {"⭐".repeat(estrelas)} +{estrelas} {estrelas === 1 ? "estrela" : "estrelas"}
                     </p>
                   )}
                   <div className="mt-3 flex flex-col gap-2">
                     <button
                       type="button"
-                      onClick={() => comecar()}
-                      className="h-11 cursor-pointer rounded-xl bg-[#c94a56] px-5 text-sm font-bold text-white hover:bg-[#b23f4a]"
+                      onClick={() => comecar(lado === "onca" ? "caes" : "onca")}
+                      className={cn(btnPrimario, "h-11")}
                     >
-                      Jogar de novo
+                      {contraPc
+                        ? "Jogar de novo, trocando de lado"
+                        : "Próxima partida (trocam de lado)"}
                     </button>
-                    {contraPc && (
-                      <button
-                        type="button"
-                        onClick={() => comecar(lado === "onca" ? "caes" : "onca")}
-                        className="h-10 cursor-pointer rounded-xl border border-[#d9b58f] bg-white/70 px-5 text-sm font-semibold text-[#7a3a24] hover:bg-white dark:bg-black/20 dark:text-[#f6e2c4]"
-                      >
-                        Trocar de lado ({lado === "onca" ? "ser os Cachorros" : "ser a Onça"})
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => comecar()}
+                      className={cn(btnSecundario, "h-10 text-sm")}
+                    >
+                      Jogar de novo, mesmos lados
+                    </button>
                   </div>
                 </div>
               </div>
@@ -668,13 +788,12 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
           <div
             className={cn(
               "rounded-xl px-3 py-2 text-center text-sm font-bold",
-              aperto
-                ? "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200"
-                : "bg-[#fbf3e4] text-[#3b2417] dark:bg-[#2a1d18] dark:text-[#f6e2c4]",
+              aperto ? "bg-[#5a3a10] text-[#ffd98a]" : "bg-[#2e1914] text-[#f6e2c4]",
             )}
             aria-live="polite"
           >
             {aperto && !contraPc ? "A Onça está quase cercada! " : ""}
+            {!fim && !contraPc ? `${nomeDaVez}: ` : ""}
             {status}
           </div>
 
@@ -683,7 +802,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               <button
                 type="button"
                 onClick={acabarSequencia}
-                className="h-10 cursor-pointer rounded-xl bg-[#3b2417] px-4 text-sm font-bold text-[#fde68a]"
+                className={cn(btnPrimario, "h-10 px-4")}
               >
                 Parar aqui
               </button>
@@ -692,27 +811,24 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               type="button"
               onClick={pedirDica}
               disabled={!humanoNaVez}
-              className="flex h-10 cursor-pointer items-center gap-1.5 rounded-xl border border-[#d9b58f] bg-white/70 px-3 text-xs font-semibold text-[#7a3a24] hover:bg-white disabled:opacity-40 dark:bg-black/20 dark:text-[#f6e2c4]"
+              className={cn(btnSecundario, "flex h-10 items-center gap-1.5")}
             >
               <Lightbulb className="size-4" /> Dica
             </button>
             <button
               type="button"
               onClick={() => comecar()}
-              className="flex h-10 cursor-pointer items-center gap-1.5 rounded-xl border border-[#d9b58f] bg-white/70 px-3 text-xs font-semibold text-[#7a3a24] hover:bg-white dark:bg-black/20 dark:text-[#f6e2c4]"
+              className={cn(btnSecundario, "flex h-10 items-center gap-1.5")}
             >
               <RotateCcw className="size-4" /> Recomeçar
             </button>
-          </div>
-
-          <div className="flex items-center justify-center gap-4 text-[11px] text-muted-foreground">
-            <span>
-              🐆 Onça <b className="text-foreground">{placar.onca}</b>
-            </span>
-            <span>empates {placar.empates}</span>
-            <span>
-              🐶 Cachorros <b className="text-foreground">{placar.caes}</b>
-            </span>
+            <button
+              type="button"
+              onClick={() => setFase("inicio")}
+              className={cn(btnSecundario, "flex h-10 items-center gap-1.5")}
+            >
+              Menu
+            </button>
           </div>
         </>
       )}
@@ -728,63 +844,113 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
 
 // ----------------------------------------------------------------- partes
 
+const NIVEIS = ["Fácil", "Médio", "Difícil"];
+
 function TelaInicial({
   contraPc,
+  nomes,
+  aoNomes,
+  nivel,
   aoEscolher,
   aoAjuda,
 }: {
   contraPc: boolean;
+  nomes: { a: string; b: string };
+  aoNomes: (n: { a: string; b: string }) => void;
+  nivel: number;
   aoEscolher: (l: Lado) => void;
   aoAjuda: () => void;
 }) {
+  const campo =
+    "h-10 w-full rounded-lg border border-[#e9c27a]/40 bg-[#241310] px-3 text-sm font-semibold text-[#f6e2c4] placeholder:text-[#8a6a54] focus:border-[#f6c945] focus:outline-none";
   return (
-    <div className="flex flex-col gap-3">
-      <div className="rounded-2xl border border-[#d9b58f] bg-[#fbf3e4] p-4 text-sm leading-relaxed text-[#4a3325] dark:border-[#5a3a2a] dark:bg-[#2a1d18] dark:text-[#e9d4bb]">
+    <div className="flex flex-col gap-2.5">
+      <div className="rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914] p-3.5 text-sm leading-relaxed text-[#e9d4bb]">
         <p>
-          Uma <b>onça</b> contra <b>14 cachorros</b>. A onça vence ao <b>capturar 5 cachorros</b>{" "}
-          pulando por cima deles. Os cachorros vencem <b>cercando a onça</b> — o triângulo lá
+          Uma <b className="text-[#f6c945]">onça</b> contra{" "}
+          <b className="text-[#f6c945]">14 cachorros</b>. A onça vence ao{" "}
+          <b className="text-[#f6c945]">capturar 5 cachorros</b> pulando por cima deles. Os
+          cachorros vencem <b className="text-[#f6c945]">cercando a onça</b> — o triângulo lá
           embaixo é a armadilha!
         </p>
         <button
           type="button"
           onClick={aoAjuda}
-          className="mt-2 cursor-pointer text-xs font-bold text-[#a5482f] underline underline-offset-2"
+          className="mt-2 cursor-pointer text-xs font-bold text-[#f0a35a] underline underline-offset-2"
         >
           Ver as regras completas
         </button>
       </div>
 
       {contraPc ? (
-        <div className="grid grid-cols-2 gap-2.5">
+        <>
+          <p className="px-1 text-xs font-semibold text-[#c9a983]">
+            Nível: <b className="text-[#f6c945]">{NIVEIS[nivel - 1]}</b> — escolha seu lado:
+          </p>
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              onClick={() => aoEscolher("onca")}
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#f6c945] bg-gradient-to-b from-[#5a3a14] to-[#3d2610] p-3 text-[#f6e2c4] shadow-sm transition-transform hover:scale-[1.02]"
+            >
+              <OncaMini tam={64} />
+              <span className="text-sm font-black text-[#f6c945]">Ser a Onça</span>
+              <span className="text-[11px] leading-tight opacity-85">
+                Pule e capture 5 cachorros
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => aoEscolher("caes")}
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#e0303a] bg-gradient-to-b from-[#5a2226] to-[#3a1519] p-3 text-[#f6e2c4] shadow-sm transition-transform hover:scale-[1.02]"
+            >
+              <CaoMini tam={60} />
+              <span className="text-sm font-black text-[#ff9a9a]">Ser os Cachorros</span>
+              <span className="text-[11px] leading-tight opacity-85">
+                Cerque a onça sem perder peças
+              </span>
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-2 rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914] p-3">
+          <p className="text-xs font-semibold text-[#c9a983]">
+            Dois jogadores no mesmo aparelho. Digite os nomes para aparecer no placar:
+          </p>
+          <label className="flex items-center gap-2">
+            <OncaMini tam={30} />
+            <input
+              value={nomes.a}
+              maxLength={14}
+              onChange={(e) => aoNomes({ ...nomes, a: e.target.value })}
+              placeholder="Jogador 1"
+              className={campo}
+              aria-label="Nome do jogador 1"
+            />
+          </label>
+          <label className="flex items-center gap-2">
+            <CaoMini tam={28} />
+            <input
+              value={nomes.b}
+              maxLength={14}
+              onChange={(e) => aoNomes({ ...nomes, b: e.target.value })}
+              placeholder="Jogador 2"
+              className={campo}
+              aria-label="Nome do jogador 2"
+            />
+          </label>
+          <p className="text-[11px] text-[#c9a983]">
+            O primeiro joga com a <b className="text-[#f6c945]">Onça</b> (e começa); o segundo, com
+            os <b className="text-[#ff9a9a]">Cachorros</b>. A cada partida, os lados se invertem.
+          </p>
           <button
             type="button"
             onClick={() => aoEscolher("onca")}
-            className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#e9a91c] bg-gradient-to-b from-[#fff6d6] to-[#ffe9a8] p-3 text-[#4a2a10] shadow-sm transition-transform hover:scale-[1.02]"
+            className="mt-1 h-12 cursor-pointer rounded-xl bg-[#f6c945] px-5 text-sm font-black text-[#3b2417] shadow hover:bg-[#ffd75e]"
           >
-            <OncaMini tam={64} />
-            <span className="text-sm font-black">Ser a Onça</span>
-            <span className="text-[11px] leading-tight opacity-80">Pule e capture 5 cachorros</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => aoEscolher("caes")}
-            className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#c81f2c] bg-gradient-to-b from-[#ffe9e6] to-[#ffd2cc] p-3 text-[#5a1218] shadow-sm transition-transform hover:scale-[1.02]"
-          >
-            <CaoMini tam={60} />
-            <span className="text-sm font-black">Ser os Cachorros</span>
-            <span className="text-[11px] leading-tight opacity-80">
-              Cerque a onça sem perder peças
-            </span>
+            Começar a partida
           </button>
         </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => aoEscolher("onca")}
-          className="h-12 cursor-pointer rounded-xl bg-[#c94a56] px-5 text-sm font-black text-white hover:bg-[#b23f4a]"
-        >
-          Começar: um joga com a Onça, o outro com os Cachorros
-        </button>
       )}
     </div>
   );
@@ -793,35 +959,33 @@ function TelaInicial({
 function Regras({ aoFechar }: { aoFechar: () => void }) {
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 p-3"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-3"
       role="dialog"
       aria-modal
       aria-label="Como jogar o Jogo da Onça"
       onClick={aoFechar}
     >
       <div
-        className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-2xl bg-[#fbf3e4] shadow-2xl dark:bg-[#2a1d18]"
+        className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[#e9c27a]/30 bg-[#2e1914] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <FaixaPenas className="block h-[28px] w-full" />
-        <div className="p-4 text-sm leading-relaxed text-[#4a3325] dark:text-[#e9d4bb]">
-          <h3 className="font-serif text-2xl font-black italic text-[#3b2417] dark:text-[#f6e2c4]">
-            Jogo da Onça
-          </h3>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#a5482f]">
+        <div className="p-4 text-sm leading-relaxed text-[#e9d4bb]">
+          <h3 className="font-serif text-2xl font-black italic text-[#f6e2c4]">Jogo da Onça</h3>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#f0a35a]">
             Jogo abstrato, da família dos jogos de captura
           </p>
           <p>
-            Também chamado de <b>Adugo</b>, é um jogo tradicional dos povos indígenas do Brasil,
-            ligado ao povo Bororo. Participam <b>dois jogadores</b>: um fica com a <b>onça</b> e o
-            outro com os <b>14 cachorros</b>.
+            Também chamado de <b className="text-[#f6c945]">Adugo</b>, é um jogo tradicional dos
+            povos indígenas do Brasil, ligado ao povo Bororo. Participam <b>dois jogadores</b>: um
+            fica com a <b>onça</b> e o outro com os <b>14 cachorros</b>.
           </p>
-          <h4 className="mt-3 font-bold text-[#a5482f]">Objetivo</h4>
+          <h4 className="mt-3 font-bold text-[#f6c945]">Objetivo</h4>
           <p>
             A onça vence capturando <b>cinco cachorros</b>. Os cachorros vencem{" "}
             <b>imobilizando a onça</b>.
           </p>
-          <h4 className="mt-3 font-bold text-[#a5482f]">Como se joga</h4>
+          <h4 className="mt-3 font-bold text-[#f6c945]">Como se joga</h4>
           <ul className="ml-4 list-disc space-y-1">
             <li>A onça começa no centro, com os cachorros à frente dela; a onça joga primeiro.</li>
             <li>
@@ -842,7 +1006,7 @@ function Regras({ aoFechar }: { aoFechar: () => void }) {
           <button
             type="button"
             onClick={aoFechar}
-            className="mt-4 h-11 w-full cursor-pointer rounded-xl bg-[#c94a56] text-sm font-bold text-white hover:bg-[#b23f4a]"
+            className="mt-4 h-11 w-full cursor-pointer rounded-xl bg-[#f6c945] text-sm font-black text-[#3b2417] hover:bg-[#ffd75e]"
           >
             Entendi, vamos jogar!
           </button>
