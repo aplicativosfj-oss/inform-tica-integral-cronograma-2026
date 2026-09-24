@@ -133,17 +133,21 @@ export function CaixaJogo({
                     <button
                       type="button"
                       onClick={aoFechar}
+                      aria-label="Fechar jogo"
                       className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-white/20 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
                     >
-                      <ArrowLeft className="size-4" /> Fechar jogo
+                      <ArrowLeft className="size-4" />{" "}
+                      <span className="hidden sm:inline">Fechar jogo</span>
                     </button>
                   )}
                   <button
                     type="button"
                     onClick={aoSair}
+                    aria-label="Modo normal"
                     className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-white/20 px-3 text-xs font-semibold text-slate-100 hover:bg-white/10"
                   >
-                    <Minimize2 className="size-4" /> Modo normal
+                    <Minimize2 className="size-4" />{" "}
+                    <span className="hidden sm:inline">Modo normal</span>
                   </button>
                 </div>
               </div>
