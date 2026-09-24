@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { OperacaoPlantao } from "@/components/plantao/plantao";
+import { metaCompartilhar } from "@/lib/compartilhar";
 
 /**
  * Operação: Plantão — jogo da equipe, em tela cheia.
@@ -11,13 +12,12 @@ import { OperacaoPlantao } from "@/components/plantao/plantao";
 export const Route = createFileRoute("/operacao-plantao")({
   component: OperacaoPlantao,
   head: () => ({
-    meta: [
-      { title: "Operação: Plantão" },
-      {
-        name: "description",
-        content:
-          "Operação: Plantão — missões reais, desafios todo dia. Jogue no navegador e no celular.",
-      },
-    ],
+    meta: metaCompartilhar({
+      titulo: "Operação: Plantão · Sala de Jogos da Infoteca",
+      descricao:
+        "Operação: Plantão — missões reais, desafios todo dia. Jogo de ação para navegador e celular.",
+      imagem: "/og/jogo-operacao-plantao.jpg",
+      alt: "Operação: Plantão, jogo de ação da Sala de Jogos da Infoteca",
+    }),
   }),
 });
