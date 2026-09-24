@@ -1,5 +1,5 @@
 import { ArrowLeft, Bot, Loader2, Maximize2, Star, Trophy, Users } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
 
 import { Corrida } from "@/components/school/jogos/corrida";
@@ -192,7 +192,27 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
   const [adversario, setAdversario] = useState<Adversario>("computador");
   const [nivel, setNivel] = useState(2);
   const [verRanking, setVerRanking] = useState(false);
-  const [cheia, setCheia] = useState(false);
+  const navigate = useNavigate();
+  // Ao abrir um jogo pela lista, a página troca para o endereço do jogo (/jogos/onca…):
+  // assim o link copiado da barra de endereços mostra a arte do jogo, e não a da Sala.
+  // O jogo já chega em tela cheia, como antes.
+  const [cheia, setCheia] = useState(() => {
+    try {
+      if (jogoInicial && window.sessionStorage.getItem("sala:cheia") === "1") {
+        window.sessionStorage.removeItem("sala:cheia");
+        return true;
+      }
+    } catch {
+      // sem armazenamento: abre em modo normal
+    }
+    return false;
+  });
+  const voltarParaSala = () => {
+    setJogo(null);
+    setCheia(false);
+    if (jogoInicial)
+      void navigate({ to: "/ferramentas/$ferramenta", params: { ferramenta: "sala-de-jogos" } });
+  };
   const [carteira, setCarteira] = useState(() => lerCarteira());
   const sessao = lerAlunoSessao();
 
@@ -215,10 +235,7 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={() => {
-              setJogo(null);
-              setCheia(false);
-            }}
+            onClick={voltarParaSala}
             className="flex h-9 cursor-pointer items-center gap-1 rounded-lg px-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-4" /> sala de jogos
@@ -244,10 +261,7 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
         <CaixaJogo
           cheia={cheia}
           aoSair={() => setCheia(false)}
-          aoFechar={() => {
-            setJogo(null);
-            setCheia(false);
-          }}
+          aoFechar={voltarParaSala}
           titulo={`${jogo.emoji} ${jogo.nome}`}
           compartilhar={{
             caminho: `/jogos/${jogo.id}`,
@@ -345,10 +359,14 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
               type="button"
               disabled={!serve}
               onClick={() => {
-                setJogo(j);
                 // Todo jogo abre em tela cheia (o clique é o gesto que o navegador exige):
                 // a partida não fica redimensionando com a janela.
-                setCheia(true);
+                try {
+                  window.sessionStorage.setItem("sala:cheia", "1");
+                } catch {
+                  // sem armazenamento: o jogo abre em modo normal
+                }
+                void navigate({ to: "/jogos/$jogo", params: { jogo: j.id } });
               }}
               className={cn(
                 "flex flex-col items-start gap-0.5 rounded-2xl border-2 p-2.5 text-left transition-colors",
