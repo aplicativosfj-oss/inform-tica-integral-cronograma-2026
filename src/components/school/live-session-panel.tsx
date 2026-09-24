@@ -996,8 +996,10 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const podeEditar = isAuthenticated || professorLiberado;
   const [pedindoPin, setPedindoPin] = useState(false);
 
+  // Horário misto não tem chamada da turma: cada fração é só um grupo de uma
+  // turma diferente. Abrir a chamada aqui gravava a turma inteira como "presente".
   const chamada = useChamadaDoDia(
-    sessao?.assignment.turma,
+    sessao?.assignment.misto ? undefined : sessao?.assignment.turma,
     config,
     dateKey,
     isReady && Boolean(sessao) && !sessao?.suspensa,
