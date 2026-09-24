@@ -63,6 +63,17 @@ export interface AparenciaAgente {
   largura?: number;
 }
 
+/** O que a cena precisa de um personagem, seja ele 3D com esqueleto ou figura de foto. */
+export interface FiguraAnimada {
+  raiz: Group;
+  modelo: Group;
+  lado?: number;
+  carga?: number;
+  atualizar(dt: number, v: number, correndo: boolean): void;
+  gesto(nome: PoseGesto, segundos?: number): void;
+  virarPara?(cx: number, cz: number): void;
+}
+
 export type PoseGesto = "agree" | "headShake" | "sad_pose" | "sneak_pose";
 
 const URL_MODELO = "/models/Xbot.glb";
@@ -287,7 +298,7 @@ export interface EstadoMovimento {
  * Um personagem em cena. `raiz` é quem anda e gira; o `modelo` dentro dela
  * pode inclinar e dar cambalhotas sem mexer no ponto de apoio.
  */
-export class Agente3D {
+export class Agente3D implements FiguraAnimada {
   readonly raiz = new Group();
   readonly modelo = new Group();
   private mixer: AnimationMixer;

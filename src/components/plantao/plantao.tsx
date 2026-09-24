@@ -770,6 +770,7 @@ export function OperacaoPlantao() {
                 ["Efeitos sonoros", "somLigado"],
                 ["Música", "musicaLigada"],
                 ["Botões de toque na tela", "botoesToque"],
+                ["Personagens com as fotos reais", "personagensFoto"],
               ] as const
             ).map(([nome, chave]) => (
               <button

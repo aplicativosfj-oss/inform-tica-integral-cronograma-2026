@@ -50,13 +50,18 @@ import {
 } from "three";
 
 import type { Clima, Personagem } from "@/components/plantao/dados";
-import { criarChao, type CorCachorro } from "@/components/plantao/desenho";
+import { SPRITES_NPC } from "@/components/plantao/dados";
+import { criarChao, type CorCachorro, type Imagens } from "@/components/plantao/desenho";
+import { FiguraFoto } from "@/components/plantao/figura-foto";
 import type { Mundo } from "@/components/plantao/motor-arena";
 import {
   Agente3D,
   carregarModeloBase,
   type AparenciaAgente,
+  type FiguraAnimada,
 } from "@/components/plantao/personagem3d";
+
+const TOM_FOTO: Record<Clima, number> = { dia: 0xffffff, "por-do-sol": 0xffd6b0, noite: 0x8c9bd0 };
 
 /** Pixels do mapa por metro do cenário 3D. */
 export const M = 55;
@@ -124,6 +129,8 @@ interface OpcoesCena {
   missao: string;
   personagem: Personagem;
   leve: boolean;
+  foto?: boolean;
+  imagens?: Imagens;
 }
 
 // ------------------------------------------------------------------- clima
@@ -618,14 +625,14 @@ export class Cena3D {
   private lampadas: Mesh[] = [];
   private luzesViatura: Mesh[] = [];
   private marcadores = new Map<string, Marcador>();
-  private jogador: Agente3D;
+  private jogador: FiguraAnimada;
   private giro = new Group();
   private carga = new Group();
   private cachorros: DogRig[] = [];
   private cachorroDir: number[] = [];
   private patrulhaObj: {
     obj: Object3D;
-    agente: Agente3D | null;
+    agente: FiguraAnimada | null;
     dir: number;
     ux: number;
     uy: number;
@@ -650,7 +657,7 @@ export class Cena3D {
 
   private constructor(
     private op: OpcoesCena,
-    jogadorAg: Agente3D,
+    jogadorAg: FiguraAnimada,
   ) {
     const { canvas, mundo, clima } = op;
     this.tempo = TEMPOS[clima];
@@ -719,7 +726,14 @@ export class Cena3D {
 
   static async criar(op: OpcoesCena): Promise<Cena3D> {
     const gltf = await carregarModeloBase();
-    const ag = new Agente3D(gltf, aparenciaDe(op.personagem));
+    const p = op.personagem;
+    const ag: FiguraAnimada = op.foto
+      ? new FiguraFoto(
+          op.imagens?.[p.sprite],
+          { pernas: p.pernas, cintura: p.cintura, calca: p.calca, bota: p.bota },
+          TOM_FOTO[op.clima],
+        )
+      : new Agente3D(gltf, aparenciaDe(p));
     const cena = new Cena3D(op, ag);
     cena.gltf = gltf;
     return cena;
@@ -1254,8 +1268,12 @@ export class Cena3D {
       this.emitir(J.x, J.y, "#d8d0bf", 1, 40, 0.1);
 
     // carga nas mãos
+    if (this.op.foto) {
+      this.jogador.carga = J.item === "marmita" ? J.carga : 0;
+      if (this.velSuave > 0.3) this.jogador.lado = vmx >= 0 ? 1 : -1;
+    }
     while (this.carga.children.length) this.carga.remove(this.carga.children[0]!);
-    if (J.carga > 0 && J.item) {
+    if (!this.op.foto && J.carga > 0 && J.item) {
       const n = Math.min(J.carga, 6);
       for (let k = 0; k < n; k++) {
         const c =
@@ -1301,10 +1319,18 @@ export class Cena3D {
     while (this.patrulhaObj.length < e.patrulhas.length) {
       const p = e.patrulhas[this.patrulhaObj.length]!;
       let obj: Object3D;
-      let agente: Agente3D | null = null;
+      let agente: FiguraAnimada | null = null;
       if (p.tipo === "carrinho") obj = criarCarrinho();
       else if (p.tipo === "carro") obj = criarCarro(p.cor.camisa, false).g;
-      else {
+      else if (this.op.foto) {
+        const idx = this.patrulhaObj.length % SPRITES_NPC.length;
+        agente = new FiguraFoto(
+          this.op.imagens?.[SPRITES_NPC[idx]!],
+          { pernas: 0, cintura: idx === 2 ? 0 : 0.5, calca: p.cor.calca, bota: "#111" },
+          TOM_FOTO[this.op.clima],
+        );
+        obj = agente.raiz;
+      } else {
         agente = new Agente3D(this.gltf!, aparenciaNpc(p.cor));
         obj = agente.raiz;
       }
@@ -1329,6 +1355,7 @@ export class Cena3D {
       o.obj.position.set(x, 0, z);
       o.obj.rotation.y = o.dir;
       o.agente?.atualizar(dt, p.parado ? 0 : Math.min(v, 2.2), false);
+      if (o.agente && this.op.foto && Math.abs(dx) > 0.002) o.agente.lado = dx >= 0 ? 1 : -1;
     });
 
     // ---- marcadores e objetos interativos
@@ -1467,6 +1494,11 @@ export class Cena3D {
       for (const mt of p.malhas) (mt as MeshStandardMaterial).opacity = p.atual;
     }
 
+    if (this.op.foto) {
+      const c = this.cam.position;
+      this.jogador.virarPara?.(c.x, c.z);
+      for (const o of this.patrulhaObj) o.agente?.virarPara?.(c.x, c.z);
+    }
     this.renderer.render(this.cena, this.cam);
   }
 

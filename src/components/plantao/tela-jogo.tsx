@@ -29,6 +29,7 @@ import {
   type Missao,
   type Nivel,
   type Personagem,
+  lerProgresso,
 } from "@/components/plantao/dados";
 import { desenharAvatar, type Imagens } from "@/components/plantao/desenho";
 import {
@@ -280,6 +281,7 @@ export function TelaArena({
       meta,
       aoHud: setHud,
       modo3d: true,
+      personagemFoto: lerProgresso().personagensFoto,
       leve: toque,
       aoPronto: () => setPronto(true),
       aoFim,

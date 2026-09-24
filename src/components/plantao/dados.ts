@@ -280,6 +280,8 @@ export interface Progresso {
   somLigado: boolean;
   musicaLigada: boolean;
   botoesToque: boolean;
+  /** Personagens com as fotos reais da equipe (em vez do boneco 3D animado). */
+  personagensFoto: boolean;
 }
 
 const CHAVE = "operacao-plantao:progresso";
@@ -291,6 +293,7 @@ export function lerProgresso(): Progresso {
     somLigado: true,
     musicaLigada: true,
     botoesToque: true,
+    personagensFoto: true,
   };
   if (typeof window === "undefined") return padrao;
   try {

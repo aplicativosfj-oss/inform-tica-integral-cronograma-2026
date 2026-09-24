@@ -109,6 +109,8 @@ export interface OpcoesArena {
   aoHud: (h: HudArena) => void;
   /** Cena 3D: desenha num canvas WebGL. */
   modo3d?: boolean;
+  /** Personagens com as fotos reais (recortes) em vez do boneco 3D. */
+  personagemFoto?: boolean;
   /** Aparelho fraco (celular): menos sombra e resolução. */
   leve?: boolean;
   /** Avisa quando a cena 3D terminou de carregar. */
@@ -982,6 +984,8 @@ export class Arena {
         missao: this.op.missao,
         personagem: this.op.personagem,
         leve: this.op.leve ?? false,
+        foto: this.op.personagemFoto ?? false,
+        imagens: this.op.imagens,
       });
     } catch (erro) {
       // Sem WebGL (ou falha ao carregar): volta para a vista 2D.
