@@ -9,6 +9,7 @@ import { TrocaGrupoOverlay } from "@/components/school/troca-grupo-overlay";
 import { unlockAlertSound } from "@/lib/alert-sound";
 import { useAppStore } from "@/lib/app-store";
 import {
+  aplicarExcecoesDeData,
   buildWeeklySchedule,
   currentWeekdayLabel,
   findSessaoAtual,
@@ -69,7 +70,16 @@ function TvPage() {
   const diaAtual = now ? currentWeekdayLabel(now) : "";
   const conteudoDoDia = config.conteudoPorDia?.[diaAtual] ?? "";
   const sessao = now
-    ? findSessaoAtual(buildWeeklySchedule(turmas, config, getWeekIndex(now)), config, now)
+    ? findSessaoAtual(
+        aplicarExcecoesDeData(
+          buildWeeklySchedule(turmas, config, getWeekIndex(now)),
+          config,
+          turmas,
+          toDateKey(now),
+        ),
+        config,
+        now,
+      )
     : null;
   const dateKey = now ? toDateKey(now) : "";
 
