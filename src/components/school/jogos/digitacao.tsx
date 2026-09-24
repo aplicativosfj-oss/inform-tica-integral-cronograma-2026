@@ -39,7 +39,6 @@ import {
 } from "@/components/school/jogos/digitacao-progresso";
 import {
   Maos,
-  Postura,
   Teclado,
   Teco,
   TutorFala,
@@ -156,7 +155,13 @@ function Teoria({ aoFim, aoSair }: { aoFim: () => void; aoSair: () => void }) {
   const [i, setI] = useState(0);
   const slide = SLIDES[i]!;
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-slate-950 p-3 text-white sm:p-4">
+    <div
+      className="flex flex-col gap-3 rounded-2xl border border-sky-300/20 bg-cover bg-center p-3 text-white shadow-2xl sm:p-4"
+      style={{
+        backgroundImage:
+          "linear-gradient(120deg, rgba(2,6,23,.96), rgba(2,6,23,.76)), url(/images/jogos/digitacao-cenario-1-pro.webp)",
+      }}
+    >
       <div className="flex items-center justify-between">
         <Voltar onClick={aoSair} />
         <span className="text-xs text-slate-400">
@@ -169,7 +174,11 @@ function Teoria({ aoFim, aoSair }: { aoFim: () => void; aoSair: () => void }) {
       <div className="rounded-xl bg-slate-900/70 p-3">
         {i === 0 && (
           <div className="grid gap-3 sm:grid-cols-[1.2fr_1fr] sm:items-center">
-            <Postura className="w-full rounded-xl" />
+            <img
+              src="/images/jogos/digitacao-postura-pro.webp"
+              alt="Criança sentada corretamente diante do computador, com coluna reta, olhos na altura da tela e pés apoiados"
+              className="aspect-video w-full rounded-xl border border-sky-300/25 object-cover shadow-2xl shadow-sky-950/60"
+            />
             <ol className="flex flex-col gap-1.5 text-sm">
               {[
                 ["1", "Olhos na altura da tela, sem baixar o pescoço."],
@@ -628,7 +637,13 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
 
   if (tela === "fases") {
     return (
-      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-slate-950 p-3 text-white sm:p-4">
+      <div
+        className="flex flex-col gap-3 rounded-2xl border border-sky-300/20 bg-cover bg-center p-3 text-white shadow-2xl sm:p-4"
+        style={{
+          backgroundImage:
+            "linear-gradient(115deg, rgba(2,6,23,.94), rgba(2,6,23,.72)), url(/images/jogos/digitacao-cenario-2-pro.webp)",
+        }}
+      >
         <Voltar onClick={() => setTela("home")} />
         <h4 className="flex items-center gap-2 text-lg font-black">
           <MapaIcone className="size-5 text-emerald-300" /> Fases do {serie}º ano

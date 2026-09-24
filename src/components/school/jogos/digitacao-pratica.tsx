@@ -204,13 +204,13 @@ export function PraticaDigitacao({
     >
       {cenario && (
         <div
-          className="absolute inset-0 scale-[1.02] bg-cover bg-center opacity-40"
+          className="absolute inset-0 scale-[1.02] bg-cover bg-center opacity-80"
           style={{ backgroundImage: `url(/images/jogos/${cenario}.webp)` }}
           aria-hidden
         />
       )}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,transparent_0%,rgba(2,6,23,.3)_38%,rgba(2,6,23,.94)_100%)]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/45 via-slate-950/72 to-slate-950/95" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,transparent_0%,rgba(2,6,23,.12)_50%,rgba(2,6,23,.78)_100%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/15 via-slate-950/35 to-slate-950/80" />
 
       <div className="relative mx-auto flex max-w-4xl flex-col gap-2 p-2 sm:p-3">
         <div className="flex items-center justify-between gap-2">
@@ -236,7 +236,11 @@ export function PraticaDigitacao({
               }
               humor="animado"
             />
-            <Maos ativos={[]} className="max-w-[230px]" />
+            <img
+              src="/images/jogos/digitacao-maos-guia-pro.webp"
+              alt="Mãos posicionadas corretamente sobre o teclado"
+              className="aspect-video w-full max-w-sm rounded-xl border border-sky-300/30 object-cover shadow-2xl shadow-sky-950/60"
+            />
             <p className="text-[11px] text-slate-400">
               {prompts.length} {prompts.length === 1 ? "item" : "itens"} para digitar
               {robo ? ` · robô: ${robo} palavras por minuto` : ""}
