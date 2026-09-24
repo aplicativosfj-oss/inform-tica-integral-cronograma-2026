@@ -231,16 +231,15 @@ function Teoria({ aoFim, aoSair }: { aoFim: () => void; aoSair: () => void }) {
         {i === 2 && (
           <div className="flex flex-col gap-3">
             <Teclado cores />
-            <div className="grid grid-cols-2 gap-1.5 text-xs sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
               {[0, 1, 2, 3, 6, 7, 8, 9].map((d) => (
                 <span
                   key={d}
-                  className="flex items-center gap-1.5 rounded-lg border px-2 py-1"
-                  style={{ borderColor: COR_DEDO[d], background: `${COR_DEDO[d]}22` }}
+                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-950/75 px-2.5 py-2 font-semibold text-slate-200 shadow-lg backdrop-blur-sm"
                 >
                   <span
-                    className="size-3 shrink-0 rounded-full"
-                    style={{ background: COR_DEDO[d] }}
+                    className="h-5 w-1.5 shrink-0 rounded-full"
+                    style={{ background: COR_DEDO[d], boxShadow: `0 0 8px ${COR_DEDO[d]}` }}
                   />
                   {NOME_DEDO[d]}
                 </span>

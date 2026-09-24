@@ -8,7 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Ilustrações do jogo de digitação: teclado colorido por dedo, as duas mãos,
+ * Elementos visuais do jogo de digitação: teclado interativo, as duas mãos,
  * o tutor (Teco, o robô) e o desenho da postura correta.
  *
  * Tudo é SVG desenhado no código — nada de imagem externa — para as cores dos
@@ -36,7 +36,7 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-0.5 rounded-xl border border-white/10 bg-slate-900/70 p-1.5 sm:gap-1 sm:p-2",
+        "flex flex-col gap-1.5 rounded-2xl border border-sky-300/15 bg-slate-950/80 p-2.5 shadow-2xl shadow-slate-950/70 ring-1 ring-white/5 backdrop-blur-md sm:gap-2 sm:p-3",
         className,
       )}
       aria-hidden
@@ -44,8 +44,8 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
       {FILEIRAS.map((f, i) => (
         <div
           key={i}
-          className="flex justify-center gap-1 sm:gap-1.5"
-          style={{ paddingLeft: `${i * 2}%`, paddingRight: `${(3 - i) * 2}%` }}
+          className="flex justify-center gap-1.5 sm:gap-2"
+          style={{ paddingLeft: `${i * 1.7}%`, paddingRight: `${(3 - i) * 1.7}%` }}
         >
           {f.map((k) => {
             const ehAlvo = alvoBase === k || (alvo === "ç" && k === "ç");
@@ -55,13 +55,14 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
               <span
                 key={k}
                 className={cn(
-                  "relative flex h-6 w-[8.6%] items-center justify-center rounded-md border text-[10px] font-bold uppercase transition-all sm:h-7 sm:text-xs",
+                  "relative flex h-8 w-[8.6%] items-center justify-center overflow-hidden rounded-lg border text-[10px] font-black uppercase tracking-wide transition-all duration-150 sm:h-10 sm:text-xs",
                   ehAlvo
-                    ? "z-10 scale-110 border-white text-white shadow-lg"
+                    ? "z-10 -translate-y-1 scale-105 border-white text-white shadow-xl"
                     : erro === k
-                      ? "border-red-400 bg-red-500/60 text-white"
-                      : "border-white/15 text-slate-300",
-                  !ehAlvo && erro !== k && !cores && !noFoco && "bg-slate-800/80",
+                      ? "border-red-300 bg-red-500/70 text-white"
+                      : "border-white/10 text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_3px_0_rgba(0,0,0,.55)]",
+                  !ehAlvo && erro !== k && !cores && !noFoco &&
+                    "bg-gradient-to-b from-slate-700/90 to-slate-900",
                 )}
                 style={
                   ehAlvo
@@ -69,15 +70,25 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
                     : erro === k
                       ? undefined
                       : cores
-                        ? { background: `${cor}55`, borderColor: `${cor}99`, color: "#fff" }
+                        ? {
+                            background: `linear-gradient(180deg, ${cor}30 0%, rgba(15,23,42,.96) 72%)`,
+                            borderColor: `${cor}88`,
+                            color: "#fff",
+                          }
                         : noFoco
                           ? { background: `${cor}33`, borderColor: cor, color: "#fff" }
                           : undefined
                 }
               >
                 {k}
+                {cores && !ehAlvo && erro !== k && (
+                  <span
+                    className="absolute inset-x-1 bottom-0 h-1 rounded-t-full"
+                    style={{ background: cor, boxShadow: `0 0 8px ${cor}` }}
+                  />
+                )}
                 {RELEVO.has(k) && (
-                  <span className="absolute bottom-0.5 h-0.5 w-2.5 rounded-full bg-white/70 sm:bottom-1" />
+                  <span className="absolute bottom-1.5 h-0.5 w-3 rounded-full bg-white/80 sm:bottom-2" />
                 )}
               </span>
             );
@@ -87,12 +98,12 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
       <div className="flex justify-center">
         <span
           className={cn(
-            "flex h-6 w-3/5 items-center justify-center rounded-md border text-[9px] font-bold uppercase tracking-widest transition-all sm:h-7",
+            "flex h-8 w-3/5 items-center justify-center rounded-lg border text-[9px] font-bold uppercase tracking-[.25em] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_3px_0_rgba(0,0,0,.55)] transition-all sm:h-10",
             alvo === " "
               ? "border-white bg-slate-500 text-white shadow-lg shadow-slate-400/60"
               : erro === " "
                 ? "border-red-400 bg-red-500/60"
-                : "border-white/15 bg-slate-800/80 text-slate-400",
+                : "border-white/10 bg-gradient-to-b from-slate-700/90 to-slate-900 text-slate-300",
           )}
         >
           espaço
