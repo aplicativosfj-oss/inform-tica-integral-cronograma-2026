@@ -42,6 +42,7 @@ import {
   type Imagens,
   type TipoChao,
 } from "@/components/plantao/desenho";
+import type { Cena3D, EstadoCena } from "@/components/plantao/cena3d";
 import type { SomPlantao } from "@/components/plantao/som-plantao";
 
 export const VIEW_W = 960;
@@ -59,6 +60,8 @@ export interface EntradaArena {
   correr: boolean;
   /** Pulso de "interagir": o motor consome (volta a false) ao tratar. */
   interagir: boolean;
+  /** Pulso de "pular" (salto e cambalhota). */
+  pular?: boolean;
 }
 
 export interface Objetivo {
@@ -104,6 +107,12 @@ export interface OpcoesArena {
   tempoTotal: number;
   meta: number;
   aoHud: (h: HudArena) => void;
+  /** Cena 3D: desenha num canvas WebGL. */
+  modo3d?: boolean;
+  /** Aparelho fraco (celular): menos sombra e resolução. */
+  leve?: boolean;
+  /** Avisa quando a cena 3D terminou de carregar. */
+  aoPronto?: () => void;
   aoFim: (r: ResultadoArena) => void;
 }
 
@@ -114,7 +123,7 @@ interface Rect {
   h: number;
 }
 
-interface Parede extends Rect {
+export interface Parede extends Rect {
   alt: number;
   topo: string;
   frente: string;
@@ -123,7 +132,7 @@ interface Parede extends Rect {
   invisivel?: boolean;
 }
 
-interface Interativo {
+export interface Interativo {
   id: string;
   tipo: "balcao" | "porta" | "breve" | "cafe" | "tarefa" | "coord";
   x: number;
@@ -135,13 +144,15 @@ interface Interativo {
   letra?: string;
 }
 
-interface Decor {
+export interface Decor {
   y: number;
   x: number;
+  /** Modelo 3D correspondente (cone, poste, arvore, placa, viatura, piso, detector). */
+  tipo3d?: string;
   desenhar: (ctx: CanvasRenderingContext2D, t: number) => void;
 }
 
-interface Zona {
+export interface Zona {
   tipo: "molhado" | "portao";
   x: number;
   y: number;
@@ -149,7 +160,7 @@ interface Zona {
   h: number;
 }
 
-interface Mundo {
+export interface Mundo {
   w: number;
   h: number;
   chao: TipoChao;
@@ -225,7 +236,7 @@ function paredeBloco(
 // =========================================================== construção dos mundos
 
 function janelas(cor = "#7dd3fc") {
-  return (ctx: CanvasRenderingContext2D, p: Parede) => {
+  const desenho = (ctx: CanvasRenderingContext2D, p: Parede) => {
     const n = Math.floor(p.w / 70);
     for (let i = 0; i < n; i++) {
       const x = p.x + 20 + i * ((p.w - 40) / Math.max(1, n));
@@ -239,6 +250,7 @@ function janelas(cor = "#7dd3fc") {
       ctx.fillRect(x + 2, p.y + p.h - p.alt + 18, 12, 26);
     }
   };
+  return Object.assign(desenho, { janelas: true });
 }
 
 function mundoCachorro(): Mundo {
@@ -301,8 +313,8 @@ function mundoCachorro(): Mundo {
     },
   );
   m.decor.push(
-    { x: 362, y: 336, desenhar: (c, t) => desenharViatura(c, 362, 336, t) },
-    { x: 1802, y: 376, desenhar: (c, t) => desenharViatura(c, 1802, 376, t) },
+    { x: 362, y: 336, tipo3d: "viatura", desenhar: (c, t) => desenharViatura(c, 362, 336, t) },
+    { x: 1802, y: 376, tipo3d: "viatura", desenhar: (c, t) => desenharViatura(c, 1802, 376, t) },
   );
   // cones espalhados
   const cones: [number, number][] = [
@@ -321,7 +333,7 @@ function mundoCachorro(): Mundo {
   ];
   for (const [x, y] of cones) {
     m.colisores.push({ x, y: y - 4, r: 10 });
-    m.decor.push({ x, y, desenhar: (c) => desenharCone(c, x, y) });
+    m.decor.push({ x, y, tipo3d: "cone", desenhar: (c) => desenharCone(c, x, y) });
   }
   // postes, árvores e placas
   for (const [x, y] of [
@@ -331,7 +343,7 @@ function mundoCachorro(): Mundo {
     [1500, 900],
     [1100, 1000],
   ] as [number, number][]) {
-    m.decor.push({ x, y, desenhar: (c) => desenharPoste(c, x, y) });
+    m.decor.push({ x, y, tipo3d: "poste", desenhar: (c) => desenharPoste(c, x, y) });
     m.luzes.push({ x, y: y - 70, r: 190 });
     m.colisores.push({ x, y: y - 4, r: 8 });
   }
@@ -340,10 +352,15 @@ function mundoCachorro(): Mundo {
     [1900, 940],
     [200, 500],
   ] as [number, number][]) {
-    m.decor.push({ x, y, desenhar: (c) => desenharArvore(c, x, y, 1.1) });
+    m.decor.push({ x, y, tipo3d: "arvore", desenhar: (c) => desenharArvore(c, x, y, 1.1) });
     m.colisores.push({ x, y: y - 6, r: 14 });
   }
-  m.decor.push({ x: 1100, y: 320, desenhar: (c) => desenharPlaca(c, 1100, 320, "!", "#ef4444") });
+  m.decor.push({
+    x: 1100,
+    y: 320,
+    tipo3d: "placa",
+    desenhar: (c) => desenharPlaca(c, 1100, 320, "!", "#ef4444"),
+  });
   return m;
 }
 
@@ -440,7 +457,7 @@ function mundoMarmitas(): Mundo {
     [1500, 900],
   ] as [number, number][]) {
     m.zonas.push({ tipo: "molhado", x: x - 46, y: y - 18, w: 92, h: 36 });
-    m.decor.push({ x, y, desenhar: (c) => desenharPisoMolhado(c, x, y) });
+    m.decor.push({ x, y, tipo3d: "piso", desenhar: (c) => desenharPisoMolhado(c, x, y) });
   }
   for (const x of [400, 900, 1500, 2000])
     m.luzes.push({ x, y: 300, r: 260 }, { x, y: 800, r: 260 });
@@ -663,6 +680,7 @@ function mundoTarefas(): Mundo {
   m.decor.push({
     x: 1250,
     y: 700,
+    tipo3d: "detector",
     desenhar: (c, t) => {
       c.save();
       c.translate(1250, 700);
@@ -681,7 +699,7 @@ function mundoTarefas(): Mundo {
     [1500, 900],
     [2200, 900],
   ] as [number, number][]) {
-    m.decor.push({ x, y, desenhar: (c) => desenharArvore(c, x, y, 1.05) });
+    m.decor.push({ x, y, tipo3d: "arvore", desenhar: (c) => desenharArvore(c, x, y, 1.05) });
     m.colisores.push({ x, y: y - 6, r: 14 });
   }
   for (const [x, y] of [
@@ -690,7 +708,7 @@ function mundoTarefas(): Mundo {
     [900, 850],
     [2000, 850],
   ] as [number, number][]) {
-    m.decor.push({ x, y, desenhar: (c) => desenharPoste(c, x, y) });
+    m.decor.push({ x, y, tipo3d: "poste", desenhar: (c) => desenharPoste(c, x, y) });
     m.luzes.push({ x, y: y - 70, r: 200 });
     m.colisores.push({ x, y: y - 4, r: 8 });
   }
@@ -701,6 +719,8 @@ function mundoTarefas(): Mundo {
 
 export class Arena {
   private ctx: CanvasRenderingContext2D;
+  private r3d: Cena3D | null = null;
+  private dtQuadro = 0.016;
   private mundo: Mundo;
   private chao: CanvasPattern | null = null;
   private chaoFaixa: CanvasPattern | null = null;
@@ -752,9 +772,17 @@ export class Arena {
   private readonly total: number;
 
   constructor(private op: OpcoesArena) {
-    op.canvas.width = VIEW_W;
-    op.canvas.height = VIEW_H;
-    this.ctx = op.canvas.getContext("2d")!;
+    if (op.modo3d) {
+      // o canvas da tela é do WebGL; o 2D fica fora da tela (só serve de base do mapa)
+      const fora = document.createElement("canvas");
+      fora.width = VIEW_W;
+      fora.height = VIEW_H;
+      this.ctx = fora.getContext("2d")!;
+    } else {
+      op.canvas.width = VIEW_W;
+      op.canvas.height = VIEW_H;
+      this.ctx = op.canvas.getContext("2d")!;
+    }
     this.mundo =
       op.missao === "cachorro"
         ? mundoCachorro()
@@ -926,23 +954,55 @@ export class Arena {
 
   iniciar() {
     this.parado = false;
-    this.ultimo = performance.now();
     this.op.som?.iniciarMusica(this.op.clima);
-    const quadro = (agora: number) => {
-      if (this.parado) return;
-      const dt = Math.min((agora - this.ultimo) / 1000, 1 / 20);
-      this.ultimo = agora;
-      if (!this.pausado && !this.terminou) this.atualizar(dt);
-      this.desenhar();
+    const comecar = () => {
+      this.ultimo = performance.now();
+      const quadro = (agora: number) => {
+        if (this.parado) return;
+        const dt = Math.min((agora - this.ultimo) / 1000, 1 / 20);
+        this.ultimo = agora;
+        this.dtQuadro = dt;
+        if (!this.pausado && !this.terminou) this.atualizar(dt);
+        this.desenhar();
+        this.raf = requestAnimationFrame(quadro);
+      };
       this.raf = requestAnimationFrame(quadro);
     };
-    this.raf = requestAnimationFrame(quadro);
+    if (this.op.modo3d) void this.preparar3d().then(() => !this.parado && comecar());
+    else comecar();
+  }
+
+  private async preparar3d() {
+    try {
+      const { Cena3D } = await import("@/components/plantao/cena3d");
+      this.r3d = await Cena3D.criar({
+        canvas: this.op.canvas,
+        mundo: this.mundo,
+        clima: this.op.clima,
+        missao: this.op.missao,
+        personagem: this.op.personagem,
+        leve: this.op.leve ?? false,
+      });
+    } catch (erro) {
+      // Sem WebGL (ou falha ao carregar): volta para a vista 2D.
+      console.error("Cena 3D indisponível, usando a vista 2D.", erro);
+      this.r3d = null;
+      this.op.canvas.width = VIEW_W;
+      this.op.canvas.height = VIEW_H;
+      this.ctx = this.op.canvas.getContext("2d") ?? this.ctx;
+      this.chao = this.ctx.createPattern(criarChao(this.mundo.chao), "repeat");
+      if (this.mundo.faixaChao)
+        this.chaoFaixa = this.ctx.createPattern(criarChao(this.mundo.faixaChao.tipo), "repeat");
+    }
+    this.op.aoPronto?.();
   }
 
   parar() {
     this.parado = true;
     cancelAnimationFrame(this.raf);
     this.op.som?.pararMusica();
+    this.r3d?.destruir();
+    this.r3d = null;
   }
 
   pausar(v: boolean) {
@@ -955,6 +1015,7 @@ export class Arena {
   }
 
   private particulasEm(x: number, y: number, cor: string, n = 10, forca = 90) {
+    this.r3d?.emitir(x, y, cor, n, forca, 0.6);
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
       const v = Math.random() * forca;
@@ -1025,6 +1086,14 @@ export class Arena {
     const e = this.entrada;
     const m = this.mundo;
     const at = this.op.personagem.atributos;
+    if (e.pular) {
+      e.pular = false;
+      if (this.r3d && this.atordoado <= 0 && this.r3d.emPulo <= 0) {
+        this.r3d.saltar(e.correr && this.folego > 0.04 && Math.hypot(this.vx, this.vy) > 150);
+        this.folego = Math.max(0, this.folego - 0.06);
+        this.op.som?.pular();
+      }
+    }
 
     this.tempoRestante -= dt;
     this.buff = Math.max(0, this.buff - dt);
@@ -1156,7 +1225,7 @@ export class Arena {
         if (Math.abs(dx) > 4) p.dir = dx > 0 ? 1 : -1;
       }
       // colisão com o jogador
-      if (p.raio > 0 && this.atordoado <= 0) {
+      if (p.raio > 0 && this.atordoado <= 0 && (this.r3d?.emPulo ?? 0) < 0.1) {
         const cx = p.tipo === "carro" ? ciclo(this.px, p.x - 60, p.x + 60) : p.x;
         const cy = p.tipo === "carro" ? ciclo(this.py, p.y - 26, p.y) : p.y;
         if (Math.hypot(this.px - cx, this.py - cy) < p.raio + 10) this.baterEm(p);
@@ -1167,7 +1236,10 @@ export class Arena {
   private baterEm(p: Patrulha) {
     this.atordoado = 0.7;
     p.espera = 0.8;
+    this.r3d?.tremer(0.7);
+    this.r3d?.gesto("sad_pose", 0.9);
     this.op.som?.erro();
+    this.r3d?.gesto("headShake", 1.1);
     const ang = Math.atan2(this.py - p.y, this.px - p.x);
     this.vx = Math.cos(ang) * 260;
     this.vy = Math.sin(ang) * 260;
@@ -1253,6 +1325,7 @@ export class Arena {
         this.particulasEm(c.x, c.y - 20, "#ffffff", 14, 120);
         this.mostrar("Peguei! Cachorro capturado!", 2);
         this.bracoAlto = 1;
+        this.r3d?.gesto("agree", 1.1);
       }
     }
   }
@@ -1283,6 +1356,7 @@ export class Arena {
     const som = this.op.som;
     if (i.requer && !i.requer.every((r) => this.tarefasFeitas.has(r))) {
       som?.erro();
+      this.r3d?.gesto("headShake", 1.1);
       this.mostrar(
         i.id === "registro"
           ? "Cumpra as outras tarefas primeiro!"
@@ -1295,11 +1369,13 @@ export class Arena {
       case "balcao":
         if (this.carga >= this.cap) {
           som?.erro();
+          this.r3d?.gesto("headShake", 1.1);
           this.mostrar(`Suas mãos estão cheias (${this.cap})!`, 1.6);
           return;
         }
         this.carga = this.cap;
         this.bracoAlto = 1;
+        this.r3d?.gesto("agree", 1.1);
         som?.pegar();
         this.mostrar(`Pegou ${this.cap} marmitas!`, 1.4);
         this.particulasEm(i.x, i.y - 30, "#7dd3fc", 8, 60);
@@ -1307,6 +1383,7 @@ export class Arena {
       case "porta": {
         if (this.carga === 0) {
           som?.erro();
+          this.r3d?.gesto("headShake", 1.1);
           this.mostrar("Você não está com marmitas!", 1.6);
           return;
         }
@@ -1331,12 +1408,14 @@ export class Arena {
         this.pontos += 120;
         som?.pegar();
         this.bracoAlto = 1;
+        this.r3d?.gesto("agree", 1.1);
         this.particulasEm(i.x, i.y - 20, "#fde047", 10, 90);
         this.mostrar("Breve coletado!", 1.2);
         break;
       case "coord": {
         if (this.breves === 0) {
           som?.erro();
+          this.r3d?.gesto("headShake", 1.1);
           this.mostrar("Você não está com nenhum breve!", 1.6);
           return;
         }
@@ -1363,6 +1442,7 @@ export class Arena {
         this.tarefasFeitas.add(i.id);
         this.pontos += 250;
         this.bracoAlto = 1;
+        this.r3d?.gesto("agree", 1.1);
         if (i.id === "agua") som?.agua();
         else som?.entregar();
         this.mostrar(
@@ -1494,7 +1574,74 @@ export class Arena {
 
   // ---------------------------------------------------------------- desenho
 
+  private interativoUtil(i: Interativo): { util: boolean; bloqueado: boolean } {
+    const bloqueado = !!i.requer && !i.requer.every((r) => this.tarefasFeitas.has(r));
+    const util =
+      i.tipo === "breve" ||
+      i.tipo === "cafe" ||
+      i.tipo === "tarefa" ||
+      (i.tipo === "balcao" && this.carga < this.cap) ||
+      (i.tipo === "porta" && this.carga > 0) ||
+      (i.tipo === "coord" && this.breves > 0);
+    return { util, bloqueado };
+  }
+
+  private estado3d(): EstadoCena {
+    return {
+      t: this.t,
+      dt: this.dtQuadro,
+      jogador: {
+        x: this.px,
+        y: this.py,
+        vx: this.vx,
+        vy: this.vy,
+        correndo: this.entrada.correr && this.folego > 0.04 && Math.hypot(this.vx, this.vy) > 60,
+        atordoado: this.atordoado > 0,
+        carga:
+          this.op.missao === "marmitas"
+            ? this.carga
+            : this.op.missao === "breves"
+              ? this.breves
+              : 0,
+        item:
+          this.op.missao === "marmitas" ? "marmita" : this.op.missao === "breves" ? "breve" : null,
+        buff: this.buff > 0,
+      },
+      cachorros: this.cachorros.map((d) => ({
+        x: d.x,
+        y: d.y,
+        vx: d.vx,
+        vy: d.vy,
+        fase: d.fase,
+        susto: d.susto,
+        visivel: !d.capturado && !d.entrou && this.t >= d.ativoEm,
+        cor: d.cor,
+      })),
+      patrulhas: this.patrulhas.map((p) => ({
+        tipo: p.tipo,
+        x: p.x,
+        y: p.y,
+        dir: p.dir,
+        parado: p.espera > 0,
+        vel: p.vel,
+        cor: p.cor,
+      })),
+      interativos: this.mundo.interativos.map((i) => ({
+        id: i.id,
+        tipo: i.tipo,
+        x: i.x,
+        y: i.y,
+        ativo: i.ativo,
+        ...this.interativoUtil(i),
+      })),
+    };
+  }
+
   private desenhar() {
+    if (this.r3d) {
+      this.r3d.desenhar(this.estado3d());
+      return;
+    }
     const c = this.ctx;
     const m = this.mundo;
     c.clearRect(0, 0, VIEW_W, VIEW_H);

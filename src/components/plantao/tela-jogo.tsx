@@ -239,15 +239,28 @@ export function TelaArena({
   const minimapa = useRef<HTMLCanvasElement>(null);
   const avatar = useRef<HTMLCanvasElement>(null);
   const motor = useRef<Arena | null>(null);
-  const entrada = useRef<EntradaArena>({ dx: 0, dy: 0, correr: false, interagir: false });
+  const entrada = useRef<EntradaArena>({
+    dx: 0,
+    dy: 0,
+    correr: false,
+    interagir: false,
+    pular: false,
+  });
   const stick = useRef({ dx: 0, dy: 0 });
   const [fase, setFase] = useState<"briefing" | "jogando" | "pausa">("briefing");
   const [hud, setHud] = useState<HudArena>(HUD_VAZIO);
   const [somOn, setSomOn] = useState(true);
+  const [pronto, setPronto] = useState(false);
   const { toque } = useAparelho();
   const meta = missao.meta[nivel - 1]!;
   const tempoTotal = missao.tempo[nivel - 1]!;
   const teclas = useRef({ w: false, a: false, s: false, d: false });
+
+  // O modelo 3D dos personagens já começa a baixar durante a preparação da missão.
+  useEffect(() => {
+    if (missao.id === "moto" || missao.id === "maratona") return;
+    void import("@/components/plantao/personagem3d").then((m) => m.carregarModeloBase());
+  }, [missao.id]);
 
   // Motor
   useEffect(() => {
@@ -266,6 +279,9 @@ export function TelaArena({
       tempoTotal,
       meta,
       aoHud: setHud,
+      modo3d: true,
+      leve: toque,
+      aoPronto: () => setPronto(true),
       aoFim,
     });
     a.entrada = entrada.current;
@@ -273,7 +289,7 @@ export function TelaArena({
     // Gancho só para depuração no ambiente de desenvolvimento.
     if (import.meta.env.DEV) (window as unknown as { __arena?: Arena }).__arena = a;
     a.iniciar();
-  }, [fase, missao, personagem, nivel, clima, som, imagens, tempoTotal, meta, aoFim]);
+  }, [fase, missao, personagem, nivel, clima, som, imagens, tempoTotal, meta, aoFim, toque]);
   useEffect(
     () => () => {
       motor.current?.parar();
@@ -311,7 +327,10 @@ export function TelaArena({
         t[mapa[k]!] = true;
         e.preventDefault();
       } else if (e.key === "Shift") entrada.current.correr = true;
-      else if (k === "e" || e.key === " " || e.key === "Enter") {
+      else if (e.key === " ") {
+        entrada.current.pular = true;
+        e.preventDefault();
+      } else if (k === "e" || e.key === "Enter") {
         entrada.current.interagir = true;
         e.preventDefault();
       } else if (e.key === "Escape" || k === "p") setFase("pausa");
@@ -361,6 +380,14 @@ export function TelaArena({
             Correr
           </BotaoToque>
           <BotaoToque
+            rotulo="Pular"
+            aoApertar={() => (entrada.current.pular = true)}
+            className="size-16"
+          >
+            <ChevronsUp className="size-5" />
+            Pular
+          </BotaoToque>
+          <BotaoToque
             rotulo="Interagir"
             aoApertar={() => (entrada.current.interagir = true)}
             className="size-20 border-amber-300/70 bg-amber-500/40"
@@ -380,6 +407,13 @@ export function TelaArena({
   return (
     <Palco esquerda={controles.esquerda} direita={controles.direita}>
       <canvas ref={canvas} className="block size-full" aria-label={`Missão: ${missao.titulo}`} />
+
+      {fase === "jogando" && !pronto && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-slate-950 text-white">
+          <div className="size-9 animate-spin rounded-full border-4 border-amber-300 border-t-transparent" />
+          <p className="text-sm font-bold uppercase tracking-wider">Montando o cenário 3D…</p>
+        </div>
+      )}
 
       {hud && fase !== "briefing" && (
         <>
