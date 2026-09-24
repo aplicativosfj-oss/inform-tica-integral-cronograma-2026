@@ -1,4 +1,4 @@
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft, Play, Volume2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -39,6 +39,8 @@ interface Props {
   /** Texto do tutor na tela de abertura. */
   abertura?: string;
   cenario?: string;
+  /** Narra letras, sílabas e palavras em português. */
+  voz?: boolean;
   aoConcluir: (r: ResultadoFase) => void;
   aoSair: () => void;
 }
@@ -62,6 +64,7 @@ export function PraticaDigitacao({
   robo,
   abertura,
   cenario,
+  voz,
   aoConcluir,
   aoSair,
 }: Props) {
@@ -84,6 +87,20 @@ export function PraticaDigitacao({
   const total = prompts.reduce((s, p) => s + p.alvo.length, 0);
   const atual = prompts[idx];
   const alvoAtual = atual?.alvo ?? "";
+
+  const falar = useCallback((texto: string) => {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const fala = new SpeechSynthesisUtterance(texto);
+    fala.lang = "pt-BR";
+    fala.rate = 0.82;
+    fala.pitch = 1.04;
+    const brasileira = window.speechSynthesis
+      .getVoices()
+      .find((v) => v.lang.toLowerCase().startsWith("pt-br"));
+    if (brasileira) fala.voice = brasileira;
+    window.speechSynthesis.speak(fala);
+  }, []);
 
   const mostrarAviso = useCallback(
     (texto: string, humor: "feliz" | "animado" | "triste", ms: number) => {
@@ -116,6 +133,11 @@ export function PraticaDigitacao({
   useEffect(() => {
     if (fase === "jogando") entrada.current?.focus();
   }, [fase, idx]);
+
+  useEffect(() => {
+    if (fase !== "jogando" || !voz || !atual) return;
+    falar(atual.fala ?? `Digite ${atual.alvo}`);
+  }, [atual, fase, falar, idx, voz]);
 
   const tecla = useCallback(
     (c: string) => {
@@ -199,7 +221,7 @@ export function PraticaDigitacao({
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl border border-white/10 bg-slate-950 text-white"
+      className="relative min-h-full overflow-hidden border border-white/10 bg-slate-950 text-white sm:rounded-xl"
       onClick={() => entrada.current?.focus()}
     >
       {cenario && (
@@ -212,7 +234,7 @@ export function PraticaDigitacao({
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,transparent_0%,rgba(2,6,23,.12)_50%,rgba(2,6,23,.78)_100%)]" />
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/15 via-slate-950/35 to-slate-950/80" />
 
-      <div className="relative mx-auto flex max-w-4xl flex-col gap-2 p-2 sm:p-3">
+      <div className="relative mx-auto flex min-h-full max-w-6xl flex-col gap-2 p-2 sm:p-4">
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
@@ -333,9 +355,23 @@ export function PraticaDigitacao({
 
             <TutorFala compacto texto={fala.texto} humor={fala.humor} />
 
+            {voz && atual && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  falar(atual.fala ?? `Digite ${atual.alvo}`);
+                  entrada.current?.focus();
+                }}
+                className="mx-auto flex h-10 items-center gap-2 rounded-full border border-cyan-300/30 bg-cyan-400/15 px-4 text-xs font-bold text-cyan-100 shadow-lg shadow-cyan-950/40 hover:bg-cyan-400/25"
+              >
+                <Volume2 className="size-4" /> Ouvir novamente
+              </button>
+            )}
+
             <div className="grid items-center gap-2 sm:grid-cols-[1fr_200px]">
               <Teclado alvo={proximo} erro={erroTecla} {...(foco !== undefined ? { foco } : {})} />
-              <div className="overflow-hidden rounded-xl border border-sky-300/20 bg-slate-950/85 text-center shadow-xl shadow-slate-950/60">
+              <div className="hidden overflow-hidden rounded-xl border border-sky-300/20 bg-slate-950/85 text-center shadow-xl shadow-slate-950/60 sm:block">
                 <p className="border-b border-white/10 bg-slate-900/90 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sky-200">
                   {dedo === null
                     ? "Mãos na posição inicial"

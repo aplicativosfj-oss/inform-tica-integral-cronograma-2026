@@ -11,6 +11,7 @@ import {
   Star,
   Swords,
   Trophy,
+  Volume2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -18,6 +19,7 @@ import {
   BLOCOS,
   CENARIOS,
   COR_DEDO,
+  alfabetizacaoSonora,
   desafioDaSerie,
   fasesDaSerie,
   LICOES,
@@ -65,6 +67,7 @@ interface Sessao {
   foco?: string;
   abertura?: string;
   robo?: number;
+  voz?: boolean;
   cenario: string;
   chave: number;
 }
@@ -418,6 +421,18 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
     });
   };
 
+  const iniciarAlfabetizacao = () =>
+    iniciar({
+      tipo: "licao",
+      id: "alfabetizacao-sonora",
+      titulo: "Alfabetização com voz",
+      prompts: alfabetizacaoSonora(),
+      modo: "alvo",
+      voz: true,
+      abertura:
+        "Escute com atenção, observe a letra ou a figura e digite. Você pode repetir o som quantas vezes quiser!",
+    });
+
   const aoConcluir = useCallback(
     (r: ResultadoFase) => {
       if (!sess) return;
@@ -476,6 +491,7 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
         {...(sess.robo !== undefined ? { robo: sess.robo } : {})}
         {...(sess.abertura !== undefined ? { abertura: sess.abertura } : {})}
         cenario={sess.cenario}
+        {...(sess.voz !== undefined ? { voz: sess.voz } : {})}
         aoConcluir={aoConcluir}
         aoSair={() =>
           setTela(sess.tipo === "licao" ? "licoes" : sess.tipo === "fase" ? "fases" : "home")
@@ -741,6 +757,13 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
       acao: () => setTela("fases"),
     },
     {
+      icone: Volume2,
+      cor: "from-fuchsia-500 to-purple-700",
+      titulo: "Alfabetização com voz",
+      desc: "Ouça letras, sílabas e palavras; observe a figura e digite no teclado.",
+      acao: iniciarAlfabetizacao,
+    },
+    {
       icone: Swords,
       cor: "from-rose-500 to-orange-600",
       titulo: "Desafio contra o robô",
@@ -805,7 +828,7 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
           </p>
         )}
 
-        <div className="mt-auto grid gap-2 sm:grid-cols-2">
+        <div className="mt-auto grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {cartoes.map((c) => (
             <button
               key={c.titulo}

@@ -88,6 +88,26 @@ export interface Prompt {
   /** Chave de uma figura do Parque das Letras. */
   figura?: string;
   legenda?: string;
+  /** Texto pronunciado pelo tutor nas atividades sonoras. */
+  fala?: string;
+}
+
+/** Sequência curta de alfabetização que combina som, letra, figura e digitação. */
+export function alfabetizacaoSonora(): Prompt[] {
+  const vogais: Prompt[] = ["A", "E", "I", "O", "U"].map((alvo) => ({
+    alvo,
+    legenda: `Esta é a letra ${alvo}`,
+    fala: `Letra ${alvo}. Ouça e digite ${alvo}.`,
+  }));
+  const palavras = PALAVRAS.filter((p) => p.texto.length <= 6)
+    .slice(0, 7)
+    .map((p) => ({
+      alvo: p.texto,
+      figura: p.figura,
+      legenda: p.silabas.join(" · "),
+      fala: `Ouça a palavra: ${p.texto}. ${p.silabas.join(", ")}. Agora digite ${p.texto}.`,
+    }));
+  return [...vogais, ...palavras];
 }
 
 const emb = <T>(l: T[]): T[] => {
