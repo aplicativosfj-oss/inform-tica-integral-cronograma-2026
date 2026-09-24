@@ -158,9 +158,40 @@ function montarDiario(
     );
     const aulas: Assignment[] = nextAssignmentsForDay([...reposicoes, ...semana], dia);
 
-    const doDia: Registro[] = aulas.map((a) => {
+    const doDia: Registro[] = aulas.flatMap((a): Registro[] => {
       const chave = suspensaoKey(dataKey, a.dia, a.slot.inicio);
       const ehReposicao = reposicoes.includes(a);
+
+      // Horário misto em que as turmas vieram e a chamada foi registrada: cada
+      // turma aparece como uma aula normal, com as suas próprias presenças, em
+      // vez de uma linha "Horário misto" sem contagem.
+      if (a.misto && !config.suspensoes?.[chave]) {
+        const porTurma = a.misto
+          .map((m) => ({
+            turma: m.turma,
+            reg: registros.filter((r) => r.turmaId === m.turma.id && r.data === dataKey),
+          }))
+          .filter((x) => x.reg.length > 0);
+        if (porTurma.length > 0) {
+          const emAndamento =
+            dataKey === hojeKey && a.slot.inicio <= agoraHHMM && agoraHHMM < a.slot.fim;
+          return porTurma.map(({ turma, reg }) => {
+            const faltasTurma = reg.filter((p) => p.status === "faltou").length;
+            return {
+              chave: `${chave}|${turma.id}`,
+              inicio: a.slot.inicio,
+              fim: a.slot.fim,
+              turmaNome: nome(turma),
+              situacao: emAndamento ? "andamento" : "realizada",
+              detalhes: [],
+              observacao: undefined,
+              presentes: reg.length - faltasTurma,
+              faltas: faltasTurma,
+              substituicoes: reg.filter((p) => p.status === "substituido").length,
+            };
+          });
+        }
+      }
       const turmaNome = a.misto
         ? `Horário misto (${a.misto.map((x) => nome(x.turma)).join(", ")})`
         : nome(a.turma);
@@ -229,18 +260,20 @@ function montarDiario(
         );
       }
 
-      return {
-        chave,
-        inicio: a.slot.inicio,
-        fim: a.slot.fim,
-        turmaNome,
-        situacao,
-        detalhes,
-        observacao: config.observacoesAula?.[chave],
-        presentes,
-        faltas,
-        substituicoes,
-      };
+      return [
+        {
+          chave,
+          inicio: a.slot.inicio,
+          fim: a.slot.fim,
+          turmaNome,
+          situacao,
+          detalhes,
+          observacao: config.observacoesAula?.[chave],
+          presentes,
+          faltas,
+          substituicoes,
+        },
+      ];
     });
 
     if (doDia.length > 0) dias.push({ dataKey, data, registros: doDia });
