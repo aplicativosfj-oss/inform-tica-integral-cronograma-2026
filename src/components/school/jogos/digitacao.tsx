@@ -44,6 +44,7 @@ import { lerAlunoSessao } from "@/lib/aluno-session";
 import { useAppStore } from "@/lib/app-store";
 import type { Adversario } from "@/lib/estrelas";
 import { fetchRanking, type Placar } from "@/lib/placares";
+import { IMAGENS_DIGITACAO, precarregar } from "@/lib/precarregar";
 import { cn } from "@/lib/utils";
 
 /**
@@ -91,7 +92,7 @@ function Estrelas({ n, tamanho = "size-4" }: { n: number; tamanho?: string }) {
       {[1, 2, 3].map((i) => (
         <img
           key={i}
-          src="/images/jogos/estrela-ouro.png"
+          src="/images/jogos/estrela-ouro.webp"
           alt=""
           className={cn(tamanho, "object-contain", i > n && "opacity-25 grayscale")}
         />
@@ -111,7 +112,7 @@ function Trofeu({ estrelas, ganhou }: { estrelas: number; ganhou: boolean }) {
         : "trofeu-bronze";
   return (
     <img
-      src={`/images/jogos/${arquivo}.png`}
+      src={`/images/jogos/${arquivo}.webp`}
       alt=""
       className={cn("size-20 object-contain drop-shadow-lg", !ganhou && "opacity-40 grayscale")}
     />
@@ -364,6 +365,9 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
   const [prog, setProg] = useState<Progresso>(() => lerProgresso());
   const [sess, setSess] = useState<Sessao | null>(null);
   const [fim, setFim] = useState<Fechamento | null>(null);
+
+  // Imagens já baixadas e decodificadas antes de a criança precisar delas.
+  useEffect(() => precarregar(IMAGENS_DIGITACAO), []);
 
   const primeiroNome = sessao?.nome.split(" ")[0];
   const fases = useMemo(() => fasesDaSerie(serie), [serie]);

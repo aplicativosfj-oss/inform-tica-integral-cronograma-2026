@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import {
   base,
   COR_DEDO,
@@ -31,7 +33,7 @@ interface TecladoProps {
 
 const RELEVO = new Set(["f", "j"]);
 
-export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
+export const Teclado = memo(function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
   const alvoBase = alvo ? base(alvo) : null;
   return (
     <div
@@ -61,7 +63,10 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
                     : erro === k
                       ? "border-red-300 bg-red-500/70 text-white"
                       : "border-white/10 text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_3px_0_rgba(0,0,0,.55)]",
-                  !ehAlvo && erro !== k && !cores && !noFoco &&
+                  !ehAlvo &&
+                    erro !== k &&
+                    !cores &&
+                    !noFoco &&
                     "bg-gradient-to-b from-slate-700/90 to-slate-900",
                 )}
                 style={
@@ -111,7 +116,7 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
       </div>
     </div>
   );
-}
+});
 
 // -------------------------------------------------------------------- mãos
 
@@ -201,101 +206,104 @@ function Dedo({
   );
 }
 
-export function Maos({ ativos, className }: { ativos: number[]; className?: string }) {
-  const aceso = (id: number) => ativos.includes(id);
-  return (
-    <svg
-      viewBox="0 0 400 176"
-      className={cn("w-full", className)}
-      role="img"
-      aria-label={
-        ativos.length
-          ? `Mãos sobre o teclado. Use o dedo: ${ativos.map((d) => NOME_DEDO[d]).join(", ")}.`
-          : "Mãos sobre o teclado"
-      }
-    >
-      <defs>
-        <linearGradient id="maos-pele" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#f8d6b8" />
-          <stop offset="0.55" stopColor="#efbd98" />
-          <stop offset="1" stopColor="#d99a72" />
-        </linearGradient>
-        <linearGradient id="maos-palma" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#efbd98" />
-          <stop offset="1" stopColor="#d08d66" />
-        </linearGradient>
-        <linearGradient id="maos-manga" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#3b82f6" />
-          <stop offset="1" stopColor="#1e3a8a" />
-        </linearGradient>
-      </defs>
-      {/* antebraços e mangas */}
-      {[74, 254].map((x0) => (
-        <g key={x0}>
-          <rect x={x0} y={140} width={72} height={36} fill="url(#maos-palma)" />
-          <rect x={x0 - 6} y={158} width={84} height={18} rx={6} fill="url(#maos-manga)" />
-        </g>
-      ))}
-      {/* palmas */}
-      <rect
-        x={24}
-        y={TOPO_PALMA - 6}
-        width={172}
-        height={66}
-        rx={30}
-        fill="url(#maos-palma)"
-        stroke="#b8825c"
-        strokeWidth={1}
-      />
-      <rect
-        x={204}
-        y={TOPO_PALMA - 6}
-        width={172}
-        height={66}
-        rx={30}
-        fill="url(#maos-palma)"
-        stroke="#b8825c"
-        strokeWidth={1}
-      />
-      {DEDOS.map((d) => (
-        <Dedo key={d.id} {...d} on={aceso(d.id)} />
-      ))}
-      {/* polegares */}
-      {[
-        { id: 4, x: 214, r: 32 },
-        { id: 5, x: 186, r: -32 },
-      ].map((t) => {
-        const on = aceso(t.id);
-        return (
-          <g
-            key={t.id}
-            transform={`rotate(${t.r} ${t.x} 132)`}
-            style={on ? { filter: "drop-shadow(0 0 7px #38bdf8)" } : undefined}
-          >
-            <rect
-              x={t.x - 16}
-              y={108}
-              width={32}
-              height={58}
-              rx={16}
-              fill={on ? "#38bdf8" : "url(#maos-pele)"}
-              stroke={on ? "#fff" : "#b8825c"}
-              strokeWidth={on ? 2.5 : 1}
-            />
-            <rect
-              x={t.x - 12}
-              y={112}
-              width={24}
-              height={13}
-              rx={6}
-              fill={on ? "#fff" : "#fbe3dc"}
-            />
+export const Maos = memo(
+  function Maos({ ativos, className }: { ativos: number[]; className?: string }) {
+    const aceso = (id: number) => ativos.includes(id);
+    return (
+      <svg
+        viewBox="0 0 400 176"
+        className={cn("w-full", className)}
+        role="img"
+        aria-label={
+          ativos.length
+            ? `Mãos sobre o teclado. Use o dedo: ${ativos.map((d) => NOME_DEDO[d]).join(", ")}.`
+            : "Mãos sobre o teclado"
+        }
+      >
+        <defs>
+          <linearGradient id="maos-pele" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#f8d6b8" />
+            <stop offset="0.55" stopColor="#efbd98" />
+            <stop offset="1" stopColor="#d99a72" />
+          </linearGradient>
+          <linearGradient id="maos-palma" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#efbd98" />
+            <stop offset="1" stopColor="#d08d66" />
+          </linearGradient>
+          <linearGradient id="maos-manga" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#3b82f6" />
+            <stop offset="1" stopColor="#1e3a8a" />
+          </linearGradient>
+        </defs>
+        {/* antebraços e mangas */}
+        {[74, 254].map((x0) => (
+          <g key={x0}>
+            <rect x={x0} y={140} width={72} height={36} fill="url(#maos-palma)" />
+            <rect x={x0 - 6} y={158} width={84} height={18} rx={6} fill="url(#maos-manga)" />
           </g>
-        );
-      })}
-    </svg>
-  );
-}
+        ))}
+        {/* palmas */}
+        <rect
+          x={24}
+          y={TOPO_PALMA - 6}
+          width={172}
+          height={66}
+          rx={30}
+          fill="url(#maos-palma)"
+          stroke="#b8825c"
+          strokeWidth={1}
+        />
+        <rect
+          x={204}
+          y={TOPO_PALMA - 6}
+          width={172}
+          height={66}
+          rx={30}
+          fill="url(#maos-palma)"
+          stroke="#b8825c"
+          strokeWidth={1}
+        />
+        {DEDOS.map((d) => (
+          <Dedo key={d.id} {...d} on={aceso(d.id)} />
+        ))}
+        {/* polegares */}
+        {[
+          { id: 4, x: 214, r: 32 },
+          { id: 5, x: 186, r: -32 },
+        ].map((t) => {
+          const on = aceso(t.id);
+          return (
+            <g
+              key={t.id}
+              transform={`rotate(${t.r} ${t.x} 132)`}
+              style={on ? { filter: "drop-shadow(0 0 7px #38bdf8)" } : undefined}
+            >
+              <rect
+                x={t.x - 16}
+                y={108}
+                width={32}
+                height={58}
+                rx={16}
+                fill={on ? "#38bdf8" : "url(#maos-pele)"}
+                stroke={on ? "#fff" : "#b8825c"}
+                strokeWidth={on ? 2.5 : 1}
+              />
+              <rect
+                x={t.x - 12}
+                y={112}
+                width={24}
+                height={13}
+                rx={6}
+                fill={on ? "#fff" : "#fbe3dc"}
+              />
+            </g>
+          );
+        })}
+      </svg>
+    );
+  },
+  (a, b) => a.className === b.className && a.ativos.join() === b.ativos.join(),
+);
 
 // ------------------------------------------------------------------- tutor
 

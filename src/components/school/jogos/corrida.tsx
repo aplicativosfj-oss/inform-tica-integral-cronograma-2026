@@ -24,6 +24,7 @@ import {
 } from "@/components/school/jogos/corrida-motor";
 import { SomCorrida } from "@/components/school/jogos/corrida-som";
 import { registrarPartida, type Adversario } from "@/lib/estrelas";
+import { IMAGENS_CORRIDA, precarregar } from "@/lib/precarregar";
 import { cn } from "@/lib/utils";
 
 /**
@@ -263,6 +264,8 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
   });
   const autoRef = useRef(true);
   autoRef.current = auto;
+
+  useEffect(() => precarregar(IMAGENS_CORRIDA), []);
 
   const cor = CARROS[carro]!.cor;
 
@@ -861,7 +864,7 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm">
               <div className="flex w-full max-w-sm flex-col items-center gap-2 rounded-2xl border border-white/15 bg-slate-900 p-4 text-center text-white shadow-2xl">
                 <img
-                  src={`/images/jogos/trofeu-${fim.posicao === 1 ? "ouro" : fim.posicao === 2 ? "prata" : "bronze"}.png`}
+                  src={`/images/jogos/trofeu-${fim.posicao === 1 ? "ouro" : fim.posicao === 2 ? "prata" : "bronze"}.webp`}
                   alt=""
                   className={cn(
                     "size-16 object-contain drop-shadow-lg",

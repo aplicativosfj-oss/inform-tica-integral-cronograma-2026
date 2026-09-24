@@ -1,0 +1,7 @@
+# Imagens dos jogos: o navegador guarda por uma semana e não pede de novo a cada visita.
+# (Sem o cache, cada partida rebaixaria capas, fundos e troféus.)
+/images/jogos/*
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+/og/*
+  Cache-Control: public, max-age=86400

@@ -67,6 +67,44 @@ function tamanhoAlvo(t: string): string {
   return "text-lg sm:text-xl";
 }
 
+/** Cronômetro com o próprio intervalo — só ele re-renderiza a cada tique, não a tela inteira. */
+function Cronometro({ inicio }: { inicio: React.RefObject<number> }) {
+  const [s, setS] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => setS((Date.now() - inicio.current) / 1000), 250);
+    return () => window.clearInterval(t);
+  }, [inicio]);
+  return <>{relogio(s)}</>;
+}
+
+/** Barra do robô adversário, com o próprio intervalo. */
+function BarraRobo({
+  inicio,
+  robo,
+  total,
+}: {
+  inicio: React.RefObject<number>;
+  robo: number;
+  total: number;
+}) {
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => {
+      const s = (Date.now() - inicio.current) / 1000;
+      setP(total ? Math.min(1, (s * ((robo * 5) / 60)) / total) : 0);
+    }, 200);
+    return () => window.clearInterval(t);
+  }, [inicio, robo, total]);
+  return (
+    <div className="h-1 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/10">
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400 transition-[width] duration-200"
+        style={{ width: `${p * 100}%` }}
+      />
+    </div>
+  );
+}
+
 function relogio(s: number): string {
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 }
@@ -93,7 +131,6 @@ export function PraticaDigitacao({
     texto: string;
     humor: "feliz" | "animado" | "triste";
   } | null>(null);
-  const [decorrido, setDecorrido] = useState(0);
   const inicio = useRef(0);
   const entrada = useRef<HTMLInputElement>(null);
   const timerAviso = useRef<number | undefined>(undefined);
@@ -134,16 +171,9 @@ export function PraticaDigitacao({
     setPos(0);
     setErros(0);
     setAcertos(0);
-    setDecorrido(0);
     inicio.current = Date.now();
     setFase("jogando");
   };
-
-  useEffect(() => {
-    if (fase !== "jogando") return;
-    const t = window.setInterval(() => setDecorrido((Date.now() - inicio.current) / 1000), 200);
-    return () => window.clearInterval(t);
-  }, [fase]);
 
   useEffect(() => {
     if (fase === "jogando") entrada.current?.focus();
@@ -224,7 +254,6 @@ export function PraticaDigitacao({
   const dedo = proximo ? dedoDe(proximo) : null;
   const feitos = prompts.slice(0, idx).reduce((s, p) => s + p.alvo.length, 0) + pos;
   const progresso = total ? feitos / total : 0;
-  const progressoRobo = robo && total ? Math.min(1, (decorrido * ((robo * 5) / 60)) / total) : 0;
 
   const dicaPadrao =
     proximo && proximo !== " " && foco !== undefined
@@ -300,14 +329,7 @@ export function PraticaDigitacao({
                   style={{ width: `${progresso * 100}%` }}
                 />
               </div>
-              {robo ? (
-                <div className="h-1 overflow-hidden rounded-full bg-slate-900/80 ring-1 ring-white/10">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400 transition-[width] duration-200"
-                    style={{ width: `${progressoRobo * 100}%` }}
-                  />
-                </div>
-              ) : null}
+              {robo ? <BarraRobo inicio={inicio} robo={robo} total={total} /> : null}
             </div>
 
             <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
@@ -351,11 +373,13 @@ export function PraticaDigitacao({
               </div>
 
               <div className="grid grid-cols-3 gap-1.5 sm:w-24 sm:grid-cols-1">
-                {[
-                  ["Tempo", relogio(decorrido)],
-                  ["Erros", String(erros)],
-                  ["Acertos", String(acertos)],
-                ].map(([r, val]) => (
+                {(
+                  [
+                    ["Tempo", <Cronometro inicio={inicio} />],
+                    ["Erros", String(erros)],
+                    ["Acertos", String(acertos)],
+                  ] as [string, React.ReactNode][]
+                ).map(([r, val]) => (
                   <div
                     key={r}
                     className="flex items-center justify-between gap-1 rounded-lg border border-sky-400/40 bg-slate-900/80 px-2 py-1"

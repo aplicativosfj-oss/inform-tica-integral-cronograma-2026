@@ -14,6 +14,7 @@ import { TabuleiroMatematica } from "@/components/school/jogos/tabuleiro-matemat
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import { lerCarteira, somarPorAluno, type Adversario, type LinhaRanking } from "@/lib/estrelas";
 import { fetchRanking } from "@/lib/placares";
+import { IMAGENS_CORRIDA, IMAGENS_DIGITACAO, precarregar } from "@/lib/precarregar";
 import { cn } from "@/lib/utils";
 
 /**
@@ -182,6 +183,13 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
   const [cheia, setCheia] = useState(false);
   const [carteira, setCarteira] = useState(() => lerCarteira());
   const sessao = lerAlunoSessao();
+
+  // Assim que a Sala abre, as imagens dos jogos já começam a baixar (digitação primeiro).
+  useEffect(() => {
+    precarregar(IMAGENS_DIGITACAO);
+    const t = window.setTimeout(() => precarregar(IMAGENS_CORRIDA), 600);
+    return () => window.clearTimeout(t);
+  }, []);
 
   // Ao voltar de uma partida, as estrelas novas já aparecem no topo.
   useEffect(() => {
