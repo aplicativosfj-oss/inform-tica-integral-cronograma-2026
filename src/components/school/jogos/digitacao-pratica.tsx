@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   base,
+  COR_DEDO,
   dedoDe,
   NOME_DEDO,
   teclaDe,
@@ -27,6 +28,20 @@ import { cn } from "@/lib/utils";
  */
 
 const ELOGIOS = ["Muito bem!", "Isso mesmo!", "Perfeito!", "Boa!", "Você está craque!"];
+
+/** Posição percentual de cada ponta de dedo na ilustração profissional. */
+const PONTA_DEDO: Record<number, { x: number; y: number }> = {
+  0: { x: 23, y: 27 },
+  1: { x: 31, y: 24 },
+  2: { x: 38, y: 23 },
+  3: { x: 44, y: 27 },
+  4: { x: 47, y: 54 },
+  5: { x: 53, y: 54 },
+  6: { x: 57, y: 27 },
+  7: { x: 64, y: 23 },
+  8: { x: 72, y: 24 },
+  9: { x: 79, y: 28 },
+};
 
 interface Props {
   titulo: string;
@@ -371,17 +386,34 @@ export function PraticaDigitacao({
 
             <div className="grid items-center gap-2 sm:grid-cols-[1fr_200px]">
               <Teclado alvo={proximo} erro={erroTecla} {...(foco !== undefined ? { foco } : {})} />
-              <div className="hidden overflow-hidden rounded-xl border border-sky-300/20 bg-slate-950/85 text-center shadow-xl shadow-slate-950/60 sm:block">
+              <div className="overflow-hidden rounded-xl border border-sky-300/20 bg-slate-950/85 text-center shadow-xl shadow-slate-950/60">
                 <p className="border-b border-white/10 bg-slate-900/90 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sky-200">
                   {dedo === null
                     ? "Mãos na posição inicial"
                     : `${dedo <= 4 ? "Mão esquerda" : "Mão direita"} · ${NOME_DEDO[dedo]}`}
                 </p>
-                <img
-                  src="/images/jogos/digitacao-maos-didaticas-pro.webp"
-                  alt="Duas mãos posicionadas corretamente para digitação"
-                  className="aspect-video w-full object-cover"
-                />
+                <div className="relative">
+                  <img
+                    src="/images/jogos/digitacao-maos-didaticas-pro.webp"
+                    alt="Duas mãos posicionadas corretamente para digitação"
+                    className="aspect-video w-full object-cover"
+                  />
+                  {dedo !== null && PONTA_DEDO[dedo] && (
+                    <span
+                      className="pointer-events-none absolute size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_18px_currentColor]"
+                      style={{
+                        left: `${PONTA_DEDO[dedo].x}%`,
+                        top: `${PONTA_DEDO[dedo].y}%`,
+                        color: COR_DEDO[dedo],
+                        background: `${COR_DEDO[dedo]}cc`,
+                      }}
+                      aria-hidden
+                    >
+                      <span className="absolute inset-0 animate-ping rounded-full bg-current opacity-60" />
+                      <span className="absolute inset-[5px] rounded-full bg-white" />
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
