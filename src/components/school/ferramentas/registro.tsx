@@ -1,5 +1,6 @@
 import {
   Baby,
+  BookOpenCheck,
   BookMarked,
   BookOpenText,
   Blocks,
@@ -37,6 +38,7 @@ import type { ComponentType } from "react";
 
 import { AcervoLeitura } from "@/components/school/ferramentas/acervo-leitura";
 import { Alfabetizacao } from "@/components/school/ferramentas/alfabetizacao";
+import { CentralAlfabetizacao } from "@/components/school/ferramentas/central-alfabetizacao";
 import { AtividadesLP } from "@/components/school/ferramentas/atividades-lp";
 import { CalculadoraJanela } from "@/components/school/ferramentas/calculadora-flutuante";
 import { DatasComemorativas } from "@/components/school/ferramentas/datas-comemorativas";
@@ -335,6 +337,16 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     Componente: Geometria,
   },
   {
+    slug: "central-alfabetizacao",
+    serieMinima: 1,
+    titulo: "Central de Alfabetização",
+    descricao: "65 missões com áudio e progressão do 1º ao 5º ano.",
+    categoria: "Alfabetização e Leitura",
+    icon: BookOpenCheck,
+    cor: "bg-violet-500/10 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
+    Componente: CentralAlfabetizacao,
+  },
+  {
     slug: "alfabetizacao",
     serieMinima: 1,
     titulo: "Alfabetização",
@@ -398,7 +410,8 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     slug: "sala-de-jogos",
     titulo: "Sala de Jogos",
     serieMinima: 1,
-    descricao: "Damas, dominó, velha, memória, quebra-cabeça, tabuleiro de matemática, digitação, corrida, Jogo da Onça e Operação: Plantão.",
+    descricao:
+      "Damas, dominó, velha, memória, quebra-cabeça, tabuleiro de matemática, digitação, corrida, Jogo da Onça e Operação: Plantão.",
     categoria: "Ferramentas",
     icon: Dices,
     cor: "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",

@@ -35,6 +35,7 @@ export const FERRAMENTAS_PUBLICAS = [
   "jogo-numeros",
   "producao-textual",
   "generos-textuais",
+  "central-alfabetizacao",
   "parque-letras",
   "sala-de-jogos",
 ] as const;
