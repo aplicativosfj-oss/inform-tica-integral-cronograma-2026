@@ -30,6 +30,8 @@ export interface Personagem {
   sprite: string;
   /** Fração da altura da figura que não existe no recorte e é desenhada em código (pernas). */
   pernas: number;
+  /** Altura (0 a 1, do topo) onde a figura se divide em tronco e pernas para animar a caminhada; 0 = sem divisão. */
+  cintura: number;
   /** Cores do uniforme, usadas para desenhar o corpo do personagem em jogo. */
   camisa: string;
   calca: string;
@@ -55,6 +57,7 @@ export const PERSONAGENS: Personagem[] = [
     arte: "arte-valentao.webp",
     sprite: "sprite-valentao.webp",
     pernas: 0,
+    cintura: 0.5,
     camisa: "#1e2a6b",
     calca: "#c2a878",
     bota: "#141414",
@@ -80,6 +83,7 @@ export const PERSONAGENS: Personagem[] = [
     arte: "arte-franc.webp",
     sprite: "sprite-franc.webp",
     pernas: 0,
+    cintura: 0.5,
     camisa: "#1b2559",
     calca: "#27406e",
     bota: "#111111",
@@ -105,6 +109,7 @@ export const PERSONAGENS: Personagem[] = [
     arte: "arte-santos.webp",
     sprite: "sprite-santos.webp",
     pernas: 0.3,
+    cintura: 0,
     camisa: "#161616",
     calca: "#b8974a",
     bota: "#2a2a2a",

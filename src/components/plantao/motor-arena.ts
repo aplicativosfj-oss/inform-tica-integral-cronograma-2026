@@ -1679,6 +1679,7 @@ export class Arena {
         correndo: false,
         parado,
         carga: 0,
+        cintura: escolha % SPRITES_NPC.length === 2 ? 0 : 0.5,
       });
     } else {
       desenharNpc(c, p.x, p.y, p.cor, p.dir, p.fase);

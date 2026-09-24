@@ -69,6 +69,8 @@ export interface PoseAgente {
   escala?: number;
   /** Levanta o braço (pegando algo). */
   bracoAlto?: number;
+  /** Altura da divisão tronco/pernas do recorte (0 = figura inteira, sem pernas articuladas). */
+  cintura?: number;
 }
 
 export const ALTURA_AGENTE = 100;
@@ -144,15 +146,82 @@ export function desenharFigura(
     }
   }
   // tronco e cabeça: giram em torno dos quadris
-  ctx.translate(0, -hPernas);
-  ctx.rotate(inclina);
-  ctx.scale(1, respira + alto * 0.03);
   if (pose.dano) ctx.globalAlpha = 0.65 + Math.sin(pose.fase * 30) * 0.3;
-  ctx.shadowColor = "rgba(0,0,0,0.55)";
-  ctx.shadowBlur = 5;
-  ctx.drawImage(img, -wFig / 2, -hFig, wFig, hFig);
-  ctx.shadowBlur = 0;
-  ctx.shadowColor = "transparent";
+  const cint = pernas === 0 ? (pose.cintura ?? 0) : 0;
+  if (cint > 0) {
+    // Figura articulada: as pernas se revezam (levantam e balançam a partir do
+    // quadril), o tronco gira em sentido contrário e os braços acompanham.
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    const hCima = hFig * cint;
+    const hBaixo = hFig - hCima;
+    const amp = (andando ? 1 : 0) * ritmo;
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
+    ctx.shadowBlur = 4;
+    for (const lado of [-1, 1]) {
+      const s = Math.sin(pose.fase + (lado < 0 ? 0 : Math.PI));
+      const levanta = Math.max(0, s);
+      ctx.save();
+      ctx.translate(lado * wFig * 0.24, -hBaixo);
+      ctx.rotate(s * 0.26 * amp);
+      ctx.translate(0, -levanta * hFig * 0.055 * amp);
+      ctx.scale(1, 1 - levanta * 0.035 * amp);
+      ctx.drawImage(
+        img,
+        lado < 0 ? 0 : iw / 2,
+        ih * cint,
+        iw / 2,
+        ih * (1 - cint),
+        -wFig / 4,
+        0,
+        wFig / 2,
+        hBaixo,
+      );
+      ctx.restore();
+    }
+    ctx.translate(0, -hBaixo);
+    ctx.rotate(inclina - passo * 0.05 * amp);
+    ctx.scale(1, respira + alto * 0.03);
+    ctx.drawImage(img, 0, 0, iw, ih * cint, -wFig / 2, -hCima, wFig, hCima);
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+    // braços: uma tira de cada lado do tronco, balançando ao contrário das pernas
+    if (pose.carga === 0) {
+      const sy = ih * 0.24;
+      const sh = ih * cint - sy;
+      const aw = iw * 0.2;
+      for (const lado of [-1, 1]) {
+        const s = -Math.sin(pose.fase + (lado < 0 ? 0 : Math.PI));
+        const ombroY = -hCima + hFig * 0.24;
+        const ombroX = lado * wFig * 0.34;
+        const elevar = lado > 0 ? alto * 0.9 : 0;
+        ctx.save();
+        ctx.translate(ombroX, ombroY);
+        ctx.rotate(s * 0.2 * amp + elevar * lado * 0.5);
+        ctx.drawImage(
+          img,
+          lado < 0 ? 0 : iw - aw,
+          sy,
+          aw,
+          sh,
+          lado < 0 ? -wFig / 2 - ombroX : wFig / 2 - (wFig * aw) / iw - ombroX,
+          0,
+          (wFig * aw) / iw,
+          (hFig * sh) / ih,
+        );
+        ctx.restore();
+      }
+    }
+  } else {
+    ctx.translate(0, -hPernas);
+    ctx.rotate(inclina);
+    ctx.scale(1, respira + alto * 0.03);
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = 5;
+    ctx.drawImage(img, -wFig / 2, -hFig, wFig, hFig);
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+  }
   if (pose.carga > 0) marmitasNasMaos(ctx, hFig, pose.carga);
   ctx.restore();
 }
@@ -168,7 +237,10 @@ export function desenharAgente(
   sprite?: HTMLImageElement,
 ) {
   if (pronta(sprite)) {
-    desenharFigura(ctx, x, y, sprite, ALTURA_AGENTE, p.pernas, p.calca, p.bota, pose);
+    desenharFigura(ctx, x, y, sprite, ALTURA_AGENTE, p.pernas, p.calca, p.bota, {
+      cintura: p.cintura,
+      ...pose,
+    });
     return;
   }
   const e = pose.escala ?? 1;
