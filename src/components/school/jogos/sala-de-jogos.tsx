@@ -6,6 +6,7 @@ import { Corrida } from "@/components/school/jogos/corrida";
 import { Damas } from "@/components/school/jogos/damas";
 import { Digitacao } from "@/components/school/jogos/digitacao";
 import { Domino } from "@/components/school/jogos/domino";
+import { JogoDaOnca } from "@/components/school/jogos/jogo-da-onca";
 import { JogoDaVelha } from "@/components/school/jogos/jogo-da-velha";
 import { Memoria } from "@/components/school/jogos/memoria";
 import { BotaoCompartilhar } from "@/components/school/botao-compartilhar";
@@ -42,6 +43,16 @@ export interface JogoInfo {
 }
 
 export const JOGOS: JogoInfo[] = [
+  {
+    id: "onca",
+    nome: "Jogo da Onça",
+    emoji: "🐆",
+    descricao:
+      "Adugo, jogo tradicional indígena: 1 onça contra 14 cachorros. Pule, cerque e capture!",
+    Componente: JogoDaOnca,
+    modos: ["computador", "colega"],
+    niveis: ["Fácil", "Médio", "Difícil"],
+  },
   {
     id: "jogo-da-velha",
     nome: "Jogo da velha",

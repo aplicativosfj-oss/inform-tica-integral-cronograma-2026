@@ -402,7 +402,7 @@ function InfotecaPage() {
                 Sala de Jogos
               </h3>
               <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-                Oito jogos de mesa, matemática, digitação e corrida, contra o computador ou um
+                Nove jogos de mesa, matemática, digitação e corrida — inclusive o Jogo da Onça, tradicional indígena —, contra o computador ou um
                 colega da turma — e cada partida ganha vale estrelas no ranking da escola.
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -410,6 +410,7 @@ function InfotecaPage() {
                   "Damas",
                   "Dominó",
                   "Jogo da velha",
+                  "Jogo da Onça",
                   "Memória",
                   "Quebra-cabeça",
                   "Matemática em Ação",
