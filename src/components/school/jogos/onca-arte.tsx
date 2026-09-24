@@ -36,8 +36,8 @@ export function PecaCao({ id, brilho }: { id: number; brilho?: boolean }) {
     <g>
       <defs>
         <radialGradient id={`${g}-f`} cx="40%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#ff6a5f" />
-          <stop offset="1" stopColor="#c81f2c" />
+          <stop offset="0" stopColor="#c9675e" />
+          <stop offset="1" stopColor="#a6443f" />
         </radialGradient>
         <radialGradient id={`${g}-r`} cx="50%" cy="40%" r="70%">
           <stop offset="0" stopColor="#fbdcc0" />
@@ -45,10 +45,10 @@ export function PecaCao({ id, brilho }: { id: number; brilho?: boolean }) {
         </radialGradient>
       </defs>
       <path d={ONDAS_CAO} fill="rgba(0,0,0,0.28)" transform="translate(1.5 3)" />
-      <path d={ONDAS_CAO} fill={`url(#${g}-f)`} stroke="#8e1420" strokeWidth={1.2} />
+      <path d={ONDAS_CAO} fill={`url(#${g}-f)`} stroke="#7d3630" strokeWidth={1.2} />
       {/* orelhas */}
-      <path d="M-17 -12 C-24 -14 -24 -2 -15 0 C-12 -4 -13 -9 -17 -12Z" fill="#6b3f2a" />
-      <path d="M17 -12 C24 -14 24 -2 15 0 C12 -4 13 -9 17 -12Z" fill="#6b3f2a" />
+      <path d="M-17 -12 C-24 -14 -24 -2 -15 0 C-12 -4 -13 -9 -17 -12Z" fill="#6b4a38" />
+      <path d="M17 -12 C24 -14 24 -2 15 0 C12 -4 13 -9 17 -12Z" fill="#6b4a38" />
       {/* rosto */}
       <ellipse cx="0" cy="-1" rx="16" ry="14.5" fill={`url(#${g}-r)`} />
       {/* focinho */}
@@ -79,7 +79,7 @@ export function PecaCao({ id, brilho }: { id: number; brilho?: boolean }) {
       {/* coleira */}
       <path
         d="M-12 12 Q0 17 12 12"
-        stroke="#f6c945"
+        stroke="#e3c37a"
         strokeWidth={2}
         fill="none"
         strokeLinecap="round"
@@ -105,38 +105,38 @@ export function PecaOnca({ brilho }: { brilho?: boolean }) {
     <g>
       <defs>
         <radialGradient id="onca-f" cx="40%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#ffe27a" />
-          <stop offset="1" stopColor="#e9a91c" />
+          <stop offset="0" stopColor="#ecd08a" />
+          <stop offset="1" stopColor="#cfa24a" />
         </radialGradient>
         <radialGradient id="onca-r" cx="50%" cy="35%" r="75%">
-          <stop offset="0" stopColor="#ffbf47" />
-          <stop offset="1" stopColor="#e27f1a" />
+          <stop offset="0" stopColor="#e8b25e" />
+          <stop offset="1" stopColor="#cf8a3a" />
         </radialGradient>
       </defs>
       <path d={ONDAS_ONCA} fill="rgba(0,0,0,0.3)" transform="translate(1.5 3)" />
-      <path d={ONDAS_ONCA} fill="url(#onca-f)" stroke="#a86a0a" strokeWidth={1.2} />
+      <path d={ONDAS_ONCA} fill="url(#onca-f)" stroke="#8f6a2a" strokeWidth={1.2} />
       {/* orelhas */}
       <path
         d="M-19 -13 L-22 -25 L-9 -19Z"
-        fill="#e27f1a"
-        stroke="#1d3f5e"
+        fill="#cf8a3a"
+        stroke="#2f4a5a"
         strokeWidth={1.6}
         strokeLinejoin="round"
       />
       <path
         d="M19 -13 L22 -25 L9 -19Z"
-        fill="#e27f1a"
-        stroke="#1d3f5e"
+        fill="#cf8a3a"
+        stroke="#2f4a5a"
         strokeWidth={1.6}
         strokeLinejoin="round"
       />
-      <path d="M-17 -15 L-19 -21 L-12 -18Z" fill="#2bb3b1" />
-      <path d="M17 -15 L19 -21 L12 -18Z" fill="#2bb3b1" />
+      <path d="M-17 -15 L-19 -21 L-12 -18Z" fill="#5fa39f" />
+      <path d="M17 -15 L19 -21 L12 -18Z" fill="#5fa39f" />
       {/* cabeça */}
       <path
         d="M-19 -8 C-21 4 -14 15 0 19 C14 15 21 4 19 -8 C14 -18 -14 -18 -19 -8Z"
         fill="url(#onca-r)"
-        stroke="#1d3f5e"
+        stroke="#2f4a5a"
         strokeWidth={1.8}
         strokeLinejoin="round"
       />
@@ -215,7 +215,7 @@ export function FaixaPenas({
     >
       <defs>
         <g id="pena-a">
-          <path d="M0 0 H26 V26 L13 40 L0 26Z" fill="#ef7c62" />
+          <path d="M0 0 H26 V26 L13 40 L0 26Z" fill="#d98a6c" />
           <path d="M13 0 V40" stroke="#5a3a2e" strokeWidth={1.4} />
           <path
             d="M13 12 L0 4 M13 12 L26 4 M13 24 L2 17 M13 24 L24 17"
@@ -223,10 +223,10 @@ export function FaixaPenas({
             strokeWidth={1.2}
             fill="none"
           />
-          <path d="M0 28 L13 40 L26 28" stroke="#59b7c6" strokeWidth={3} fill="none" />
+          <path d="M0 28 L13 40 L26 28" stroke="#7fb0ac" strokeWidth={3} fill="none" />
         </g>
         <g id="pena-b">
-          <path d="M0 0 H26 V26 L13 40 L0 26Z" fill="#f6c945" />
+          <path d="M0 0 H26 V26 L13 40 L0 26Z" fill="#e3c37a" />
           <path d="M13 0 V40" stroke="#5a3a2e" strokeWidth={1.4} />
           <path
             d="M13 12 L0 4 M13 12 L26 4 M13 24 L2 17 M13 24 L24 17"
@@ -234,7 +234,7 @@ export function FaixaPenas({
             strokeWidth={1.2}
             fill="none"
           />
-          <path d="M0 28 L13 40 L26 28" stroke="#59b7c6" strokeWidth={3} fill="none" />
+          <path d="M0 28 L13 40 L26 28" stroke="#7fb0ac" strokeWidth={3} fill="none" />
         </g>
       </defs>
       <g transform={invertida ? "translate(0 40) scale(1 -1)" : undefined}>

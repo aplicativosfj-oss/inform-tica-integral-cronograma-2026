@@ -433,21 +433,21 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
   const ativoP1 = !fim && estado.vez === lado;
   const nomeDaVez = estado.vez === lado ? nomeP1 : nomeP2;
   const btnPrimario =
-    "cursor-pointer rounded-xl bg-[#f6c945] px-5 text-sm font-black text-[#3b2417] shadow hover:bg-[#ffd75e]";
+    "cursor-pointer rounded-xl bg-[#d9b26a] px-5 text-sm font-black text-[#2a2320] shadow hover:bg-[#e6c383]";
   const btnSecundario =
-    "cursor-pointer rounded-xl border border-[#e9c27a]/40 bg-[#3d231b] px-3 text-xs font-semibold text-[#f6e2c4] hover:bg-[#4a2b21] disabled:cursor-default disabled:opacity-40";
+    "cursor-pointer rounded-xl border border-[#d9b26a]/40 bg-[#3f3530] px-3 text-xs font-semibold text-[#efe4d2] hover:bg-[#4a3e37] disabled:cursor-default disabled:opacity-40";
 
   return (
-    <div className="mx-auto flex w-full max-w-[460px] flex-col gap-2.5 rounded-3xl bg-[#241310] p-2.5 shadow-xl ring-1 ring-[#e9c27a]/25">
+    <div className="mx-auto flex w-full max-w-[460px] flex-col gap-2.5 rounded-3xl bg-[#2a2320] p-2.5 shadow-xl ring-1 ring-[#d9b26a]/25">
       {/* cabeçalho */}
-      <div className="overflow-hidden rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914]">
+      <div className="overflow-hidden rounded-2xl border border-[#d9b26a]/20 bg-[#342b26]">
         <FaixaPenas className="block h-[26px] w-full" />
         <div className="flex items-center justify-between gap-2 px-3 py-2">
           <div>
-            <h3 className="font-serif text-xl font-black italic leading-tight text-[#f6e2c4]">
+            <h3 className="font-serif text-xl font-black italic leading-tight text-[#efe4d2]">
               Jogo da Onça
             </h3>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#f0a35a]">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[#d9a06a]">
               Adugo · jogo tradicional indígena
             </p>
           </div>
@@ -456,7 +456,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               type="button"
               onClick={() => setAjuda(true)}
               aria-label="Como jogar"
-              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#e9c27a]/40 bg-[#3d231b] text-[#f6e2c4] hover:bg-[#4a2b21]"
+              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#d9b26a]/40 bg-[#3f3530] text-[#efe4d2] hover:bg-[#4a3e37]"
             >
               <BookOpen className="size-4" />
             </button>
@@ -464,14 +464,14 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               type="button"
               onClick={() => setSom((s) => !s)}
               aria-label={som ? "Desligar o som" : "Ligar o som"}
-              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#e9c27a]/40 bg-[#3d231b] text-[#f6e2c4] hover:bg-[#4a2b21]"
+              className="flex size-9 cursor-pointer items-center justify-center rounded-lg border border-[#d9b26a]/40 bg-[#3f3530] text-[#efe4d2] hover:bg-[#4a3e37]"
             >
               {som ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
             </button>
           </div>
         </div>
         {/* modo de jogo */}
-        <div className="flex gap-1 border-t border-[#e9c27a]/15 bg-[#241310]/60 p-1.5">
+        <div className="flex gap-1 border-t border-[#d9b26a]/15 bg-[#2a2320]/60 p-1.5">
           {(
             [
               ["computador", "Contra o computador", Bot],
@@ -486,8 +486,8 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               className={cn(
                 "flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-bold transition-colors",
                 modo === id
-                  ? "bg-[#f6c945] text-[#3b2417]"
-                  : "text-[#c9a983] hover:bg-[#3d231b] hover:text-[#f6e2c4]",
+                  ? "bg-[#d9b26a] text-[#2a2320]"
+                  : "text-[#b8a58f] hover:bg-[#3f3530] hover:text-[#efe4d2]",
               )}
             >
               <Icone className="size-3.5" />
@@ -509,7 +509,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
       ) : (
         <>
           {/* placar */}
-          <div className="rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914] p-2.5">
+          <div className="rounded-2xl border border-[#d9b26a]/20 bg-[#342b26] p-2.5">
             <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
               {(
                 [
@@ -528,21 +528,21 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                     className={cn(
                       "flex min-w-0 flex-col items-center gap-0.5 rounded-xl border-2 px-2 py-1.5 text-center transition-colors",
                       j.ativo
-                        ? "border-[#f6c945] bg-[#4a2b21] shadow-[0_0_0_3px_rgba(246,201,69,0.15)]"
-                        : "border-transparent bg-[#3d231b]",
+                        ? "border-[#d9b26a] bg-[#4a3e37] shadow-[0_0_0_3px_rgba(217,178,106,0.15)]"
+                        : "border-transparent bg-[#3f3530]",
                     )}
                   >
                     {j.lado === "onca" ? <OncaMini tam={34} /> : <CaoMini tam={32} />}
-                    <span className="max-w-full truncate text-xs font-black text-[#f6e2c4]">
+                    <span className="max-w-full truncate text-xs font-black text-[#efe4d2]">
                       {j.nome}
                     </span>
-                    <span className="text-[10px] font-semibold text-[#c9a983]">
+                    <span className="text-[10px] font-semibold text-[#b8a58f]">
                       {j.lado === "onca" ? "Onça" : "Cachorros"}
                     </span>
-                    <span className="mt-0.5 text-2xl font-black leading-none text-[#f6c945] tabular-nums">
+                    <span className="mt-0.5 text-2xl font-black leading-none text-[#d9b26a] tabular-nums">
                       {j.vitorias}
                     </span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#c9a983]">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#b8a58f]">
                       {j.vitorias === 1 ? "vitória" : "vitórias"}
                     </span>
                   </div>
@@ -552,10 +552,10 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                       cartao,
                       <div
                         key="vs"
-                        className="flex flex-col items-center justify-center gap-1 text-[#c9a983]"
+                        className="flex flex-col items-center justify-center gap-1 text-[#b8a58f]"
                       >
                         <span className="text-[10px] font-black">VS</span>
-                        <span className="rounded-full bg-[#3d231b] px-2 py-0.5 text-[10px] font-bold">
+                        <span className="rounded-full bg-[#3f3530] px-2 py-0.5 text-[10px] font-bold">
                           {placar.empates} emp.
                         </span>
                       </div>,
@@ -565,7 +565,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
             </div>
 
             {/* capturas da onça */}
-            <div className="mt-2 flex items-center justify-between gap-2 rounded-xl bg-[#241310] px-2.5 py-1.5">
+            <div className="mt-2 flex items-center justify-between gap-2 rounded-xl bg-[#2a2320] px-2.5 py-1.5">
               <div className="flex items-center gap-1.5">
                 <OncaMini tam={22} />
                 <div
@@ -578,8 +578,8 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                       className={cn(
                         "flex size-6 items-center justify-center rounded-full border-2 transition-all",
                         i < capturados
-                          ? "border-[#e0303a] bg-[#5a2226]"
-                          : "border-dashed border-[#8a6a54] opacity-70",
+                          ? "border-[#c46a62] bg-[#55302c]"
+                          : "border-dashed border-[#8a7a68] opacity-70",
                       )}
                     >
                       {i < capturados && <CaoMini tam={18} />}
@@ -587,15 +587,15 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                   ))}
                 </div>
               </div>
-              <span className="text-[11px] font-semibold text-[#c9a983]">
-                <b className="text-[#ff8a8a]">{CAES_TOTAL - capturados}</b> cães na roda ·{" "}
-                <b className="text-[#f6c945]">{capturados}</b>/{CAPTURAS_PARA_VENCER} capturas
+              <span className="text-[11px] font-semibold text-[#b8a58f]">
+                <b className="text-[#e0a29a]">{CAES_TOTAL - capturados}</b> cães na roda ·{" "}
+                <b className="text-[#d9b26a]">{capturados}</b>/{CAPTURAS_PARA_VENCER} capturas
               </span>
             </div>
           </div>
 
           {/* tabuleiro */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#b8434d] to-[#8e2f3a] p-2 shadow-md ring-1 ring-[#f6c945]/30">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#52746a] to-[#3e5c53] p-2 shadow-md ring-1 ring-[#d9b26a]/30">
             <svg
               viewBox={`0 0 ${LARGURA} ${ALTURA}`}
               className="mx-auto block w-full max-w-[420px] select-none touch-manipulation"
@@ -635,9 +635,9 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                         cy={py(p.y)}
                         r={alvo.captura !== null ? 19 : 15}
                         fill={
-                          alvo.captura !== null ? "rgba(224,48,58,0.3)" : "rgba(246,201,69,0.4)"
+                          alvo.captura !== null ? "rgba(196,106,98,0.35)" : "rgba(217,178,106,0.45)"
                         }
-                        stroke={alvo.captura !== null ? "#e0303a" : "#d99a00"}
+                        stroke={alvo.captura !== null ? "#c46a62" : "#b98a3a"}
                         strokeWidth={2.4}
                       >
                         <animate
@@ -724,7 +724,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
 
             {aviso && (
               <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-center px-3">
-                <span className="rounded-full bg-[#241310]/95 px-4 py-1.5 text-center text-xs font-bold text-[#f6c945] shadow-lg">
+                <span className="rounded-full bg-[#2a2320]/95 px-4 py-1.5 text-center text-xs font-bold text-[#d9b26a] shadow-lg">
                   {aviso}
                 </span>
               </div>
@@ -732,7 +732,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
 
             {fim && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px]">
-                <div className="w-full max-w-[310px] rounded-2xl border-2 border-[#f6c945]/60 bg-[#2e1914] p-4 text-center shadow-2xl">
+                <div className="w-full max-w-[310px] rounded-2xl border-2 border-[#d9b26a]/60 bg-[#342b26] p-4 text-center shadow-2xl">
                   <div className="mb-1 flex justify-center">
                     {fim.vencedor === "empate" ? (
                       <span className="text-4xl">🤝</span>
@@ -742,7 +742,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                       <OncaMini tam={58} />
                     )}
                   </div>
-                  <p className="font-serif text-xl font-black italic text-[#f6e2c4]">
+                  <p className="font-serif text-xl font-black italic text-[#efe4d2]">
                     {fim.vencedor === "empate"
                       ? "Empate!"
                       : contraPc
@@ -751,13 +751,13 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                           : "Não foi dessa vez"
                         : `${fim.vencedor === lado ? nomeP1 : nomeP2} venceu!`}
                   </p>
-                  <p className="mt-1 text-xs text-[#c9a983]">{status}</p>
-                  <p className="mt-2 text-sm font-bold text-[#f6e2c4]">
-                    {nomeP1} <span className="text-[#f6c945]">{placar.p1}</span> ×{" "}
-                    <span className="text-[#f6c945]">{placar.p2}</span> {nomeP2}
+                  <p className="mt-1 text-xs text-[#b8a58f]">{status}</p>
+                  <p className="mt-2 text-sm font-bold text-[#efe4d2]">
+                    {nomeP1} <span className="text-[#d9b26a]">{placar.p1}</span> ×{" "}
+                    <span className="text-[#d9b26a]">{placar.p2}</span> {nomeP2}
                   </p>
                   {estrelas !== null && estrelas > 0 && (
-                    <p className="mt-1 text-sm font-bold text-[#f6c945]">
+                    <p className="mt-1 text-sm font-bold text-[#d9b26a]">
                       {"⭐".repeat(estrelas)} +{estrelas} {estrelas === 1 ? "estrela" : "estrelas"}
                     </p>
                   )}
@@ -788,7 +788,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
           <div
             className={cn(
               "rounded-xl px-3 py-2 text-center text-sm font-bold",
-              aperto ? "bg-[#5a3a10] text-[#ffd98a]" : "bg-[#2e1914] text-[#f6e2c4]",
+              aperto ? "bg-[#5a4a2a] text-[#f0d9a0]" : "bg-[#342b26] text-[#efe4d2]",
             )}
             aria-live="polite"
           >
@@ -862,21 +862,21 @@ function TelaInicial({
   aoAjuda: () => void;
 }) {
   const campo =
-    "h-10 w-full rounded-lg border border-[#e9c27a]/40 bg-[#241310] px-3 text-sm font-semibold text-[#f6e2c4] placeholder:text-[#8a6a54] focus:border-[#f6c945] focus:outline-none";
+    "h-10 w-full rounded-lg border border-[#d9b26a]/40 bg-[#2a2320] px-3 text-sm font-semibold text-[#efe4d2] placeholder:text-[#8a7a68] focus:border-[#d9b26a] focus:outline-none";
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914] p-3.5 text-sm leading-relaxed text-[#e9d4bb]">
+      <div className="rounded-2xl border border-[#d9b26a]/20 bg-[#342b26] p-3.5 text-sm leading-relaxed text-[#e2d5c0]">
         <p>
-          Uma <b className="text-[#f6c945]">onça</b> contra{" "}
-          <b className="text-[#f6c945]">14 cachorros</b>. A onça vence ao{" "}
-          <b className="text-[#f6c945]">capturar 5 cachorros</b> pulando por cima deles. Os
-          cachorros vencem <b className="text-[#f6c945]">cercando a onça</b> — o triângulo lá
+          Uma <b className="text-[#d9b26a]">onça</b> contra{" "}
+          <b className="text-[#d9b26a]">14 cachorros</b>. A onça vence ao{" "}
+          <b className="text-[#d9b26a]">capturar 5 cachorros</b> pulando por cima deles. Os
+          cachorros vencem <b className="text-[#d9b26a]">cercando a onça</b> — o triângulo lá
           embaixo é a armadilha!
         </p>
         <button
           type="button"
           onClick={aoAjuda}
-          className="mt-2 cursor-pointer text-xs font-bold text-[#f0a35a] underline underline-offset-2"
+          className="mt-2 cursor-pointer text-xs font-bold text-[#d9a06a] underline underline-offset-2"
         >
           Ver as regras completas
         </button>
@@ -884,17 +884,17 @@ function TelaInicial({
 
       {contraPc ? (
         <>
-          <p className="px-1 text-xs font-semibold text-[#c9a983]">
-            Nível: <b className="text-[#f6c945]">{NIVEIS[nivel - 1]}</b> — escolha seu lado:
+          <p className="px-1 text-xs font-semibold text-[#b8a58f]">
+            Nível: <b className="text-[#d9b26a]">{NIVEIS[nivel - 1]}</b> — escolha seu lado:
           </p>
           <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
               onClick={() => aoEscolher("onca")}
-              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#f6c945] bg-gradient-to-b from-[#5a3a14] to-[#3d2610] p-3 text-[#f6e2c4] shadow-sm transition-transform hover:scale-[1.02]"
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#d9b26a] bg-gradient-to-b from-[#5a4a2e] to-[#40351f] p-3 text-[#efe4d2] shadow-sm transition-transform hover:scale-[1.02]"
             >
               <OncaMini tam={64} />
-              <span className="text-sm font-black text-[#f6c945]">Ser a Onça</span>
+              <span className="text-sm font-black text-[#d9b26a]">Ser a Onça</span>
               <span className="text-[11px] leading-tight opacity-85">
                 Pule e capture 5 cachorros
               </span>
@@ -902,10 +902,10 @@ function TelaInicial({
             <button
               type="button"
               onClick={() => aoEscolher("caes")}
-              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#e0303a] bg-gradient-to-b from-[#5a2226] to-[#3a1519] p-3 text-[#f6e2c4] shadow-sm transition-transform hover:scale-[1.02]"
+              className="flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-[#c46a62] bg-gradient-to-b from-[#55302c] to-[#3a2220] p-3 text-[#efe4d2] shadow-sm transition-transform hover:scale-[1.02]"
             >
               <CaoMini tam={60} />
-              <span className="text-sm font-black text-[#ff9a9a]">Ser os Cachorros</span>
+              <span className="text-sm font-black text-[#e0a29a]">Ser os Cachorros</span>
               <span className="text-[11px] leading-tight opacity-85">
                 Cerque a onça sem perder peças
               </span>
@@ -913,8 +913,8 @@ function TelaInicial({
           </div>
         </>
       ) : (
-        <div className="flex flex-col gap-2 rounded-2xl border border-[#e9c27a]/20 bg-[#2e1914] p-3">
-          <p className="text-xs font-semibold text-[#c9a983]">
+        <div className="flex flex-col gap-2 rounded-2xl border border-[#d9b26a]/20 bg-[#342b26] p-3">
+          <p className="text-xs font-semibold text-[#b8a58f]">
             Dois jogadores no mesmo aparelho. Digite os nomes para aparecer no placar:
           </p>
           <label className="flex items-center gap-2">
@@ -939,14 +939,14 @@ function TelaInicial({
               aria-label="Nome do jogador 2"
             />
           </label>
-          <p className="text-[11px] text-[#c9a983]">
-            O primeiro joga com a <b className="text-[#f6c945]">Onça</b> (e começa); o segundo, com
-            os <b className="text-[#ff9a9a]">Cachorros</b>. A cada partida, os lados se invertem.
+          <p className="text-[11px] text-[#b8a58f]">
+            O primeiro joga com a <b className="text-[#d9b26a]">Onça</b> (e começa); o segundo, com
+            os <b className="text-[#e0a29a]">Cachorros</b>. A cada partida, os lados se invertem.
           </p>
           <button
             type="button"
             onClick={() => aoEscolher("onca")}
-            className="mt-1 h-12 cursor-pointer rounded-xl bg-[#f6c945] px-5 text-sm font-black text-[#3b2417] shadow hover:bg-[#ffd75e]"
+            className="mt-1 h-12 cursor-pointer rounded-xl bg-[#d9b26a] px-5 text-sm font-black text-[#2a2320] shadow hover:bg-[#e6c383]"
           >
             Começar a partida
           </button>
@@ -966,26 +966,26 @@ function Regras({ aoFechar }: { aoFechar: () => void }) {
       onClick={aoFechar}
     >
       <div
-        className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[#e9c27a]/30 bg-[#2e1914] shadow-2xl"
+        className="max-h-[88vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[#d9b26a]/30 bg-[#342b26] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <FaixaPenas className="block h-[28px] w-full" />
-        <div className="p-4 text-sm leading-relaxed text-[#e9d4bb]">
-          <h3 className="font-serif text-2xl font-black italic text-[#f6e2c4]">Jogo da Onça</h3>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#f0a35a]">
+        <div className="p-4 text-sm leading-relaxed text-[#e2d5c0]">
+          <h3 className="font-serif text-2xl font-black italic text-[#efe4d2]">Jogo da Onça</h3>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#d9a06a]">
             Jogo abstrato, da família dos jogos de captura
           </p>
           <p>
-            Também chamado de <b className="text-[#f6c945]">Adugo</b>, é um jogo tradicional dos
+            Também chamado de <b className="text-[#d9b26a]">Adugo</b>, é um jogo tradicional dos
             povos indígenas do Brasil, ligado ao povo Bororo. Participam <b>dois jogadores</b>: um
             fica com a <b>onça</b> e o outro com os <b>14 cachorros</b>.
           </p>
-          <h4 className="mt-3 font-bold text-[#f6c945]">Objetivo</h4>
+          <h4 className="mt-3 font-bold text-[#d9b26a]">Objetivo</h4>
           <p>
             A onça vence capturando <b>cinco cachorros</b>. Os cachorros vencem{" "}
             <b>imobilizando a onça</b>.
           </p>
-          <h4 className="mt-3 font-bold text-[#f6c945]">Como se joga</h4>
+          <h4 className="mt-3 font-bold text-[#d9b26a]">Como se joga</h4>
           <ul className="ml-4 list-disc space-y-1">
             <li>A onça começa no centro, com os cachorros à frente dela; a onça joga primeiro.</li>
             <li>
@@ -1006,7 +1006,7 @@ function Regras({ aoFechar }: { aoFechar: () => void }) {
           <button
             type="button"
             onClick={aoFechar}
-            className="mt-4 h-11 w-full cursor-pointer rounded-xl bg-[#f6c945] text-sm font-black text-[#3b2417] hover:bg-[#ffd75e]"
+            className="mt-4 h-11 w-full cursor-pointer rounded-xl bg-[#d9b26a] text-sm font-black text-[#2a2320] hover:bg-[#e6c383]"
           >
             Entendi, vamos jogar!
           </button>
