@@ -90,7 +90,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  head: ({ matches }) => {
+    // A página /sala-de-jogos é instalada como um app à parte, com ícone e
+    // nome próprios: só ela troca o manifesto e o ícone do site.
+    const appJogos = matches.some((m) => (m.routeId as string) === "/sala-de-jogos");
+    return {
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -136,18 +140,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "twitter:image:alt",
         content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro",
       },
-      { name: "theme-color", content: "#1e3a8a" },
+      { name: "theme-color", content: appJogos ? "#047857" : "#1e3a8a" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      { name: "apple-mobile-web-app-title", content: "Agenda Informática" },
+      {
+        name: "apple-mobile-web-app-title",
+        content: appJogos ? "Sala de Jogos" : "Agenda Informática",
+      },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "manifest", href: "/manifest.webmanifest" },
+      {
+        rel: "manifest",
+        href: appJogos ? "/manifest-jogos.webmanifest" : "/manifest.webmanifest",
+      },
       // Resource hints for performance optimization
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -166,9 +176,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.svg?v=4", type: "image/svg+xml" },
       { rel: "icon", href: "/favicon-32.png?v=4", type: "image/png", sizes: "32x32" },
       { rel: "icon", href: "/favicon-16.png?v=4", type: "image/png", sizes: "16x16" },
-      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png?v=4" },
+      {
+        rel: "apple-touch-icon",
+        href: appJogos ? "/icons/jogos-apple-touch.png" : "/icons/apple-touch-icon.png?v=4",
+      },
     ],
-  }),
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

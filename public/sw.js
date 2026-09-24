@@ -113,7 +113,8 @@ self.addEventListener("fetch", (event) => {
   if (
     url.pathname.startsWith("/assets/") ||
     url.pathname.startsWith("/icons/") ||
-    url.pathname.startsWith("/images/jogos/")
+    url.pathname.startsWith("/images/jogos/") ||
+    url.pathname.startsWith("/models/")
   ) {
     event.respondWith(
       caches.match(request).then((cached) => {

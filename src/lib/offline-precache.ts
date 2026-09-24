@@ -27,15 +27,25 @@ const PAGINAS_OFFLINE = [
   "/",
   "/ferramentas",
   "/ferramentas/sala-de-jogos",
+  "/sala-de-jogos",
+  "/operacao-plantao",
   "/infoteca",
   ...JOGOS_OFFLINE.map((id) => `/jogos/${id}`),
 ];
 
-// Imagens que os jogos pedem na hora de jogar (fundos, carros, troféus).
-const IMAGENS_JOGOS = [...IMAGENS_DIGITACAO, ...IMAGENS_CORRIDA];
+// Imagens que os jogos pedem na hora de jogar (fundos, carros, troféus), mais
+// os ícones do app de jogos (instalação e cabeçalho da página).
+const IMAGENS_JOGOS = [
+  ...IMAGENS_DIGITACAO,
+  ...IMAGENS_CORRIDA,
+  "/models/Xbot.glb", // personagem 3D do Operação Plantão (~2,8 MB)
+  "/manifest-jogos.webmanifest",
+  "/icons/jogos-192.png",
+  "/icons/jogos-512.png",
+];
 
 // Refaz o pré-carregamento no máximo a cada 12 horas por aparelho.
-const CHAVE = "informatica:precache-offline";
+const CHAVE = "informatica:precache-offline:v2";
 const INTERVALO_MS = 12 * 60 * 60 * 1000;
 
 function jaFeitoRecentemente(): boolean {

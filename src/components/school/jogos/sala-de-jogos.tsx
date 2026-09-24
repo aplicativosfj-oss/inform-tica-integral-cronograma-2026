@@ -1,4 +1,14 @@
-import { ArrowLeft, Bot, Loader2, Maximize2, Star, Trophy, Users, WifiOff } from "lucide-react";
+import {
+  ArrowLeft,
+  Bot,
+  Loader2,
+  Maximize2,
+  Smartphone,
+  Star,
+  Trophy,
+  Users,
+  WifiOff,
+} from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
 
@@ -217,6 +227,12 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
   const [carteira, setCarteira] = useState(() => lerCarteira());
   const sessao = lerAlunoSessao();
   const online = useOnline();
+  // Convite para instalar: só fora do próprio app de jogos e do app já aberto.
+  const [ofereceInstalar, setOfereceInstalar] = useState(false);
+  useEffect(() => {
+    const noApp = window.matchMedia("(display-mode: standalone)").matches;
+    setOfereceInstalar(!noApp && window.location.pathname !== "/sala-de-jogos");
+  }, []);
 
   // Assim que a Sala abre, as imagens dos jogos já começam a baixar (digitação primeiro).
   useEffect(() => {
@@ -304,6 +320,18 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
           Sem internet: os jogos continuam funcionando. As estrelas ficam neste aparelho e o
           ranking mostra só as partidas daqui.
         </p>
+      )}
+
+      {ofereceInstalar && (
+        // Link comum (recarrega a página): o navegador só lê o manifesto do app
+        // de jogos numa página carregada já com ele.
+        <a
+          href="/sala-de-jogos"
+          className="flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-800 hover:bg-emerald-500/15 dark:text-emerald-200"
+        >
+          <Smartphone className="size-3.5 shrink-0" />
+          Instalar a Sala de Jogos como app (ícone na tela, funciona sem internet)
+        </a>
       )}
 
       {verRanking && <Ranking />}

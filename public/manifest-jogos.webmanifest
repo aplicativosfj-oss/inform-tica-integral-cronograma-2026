@@ -1,0 +1,24 @@
+{
+  "id": "/sala-de-jogos",
+  "name": "Sala de Jogos · Agenda de Informática",
+  "short_name": "Sala de Jogos",
+  "description": "Damas, dominó, jogo da velha, memória, quebra-cabeça, digitação e mais. Funciona sem internet.",
+  "start_url": "/sala-de-jogos?origem=app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#047857",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "categories": ["education", "games", "kids"],
+  "icons": [
+    { "src": "/icons/jogos-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/jogos-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    {
+      "src": "/icons/jogos-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
