@@ -12,7 +12,7 @@ import {
   estrelasPorPrecisao,
   type ResultadoFase,
 } from "@/components/school/jogos/digitacao-progresso";
-import { Maos, Teclado, TutorFala } from "@/components/school/jogos/digitacao-visual";
+import { Teclado, TutorFala } from "@/components/school/jogos/digitacao-visual";
 import { Figura } from "@/components/school/ferramentas/figuras-alfabeto";
 import { cn } from "@/lib/utils";
 
@@ -335,13 +335,17 @@ export function PraticaDigitacao({
 
             <div className="grid items-center gap-2 sm:grid-cols-[1fr_200px]">
               <Teclado alvo={proximo} erro={erroTecla} {...(foco !== undefined ? { foco } : {})} />
-              <div className="rounded-xl border border-white/10 bg-slate-950/75 p-2 text-center">
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-sky-300">
+              <div className="overflow-hidden rounded-xl border border-sky-300/20 bg-slate-950/85 text-center shadow-xl shadow-slate-950/60">
+                <p className="border-b border-white/10 bg-slate-900/90 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sky-200">
                   {dedo === null
                     ? "Mãos na posição inicial"
                     : `${dedo <= 4 ? "Mão esquerda" : "Mão direita"} · ${NOME_DEDO[dedo]}`}
                 </p>
-                <Maos ativos={dedo === null ? [] : [dedo]} className="mx-auto max-w-[200px]" />
+                <img
+                  src="/images/jogos/digitacao-maos-didaticas-pro.webp"
+                  alt="Duas mãos posicionadas corretamente para digitação"
+                  className="aspect-video w-full object-cover"
+                />
               </div>
             </div>
 
