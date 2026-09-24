@@ -26,6 +26,10 @@ export interface Personagem {
   /** Arquivos em /images/plantao/. */
   rosto: string;
   arte: string;
+  /** Figura de corpo inteiro (recorte realista) usada dentro do jogo. */
+  sprite: string;
+  /** Fração da altura da figura que não existe no recorte e é desenhada em código (pernas). */
+  pernas: number;
   /** Cores do uniforme, usadas para desenhar o corpo do personagem em jogo. */
   camisa: string;
   calca: string;
@@ -49,6 +53,8 @@ export const PERSONAGENS: Personagem[] = [
     frase: "Disciplina presente em ação.",
     rosto: "rosto-valentao.webp",
     arte: "arte-valentao.webp",
+    sprite: "sprite-valentao.webp",
+    pernas: 0,
     camisa: "#1e2a6b",
     calca: "#c2a878",
     bota: "#141414",
@@ -72,6 +78,8 @@ export const PERSONAGENS: Personagem[] = [
     frase: "Mesma essência, novos destinos.",
     rosto: "rosto-franc.webp",
     arte: "arte-franc.webp",
+    sprite: "sprite-franc.webp",
+    pernas: 0,
     camisa: "#1b2559",
     calca: "#27406e",
     bota: "#111111",
@@ -95,6 +103,8 @@ export const PERSONAGENS: Personagem[] = [
     frase: "Plano, disciplina e sempre com você.",
     rosto: "rosto-santos.webp",
     arte: "arte-santos.webp",
+    sprite: "sprite-santos.webp",
+    pernas: 0.3,
     camisa: "#161616",
     calca: "#b8974a",
     bota: "#2a2a2a",
@@ -118,7 +128,15 @@ export const DIEGO = {
   funcao: "Malfeitor",
   frase: "Sempre tentando escapar.",
   rosto: "rosto-diego.webp",
+  sprite: "sprite-diego.webp",
 };
+
+/** Figuras extras usadas como funcionários e seguranças nos cenários. */
+export const SPRITES_NPC = [
+  "sprite-guarda.webp",
+  "sprite-agente.webp",
+  "sprite-valentao-marcha.webp",
+];
 
 export interface Missao {
   id: MissaoId;

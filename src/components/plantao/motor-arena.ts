@@ -15,6 +15,7 @@ import {
   type Clima,
   type MissaoId,
   type Nivel,
+  SPRITES_NPC,
   type Personagem,
 } from "@/components/plantao/dados";
 import {
@@ -23,6 +24,7 @@ import {
   criarChao,
   desenharAgente,
   desenharArvore,
+  desenharFigura,
   desenharBreve,
   desenharCachorro,
   desenharCafe,
@@ -45,7 +47,7 @@ import type { SomPlantao } from "@/components/plantao/som-plantao";
 export const VIEW_W = 960;
 export const VIEW_H = 540;
 /** Aproximação da câmera: os personagens aparecem maiores e o mapa parece mais rico. */
-const ZOOM = 1.3;
+const ZOOM = 1.5;
 const VW = VIEW_W / ZOOM;
 const VH = VIEW_H / ZOOM;
 
@@ -1593,7 +1595,7 @@ export class Arena {
         f: () => {
           if (p.tipo === "carrinho") desenharCarrinho(c, p.x, p.y, p.dir);
           else if (p.tipo === "carro") this.desenharCarroRua(c, p);
-          else desenharNpc(c, p.x, p.y, p.cor, p.dir, p.fase);
+          else this.desenharFuncionario(c, p);
         },
       });
     }
@@ -1623,6 +1625,7 @@ export class Arena {
             dano: this.atordoado > 0 ? this.atordoado : 0,
             bracoAlto: this.bracoAlto,
           },
+          this.op.imagens[this.op.personagem.sprite],
         );
         // breves nas mãos
         if (this.op.missao === "breves" && this.breves > 0) {
@@ -1662,6 +1665,24 @@ export class Arena {
 
     this.desenharClima(c);
     this.desenharVinheta(c);
+  }
+
+  /** Funcionário andando: usa uma figura realista da equipe; sem imagem, o boneco em código. */
+  private desenharFuncionario(c: CanvasRenderingContext2D, p: Patrulha) {
+    const escolha = Math.abs(Math.round(p.cor.camisa.charCodeAt(1) + p.cor.calca.charCodeAt(2)));
+    const img = this.op.imagens[SPRITES_NPC[escolha % SPRITES_NPC.length]!];
+    if (img && img.complete && img.naturalWidth > 0) {
+      const parado = p.espera > 0;
+      desenharFigura(c, p.x, p.y, img, 80, 0, p.cor.calca, "#111", {
+        dir: p.dir,
+        fase: p.fase,
+        correndo: false,
+        parado,
+        carga: 0,
+      });
+    } else {
+      desenharNpc(c, p.x, p.y, p.cor, p.dir, p.fase);
+    }
   }
 
   private desenharCarroRua(c: CanvasRenderingContext2D, p: Patrulha) {

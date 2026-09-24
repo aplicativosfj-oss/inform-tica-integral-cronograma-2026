@@ -3,11 +3,17 @@ import {
   ArrowUp,
   Briefcase,
   ChevronsUp,
+  ClipboardList,
   Clock,
+  GlassWater,
   Hand,
+  KeyRound,
+  Link2,
   Pause,
   Play,
+  Radio,
   Star,
+  UtensilsCrossed,
   Volume2,
   VolumeX,
   Zap,
@@ -473,6 +479,51 @@ export function TelaArena({
             </div>
           </div>
 
+          {/* Barra de itens do plantão */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center [@media(max-height:520px)]:hidden">
+            <div className="flex gap-1 rounded-xl border border-white/15 bg-slate-950/60 p-1 backdrop-blur">
+              {[
+                { nome: "Rádio", Icone: Radio, n: 0, ativo: false },
+                { nome: "Algema", Icone: Link2, n: 0, ativo: false },
+                {
+                  nome: "Prancheta",
+                  Icone: ClipboardList,
+                  n: hud.item === "breve" ? hud.carga : 0,
+                  ativo: hud.item === "breve",
+                },
+                {
+                  nome: "Marmita",
+                  Icone: UtensilsCrossed,
+                  n: hud.item === "marmita" ? hud.carga : 0,
+                  ativo: hud.item === "marmita",
+                },
+                { nome: "Chave", Icone: KeyRound, n: 0, ativo: false },
+                { nome: "Garrafa", Icone: GlassWater, n: 0, ativo: false },
+              ].map((it, i) => (
+                <div
+                  key={it.nome}
+                  className={cn(
+                    "relative flex h-11 w-12 flex-col items-center justify-center rounded-lg border text-slate-200 sm:h-12 sm:w-14",
+                    it.ativo
+                      ? "border-amber-300 bg-amber-400/20"
+                      : "border-white/15 bg-slate-900/60",
+                  )}
+                >
+                  <span className="absolute left-1 top-0.5 text-[8px] font-bold text-slate-400">
+                    {i + 1}
+                  </span>
+                  <it.Icone className="size-4 sm:size-5" />
+                  <span className="text-[7px] font-bold uppercase leading-none sm:text-[8px]">
+                    {it.nome}
+                  </span>
+                  {it.n > 0 && (
+                    <b className="absolute bottom-0.5 right-1 text-[10px] text-amber-300">{it.n}</b>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Aviso e dica de interação */}
           {hud.aviso && (
             <div className="pointer-events-none absolute inset-x-0 top-[28%] flex justify-center">
@@ -482,7 +533,7 @@ export function TelaArena({
             </div>
           )}
           {hud.prompt && (
-            <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
+            <div className="pointer-events-none absolute inset-x-0 bottom-[4.5rem] flex justify-center [@media(max-height:520px)]:bottom-3">
               <span className="flex items-center gap-2 rounded-xl border border-white/30 bg-slate-950/85 px-3 py-1.5 text-xs font-black uppercase text-white shadow-xl sm:text-sm">
                 {!toque && (
                   <kbd className="rounded bg-amber-400 px-1.5 py-0.5 text-amber-950">E</kbd>

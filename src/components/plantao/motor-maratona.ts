@@ -405,7 +405,7 @@ export class Maratona {
     itens.push({
       y: this.yTela,
       f: () => {
-        const esc = 0.9 + ((this.yTela - FAIXAS_Y[0]!) / (FAIXAS_Y[2]! - FAIXAS_Y[0]!)) * 0.25;
+        const esc = 1.2 + ((this.yTela - FAIXAS_Y[0]!) / (FAIXAS_Y[2]! - FAIXAS_Y[0]!)) * 0.3;
         sombra(c, X_JOGADOR, this.yTela, 22 * esc);
         desenharAgente(
           c,
@@ -422,6 +422,7 @@ export class Maratona {
             dano: this.dano,
             escala: esc,
           },
+          this.op.imagens[this.op.personagem.sprite],
         );
       },
     });

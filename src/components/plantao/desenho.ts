@@ -1,11 +1,10 @@
 /**
  * Desenho dos personagens, do cachorro e dos objetos do "Operação: Plantão".
  *
- * Os agentes são "bonecos de cabeça grande": o rosto é a foto real do
- * personagem recortada em círculo, e o corpo é desenhado em código com o
- * uniforme dele. Assim o jogador reconhece a equipe na hora e o corpo pode
- * correr, carregar marmitas e virar para os dois lados sem precisar de
- * dezenas de quadros de animação.
+ * Os agentes são figuras realistas recortadas das imagens da equipe (estilo
+ * "action figure"): a figura inteira balança, inclina e pula no ritmo da
+ * corrida, sem precisar de dezenas de quadros de animação. Enquanto a imagem
+ * não carrega, um boneco desenhado em código ocupa o lugar.
  */
 
 import type { Personagem } from "@/components/plantao/dados";
@@ -72,6 +71,92 @@ export interface PoseAgente {
   bracoAlto?: number;
 }
 
+export const ALTURA_AGENTE = 100;
+
+function pronta(i: HTMLImageElement | undefined): i is HTMLImageElement {
+  return !!i && i.complete && i.naturalWidth > 0;
+}
+
+function marmitasNasMaos(ctx: CanvasRenderingContext2D, alto: number, qtd: number) {
+  for (let i = 0; i < Math.min(qtd, 5); i++) {
+    ctx.fillStyle = i % 2 ? "#f1f5f9" : "#e2e8f0";
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(4, -alto * 0.4 - i * 6, 20, 7, 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#38bdf8";
+    ctx.fillRect(9, -alto * 0.4 + 1 - i * 6, 10, 1.6);
+  }
+}
+
+/**
+ * Desenha uma figura realista (recorte) com animação de corrida: quique,
+ * inclinação para a frente, balanço e sombra. (x, y) é o ponto dos pés.
+ * Quando o recorte não tem pernas (`pernas` > 0), elas são desenhadas em código.
+ */
+export function desenharFigura(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  img: HTMLImageElement,
+  altura: number,
+  pernas: number,
+  corCalca: string,
+  corBota: string,
+  pose: PoseAgente,
+) {
+  const e = pose.escala ?? 1;
+  const andando = !pose.parado;
+  const ritmo = pose.correndo ? 1.25 : 1;
+  const passo = Math.sin(pose.fase);
+  const quique = andando ? Math.abs(passo) * 4.2 * ritmo : 0;
+  const inclina = andando ? passo * 0.05 + (pose.correndo ? 0.1 : 0.035) : 0;
+  const respira = andando
+    ? 1 + Math.sin(pose.fase * 2) * 0.014
+    : 1 + Math.sin(pose.fase * 0.4) * 0.012;
+  const alto = pose.bracoAlto ?? 0;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(e * pose.dir, e);
+  if (pose.dano) ctx.translate((Math.random() - 0.5) * 6 * pose.dano, 0);
+  sombra(ctx, 0, 0, 24 - quique * 0.6, 8 - quique * 0.2);
+
+  const hFig = altura * (1 - pernas);
+  const hPernas = altura * pernas;
+  const wFig = (img.naturalWidth / img.naturalHeight) * hFig;
+
+  ctx.translate(0, -quique);
+  if (pernas > 0) {
+    const sw = andando ? passo * 6 : 0;
+    for (const lado of [-1, 1]) {
+      const px = lado * wFig * 0.17;
+      const dx = lado * sw * (pose.correndo ? 0.9 : 0.6);
+      ctx.fillStyle = corCalca;
+      ctx.beginPath();
+      ctx.roundRect(px - 6 + dx * 0.5, -hPernas, 12, hPernas - 3, 3);
+      ctx.fill();
+      ctx.fillStyle = corBota;
+      ctx.beginPath();
+      ctx.roundRect(px - 7 + dx, -5, 15, 6, 2);
+      ctx.fill();
+    }
+  }
+  // tronco e cabeça: giram em torno dos quadris
+  ctx.translate(0, -hPernas);
+  ctx.rotate(inclina);
+  ctx.scale(1, respira + alto * 0.03);
+  if (pose.dano) ctx.globalAlpha = 0.65 + Math.sin(pose.fase * 30) * 0.3;
+  ctx.shadowColor = "rgba(0,0,0,0.55)";
+  ctx.shadowBlur = 5;
+  ctx.drawImage(img, -wFig / 2, -hFig, wFig, hFig);
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = "transparent";
+  if (pose.carga > 0) marmitasNasMaos(ctx, hFig, pose.carga);
+  ctx.restore();
+}
+
 /** (x, y) é o ponto dos pés. */
 export function desenharAgente(
   ctx: CanvasRenderingContext2D,
@@ -80,7 +165,12 @@ export function desenharAgente(
   p: Personagem,
   rosto: HTMLImageElement | undefined,
   pose: PoseAgente,
+  sprite?: HTMLImageElement,
 ) {
+  if (pronta(sprite)) {
+    desenharFigura(ctx, x, y, sprite, ALTURA_AGENTE, p.pernas, p.calca, p.bota, pose);
+    return;
+  }
   const e = pose.escala ?? 1;
   const bal = pose.parado ? Math.sin(pose.fase * 0.4) * 0.6 : Math.sin(pose.fase * 2) * 1.6;
   const pernaSwing = pose.parado ? 0 : Math.sin(pose.fase) * (pose.correndo ? 11 : 7);

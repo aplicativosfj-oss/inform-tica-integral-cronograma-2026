@@ -27,6 +27,7 @@ import {
   PASTA_IMG,
   PERSONAGENS,
   PISTAS_MOTO,
+  SPRITES_NPC,
   type CenarioMaratona,
   type Clima,
   type Missao,
@@ -52,7 +53,13 @@ import { cn } from "@/lib/utils";
 
 type Tela = "menu" | "selecao" | "missoes" | "config" | "como" | "jogo" | "resultado";
 
-const ARQUIVOS = [...PERSONAGENS.map((p) => p.rosto), DIEGO.rosto];
+const ARQUIVOS = [
+  ...PERSONAGENS.map((p) => p.rosto),
+  ...PERSONAGENS.map((p) => p.sprite),
+  DIEGO.rosto,
+  DIEGO.sprite,
+  ...SPRITES_NPC,
+];
 
 function useImagens(): Imagens {
   const [imgs] = useState<Imagens>(() => {
