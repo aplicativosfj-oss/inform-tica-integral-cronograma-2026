@@ -20,6 +20,7 @@ import { Toaster } from "../components/ui/sonner";
 import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
+import { FONTES_CSS, precarregarOffline } from "../lib/offline-precache";
 
 /**
  * Aplica o tema salvo (ou o do sistema) antes da primeira pintura, para
@@ -154,7 +155,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // aqui carregada pro site inteiro falar a mesma tipografia.
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap",
+        href: FONTES_CSS,
       },
       { rel: "dns-prefetch", href: "https://cdn.example.com" },
       // Prefetch next likely routes
@@ -197,9 +198,12 @@ function RootComponent() {
     // script, então o registro sempre falha — sem ganho nenhum localmente.
     if (import.meta.env.DEV) return;
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
-      console.error("Falha ao registrar o service worker:", err);
-    });
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then(() => precarregarOffline())
+      .catch((err) => {
+        console.error("Falha ao registrar o service worker:", err);
+      });
   }, []);
 
   return (

@@ -17,6 +17,7 @@ import {
   Star,
   Target,
   Users2,
+  WifiOff,
   Wrench,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -30,6 +31,7 @@ import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { listarFerramentasPublicas } from "@/lib/ferramentas-publicas";
+import { useOnline } from "@/lib/use-online";
 import infotecaHeroImg from "@/assets/feature-kids-learning.jpg";
 
 export const Route = createFileRoute("/infoteca")({
@@ -282,12 +284,23 @@ const GRUPOS_ESCOLA: {
 
 function InfotecaPage() {
   const publicas = listarFerramentasPublicas();
+  const online = useOnline();
 
   return (
     <div className="relative min-h-screen bg-background">
       <PageBackground />
       <div className="relative z-10">
         <NavBar />
+
+        {!online && (
+          <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
+            <p className="flex items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-xs text-sky-800 dark:text-sky-200">
+              <WifiOff className="size-4 shrink-0" />
+              Sem internet: as ferramentas da escola (como a Sala de Jogos) continuam funcionando.
+              Os sites externos abaixo só abrem quando a conexão voltar.
+            </p>
+          </div>
+        )}
 
         {/* Hero — banner mais baixo, com painel glassmorphism sobre a imagem em
             vez de um véu escuro cobrindo tudo (deixa a foto respirar). */}
@@ -628,7 +641,9 @@ function InfotecaPage() {
                       href={ferramenta.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                      aria-disabled={!online}
+                      tabIndex={online ? undefined : -1}
+                      className={`group flex items-start gap-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${online ? "" : "pointer-events-none opacity-50"}`}
                     >
                       <img
                         src={faviconUrl(ferramenta.url)}

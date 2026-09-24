@@ -1,4 +1,4 @@
-import { ArrowLeft, Bot, Loader2, Maximize2, Star, Trophy, Users } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Maximize2, Star, Trophy, Users, WifiOff } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
 
@@ -17,6 +17,7 @@ import { lerAlunoSessao } from "@/lib/aluno-session";
 import { lerCarteira, somarPorAluno, type Adversario, type LinhaRanking } from "@/lib/estrelas";
 import { fetchRanking } from "@/lib/placares";
 import { IMAGENS_CORRIDA, IMAGENS_DIGITACAO, precarregar } from "@/lib/precarregar";
+import { useOnline } from "@/lib/use-online";
 import { cn } from "@/lib/utils";
 
 /**
@@ -215,6 +216,7 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
   };
   const [carteira, setCarteira] = useState(() => lerCarteira());
   const sessao = lerAlunoSessao();
+  const online = useOnline();
 
   // Assim que a Sala abre, as imagens dos jogos já começam a baixar (digitação primeiro).
   useEffect(() => {
@@ -295,6 +297,14 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
           <Trophy className="size-3.5" /> {verRanking ? "esconder" : "ranking"}
         </button>
       </div>
+
+      {!online && (
+        <p className="flex items-center gap-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-[11px] text-sky-800 dark:text-sky-200">
+          <WifiOff className="size-3.5 shrink-0" />
+          Sem internet: os jogos continuam funcionando. As estrelas ficam neste aparelho e o
+          ranking mostra só as partidas daqui.
+        </p>
+      )}
 
       {verRanking && <Ranking />}
 
