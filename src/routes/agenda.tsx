@@ -22,6 +22,7 @@ import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import {
+  aplicarExcecoesDeData,
   buildGrupos,
   buildWeeklySchedule,
   currentWeekdayLabel,
@@ -82,11 +83,14 @@ function AgendaPage() {
     [turmas, config, dataDoDia],
   );
   const assignmentsDoDia = [
-    ...assignments.filter(
-      (a) =>
-        a.dia === diaSelecionado &&
-        !config.suspensoes?.[suspensaoKey(dataDoDiaKey, a.dia, a.slot.inicio)],
-    ),
+    // Exceções por data (ex.: turma trocada só naquele dia) valem aqui também,
+    // como na grade semanal e no painel ao vivo.
+    ...aplicarExcecoesDeData(
+      assignments.filter((a) => a.dia === diaSelecionado),
+      config,
+      turmas,
+      dataDoDiaKey,
+    ).filter((a) => !config.suspensoes?.[suspensaoKey(dataDoDiaKey, a.dia, a.slot.inicio)]),
     ...reprogramadasDoDia,
   ].sort((a, b) => a.slot.inicio.localeCompare(b.slot.inicio));
   const dataDoDiaFormatada = dataDoDia.toLocaleDateString("pt-BR", {
