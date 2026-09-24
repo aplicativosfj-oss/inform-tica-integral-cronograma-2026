@@ -43,8 +43,13 @@ async function guardar(cache, url, opcoes) {
 }
 
 // Pré-carrega páginas (e os arquivos que elas usam) para funcionarem offline.
-async function precarregar(urls, fontesCss) {
+async function precarregar(urls, fontesCss, arquivos) {
   const cache = await caches.open(CACHE_NAME);
+
+  // Imagens e outros arquivos avulsos (ex.: fundos e carros dos jogos).
+  for (const arquivo of arquivos || []) {
+    if (!(await cache.match(arquivo))) await guardar(cache, arquivo);
+  }
 
   for (const url of urls) {
     const resposta = await guardar(cache, url, { credentials: "same-origin" });
@@ -74,7 +79,7 @@ async function precarregar(urls, fontesCss) {
 self.addEventListener("message", (event) => {
   const dados = event.data;
   if (!dados || dados.type !== "PRECARREGAR" || !Array.isArray(dados.urls)) return;
-  event.waitUntil(precarregar(dados.urls, dados.fontesCss));
+  event.waitUntil(precarregar(dados.urls, dados.fontesCss, dados.arquivos));
 });
 
 self.addEventListener("fetch", (event) => {
@@ -105,7 +110,11 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   // Content-hashed build assets and icons: safe to serve straight from cache.
-  if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/icons/")) {
+  if (
+    url.pathname.startsWith("/assets/") ||
+    url.pathname.startsWith("/icons/") ||
+    url.pathname.startsWith("/images/jogos/")
+  ) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) return cached;

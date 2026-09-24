@@ -4,12 +4,35 @@
  * páginas públicas, os arquivos que elas usam e as fontes.
  */
 
+import { IMAGENS_CORRIDA, IMAGENS_DIGITACAO } from "@/lib/precarregar";
+
 export const FONTES_CSS =
   "https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap";
 
 // Só páginas públicas: as áreas de aluno e de professor exigem login e
 // entram no cache normalmente quando são visitadas.
-const PAGINAS_OFFLINE = ["/", "/ferramentas", "/ferramentas/sala-de-jogos", "/infoteca"];
+const JOGOS_OFFLINE = [
+  "onca",
+  "jogo-da-velha",
+  "damas",
+  "domino",
+  "memoria",
+  "quebra-cabeca",
+  "tabuleiro-matematica",
+  "digitacao",
+  "corrida",
+];
+
+const PAGINAS_OFFLINE = [
+  "/",
+  "/ferramentas",
+  "/ferramentas/sala-de-jogos",
+  "/infoteca",
+  ...JOGOS_OFFLINE.map((id) => `/jogos/${id}`),
+];
+
+// Imagens que os jogos pedem na hora de jogar (fundos, carros, troféus).
+const IMAGENS_JOGOS = [...IMAGENS_DIGITACAO, ...IMAGENS_CORRIDA];
 
 // Refaz o pré-carregamento no máximo a cada 12 horas por aparelho.
 const CHAVE = "informatica:precache-offline";
@@ -42,6 +65,7 @@ export function precarregarOffline(): void {
         type: "PRECARREGAR",
         urls: PAGINAS_OFFLINE,
         fontesCss: FONTES_CSS,
+        arquivos: IMAGENS_JOGOS,
       });
       marcarFeito();
     });
