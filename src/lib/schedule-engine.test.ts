@@ -3,6 +3,8 @@ import { describe, expect, test } from "bun:test";
 import {
   buildDailySlots,
   buildGrupos,
+  definirHistoricoParticipacao,
+  escolherGrupoMisto,
   buildSubBlocos,
   buildWeeklySchedule,
   currentWeekdayLabel,
@@ -38,6 +40,37 @@ function makeTurma(id: string, alunoCount: number): Turma {
   }));
   return { id, serie: "Teste", letra: id, professorRegente: "Prof.", alunos };
 }
+
+describe("escolherGrupoMisto", () => {
+  test("sem histórico usa o grupo por índice", () => {
+    definirHistoricoParticipacao(new Map());
+    const turma = makeTurma("m1", 21);
+    const grupo = escolherGrupoMisto(turma, 2, makeConfig());
+    expect(grupo.alunos.map((a) => a.id)).toEqual(
+      buildGrupos(turma, makeConfig())[2]!.alunos.map((a) => a.id),
+    );
+  });
+
+  test("com histórico chama quem nunca foi antes de quem já foi", () => {
+    const turma = makeTurma("m2", 21);
+    // Os 14 primeiros já vieram; os 7 últimos nunca foram.
+    const ultima = new Map(turma.alunos.slice(0, 14).map((a) => [a.id, "2026-09-22"] as const));
+    definirHistoricoParticipacao(new Map([["m2", ultima]]));
+    const grupo = escolherGrupoMisto(turma, 0, makeConfig());
+    expect(grupo.alunos.map((a) => a.id)).toEqual(turma.alunos.slice(14).map((a) => a.id));
+    definirHistoricoParticipacao(new Map());
+  });
+
+  test("não chama aluno impedido", () => {
+    const turma = makeTurma("m3", 8);
+    turma.alunos[0] = { ...turma.alunos[0]!, impedido: true };
+    definirHistoricoParticipacao(new Map([["m3", new Map([["m3-a7", "2026-09-22"]])]]));
+    const grupo = escolherGrupoMisto(turma, 0, makeConfig());
+    expect(grupo.alunos.some((a) => a.id === "m3-a0")).toBe(false);
+    expect(grupo.alunos).toHaveLength(7);
+    definirHistoricoParticipacao(new Map());
+  });
+});
 
 describe("buildDailySlots", () => {
   test("gera 6 janelas de 1h pulando o horário de almoço", () => {

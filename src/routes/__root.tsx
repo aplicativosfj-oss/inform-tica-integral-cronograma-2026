@@ -21,6 +21,7 @@ import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 import { FONTES_CSS, precarregarOffline } from "../lib/offline-precache";
+import { useCarregarHistoricoParticipacao } from "../lib/use-historico-participacao";
 
 /**
  * Aplica o tema salvo (ou o do sistema) antes da primeira pintura, para
@@ -192,6 +193,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   usePWAInstallInitializer();
+  useCarregarHistoricoParticipacao();
 
   useEffect(() => {
     // Em dev, o middleware SSR intercepta /sw.js e devolve HTML em vez do

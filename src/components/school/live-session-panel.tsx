@@ -59,6 +59,7 @@ import {
   iniciarProfissionalSessao,
   senhaDoProfessorDaTurma,
 } from "@/lib/profissional-session";
+import { useHistoricoParticipacao } from "@/lib/use-historico-participacao";
 import {
   fetchPresencasDoDia,
   fetchUltimaParticipacao,
@@ -965,6 +966,8 @@ export function LiveSessionPanel({ editable = false }: { editable?: boolean }) {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const now = useNow(true);
+  // Relê o painel quando o histórico de participação (usado no horário misto) chega.
+  useHistoricoParticipacao();
   // Antes dos early returns abaixo: hook não pode ficar atrás de um return.
   const [somAtivo, setSomAtivo] = useState(false);
 

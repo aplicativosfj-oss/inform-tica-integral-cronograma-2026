@@ -450,6 +450,55 @@ export function getWeekIndex(date: Date): number {
 }
 
 /**
+ * Histórico real de participação (turma -> aluno -> última data em que veio),
+ * alimentado pela tela a partir da tabela `presencas`. O horário misto usa
+ * isso para chamar quem está há mais tempo sem vir, em vez de repetir alunos
+ * que já foram. Enquanto não carrega (ou sem rede), vale o rodízio por índice.
+ */
+let historicoParticipacao: Map<string, Map<string, string>> = new Map();
+let versaoHistorico = 0;
+const ouvintesHistorico = new Set<() => void>();
+
+export function definirHistoricoParticipacao(historico: Map<string, Map<string, string>>): void {
+  historicoParticipacao = historico;
+  versaoHistorico += 1;
+  ouvintesHistorico.forEach((avisar) => avisar());
+}
+
+export function assinarHistoricoParticipacao(avisar: () => void): () => void {
+  ouvintesHistorico.add(avisar);
+  return () => {
+    ouvintesHistorico.delete(avisar);
+  };
+}
+
+export function versaoHistoricoParticipacao(): number {
+  return versaoHistorico;
+}
+
+/**
+ * Grupo que ocupa uma fração de horário misto. Com histórico da turma, são os
+ * `numeroComputadores` alunos há mais tempo sem participar (quem nunca foi ou
+ * faltou vem primeiro); sem histórico, o grupo por índice de `buildGrupos`.
+ */
+export function escolherGrupoMisto(
+  turma: Turma,
+  grupoIndice: number,
+  config: ScheduleConfig,
+): GrupoRevezamento {
+  const porIndice = buildGrupos(turma, config);
+  const padrao = porIndice[grupoIndice] ?? porIndice[0] ?? { indice: 0, alunos: [] };
+  const ultima = historicoParticipacao.get(turma.id);
+  // Grupos cadastrados pelo administrador são respeitados como estão.
+  if (!ultima || ultima.size === 0 || (turma.grupos ?? []).length > 0) return padrao;
+  const escolhidos = turma.alunos
+    .filter((aluno) => !aluno.impedido)
+    .sort((a, b) => (ultima.get(a.id) ?? "").localeCompare(ultima.get(b.id) ?? ""))
+    .slice(0, Math.max(1, config.numeroComputadores));
+  return { indice: padrao.indice, alunos: escolhidos };
+}
+
+/**
  * Splits one hour-long slot into rotating sub-blocks (e.g. two 30min turns).
  *
  * The starting group is offset by how many sub-blocks this turma has already
@@ -477,8 +526,7 @@ export function buildSubBlocos(
     const inicioMisto = toMinutes(assignment.slot.inicio);
     const passoMisto = Math.max(1, config.duracaoGrupoMinutos);
     return assignment.misto.map((m, i) => {
-      const gruposDaTurma = buildGrupos(m.turma, config);
-      const grupo = gruposDaTurma[m.grupoIndice] ?? gruposDaTurma[0] ?? { indice: 0, alunos: [] };
+      const grupo = escolherGrupoMisto(m.turma, m.grupoIndice, config);
       return {
         indice: i,
         inicio: toHHMM(inicioMisto + i * passoMisto),
