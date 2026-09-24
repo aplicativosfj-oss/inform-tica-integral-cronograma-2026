@@ -37,12 +37,7 @@ import {
   type Progresso,
   type ResultadoFase,
 } from "@/components/school/jogos/digitacao-progresso";
-import {
-  Maos,
-  Teclado,
-  Teco,
-  TutorFala,
-} from "@/components/school/jogos/digitacao-visual";
+import { Teclado, Teco, TutorFala } from "@/components/school/jogos/digitacao-visual";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import { useAppStore } from "@/lib/app-store";
 import type { Adversario } from "@/lib/estrelas";
@@ -210,18 +205,26 @@ function Teoria({ aoFim, aoSair }: { aoFim: () => void; aoSair: () => void }) {
               </figcaption>
             </figure>
             <Teclado foco="asdfjklç" />
-            <Maos ativos={[0, 1, 2, 3, 6, 7, 8, 9]} className="mx-auto max-w-sm" />
-            <ul className="grid gap-1 text-sm sm:grid-cols-2">
-              <li>
-                ✋ Mão esquerda em <b>A S D F</b>, mão direita em <b>J K L Ç</b>.
-              </li>
-              <li>
-                👆 Os indicadores ficam em <b>F</b> e <b>J</b>: sinta o pontinho em relevo!
-              </li>
-              <li>
-                👍 Os polegares descansam na barra de <b>espaço</b>.
-              </li>
-              <li>↩️ Depois de cada tecla, o dedo volta para a casinha.</li>
+            <ul className="grid gap-2 text-sm sm:grid-cols-2">
+              {[
+                ["01", "Fileira inicial", "Esquerda em A S D F · direita em J K L Ç"],
+                ["02", "Teclas de referência", "Indicadores em F e J, sobre os pontos em relevo"],
+                ["03", "Barra de espaço", "Polegares relaxados e prontos para pressionar"],
+                ["04", "Sempre retorne", "Depois de cada tecla, volte à posição inicial"],
+              ].map(([numero, titulo, texto]) => (
+                <li
+                  key={numero}
+                  className="flex items-start gap-3 rounded-xl border border-sky-300/15 bg-slate-950/75 p-3 shadow-lg backdrop-blur-sm"
+                >
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-400 to-blue-600 text-xs font-black text-white shadow-md shadow-sky-950/50">
+                    {numero}
+                  </span>
+                  <span>
+                    <b className="block text-sky-100">{titulo}</b>
+                    <span className="text-xs leading-relaxed text-slate-300">{texto}</span>
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         )}
