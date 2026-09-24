@@ -398,7 +398,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     slug: "sala-de-jogos",
     titulo: "Sala de Jogos",
     serieMinima: 1,
-    descricao: "Damas, dominó, velha, memória, quebra-cabeça, tabuleiro de matemática, digitação e corrida.",
+    descricao: "Damas, dominó, velha, memória, quebra-cabeça, tabuleiro de matemática, digitação, corrida e Operação: Plantão.",
     categoria: "Ferramentas",
     icon: Dices,
     cor: "bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",

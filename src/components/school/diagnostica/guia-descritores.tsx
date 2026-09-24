@@ -169,8 +169,9 @@ export function GuiaDescritores() {
         </p>
       </section>
 
-      {/* Filtros */}
-      <section className="sticky top-16 z-30 -mx-4 border-y border-border/60 bg-background/85 px-4 py-3 backdrop-blur-lg sm:-mx-6 sm:top-14 sm:px-6">
+      {/* Filtros. `top-14` casa com a altura fixa (56px) da barra mínima
+          que o NavBar usa fora da home. */}
+      <section className="sticky top-14 z-30 -mx-4 border-y border-border/60 bg-background/85 px-4 py-3 backdrop-blur-lg sm:-mx-6 sm:px-6">
         <div className="flex flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
             <ListFilter className="size-4 shrink-0 text-muted-foreground" />

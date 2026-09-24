@@ -1,4 +1,5 @@
 import { ArrowLeft, Bot, Loader2, Maximize2, Star, Trophy, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ComponentType } from "react";
 
 import { Corrida } from "@/components/school/jogos/corrida";
@@ -371,6 +372,29 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
           );
         })}
       </div>
+
+      {/* Jogo da equipe: tem tela e controles próprios, então abre em página cheia */}
+      <Link
+        to="/operacao-plantao"
+        className="group relative flex min-h-28 items-end overflow-hidden rounded-2xl border-2 border-amber-500/60 bg-slate-950 p-3 text-left transition-colors hover:border-amber-400"
+      >
+        <img
+          src="/images/plantao/menu-fundo.webp"
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 size-full object-cover opacity-70 transition-transform duration-300 group-hover:scale-105"
+        />
+        <span className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+        <span className="relative flex flex-col gap-0.5">
+          <span className="text-sm font-black uppercase tracking-wide text-amber-300">
+            🚔 Operação: Plantão
+          </span>
+          <span className="text-[11px] leading-tight text-slate-200">
+            Três agentes, seis missões: pegue o cachorro, entregue marmitas, corra de moto e
+            maratona. Com som, para celular e computador.
+          </span>
+        </span>
+      </Link>
     </div>
   );
 }
