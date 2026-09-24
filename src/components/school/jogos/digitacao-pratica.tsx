@@ -236,12 +236,12 @@ export function PraticaDigitacao({
 
   return (
     <div
-      className="relative min-h-full overflow-hidden border border-white/10 bg-slate-950 text-white sm:rounded-xl"
+      className="relative isolate min-h-full overflow-hidden border border-white/10 bg-slate-950 text-white [contain:paint] sm:rounded-xl"
       onClick={() => entrada.current?.focus()}
     >
       {cenario && (
         <div
-          className="absolute inset-0 scale-[1.02] bg-cover bg-center opacity-80"
+          className="absolute inset-0 bg-cover bg-center opacity-80"
           style={{ backgroundImage: `url(/images/jogos/${cenario}.webp)` }}
           aria-hidden
         />
@@ -266,7 +266,6 @@ export function PraticaDigitacao({
         {fase === "pronto" && (
           <div className="flex flex-col items-center gap-2 py-1">
             <TutorFala
-              compacto
               texto={
                 abertura ??
                 "Olá! Eu sou o Teco. Vou acender a tecla certa e mostrar qual dedo usar. É só seguir a cor!"
@@ -276,7 +275,7 @@ export function PraticaDigitacao({
             <img
               src="/images/jogos/digitacao-maos-guia-pro.webp"
               alt="Mãos posicionadas corretamente sobre o teclado"
-              className="aspect-video w-full max-w-sm rounded-xl border border-sky-300/30 object-cover shadow-2xl shadow-sky-950/60"
+              className="aspect-video max-h-[48dvh] w-full max-w-2xl rounded-2xl border border-sky-300/30 object-cover shadow-2xl shadow-sky-950/60"
             />
             <p className="text-[11px] text-slate-400">
               {prompts.length} {prompts.length === 1 ? "item" : "itens"} para digitar
@@ -400,7 +399,7 @@ export function PraticaDigitacao({
                   />
                   {dedo !== null && PONTA_DEDO[dedo] && (
                     <span
-                      className="pointer-events-none absolute size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_18px_currentColor]"
+                      className="pointer-events-none absolute size-7 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_18px_currentColor]"
                       style={{
                         left: `${PONTA_DEDO[dedo].x}%`,
                         top: `${PONTA_DEDO[dedo].y}%`,
@@ -409,8 +408,7 @@ export function PraticaDigitacao({
                       }}
                       aria-hidden
                     >
-                      <span className="absolute inset-0 animate-ping rounded-full bg-current opacity-60" />
-                      <span className="absolute inset-[5px] rounded-full bg-white" />
+                      <span className="absolute inset-[6px] rounded-full bg-white" />
                     </span>
                   )}
                 </div>

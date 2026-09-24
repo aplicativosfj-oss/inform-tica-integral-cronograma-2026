@@ -55,7 +55,7 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
               <span
                 key={k}
                 className={cn(
-                  "relative flex h-8 w-[8.6%] items-center justify-center overflow-hidden rounded-lg border text-[10px] font-black uppercase tracking-wide transition-all duration-150 sm:h-10 sm:text-xs",
+                  "relative flex h-9 w-[8.6%] items-center justify-center overflow-hidden rounded-lg border text-xs font-black uppercase tracking-wide sm:h-11 sm:text-sm",
                   ehAlvo
                     ? "z-10 -translate-y-1 scale-105 border-white text-white shadow-xl"
                     : erro === k
@@ -98,7 +98,7 @@ export function Teclado({ alvo, erro, cores, foco, className }: TecladoProps) {
       <div className="flex justify-center">
         <span
           className={cn(
-            "flex h-8 w-3/5 items-center justify-center rounded-lg border text-[9px] font-bold uppercase tracking-[.25em] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_3px_0_rgba(0,0,0,.55)] transition-all sm:h-10",
+            "flex h-9 w-3/5 items-center justify-center rounded-lg border text-[10px] font-bold uppercase tracking-[.25em] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_3px_0_rgba(0,0,0,.55)] sm:h-11 sm:text-xs",
             alvo === " "
               ? "border-white bg-slate-500 text-white shadow-lg shadow-slate-400/60"
               : erro === " "

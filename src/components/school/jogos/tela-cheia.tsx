@@ -63,6 +63,10 @@ export function CaixaJogo({
   // API nativa de tela cheia e bloqueio de orientação.
   useEffect(() => {
     if (!cheia) return;
+    const overflowHtml = document.documentElement.style.overflow;
+    const overflowBody = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
     const el = document.documentElement;
     void el.requestFullscreen?.().catch(() => undefined);
     if (horizontal) {
@@ -83,6 +87,8 @@ export function CaixaJogo({
     return () => {
       document.removeEventListener("fullscreenchange", aoMudar);
       window.removeEventListener("keydown", aoTecla);
+      document.documentElement.style.overflow = overflowHtml;
+      document.body.style.overflow = overflowBody;
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined);
       try {
         window.screen.orientation?.unlock?.();
@@ -145,7 +151,7 @@ export function CaixaJogo({
             <div
               className={
                 cheia
-                  ? "min-h-0 flex-1 overflow-auto p-2 [&>*]:min-h-full sm:p-4"
+                  ? "min-h-0 flex-1 overflow-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:min-h-full sm:p-4"
                   : ""
               }
             >
