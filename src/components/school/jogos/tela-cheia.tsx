@@ -52,7 +52,7 @@ export function CaixaJogo({
     if (!hospedeiro) return;
     if (cheia) {
       hospedeiro.className =
-        "fixed inset-0 z-[9999] flex flex-col overflow-auto overscroll-contain bg-slate-950 text-white";
+        "fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-slate-950 text-white";
       document.body.appendChild(hospedeiro);
     } else if (lugar.current) {
       hospedeiro.className = "";
@@ -107,7 +107,7 @@ export function CaixaJogo({
       <div ref={lugar} />
       {hospedeiro &&
         createPortal(
-          <div className={cheia ? "flex min-h-full flex-1 flex-col" : ""}>
+          <div className={cheia ? "flex h-full min-h-0 flex-1 flex-col overflow-hidden" : ""}>
             {cheia && (
               <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-slate-950/95 px-3 py-1.5 backdrop-blur">
                 <span className="min-w-0 truncate text-xs font-bold text-slate-200">
@@ -142,11 +142,19 @@ export function CaixaJogo({
                 </div>
               </div>
             )}
-            <div className={cheia ? "flex-1 p-2 sm:p-4" : ""}>{children}</div>
+            <div
+              className={
+                cheia
+                  ? "min-h-0 flex-1 overflow-auto p-2 [&>*]:min-h-full sm:p-4"
+                  : ""
+              }
+            >
+              {children}
+            </div>
             <p
               className={
                 cheia
-                  ? "border-t border-white/10 px-3 py-2 text-center text-[10px] text-slate-400"
+                  ? "shrink-0 border-t border-white/10 px-3 py-1.5 text-center text-[10px] text-slate-400"
                   : "mt-2 text-center text-[10px] text-muted-foreground"
               }
             >

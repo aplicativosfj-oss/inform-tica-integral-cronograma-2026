@@ -308,7 +308,13 @@ function Ranking({ aoSair }: { aoSair: () => void }) {
     };
   }, []);
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-slate-950 p-3 text-white sm:p-4">
+    <div
+      className="flex min-h-full flex-col gap-2 rounded-2xl border border-sky-300/20 bg-cover bg-center p-3 text-white shadow-2xl sm:p-4"
+      style={{
+        backgroundImage:
+          "linear-gradient(115deg, rgba(2,6,23,.96), rgba(2,6,23,.76)), url(/images/jogos/digitacao-cenario-6-pro.webp)",
+      }}
+    >
       <Voltar onClick={aoSair} />
       <h4 className="flex items-center gap-2 text-lg font-black">
         <Trophy className="size-5 text-amber-400" /> Ranking de digitação
@@ -493,7 +499,13 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
         ? "O robô foi mais rápido desta vez. Treine as fases e volte para me vencer!"
         : "Ainda não foi. Tente de novo, com calma: precisão vem antes de velocidade.";
     return (
-      <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-slate-950 p-4 text-center text-white">
+      <div
+        className="flex min-h-full flex-col items-center justify-center gap-3 rounded-2xl border border-sky-300/20 bg-cover bg-center p-4 text-center text-white shadow-2xl"
+        style={{
+          backgroundImage:
+            "linear-gradient(115deg, rgba(2,6,23,.94), rgba(2,6,23,.72)), url(/images/jogos/digitacao-cenario-5-pro.webp)",
+        }}
+      >
         <Trofeu estrelas={r.estrelas} ganhou={passou} />
         <h4 className="text-xl font-black">
           {sess.tipo === "desafio"
@@ -587,7 +599,13 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
 
   if (tela === "licoes") {
     return (
-      <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-slate-950 p-3 text-white sm:p-4">
+      <div
+        className="flex min-h-full flex-col gap-2 rounded-2xl border border-sky-300/20 bg-cover bg-center p-3 text-white shadow-2xl sm:p-4"
+        style={{
+          backgroundImage:
+            "linear-gradient(115deg, rgba(2,6,23,.95), rgba(2,6,23,.74)), url(/images/jogos/digitacao-cenario-3-pro.webp)",
+        }}
+      >
         <Voltar onClick={() => setTela("home")} />
         <h4 className="flex items-center gap-2 text-lg font-black">
           <GraduationCap className="size-5 text-sky-300" /> Lições do tutor
@@ -731,7 +749,7 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
     },
   ];
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-sky-300/20 bg-slate-950 text-white shadow-2xl shadow-sky-950/30">
+    <div className="relative min-h-full overflow-hidden rounded-2xl border border-sky-300/20 bg-slate-950 text-white shadow-2xl shadow-sky-950/30">
       <div
         className="absolute inset-0 scale-[1.02] bg-cover bg-[68%_center] opacity-55"
         style={{ backgroundImage: "url(/images/jogos/digitacao-capa-pro.webp)" }}
@@ -739,7 +757,7 @@ export function Digitacao({ adversario, nivel }: { adversario: Adversario; nivel
       />
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/35" />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/35 to-slate-950" />
-      <div className="relative flex min-h-[390px] flex-col gap-3 p-3 sm:min-h-[420px] sm:p-5">
+      <div className="relative flex min-h-full flex-col gap-4 p-4 sm:p-6 lg:p-8">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <span className="rounded-2xl border border-cyan-300/20 bg-slate-950/55 p-1.5 shadow-lg shadow-cyan-950/50 backdrop-blur-md">
             <Teco humor="animado" className="size-11 shrink-0 sm:size-16" />
