@@ -23,6 +23,7 @@ import {
   type IdPista,
 } from "@/components/school/jogos/corrida-motor";
 import { SomCorrida } from "@/components/school/jogos/corrida-som";
+import type { PilotoMoto } from "@/components/school/jogos/corrida-motor";
 import { registrarPartida, type Adversario } from "@/lib/estrelas";
 import { IMAGENS_CORRIDA, precarregar } from "@/lib/precarregar";
 import { cn } from "@/lib/utils";
@@ -234,14 +235,38 @@ const semHud: Hud = {
   voltasFeitas: 0,
 };
 
-export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
+/** Configuração fixa da corrida quando ela é usada por outro jogo (missão de moto do Operação: Plantão). */
+export interface CorridaAutomatica {
+  pista: IdPista;
+  modo: "voltas" | "tempo";
+  voltas: number;
+  tempo: number;
+  nivel: 1 | 2 | 3;
+  veiculo: "carro" | "moto";
+  piloto?: PilotoMoto;
+  corVeiculo: string;
+  titulo: string;
+  subtitulo: string;
+  aoFim: (r: { posicao: number; segundos: number; total: number }) => void;
+  aoSair: () => void;
+}
+
+export function Corrida({
+  adversario,
+  nivel,
+  automatico,
+}: {
+  adversario: Adversario;
+  nivel: number;
+  automatico?: CorridaAutomatica;
+}) {
   const [fase, setFase] = useState<Fase>("menu");
-  const [nivelEsc, setNivelEsc] = useState(Math.min(Math.max(nivel, 1), 3));
-  const [modo, setModo] = useState<"voltas" | "tempo">("voltas");
-  const [voltasEsc, setVoltasEsc] = useState(3);
-  const [tempoEsc, setTempoEsc] = useState(90);
+  const [nivelEsc, setNivelEsc] = useState(automatico?.nivel ?? Math.min(Math.max(nivel, 1), 3));
+  const [modo, setModo] = useState<"voltas" | "tempo">(automatico?.modo ?? "voltas");
+  const [voltasEsc, setVoltasEsc] = useState(automatico?.voltas ?? 3);
+  const [tempoEsc, setTempoEsc] = useState(automatico?.tempo ?? 90);
   const [carro, setCarro] = useState(0);
-  const [pista, setPista] = useState<IdPista>("praia");
+  const [pista, setPista] = useState<IdPista>(automatico?.pista ?? "praia");
   const [rodada, setRodada] = useState(0);
   const [contagem, setContagem] = useState<number | null>(null);
   const [hud, setHud] = useState<Hud>(semHud);
@@ -267,7 +292,7 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
 
   useEffect(() => precarregar(IMAGENS_CORRIDA), []);
 
-  const cor = CARROS[carro]!.cor;
+  const cor = automatico?.corVeiculo ?? CARROS[carro]!.cor;
 
   // Aparelho de toque: controles na tela, aceleração automática ligada.
   useEffect(() => {
@@ -316,6 +341,12 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
       canvas: canvas.current,
       pista,
       corJogador: cor,
+      ...(automatico
+        ? {
+            veiculo: automatico.veiculo,
+            ...(automatico.piloto ? { piloto: automatico.piloto } : {}),
+          }
+        : {}),
       nivel: nivelEsc,
       modo,
       voltas: voltasEsc,
@@ -323,6 +354,10 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
       som: som.current,
       aoMudarHud: setHud,
       aoTerminar: (posicao, segundos, extra) => {
+        if (automatico) {
+          automatico.aoFim({ posicao, segundos, total: 6 });
+          return;
+        }
         setFim({ posicao, segundos, estrelas: null, ...extra });
         setFase("fim");
         void registrarPartida({
@@ -498,6 +533,46 @@ export function Corrida({ adversario, nivel }: { adversario: Adversario; nivel: 
       if (!inclinar) entrada.current.volante = 0;
     },
   };
+
+  if (fase === "menu" && automatico) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950 text-white">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-40"
+          style={{ backgroundImage: "url(/images/plantao/missao-moto.webp)" }}
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-slate-950/80 to-slate-950" />
+        <div className="relative flex flex-col items-center gap-3 p-6 text-center">
+          <h3 className="text-3xl font-black uppercase italic tracking-tight text-amber-300 sm:text-4xl">
+            {automatico.titulo}
+          </h3>
+          <p className="max-w-md text-sm text-slate-200">{automatico.subtitulo}</p>
+          <p className="max-w-md text-xs text-slate-400">
+            {toque
+              ? "A moto acelera sozinha: gire o volante da tela, arraste o dedo ou incline o celular."
+              : "Setas ou WASD para pilotar. Passe nas faixas azuis para ganhar turbo."}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={automatico.aoSair}
+              className="h-12 cursor-pointer rounded-xl border border-white/20 px-5 text-sm font-semibold text-slate-200 hover:bg-white/10"
+            >
+              Voltar
+            </button>
+            <button
+              type="button"
+              onClick={correr}
+              className="flex h-12 cursor-pointer items-center gap-2 rounded-xl bg-gradient-to-b from-amber-300 to-orange-500 px-8 text-base font-black uppercase text-amber-950 shadow-lg transition-transform hover:scale-105 active:scale-95"
+            >
+              <Play className="size-5 fill-current" /> Largar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (fase === "menu") {
     return (

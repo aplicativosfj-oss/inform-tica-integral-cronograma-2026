@@ -267,8 +267,18 @@ export interface Hud {
   voltasFeitas: number;
 }
 
+export interface PilotoMoto {
+  camisa: string;
+  calca: string;
+  capacete: string;
+  mochila: boolean;
+}
+
 export interface OpcoesCorrida {
   canvas: HTMLCanvasElement;
+  /** "moto" troca os carros por motos com piloto (missão do Operação: Plantão). */
+  veiculo?: "carro" | "moto";
+  piloto?: PilotoMoto;
   pista: IdPista;
   corJogador: string;
   /** 1 fácil, 2 médio, 3 difícil */
@@ -328,6 +338,153 @@ function novoPonto(): Ponto {
 }
 
 // ----------------------------------------------------------------- desenho
+
+/** Moto vista de trás, com o piloto de capacete. `w` é a largura de referência do carro. */
+export function desenharMoto(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  base: number,
+  w: number,
+  cor: string,
+  opcoes: { inclinacao?: number; freando?: boolean; piloto?: PilotoMoto } = {},
+) {
+  const h = w * 0.5;
+  const p = opcoes.piloto ?? {
+    camisa: "#1e2a6b",
+    calca: "#27406e",
+    capacete: "#dc2626",
+    mochila: false,
+  };
+  const traco = Math.max(1, w * 0.008);
+  ctx.save();
+  ctx.translate(cx, base);
+  if (opcoes.inclinacao) ctx.rotate(opcoes.inclinacao * 2.2);
+
+  // sombra
+  ctx.save();
+  ctx.scale(1, 0.14);
+  const sombra = ctx.createRadialGradient(0, 0, w * 0.03, 0, 0, w * 0.4);
+  sombra.addColorStop(0, "rgba(0,0,0,0.65)");
+  sombra.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = sombra;
+  ctx.beginPath();
+  ctx.arc(0, 0, w * 0.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // pneu traseiro
+  const tg = ctx.createLinearGradient(-w * 0.08, 0, w * 0.08, 0);
+  tg.addColorStop(0, "#05070a");
+  tg.addColorStop(0.5, "#2a313c");
+  tg.addColorStop(1, "#05070a");
+  ctx.fillStyle = tg;
+  ctx.beginPath();
+  ctx.roundRect(-w * 0.075, -h * 0.66, w * 0.15, h * 0.66, w * 0.05);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.lineWidth = traco;
+  for (let i = 1; i < 6; i++) {
+    ctx.beginPath();
+    ctx.moveTo(-w * 0.07, -h * 0.66 + (h * 0.66 * i) / 6);
+    ctx.lineTo(w * 0.07, -h * 0.66 + (h * 0.66 * i) / 6);
+    ctx.stroke();
+  }
+  // escapamento cromado
+  const eg = ctx.createLinearGradient(w * 0.1, 0, w * 0.16, 0);
+  eg.addColorStop(0, "#f8fafc");
+  eg.addColorStop(1, "#64748b");
+  ctx.fillStyle = eg;
+  ctx.beginPath();
+  ctx.roundRect(w * 0.1, -h * 0.5, w * 0.055, h * 0.34, w * 0.02);
+  ctx.fill();
+  // paralama e lanterna
+  const pg = ctx.createLinearGradient(0, -h * 0.85, 0, -h * 0.55);
+  pg.addColorStop(0, cor);
+  pg.addColorStop(1, "#000000");
+  ctx.fillStyle = pg;
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.14, -h * 0.6);
+  ctx.lineTo(-w * 0.1, -h * 0.85);
+  ctx.lineTo(w * 0.1, -h * 0.85);
+  ctx.lineTo(w * 0.14, -h * 0.6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#f8fafc";
+  ctx.fillRect(-w * 0.06, -h * 0.72, w * 0.12, h * 0.07);
+  if (opcoes.freando) {
+    ctx.shadowColor = "#ff3030";
+    ctx.shadowBlur = w * 0.08;
+  }
+  ctx.fillStyle = opcoes.freando ? "#ff4444" : "#b91c1c";
+  ctx.beginPath();
+  ctx.roundRect(-w * 0.09, -h * 0.82, w * 0.18, h * 0.05, w * 0.015);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // pernas do piloto ao lado do tanque
+  ctx.fillStyle = p.calca;
+  for (const lado of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(lado * w * 0.16, -h * 1.02, w * 0.075, h * 0.3, lado * 0.1, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // tronco
+  const cg = ctx.createLinearGradient(-w * 0.2, 0, w * 0.2, 0);
+  cg.addColorStop(0, p.camisa);
+  cg.addColorStop(1, "rgba(0,0,0,0.5)");
+  ctx.fillStyle = p.camisa;
+  ctx.beginPath();
+  ctx.roundRect(-w * 0.16, -h * 1.5, w * 0.32, h * 0.7, w * 0.07);
+  ctx.fill();
+  ctx.fillStyle = cg;
+  ctx.globalAlpha = 0.35;
+  ctx.fillRect(-w * 0.16, -h * 1.5, w * 0.32, h * 0.7);
+  ctx.globalAlpha = 1;
+  if (p.mochila) {
+    ctx.fillStyle = "#1c1c20";
+    ctx.beginPath();
+    ctx.roundRect(-w * 0.14, -h * 1.5, w * 0.28, h * 0.52, w * 0.05);
+    ctx.fill();
+    ctx.fillStyle = "#2f2f36";
+    ctx.fillRect(-w * 0.1, -h * 1.34, w * 0.2, h * 0.05);
+  }
+  // braços até o guidão
+  ctx.strokeStyle = p.camisa;
+  ctx.lineCap = "round";
+  ctx.lineWidth = w * 0.075;
+  for (const lado of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(lado * w * 0.2, -h * 1.5);
+    ctx.lineTo(lado * w * 0.37, -h * 1.12);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = "#111827";
+  ctx.lineWidth = w * 0.03;
+  ctx.beginPath();
+  ctx.moveTo(-w * 0.4, -h * 1.1);
+  ctx.lineTo(w * 0.4, -h * 1.1);
+  ctx.stroke();
+  ctx.fillStyle = "#0b0f14";
+  for (const lado of [-1, 1]) {
+    ctx.beginPath();
+    ctx.arc(lado * w * 0.39, -h * 1.1, w * 0.04, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // capacete
+  const hg = ctx.createRadialGradient(-w * 0.03, -h * 1.9, 2, 0, -h * 1.82, w * 0.14);
+  hg.addColorStop(0, "#ffffff");
+  hg.addColorStop(0.25, p.capacete);
+  hg.addColorStop(1, "#000000");
+  ctx.fillStyle = hg;
+  ctx.beginPath();
+  ctx.arc(0, -h * 1.66, w * 0.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.28)";
+  ctx.beginPath();
+  ctx.ellipse(-w * 0.04, -h * 1.9, w * 0.035, w * 0.05, -0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
 
 /** Carro esportivo visto de trás. `w` é a largura total; (cx, base) é o meio da base. */
 export function desenharCarro(
@@ -1338,7 +1495,16 @@ export class Corrida {
         c.beginPath();
         c.rect(0, 0, LARGURA, seg.clip);
         c.clip();
-        desenharCarro(c, sx, sy, larg, r.cor, { freando: false });
+        if (this.op.veiculo === "moto") {
+          desenharMoto(c, sx, sy, larg * 1.15, r.cor, {
+            piloto: {
+              camisa: r.cor,
+              calca: "#1f2937",
+              capacete: r.cor === CARROS[0]!.cor ? "#0b0f14" : "#f8fafc",
+              mochila: false,
+            },
+          });
+        } else desenharCarro(c, sx, sy, larg, r.cor, { freando: false });
         c.restore();
       }
     }
@@ -1364,10 +1530,18 @@ export class Corrida {
         : (this.entrada.direita ? 1 : 0) - (this.entrada.esquerda ? 1 : 0);
     const inclina = dirVisual * 0.045 * (this.vel / VEL_MAX);
     if (this.piscar <= 0 || Math.floor(this.piscar * 20) % 2 === 0) {
-      desenharCarro(c, LARGURA / 2, ALTURA - 12 + trepida, LARGURA * 0.3, this.op.corJogador, {
-        inclinacao: inclina,
-        freando: this.freando,
-      });
+      if (this.op.veiculo === "moto") {
+        desenharMoto(c, LARGURA / 2, ALTURA - 12 + trepida, LARGURA * 0.3, this.op.corJogador, {
+          inclinacao: inclina,
+          freando: this.freando,
+          ...(this.op.piloto ? { piloto: this.op.piloto } : {}),
+        });
+      } else {
+        desenharCarro(c, LARGURA / 2, ALTURA - 12 + trepida, LARGURA * 0.3, this.op.corJogador, {
+          inclinacao: inclina,
+          freando: this.freando,
+        });
+      }
     }
 
     desenharAcabamento(c, this.tema, this.vel / VEL_MAX);
