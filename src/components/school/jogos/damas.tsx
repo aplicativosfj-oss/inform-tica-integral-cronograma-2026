@@ -231,6 +231,7 @@ function Disco({ peca }: { peca: Peca }) {
 }
 
 export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
+  const [tema, setTema] = useState<"madeira" | "neon" | "oceano">("madeira");
   const [tab, setTab] = useState<Tab>(tabuleiroInicial);
   const [vez, setVez] = useState<Cor>("b");
   const [sel, setSel] = useState<number | null>(null);
@@ -323,7 +324,31 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
   const temCaptura = legais.some((j) => j.capturadas.length > 0);
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div
+      className="flex min-h-[34rem] flex-col items-center gap-2 rounded-3xl border border-white/20 bg-slate-950/90 p-4 text-white shadow-2xl"
+      style={{
+        backgroundImage:
+          "linear-gradient(180deg,rgba(2,6,23,.5),rgba(2,6,23,.94)),url(/images/jogos/central-arcade-profissional.png)",
+        backgroundSize: "cover",
+      }}
+    >
+      <div className="flex flex-wrap justify-center gap-2" aria-label="Tema do tabuleiro">
+        {(["madeira", "neon", "oceano"] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setTema(t)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-bold capitalize",
+              tema === t
+                ? "border-amber-300 bg-amber-300/20 text-amber-100"
+                : "border-white/20 bg-black/30 text-slate-200",
+            )}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
       <p className="text-sm font-semibold text-foreground">
         {fim
           ? fim === "empate"
@@ -345,7 +370,14 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
         </p>
       )}
 
-      <div className="grid w-[min(92vw,calc(100dvh-12rem),32rem)] grid-cols-8 overflow-hidden rounded-xl border-4 border-[#5b3a24] shadow-lg">
+      <div
+        className={cn(
+          "grid w-[min(92vw,calc(100dvh-12rem),32rem)] grid-cols-8 overflow-hidden rounded-xl border-4 shadow-2xl",
+          tema === "madeira" && "border-amber-950",
+          tema === "neon" && "border-fuchsia-400 shadow-[0_0_30px_#d946ef]",
+          tema === "oceano" && "border-cyan-300 shadow-[0_0_25px_#22d3ee]",
+        )}
+      >
         {tab.map((c, i) => {
           const podeIr = destinos.some((j) => j.para === i);
           const ehOrigem = origens.includes(i);
@@ -394,7 +426,9 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
               className={cn(
                 "relative aspect-square w-full touch-none transition-colors",
                 puxando?.de === i && "z-20",
-                escura(i) ? "bg-[#8a5a34]" : "bg-[#e8d5b7]",
+                tema === "madeira" && (escura(i) ? "bg-[#8a5a34]" : "bg-[#e8d5b7]"),
+                tema === "neon" && (escura(i) ? "bg-violet-950" : "bg-fuchsia-300"),
+                tema === "oceano" && (escura(i) ? "bg-cyan-900" : "bg-sky-100"),
                 sel === i && "ring-4 ring-inset ring-primary",
                 podeIr && "cursor-pointer",
                 ehOrigem && !fim && "cursor-pointer",

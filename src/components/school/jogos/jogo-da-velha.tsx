@@ -105,6 +105,7 @@ function Simbolo({ marca, destaque }: { marca: Marca; destaque?: boolean }) {
 }
 
 export function JogoDaVelha({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
+  const [cenario, setCenario] = useState<"espaco" | "selva" | "oceano">("espaco");
   const [tab, setTab] = useState<Marca[]>(Array(9).fill(null));
   const [vez, setVez] = useState<Marca>("X");
   const [fim, setFim] = useState<{ marca: Marca; linha: number[] } | "empate" | null>(null);
@@ -184,7 +185,30 @@ export function JogoDaVelha({ adversario, nivel }: { adversario: Adversario; niv
   const linhaVencedora = fim && fim !== "empate" ? fim.linha : [];
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div
+      className="flex min-h-[32rem] flex-col items-center gap-3 rounded-3xl border border-white/20 bg-slate-950/90 p-5 text-white shadow-2xl"
+      style={{
+        backgroundImage:
+          "linear-gradient(180deg,rgba(2,6,23,.5),rgba(2,6,23,.94)),url(/images/jogos/central-arcade-profissional.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="flex gap-2">
+        {(["espaco", "selva", "oceano"] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => setCenario(t)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-bold capitalize",
+              cenario === t ? "border-cyan-300 bg-cyan-300/20" : "border-white/20 bg-black/30",
+            )}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
       <p className="text-sm font-semibold text-foreground">
         {fim === "empate"
           ? "Deu velha! Ninguém ganhou."
@@ -201,7 +225,14 @@ export function JogoDaVelha({ adversario, nivel }: { adversario: Adversario; niv
               : `Vez do ${vez}`}
       </p>
 
-      <div className="grid grid-cols-3 gap-1.5 rounded-2xl bg-muted/50 p-1.5">
+      <div
+        className={cn(
+          "grid grid-cols-3 gap-2 rounded-3xl border-4 p-2 shadow-2xl",
+          cenario === "espaco" && "border-violet-400 bg-violet-950/70 shadow-[0_0_28px_#8b5cf6]",
+          cenario === "selva" && "border-emerald-400 bg-emerald-950/70",
+          cenario === "oceano" && "border-cyan-300 bg-cyan-950/70",
+        )}
+      >
         {tab.map((m, i) => (
           <button
             key={i}
@@ -210,7 +241,7 @@ export function JogoDaVelha({ adversario, nivel }: { adversario: Adversario; niv
             disabled={!!m || !!fim}
             aria-label={`Casa ${i + 1}${m ? `, ${m}` : ", vazia"}`}
             className={cn(
-              "size-[74px] rounded-xl border-2 bg-card transition-colors",
+              "size-[78px] rounded-2xl border-2 bg-white/90 transition-all hover:-translate-y-0.5 hover:shadow-lg",
               !m && !fim
                 ? "cursor-pointer border-border hover:border-primary hover:bg-primary/5"
                 : "border-border",

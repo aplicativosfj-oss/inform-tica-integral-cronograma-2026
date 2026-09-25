@@ -60,6 +60,7 @@ function embaralharLegal(lado: number): number[] {
 }
 
 export function QuebraCabeca({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
+  const [perfil, setPerfil] = useState<"1-2" | "3-5" | "inclusivo">("1-2");
   const config = TAMANHOS[Math.min(nivel, TAMANHOS.length) - 1] ?? TAMANHOS[0]!;
   const lado = config.lado;
   const total = lado * lado;
@@ -115,7 +116,41 @@ export function QuebraCabeca({ adversario, nivel }: { adversario: Adversario; ni
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div
+      className="flex min-h-[34rem] flex-col items-center gap-3 rounded-3xl border border-white/20 bg-slate-950/90 p-4 text-white shadow-2xl"
+      style={{
+        backgroundImage:
+          "linear-gradient(180deg,rgba(2,6,23,.48),rgba(2,6,23,.94)),url(/images/jogos/central-arcade-profissional.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "left center",
+      }}
+    >
+      <div className="flex flex-wrap justify-center gap-2">
+        {(
+          [
+            ["1-2", "1º–2º ano"],
+            ["3-5", "3º–5º ano"],
+            ["inclusivo", "Modo inclusivo"],
+          ] as const
+        ).map(([id, nome]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setPerfil(id)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-bold",
+              perfil === id ? "border-amber-300 bg-amber-300/20" : "border-white/20 bg-black/30",
+            )}
+          >
+            {nome}
+          </button>
+        ))}
+      </div>
+      {perfil === "inclusivo" && (
+        <p className="rounded-xl bg-cyan-300/15 px-3 py-2 text-center text-xs text-cyan-100">
+          Peças maiores, contraste reforçado, modelo livre e instruções faladas.
+        </p>
+      )}
       <p className="text-sm font-semibold text-foreground">
         {pronto && movimentos > 0
           ? `Pronto! Era ${palavra.texto}, em ${movimentos} movimentos.`
@@ -123,7 +158,10 @@ export function QuebraCabeca({ adversario, nivel }: { adversario: Adversario; ni
       </p>
 
       <div
-        className="relative overflow-hidden rounded-2xl border-4 border-border bg-muted/40"
+        className={cn(
+          "relative overflow-hidden rounded-3xl border-4 bg-white/90 shadow-2xl",
+          perfil === "inclusivo" ? "border-amber-300 ring-4 ring-cyan-300/50" : "border-violet-300",
+        )}
         style={{ width: LADO_PX, height: LADO_PX }}
       >
         {pecas.map((peca, pos) => {

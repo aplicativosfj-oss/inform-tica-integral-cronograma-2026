@@ -23,6 +23,11 @@ import { BotaoCompartilhar } from "@/components/school/botao-compartilhar";
 import { CaixaJogo } from "@/components/school/jogos/tela-cheia";
 import { QuebraCabeca } from "@/components/school/jogos/quebra-cabeca";
 import { TabuleiroMatematica } from "@/components/school/jogos/tabuleiro-matematica";
+import {
+  CartasEducativas,
+  NaveEducativa,
+  PinballEducativo,
+} from "@/components/school/jogos/arcade-educativo";
 import { lerAlunoSessao } from "@/lib/aluno-session";
 import { lerCarteira, somarPorAluno, type Adversario, type LinhaRanking } from "@/lib/estrelas";
 import { fetchRanking } from "@/lib/placares";
@@ -135,6 +140,33 @@ export const JOGOS: JogoInfo[] = [
     Componente: Corrida,
     modos: ["computador"],
     niveis: ["Fácil", "Médio", "Difícil"],
+  },
+  {
+    id: "pinball-educativo",
+    nome: "Pinball das Descobertas",
+    emoji: "🕹️",
+    descricao: "Pinball luminoso com três cenários, efeitos, pontuação e som.",
+    Componente: PinballEducativo,
+    modos: ["computador"],
+    niveis: ["Explorar", "Desafio", "Mestre"],
+  },
+  {
+    id: "esquadrao-estelar",
+    nome: "Esquadrão Estelar",
+    emoji: "🚀",
+    descricao: "Nave espacial com aventura, alfabetização e matemática personalizáveis.",
+    Componente: NaveEducativa,
+    modos: ["computador"],
+    niveis: ["1º–2º ano", "3º–4º ano", "5º ano"],
+  },
+  {
+    id: "clube-das-cartas",
+    nome: "Clube das Cartas",
+    emoji: "🃏",
+    descricao: "Cartas para alfabetização, matemática e baralho convencional.",
+    Componente: CartasEducativas,
+    modos: ["computador", "colega"],
+    niveis: ["Iniciante", "Intermediário", "Avançado"],
   },
 ];
 
@@ -299,7 +331,24 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div
+      className="relative flex flex-col gap-3 overflow-hidden rounded-3xl border border-violet-300/40 bg-slate-950 p-3 shadow-2xl"
+      style={{
+        backgroundImage:
+          "linear-gradient(180deg,rgba(2,6,23,.68),rgba(2,6,23,.93)),url(/images/jogos/central-arcade-profissional.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="rounded-2xl border border-white/15 bg-black/35 p-3 text-white backdrop-blur-sm">
+        <p className="text-[10px] font-black uppercase tracking-[.25em] text-cyan-300">
+          Universo de aprendizagem
+        </p>
+        <h3 className="text-xl font-black">Sala de Jogos — Edição Profissional</h3>
+        <p className="text-xs text-slate-200">
+          Cenários, progressão, acessibilidade, som e desafios do 1º ao 5º ano.
+        </p>
+      </div>
       <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2">
         <span className="flex items-center gap-1.5 text-sm font-bold text-amber-700 dark:text-amber-300">
           <Star className="size-4 fill-current" /> {carteira.total}{" "}
@@ -317,8 +366,8 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
       {!online && (
         <p className="flex items-center gap-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-[11px] text-sky-800 dark:text-sky-200">
           <WifiOff className="size-3.5 shrink-0" />
-          Sem internet: os jogos continuam funcionando. As estrelas ficam neste aparelho e o
-          ranking mostra só as partidas daqui.
+          Sem internet: os jogos continuam funcionando. As estrelas ficam neste aparelho e o ranking
+          mostra só as partidas daqui.
         </p>
       )}
 
@@ -409,12 +458,12 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
               className={cn(
                 "flex flex-col items-start gap-0.5 rounded-2xl border-2 p-2.5 text-left transition-colors",
                 serve
-                  ? "cursor-pointer border-border bg-card hover:border-primary hover:bg-primary/5"
+                  ? "cursor-pointer border-white/20 bg-slate-950/75 text-white shadow-lg backdrop-blur-sm hover:-translate-y-1 hover:border-cyan-300 hover:bg-violet-950/85"
                   : "border-dashed border-border bg-muted/30 opacity-60",
               )}
             >
               <span className="flex w-full items-center justify-between">
-                <span className="text-sm font-bold text-foreground">
+                <span className="text-sm font-bold text-white">
                   <span aria-hidden>{j.emoji}</span> {j.nome}
                 </span>
                 {minhas && minhas.estrelas > 0 && (
@@ -424,7 +473,7 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
                   </span>
                 )}
               </span>
-              <span className="text-[11px] leading-tight text-muted-foreground">
+              <span className="text-[11px] leading-tight text-slate-300">
                 {serve
                   ? j.descricao
                   : `Este só tem ${j.modos.includes("computador") ? "contra o computador" : "contra um colega"}.`}
