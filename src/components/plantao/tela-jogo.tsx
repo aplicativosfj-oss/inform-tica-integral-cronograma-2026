@@ -637,6 +637,7 @@ export function TelaMaratona({
       clima,
       cenario,
       meta,
+      missao: missao.id as "maratona" | "perseguicao",
       som,
       imagens,
       aoHud: setHud,
@@ -645,7 +646,7 @@ export function TelaMaratona({
     m.entrada = entrada.current;
     motor.current = m;
     m.iniciar();
-  }, [fase, personagem, nivel, clima, cenario, meta, som, imagens, aoFim]);
+  }, [fase, personagem, nivel, clima, cenario, meta, missao.id, som, imagens, aoFim]);
   useEffect(
     () => () => {
       motor.current?.parar();
@@ -708,9 +709,20 @@ export function TelaMaratona({
               <BarraFolego v={hud.folego} />
             </div>
             <div className="rounded-xl border border-amber-300/50 bg-slate-950/70 px-3 py-1 text-center backdrop-blur">
-              <p className="text-lg font-black tabular-nums text-amber-300 sm:text-2xl">
-                {hud.metros} <span className="text-xs text-slate-300">/ {hud.meta} m</span>
-              </p>
+              {hud.distanciaAlvo !== null ? (
+                <>
+                  <p className="text-[9px] font-black uppercase tracking-wider text-red-300">
+                    Diego à frente
+                  </p>
+                  <p className="text-lg font-black tabular-nums text-amber-300 sm:text-2xl">
+                    {hud.distanciaAlvo} m
+                  </p>
+                </>
+              ) : (
+                <p className="text-lg font-black tabular-nums text-amber-300 sm:text-2xl">
+                  {hud.metros} <span className="text-xs text-slate-300">/ {hud.meta} m</span>
+                </p>
+              )}
             </div>
             <div className="rounded-xl border border-white/15 bg-slate-950/70 px-3 py-1 text-right backdrop-blur">
               <p className="flex items-center gap-1 text-sm font-bold text-white">

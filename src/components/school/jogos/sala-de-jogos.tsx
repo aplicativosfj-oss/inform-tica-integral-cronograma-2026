@@ -495,7 +495,7 @@ export function SalaDeJogos({ jogoInicial }: { jogoInicial?: string } = {}) {
         className="group relative flex min-h-28 items-end overflow-hidden rounded-2xl border-2 border-amber-500/60 bg-slate-950 p-3 text-left transition-colors hover:border-amber-400"
       >
         <img
-          src="/images/plantao/menu-fundo.webp"
+          src="/images/plantao/menu-fundo-sem-armas.png"
           alt=""
           loading="lazy"
           className="absolute inset-0 size-full object-cover opacity-70 transition-transform duration-300 group-hover:scale-105"

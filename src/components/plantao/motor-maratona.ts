@@ -8,9 +8,11 @@
  */
 
 import {
+  DIEGO,
   velocidadeDe,
   type CenarioMaratona,
   type Clima,
+  type MissaoId,
   type Nivel,
   type Personagem,
 } from "@/components/plantao/dados";
@@ -20,11 +22,13 @@ import {
   desenharCachorro,
   desenharCone,
   desenharGarrafa,
+  desenharFigura,
   sombra,
   type Imagens,
 } from "@/components/plantao/desenho";
 import type { SomPlantao } from "@/components/plantao/som-plantao";
 import type { ResultadoArena } from "@/components/plantao/motor-arena";
+import type { CenaMaratona3d } from "@/components/plantao/cena-maratona3d";
 
 export const MW = 960;
 export const MH = 540;
@@ -42,6 +46,7 @@ export interface HudMaratona {
   pontos: number;
   velocidade: number;
   aviso: string | null;
+  distanciaAlvo: number | null;
 }
 
 export interface OpcoesMaratona {
@@ -51,6 +56,7 @@ export interface OpcoesMaratona {
   clima: Clima;
   cenario: CenarioMaratona;
   meta: number;
+  missao: Extract<MissaoId, "maratona" | "perseguicao">;
   som: SomPlantao | null;
   imagens: Imagens;
   aoHud: (h: HudMaratona) => void;
@@ -110,34 +116,71 @@ export class Maratona {
   private sonsAgua = 0;
   private readonly total: number;
   private readonly base: number;
+  private r3d: CenaMaratona3d | null = null;
+  private readonly perseguicao: boolean;
+  private distanciaDiego = 0;
+  private faixaDiego = 1;
+  private trocaDiego = 0;
 
   constructor(private op: OpcoesMaratona) {
-    op.canvas.width = MW;
-    op.canvas.height = MH;
-    this.ctx = op.canvas.getContext("2d")!;
+    // A cena principal usa WebGL. O canvas 2D fica fora da tela e serve como
+    // fallback para aparelhos sem aceleração gráfica.
+    const fora = document.createElement("canvas");
+    fora.width = MW;
+    fora.height = MH;
+    this.ctx = fora.getContext("2d")!;
     this.total = op.meta * PX_METRO;
+    this.perseguicao = op.missao === "perseguicao";
     this.base = 250 + (velocidadeDe(op.personagem) - 275) * 0.55 + op.nivel * 30;
     this.vel = this.base;
+    this.distanciaDiego = X_JOGADOR + (920 + op.nivel * 180);
   }
 
   iniciar() {
     this.parado = false;
-    this.ultimo = performance.now();
-    this.op.som?.iniciarMusica(this.op.clima);
-    const quadro = (agora: number) => {
-      if (this.parado) return;
-      const dt = Math.min((agora - this.ultimo) / 1000, 1 / 20);
-      this.ultimo = agora;
-      if (!this.terminou) this.atualizar(dt);
-      this.desenhar();
+    const comecar = () => {
+      this.ultimo = performance.now();
+      this.op.som?.iniciarMusica(this.op.clima);
+      const quadro = (agora: number) => {
+        if (this.parado) return;
+        const dt = Math.min((agora - this.ultimo) / 1000, 1 / 20);
+        this.ultimo = agora;
+        if (!this.terminou) this.atualizar(dt);
+        this.desenhar(dt);
+        this.raf = requestAnimationFrame(quadro);
+      };
       this.raf = requestAnimationFrame(quadro);
     };
-    this.raf = requestAnimationFrame(quadro);
+    void this.preparar3d().then(comecar);
+  }
+
+  private async preparar3d() {
+    try {
+      const { CenaMaratona3d } = await import("@/components/plantao/cena-maratona3d");
+      this.r3d = await CenaMaratona3d.criar(
+        {
+          canvas: this.op.canvas,
+          clima: this.op.clima,
+          cenario: this.op.cenario,
+          personagem: this.op.personagem,
+          leve: (navigator.hardwareConcurrency || 8) <= 4,
+        },
+        this.total,
+      );
+    } catch (erro) {
+      console.error("Cena 3D da corrida indisponível, usando a vista 2D.", erro);
+      this.r3d = null;
+      this.op.canvas.width = MW;
+      this.op.canvas.height = MH;
+      this.ctx = this.op.canvas.getContext("2d") ?? this.ctx;
+    }
   }
 
   parar() {
     this.parado = true;
     cancelAnimationFrame(this.raf);
+    this.r3d?.destruir();
+    this.r3d = null;
     this.op.som?.pararMusica();
   }
 
@@ -211,6 +254,7 @@ export class Maratona {
       e.pular = false;
       if (this.z <= 0.5) {
         this.vz = 540;
+        this.r3d?.saltar();
         this.op.som?.pular();
       }
     }
@@ -231,6 +275,15 @@ export class Maratona {
       (this.tropeco > 0 ? 0.55 : 1);
     this.vel += (alvo - this.vel) * Math.min(1, dt * 3);
     this.distancia += this.vel * dt;
+    if (this.perseguicao) {
+      const velocidadeDiego = this.base * (0.72 + this.op.nivel * 0.045);
+      this.distanciaDiego += velocidadeDiego * dt;
+      this.trocaDiego -= dt;
+      if (this.trocaDiego <= 0) {
+        this.faixaDiego = Math.floor(Math.random() * 3);
+        this.trocaDiego = 1.1 + Math.random() * 1.4;
+      }
+    }
     this.fase += dt * (this.vel / 32);
     this.pontos += (this.vel * dt) / PX_METRO;
     this.folego = Math.max(0, this.folego - dt * (0.012 + this.op.nivel * 0.006));
@@ -260,6 +313,7 @@ export class Maratona {
         this.tropeco = 0.9;
         this.dano = 1;
         this.op.som?.erro();
+        this.r3d?.tremer(0.75);
         if (o.tipo === "cachorro") this.op.som?.latido(1);
         this.mostrar(o.tipo === "poca" ? "Escorregou!" : "Trombou! -fôlego", 1.4);
       }
@@ -289,7 +343,13 @@ export class Maratona {
       this.cansado += dt;
       if (this.cansado > 2.5) return this.terminar(false, "Sem fôlego! Faltou água pelo caminho.");
     } else this.cansado = 0;
-    if (this.distancia >= this.total)
+    if (this.perseguicao) {
+      const distanciaAlvo = this.distanciaDiego - (this.distancia + X_JOGADOR);
+      if (distanciaAlvo <= 36 && Math.abs(this.faixa - this.faixaDiego) <= 1)
+        return this.terminar(true, "Diego alcançado! Fuga impedida antes do portão.");
+      if (this.distancia >= this.total)
+        return this.terminar(false, "Diego chegou ao portão. Tente uma rota mais rápida.");
+    } else if (this.distancia >= this.total)
       return this.terminar(true, "Linha de chegada! Maratona concluída!");
 
     this.acumHud += dt;
@@ -307,6 +367,9 @@ export class Maratona {
       pontos: Math.round(this.pontos),
       velocidade: Math.round(this.vel / 5),
       aviso: this.aviso,
+      distanciaAlvo: this.perseguicao
+        ? Math.max(0, Math.round((this.distanciaDiego - (this.distancia + X_JOGADOR)) / 8))
+        : null,
     };
   }
 
@@ -327,7 +390,9 @@ export class Maratona {
           estrelas,
           tempoGasto: this.t,
           detalhes: [
-            `Distância: ${Math.floor(this.distancia / PX_METRO)} m de ${this.op.meta} m`,
+            this.perseguicao
+              ? `Perseguição: ${Math.floor(this.distancia / PX_METRO)} m percorridos`
+              : `Distância: ${Math.floor(this.distancia / PX_METRO)} m de ${this.op.meta} m`,
             `Fôlego restante: ${Math.round(this.folego * 100)}%`,
           ],
         }),
@@ -346,7 +411,23 @@ export class Maratona {
         : { topo: "#060a2a", meio: "#1b2560", base: "#42408a", sombra: 0.4 };
   }
 
-  private desenhar() {
+  private desenhar(dt = 1 / 60) {
+    if (this.r3d) {
+      this.r3d.desenhar({
+        dt,
+        posicao: this.distancia + X_JOGADOR,
+        faixa: this.faixa,
+        z: this.z,
+        vel: this.vel,
+        dano: this.dano,
+        tropeco: this.tropeco,
+        cansado: this.folego < 0.2,
+        total: this.total,
+        obstaculos: this.obstaculos.map((o, id) => ({ id, ...o })),
+        coletas: this.coletas.map((o, id) => ({ id, tipo: o.tipo, x: o.x, faixa: o.faixa })),
+      });
+      return;
+    }
     const c = this.ctx;
     const pal = this.paleta();
     const off = this.distancia;
@@ -401,6 +482,38 @@ export class Maratona {
       const y = FAIXAS_Y[o.faixa]!;
       const esc = ESCALA_FAIXA[o.faixa]!;
       itens.push({ y, f: () => this.obstaculo(c, o, x, y, esc) });
+    }
+    const spriteDiego = this.op.imagens[DIEGO.sprite];
+    if (this.perseguicao && spriteDiego?.complete && spriteDiego.naturalWidth > 0) {
+      const xDiego = this.distanciaDiego - off;
+      const yDiego = FAIXAS_Y[this.faixaDiego]!;
+      if (xDiego > -100 && xDiego < MW + 140) {
+        itens.push({
+          y: yDiego,
+          f: () => {
+            const esc =
+              1.15 +
+              ((yDiego - FAIXAS_Y[0]!) / (FAIXAS_Y[2]! - FAIXAS_Y[0]!)) * 0.28;
+            desenharFigura(c, xDiego, yDiego, spriteDiego, 106, 0, "#dc2626", "#111827", {
+              dir: 1,
+              fase: this.fase * 2.9 + 1.4,
+              correndo: true,
+              parado: false,
+              carga: 0,
+              dano: 0,
+              escala: esc,
+              cintura: 0.5,
+            });
+            c.fillStyle = "#ef4444";
+            c.beginPath();
+            c.moveTo(xDiego, yDiego - 128 * esc);
+            c.lineTo(xDiego - 10, yDiego - 146 * esc);
+            c.lineTo(xDiego + 10, yDiego - 146 * esc);
+            c.closePath();
+            c.fill();
+          },
+        });
+      }
     }
     itens.push({
       y: this.yTela,

@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Flag,
+  Hand,
   Music,
   Play,
   RotateCcw,
@@ -193,7 +194,7 @@ function BotaoToque({
 }: {
   rotulo: string;
   entrada: React.RefObject<Entrada>;
-  chave: "acelerar" | "frear";
+  chave: "acelerar" | "frear" | "empurrar";
   className?: string;
   children: React.ReactNode;
 }) {
@@ -249,6 +250,7 @@ export interface CorridaAutomatica {
   subtitulo: string;
   aoFim: (r: { posicao: number; segundos: number; total: number }) => void;
   aoSair: () => void;
+  permiteEmpurrar?: boolean;
 }
 
 export function Corrida({
@@ -286,6 +288,7 @@ export function Corrida({
     acelerar: false,
     frear: false,
     volante: 0,
+    empurrar: false,
   });
   const autoRef = useRef(true);
   autoRef.current = auto;
@@ -336,6 +339,7 @@ export function Corrida({
     entrada.current.acelerar = false;
     entrada.current.frear = false;
     entrada.current.volante = 0;
+    entrada.current.empurrar = false;
 
     const motor = new MotorCorrida({
       canvas: canvas.current,
@@ -345,6 +349,7 @@ export function Corrida({
         ? {
             veiculo: automatico.veiculo,
             ...(automatico.piloto ? { piloto: automatico.piloto } : {}),
+            permiteEmpurrar: automatico.permiteEmpurrar,
           }
         : {}),
       nivel: nivelEsc,
@@ -457,6 +462,8 @@ export function Corrida({
       s: "frear",
       S: "frear",
       " ": "acelerar",
+      e: "empurrar",
+      E: "empurrar",
     };
     const troca = (e: KeyboardEvent, v: boolean) => {
       const k = mapa[e.key];
@@ -551,7 +558,7 @@ export function Corrida({
           <p className="max-w-md text-xs text-slate-400">
             {toque
               ? "A moto acelera sozinha: gire o volante da tela, arraste o dedo ou incline o celular."
-              : "Setas ou WASD para pilotar. Passe nas faixas azuis para ganhar turbo."}
+              : `Setas ou WASD para pilotar${automatico.permiteEmpurrar ? "; E para dar uma ombrada quando estiver lado a lado" : ""}. Passe nas faixas azuis para ganhar turbo.`}
           </p>
           <div className="flex gap-2">
             <button
@@ -806,6 +813,18 @@ export function Corrida({
         </button>
       </div>
       <div className={cn("flex items-end gap-2", !retrato && "flex-col-reverse items-end")}>
+        {automatico?.permiteEmpurrar && (
+          <BotaoToque
+            rotulo="Dar ombrada no rival"
+            entrada={entrada}
+            chave="empurrar"
+            className="h-16 w-20 border-amber-300/70 bg-amber-600/60 text-[10px]"
+          >
+            <span className="flex flex-col items-center gap-1">
+              <Hand className="size-5" /> Ombrada
+            </span>
+          </BotaoToque>
+        )}
         <BotaoToque
           rotulo="Frear"
           entrada={entrada}
@@ -1003,6 +1022,7 @@ export function Corrida({
         <p className="hidden text-center text-[11px] text-muted-foreground sm:block">
           <ArrowLeft className="inline size-3" /> <ArrowRight className="inline size-3" /> ou A D
           para virar · ↑ ou W para acelerar · ↓ ou S para frear
+          {automatico?.permiteEmpurrar ? " · E para ombrada" : ""}
         </p>
       )}
     </div>

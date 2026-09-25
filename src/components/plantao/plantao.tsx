@@ -75,7 +75,7 @@ function useImagens(): Imagens {
   // Imagens grandes de tela: baixam em segundo plano para as telas abrirem instantâneas.
   useEffect(() => {
     for (const a of [
-      "menu-fundo.webp",
+      "menu-fundo-sem-armas.png",
       "selecao-fundo.webp",
       "missao-cachorro.webp",
       "missao-moto.webp",
@@ -332,6 +332,7 @@ export function OperacaoPlantao() {
                     mochila: personagem.mochila,
                   },
                   corVeiculo: "#b91c1c",
+                  permiteEmpurrar: true,
                   titulo: missaoSel.titulo,
                   subtitulo: `${personagem.nome} na moto, atrás do suspeito ${DIEGO.nome}. Chegue à frente dele!`,
                   aoFim: fimMoto,
@@ -351,7 +352,7 @@ export function OperacaoPlantao() {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url(${PASTA_IMG}${tela === "selecao" ? "selecao-fundo.webp" : "menu-fundo.webp"})`,
+          backgroundImage: `url(${PASTA_IMG}${tela === "selecao" ? "selecao-fundo.webp" : "menu-fundo-sem-armas.png"})`,
         }}
         aria-hidden
       />

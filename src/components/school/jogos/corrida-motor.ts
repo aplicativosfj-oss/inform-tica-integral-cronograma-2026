@@ -238,6 +238,8 @@ interface Rival {
   cor: string;
   volta: number;
   terminou: boolean;
+  queda: number;
+  ladoQueda: number;
 }
 
 export interface Entrada {
@@ -247,6 +249,8 @@ export interface Entrada {
   frear: boolean;
   /** Direção analógica de -1 (esquerda) a 1 (direita): volante de toque e inclinação. */
   volante: number;
+  /** Pulso de interação da moto (tecla E ou botão de ombrada). */
+  empurrar: boolean;
 }
 
 export interface FimExtra {
@@ -279,6 +283,8 @@ export interface OpcoesCorrida {
   /** "moto" troca os carros por motos com piloto (missão do Operação: Plantão). */
   veiculo?: "carro" | "moto";
   piloto?: PilotoMoto;
+  /** Libera a ombrada contra rivais próximos na missão de perseguição. */
+  permiteEmpurrar?: boolean;
   pista: IdPista;
   corJogador: string;
   /** 1 fácil, 2 médio, 3 difícil */
@@ -346,7 +352,13 @@ export function desenharMoto(
   base: number,
   w: number,
   cor: string,
-  opcoes: { inclinacao?: number; freando?: boolean; piloto?: PilotoMoto } = {},
+  opcoes: {
+    inclinacao?: number;
+    freando?: boolean;
+    piloto?: PilotoMoto;
+    faseRoda?: number;
+    queda?: number;
+  } = {},
 ) {
   const h = w * 0.5;
   const p = opcoes.piloto ?? {
@@ -358,7 +370,8 @@ export function desenharMoto(
   const traco = Math.max(1, w * 0.008);
   ctx.save();
   ctx.translate(cx, base);
-  if (opcoes.inclinacao) ctx.rotate(opcoes.inclinacao * 2.2);
+  if (opcoes.queda) ctx.rotate(opcoes.queda);
+  else if (opcoes.inclinacao) ctx.rotate(opcoes.inclinacao * 2.2);
 
   // sombra
   ctx.save();
@@ -383,10 +396,12 @@ export function desenharMoto(
   ctx.fill();
   ctx.strokeStyle = "rgba(255,255,255,0.1)";
   ctx.lineWidth = traco;
-  for (let i = 1; i < 6; i++) {
+  const giroPneu = ((opcoes.faseRoda ?? 0) % 18) / 18;
+  for (let i = 0; i < 7; i++) {
+    const sulco = (i + giroPneu) / 7;
     ctx.beginPath();
-    ctx.moveTo(-w * 0.07, -h * 0.66 + (h * 0.66 * i) / 6);
-    ctx.lineTo(w * 0.07, -h * 0.66 + (h * 0.66 * i) / 6);
+    ctx.moveTo(-w * 0.07, -h * 0.66 + h * 0.66 * sulco);
+    ctx.lineTo(w * 0.07, -h * 0.66 + h * 0.66 * Math.min(1, sulco + 0.1));
     ctx.stroke();
   }
   // escapamento cromado
@@ -748,7 +763,14 @@ export class Corrida {
   private raf = 0;
   private ultimo = 0;
   private parado = true;
-  entrada: Entrada = { esquerda: false, direita: false, acelerar: false, frear: false, volante: 0 };
+  entrada: Entrada = {
+    esquerda: false,
+    direita: false,
+    acelerar: false,
+    frear: false,
+    volante: 0,
+    empurrar: false,
+  };
   private fumaca: { x: number; y: number; r: number; vx: number; vy: number; vida: number }[] = [];
   private derrapando = false;
   private escorregaAte = 0;
@@ -756,6 +778,7 @@ export class Corrida {
   private solavanco = 0;
   private voltasTotal: number;
   private foraDaPista = false;
+  private recargaEmpurrao = 0;
 
   constructor(private op: OpcoesCorrida) {
     op.canvas.width = LARGURA;
@@ -895,6 +918,8 @@ export class Corrida {
       cor,
       volta: 1,
       terminou: false,
+      queda: 0,
+      ladoQueda: 1,
     }));
   }
 
@@ -1008,6 +1033,33 @@ export class Corrida {
     this.vel = limitar(this.vel, 0, turbo ? VEL_MAX * 1.3 : VEL_MAX);
     this.solavanco = Math.max(0, this.solavanco - dt);
     this.piscar = Math.max(0, this.piscar - dt);
+    this.recargaEmpurrao = Math.max(0, this.recargaEmpurrao - dt);
+
+    // Ombrada da perseguição: só acerta uma moto realmente lado a lado.
+    if (this.op.permiteEmpurrar && e.empurrar && this.recargaEmpurrao <= 0 && razao > 0.28) {
+      const meuZ = this.posicao + POS_JOGADOR;
+      const alvo = this.rivais
+        .filter((r) => r.queda <= 0)
+        .map((r) => {
+          let dz = r.z - meuZ;
+          if (dz > this.comprimento / 2) dz -= this.comprimento;
+          if (dz < -this.comprimento / 2) dz += this.comprimento;
+          return { r, dz, dx: Math.abs(r.offset - this.x) };
+        })
+        .filter(({ dz, dx }) => Math.abs(dz) < SEG * 2.4 && dx < 0.48)
+        .sort((a, b) => Math.abs(a.dz) + a.dx * SEG - (Math.abs(b.dz) + b.dx * SEG))[0];
+      if (alvo) {
+        alvo.r.ladoQueda = alvo.r.offset >= this.x ? 1 : -1;
+        alvo.r.queda = 1.15;
+        alvo.r.vel *= 0.42;
+        alvo.r.offset = limitar(alvo.r.offset + alvo.r.ladoQueda * 0.28, -1.15, 1.15);
+        this.vel *= 0.94;
+        this.solavanco = 0.22;
+        this.op.som?.batida();
+        this.recargaEmpurrao = 1.1;
+      }
+      e.empurrar = false;
+    }
 
     this.atualizarRivais(dt);
     this.atualizarFumaca(dt);
@@ -1027,6 +1079,7 @@ export class Corrida {
     const largou = this.aceso;
     for (const r of this.rivais) {
       const seg = this.achar(r.z);
+      r.queda = Math.max(0, r.queda - dt);
       if (largou) {
         // Freia um pouco nas curvas fechadas, como qualquer piloto.
         const alvo = r.velAlvo * (1 - (Math.min(Math.abs(seg.curva), 6) / 6) * 0.12);
@@ -1034,7 +1087,7 @@ export class Corrida {
       }
       // Desvia de quem está mais lento à frente.
       const desvio = this.desviar(r, seg);
-      r.offset = limitar(r.offset + desvio * dt * 2.2, -0.8, 0.8);
+      if (r.queda <= 0) r.offset = limitar(r.offset + desvio * dt * 2.2, -0.8, 0.8);
       const antes = r.z;
       r.z += r.vel * dt;
       if (r.z >= this.comprimento) {
@@ -1497,6 +1550,8 @@ export class Corrida {
         c.clip();
         if (this.op.veiculo === "moto") {
           desenharMoto(c, sx, sy, larg * 1.15, r.cor, {
+            faseRoda: r.z / 12,
+            queda: r.queda > 0 ? r.ladoQueda * (1 - r.queda / 1.15) * 1.15 : 0,
             piloto: {
               camisa: r.cor,
               calca: "#1f2937",
@@ -1534,6 +1589,7 @@ export class Corrida {
         desenharMoto(c, LARGURA / 2, ALTURA - 12 + trepida, LARGURA * 0.3, this.op.corJogador, {
           inclinacao: inclina,
           freando: this.freando,
+          faseRoda: this.distancia / 10,
           ...(this.op.piloto ? { piloto: this.op.piloto } : {}),
         });
       } else {

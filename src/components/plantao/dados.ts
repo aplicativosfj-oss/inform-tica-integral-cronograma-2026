@@ -7,7 +7,14 @@
  */
 
 export type PersonagemId = "valentao" | "franc" | "santos";
-export type MissaoId = "cachorro" | "marmitas" | "breves" | "tarefas" | "moto" | "maratona";
+export type MissaoId =
+  | "cachorro"
+  | "marmitas"
+  | "breves"
+  | "tarefas"
+  | "perseguicao"
+  | "moto"
+  | "maratona";
 export type Clima = "dia" | "por-do-sol" | "noite";
 export type Nivel = 1 | 2 | 3;
 
@@ -204,6 +211,18 @@ export const MISSOES: Missao[] = [
     tempo: [220, 200, 180],
     meta: [5, 5, 5],
     dica: "Só dá para registrar a ocorrência depois de cumprir as outras tarefas.",
+  },
+  {
+    id: "perseguicao",
+    titulo: "Caçada ao Diego Rato",
+    local: "Pátio, blocos e portão da unidade",
+    resumo:
+      "Corra atrás de Diego em três faixas, pule barreiras, desvie de caixas e alcance-o antes do portão.",
+    tipo: "maratona",
+    cenario: "missao-perseguicao.png",
+    tempo: [0, 0, 0],
+    meta: [420, 560, 700],
+    dica: "A distância para Diego aparece no alto. Água mantém o fôlego; estrelas aumentam a pontuação.",
   },
   {
     id: "moto",
