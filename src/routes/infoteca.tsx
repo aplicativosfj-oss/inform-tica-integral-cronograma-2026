@@ -12,9 +12,9 @@ import {
   HeartHandshake,
   Keyboard,
   Layers,
-  Puzzle,
   Sparkles,
-  Star,
+  ArrowUpRight,
+  ArrowRight,
   Target,
   Users2,
   WifiOff,
@@ -22,10 +22,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BarraFerramentas, CLASSES_BARRA_FERRAMENTAS } from "@/components/school/barra-ferramentas";
-import { CategoriaHero, type CorCategoria } from "@/components/school/categoria-hero";
+import { CORES_CATEGORIA, type CorCategoria } from "@/components/school/categoria-hero";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
@@ -282,6 +280,86 @@ const GRUPOS_ESCOLA: {
   },
 ];
 
+const SALA_JOGOS = [
+  "Damas",
+  "Dominó",
+  "Jogo da velha",
+  "Jogo da Onça",
+  "Memória",
+  "Quebra-cabeça",
+  "Matemática em Ação",
+  "Digitação",
+  "Corrida",
+];
+
+/** Cabeçalho de seção (nível 1): numeração + título + descrição, com filete. */
+function CabecalhoSecao({
+  numero,
+  titulo,
+  descricao,
+  acao,
+}: {
+  numero: string;
+  titulo: string;
+  descricao: string;
+  acao?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
+      <div className="max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+          {numero}
+        </p>
+        <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {titulo}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {descricao}
+        </p>
+      </div>
+      {acao}
+    </div>
+  );
+}
+
+/** Bloco de grupo: título fixo à esquerda (desktop) e conteúdo à direita. */
+function Grupo({
+  id,
+  icon: Icon,
+  cor,
+  titulo,
+  descricao,
+  contagem,
+  children,
+}: {
+  id: string;
+  icon: LucideIcon;
+  cor: CorCategoria;
+  titulo: string;
+  descricao: string;
+  contagem: string;
+  children: React.ReactNode;
+}) {
+  const c = CORES_CATEGORIA[cor];
+  return (
+    <div id={id} className="grid scroll-mt-32 gap-5 py-8 lg:grid-cols-[17rem_1fr] lg:gap-10">
+      <div className="lg:sticky lg:top-32 lg:self-start">
+        <span
+          className={`flex size-10 items-center justify-center rounded-xl border ${c.chip}`}
+        >
+          <Icon className="size-5" />
+        </span>
+        <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">{titulo}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{descricao}</p>
+        <p className="mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground/80">
+          {contagem}
+        </p>
+      </div>
+      <div>{children}</div>
+    </div>
+  );
+}
+
 function InfotecaPage() {
   const publicas = listarFerramentasPublicas();
   const online = useOnline();
@@ -302,288 +380,257 @@ function InfotecaPage() {
           </div>
         )}
 
-        {/* Hero — banner mais baixo, com painel glassmorphism sobre a imagem em
-            vez de um véu escuro cobrindo tudo (deixa a foto respirar). */}
-        <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-8">
-          <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-xl">
-            <SiteImage
-              src={infotecaHeroImg}
-              alt="Criança sorrindo em frente a um computador com ícones coloridos de aprendizagem — teclado, mouse, alfabeto, números e jogos educativos"
-              width={1600}
-              height={600}
-              className="h-[180px] w-full sm:h-[220px] lg:aspect-[21/8] lg:h-auto lg:max-h-[280px]"
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-            />
-            {/* Sombra suave só embaixo, pra imagem continuar viva mas a faixa
-                de chips abaixo do hero não colar direto na foto. */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent"
-            />
-            <div className="absolute inset-0 flex items-center p-4 sm:p-6 lg:p-8">
-              <div className="flex max-w-lg flex-col gap-2.5 rounded-2xl border border-white/25 bg-white/10 p-4 shadow-2xl backdrop-blur-xl sm:gap-3 sm:p-6">
-                <Badge className="w-fit gap-1.5 border-white/25 bg-white/15 text-white backdrop-blur">
-                  <Puzzle className="size-3.5" /> Espaço de aprendizagem digital
-                </Badge>
-                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
-                  Infoteca
-                </h1>
-                <p className="text-balance text-xs text-white/90 sm:text-sm">
-                  Um espaço lúdico, criativo e de apoio pedagógico digital — ferramentas e jogos
-                  educativos para alunos, professores, pais e comunidade, com atenção especial a
-                  alunos com necessidades especiais.
-                </p>
-                <div className="mt-1 flex flex-wrap gap-2.5">
-                  <Button
-                    asChild
-                    size="sm"
-                    className="gap-1.5 bg-white text-slate-900 hover:bg-white/90"
-                  >
-                    <a href="#gcompris">
-                      <Download className="size-4" /> Baixar o GCompris
-                    </a>
-                  </Button>
-                  <Button
-                    asChild
-                    size="sm"
-                    variant="outline"
-                    className="gap-1.5 border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20"
-                  >
-                    <a href="#da-escola">Ver as ferramentas</a>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Chips com o resumo do que tem aqui embaixo. Separa o que é da
-            escola do que é link de fora: são coisas diferentes e a criança
-            precisa saber onde vai parar ao clicar. */}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
-              <Sparkles className="mr-1 inline size-3.5" />
-              <strong>{publicas.length}</strong> ferramentas da escola
-            </span>
-            <span className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm">
-              <strong className="text-foreground">{TOTAL_FERRAMENTAS}</strong> sites selecionados
-            </span>
-            <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm backdrop-blur-md dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-300">
-              <HeartHandshake className="mr-1 inline size-3.5" /> Com opções acessíveis
-            </span>
-          </div>
-        </section>
-
-        {/* O que a escola mantém vem primeiro e com mais destaque: funciona
-          sem login, sem instalar e sem sair do site. A faixa-anúncio que
-          ficava aqui repetia a contagem que já aparece nos cards logo
-          abaixo — virou um cabeçalho de seção comum. */}
-        <section id="da-escola" className="mx-auto max-w-6xl scroll-mt-20 px-4 pt-4 sm:px-6">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
+        {/* Hero editorial: texto à esquerda, imagem limpa à direita. */}
+        <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-14">
+          <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
             <div>
-              <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
-                <Sparkles className="size-5 text-primary" /> Ferramentas da escola
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                Feitas aqui, para alunos e professores. Abrem no navegador, sem login e sem instalar
-                nada.
+              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                <span className="h-px w-8 bg-primary" aria-hidden />
+                Acervo digital de aprendizagem
               </p>
-            </div>
-            <Button asChild size="sm" variant="outline" className="gap-1.5">
-              <Link to="/ferramentas">Ver todas as {publicas.length} →</Link>
-            </Button>
-          </div>
-
-          {/* A Sala de Jogos é a ferramenta que as crianças mais procuram e
-            estava perdida no meio da grade de "Ferramentas", do mesmo
-            tamanho de uma calculadora. Sobe para um card largo, antes dos
-            grupos, e sai da grade abaixo para não aparecer duas vezes. */}
-          <Link
-            to="/ferramentas/$ferramenta"
-            params={{ ferramenta: "sala-de-jogos" }}
-            className="group mb-6 flex flex-col gap-4 overflow-hidden rounded-3xl border-2 border-emerald-400/45 bg-gradient-to-br from-emerald-500/20 via-emerald-500/[0.07] to-transparent p-5 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-emerald-400/70 hover:shadow-lg dark:border-emerald-400/35 sm:flex-row sm:items-center sm:gap-5 sm:p-6"
-          >
-            <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-500/15 text-emerald-700 shadow-sm dark:border-emerald-400/30 dark:bg-emerald-400/15 dark:text-emerald-300 sm:size-20">
-              <Dices className="size-8 sm:size-10" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/15 dark:text-emerald-300">
-                <Star className="size-3" /> Destaque da Infoteca
-              </span>
-              <h3 className="text-xl font-bold tracking-tight text-foreground group-hover:text-emerald-700 dark:group-hover:text-emerald-300 sm:text-2xl">
-                Sala de Jogos
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-                Nove jogos de mesa, matemática, digitação e corrida — inclusive o Jogo da Onça, tradicional indígena —, contra o computador ou um
-                colega da turma — e cada partida ganha vale estrelas no ranking da escola.
+              <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                Infoteca
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Ferramentas, jogos e plataformas educativas selecionadas para alunos, professores,
+                famílias e comunidade — com atenção especial a alunos com necessidades especiais.
               </p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {[
-                  "Damas",
-                  "Dominó",
-                  "Jogo da velha",
-                  "Jogo da Onça",
-                  "Memória",
-                  "Quebra-cabeça",
-                  "Matemática em Ação",
-                  "Digitação",
-                  "Corrida",
-                ].map((jogo) => (
-                  <span
-                    key={jogo}
-                    className="rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground"
-                  >
-                    {jogo}
-                  </span>
-                ))}
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Button asChild size="lg" className="gap-2">
+                  <a href="#da-escola">
+                    Explorar o acervo <ArrowRight className="size-4" />
+                  </a>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="gap-2">
+                  <a href="#gcompris">
+                    <Download className="size-4" /> Baixar o GCompris
+                  </a>
+                </Button>
               </div>
-            </div>
-            <span className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors group-hover:bg-emerald-800 dark:bg-emerald-500 dark:text-emerald-950 dark:group-hover:bg-emerald-400">
-              Abrir a sala →
-            </span>
-          </Link>
 
-          {GRUPOS_ESCOLA.map((grupo) => {
-            const itens = publicas.filter(
-              (f) => f.categoria === grupo.categoria && f.slug !== "sala-de-jogos",
-            );
-            if (!itens.length) return null;
-            return (
-              <div key={grupo.categoria} className="mb-6">
-                <CategoriaHero
-                  id={grupo.id}
-                  icon={grupo.icon}
-                  cor={grupo.cor}
-                  titulo={grupo.titulo}
-                  descricao={grupo.descricao}
-                  className="mb-3"
-                  extra={
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {itens.length} {itens.length === 1 ? "ferramenta" : "ferramentas"}
-                    </span>
-                  }
+              <dl className="mt-9 grid max-w-md grid-cols-3 divide-x divide-border border-y border-border py-4">
+                <div className="pr-4">
+                  <dt className="text-xs text-muted-foreground">Da escola</dt>
+                  <dd className="mt-0.5 text-2xl font-bold tabular-nums text-foreground">
+                    {publicas.length}
+                  </dd>
+                </div>
+                <div className="px-4">
+                  <dt className="text-xs text-muted-foreground">Sites externos</dt>
+                  <dd className="mt-0.5 text-2xl font-bold tabular-nums text-foreground">
+                    {TOTAL_FERRAMENTAS}
+                  </dd>
+                </div>
+                <div className="pl-4">
+                  <dt className="text-xs text-muted-foreground">Categorias</dt>
+                  <dd className="mt-0.5 text-2xl font-bold tabular-nums text-foreground">
+                    {GRUPOS_ESCOLA.length + CATEGORIAS.length}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className="relative">
+              <div className="overflow-hidden rounded-3xl border border-border shadow-xl">
+                <SiteImage
+                  src={infotecaHeroImg}
+                  alt="Criança sorrindo em frente a um computador com ícones coloridos de aprendizagem — teclado, mouse, alfabeto, números e jogos educativos"
+                  width={1600}
+                  height={1200}
+                  className="aspect-[4/3] w-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                 />
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {itens.map((ferramenta) => (
-                    <Link
-                      key={ferramenta.slug}
-                      to="/ferramentas/$ferramenta"
-                      params={{ ferramenta: ferramenta.slug }}
-                      className="group flex cursor-pointer items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-                    >
-                      <span
-                        className={`flex size-10 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ring-black/5 dark:ring-white/10 ${ferramenta.cor}`}
-                      >
-                        <ferramenta.icon className="size-5" />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground group-hover:text-primary">
-                          {ferramenta.titulo}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{ferramenta.descricao}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
               </div>
-            );
-          })}
-
-          {/* Vizinho temático da Recomposição: explica o que cada habilidade
-            cobrada na avaliação espera da criança. */}
-          <Link
-            to="/avaliacao"
-            search={{ aba: "descritores" as const }}
-            className="group mb-2 flex items-center gap-3 rounded-2xl border border-indigo-400/25 bg-gradient-to-r from-indigo-500/10 via-indigo-500/[0.03] to-transparent p-4 transition-colors hover:border-indigo-400/50 dark:border-indigo-400/15"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-indigo-400/25 bg-indigo-500/10 text-indigo-600 shadow-sm dark:border-indigo-400/20 dark:bg-indigo-400/10 dark:text-indigo-300">
-              <Compass className="size-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-foreground group-hover:text-primary sm:text-base">
-                O que cada habilidade da avaliação espera da criança
-              </p>
-              <p className="text-xs text-muted-foreground sm:text-sm">
-                Guia por série, disciplina e nível: o que se espera, como avaliar e estratégias de
-                apoio — e as atividades do site ligadas a cada uma.
-              </p>
-            </div>
-            <ExternalLink className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-          </Link>
-        </section>
-
-        {/* A partir daqui é material de fora. A divisão é explícita para
-          ninguém clicar achando que continua na escola. */}
-        <section id="ferramentas" className="mx-auto max-w-6xl scroll-mt-20 px-4 pt-6 sm:px-6">
-          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-3">
-            <div>
-              <h2 className="flex items-center gap-2 text-lg font-bold text-foreground">
-                <ExternalLink className="size-5 text-muted-foreground" /> Sites e plataformas de
-                fora
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {TOTAL_FERRAMENTAS} endereços escolhidos pela escola, em {CATEGORIAS.length}{" "}
-                categorias. Abrem em outro site, numa aba nova.
-              </p>
+              <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-medium text-foreground shadow-lg sm:left-6">
+                <HeartHandshake className="size-4 text-emerald-600 dark:text-emerald-400" />
+                Com opções acessíveis
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Navegação rápida — agora com as duas metades da página (escola e
-          de fora) na mesma lista de âncoras, pra ficar fácil pular pra
-          qualquer área direto. `top-14` casa com a altura fixa (56px) da
-          barra mínima que o NavBar usa fora da home — um valor errado aqui
-          deixa uma fresta por onde o conteúdo da página aparece por trás
-          ao rolar. */}
+        {/* Navegação rápida. `top-14` casa com a altura fixa (56px) da barra
+          mínima que o NavBar usa fora da home — um valor errado aqui deixa uma
+          fresta por onde o conteúdo aparece por trás ao rolar. */}
         <nav
           aria-label="Ir direto para uma área"
-          className="sticky top-14 z-30 mt-3 border-y border-border/60 bg-background/85 py-2.5 backdrop-blur-lg"
+          className="sticky top-14 z-30 mt-12 border-y border-border/60 bg-background/90 py-2.5 backdrop-blur-lg"
         >
-          <div className="mx-auto flex max-w-6xl gap-2 overflow-x-auto px-4 sm:px-6 [&::-webkit-scrollbar]:hidden">
+          <div className="mx-auto flex max-w-6xl gap-1.5 overflow-x-auto px-4 sm:px-6 [&::-webkit-scrollbar]:hidden">
             {GRUPOS_ESCOLA.map((grupo) => (
               <a
                 key={grupo.id}
                 href={`#${grupo.id}`}
-                className="flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <grupo.icon className="size-3.5" />
                 {grupo.titulo}
               </a>
             ))}
-            <span className="mx-0.5 h-4 w-px shrink-0 self-center bg-border" aria-hidden />
+            <span className="mx-1 h-4 w-px shrink-0 self-center bg-border" aria-hidden />
             {CATEGORIAS.map((categoria) => (
               <a
                 key={categoria.id}
                 href={`#${categoria.id}`}
-                className="flex shrink-0 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+                className="flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
-                <categoria.icon className={`size-3.5 ${categoria.cor}`} />
+                <categoria.icon className="size-3.5" />
                 {categoria.titulo}
               </a>
             ))}
           </div>
         </nav>
 
-        {/* GCompris + Acessibilidade, lado a lado */}
-        <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-          <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+        {/* 01 — Ferramentas da escola: sem login, sem instalar. */}
+        <section id="da-escola" className="mx-auto max-w-6xl scroll-mt-28 px-4 pt-14 sm:px-6">
+          <CabecalhoSecao
+            numero="01 · Feito pela escola"
+            titulo="Ferramentas da escola"
+            descricao="Criadas aqui, para alunos e professores. Abrem no navegador, sem login e sem instalar nada."
+            acao={
+              <Button asChild size="sm" variant="outline" className="gap-1.5">
+                <Link to="/ferramentas">
+                  Ver todas as {publicas.length} <ArrowRight className="size-3.5" />
+                </Link>
+              </Button>
+            }
+          />
+
+          {/* Destaque: a Sala de Jogos é o que as crianças mais procuram. */}
+          <Link
+            to="/ferramentas/$ferramenta"
+            params={{ ferramenta: "sala-de-jogos" }}
+            className="group relative mt-8 flex flex-col gap-6 overflow-hidden rounded-3xl bg-slate-900 p-6 text-white shadow-lg transition-shadow duration-200 hover:shadow-xl sm:p-8 lg:flex-row lg:items-center lg:gap-10"
+          >
             <div
-              id="gcompris"
-              className="scroll-mt-32 flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5 sm:flex-row sm:items-center"
-            >
-              <div className="flex items-start gap-3">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-inset ring-primary/20">
+              aria-hidden
+              className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-emerald-500/25 blur-3xl"
+            />
+            <span className="relative flex size-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-300 ring-1 ring-inset ring-emerald-400/30 sm:size-20">
+              <Dices className="size-8 sm:size-10" />
+            </span>
+            <div className="relative min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300">
+                Destaque da Infoteca
+              </p>
+              <h3 className="mt-1.5 text-2xl font-bold tracking-tight sm:text-3xl">
+                Sala de Jogos
+              </h3>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+                Nove jogos de mesa, matemática, digitação e corrida — inclusive o Jogo da Onça,
+                tradicional indígena —, contra o computador ou um colega da turma. Cada partida
+                ganha vale estrelas no ranking da escola.
+              </p>
+              <ul className="mt-4 flex flex-wrap gap-1.5">
+                {SALA_JOGOS.map((jogo) => (
+                  <li
+                    key={jogo}
+                    className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-medium text-slate-200"
+                  >
+                    {jogo}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <span className="relative inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors group-hover:bg-emerald-300">
+              Abrir a sala <ArrowRight className="size-4" />
+            </span>
+          </Link>
+
+          <div className="mt-4 divide-y divide-border">
+            {GRUPOS_ESCOLA.map((grupo) => {
+              const itens = publicas.filter(
+                (f) => f.categoria === grupo.categoria && f.slug !== "sala-de-jogos",
+              );
+              if (!itens.length) return null;
+              return (
+                <Grupo
+                  key={grupo.categoria}
+                  id={grupo.id}
+                  icon={grupo.icon}
+                  cor={grupo.cor}
+                  titulo={grupo.titulo}
+                  descricao={grupo.descricao}
+                  contagem={`${itens.length} ${itens.length === 1 ? "ferramenta" : "ferramentas"}`}
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {itens.map((ferramenta) => (
+                      <Link
+                        key={ferramenta.slug}
+                        to="/ferramentas/$ferramenta"
+                        params={{ ferramenta: ferramenta.slug }}
+                        className="group flex items-start gap-3.5 rounded-xl border border-border bg-card p-4 transition-all duration-200 ease-out hover:border-primary/40 hover:shadow-md"
+                      >
+                        <span
+                          className={`flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted ${ferramenta.cor}`}
+                        >
+                          <ferramenta.icon className="size-5" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground group-hover:text-primary">
+                            {ferramenta.titulo}
+                          </p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                            {ferramenta.descricao}
+                          </p>
+                        </div>
+                        <ArrowRight className="mt-1 size-4 shrink-0 -translate-x-1 text-primary opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                      </Link>
+                    ))}
+                  </div>
+                </Grupo>
+              );
+            })}
+          </div>
+
+          {/* Vizinho temático da Recomposição. */}
+          <Link
+            to="/avaliacao"
+            search={{ aba: "descritores" as const }}
+            className="group mt-2 flex items-center gap-4 rounded-2xl border border-border bg-muted/40 p-5 transition-colors hover:border-primary/40 hover:bg-muted/70"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-300">
+              <Compass className="size-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-foreground group-hover:text-primary sm:text-base">
+                O que cada habilidade da avaliação espera da criança
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+                Guia por série, disciplina e nível: o que se espera, como avaliar e estratégias de
+                apoio — e as atividades do site ligadas a cada uma.
+              </p>
+            </div>
+            <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+          </Link>
+        </section>
+
+        {/* 02 — Material de fora. A divisão é explícita para ninguém clicar
+          achando que continua na escola. */}
+        <section id="ferramentas" className="mx-auto max-w-6xl scroll-mt-28 px-4 pt-20 sm:px-6">
+          <CabecalhoSecao
+            numero="02 · Curadoria externa"
+            titulo="Sites e plataformas de fora"
+            descricao={`${TOTAL_FERRAMENTAS} endereços escolhidos pela escola, em ${CATEGORIAS.length} categorias. Abrem em outro site, numa aba nova.`}
+          />
+
+          {/* GCompris + acessibilidade */}
+          <div id="gcompris" className="mt-8 grid scroll-mt-32 gap-4 lg:grid-cols-[1.4fr_1fr]">
+            <div className="flex flex-col justify-between gap-5 rounded-2xl border border-border bg-card p-6 sm:flex-row sm:items-center">
+              <div className="flex items-start gap-4">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <Download className="size-5" />
                 </span>
                 <div>
-                  <p className="text-base font-semibold text-foreground">
+                  <p className="text-base font-bold text-foreground">
                     GCompris — pacote educacional gratuito
                   </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                     Dezenas de atividades de matemática, leitura, ciências, lógica e arte para
-                    crianças a partir dos 2 anos. Funciona offline, sem anúncios e sem precisar de
-                    internet na hora da aula.
+                    crianças a partir dos 2 anos. Funciona offline, sem anúncios e sem internet na
+                    hora da aula.
                   </p>
                 </div>
               </div>
@@ -598,75 +645,67 @@ function InfotecaPage() {
               </Button>
             </div>
 
-            <div className="flex items-start gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-700 ring-1 ring-inset ring-emerald-500/20 dark:text-emerald-400">
+            <div className="flex items-start gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] p-6">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
                 <HeartHandshake className="size-5" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-foreground">
+                <p className="text-base font-bold text-foreground">
                   Alunos com necessidades especiais
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Priorizamos ferramentas simples, visuais e com pouco texto. O GCompris ao lado é o
-                  ponto de partida mais indicado — mas cada criança é diferente, vale testar junto.
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  Priorizamos ferramentas simples, visuais e com pouco texto. O GCompris é o ponto
+                  de partida mais indicado — mas cada criança é diferente, vale testar junto.
                 </p>
               </div>
             </div>
           </div>
-        </section>
 
-        {/* Categorias */}
-        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
-          <div className="flex flex-col gap-10">
+          <div className="mt-4 divide-y divide-border pb-16">
             {CATEGORIAS.map((categoria) => (
-              <div key={categoria.id} className="scroll-mt-32">
-                <CategoriaHero
-                  id={categoria.id}
-                  icon={categoria.icon}
-                  cor={COR_CATEGORIA_EXTERNA[categoria.id] ?? "blue"}
-                  titulo={categoria.titulo}
-                  descricao={categoria.descricao}
-                  className="mb-4"
-                  extra={
-                    <span className="text-xs font-medium text-muted-foreground">
-                      {categoria.ferramentas.length}{" "}
-                      {categoria.ferramentas.length === 1 ? "site" : "sites"}
-                    </span>
-                  }
-                />
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Grupo
+                key={categoria.id}
+                id={categoria.id}
+                icon={categoria.icon}
+                cor={COR_CATEGORIA_EXTERNA[categoria.id] ?? "blue"}
+                titulo={categoria.titulo}
+                descricao={categoria.descricao}
+                contagem={`${categoria.ferramentas.length} ${categoria.ferramentas.length === 1 ? "site" : "sites"}`}
+              >
+                <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
                   {categoria.ferramentas.map((ferramenta) => (
-                    <a
-                      key={ferramenta.url}
-                      href={ferramenta.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-disabled={!online}
-                      tabIndex={online ? undefined : -1}
-                      className={`group flex items-start gap-3 rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${online ? "" : "pointer-events-none opacity-50"}`}
-                    >
-                      <img
-                        src={faviconUrl(ferramenta.url)}
-                        alt=""
-                        aria-hidden
-                        width={32}
-                        height={32}
-                        loading="lazy"
-                        className="mt-0.5 size-8 shrink-0 rounded-lg border border-border/40 bg-white object-contain p-1.5"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="flex items-center gap-1 text-sm font-semibold text-foreground group-hover:text-primary">
-                          <span className="truncate">{ferramenta.nome}</span>
-                          <ExternalLink className="size-3 shrink-0 opacity-60" />
-                        </p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-                          {ferramenta.descricao}
-                        </p>
-                      </div>
-                    </a>
+                    <li key={ferramenta.url}>
+                      <a
+                        href={ferramenta.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-disabled={!online}
+                        tabIndex={online ? undefined : -1}
+                        className={`group flex items-center gap-4 p-4 transition-colors hover:bg-muted/50 ${online ? "" : "pointer-events-none opacity-50"}`}
+                      >
+                        <img
+                          src={faviconUrl(ferramenta.url)}
+                          alt=""
+                          aria-hidden
+                          width={36}
+                          height={36}
+                          loading="lazy"
+                          className="size-9 shrink-0 rounded-lg border border-border/60 bg-white object-contain p-1.5"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary">
+                            {ferramenta.nome}
+                          </p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                            {ferramenta.descricao}
+                          </p>
+                        </div>
+                        <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+                      </a>
+                    </li>
                   ))}
-                </div>
-              </div>
+                </ul>
+              </Grupo>
             ))}
           </div>
         </section>
