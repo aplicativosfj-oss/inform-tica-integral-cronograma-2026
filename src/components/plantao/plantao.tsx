@@ -332,9 +332,59 @@ export function OperacaoPlantao() {
                     mochila: personagem.mochila,
                   },
                   corVeiculo: "#b91c1c",
-                  permiteEmpurrar: true,
+                  spriteJogador: `${PASTA_IMG}cb650r-jogador.png`,
+                  cenarioImagem: `${PASTA_IMG}${
+                    PISTAS_MOTO.find((p) => p.id === pistaMoto)?.arquivo ?? "cenario-rio.webp"
+                  }`,
+                  permiteEmpurrar: false,
+                  obstaculos: "nenhum",
+                  modeloVeiculo: "Honda CB650R",
+                  nomePista: PISTAS_MOTO.find((p) => p.id === pistaMoto)?.nome ?? "Orla",
+                  nomeJogador: personagem.nome,
+                  rivais: [
+                    ...PERSONAGENS.filter((p) => p.id !== personagem.id).map((p) => ({
+                      nome: p.nome,
+                      cor: p.camisa,
+                      piloto: {
+                        camisa: p.camisa,
+                        calca: p.calca,
+                        capacete: p.capacete,
+                        mochila: p.mochila,
+                      },
+                    })),
+                    {
+                      nome: DIEGO.nome,
+                      cor: "#dc2626",
+                      piloto: {
+                        camisa: "#dc2626",
+                        calca: "#991b1b",
+                        capacete: "#111827",
+                        mochila: false,
+                      },
+                    },
+                    {
+                      nome: "Agente Lima",
+                      cor: "#0ea5e9",
+                      piloto: {
+                        camisa: "#172554",
+                        calca: "#334155",
+                        capacete: "#e2e8f0",
+                        mochila: false,
+                      },
+                    },
+                    {
+                      nome: "Agente Costa",
+                      cor: "#f59e0b",
+                      piloto: {
+                        camisa: "#1e3a8a",
+                        calca: "#292524",
+                        capacete: "#f59e0b",
+                        mochila: false,
+                      },
+                    },
+                  ],
                   titulo: missaoSel.titulo,
-                  subtitulo: `${personagem.nome} na moto, atrás do suspeito ${DIEGO.nome}. Chegue à frente dele!`,
+                  subtitulo: `${personagem.nome} acelera sua CB650R contra os outros personagens, cada um com uma cor exclusiva.`,
                   aoFim: fimMoto,
                   aoSair: sairDoJogo,
                 }}

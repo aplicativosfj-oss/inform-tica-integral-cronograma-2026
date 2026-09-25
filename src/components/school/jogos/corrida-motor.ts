@@ -231,6 +231,7 @@ interface Segmento {
 }
 
 interface Rival {
+  nome: string;
   z: number;
   offset: number;
   vel: number;
@@ -240,6 +241,8 @@ interface Rival {
   terminou: boolean;
   queda: number;
   ladoQueda: number;
+  piloto?: PilotoMoto;
+  matiz: number;
 }
 
 export interface Entrada {
@@ -269,6 +272,10 @@ export interface Hud {
   voltasTotal: number;
   /** Voltas completas até agora. */
   voltasFeitas: number;
+  /** Tempo total de prova já transcorrido, em segundos. */
+  tempoDecorrido: number;
+  /** Ordem ao vivo de todos os competidores. */
+  ranking: { nome: string; posicao: number; jogador: boolean }[];
 }
 
 export interface PilotoMoto {
@@ -283,8 +290,18 @@ export interface OpcoesCorrida {
   /** "moto" troca os carros por motos com piloto (missão do Operação: Plantão). */
   veiculo?: "carro" | "moto";
   piloto?: PilotoMoto;
+  /** Sprite transparente opcional para a moto do jogador. */
+  spriteJogador?: string;
+  /** Imagem panorâmica própria da missão, usada no lugar do cenário genérico. */
+  cenarioImagem?: string;
   /** Libera a ombrada contra rivais próximos na missão de perseguição. */
   permiteEmpurrar?: boolean;
+  /** Identificação usada no ranking ao vivo. */
+  nomeJogador?: string;
+  /** Pilotos rivais personalizados; quando omitidos, usa a grade colorida padrão. */
+  rivais?: { nome: string; cor: string; piloto?: PilotoMoto }[];
+  /** A missão de moto privilegia a disputa direta, sem obstáculos artificiais. */
+  obstaculos?: "normal" | "leves" | "nenhum";
   pista: IdPista;
   corJogador: string;
   /** 1 fácil, 2 médio, 3 difícil */
@@ -358,6 +375,7 @@ export function desenharMoto(
     piloto?: PilotoMoto;
     faseRoda?: number;
     queda?: number;
+    modelo?: string;
   } = {},
 ) {
   const h = w * 0.5;
@@ -426,6 +444,12 @@ export function desenharMoto(
   ctx.fill();
   ctx.fillStyle = "#f8fafc";
   ctx.fillRect(-w * 0.06, -h * 0.72, w * 0.12, h * 0.07);
+  if (opcoes.modelo && w >= 90) {
+    ctx.fillStyle = "#111827";
+    ctx.font = `900 ${Math.max(6, w * 0.035)}px system-ui`;
+    ctx.textAlign = "center";
+    ctx.fillText(opcoes.modelo, 0, -h * 0.665);
+  }
   if (opcoes.freando) {
     ctx.shadowColor = "#ff3030";
     ctx.shadowBlur = w * 0.08;
@@ -743,6 +767,7 @@ export class Corrida {
   private ctx: CanvasRenderingContext2D;
   private tema: Tema;
   private foto: HTMLImageElement | null = null;
+  private spriteJogador: HTMLImageElement | null = null;
   private tempoCena = 0;
   private segs: Segmento[] = [];
   private comprimento = 0;
@@ -786,9 +811,13 @@ export class Corrida {
     this.ctx = op.canvas.getContext("2d")!;
     this.tema = TEMAS[op.pista];
     this.voltasTotal = op.modo === "voltas" ? op.voltas : 9999;
-    if (this.tema.foto && typeof Image !== "undefined") {
+    if ((op.cenarioImagem || this.tema.foto) && typeof Image !== "undefined") {
       this.foto = new Image();
-      this.foto.src = `/images/jogos/${this.tema.foto.arquivo}`;
+      this.foto.src = op.cenarioImagem ?? `/images/jogos/${this.tema.foto!.arquivo}`;
+    }
+    if (op.spriteJogador && typeof Image !== "undefined") {
+      this.spriteJogador = new Image();
+      this.spriteJogador.src = op.spriteJogador;
     }
     this.montarPista();
     this.montarRivais();
@@ -875,16 +904,29 @@ export class Corrida {
       if (rnd() < 0.35)
         this.segs[n]!.sprites.push({ tipo, offset: -lado * (1.4 + rnd() * 1.6), sem: rnd() });
     }
-    // Obstáculos: quanto maior o nível, mais frequentes e mais variados.
+    // A corrida de moto pode manter a pista limpa: nesse modo, o desafio vem
+    // da disputa por posição e da escolha da melhor linha nas curvas.
     const nivel = Math.min(Math.max(this.op.nivel, 1), 3);
-    const [de, ate] = nivel === 1 ? [60, 95] : nivel === 2 ? [40, 70] : [24, 46];
+    const densidade = this.op.obstaculos ?? "normal";
+    const [de, ate] =
+      densidade === "leves"
+        ? [150, 210]
+        : nivel === 1
+          ? [60, 95]
+          : nivel === 2
+            ? [40, 70]
+            : [24, 46];
     const tipos: TipoSprite[] =
       nivel === 1
         ? ["cone", "caixa", "buraco"]
         : nivel === 2
           ? ["cone", "caixa", "buraco", "pneus", "poca", "barreira"]
           : ["cone", "caixa", "buraco", "pneus", "poca", "barreira", "barreira", "poca"];
-    for (let n = 60; n < this.segs.length - 20; n += de + Math.floor(rnd() * (ate - de))) {
+    for (
+      let n = 60;
+      densidade !== "nenhum" && n < this.segs.length - 20;
+      n += de + Math.floor(rnd() * (ate - de))
+    ) {
       const tipo = tipos[Math.floor(rnd() * tipos.length)]!;
       const off = (rnd() - 0.5) * 1.3;
       this.segs[n]!.sprites.push({ tipo, offset: off, sem: rnd() });
@@ -906,20 +948,26 @@ export class Corrida {
 
   private montarRivais() {
     const nivel = this.op.nivel;
-    const cores = CARROS.map((c) => c.cor).filter((c) => c !== this.op.corJogador);
+    const padrao = CARROS.map((c, i) => ({ nome: `Piloto ${i + 1}`, cor: c.cor })).filter(
+      (c) => c.cor !== this.op.corJogador,
+    );
+    const grade = (this.op.rivais?.length ? this.op.rivais : padrao).slice(0, 5);
     // Quanto do máximo cada nível deixa o rival correr.
     const faixa = nivel === 1 ? [0.66, 0.8] : nivel === 2 ? [0.78, 0.9] : [0.88, 0.99];
-    this.rivais = cores.slice(0, 5).map((cor, i) => ({
+    this.rivais = grade.map((competidor, i) => ({
+      nome: competidor.nome,
       // Grade de largada: dois carros por fileira, alguns metros à frente.
       z: POS_JOGADOR + 500 + i * SEG * 3,
       offset: i % 2 === 0 ? -0.55 : 0.55,
       vel: 0,
       velAlvo: VEL_MAX * (faixa[0]! + ((faixa[1]! - faixa[0]!) * (4 - i)) / 4),
-      cor,
+      cor: competidor.cor,
       volta: 1,
       terminou: false,
       queda: 0,
       ladoQueda: 1,
+      matiz: [210, 48, 116, 278, 22][i] ?? i * 70,
+      ...(competidor.piloto ? { piloto: competidor.piloto } : {}),
     }));
   }
 
@@ -1227,6 +1275,27 @@ export class Corrida {
     return pos;
   }
 
+  private ranking(): Hud["ranking"] {
+    const itens = [
+      {
+        nome: this.op.nomeJogador ?? "Você",
+        progresso: (this.volta - 1) * this.comprimento + this.posicao + POS_JOGADOR,
+        jogador: true,
+      },
+      ...this.rivais.map((r) => ({
+        nome: r.nome,
+        progresso: (r.volta - 1) * this.comprimento + r.z,
+        jogador: false,
+      })),
+    ].sort((a, b) => b.progresso - a.progresso);
+
+    return itens.map((item, i) => ({
+      nome: item.nome,
+      posicao: i + 1,
+      jogador: item.jogador,
+    }));
+  }
+
   private enviarHud(dt: number) {
     this.acumulaHud += dt;
     if (this.acumulaHud < 0.1) return;
@@ -1240,8 +1309,10 @@ export class Corrida {
         this.op.modo === "tempo" ? Math.max(0, Math.ceil(this.op.tempoLimite - this.tempo)) : null,
       voltasTotal: this.op.modo === "voltas" ? this.op.voltas : 0,
       voltasFeitas: Math.max(0, this.volta - 1),
+      tempoDecorrido: this.tempo,
+      ranking: this.ranking(),
     };
-    const chave = `${hud.posicao}|${hud.volta}|${hud.kmh}|${hud.tempoRestante}`;
+    const chave = `${hud.posicao}|${hud.volta}|${hud.kmh}|${hud.tempoRestante}|${Math.floor(hud.tempoDecorrido * 10)}|${hud.ranking.map((r) => r.nome).join(",")}`;
     if (chave === this.ultimoHud) return;
     this.ultimoHud = chave;
     this.op.aoMudarHud(hud);
@@ -1373,11 +1444,11 @@ export class Corrida {
   /** Fundo: foto panorâmica (espelhada nas emendas) ou, sem ela, o céu desenhado em código. */
   private desenharFundoCena(c: CanvasRenderingContext2D) {
     const img = this.foto;
-    const f = this.tema.foto;
-    if (img && f && img.complete && img.naturalWidth > 0) {
+    const horizonte = this.tema.foto?.horizonte ?? 0.62;
+    if (img && img.complete && img.naturalWidth > 0) {
       const larg = 1100;
       const alt = (larg * img.naturalHeight) / img.naturalWidth;
-      const topo = ALTURA / 2 - f.horizonte * alt;
+      const topo = ALTURA / 2 - horizonte * alt;
       const volta = larg * 2;
       const off = (((this.ceuOff * 0.6) % volta) + volta) % volta;
       const t0 = Math.floor(off / larg);
@@ -1404,6 +1475,34 @@ export class Corrida {
     }
     desenharCeu(c, this.tema, this.ceuOff, this.tempoCena);
     desenharFundo(c, this.tema, this.ceuOff, this.tempoCena);
+  }
+
+  /** Reflexos móveis no pneu traseiro dão leitura de rotação mesmo na câmera posterior. */
+  private desenharRodaGirando(
+    c: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    larguraMoto: number,
+    fase: number,
+  ) {
+    const rx = larguraMoto * 0.07;
+    const ry = larguraMoto * 0.145;
+    c.save();
+    c.translate(x, y);
+    c.beginPath();
+    c.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+    c.clip();
+    c.strokeStyle = "rgba(226,232,240,0.72)";
+    c.lineWidth = Math.max(1, larguraMoto * 0.012);
+    const passo = Math.max(5, ry * 0.42);
+    const desloc = ((fase % passo) + passo) % passo;
+    for (let py = -ry - passo + desloc; py <= ry + passo; py += passo) {
+      c.beginPath();
+      c.moveTo(-rx * 0.9, py - passo * 0.2);
+      c.lineTo(rx * 0.9, py + passo * 0.2);
+      c.stroke();
+    }
+    c.restore();
   }
 
   private desenhar() {
@@ -1548,17 +1647,62 @@ export class Corrida {
         c.beginPath();
         c.rect(0, 0, LARGURA, seg.clip);
         c.clip();
-        if (this.op.veiculo === "moto") {
+        if (
+          this.op.veiculo === "moto" &&
+          this.spriteJogador?.complete &&
+          this.spriteJogador.naturalWidth > 0
+        ) {
+          const img = this.spriteJogador;
+          // Na missão todas as CB650R usam a mesma escala visual. A profundidade
+          // continua sendo comunicada pela posição na pista, sem motos gigantes.
+          const larguraMoto = LARGURA * 0.2;
+          const alturaMoto = (larguraMoto * img.naturalHeight) / img.naturalWidth;
+          const inclinaRival =
+            Math.max(-1, Math.min(1, seg.curva / 5)) * 0.045 + Math.sin(r.z / 85) * 0.006;
+          const movimentoPiloto = Math.sin(r.z / 38) * Math.min(2, r.vel / VEL_MAX + 0.4);
+          c.save();
+          c.translate(sx, sy + movimentoPiloto);
+          c.rotate(inclinaRival);
+          if (r.queda > 0) c.rotate(r.ladoQueda * (1 - r.queda / 1.15) * 1.15);
+          c.filter = `hue-rotate(${r.matiz}deg) saturate(1.08)`;
+          c.drawImage(img, -larguraMoto / 2, -alturaMoto, larguraMoto, alturaMoto);
+          c.filter = "none";
+          this.desenharRodaGirando(c, 0, -larguraMoto * 0.1, larguraMoto, r.z / 3.5);
+          c.restore();
+          if (larg > 16) {
+            const alturaEtiqueta = 14;
+            c.font = "700 9px system-ui";
+            c.textAlign = "center";
+            c.fillStyle = "rgba(2,6,23,0.82)";
+            c.fillRect(
+              sx - larguraMoto * 0.43,
+              sy - alturaMoto - alturaEtiqueta,
+              larguraMoto * 0.86,
+              alturaEtiqueta,
+            );
+            c.fillStyle = "#f8fafc";
+            c.fillText(r.nome, sx, sy - alturaMoto - 2);
+          }
+        } else if (this.op.veiculo === "moto") {
           desenharMoto(c, sx, sy, larg * 1.15, r.cor, {
             faseRoda: r.z / 12,
             queda: r.queda > 0 ? r.ladoQueda * (1 - r.queda / 1.15) * 1.15 : 0,
-            piloto: {
+            piloto: r.piloto ?? {
               camisa: r.cor,
               calca: "#1f2937",
               capacete: r.cor === CARROS[0]!.cor ? "#0b0f14" : "#f8fafc",
               mochila: false,
             },
           });
+          if (larg > 28) {
+            const alturaEtiqueta = Math.max(12, larg * 0.2);
+            c.font = `700 ${Math.max(7, Math.min(11, larg * 0.13))}px system-ui`;
+            c.textAlign = "center";
+            c.fillStyle = "rgba(2,6,23,0.82)";
+            c.fillRect(sx - larg * 0.52, sy - larg * 1.2, larg * 1.04, alturaEtiqueta);
+            c.fillStyle = "#f8fafc";
+            c.fillText(r.nome, sx, sy - larg * 1.04);
+          }
         } else desenharCarro(c, sx, sy, larg, r.cor, { freando: false });
         c.restore();
       }
@@ -1583,13 +1727,30 @@ export class Corrida {
       this.entrada.volante !== 0
         ? this.entrada.volante
         : (this.entrada.direita ? 1 : 0) - (this.entrada.esquerda ? 1 : 0);
-    const inclina = dirVisual * 0.045 * (this.vel / VEL_MAX);
+    const razaoVelocidade = this.vel / VEL_MAX;
+    const inclina = dirVisual * 0.085 * razaoVelocidade;
+    const corpoPiloto = Math.sin(this.distancia / 42) * razaoVelocidade * 0.9;
     if (this.piscar <= 0 || Math.floor(this.piscar * 20) % 2 === 0) {
-      if (this.op.veiculo === "moto") {
+      if (
+        this.op.veiculo === "moto" &&
+        this.spriteJogador?.complete &&
+        this.spriteJogador.naturalWidth > 0
+      ) {
+        const img = this.spriteJogador;
+        const largura = LARGURA * 0.2;
+        const altura = (largura * img.naturalHeight) / img.naturalWidth;
+        c.save();
+        c.translate(LARGURA / 2 + dirVisual * 2, ALTURA - 4 + trepida + corpoPiloto);
+        c.rotate(inclina * 2.2 + Math.sin(this.distancia / 75) * razaoVelocidade * 0.006);
+        c.drawImage(img, -largura / 2, -altura, largura, altura);
+        this.desenharRodaGirando(c, 0, -largura * 0.1, largura, this.distancia / 3.5);
+        c.restore();
+      } else if (this.op.veiculo === "moto") {
         desenharMoto(c, LARGURA / 2, ALTURA - 12 + trepida, LARGURA * 0.3, this.op.corJogador, {
           inclinacao: inclina,
           freando: this.freando,
           faseRoda: this.distancia / 10,
+          modelo: "CB650R",
           ...(this.op.piloto ? { piloto: this.op.piloto } : {}),
         });
       } else {

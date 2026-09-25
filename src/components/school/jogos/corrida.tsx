@@ -194,7 +194,7 @@ function BotaoToque({
 }: {
   rotulo: string;
   entrada: React.RefObject<Entrada>;
-  chave: "acelerar" | "frear" | "empurrar";
+  chave: "esquerda" | "direita" | "acelerar" | "frear" | "empurrar";
   className?: string;
   children: React.ReactNode;
 }) {
@@ -234,6 +234,8 @@ const semHud: Hud = {
   tempoRestante: null,
   voltasTotal: 0,
   voltasFeitas: 0,
+  tempoDecorrido: 0,
+  ranking: [],
 };
 
 /** Configuração fixa da corrida quando ela é usada por outro jogo (missão de moto do Operação: Plantão). */
@@ -245,12 +247,19 @@ export interface CorridaAutomatica {
   nivel: 1 | 2 | 3;
   veiculo: "carro" | "moto";
   piloto?: PilotoMoto;
+  spriteJogador?: string;
+  cenarioImagem?: string;
   corVeiculo: string;
   titulo: string;
   subtitulo: string;
   aoFim: (r: { posicao: number; segundos: number; total: number }) => void;
   aoSair: () => void;
   permiteEmpurrar?: boolean;
+  nomeJogador?: string;
+  rivais?: { nome: string; cor: string; piloto?: PilotoMoto }[];
+  obstaculos?: "normal" | "leves" | "nenhum";
+  modeloVeiculo?: string;
+  nomePista?: string;
 }
 
 export function Corrida({
@@ -292,6 +301,7 @@ export function Corrida({
   });
   const autoRef = useRef(true);
   autoRef.current = auto;
+  const corridaAutomatica = Boolean(automatico);
 
   useEffect(() => precarregar(IMAGENS_CORRIDA), []);
 
@@ -303,13 +313,13 @@ export function Corrida({
       window.matchMedia("(pointer: coarse)").matches ||
       window.matchMedia("(max-width: 640px)").matches;
     setToque(t);
-    setAuto(t);
+    setAuto(corridaAutomatica ? true : t);
     const mq = window.matchMedia("(orientation: portrait)");
     const atualizar = () => setRetrato(mq.matches);
     atualizar();
     mq.addEventListener("change", atualizar);
     return () => mq.removeEventListener("change", atualizar);
-  }, []);
+  }, [corridaAutomatica]);
 
   const correr = useCallback(() => {
     // O áudio só nasce dentro de um toque/clique: este é o clique em "Largar".
@@ -349,7 +359,12 @@ export function Corrida({
         ? {
             veiculo: automatico.veiculo,
             ...(automatico.piloto ? { piloto: automatico.piloto } : {}),
+            ...(automatico.spriteJogador ? { spriteJogador: automatico.spriteJogador } : {}),
+            ...(automatico.cenarioImagem ? { cenarioImagem: automatico.cenarioImagem } : {}),
             permiteEmpurrar: automatico.permiteEmpurrar,
+            nomeJogador: automatico.nomeJogador,
+            rivais: automatico.rivais,
+            obstaculos: automatico.obstaculos,
           }
         : {}),
       nivel: nivelEsc,
@@ -450,20 +465,24 @@ export function Corrida({
     if (fase === "menu") return;
     const mapa: Record<string, keyof Omit<Entrada, "volante">> = {
       ArrowLeft: "esquerda",
-      a: "esquerda",
-      A: "esquerda",
       ArrowRight: "direita",
-      d: "direita",
-      D: "direita",
       ArrowUp: "acelerar",
-      w: "acelerar",
-      W: "acelerar",
       ArrowDown: "frear",
-      s: "frear",
-      S: "frear",
-      " ": "acelerar",
-      e: "empurrar",
-      E: "empurrar",
+      ...(!corridaAutomatica
+        ? {
+            a: "esquerda" as const,
+            A: "esquerda" as const,
+            d: "direita" as const,
+            D: "direita" as const,
+            w: "acelerar" as const,
+            W: "acelerar" as const,
+            s: "frear" as const,
+            S: "frear" as const,
+            " ": "acelerar" as const,
+            e: "empurrar" as const,
+            E: "empurrar" as const,
+          }
+        : {}),
     };
     const troca = (e: KeyboardEvent, v: boolean) => {
       const k = mapa[e.key];
@@ -479,7 +498,7 @@ export function Corrida({
       window.removeEventListener("keydown", desce);
       window.removeEventListener("keyup", sobe);
     };
-  }, [fase]);
+  }, [fase, corridaAutomatica]);
 
   // Inclinar o celular para virar.
   useEffect(() => {
@@ -551,14 +570,25 @@ export function Corrida({
         />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/50 via-slate-950/80 to-slate-950" />
         <div className="relative flex flex-col items-center gap-3 p-6 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
+            <span className="rounded-full border border-red-300/50 bg-red-950/70 px-3 py-1 text-red-200">
+              {automatico.modeloVeiculo ?? "Moto de competição"}
+            </span>
+            <span className="rounded-full border border-sky-300/50 bg-sky-950/70 px-3 py-1 text-sky-200">
+              {automatico.nomePista ?? TEMAS[pista].nome}
+            </span>
+            <span className="rounded-full border border-amber-300/50 bg-amber-950/70 px-3 py-1 text-amber-200">
+              6 CB650R · {voltasEsc} {voltasEsc === 1 ? "volta" : "voltas"}
+            </span>
+          </div>
           <h3 className="text-3xl font-black uppercase italic tracking-tight text-amber-300 sm:text-4xl">
             {automatico.titulo}
           </h3>
           <p className="max-w-md text-sm text-slate-200">{automatico.subtitulo}</p>
           <p className="max-w-md text-xs text-slate-400">
             {toque
-              ? "A moto acelera sozinha: gire o volante da tela, arraste o dedo ou incline o celular."
-              : `Setas ou WASD para pilotar${automatico.permiteEmpurrar ? "; E para dar uma ombrada quando estiver lado a lado" : ""}. Passe nas faixas azuis para ganhar turbo.`}
+              ? "A moto acelera sozinha: use os botões direcionais ou arraste o dedo sobre a pista."
+              : "Use as setas do teclado para pilotar. Toda a grade usa CB650R em cores diferentes; faça a melhor linha nas curvas."}
           </p>
           <div className="flex gap-2">
             <button
@@ -776,41 +806,68 @@ export function Corrida({
     );
   }
 
-  const volanteEl = (
+  const volanteEl = automatico ? (
+    <div className="flex items-center gap-2 rounded-2xl border border-sky-300/30 bg-slate-950/70 p-2 shadow-xl backdrop-blur">
+      <BotaoToque
+        rotulo="Virar à esquerda"
+        entrada={entrada}
+        chave="esquerda"
+        className="size-16 border-sky-200/60 bg-sky-900/70 sm:size-20"
+      >
+        <ArrowLeft className="size-8" />
+      </BotaoToque>
+      <BotaoToque
+        rotulo="Virar à direita"
+        entrada={entrada}
+        chave="direita"
+        className="size-16 border-sky-200/60 bg-sky-900/70 sm:size-20"
+      >
+        <ArrowRight className="size-8" />
+      </BotaoToque>
+    </div>
+  ) : (
     <VolanteToque entrada={entrada} className={retrato ? "size-32" : "size-24 sm:size-28"} />
   );
 
   const pedaisEl = (
     <div className="flex flex-col items-end gap-1.5">
       <div className={cn("flex gap-1.5", !retrato && "flex-col items-end")}>
-        <button
-          type="button"
-          onClick={() => void alternarInclinar()}
-          aria-pressed={inclinar}
-          aria-label="Inclinar o celular para virar"
-          className={cn(
-            "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
-            inclinar
-              ? "border-sky-300 bg-sky-500/60 text-white"
-              : "border-white/30 bg-black/40 text-slate-200",
-          )}
-        >
-          <Smartphone className="size-3.5" /> inclinar
-        </button>
-        <button
-          type="button"
-          onClick={() => setAuto((a) => !a)}
-          aria-pressed={auto}
-          aria-label="Acelerador automático"
-          className={cn(
-            "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
-            auto
-              ? "border-emerald-300 bg-emerald-500/60 text-white"
-              : "border-white/30 bg-black/40 text-slate-200",
-          )}
-        >
-          <Zap className="size-3.5" /> auto
-        </button>
+        {!automatico && (
+          <button
+            type="button"
+            onClick={() => void alternarInclinar()}
+            aria-pressed={inclinar}
+            aria-label="Inclinar o celular para virar"
+            className={cn(
+              "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
+              inclinar
+                ? "border-sky-300 bg-sky-500/60 text-white"
+                : "border-white/30 bg-black/40 text-slate-200",
+            )}
+          >
+            <Smartphone className="size-3.5" /> inclinar
+          </button>
+        )}
+        {automatico ? (
+          <span className="flex h-9 items-center gap-1 rounded-lg border border-emerald-300/60 bg-emerald-500/50 px-2 text-[10px] font-bold uppercase text-white backdrop-blur">
+            <Zap className="size-3.5" /> aceleração auto
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAuto((a) => !a)}
+            aria-pressed={auto}
+            aria-label="Acelerador automático"
+            className={cn(
+              "flex h-9 cursor-pointer items-center gap-1 rounded-lg border px-2 text-[10px] font-bold uppercase backdrop-blur",
+              auto
+                ? "border-emerald-300 bg-emerald-500/60 text-white"
+                : "border-white/30 bg-black/40 text-slate-200",
+            )}
+          >
+            <Zap className="size-3.5" /> auto
+          </button>
+        )}
       </div>
       <div className={cn("flex items-end gap-2", !retrato && "flex-col-reverse items-end")}>
         {automatico?.permiteEmpurrar && (
@@ -833,7 +890,7 @@ export function Corrida({
         >
           Frear
         </BotaoToque>
-        {!auto && (
+        {!automatico && !auto && (
           <BotaoToque
             rotulo="Acelerar"
             entrada={entrada}
@@ -924,6 +981,32 @@ export function Corrida({
               </b>
             </div>
           </div>
+          {automatico && hud.ranking.length > 0 && (
+            <div className="pointer-events-none absolute left-2 top-14 w-36 overflow-hidden rounded-lg border border-white/20 bg-slate-950/80 text-white shadow-xl backdrop-blur sm:top-16 sm:w-44">
+              <div className="flex items-center justify-between border-b border-white/10 bg-sky-500/15 px-2 py-1">
+                <span className="text-[8px] font-black uppercase tracking-[0.16em] text-sky-200 sm:text-[9px]">
+                  Ranking ao vivo
+                </span>
+                <span className="text-[8px] tabular-nums text-slate-300 sm:text-[9px]">
+                  {tempoFmt(hud.tempoDecorrido)}
+                </span>
+              </div>
+              <ol className="grid gap-px p-1">
+                {hud.ranking.map((item) => (
+                  <li
+                    key={item.nome}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[8px] font-bold sm:text-[10px]",
+                      item.jogador ? "bg-amber-400 text-amber-950" : "bg-white/5 text-slate-100",
+                    )}
+                  >
+                    <span className="w-4 shrink-0 tabular-nums">{item.posicao}º</span>
+                    <span className="truncate">{item.nome}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
           <div className={cn("pointer-events-none absolute bottom-2", "right-2")}>
             <Velocimetro kmh={hud.kmh} />
           </div>
@@ -1020,9 +1103,17 @@ export function Corrida({
       )}
       {!toque && (
         <p className="hidden text-center text-[11px] text-muted-foreground sm:block">
-          <ArrowLeft className="inline size-3" /> <ArrowRight className="inline size-3" /> ou A D
-          para virar · ↑ ou W para acelerar · ↓ ou S para frear
-          {automatico?.permiteEmpurrar ? " · E para ombrada" : ""}
+          {automatico ? (
+            <>
+              <ArrowLeft className="inline size-3" /> <ArrowRight className="inline size-3" />
+              setas do teclado para pilotar · aceleração automática
+            </>
+          ) : (
+            <>
+              <ArrowLeft className="inline size-3" /> <ArrowRight className="inline size-3" /> ou A
+              D para virar · ↑ ou W para acelerar · ↓ ou S para frear
+            </>
+          )}
         </p>
       )}
     </div>
