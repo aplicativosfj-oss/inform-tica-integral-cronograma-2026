@@ -1,4 +1,4 @@
-import { Brain, Palette, Volume2, VolumeX } from "lucide-react";
+import { Brain, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { registrarPartida, type Adversario } from "@/lib/estrelas";
@@ -362,7 +362,7 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
     <div
       className="flex min-h-[40rem] flex-col items-center gap-3 overflow-hidden rounded-3xl border border-white/20 p-4 text-white shadow-2xl"
       style={{
-          backgroundImage: `linear-gradient(180deg,rgba(15,23,42,.18),rgba(15,23,42,.9)),url(/images/jogos/personalizacao/domino-${cenario}.webp)`,
+        backgroundImage: `linear-gradient(180deg,rgba(15,23,42,.18),rgba(15,23,42,.9)),url(/images/jogos/personalizacao/domino-${cenario}.webp)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

@@ -1,4 +1,4 @@
-import { Palette, RotateCw, Sparkles, Volume2, VolumeX } from "lucide-react";
+import { RotateCw, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { registrarPartida, type Adversario } from "@/lib/estrelas";
