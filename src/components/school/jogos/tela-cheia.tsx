@@ -1,5 +1,5 @@
 import { ArrowLeft, Minimize2 } from "lucide-react";
-import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { BotaoCompartilhar } from "@/components/school/botao-compartilhar";
@@ -42,10 +42,13 @@ export function CaixaJogo({
   children,
 }: Props) {
   const lugar = useRef<HTMLDivElement>(null);
-  const hospedeiro = useMemo(
-    () => (typeof document === "undefined" ? null : document.createElement("div")),
-    [],
-  );
+  // O hospedeiro nasce apenas depois da hidratação. Assim o HTML do servidor e
+  // o primeiro render do navegador são idênticos, e o jogo também aparece no
+  // modo normal sem depender de abrir a tela cheia primeiro.
+  const [hospedeiro, setHospedeiro] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    setHospedeiro(document.createElement("div"));
+  }, []);
 
   // Move o hospedeiro entre a janela e o <body>.
   useEffect(() => {

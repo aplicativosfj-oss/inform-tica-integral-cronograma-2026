@@ -1,4 +1,14 @@
-import { BookOpen, Bot, Lightbulb, Menu, RotateCcw, Users, Volume2, VolumeX } from "lucide-react";
+import {
+  BookOpen,
+  Bot,
+  Lightbulb,
+  Menu,
+  Palette,
+  RotateCcw,
+  Users,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -12,6 +22,9 @@ import {
   PecaOnca,
   px,
   py,
+  type SkinCao,
+  type SkinOnca,
+  type TemaOnca,
 } from "@/components/school/jogos/onca-arte";
 import {
   aplicar,
@@ -124,6 +137,11 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
   /** p1 = quem começa com o lado `lado`; p2 = o outro (o computador, se for o caso). */
   const [placar, setPlacar] = useState({ p1: 0, p2: 0, empates: 0 });
   const [som, setSom] = useState(true);
+  const [cenario, setCenario] = useState<"cerrado" | "amazonia">("cerrado");
+  const [temaTabuleiro, setTemaTabuleiro] = useState<TemaOnca>("madeira");
+  const [skinOnca, setSkinOnca] = useState<SkinOnca>("pintada");
+  const [skinCao, setSkinCao] = useState<SkinCao>("pug");
+  const [personalizar, setPersonalizar] = useState(false);
   const [ajuda, setAjuda] = useState(false);
   const [pensando, setPensando] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
@@ -488,6 +506,14 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
           )}
           <button
             type="button"
+            onClick={() => setPersonalizar((v) => !v)}
+            aria-label="Personalizar jogo"
+            className={btnIcone}
+          >
+            <Palette className="size-4" />
+          </button>
+          <button
+            type="button"
             onClick={() => setAjuda(true)}
             aria-label="Como jogar"
             className={btnIcone}
@@ -528,6 +554,60 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               {rotulo}
             </button>
           ))}
+        </div>
+      )}
+      {personalizar && (
+        <div className="grid gap-2 border-t border-[#d9b26a]/15 bg-[#201b18]/90 p-2 sm:grid-cols-2">
+          <label className="text-[10px] font-bold uppercase tracking-wide text-[#d9b26a]">
+            Bioma
+            <select
+              value={cenario}
+              onChange={(e) => setCenario(e.target.value as typeof cenario)}
+              className="mt-1 h-9 w-full rounded-lg border border-[#d9b26a]/30 bg-[#342b26] px-2 text-xs text-[#efe4d2]"
+            >
+              <option value="cerrado">Cerrado solar</option>
+              <option value="amazonia">Amazônia lunar</option>
+            </select>
+          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-[#d9b26a]">
+            Tabuleiro
+            <select
+              value={temaTabuleiro}
+              onChange={(e) => setTemaTabuleiro(e.target.value as TemaOnca)}
+              className="mt-1 h-9 w-full rounded-lg border border-[#d9b26a]/30 bg-[#342b26] px-2 text-xs text-[#efe4d2]"
+            >
+              <option value="madeira">Madeira entalhada</option>
+              <option value="rio">Água turquesa</option>
+              <option value="pedra">Pedra ancestral</option>
+              <option value="noite">Cristal noturno</option>
+            </select>
+          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-[#d9b26a]">
+            Onça
+            <select
+              value={skinOnca}
+              onChange={(e) => setSkinOnca(e.target.value as SkinOnca)}
+              className="mt-1 h-9 w-full rounded-lg border border-[#d9b26a]/30 bg-[#342b26] px-2 text-xs text-[#efe4d2]"
+            >
+              <option value="pintada">Pintada</option>
+              <option value="negra">Pantera negra</option>
+              <option value="dourada">Dourada</option>
+              <option value="guardia">Guardiã turquesa</option>
+            </select>
+          </label>
+          <label className="text-[10px] font-bold uppercase tracking-wide text-[#d9b26a]">
+            Cachorros
+            <select
+              value={skinCao}
+              onChange={(e) => setSkinCao(e.target.value as SkinCao)}
+              className="mt-1 h-9 w-full rounded-lg border border-[#d9b26a]/30 bg-[#342b26] px-2 text-xs text-[#efe4d2]"
+            >
+              <option value="pug">Pugs</option>
+              <option value="caramelo">Caramelos</option>
+              <option value="azul">Guardiões azuis</option>
+              <option value="raposa">Raposa coral</option>
+            </select>
+          </label>
         </div>
       )}
     </div>
@@ -626,7 +706,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
         role="group"
         aria-label="Tabuleiro do Jogo da Onça"
       >
-        <Madeira dica={dica} />
+        <Madeira dica={dica} tema={temaTabuleiro} />
 
         {/* rastro da última jogada */}
         {ultimo && (
@@ -683,7 +763,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                   fill="freeze"
                 />
                 <animate attributeName="opacity" values="1;1;0" dur="0.7s" fill="freeze" />
-                <PecaCao id={id} />
+                <PecaCao id={id} skin={skinCao} />
               </g>
             </g>
           ) : null,
@@ -711,7 +791,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
                   transition: "transform 160ms",
                 }}
               >
-                <PecaCao id={id} brilho={selecionado} />
+                <PecaCao id={id} brilho={selecionado} skin={skinCao} />
               </g>
             </g>
           );
@@ -732,7 +812,7 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
               transition: "transform 160ms",
             }}
           >
-            <PecaOnca brilho={sel?.peca === "onca"} />
+            <PecaOnca brilho={sel?.peca === "onca"} skin={skinOnca} />
           </g>
         </g>
       </svg>
@@ -853,9 +933,12 @@ export function JogoDaOnca({ adversario, nivel }: { adversario: Adversario; nive
     <div
       ref={raiz}
       className={cn(
-        "mx-auto flex w-full flex-col justify-center gap-2 rounded-3xl bg-[#2a2320] p-2 shadow-xl ring-1 ring-[#d9b26a]/25 sm:p-2.5",
+        "mx-auto flex min-h-[42rem] w-full flex-col justify-center gap-2 rounded-3xl bg-[#2a2320] bg-cover bg-center p-2 shadow-xl ring-1 ring-[#d9b26a]/25 sm:p-2.5",
         dois ? "max-w-[980px]" : "max-w-[460px]",
       )}
+      style={{
+        backgroundImage: `linear-gradient(180deg,rgba(20,15,10,.3),rgba(42,35,32,.92)),url(/images/jogos/personalizacao/onca-${cenario}.webp)`,
+      }}
     >
       {fase === "inicio" ? (
         dois ? (

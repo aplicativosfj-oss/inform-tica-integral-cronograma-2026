@@ -1,3 +1,4 @@
+import { Brain, Palette, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { registrarPartida, type Adversario } from "@/lib/estrelas";
@@ -22,6 +23,37 @@ interface Pedra {
 }
 
 type Lado = "esquerda" | "direita";
+type TemaDomino = "madeira" | "oceano" | "galaxia" | "frutas";
+type EstiloPedra = "marfim" | "colorido" | "madeira" | "numeros";
+
+const TEMAS_DOMINO: Record<TemaDomino, { nome: string; mesa: string; destaque: string }> = {
+  madeira: { nome: "Ateliê brasileiro", mesa: "#8b5e3c", destaque: "#f59e0b" },
+  oceano: { nome: "Fundo do mar", mesa: "#075985", destaque: "#67e8f9" },
+  galaxia: { nome: "Laboratório orbital", mesa: "#312e81", destaque: "#a78bfa" },
+  frutas: { nome: "Feira de cores", mesa: "#166534", destaque: "#fb7185" },
+};
+
+let audioDomino: AudioContext | null = null;
+function tocarDomino(tipo: "pedra" | "compra" | "erro" | "vitoria") {
+  try {
+    audioDomino ??= new AudioContext();
+    const ctx = audioDomino;
+    if (ctx.state === "suspended") void ctx.resume();
+    const freq = tipo === "pedra" ? 260 : tipo === "compra" ? 420 : tipo === "erro" ? 130 : 660;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = tipo === "erro" ? "square" : "triangle";
+    o.frequency.setValueAtTime(freq, ctx.currentTime);
+    if (tipo === "vitoria") o.frequency.exponentialRampToValueAtTime(990, ctx.currentTime + 0.3);
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.28);
+    o.connect(g).connect(ctx.destination);
+    o.start();
+    o.stop(ctx.currentTime + 0.3);
+  } catch {
+    // O jogo segue sem som quando o navegador não oferece áudio.
+  }
+}
 
 function baralho(): Pedra[] {
   const p: Pedra[] = [];
@@ -80,18 +112,46 @@ const PONTOS: Record<number, [number, number][]> = {
   ],
 };
 
-function Face({ n, y }: { n: number; y: number }) {
+function Face({ n, y, cor, numeros }: { n: number; y: number; cor: string; numeros?: boolean }) {
   return (
     <g transform={`translate(0 ${y})`}>
-      {(PONTOS[n] ?? []).map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy * 0.5} r={7} fill="#1c1917" />
-      ))}
+      {numeros ? (
+        <text x="50" y="35" textAnchor="middle" fontSize="34" fontWeight="900" fill={cor}>
+          {n}
+        </text>
+      ) : (
+        (PONTOS[n] ?? []).map(([cx, cy], i) => (
+          <circle key={i} cx={cx} cy={cy * 0.5} r={7} fill={cor} />
+        ))
+      )}
     </g>
   );
 }
 
 /** A pedra em pé (mão) ou deitada (mesa). */
-function PedraSVG({ p, deitada = false }: { p: Pedra; deitada?: boolean }) {
+function PedraSVG({
+  p,
+  estilo,
+  deitada = false,
+}: {
+  p: Pedra;
+  estilo: EstiloPedra;
+  deitada?: boolean;
+}) {
+  const fundo = estilo === "madeira" ? "#b7793e" : estilo === "colorido" ? "#fff7ed" : "#fffdf4";
+  const borda = estilo === "madeira" ? "#5b341d" : estilo === "colorido" ? "#fb7185" : "#a8a29e";
+  const corA =
+    estilo === "colorido"
+      ? ["#0ea5e9", "#f43f5e", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899", "#14b8a6"][p.a]!
+      : estilo === "madeira"
+        ? "#fff7d6"
+        : "#1c1917";
+  const corB =
+    estilo === "colorido"
+      ? ["#0ea5e9", "#f43f5e", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899", "#14b8a6"][p.b]!
+      : estilo === "madeira"
+        ? "#fff7d6"
+        : "#1c1917";
   const corpo = (
     <svg
       viewBox="0 0 100 100"
@@ -106,13 +166,13 @@ function PedraSVG({ p, deitada = false }: { p: Pedra; deitada?: boolean }) {
           width={92}
           height={92}
           rx={9}
-          fill="#fdfcf7"
-          stroke="#b6b0a4"
+          fill={fundo}
+          stroke={borda}
           strokeWidth={3}
         />
-        <line x1={10} y1={50} x2={90} y2={50} stroke="#b6b0a4" strokeWidth={3} />
-        <Face n={p.a} y={0} />
-        <Face n={p.b} y={50} />
+        <line x1={10} y1={50} x2={90} y2={50} stroke={borda} strokeWidth={3} />
+        <Face n={p.a} y={0} cor={corA} numeros={estilo === "numeros"} />
+        <Face n={p.b} y={50} cor={corB} numeros={estilo === "numeros"} />
       </g>
     </svg>
   );
@@ -120,6 +180,11 @@ function PedraSVG({ p, deitada = false }: { p: Pedra; deitada?: boolean }) {
 }
 
 export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
+  const [tema, setTema] = useState<TemaDomino>("madeira");
+  const [estiloPedra, setEstiloPedra] = useState<EstiloPedra>("marfim");
+  const [cenario, setCenario] = useState<"atelie" | "orbita">("atelie");
+  const [som, setSom] = useState(true);
+  const [modoEducativo, setModoEducativo] = useState(true);
   const [maoJogador, setMaoJogador] = useState<Pedra[]>([]);
   const [maoAdv, setMaoAdv] = useState<Pedra[]>([]);
   const [monte, setMonte] = useState<Pedra[]>([]);
@@ -181,6 +246,7 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
   }
 
   function colocar(p: Pedra, lado: Lado, deQuem: 1 | 2) {
+    if (som) tocarDomino("pedra");
     if (!mesa.length) {
       setMesa([p]);
       setPontas([p.a, p.b]);
@@ -206,6 +272,7 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
     if (!p) return;
     const ponta = lado === "esquerda" ? pontas[0] : pontas[1];
     if (mesa.length && !encaixa(p, ponta)) {
+      if (som) tocarDomino("erro");
       setAviso("Essa pedra não encaixa desse lado.");
       return;
     }
@@ -223,6 +290,7 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
       return;
     }
     const [p, ...resto] = monte;
+    if (som) tocarDomino("compra");
     setMonte(resto);
     setMaoJogador((m) => [...m, p!]);
   }
@@ -291,7 +359,82 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
   const minhaVez = vez === 1 && !fim;
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div
+      className="flex min-h-[40rem] flex-col items-center gap-3 overflow-hidden rounded-3xl border border-white/20 p-4 text-white shadow-2xl"
+      style={{
+          backgroundImage: `linear-gradient(180deg,rgba(15,23,42,.18),rgba(15,23,42,.9)),url(/images/jogos/personalizacao/domino-${cenario}.webp)`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="w-full max-w-4xl rounded-2xl border border-white/20 bg-slate-950/75 p-3 backdrop-blur-md">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.2em] text-orange-300">
+              Laboratório de combinações
+            </p>
+            <h3 className="text-xl font-black">Dominó profissional</h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSom((v) => !v)}
+            aria-label={som ? "Desligar sons" : "Ligar sons"}
+            className="flex size-10 items-center justify-center rounded-xl bg-white/10 hover:bg-white/20"
+          >
+            {som ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+          </button>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <label className="text-[11px] font-bold text-slate-300">
+            Cenário
+            <select
+              value={cenario}
+              onChange={(e) => setCenario(e.target.value as typeof cenario)}
+              className="mt-1 h-10 w-full rounded-xl border border-white/15 bg-slate-900 px-2 text-sm"
+            >
+              <option value="atelie">Ateliê brasileiro</option>
+              <option value="orbita">Estação orbital</option>
+            </select>
+          </label>
+          <label className="text-[11px] font-bold text-slate-300">
+            Mesa
+            <select
+              value={tema}
+              onChange={(e) => setTema(e.target.value as TemaDomino)}
+              className="mt-1 h-10 w-full rounded-xl border border-white/15 bg-slate-900 px-2 text-sm"
+            >
+              {Object.entries(TEMAS_DOMINO).map(([id, t]) => (
+                <option key={id} value={id}>
+                  {t.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-[11px] font-bold text-slate-300">
+            Pedras
+            <select
+              value={estiloPedra}
+              onChange={(e) => setEstiloPedra(e.target.value as EstiloPedra)}
+              className="mt-1 h-10 w-full rounded-xl border border-white/15 bg-slate-900 px-2 text-sm"
+            >
+              <option value="marfim">Marfim clássico</option>
+              <option value="colorido">Pontos coloridos</option>
+              <option value="madeira">Madeira</option>
+              <option value="numeros">Números grandes</option>
+            </select>
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={() => setModoEducativo((v) => !v)}
+          className={cn(
+            "mt-2 flex h-9 items-center gap-2 rounded-xl px-3 text-xs font-bold",
+            modoEducativo ? "bg-emerald-400 text-emerald-950" : "bg-white/10 text-white",
+          )}
+        >
+          <Brain className="size-4" /> Modo educativo {modoEducativo ? "ligado" : "desligado"}
+        </button>
+      </div>
       <p className="text-sm font-semibold text-foreground">
         {fim ? fim : minhaVez ? "Sua vez" : "O computador está jogando…"}
       </p>
@@ -299,7 +442,11 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
       {/* Mesa */}
       <div
         data-mesa
-        className="flex w-full items-center gap-1.5 overflow-x-auto rounded-xl bg-[#2f6f4e]/20 p-2 [&::-webkit-scrollbar]:h-1.5"
+        className="flex min-h-32 w-full max-w-4xl items-center gap-1.5 overflow-x-auto rounded-2xl border-4 p-3 shadow-2xl transition-colors [&::-webkit-scrollbar]:h-1.5"
+        style={{
+          backgroundColor: `${TEMAS_DOMINO[tema].mesa}e6`,
+          borderColor: TEMAS_DOMINO[tema].destaque,
+        }}
       >
         <button
           type="button"
@@ -320,7 +467,7 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
             Mesa vazia — arraste uma pedra até aqui (ou toque nela e num lado).
           </span>
         ) : (
-          mesa.map((p, i) => <PedraSVG key={`${p.id}-${i}`} p={p} deitada />)
+          mesa.map((p, i) => <PedraSVG key={`${p.id}-${i}`} p={p} estilo={estiloPedra} deitada />)
         )}
         <button
           type="button"
@@ -414,7 +561,7 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
                     : "border-transparent opacity-60",
               )}
             >
-              <PedraSVG p={p} />
+              <PedraSVG p={p} estilo={estiloPedra} />
             </button>
           );
         })}
@@ -440,6 +587,17 @@ export function Domino({ adversario, nivel }: { adversario: Adversario; nivel: n
           Passar
         </button>
       </div>
+      {modoEducativo && (
+        <div className="flex max-w-2xl items-start gap-2 rounded-xl border border-emerald-300/30 bg-slate-950/80 px-3 py-2 text-xs text-slate-100 backdrop-blur">
+          <Brain className="mt-0.5 size-4 shrink-0 text-emerald-300" />
+          <span>
+            <b>Desafio matemático:</b> você tem {maoJogador.reduce((s, p) => s + peso(p), 0)} pontos
+            na mão. Procure uma pedra com{" "}
+            {pontas[0] >= 0 ? `${pontas[0]} ou ${pontas[1]}` : "a maior carroça"} e tente reduzir
+            sua soma.
+          </span>
+        </div>
+      )}
 
       {estrelas !== null && estrelas > 0 && (
         <p className="text-sm font-bold text-amber-600 dark:text-amber-400">

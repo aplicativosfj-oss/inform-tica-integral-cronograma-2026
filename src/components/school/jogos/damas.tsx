@@ -1,3 +1,4 @@
+import { Palette, RotateCw, Sparkles, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { registrarPartida, type Adversario } from "@/lib/estrelas";
@@ -27,6 +28,40 @@ interface Peca {
 }
 type Casa = Peca | null;
 type Tab = Casa[];
+type Tema = "classico" | "neon" | "oceano" | "floresta" | "doce";
+type EstiloPeca = "disco" | "cristal" | "escudo" | "bichos";
+
+const TEMAS: Record<Tema, { nome: string; clara: string; escura: string; moldura: string }> = {
+  classico: { nome: "Madeira real", clara: "#f3dfbd", escura: "#8b5a35", moldura: "#3b2115" },
+  neon: { nome: "Neon", clara: "#c4b5fd", escura: "#312e81", moldura: "#d946ef" },
+  oceano: { nome: "Oceano", clara: "#cffafe", escura: "#0e7490", moldura: "#67e8f9" },
+  floresta: { nome: "Floresta", clara: "#d9f99d", escura: "#3f6212", moldura: "#a3e635" },
+  doce: { nome: "Doceria", clara: "#fce7f3", escura: "#be185d", moldura: "#f9a8d4" },
+};
+
+let audioDamas: AudioContext | null = null;
+function somDamas(tipo: "mover" | "captura" | "dama") {
+  try {
+    audioDamas ??= new AudioContext();
+    const ctx = audioDamas;
+    if (ctx.state === "suspended") void ctx.resume();
+    const notas = tipo === "captura" ? [220, 150] : tipo === "dama" ? [523, 659, 784] : [360];
+    notas.forEach((freq, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      const t = ctx.currentTime + i * 0.08;
+      o.type = tipo === "captura" ? "square" : "triangle";
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+      o.connect(g).connect(ctx.destination);
+      o.start(t);
+      o.stop(t + 0.15);
+    });
+  } catch {
+    // O jogo continua normalmente quando o navegador bloqueia áudio.
+  }
+}
 
 interface Jogada {
   de: number;
@@ -203,21 +238,78 @@ function jogadaDoComputador(t: Tab, nivel: number): Jogada | null {
 }
 
 /** A peça desenhada: disco com bisel e, na dama, a coroa. */
-function Disco({ peca }: { peca: Peca }) {
+function Disco({ peca, estilo }: { peca: Peca; estilo: EstiloPeca }) {
   const claro = peca.cor === "b";
+  const cores = claro
+    ? { a: "#fff7d6", b: "#f59e0b", borda: "#92400e" }
+    : { a: "#312e81", b: "#a855f7", borda: "#e9d5ff" };
   return (
     <svg viewBox="0 0 100 100" className="size-full p-[6px]" aria-hidden>
-      <circle cx={50} cy={54} r={40} fill={claro ? "#b6b0a4" : "#0f0f10"} opacity={0.55} />
-      <circle cx={50} cy={50} r={40} fill={claro ? "#f5f0e6" : "#2b2b2e"} />
-      <circle
-        cx={50}
-        cy={50}
-        r={31}
-        fill="none"
-        stroke={claro ? "#cfc7b6" : "#4a4a4f"}
-        strokeWidth={4}
-      />
-      <ellipse cx={42} cy={36} rx={13} ry={8} fill="#ffffff" opacity={claro ? 0.7 : 0.12} />
+      <defs>
+        <radialGradient id={`peca-${peca.cor}-${estilo}`} cx="35%" cy="25%" r="75%">
+          <stop offset="0" stopColor={cores.a} />
+          <stop offset="1" stopColor={cores.b} />
+        </radialGradient>
+      </defs>
+      {estilo === "escudo" ? (
+        <path
+          d="M50 6 88 22v28c0 24-16 38-38 46C28 88 12 74 12 50V22Z"
+          fill={`url(#peca-${peca.cor}-${estilo})`}
+          stroke={cores.borda}
+          strokeWidth="5"
+        />
+      ) : estilo === "bichos" ? (
+        <g>
+          <circle
+            cx="50"
+            cy="52"
+            r="39"
+            fill={`url(#peca-${peca.cor}-${estilo})`}
+            stroke={cores.borda}
+            strokeWidth="5"
+          />
+          <path
+            d="M23 28 28 10 41 24M77 28 72 10 59 24"
+            fill={cores.b}
+            stroke={cores.borda}
+            strokeWidth="4"
+          />
+          <circle cx="38" cy="47" r="5" fill="#172033" />
+          <circle cx="62" cy="47" r="5" fill="#172033" />
+          <path
+            d="M40 65q10 9 20 0"
+            fill="none"
+            stroke="#172033"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+        </g>
+      ) : (
+        <>
+          <circle cx={50} cy={55} r={40} fill="#020617" opacity={0.4} />
+          <circle
+            cx={50}
+            cy={50}
+            r={40}
+            fill={`url(#peca-${peca.cor}-${estilo})`}
+            stroke={cores.borda}
+            strokeWidth={estilo === "cristal" ? 5 : 3}
+          />
+          {estilo === "cristal" ? (
+            <path d="M28 55 42 22h24l12 33-28 24Z" fill="#fff" opacity=".24" />
+          ) : (
+            <circle
+              cx={50}
+              cy={50}
+              r={29}
+              fill="none"
+              stroke={cores.borda}
+              strokeWidth={4}
+              opacity=".7"
+            />
+          )}
+        </>
+      )}
       {peca.dama && (
         <path
           d="M32 56 l6 -16 l12 10 l12 -10 l6 16 z"
@@ -231,7 +323,11 @@ function Disco({ peca }: { peca: Peca }) {
 }
 
 export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: number }) {
-  const [tema, setTema] = useState<"madeira" | "neon" | "oceano">("madeira");
+  const [tema, setTema] = useState<Tema>("classico");
+  const [estiloPeca, setEstiloPeca] = useState<EstiloPeca>("disco");
+  const [cenario, setCenario] = useState<"arena" | "biblioteca">("arena");
+  const [girado, setGirado] = useState(false);
+  const [som, setSom] = useState(true);
   const [tab, setTab] = useState<Tab>(tabuleiroInicial);
   const [vez, setVez] = useState<Cor>("b");
   const [sel, setSel] = useState<number | null>(null);
@@ -267,6 +363,10 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
 
   function executar(j: Jogada) {
     const novo = aplicar(tab, j);
+    if (som) {
+      const virou = !tab[j.de]?.dama && novo[j.para]?.dama;
+      somDamas(virou ? "dama" : j.capturadas.length ? "captura" : "mover");
+    }
     setTab(novo);
     setSel(null);
     const proxima: Cor = vez === "b" ? "p" : "b";
@@ -325,15 +425,85 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
 
   return (
     <div
-      className="flex min-h-[34rem] flex-col items-center gap-2 rounded-3xl border border-white/20 bg-slate-950/90 p-4 text-white shadow-2xl"
+      className="flex min-h-[42rem] flex-col items-center gap-3 overflow-hidden rounded-3xl border border-white/20 bg-slate-950/90 p-4 text-white shadow-2xl"
       style={{
-        backgroundImage:
-          "linear-gradient(180deg,rgba(2,6,23,.5),rgba(2,6,23,.94)),url(/images/jogos/central-arcade-profissional.png)",
+        backgroundImage: `linear-gradient(180deg,rgba(2,6,23,.28),rgba(2,6,23,.94)),url(/images/jogos/personalizacao/damas-${cenario}.webp)`,
         backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
-      <div className="flex flex-wrap justify-center gap-2" aria-label="Tema do tabuleiro">
-        {(["madeira", "neon", "oceano"] as const).map((t) => (
+      <div className="w-full max-w-3xl rounded-2xl border border-white/15 bg-slate-950/75 p-3 backdrop-blur-md">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.2em] text-amber-300">
+              Academia de estratégia
+            </p>
+            <h3 className="text-xl font-black">Damas — monte seu estilo</h3>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setGirado((v) => !v)}
+              className="flex h-10 items-center gap-1 rounded-xl bg-white/10 px-3 text-xs font-bold hover:bg-white/20"
+            >
+              <RotateCw className="size-4" /> Girar
+            </button>
+            <button
+              type="button"
+              onClick={() => setSom((v) => !v)}
+              aria-label={som ? "Desligar sons" : "Ligar sons"}
+              className="flex size-10 items-center justify-center rounded-xl bg-white/10 hover:bg-white/20"
+            >
+              {som ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+            </button>
+          </div>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <label className="text-[11px] font-bold text-slate-300">
+            Cenário
+            <select
+              value={cenario}
+              onChange={(e) => setCenario(e.target.value as typeof cenario)}
+              className="mt-1 h-10 w-full rounded-xl border border-white/15 bg-slate-900 px-2 text-sm text-white"
+            >
+              <option value="arena">Cidade do futuro</option>
+              <option value="biblioteca">Biblioteca mágica</option>
+            </select>
+          </label>
+          <label className="text-[11px] font-bold text-slate-300">
+            Tabuleiro
+            <select
+              value={tema}
+              onChange={(e) => setTema(e.target.value as Tema)}
+              className="mt-1 h-10 w-full rounded-xl border border-white/15 bg-slate-900 px-2 text-sm text-white"
+            >
+              {Object.entries(TEMAS).map(([id, t]) => (
+                <option key={id} value={id}>
+                  {t.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-[11px] font-bold text-slate-300">
+            Peças
+            <select
+              value={estiloPeca}
+              onChange={(e) => setEstiloPeca(e.target.value as EstiloPeca)}
+              className="mt-1 h-10 w-full rounded-xl border border-white/15 bg-slate-900 px-2 text-sm text-white"
+            >
+              <option value="disco">Discos clássicos</option>
+              <option value="cristal">Cristais</option>
+              <option value="escudo">Escudos</option>
+              <option value="bichos">Animais</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div
+        className="flex flex-wrap justify-center gap-2"
+        aria-label="Atalhos de tema do tabuleiro"
+      >
+        {(Object.keys(TEMAS) as Tema[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -345,7 +515,11 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
                 : "border-white/20 bg-black/30 text-slate-200",
             )}
           >
-            {t}
+            <span
+              className="mr-1 inline-block size-3 rounded-full"
+              style={{ background: TEMAS[t].escura }}
+            />
+            {TEMAS[t].nome}
           </button>
         ))}
       </div>
@@ -372,11 +546,13 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
 
       <div
         className={cn(
-          "grid w-[min(92vw,calc(100dvh-12rem),32rem)] grid-cols-8 overflow-hidden rounded-xl border-4 shadow-2xl",
-          tema === "madeira" && "border-amber-950",
-          tema === "neon" && "border-fuchsia-400 shadow-[0_0_30px_#d946ef]",
-          tema === "oceano" && "border-cyan-300 shadow-[0_0_25px_#22d3ee]",
+          "grid w-[min(92vw,calc(100dvh-17rem),34rem)] grid-cols-8 overflow-hidden rounded-xl border-4 shadow-2xl transition-transform duration-500",
+          tema === "neon" && "shadow-[0_0_30px_#d946ef]",
         )}
+        style={{
+          borderColor: TEMAS[tema].moldura,
+          transform: girado ? "rotate(180deg)" : undefined,
+        }}
       >
         {tab.map((c, i) => {
           const podeIr = destinos.some((j) => j.para === i);
@@ -426,13 +602,11 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
               className={cn(
                 "relative aspect-square w-full touch-none transition-colors",
                 puxando?.de === i && "z-20",
-                tema === "madeira" && (escura(i) ? "bg-[#8a5a34]" : "bg-[#e8d5b7]"),
-                tema === "neon" && (escura(i) ? "bg-violet-950" : "bg-fuchsia-300"),
-                tema === "oceano" && (escura(i) ? "bg-cyan-900" : "bg-sky-100"),
                 sel === i && "ring-4 ring-inset ring-primary",
                 podeIr && "cursor-pointer",
                 ehOrigem && !fim && "cursor-pointer",
               )}
+              style={{ backgroundColor: escura(i) ? TEMAS[tema].escura : TEMAS[tema].clara }}
             >
               {c && (
                 <span
@@ -447,7 +621,12 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
                       : undefined
                   }
                 >
-                  <Disco peca={c} />
+                  <span
+                    className="block size-full transition-transform duration-500"
+                    style={{ transform: girado ? "rotate(180deg)" : undefined }}
+                  >
+                    <Disco peca={c} estilo={estiloPeca} />
+                  </span>
                 </span>
               )}
               {podeIr && (
@@ -461,6 +640,13 @@ export function Damas({ adversario, nivel }: { adversario: Adversario; nivel: nu
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span>Claras: {tab.filter((c) => c?.cor === "b").length}</span>
         <span>Escuras: {tab.filter((c) => c?.cor === "p").length}</span>
+      </div>
+      <div className="flex max-w-xl items-start gap-2 rounded-xl border border-cyan-300/25 bg-slate-950/75 px-3 py-2 text-xs text-slate-200 backdrop-blur">
+        <Sparkles className="mt-0.5 size-4 shrink-0 text-cyan-300" />
+        <span>
+          <b>Estratégia:</b> controle o centro, proteja a última fileira e procure sequências de
+          captura. Os pontos verdes mostram jogadas possíveis.
+        </span>
       </div>
 
       {estrelas !== null && estrelas > 0 && (

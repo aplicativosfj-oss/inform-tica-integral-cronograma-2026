@@ -5,6 +5,10 @@
 
 import { ARESTAS, PONTOS } from "@/components/school/jogos/onca-motor";
 
+export type TemaOnca = "madeira" | "rio" | "pedra" | "noite";
+export type SkinOnca = "pintada" | "negra" | "dourada" | "guardia";
+export type SkinCao = "pug" | "caramelo" | "azul" | "raposa";
+
 /** Espaço entre pontos e margem do desenho, em unidades do SVG. */
 export const ESCALA = 64;
 export const MARGEM = 58;
@@ -30,18 +34,32 @@ const ONDAS_CAO = ondas(25);
 const ONDAS_ONCA = ondas(28, 14, 0.08);
 
 /** O cachorro (pug) da peça — desenhado em (0,0), raio ~25. */
-export function PecaCao({ id, brilho }: { id: number; brilho?: boolean }) {
+export function PecaCao({
+  id,
+  brilho,
+  skin = "pug",
+}: {
+  id: number;
+  brilho?: boolean;
+  skin?: SkinCao;
+}) {
   const g = `cao-${id}`;
+  const paleta = {
+    pug: ["#c9675e", "#a6443f", "#fbdcc0", "#efb98f"],
+    caramelo: ["#f59e0b", "#b45309", "#ffedd5", "#fdba74"],
+    azul: ["#38bdf8", "#0369a1", "#e0f2fe", "#7dd3fc"],
+    raposa: ["#fb7185", "#be123c", "#fff1f2", "#fda4af"],
+  }[skin];
   return (
     <g>
       <defs>
         <radialGradient id={`${g}-f`} cx="40%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#c9675e" />
-          <stop offset="1" stopColor="#a6443f" />
+          <stop offset="0" stopColor={paleta[0]} />
+          <stop offset="1" stopColor={paleta[1]} />
         </radialGradient>
         <radialGradient id={`${g}-r`} cx="50%" cy="40%" r="70%">
-          <stop offset="0" stopColor="#fbdcc0" />
-          <stop offset="1" stopColor="#efb98f" />
+          <stop offset="0" stopColor={paleta[2]} />
+          <stop offset="1" stopColor={paleta[3]} />
         </radialGradient>
       </defs>
       <path d={ONDAS_CAO} fill="rgba(0,0,0,0.28)" transform="translate(1.5 3)" />
@@ -90,7 +108,13 @@ export function PecaCao({ id, brilho }: { id: number; brilho?: boolean }) {
 }
 
 /** A onça-pintada da peça — desenhada em (0,0), raio ~28. */
-export function PecaOnca({ brilho }: { brilho?: boolean }) {
+export function PecaOnca({ brilho, skin = "pintada" }: { brilho?: boolean; skin?: SkinOnca }) {
+  const paleta = {
+    pintada: ["#ecd08a", "#cfa24a", "#e8b25e", "#cf8a3a", "#1b1410"],
+    negra: ["#475569", "#0f172a", "#334155", "#020617", "#f8fafc"],
+    dourada: ["#fef08a", "#eab308", "#fde047", "#ca8a04", "#713f12"],
+    guardia: ["#99f6e4", "#0f766e", "#5eead4", "#115e59", "#042f2e"],
+  }[skin];
   const pintas: [number, number, number][] = [
     [-11, -13, 2.2],
     [-5, -16, 1.8],
@@ -105,12 +129,12 @@ export function PecaOnca({ brilho }: { brilho?: boolean }) {
     <g>
       <defs>
         <radialGradient id="onca-f" cx="40%" cy="30%" r="80%">
-          <stop offset="0" stopColor="#ecd08a" />
-          <stop offset="1" stopColor="#cfa24a" />
+          <stop offset="0" stopColor={paleta[0]} />
+          <stop offset="1" stopColor={paleta[1]} />
         </radialGradient>
         <radialGradient id="onca-r" cx="50%" cy="35%" r="75%">
-          <stop offset="0" stopColor="#e8b25e" />
-          <stop offset="1" stopColor="#cf8a3a" />
+          <stop offset="0" stopColor={paleta[2]} />
+          <stop offset="1" stopColor={paleta[3]} />
         </radialGradient>
       </defs>
       <path d={ONDAS_ONCA} fill="rgba(0,0,0,0.3)" transform="translate(1.5 3)" />
@@ -141,7 +165,7 @@ export function PecaOnca({ brilho }: { brilho?: boolean }) {
         strokeLinejoin="round"
       />
       {pintas.map(([x, y, r], i) => (
-        <circle key={i} cx={x} cy={y} r={r} fill="#1b1410" />
+        <circle key={i} cx={x} cy={y} r={r} fill={paleta[4]} />
       ))}
       {/* faixa clara do focinho */}
       <path d="M-9 4 Q0 -2 9 4 Q7 15 0 17 Q-7 15 -9 4Z" fill="#fff0c9" />
@@ -250,14 +274,26 @@ export function FaixaPenas({
 }
 
 /** A madeira do tabuleiro, com o triângulo (a armadilha) e as linhas entalhadas. */
-export function Madeira({ dica }: { dica?: { a: number; b: number } | null }) {
+export function Madeira({
+  dica,
+  tema = "madeira",
+}: {
+  dica?: { a: number; b: number } | null;
+  tema?: TemaOnca;
+}) {
+  const cores = {
+    madeira: ["#f6e2c4", "#efd3aa", "#e6c294", "#a97a45", "#5a341d"],
+    rio: ["#cffafe", "#67e8f9", "#0891b2", "#155e75", "#164e63"],
+    pedra: ["#e2e8f0", "#94a3b8", "#64748b", "#475569", "#1e293b"],
+    noite: ["#312e81", "#1e1b4b", "#0f172a", "#8b5cf6", "#c4b5fd"],
+  }[tema];
   return (
     <g>
       <defs>
         <linearGradient id="madeira" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#f6e2c4" />
-          <stop offset="0.5" stopColor="#efd3aa" />
-          <stop offset="1" stopColor="#e6c294" />
+          <stop offset="0" stopColor={cores[0]} />
+          <stop offset="0.5" stopColor={cores[1]} />
+          <stop offset="1" stopColor={cores[2]} />
         </linearGradient>
         <pattern id="veios" width="90" height="14" patternUnits="userSpaceOnUse">
           <path
@@ -284,13 +320,13 @@ export function Madeira({ dica }: { dica?: { a: number; b: number } | null }) {
           height={4 * ESCALA + 68}
           rx={16}
           fill="url(#madeira)"
-          stroke="#a97a45"
+          stroke={cores[3]}
           strokeWidth={2}
         />
         <path
           d={`M${px(2)} ${py(4) - 6} L${px(4) + 34} ${py(6) + 34} Q${px(4) + 34} ${py(6) + 40} ${px(4) + 26} ${py(6) + 40} H${px(0) - 26} Q${px(0) - 34} ${py(6) + 40} ${px(0) - 34} ${py(6) + 34}Z`}
           fill="url(#madeira)"
-          stroke="#a97a45"
+          stroke={cores[3]}
           strokeWidth={2}
           strokeLinejoin="round"
         />
@@ -328,7 +364,7 @@ export function Madeira({ dica }: { dica?: { a: number; b: number } | null }) {
               y1={py(A.y)}
               x2={px(B.x)}
               y2={py(B.y)}
-              stroke="#5a341d"
+              stroke={cores[4]}
               strokeWidth={3}
               strokeLinecap="round"
             />
