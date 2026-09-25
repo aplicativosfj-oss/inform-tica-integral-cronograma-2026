@@ -62,6 +62,21 @@ const DADOS: Record<number, DesafioCompacto[]> = {
       "GATO e PATO terminam com o som ATO.",
     ],
     ["Que letra vem depois de D?", ["C", "E", "F"], "E", "No alfabeto: C, D, E."],
+    ["Qual letra termina a palavra MEL?", ["M", "E", "L"], "L", "MEL termina com L."],
+    [
+      "Qual palavra começa com o som de LUA?",
+      ["lata", "mala", "pipa"],
+      "lata",
+      "LUA e LATA começam com L.",
+    ],
+    ["Complete: __ATO", ["G", "V", "N"], "G", "G + ATO forma GATO.", "gato", "gato"],
+    [
+      "Qual palavra tem quatro letras?",
+      ["uva", "sapo", "janela"],
+      "sapo",
+      "S-A-P-O: quatro letras.",
+    ],
+    ["Qual dupla forma a sílaba MA?", ["M + A", "N + A", "M + O"], "M + A", "M com A forma MA."],
   ],
   2: [
     [
@@ -130,6 +145,33 @@ const DADOS: Record<number, DesafioCompacto[]> = {
       "leu",
       "LEU indica a ação da menina.",
     ],
+    ["Qual é a sílaba final de BONECA?", ["BO", "NE", "CA"], "CA", "BO-NE-CA termina com CA."],
+    [
+      "Qual palavra tem três sílabas?",
+      ["pé", "cavalo", "flor"],
+      "cavalo",
+      "CA-VA-LO tem três sílabas.",
+    ],
+    [
+      "Complete: O ___ mia.",
+      ["gato", "livro", "sol"],
+      "gato",
+      "O gato é o animal que mia.",
+      "gato",
+      "gato",
+    ],
+    [
+      "Qual palavra está no feminino?",
+      ["menina", "menino", "meninos"],
+      "menina",
+      "MENINA está no feminino.",
+    ],
+    [
+      "Onde o espaço está correto?",
+      ["A CASA", "AC ASA", "ACASA"],
+      "A CASA",
+      "Separamos o artigo A da palavra CASA.",
+    ],
   ],
   3: [
     [
@@ -194,6 +236,36 @@ const DADOS: Record<number, DesafioCompacto[]> = {
       "viagem",
       "O substantivo VIAGEM é escrito com G.",
     ],
+    [
+      "Qual é o antônimo de ALTO?",
+      ["baixo", "largo", "forte"],
+      "baixo",
+      "BAIXO tem sentido contrário a ALTO.",
+    ],
+    [
+      "Qual palavra indica uma ação?",
+      ["correr", "bonito", "parque"],
+      "correr",
+      "CORRER é uma ação.",
+    ],
+    [
+      "Qual frase é uma pergunta?",
+      ["Você vem?", "Você vem!", "Você vem."],
+      "Você vem?",
+      "O ponto de interrogação marca a pergunta.",
+    ],
+    [
+      "Complete: O pássaro ___ no céu.",
+      ["voa", "azul", "asa"],
+      "voa",
+      "VOA indica a ação do pássaro.",
+    ],
+    [
+      "Qual palavra pertence à família de PEDRA?",
+      ["pedreiro", "madeira", "parede"],
+      "pedreiro",
+      "PEDRA e PEDREIRO pertencem à mesma família.",
+    ],
   ],
   4: [
     ["Complete: A__ÚCAR", ["Ç", "SS", "S"], "Ç", "AÇÚCAR é escrito com Ç."],
@@ -238,6 +310,36 @@ const DADOS: Record<number, DesafioCompacto[]> = {
       ["porque", "porém", "depois"],
       "porque",
       "PORQUE pode apresentar uma explicação ou causa.",
+    ],
+    [
+      "Qual palavra é paroxítona?",
+      ["mesa", "café", "jacaré"],
+      "mesa",
+      "ME-sa tem a penúltima sílaba forte.",
+    ],
+    [
+      "Qual opção completa: Ontem nós ___ ao parque.",
+      ["fomos", "iremos", "vamos"],
+      "fomos",
+      "FOMOS indica uma ação que já aconteceu.",
+    ],
+    [
+      "Qual pronome substitui AS MENINAS?",
+      ["elas", "eles", "ela"],
+      "elas",
+      "ELAS retoma um grupo feminino plural.",
+    ],
+    [
+      "Qual frase tem sentido completo?",
+      ["O aluno terminou a tarefa.", "O aluno a.", "Terminou o."],
+      "O aluno terminou a tarefa.",
+      "A frase apresenta uma ideia completa.",
+    ],
+    [
+      "Qual palavra é derivada de FELIZ?",
+      ["felicidade", "festa", "fiel"],
+      "felicidade",
+      "FELICIDADE deriva de FELIZ.",
     ],
   ],
   5: [
@@ -304,6 +406,40 @@ const DADOS: Record<number, DesafioCompacto[]> = {
       "As meninas estudaram.",
       "Todos os termos concordam no plural.",
     ],
+    [
+      "Qual conectivo indica oposição?",
+      ["porém", "portanto", "porque"],
+      "porém",
+      "PORÉM introduz uma ideia contrária.",
+    ],
+    [
+      "Qual frase apresenta opinião?",
+      ["O filme é emocionante.", "O filme dura 90 minutos.", "O filme começou às oito."],
+      "O filme é emocionante.",
+      "EMOCIONANTE expressa uma avaliação de quem fala.",
+    ],
+    [
+      "Qual palavra está escrita corretamente?",
+      ["consciência", "conciencia", "consiência"],
+      "consciência",
+      "CONSCIÊNCIA leva SC e acento circunflexo.",
+    ],
+    [
+      "Em 'Pedro, feche a porta', a vírgula separa...",
+      ["o chamamento", "uma lista", "uma explicação"],
+      "o chamamento",
+      "PEDRO é o vocativo, isto é, quem está sendo chamado.",
+    ],
+    [
+      "Qual resumo preserva a ideia principal?",
+      [
+        "A turma plantou árvores para cuidar da praça.",
+        "A praça tem bancos verdes.",
+        "Uma árvore era pequena.",
+      ],
+      "A turma plantou árvores para cuidar da praça.",
+      "O resumo reúne a ação e a finalidade principais.",
+    ],
   ],
 };
 
@@ -320,6 +456,11 @@ const desafiosPorAno: Record<number, Desafio[]> = Object.fromEntries(
       figura,
     })),
   ]),
+);
+
+const TOTAL_MISSOES = Object.values(desafiosPorAno).reduce(
+  (total, desafios) => total + desafios.length,
+  0,
 );
 
 const CHAVE = "central-alfabetizacao:progresso:v1";
@@ -425,8 +566,8 @@ export function CentralAlfabetizacao() {
               Central de Alfabetização
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-100 sm:text-base">
-              Explore cinco mundos, conquiste estrelas e avance por 65 missões com imagens, voz,
-              leitura, ortografia e desafios do 1º ao 5º ano.
+              Explore cinco mundos, conquiste estrelas e avance por {TOTAL_MISSOES} missões com
+              imagens, voz, leitura, ortografia e desafios do 1º ao 5º ano.
             </p>
             <button
               type="button"
@@ -441,7 +582,9 @@ export function CentralAlfabetizacao() {
             <div className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-2">
               <Trophy className="size-7 text-amber-300" />
               <span>
-                <b className="block text-2xl">{Object.keys(progresso).length}/65</b>
+                <b className="block text-2xl">
+                  {Object.keys(progresso).length}/{TOTAL_MISSOES}
+                </b>
                 <small className="text-slate-200">missões</small>
               </span>
             </div>
@@ -511,7 +654,7 @@ export function CentralAlfabetizacao() {
               <p className="text-sm text-slate-300">{MUNDOS[ano - 1]!.foco}</p>
             </div>
             <span className="rounded-full bg-amber-400/15 px-3 py-1 text-xs font-bold text-amber-300">
-              {concluidos} de 13 estrelas
+              {concluidos} de {desafios.length} estrelas
             </span>
           </div>
           {mostrarMapa && (
@@ -546,17 +689,19 @@ export function CentralAlfabetizacao() {
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-violet-100 dark:bg-violet-950">
             <div
               className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 transition-all"
-              style={{ width: `${(concluidos / 13) * 100}%` }}
+              style={{ width: `${(concluidos / desafios.length) * 100}%` }}
             />
           </div>
-          <span className="text-xs font-bold text-muted-foreground">{concluidos}/13</span>
+          <span className="text-xs font-bold text-muted-foreground">
+            {concluidos}/{desafios.length}
+          </span>
         </div>
 
         {!mostrarMapa && (
           <div className="rounded-[2rem] border-2 border-violet-300/40 bg-white/95 p-5 shadow-2xl dark:bg-slate-900/95 sm:p-8">
             <div className="mb-4 flex items-center justify-between">
               <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-200">
-                Missão {indice + 1} de 13
+                Missão {indice + 1} de {desafios.length}
               </span>
               {progresso[chave] && (
                 <span className="flex items-center gap-1 text-xs font-bold text-amber-600">

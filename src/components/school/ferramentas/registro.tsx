@@ -340,7 +340,7 @@ export const FERRAMENTAS: FerramentaInfo[] = [
     slug: "central-alfabetizacao",
     serieMinima: 1,
     titulo: "Central de Alfabetização",
-    descricao: "65 missões com áudio e progressão do 1º ao 5º ano.",
+    descricao: "90 missões com áudio e progressão do 1º ao 5º ano.",
     categoria: "Alfabetização e Leitura",
     icon: BookOpenCheck,
     cor: "bg-violet-500/10 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
