@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DADOS_I } from "@/lib/diagnostica/dados-i";
 import { RENDIMENTO_3_BIMESTRE } from "@/lib/rendimento/dados-3bim";
+import { instrumento, textoAplicacao } from "@/lib/resultados/referencia";
 import { percentuais, type RendimentoDisciplina } from "@/lib/rendimento/tipos";
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
@@ -25,7 +26,15 @@ function diagnostica(ano: number, turma: string, disc: "LP" | "MAT") {
   return DADOS_I.turmas.find((t) => t.ano === ano && t.turma === turma && t.disc === disc);
 }
 
-export function PainelRendimento() {
+export function PainelRendimento({
+  mostrarProfessor = true,
+  semCabecalho = false,
+}: {
+  /** Na página pública o nome do professor não aparece ao lado das notas da turma. */
+  mostrarProfessor?: boolean;
+  /** A página que hospeda o painel já tem o título dela. */
+  semCabecalho?: boolean;
+} = {}) {
   const { turmas, titulo } = RENDIMENTO_3_BIMESTRE;
 
   const alertas = turmas.flatMap((t) =>
@@ -35,7 +44,7 @@ export function PainelRendimento() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{titulo}</h1>
+        {semCabecalho ? null : <h1 className="text-2xl font-bold">{titulo}</h1>}
         <p className="text-sm text-muted-foreground">
           Alunos por faixa de nota: <span className="font-medium text-emerald-600">7,0 a 10,0</span>{" "}
           · <span className="font-medium text-amber-600">5,0 a 6,9</span> ·{" "}
@@ -104,8 +113,12 @@ export function PainelRendimento() {
             </tbody>
           </table>
           <p className="mt-3 text-xs text-muted-foreground">
-            Quando quase todos passam de 7,0 no bimestre mas a média na diagnóstica é baixa, vale
-            conferir se as duas provas medem a mesma coisa.
+            <strong>Atenção: são momentos diferentes do ano.</strong> As notas são do{" "}
+            {instrumento("rendimento").periodo} ({textoAplicacao(instrumento("rendimento"))}); a
+            diagnóstica foi aplicada no {instrumento("diagnostica").periodo} (
+            {textoAplicacao(instrumento("diagnostica"))}). Os dois resultados medem coisas
+            distintas, então a comparação serve para levantar perguntas, não para concluir que um
+            está certo e o outro errado.
           </p>
         </CardContent>
       </Card>
@@ -117,7 +130,7 @@ export function PainelRendimento() {
               <CardTitle className="text-base">
                 {t.ano}º ano {t.turma}
               </CardTitle>
-              {t.professor ? (
+              {mostrarProfessor && t.professor ? (
                 <p className="text-xs text-muted-foreground">Professor(a): {t.professor}</p>
               ) : null}
             </CardHeader>

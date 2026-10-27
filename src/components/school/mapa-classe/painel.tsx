@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MAPA_CLASSE_3_BIM } from "@/lib/mapa-classe/dados-3bim";
+import { instrumento, textoAplicacao } from "@/lib/resultados/referencia";
 import { LEITURA, ZONAS, escritaDoAno, type NivelInfo, type Zona } from "@/lib/mapa-classe/niveis";
 import type { EvolucaoLeitura, TurmaMapa } from "@/lib/mapa-classe/tipos";
 
@@ -113,7 +114,15 @@ function Seta({ de, para, bomQuandoSobe }: { de: number; para: number; bomQuando
   );
 }
 
-export function PainelMapaClasse() {
+export function PainelMapaClasse({
+  mostrarProfessor = true,
+  semCabecalho = false,
+}: {
+  /** Na página pública o nome do professor não aparece ao lado dos resultados da turma. */
+  mostrarProfessor?: boolean;
+  /** A página que hospeda o painel já tem o título dela. */
+  semCabecalho?: boolean;
+} = {}) {
   const { turmas, evolucaoLeitura, bimestre } = MAPA_CLASSE_3_BIM;
   const [foco, setFoco] = useState<"leitura" | "escrita">("leitura");
 
@@ -175,11 +184,13 @@ export function PainelMapaClasse() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Mapa de classe · Escrita e leitura</h1>
+        {semCabecalho ? null : (
+          <h1 className="text-2xl font-bold">Mapa de classe · Escrita e leitura</h1>
+        )}
         <p className="text-sm text-muted-foreground">
-          {bimestre}º bimestre de 2026 · Escola Dr. Eiraldo Carneiro de França · modelo da
-          Secretaria de Educação. Mostra quantos alunos estão em cada nível, por turma. Nenhum nome
-          de aluno aparece nesta tela.
+          {bimestre}º bimestre de 2026 · {instrumento("mapa").nome} (aplicação:{" "}
+          {textoAplicacao(instrumento("mapa"))}) · modelo da Secretaria de Educação. Mostra quantos
+          alunos estão em cada nível, por turma. Nenhum nome de aluno aparece nesta tela.
         </p>
       </div>
 
@@ -379,8 +390,9 @@ export function PainelMapaClasse() {
                   escrita: <strong>{escrita}</strong> aluno{escrita === 1 ? "" : "s"}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Prof(a). {t.professor}
-                  {t.semRegistro > 0 ? ` · ${t.semRegistro} sem registro` : ""}
+                  {mostrarProfessor ? `Prof(a). ${t.professor}` : ""}
+                  {mostrarProfessor && t.semRegistro > 0 ? " · " : ""}
+                  {t.semRegistro > 0 ? `${t.semRegistro} sem registro` : ""}
                 </span>
               </li>
             ))}
@@ -426,6 +438,13 @@ export function PainelMapaClasse() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            Estes são os números do {bimestre}º bimestre. A evolução usa os quadros do 1º e do 2º
+            bimestres da própria planilha, sempre rotulados. As folhas de cada turma não trazem o
+            bimestre escrito; o que confirma que são do 3º é a conferência da leitura de cada turma
+            com o quadro do 3º bimestre, que bate em 9 das 10 turmas (no 1º A há 1 aluno de
+            diferença).
+          </p>
           <p>
             As quantidades foram recontadas a partir das marcações de cada aluno na planilha do mapa
             de classe.

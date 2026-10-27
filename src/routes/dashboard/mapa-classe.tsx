@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { QuadroReferencia } from "@/components/school/resultados/quadro-referencia";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { PainelMapaClasse } from "@/components/school/mapa-classe/painel";
 
@@ -16,7 +17,10 @@ export const Route = createFileRoute("/dashboard/mapa-classe")({
 function MapaClassePage() {
   return (
     <DashboardShell>
-      <PainelMapaClasse />
+      <div className="space-y-6">
+        <QuadroReferencia ids={["mapa"]} />
+        <PainelMapaClasse />
+      </div>
     </DashboardShell>
   );
 }

@@ -100,6 +100,7 @@ const LINKS = [
   { to: "/coordenacao", label: "Coordenação" },
   { to: "/infoteca", label: "Infoteca" },
   { to: "/avaliacao", label: "Avaliações" },
+  { to: "/resultados", label: "Resultados" },
   { to: "/aluno", label: "Área do Aluno" },
   { to: "/professor", label: "Professor" },
   { to: "/mediador", label: "Mediadores" },
@@ -324,6 +325,7 @@ export function NavBar() {
           <NavLink to="/coordenacao" label="Coordenação" />
           <NavLink to="/infoteca" label="Infoteca" />
           <NavLink to="/avaliacao" label="Avaliações" />
+          <NavLink to="/resultados" label="Resultados" />
           <NavLink to="/aluno" label="Área do Aluno" />
           <NavLink to="/professor" label="Professor" />
           <NavLink to="/mediador" label="Mediadores" />

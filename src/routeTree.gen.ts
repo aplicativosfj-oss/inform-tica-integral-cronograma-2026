@@ -18,6 +18,7 @@ import { Route as EvolucaoRouteImport } from './routes/evolucao'
 import { Route as InfotecaRouteImport } from './routes/infoteca'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OperacaoPlantaoRouteImport } from './routes/operacao-plantao'
+import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as SalaDeJogosRouteImport } from './routes/sala-de-jogos'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TvRouteImport } from './routes/tv'
@@ -106,6 +107,11 @@ const LoginRoute = LoginRouteImport.update({
 const OperacaoPlantaoRoute = OperacaoPlantaoRouteImport.update({
   id: '/operacao-plantao',
   path: '/operacao-plantao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultadosRoute = ResultadosRouteImport.update({
+  id: '/resultados',
+  path: '/resultados',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SalaDeJogosRoute = SalaDeJogosRouteImport.update({
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/operacao-plantao': typeof OperacaoPlantaoRoute
+  '/resultados': typeof ResultadosRoute
   '/sala-de-jogos': typeof SalaDeJogosRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
@@ -406,6 +413,7 @@ export interface FileRoutesByTo {
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/operacao-plantao': typeof OperacaoPlantaoRoute
+  '/resultados': typeof ResultadosRoute
   '/sala-de-jogos': typeof SalaDeJogosRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
@@ -462,6 +470,7 @@ export interface FileRoutesById {
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
   '/operacao-plantao': typeof OperacaoPlantaoRoute
+  '/resultados': typeof ResultadosRoute
   '/sala-de-jogos': typeof SalaDeJogosRoute
   '/sobre': typeof SobreRoute
   '/tv': typeof TvRoute
@@ -519,6 +528,7 @@ export interface FileRouteTypes {
     | '/infoteca'
     | '/login'
     | '/operacao-plantao'
+    | '/resultados'
     | '/sala-de-jogos'
     | '/sobre'
     | '/tv'
@@ -574,6 +584,7 @@ export interface FileRouteTypes {
     | '/infoteca'
     | '/login'
     | '/operacao-plantao'
+    | '/resultados'
     | '/sala-de-jogos'
     | '/sobre'
     | '/tv'
@@ -629,6 +640,7 @@ export interface FileRouteTypes {
     | '/infoteca'
     | '/login'
     | '/operacao-plantao'
+    | '/resultados'
     | '/sala-de-jogos'
     | '/sobre'
     | '/tv'
@@ -685,6 +697,7 @@ export interface RootRouteChildren {
   InfotecaRoute: typeof InfotecaRoute
   LoginRoute: typeof LoginRoute
   OperacaoPlantaoRoute: typeof OperacaoPlantaoRoute
+  ResultadosRoute: typeof ResultadosRoute
   SalaDeJogosRoute: typeof SalaDeJogosRoute
   SobreRoute: typeof SobreRoute
   TvRoute: typeof TvRoute
@@ -794,6 +807,13 @@ declare module '@tanstack/react-router' {
       path: '/operacao-plantao'
       fullPath: '/operacao-plantao'
       preLoaderRoute: typeof OperacaoPlantaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resultados': {
+      id: '/resultados'
+      path: '/resultados'
+      fullPath: '/resultados'
+      preLoaderRoute: typeof ResultadosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sala-de-jogos': {
@@ -1117,6 +1137,7 @@ const rootRouteChildren: RootRouteChildren = {
   InfotecaRoute: InfotecaRoute,
   LoginRoute: LoginRoute,
   OperacaoPlantaoRoute: OperacaoPlantaoRoute,
+  ResultadosRoute: ResultadosRoute,
   SalaDeJogosRoute: SalaDeJogosRoute,
   SobreRoute: SobreRoute,
   TvRoute: TvRoute,
