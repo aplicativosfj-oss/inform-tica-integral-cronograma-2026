@@ -35,6 +35,7 @@ import { Route as DashboardFichasAcessoRouteImport } from './routes/dashboard/fi
 import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/frequencia'
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardIndicadoresRouteImport } from './routes/dashboard/indicadores'
+import { Route as DashboardMapaClasseRouteImport } from './routes/dashboard/mapa-classe'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
 import { Route as DashboardRendimentoRouteImport } from './routes/dashboard/rendimento'
 import { Route as DashboardSimuladosRouteImport } from './routes/dashboard/simulados'
@@ -190,6 +191,11 @@ const DashboardGruposRoute = DashboardGruposRouteImport.update({
 const DashboardIndicadoresRoute = DashboardIndicadoresRouteImport.update({
   id: '/dashboard/indicadores',
   path: '/dashboard/indicadores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardMapaClasseRoute = DashboardMapaClasseRouteImport.update({
+  id: '/dashboard/mapa-classe',
+  path: '/dashboard/mapa-classe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/indicadores': typeof DashboardIndicadoresRoute
+  '/dashboard/mapa-classe': typeof DashboardMapaClasseRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/indicadores': typeof DashboardIndicadoresRoute
+  '/dashboard/mapa-classe': typeof DashboardMapaClasseRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
@@ -469,6 +477,7 @@ export interface FileRoutesById {
   '/dashboard/frequencia': typeof DashboardFrequenciaRoute
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/indicadores': typeof DashboardIndicadoresRoute
+  '/dashboard/mapa-classe': typeof DashboardMapaClasseRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
   '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
@@ -525,6 +534,7 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/indicadores'
+    | '/dashboard/mapa-classe'
     | '/dashboard/programacao'
     | '/dashboard/rendimento'
     | '/dashboard/simulados'
@@ -579,6 +589,7 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/indicadores'
+    | '/dashboard/mapa-classe'
     | '/dashboard/programacao'
     | '/dashboard/rendimento'
     | '/dashboard/simulados'
@@ -633,6 +644,7 @@ export interface FileRouteTypes {
     | '/dashboard/frequencia'
     | '/dashboard/grupos'
     | '/dashboard/indicadores'
+    | '/dashboard/mapa-classe'
     | '/dashboard/programacao'
     | '/dashboard/rendimento'
     | '/dashboard/simulados'
@@ -688,6 +700,7 @@ export interface RootRouteChildren {
   DashboardFrequenciaRoute: typeof DashboardFrequenciaRoute
   DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardIndicadoresRoute: typeof DashboardIndicadoresRoute
+  DashboardMapaClasseRoute: typeof DashboardMapaClasseRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
   DashboardRendimentoRoute: typeof DashboardRendimentoRoute
   DashboardSimuladosRoute: typeof DashboardSimuladosRoute
@@ -902,6 +915,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndicadoresRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/mapa-classe': {
+      id: '/dashboard/mapa-classe'
+      path: '/dashboard/mapa-classe'
+      fullPath: '/dashboard/mapa-classe'
+      preLoaderRoute: typeof DashboardMapaClasseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/programacao': {
       id: '/dashboard/programacao'
       path: '/dashboard/programacao'
@@ -1112,6 +1132,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardFrequenciaRoute: DashboardFrequenciaRoute,
   DashboardGruposRoute: DashboardGruposRoute,
   DashboardIndicadoresRoute: DashboardIndicadoresRoute,
+  DashboardMapaClasseRoute: DashboardMapaClasseRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
   DashboardRendimentoRoute: DashboardRendimentoRoute,
   DashboardSimuladosRoute: DashboardSimuladosRoute,
