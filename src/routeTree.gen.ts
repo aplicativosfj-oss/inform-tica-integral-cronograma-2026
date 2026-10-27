@@ -36,6 +36,7 @@ import { Route as DashboardFrequenciaRouteImport } from './routes/dashboard/freq
 import { Route as DashboardGruposRouteImport } from './routes/dashboard/grupos'
 import { Route as DashboardIndicadoresRouteImport } from './routes/dashboard/indicadores'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
+import { Route as DashboardRendimentoRouteImport } from './routes/dashboard/rendimento'
 import { Route as DashboardSimuladosRouteImport } from './routes/dashboard/simulados'
 import { Route as DashboardTrilhasRouteImport } from './routes/dashboard/trilhas'
 import { Route as FerramentasIndexRouteImport } from './routes/ferramentas/index'
@@ -194,6 +195,11 @@ const DashboardIndicadoresRoute = DashboardIndicadoresRouteImport.update({
 const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
   id: '/dashboard/programacao',
   path: '/dashboard/programacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRendimentoRoute = DashboardRendimentoRouteImport.update({
+  id: '/dashboard/rendimento',
+  path: '/dashboard/rendimento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardSimuladosRoute = DashboardSimuladosRouteImport.update({
@@ -355,6 +361,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/indicadores': typeof DashboardIndicadoresRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
@@ -408,6 +415,7 @@ export interface FileRoutesByTo {
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/indicadores': typeof DashboardIndicadoresRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
@@ -462,6 +470,7 @@ export interface FileRoutesById {
   '/dashboard/grupos': typeof DashboardGruposRoute
   '/dashboard/indicadores': typeof DashboardIndicadoresRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
   '/ferramentas/$ferramenta': typeof FerramentasFerramentaRoute
@@ -517,6 +526,7 @@ export interface FileRouteTypes {
     | '/dashboard/grupos'
     | '/dashboard/indicadores'
     | '/dashboard/programacao'
+    | '/dashboard/rendimento'
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
@@ -570,6 +580,7 @@ export interface FileRouteTypes {
     | '/dashboard/grupos'
     | '/dashboard/indicadores'
     | '/dashboard/programacao'
+    | '/dashboard/rendimento'
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
@@ -623,6 +634,7 @@ export interface FileRouteTypes {
     | '/dashboard/grupos'
     | '/dashboard/indicadores'
     | '/dashboard/programacao'
+    | '/dashboard/rendimento'
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
     | '/ferramentas/$ferramenta'
@@ -677,6 +689,7 @@ export interface RootRouteChildren {
   DashboardGruposRoute: typeof DashboardGruposRoute
   DashboardIndicadoresRoute: typeof DashboardIndicadoresRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
+  DashboardRendimentoRoute: typeof DashboardRendimentoRoute
   DashboardSimuladosRoute: typeof DashboardSimuladosRoute
   DashboardTrilhasRoute: typeof DashboardTrilhasRoute
   FerramentasFerramentaRoute: typeof FerramentasFerramentaRoute
@@ -896,6 +909,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProgramacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/rendimento': {
+      id: '/dashboard/rendimento'
+      path: '/dashboard/rendimento'
+      fullPath: '/dashboard/rendimento'
+      preLoaderRoute: typeof DashboardRendimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/simulados': {
       id: '/dashboard/simulados'
       path: '/dashboard/simulados'
@@ -1093,6 +1113,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardGruposRoute: DashboardGruposRoute,
   DashboardIndicadoresRoute: DashboardIndicadoresRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
+  DashboardRendimentoRoute: DashboardRendimentoRoute,
   DashboardSimuladosRoute: DashboardSimuladosRoute,
   DashboardTrilhasRoute: DashboardTrilhasRoute,
   FerramentasFerramentaRoute: FerramentasFerramentaRoute,

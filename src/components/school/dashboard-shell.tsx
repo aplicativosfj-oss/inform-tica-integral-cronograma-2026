@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  Award,
   BarChart3,
   CalendarClock,
   CalendarPlus,
@@ -54,6 +55,7 @@ const NAV_GROUPS = [
     items: [
       { to: "/dashboard/avaliacao", label: "Avaliação diagnóstica", icon: BarChart3 },
       { to: "/dashboard/evolucao", label: "Evolução diagnóstica", icon: TrendingUp },
+      { to: "/dashboard/rendimento", label: "Rendimento bimestral", icon: Award },
       { to: "/dashboard/trilhas", label: "Progresso das trilhas", icon: Target },
       { to: "/dashboard/simulados", label: "Simulados", icon: ClipboardList },
       { to: "/dashboard/indicadores", label: "Indicadores das turmas", icon: Gauge },
