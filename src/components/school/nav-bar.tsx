@@ -42,7 +42,7 @@ import { useAppStore } from "@/lib/app-store";
 import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
 import { useConfirmar } from "@/lib/confirm-store";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
-import logoIcon from "@/assets/logo-icon.png";
+import { Marca, MarcaLogo } from "@/components/school/marca";
 
 function NavLink({ to, label }: { to: string; label: string }) {
   const location = useLocation();
@@ -92,7 +92,7 @@ function tituloDaPagina(pathname: string): string {
   if (pathname.startsWith("/mediador")) return "Espaço do Mediador";
   if (pathname.startsWith("/ferramentas")) return "Ferramentas";
   if (pathname.startsWith("/dashboard")) return "Painel de gestão";
-  return "Agenda de Informática";
+  return "Laboratório de informática";
 }
 
 const LINKS = [
@@ -166,15 +166,11 @@ export function NavBar() {
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
         <span
           aria-hidden
-          className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 dark:from-blue-500 dark:via-cyan-400 dark:to-blue-500"
+          className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-primary via-sun to-primary"
         />
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:h-14 sm:px-6">
           <div className="flex min-w-0 items-center gap-2.5">
-            <img
-              src={logoIcon}
-              alt="Agenda de Informática .Online"
-              className="size-9 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20"
-            />
+            <MarcaLogo tamanho={36} />
             <div className="flex min-w-0 items-center gap-2">
               {corTurma && (
                 <span
@@ -262,12 +258,7 @@ export function NavBar() {
           className="h-10 gap-2 px-3 text-base text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
         >
           <Link to="/">
-            <img
-              src={logoIcon}
-              alt=""
-              aria-hidden
-              className="size-6 shrink-0 rounded bg-slate-100 object-contain p-0.5 dark:bg-white"
-            />
+            <MarcaLogo tamanho={24} />
             <span className="hidden font-medium sm:inline">Início</span>
           </Link>
         </Button>
@@ -297,27 +288,11 @@ export function NavBar() {
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
       <span
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 dark:from-blue-500 dark:via-cyan-400 dark:to-blue-500"
+        className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-primary via-sun to-primary"
       />
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-3 sm:gap-4 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-2.5">
-          <img
-            src={logoIcon}
-            alt="Agenda de Informática .Online"
-            className="size-9 shrink-0 rounded-lg bg-slate-100 object-contain p-1 shadow-sm ring-1 ring-slate-200 dark:bg-white dark:ring-white/20"
-          />
-          {/* Marca em duas linhas: nome do produto + escola em versalete.
-              Textos curtos e sem quebra, para caberem inteiros em qualquer tela. */}
-          <span className="flex min-w-0 flex-col justify-center gap-0.5 border-l border-slate-300/70 pl-2.5 dark:border-white/15">
-            <span className="whitespace-nowrap text-[13px] font-bold leading-none tracking-tight text-slate-900 dark:text-white sm:text-[15px]">
-              Agenda{" "}
-              <span className="font-medium text-blue-600 dark:text-blue-400">de Informática</span>
-            </span>
-            <span className="whitespace-nowrap text-[9.5px] font-semibold uppercase leading-none tracking-[0.12em] text-slate-600 dark:text-white/70 sm:text-[10.5px]">
-              <span className="sm:hidden">E.M. Dr. Eiraldo</span>
-              <span className="hidden sm:inline">Escola Dr. Eiraldo Carneiro</span>
-            </span>
-          </span>
+        <Link to="/" className="flex shrink-0 items-center" aria-label="Início">
+          <Marca curto />
         </Link>
 
         <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5 xl:gap-0">
@@ -385,16 +360,9 @@ export function NavBar() {
                   a mesma identidade do topo do site. */}
               <SheetHeader className="space-y-0 border-b border-border/60 bg-gradient-to-br from-primary/10 to-transparent px-5 py-4 text-left">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={logoIcon}
-                    alt=""
-                    aria-hidden
-                    className="size-10 shrink-0 rounded-xl bg-card object-contain p-1 shadow-sm ring-1 ring-border"
-                  />
+                  <MarcaLogo tamanho={24} />
                   <div className="min-w-0">
-                    <SheetTitle className="truncate text-sm font-semibold">
-                      Agenda de Informática
-                    </SheetTitle>
+                    <SheetTitle className="truncate text-sm font-semibold">informática.</SheetTitle>
                     <p className="truncate text-xs text-muted-foreground">
                       E.M. Dr. Eiraldo Carneiro
                     </p>

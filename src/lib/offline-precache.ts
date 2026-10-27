@@ -7,7 +7,7 @@
 import { IMAGENS_CORRIDA, IMAGENS_DIGITACAO } from "@/lib/precarregar";
 
 export const FONTES_CSS =
-  "https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap";
+  "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap";
 
 // Só páginas públicas: as áreas de aluno e de professor exigem login e
 // entram no cache normalmente quando são visitadas.

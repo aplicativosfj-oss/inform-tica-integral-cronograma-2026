@@ -18,14 +18,86 @@
  * 2. Register it in @theme inline as --color-<name>: var(--<name>)
  */
 
+
+/*
+ * IDENTIDADE 2026 — "Tinta & Sol".
+ * Índigo-tinta como cor da marca, âmbar-sol como destaque, menta como apoio.
+ * O site tem centenas de classes escritas à mão (bg-blue-500, text-cyan-600,
+ * border-violet-400...). Em vez de reescrever uma por uma, a rampa de cada
+ * cor do Tailwind é redefinida aqui: tudo o que era "azul" vira índigo da
+ * marca, o "ciano" vira menta, o "violeta" vira ameixa, e o site inteiro
+ * troca de identidade de uma vez, sem quebrar nenhuma tela.
+ */
+@theme {
+  --color-blue-50: oklch(0.975 0.012 276);
+  --color-blue-100: oklch(0.945 0.03 276);
+  --color-blue-200: oklch(0.895 0.06 276);
+  --color-blue-300: oklch(0.82 0.1 276);
+  --color-blue-400: oklch(0.72 0.15 276);
+  --color-blue-500: oklch(0.62 0.19 276);
+  --color-blue-600: oklch(0.53 0.2 276);
+  --color-blue-700: oklch(0.45 0.18 276);
+  --color-blue-800: oklch(0.37 0.14 276);
+  --color-blue-900: oklch(0.3 0.1 276);
+  --color-blue-950: oklch(0.22 0.07 276);
+  --color-indigo-50: oklch(0.975 0.012 286);
+  --color-indigo-100: oklch(0.945 0.03 286);
+  --color-indigo-200: oklch(0.895 0.06 286);
+  --color-indigo-300: oklch(0.82 0.1 286);
+  --color-indigo-400: oklch(0.72 0.15 286);
+  --color-indigo-500: oklch(0.62 0.19 286);
+  --color-indigo-600: oklch(0.53 0.2 286);
+  --color-indigo-700: oklch(0.45 0.18 286);
+  --color-indigo-800: oklch(0.37 0.14 286);
+  --color-indigo-900: oklch(0.3 0.1 286);
+  --color-indigo-950: oklch(0.22 0.07 286);
+  --color-sky-50: oklch(0.975 0.008 268);
+  --color-sky-100: oklch(0.945 0.021 268);
+  --color-sky-200: oklch(0.895 0.042 268);
+  --color-sky-300: oklch(0.82 0.07 268);
+  --color-sky-400: oklch(0.72 0.105 268);
+  --color-sky-500: oklch(0.62 0.133 268);
+  --color-sky-600: oklch(0.53 0.14 268);
+  --color-sky-700: oklch(0.45 0.126 268);
+  --color-sky-800: oklch(0.37 0.098 268);
+  --color-sky-900: oklch(0.3 0.07 268);
+  --color-sky-950: oklch(0.22 0.049 268);
+  --color-cyan-50: oklch(0.975 0.008 178);
+  --color-cyan-100: oklch(0.945 0.019 178);
+  --color-cyan-200: oklch(0.895 0.039 178);
+  --color-cyan-300: oklch(0.82 0.065 178);
+  --color-cyan-400: oklch(0.72 0.097 178);
+  --color-cyan-500: oklch(0.62 0.123 178);
+  --color-cyan-600: oklch(0.53 0.13 178);
+  --color-cyan-700: oklch(0.45 0.117 178);
+  --color-cyan-800: oklch(0.37 0.091 178);
+  --color-cyan-900: oklch(0.3 0.065 178);
+  --color-cyan-950: oklch(0.22 0.045 178);
+  --color-violet-50: oklch(0.975 0.011 318);
+  --color-violet-100: oklch(0.945 0.029 318);
+  --color-violet-200: oklch(0.895 0.057 318);
+  --color-violet-300: oklch(0.82 0.095 318);
+  --color-violet-400: oklch(0.72 0.142 318);
+  --color-violet-500: oklch(0.62 0.18 318);
+  --color-violet-600: oklch(0.53 0.19 318);
+  --color-violet-700: oklch(0.45 0.171 318);
+  --color-violet-800: oklch(0.37 0.133 318);
+  --color-violet-900: oklch(0.3 0.095 318);
+  --color-violet-950: oklch(0.22 0.067 318);
+}
+
 @theme inline {
   /* Mesma dupla de fontes já carregada pelo observatório de Avaliações
      (src/lib/observatorio-template.html) — reaproveitada aqui para o site
      inteiro falar a mesma língua tipográfica: Sora nos títulos (geométrica,
      confiante em tamanho grande), Nunito Sans no corpo (mais arredondada e
      legível que a pilha padrão do sistema). */
-  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --color-sun: oklch(0.83 0.165 85);
+  --color-sun-foreground: oklch(0.27 0.06 70);
+  --color-ink: oklch(0.2 0.045 276);
+  --color-mint: oklch(0.72 0.12 178);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -74,7 +146,7 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.875rem;
   /*
    * Tema claro.
    *
@@ -95,51 +167,43 @@
    * a 1.14:1: dá para ver onde um card começa e termina, sem escurecer a
    * página. Texto sobre esse fundo continua em 17.4:1.
    */
-  --background: oklch(0.955 0.01 250);
-  --foreground: oklch(0.145 0.04 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0.04 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0.04 264.695);
-  --primary: oklch(0.53 0.17 258);
-  --primary-foreground: oklch(0.99 0.002 247.858);
-  --secondary: oklch(0.935 0.014 250);
-  --secondary-foreground: oklch(0.255 0.045 265.755);
-  --muted: oklch(0.935 0.014 250);
-  /* Mais escuro que o slate-500 padrao (0.554) para melhorar a leitura de
-     texto secundario no celular -- o valor original passava raspando no
-     minimo de contraste AA em telas pequenas com luz forte. */
-  --muted-foreground: oklch(0.455 0.042 257.417);
-  --accent: oklch(0.92 0.022 250);
-  --accent-foreground: oklch(0.36 0.12 258);
+  --background: oklch(0.975 0.012 85);
+  --foreground: oklch(0.2 0.045 276);
+  --card: oklch(0.995 0.004 85);
+  --card-foreground: oklch(0.2 0.045 276);
+  --popover: oklch(0.995 0.004 85);
+  --popover-foreground: oklch(0.2 0.045 276);
+  --primary: oklch(0.46 0.2 276);
+  --primary-foreground: oklch(0.985 0.01 85);
+  --secondary: oklch(0.94 0.02 85);
+  --secondary-foreground: oklch(0.27 0.05 276);
+  --muted: oklch(0.945 0.015 85);
+  --muted-foreground: oklch(0.45 0.035 276);
+  --accent: oklch(0.92 0.07 88);
+  --accent-foreground: oklch(0.3 0.08 70);
   --destructive: oklch(0.55 0.225 27.325);
   --destructive-foreground: oklch(0.99 0.002 247.858);
-  /* Borda um degrau mais presente: com card branco sobre fundo claro, a
-     borda anterior (0.929) praticamente sumia. */
-  --border: oklch(0.878 0.016 252);
-  --input: oklch(0.878 0.016 252);
-  --ring: oklch(0.53 0.17 258);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  /* Sequential (one-hue, light→dark) ramp for ordinal data — e.g. grade
-     level in the weekly schedule, where a darker chip reads as "further
-     along" without needing a legend to decode. */
-  --serie-1: oklch(0.74 0.083 255);
-  --serie-2: oklch(0.655 0.115 256);
-  --serie-3: oklch(0.565 0.145 258);
-  --serie-4: oklch(0.475 0.165 260);
-  --serie-5: oklch(0.385 0.135 262);
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.145 0.04 264.695);
-  --sidebar-primary: oklch(0.53 0.17 258);
-  --sidebar-primary-foreground: oklch(0.99 0.002 247.858);
-  --sidebar-accent: oklch(0.92 0.022 250);
-  --sidebar-accent-foreground: oklch(0.36 0.12 258);
-  --sidebar-border: oklch(0.878 0.016 252);
-  --sidebar-ring: oklch(0.53 0.17 258);
+  --border: oklch(0.89 0.018 85);
+  --input: oklch(0.89 0.018 85);
+  --ring: oklch(0.46 0.2 276);
+  --chart-1: oklch(0.5 0.2 276);
+  --chart-2: oklch(0.66 0.12 178);
+  --chart-3: oklch(0.8 0.16 85);
+  --chart-4: oklch(0.66 0.19 28);
+  --chart-5: oklch(0.55 0.19 318);
+  --serie-1: oklch(0.76 0.09 276);
+  --serie-2: oklch(0.67 0.13 276);
+  --serie-3: oklch(0.57 0.17 276);
+  --serie-4: oklch(0.47 0.19 276);
+  --serie-5: oklch(0.38 0.16 276);
+  --sidebar: oklch(0.995 0.004 85);
+  --sidebar-foreground: oklch(0.2 0.045 276);
+  --sidebar-primary: oklch(0.46 0.2 276);
+  --sidebar-primary-foreground: oklch(0.985 0.01 85);
+  --sidebar-accent: oklch(0.92 0.07 88);
+  --sidebar-accent-foreground: oklch(0.3 0.08 70);
+  --sidebar-border: oklch(0.89 0.018 85);
+  --sidebar-ring: oklch(0.46 0.2 276);
 }
 
 .dark {
@@ -160,49 +224,43 @@
      chamar atenção (botões, links, selos) saía cinza. Agora é o azul da
      marca clareado (0.72 0.14 254) — 5.1:1 sobre o card, e texto escuro
      por cima dele em 7.6:1. */
-  --background: oklch(0.268 0.012 264);
-  --foreground: oklch(0.955 0.004 247.858);
-  --card: oklch(0.322 0.013 264);
-  --card-foreground: oklch(0.955 0.004 247.858);
-  --popover: oklch(0.33 0.013 264);
-  --popover-foreground: oklch(0.955 0.004 247.858);
-  --primary: oklch(0.72 0.14 254);
-  --primary-foreground: oklch(0.18 0.02 264);
-  --secondary: oklch(0.375 0.015 262);
-  --secondary-foreground: oklch(0.955 0.004 247.858);
-  --muted: oklch(0.375 0.015 262);
-  --muted-foreground: oklch(0.8 0.02 256);
-  --accent: oklch(0.4 0.016 262);
-  --accent-foreground: oklch(0.955 0.004 247.858);
+  --background: oklch(0.2 0.04 276);
+  --foreground: oklch(0.96 0.01 85);
+  --card: oklch(0.25 0.045 276);
+  --card-foreground: oklch(0.96 0.01 85);
+  --popover: oklch(0.27 0.048 276);
+  --popover-foreground: oklch(0.96 0.01 85);
+  --primary: oklch(0.76 0.14 285);
+  --primary-foreground: oklch(0.2 0.04 276);
+  --secondary: oklch(0.31 0.05 276);
+  --secondary-foreground: oklch(0.96 0.01 85);
+  --muted: oklch(0.31 0.05 276);
+  --muted-foreground: oklch(0.79 0.03 280);
+  --accent: oklch(0.36 0.06 276);
+  --accent-foreground: oklch(0.96 0.01 85);
   --destructive: oklch(0.68 0.16 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 16%);
-  --input: oklch(1 0 0 / 20%);
-  --ring: oklch(0.72 0.14 254);
-  --chart-1: oklch(0.62 0.15 264.376);
-  --chart-2: oklch(0.7 0.13 162.48);
-  --chart-3: oklch(0.76 0.14 70.08);
-  --chart-4: oklch(0.66 0.16 303.9);
-  --chart-5: oklch(0.67 0.16 16.439);
-  /* Rampa por série no escuro, reafinada para o texto passar em AA: as
-     séries 1 e 2 levam texto escuro e as 3 a 5 texto branco (ver
-     serie-colors.ts), e os valores antigos deixavam branco sobre serie-3
-     em 3.2:1 e sobre serie-4 em 4.3:1 — as duas abaixo do mínimo. Agora o
-     degrau entre a 2 e a 3 é maior e todas passam: 10.6, 7.9, 4.6, 6.1 e
-     8.0:1. */
-  --serie-1: oklch(0.83 0.05 255);
-  --serie-2: oklch(0.745 0.078 256);
-  --serie-3: oklch(0.565 0.115 258);
-  --serie-4: oklch(0.5 0.115 260);
-  --serie-5: oklch(0.435 0.1 262);
-  --sidebar: oklch(0.322 0.013 264);
-  --sidebar-foreground: oklch(0.955 0.004 247.858);
-  --sidebar-primary: oklch(0.72 0.14 254);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.375 0.015 262);
-  --sidebar-accent-foreground: oklch(0.955 0.004 247.858);
-  --sidebar-border: oklch(1 0 0 / 16%);
-  --sidebar-ring: oklch(0.72 0.14 254);
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 18%);
+  --ring: oklch(0.76 0.14 285);
+  --chart-1: oklch(0.7 0.16 285);
+  --chart-2: oklch(0.74 0.12 178);
+  --chart-3: oklch(0.84 0.16 85);
+  --chart-4: oklch(0.7 0.17 28);
+  --chart-5: oklch(0.68 0.17 318);
+  --serie-1: oklch(0.84 0.06 280);
+  --serie-2: oklch(0.76 0.09 280);
+  --serie-3: oklch(0.58 0.14 280);
+  --serie-4: oklch(0.5 0.14 280);
+  --serie-5: oklch(0.43 0.12 280);
+  --sidebar: oklch(0.25 0.045 276);
+  --sidebar-foreground: oklch(0.96 0.01 85);
+  --sidebar-primary: oklch(0.76 0.14 285);
+  --sidebar-primary-foreground: oklch(0.2 0.04 276);
+  --sidebar-accent: oklch(0.31 0.05 276);
+  --sidebar-accent-foreground: oklch(0.96 0.01 85);
+  --sidebar-border: oklch(1 0 0 / 14%);
+  --sidebar-ring: oklch(0.76 0.14 285);
 }
 
 /* Barras do equalizador do player de rádio flutuante — cada uma anima em um
@@ -390,7 +448,8 @@
   h3,
   h4 {
     font-family: var(--font-heading);
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    letter-spacing: -0.025em;
     text-wrap: balance;
   }
 
@@ -591,4 +650,12 @@
   background-image: linear-gradient(135deg, var(--jf-a), var(--jf-b));
   border-color: var(--jf-b);
   color: #fff;
+}
+
+
+/* Grade pontilhada da identidade: lembra a tela de um monitor antigo e o
+   caderno quadriculado ao mesmo tempo. Usada de fundo nas seções de destaque. */
+.fundo-pixel {
+  background-image: radial-gradient(color-mix(in oklch, var(--foreground) 14%, transparent) 1.1px, transparent 1.1px);
+  background-size: 22px 22px;
 }

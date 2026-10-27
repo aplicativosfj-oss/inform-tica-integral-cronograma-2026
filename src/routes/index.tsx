@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import {
+  ArrowRight,
   BookOpen,
   CalendarClock,
   ChevronRight,
@@ -23,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { MarcaLogo } from "@/components/school/marca";
 import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialog";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { WeatherWidget } from "@/components/school/weather-widget";
@@ -32,7 +34,7 @@ import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
-import { useSessoesLab } from "@/lib/laboratorio";
+import { estadoDaSessao, useAgora, useSessoesLab } from "@/lib/laboratorio";
 import { cn } from "@/lib/utils";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
@@ -89,183 +91,155 @@ function Index() {
   const { turmas, config, isReady } = useAppStore();
   const { isAuthenticated } = useAuth();
   const lab = useSessoesLab();
+  const agora = useAgora(30_000);
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
+  const noLabAgora = new Set(
+    lab.sessoes.filter((x) => estadoDaSessao(x, agora) === "ao-vivo").map((x) => x.alunoId),
+  ).size;
 
   return (
     <div className="relative min-h-screen bg-background">
-      <PageBackground />
       <div className="relative z-10">
         <NavBar />
 
+        {/* ───────── Hero ───────── */}
         <section className="relative overflow-hidden border-b border-border/60">
-          {/* Foto de ambiente (laptop + ícones de produtividade) bem desfocada e
-              apagada — dá cor e textura ao hero sem competir com o texto; os
-              véus abaixo garantem contraste por cima dela. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-20 scale-110 bg-cover bg-right opacity-[0.14] blur-2xl dark:opacity-[0.22]"
-            style={{ backgroundImage: `url("${heroTechBgImg}")` }}
+            className="fundo-pixel pointer-events-none absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
           />
-          {/* O padrão de marca é a camada mais baixa. No celular a seção fica
-              alta e estreita, então o bg-cover amplia muito o SVG — por isso
-              ele entra bem apagado aqui e só ganha presença a partir do sm. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-30 sm:opacity-60"
-            style={{ backgroundImage: `url("${homePageBgImg}")` }}
+            className="pointer-events-none absolute -left-24 -top-24 -z-10 size-96 rounded-full bg-primary/20 blur-3xl"
           />
-          {/* Véu que define a luz do hero: claro e arejado no modo claro,
-              azul-noite um tom acima do fundo da página no modo escuro. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-sky-50/85 via-white/55 to-background dark:from-muted/35 dark:via-background/60 dark:to-background"
+            className="pointer-events-none absolute -bottom-32 right-0 -z-10 size-96 rounded-full bg-sun/30 blur-3xl"
           />
-          {/* Dois respiros radiais de cor por cima do véu — a "tira" âmbar
-              decorativa que existia aqui antes saiu por não somar nada. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_-10%,rgba(56,130,246,0.16),transparent_55%),radial-gradient(circle_at_100%_8%,rgba(14,165,233,0.13),transparent_50%)]"
-          />
-          <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:items-center lg:py-10">
+
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12 lg:py-20">
             <div>
-              <Badge className="mb-3 gap-1.5 rounded-full border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
-                <MonitorSmartphone className="size-4" /> Laboratório de informática
-              </Badge>
-              <h1 className="text-[2rem] font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                Informática na <span className="text-primary">Escola</span>
+              <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-sm font-semibold text-muted-foreground shadow-sm backdrop-blur">
+                <GraduationCap className="size-4 text-primary" aria-hidden />
+                Escola Dr. Eiraldo Carneiro de França · Feijó, Acre
+              </p>
+              <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.02] sm:text-6xl lg:text-7xl">
+                Onde a escola aprende com{" "}
+                <span className="bg-[linear-gradient(transparent_62%,var(--color-sun)_62%)] px-1">
+                  tecnologia
+                </span>
+                .
               </h1>
-              {/* Quem abre a home precisa saber de qual escola é a agenda sem
-                  ter que rolar até o rodapé. O degradê no lugar de uma cor
-                  chapada dá direção à luz — é o que faz o vidro parecer vidro,
-                  e não um retângulo translúcido. */}
-              <p className="mt-3 inline-flex max-w-xl items-start gap-2 rounded-xl border border-sky-200/80 bg-gradient-to-br from-white/70 to-sky-100/40 px-3.5 py-2 text-[15px] font-semibold text-primary shadow-md shadow-slate-900/5 backdrop-blur-md dark:border-white/15 dark:from-white/12 dark:to-white/5 dark:shadow-black/20 sm:text-base">
-                <GraduationCap className="mt-0.5 size-4 shrink-0 opacity-80" aria-hidden />
-                {config.nomeEscola}
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
+                O laboratório de informática da nossa escola. O professor{" "}
+                {config.professorInformatica} escolhe quem vai, define o tempo de cada grupo e todo
+                mundo acompanha, ao vivo, quem está no laboratório.
               </p>
-              <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-muted-foreground sm:text-lg">
-                O professor {config.professorInformatica} escolhe os alunos de cada turma que vão ao
-                laboratório, define o tempo de cada grupo e o painel abaixo mostra, ao vivo, quem
-                está lá e até que horas.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Button asChild size="lg">
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Button asChild size="lg" className="rounded-full px-6">
                   <a href="#laboratorio-agora">
                     <MonitorSmartphone /> Ver quem está no laboratório
                   </a>
                 </Button>
-                <Button asChild size="lg" variant="outline">
-                  <Link to="/dashboard">
-                    <LayoutDashboard /> Painel de gestão
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full bg-card/70 px-6"
+                >
+                  <Link to="/resultados">
+                    Resultados do bimestre <ArrowRight />
                   </Link>
                 </Button>
               </div>
 
-              <dl className="mt-5 grid grid-cols-2 gap-2.5 rounded-2xl border border-white/40 bg-white/30 p-4 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5 sm:grid-cols-4 sm:gap-3">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-violet-400/25 bg-violet-500/10 text-violet-600 dark:border-violet-400/20 dark:bg-violet-400/10 dark:text-violet-300">
-                    <BookOpen className="size-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-[13px] leading-none text-muted-foreground">Turmas</dt>
+              <p className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <span className="relative flex size-2.5">
+                  <span
+                    className={`absolute inline-flex size-full rounded-full opacity-60 ${noLabAgora > 0 ? "animate-ping bg-emerald-500" : "bg-muted-foreground/40"}`}
+                  />
+                  <span
+                    className={`relative inline-flex size-2.5 rounded-full ${noLabAgora > 0 ? "bg-emerald-500" : "bg-muted-foreground/50"}`}
+                  />
+                </span>
+                {noLabAgora > 0
+                  ? `${noLabAgora} aluno${noLabAgora === 1 ? "" : "s"} no laboratório agora`
+                  : "Laboratório livre neste momento"}
+              </p>
+
+              <dl className="mt-8 grid grid-cols-2 divide-x divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/80 shadow-sm backdrop-blur sm:grid-cols-4 sm:divide-y-0">
+                {[
+                  { rotulo: "Turmas", valor: turmas.length },
+                  { rotulo: "Alunos", valor: totalAlunos },
+                  { rotulo: "Máquinas", valor: config.numeroComputadores },
+                ].map((d) => (
+                  <div key={d.rotulo} className="px-4 py-3">
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {d.rotulo}
+                    </dt>
                     {isReady ? (
-                      <StatCounter valor={turmas.length} />
+                      <StatCounter valor={d.valor} />
                     ) : (
-                      <div className="mt-1.5 h-6 w-8 animate-pulse rounded bg-muted-foreground/20" />
+                      <div className="mt-1.5 h-7 w-10 animate-pulse rounded bg-muted-foreground/20" />
                     )}
                   </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
-                    <Users2 className="size-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-[13px] leading-none text-muted-foreground">Alunos</dt>
-                    {isReady ? (
-                      <StatCounter valor={totalAlunos} />
-                    ) : (
-                      <div className="mt-1.5 h-6 w-10 animate-pulse rounded bg-muted-foreground/20" />
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
-                    <MonitorSmartphone className="size-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-[13px] leading-none text-muted-foreground">Máquinas</dt>
-                    {isReady ? (
-                      <StatCounter valor={config.numeroComputadores} />
-                    ) : (
-                      <div className="mt-1.5 h-6 w-8 animate-pulse rounded bg-muted-foreground/20" />
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
-                    <Clock3 className="size-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-[13px] leading-none text-muted-foreground">Horário</dt>
-                    <dd className="text-lg font-semibold leading-tight text-foreground">
-                      {config.horaInicio}–{config.horaFim}
-                    </dd>
-                  </div>
+                ))}
+                <div className="px-4 py-3">
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Horário
+                  </dt>
+                  <dd className="font-heading text-xl font-bold leading-tight">
+                    {config.horaInicio}–{config.horaFim}
+                  </dd>
                 </div>
               </dl>
             </div>
 
-            <div className="relative order-first lg:order-none">
-              <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl" aria-hidden />
-              {/* Elementos decorativos flutuantes — sutis, só para dar vida ao
-                  hero sem distrair do conteúdo real. */}
-              <span
+            <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
+              <div
                 aria-hidden
-                className="absolute -right-3 top-8 z-10 hidden size-3 rounded-full bg-amber-400/70 animate-float-slow sm:block"
+                className="absolute -bottom-4 -right-4 size-full rounded-[2rem] bg-sun"
               />
-              <span
+              <div
                 aria-hidden
-                className="absolute -right-6 top-1/2 z-10 hidden size-2 rounded-full bg-primary/60 animate-float-slower sm:block"
+                className="absolute -left-3 -top-3 size-14 rounded-2xl border-4 border-primary/60"
               />
-              <span
-                aria-hidden
-                className="absolute -bottom-4 left-10 z-10 hidden size-2.5 rounded-full bg-emerald-400/60 animate-float-slow sm:block"
-              />
-              {/* A proporção acompanha a do arquivo (854x302) para o banner
-                  aparecer inteiro — cortar em 13/4 comia a lâmpada e o globo
-                  das pontas. Isso faz da imagem um retângulo bem mais baixo
-                  que a coluna de texto ao lado no desktop; a partir do lg,
-                  uma moldura com uma cópia borrada e ampliada da própria
-                  imagem preenche o espaço vazio ao redor dela, em vez de
-                  deixar só o fundo escuro por trás.
-
-                  No celular ele sangra até a borda da tela (-mx-4, anulando o
-                  padding do container). Como a proporção é fixa e não pode ser
-                  cortada, ocupar os 32px do padding é o único jeito de crescer:
-                  rende ~10% de altura. A seção tem overflow-hidden, então o
-                  transbordo não vira rolagem lateral. */}
-              <div className="lg:relative lg:flex lg:min-h-[260px] lg:items-center lg:justify-center lg:overflow-hidden lg:rounded-2xl lg:border lg:border-white/30 lg:shadow-2xl dark:lg:border-white/10 xl:min-h-[300px]">
-                <div
-                  aria-hidden
-                  className="absolute inset-0 hidden scale-110 bg-cover bg-center opacity-60 blur-2xl lg:block"
-                  style={{ backgroundImage: `url(${escolaInformaticaHeroImg})` }}
-                />
-                <div aria-hidden className="absolute inset-0 hidden bg-slate-900/25 lg:block" />
+              <div className="relative overflow-hidden rounded-[2rem] border-4 border-card bg-card shadow-2xl">
                 <SiteImage
-                  src={escolaInformaticaHeroImg}
-                  alt="Escola Municipal Dr. Eiraldo Carneiro - Informática é porta para o futuro com alunos no laboratório"
-                  width={854}
-                  height={302}
-                  className="relative -mx-4 aspect-[854/302] w-auto overflow-hidden border-y border-border bg-card shadow-lg dark:border-white/10 dark:bg-card/60 dark:shadow-2xl dark:backdrop-blur-xl sm:mx-0 sm:w-full sm:rounded-2xl sm:border lg:w-full lg:rounded-2xl"
+                  src={laboratorioTurmaFotoImg}
+                  alt={`Turma da ${config.nomeEscola} durante a aula de informática, cada aluno em seu computador`}
+                  legenda={`Turma da ${config.nomeEscola} em aula de informática.`}
+                  width={1280}
+                  height={720}
+                  className="aspect-[4/3] w-full object-cover"
                   loading="eager"
                   decoding="async"
                   fetchPriority="high"
                 />
               </div>
+              <div className="absolute -bottom-6 left-4 hidden items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-xl sm:flex">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                  <Users2 className="size-5" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    1º ao 5º ano
+                  </p>
+                  <p className="font-heading text-sm font-bold">Todas as turmas, todo dia</p>
+                </div>
+              </div>
             </div>
           </div>
+          <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 sm:px-6" />
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+        {/* ───────── Laboratório ao vivo ───────── */}
+        <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <div className="mb-5 max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">Ao vivo</p>
+            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Quem está no laboratório</h2>
+          </div>
           <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
             <PainelLaboratorioAgora dados={lab} logado={isAuthenticated} />
             <div className="space-y-4">
@@ -275,108 +249,124 @@ function Index() {
           </div>
         </section>
 
-        <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-          <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <MonitorSmartphone className="size-3.5 text-primary" /> Nosso laboratório
-          </p>
-          <div className="group overflow-hidden rounded-2xl border border-border/60 shadow-lg transition-shadow hover:shadow-xl">
-            <SiteImage
-              src={laboratorioTurmaFotoImg}
-              alt={`Turma completa da ${config.nomeEscola} durante a aula de informática, cada aluno em seu computador`}
-              legenda={`O laboratório de informática da ${config.nomeEscola} em plena aula — turma completa, cada aluno em seu computador.`}
-              width={1280}
-              height={720}
-              className="aspect-[21/9] max-h-52 w-full transition-transform duration-300 group-hover:scale-[1.02] sm:max-h-60"
-              loading="lazy"
-              decoding="async"
-            />
+        {/* ───────── Como funciona ───────── */}
+        <RevealSection className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          <div className="mb-6 max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">
+              Como funciona
+            </p>
+            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
+              Simples, justo e à vista de todos
+            </h2>
           </div>
-          <AvisoDireitosImagem className="mt-1.5" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                n: "01",
+                Icone: Users2,
+                titulo: "Escolha do dia",
+                texto: "O professor marca, turma por turma, os alunos que vão ao laboratório.",
+                cor: "bg-primary text-primary-foreground",
+              },
+              {
+                n: "02",
+                Icone: Timer,
+                titulo: "Tempo de cada grupo",
+                texto: "Início e fim definidos pelo professor, com contagem regressiva ao vivo.",
+                cor: "bg-sun text-sun-foreground",
+              },
+              {
+                n: "03",
+                Icone: ShieldCheck,
+                titulo: "Revezamento justo",
+                texto: "O sistema avisa quando um aluno já foi na semana ou no mês.",
+                cor: "bg-mint text-ink",
+              },
+              {
+                n: "04",
+                Icone: Gamepad2,
+                titulo: "Aprender brincando",
+                texto: "Jogos, trilhas e atividades para praticar também fora do laboratório.",
+                cor: "bg-ink text-white dark:bg-secondary",
+              },
+            ].map(({ n, Icone, titulo, texto, cor }) => (
+              <div
+                key={n}
+                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
+              >
+                <span className="absolute right-4 top-3 font-heading text-5xl font-extrabold text-foreground/[0.06]">
+                  {n}
+                </span>
+                <span className={`flex size-11 items-center justify-center rounded-2xl ${cor}`}>
+                  <Icone className="size-5" aria-hidden />
+                </span>
+                <h3 className="mt-4 text-lg font-bold">{titulo}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{texto}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex items-center gap-2">
+            {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map(
+              (src, i) => (
+                <SiteImage
+                  key={i}
+                  src={src}
+                  alt="Aluno usando um computador do laboratório de informática"
+                  legenda="Aluno usando um computador do laboratório de informática da escola."
+                  loading="lazy"
+                  width={64}
+                  height={64}
+                  className="size-14 rounded-2xl border-2 border-card shadow-sm sm:size-16"
+                />
+              ),
+            )}
+          </div>
         </RevealSection>
 
-        <RevealSection className="relative mx-auto max-w-6xl overflow-hidden px-4 py-6 sm:px-6">
-          {/* Foto de ambiente infantil/educacional, bem apagada — só um toque de
-              cor atrás dos cards, coerente com o tema "aprendizado digital". */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-[0.1] blur-md dark:opacity-[0.14]"
-            style={{ backgroundImage: `url("${featureKidsBgImg}")` }}
-          />
-          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-2xl">
-              <h2 className="text-2xl font-semibold text-foreground">
-                Como funciona o laboratório
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                O professor de informática escolhe os alunos do dia, define o tempo de cada grupo e
-                o painel mostra quem está no laboratório e até que horas. O sistema também conta
-                quantas vezes cada aluno já foi na semana e no mês, para o revezamento ser justo.
+        {/* ───────── Resultados ───────── */}
+        <RevealSection className="px-4 py-6 sm:px-6">
+          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-ink p-8 text-white sm:p-12 dark:bg-card">
+            <div
+              aria-hidden
+              className="fundo-pixel absolute inset-0 opacity-30 [mask-image:linear-gradient(to_left,black,transparent_70%)]"
+            />
+            <div
+              aria-hidden
+              className="absolute -right-16 -top-16 size-64 rounded-full bg-sun/30 blur-3xl"
+            />
+            <div className="relative max-w-2xl">
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-sun">
+                Transparência
               </p>
+              <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
+                Como estão a leitura, a escrita e as notas
+              </h2>
+              <p className="mt-3 text-white/75">
+                Os resultados do 3º bimestre, turma por turma, com o que cada nível pede da escola.
+                Nenhum aluno é identificado.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="mt-6 rounded-full bg-sun px-6 text-sun-foreground hover:bg-sun/90"
+              >
+                <Link to="/resultados">
+                  Ver os resultados <ArrowRight />
+                </Link>
+              </Button>
             </div>
-            {/* Fotos reais dos alunos usando o laboratório — discreto, sem virar mosaico. */}
-            <div className="flex shrink-0 items-center gap-2">
-              {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map(
-                (src, i) => (
-                  <SiteImage
-                    key={i}
-                    src={src}
-                    alt="Aluno usando um computador do laboratório de informática"
-                    legenda="Aluno usando um computador do laboratório de informática da escola."
-                    loading="lazy"
-                    width={64}
-                    height={64}
-                    className="size-16 rounded-xl border border-border/60 shadow-sm sm:size-20"
-                  />
-                ),
-              )}
-            </div>
-          </div>
-          <AvisoDireitosImagem className="mt-2 sm:justify-end" />
-
-          {/* Duas colunas já no celular: em coluna única os quatro cards viravam
-              uma fila vertical longa demais, empurrando a grade da semana pra
-              fora da tela. */}
-          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
-            <FeatureCard
-              icon={<Gamepad2 className="size-5" />}
-              iconClassName="border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-500/20 dark:text-blue-300"
-              title="Aprendizado digital"
-              description="Tecnologia que estimula o raciocínio e a criatividade."
-            />
-            <FeatureCard
-              icon={<CalendarClock className="size-5" />}
-              iconClassName="border-violet-400/25 bg-violet-500/10 text-violet-600 dark:border-violet-400/20 dark:bg-violet-500/20 dark:text-violet-300"
-              title="Escolha do dia"
-              description="O professor marca os alunos de cada turma que vão ao laboratório."
-            />
-            <FeatureCard
-              icon={<Timer className="size-5" />}
-              iconClassName="border-amber-400/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/20 dark:text-amber-300"
-              title="Tempo de cada grupo"
-              description="Início e fim definidos pelo professor, com contagem regressiva ao vivo."
-            />
-            <FeatureCard
-              icon={<ShieldCheck className="size-5" />}
-              iconClassName="border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/20 dark:text-emerald-300"
-              title="Revezamento justo"
-              description="Aviso quando um aluno já foi ao laboratório na semana ou no mês."
-            />
           </div>
         </RevealSection>
 
         <CanalYoutubeSection />
 
-        <section className="border-t border-border/60 bg-gradient-to-b from-muted/50 to-background">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-5 text-center sm:px-6">
-            <span className="flex size-9 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 shadow-sm dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
-              <GraduationCap className="size-5" />
-            </span>
-            <h2 className="text-base font-semibold text-foreground">{config.nomeEscola}</h2>
+        <section className="border-t border-border/60 bg-muted/40">
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-6 text-center sm:px-6">
+            <MarcaLogo tamanho={44} />
+            <h2 className="text-base font-bold">{config.nomeEscola}</h2>
             <p className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground/80">INEP {config.inep}</span>
-              <span aria-hidden className="text-border">
-                ·
-              </span>
+              <span className="font-semibold text-foreground/80">INEP {config.inep}</span>
+              <span aria-hidden>·</span>
               <span className="flex items-center gap-1">
                 <MapPin className="size-3.5 shrink-0" /> {config.endereco}
               </span>

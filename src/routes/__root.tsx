@@ -141,7 +141,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "twitter:image:alt",
         content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro",
       },
-      { name: "theme-color", content: appJogos ? "#047857" : "#1e3a8a" },
+      { name: "theme-color", content: appJogos ? "#047857" : "#2b2470" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -174,12 +174,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "prefetch", href: "/agenda", as: "fetch" },
       { rel: "prefetch", href: "/dashboard", as: "fetch" },
       // Favicon profissional com gradiente
-      { rel: "icon", href: "/favicon.svg?v=4", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon-32.png?v=4", type: "image/png", sizes: "32x32" },
-      { rel: "icon", href: "/favicon-16.png?v=4", type: "image/png", sizes: "16x16" },
+      { rel: "icon", href: "/favicon.svg?v=5", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon-32.png?v=5", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon-16.png?v=5", type: "image/png", sizes: "16x16" },
       {
         rel: "apple-touch-icon",
-        href: appJogos ? "/icons/jogos-apple-touch.png" : "/icons/apple-touch-icon.png?v=4",
+        href: appJogos ? "/icons/jogos-apple-touch.png" : "/icons/apple-touch-icon.png?v=5",
       },
     ],
     };
