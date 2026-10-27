@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { PROGRAMACAO_ATIVA } from "@/lib/recursos";
 import { CalendarSearch, FileDown, UserCheck, UserX, Users2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -31,6 +32,10 @@ import { toDateKey, agoraNaEscola } from "@/lib/schedule-engine";
 import type { Presenca } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/frequencia")({
+  beforeLoad: () => {
+    // Programação desligada: a rotina agora é o controle do laboratório.
+    if (!PROGRAMACAO_ATIVA) throw redirect({ to: "/dashboard/laboratorio" });
+  },
   component: FrequenciaPage,
   head: () => ({
     meta: [

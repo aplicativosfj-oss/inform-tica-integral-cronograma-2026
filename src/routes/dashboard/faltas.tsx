@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { PROGRAMACAO_ATIVA } from "@/lib/recursos";
 import {
   CalendarClock,
   CalendarX2,
@@ -43,6 +44,10 @@ import {
 import type { Assignment, Presenca } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/faltas")({
+  beforeLoad: () => {
+    // Programação desligada: a rotina agora é o controle do laboratório.
+    if (!PROGRAMACAO_ATIVA) throw redirect({ to: "/dashboard/laboratorio" });
+  },
   component: FaltasPage,
   head: () => ({
     meta: [

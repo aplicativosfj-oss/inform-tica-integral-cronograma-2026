@@ -19,6 +19,7 @@ import { ThemeProvider } from "../lib/theme-store";
 import { Toaster } from "../components/ui/sonner";
 import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
+import { PROGRAMACAO_ATIVA } from "../lib/recursos";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 import { FONTES_CSS, precarregarOffline } from "../lib/offline-precache";
 import { useCarregarHistoricoParticipacao } from "../lib/use-historico-participacao";
@@ -232,7 +233,7 @@ function RootComponent() {
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                 <Outlet />
                 <Toaster />
-                <AvisoAulaEmBreve />
+                {PROGRAMACAO_ATIVA ? <AvisoAulaEmBreve /> : null}
                 <AlunoSessaoGuard />
               </JovemPanRadioProvider>
             </ConfirmProvider>

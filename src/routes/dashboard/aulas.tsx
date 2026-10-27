@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { PROGRAMACAO_ATIVA } from "@/lib/recursos";
 import { CalendarPlus, Pencil, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -28,6 +29,10 @@ import { useAppStore } from "@/lib/app-store";
 import { useConfirmar } from "@/lib/confirm-store";
 
 export const Route = createFileRoute("/dashboard/aulas")({
+  beforeLoad: () => {
+    // Programação desligada: a rotina agora é o controle do laboratório.
+    if (!PROGRAMACAO_ATIVA) throw redirect({ to: "/dashboard/laboratorio" });
+  },
   component: AulasPage,
   head: () => ({
     meta: [

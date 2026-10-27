@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  CalendarClock,
   GraduationCap,
+  MonitorSmartphone,
   LayoutDashboard,
   Settings2,
   UserX,
@@ -13,10 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardShell } from "@/components/school/dashboard-shell";
-import { LiveSessionPanel } from "@/components/school/live-session-panel";
+import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { SiteImage } from "@/components/school/site-image";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
+import { useSessoesLab } from "@/lib/laboratorio";
 import dashboardHeroImg from "@/assets/laboratorio-informatica-turma.jpg";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -30,7 +31,8 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 function DashboardHome() {
-  const { turmas, config } = useAppStore();
+  const { turmas } = useAppStore();
+  const lab = useSessoesLab();
   const { email } = useAuth();
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
   const turmasSemAlunos = turmas.filter((t) => t.alunos.length === 0).length;
@@ -49,7 +51,8 @@ function DashboardHome() {
             </Badge>
             <h1 className="text-2xl font-semibold text-foreground">Visão geral</h1>
             <p className="mt-1 max-w-md text-sm text-muted-foreground">
-              Bem-vindo(a), {email}. Gerencie turmas, alunos e horários da sala de informática.
+              Bem-vindo(a), {email}. Gerencie turmas e alunos e marque quem vai ao laboratório de
+              informática.
             </p>
           </div>
           <SiteImage
@@ -79,7 +82,7 @@ function DashboardHome() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <LiveSessionPanel editable />
+        <PainelLaboratorioAgora dados={lab} logado />
 
         <Card>
           <CardHeader>
@@ -91,9 +94,9 @@ function DashboardHome() {
                 <Users2 /> Cadastrar turmas e alunos
               </Link>
             </Button>
-            <Button asChild variant="outline" className="justify-start">
-              <Link to="/dashboard/programacao">
-                <CalendarClock /> Editar programação da semana
+            <Button asChild className="justify-start">
+              <Link to="/dashboard/laboratorio">
+                <MonitorSmartphone /> Marcar alunos no laboratório
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start">
@@ -102,14 +105,13 @@ function DashboardHome() {
               </Link>
             </Button>
             <Button asChild variant="outline" className="justify-start">
-              <Link to="/agenda">
-                <CalendarClock /> Ver agenda pública
+              <Link to="/">
+                <LayoutDashboard /> Ver a página inicial
               </Link>
             </Button>
             <p className="mt-2 text-xs text-muted-foreground">
-              Regra atual: grupos de {config.numeroComputadores} alunos, revezando a cada{" "}
-              {config.duracaoGrupoMinutos} min dentro de janelas de {config.duracaoSlotMinutos} min
-              por turma.
+              O controle por laboratório substituiu a programação automática. Os dados antigos
+              continuam guardados.
             </p>
           </CardContent>
         </Card>

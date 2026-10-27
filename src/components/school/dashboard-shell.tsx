@@ -13,6 +13,7 @@ import {
   Layers,
   LayoutDashboard,
   Map as MapIcon,
+  MonitorSmartphone,
   Settings2,
   Target,
   TrendingUp,
@@ -25,6 +26,7 @@ import { NavBar } from "@/components/school/nav-bar";
 import { useAuth } from "@/lib/auth-store";
 import { SessaoAtiva } from "@/components/school/sessao-ativa";
 import { Protected } from "@/components/school/protected";
+import { PROGRAMACAO_ATIVA } from "@/lib/recursos";
 import { cn } from "@/lib/utils";
 import dashboardBgImg from "@/assets/image8.png";
 
@@ -37,17 +39,23 @@ const NAV_GROUPS = [
     label: "Cadastro",
     items: [
       { to: "/dashboard/turmas", label: "Turmas e alunos", icon: Users2 },
-      { to: "/dashboard/grupos", label: "Turmas e grupos", icon: Layers },
+      { to: "/dashboard/grupos", label: "Turmas e grupos", icon: Layers, programacao: true },
       { to: "/dashboard/alunos", label: "Buscar aluno", icon: GraduationCap },
     ],
   },
   {
     label: "Rotina",
     items: [
-      { to: "/dashboard/aulas", label: "Aulas", icon: CalendarPlus },
-      { to: "/dashboard/programacao", label: "Programação", icon: CalendarClock },
-      { to: "/dashboard/frequencia", label: "Frequência", icon: CalendarSearch },
-      { to: "/dashboard/faltas", label: "Faltas do mês", icon: UserX },
+      { to: "/dashboard/laboratorio", label: "Laboratório", icon: MonitorSmartphone },
+      { to: "/dashboard/aulas", label: "Aulas", icon: CalendarPlus, programacao: true },
+      {
+        to: "/dashboard/programacao",
+        label: "Programação",
+        icon: CalendarClock,
+        programacao: true,
+      },
+      { to: "/dashboard/frequencia", label: "Frequência", icon: CalendarSearch, programacao: true },
+      { to: "/dashboard/faltas", label: "Faltas do mês", icon: UserX, programacao: true },
       { to: "/dashboard/atividades", label: "Área do Aluno", icon: ClipboardCheck },
     ],
   },
@@ -103,27 +111,31 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                         {group.label}
                       </p>
                     ) : null}
-                    {group.items.map((item) => {
-                      const active =
-                        item.to === "/dashboard"
-                          ? pathname === item.to
-                          : pathname.startsWith(item.to);
-                      const Icon = item.icon;
-                      return (
-                        <Link
-                          key={item.to}
-                          to={item.to}
-                          className={cn(
-                            "flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                            active
-                              ? "bg-primary text-primary-foreground"
-                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                          )}
-                        >
-                          <Icon className="size-4" /> {item.label}
-                        </Link>
-                      );
-                    })}
+                    {group.items
+                      .filter(
+                        (item) => PROGRAMACAO_ATIVA || !("programacao" in item && item.programacao),
+                      )
+                      .map((item) => {
+                        const active =
+                          item.to === "/dashboard"
+                            ? pathname === item.to
+                            : pathname.startsWith(item.to);
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            className={cn(
+                              "flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                              active
+                                ? "bg-primary text-primary-foreground"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                            )}
+                          >
+                            <Icon className="size-4" /> {item.label}
+                          </Link>
+                        );
+                      })}
                   </div>
                 ))}
               </nav>

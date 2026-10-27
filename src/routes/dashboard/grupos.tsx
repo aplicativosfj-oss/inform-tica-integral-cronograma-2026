@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { PROGRAMACAO_ATIVA } from "@/lib/recursos";
 import { Layers, Plus, Trash2, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +15,10 @@ import { useConfirmar } from "@/lib/confirm-store";
 import type { Turma } from "@/lib/types";
 
 export const Route = createFileRoute("/dashboard/grupos")({
+  beforeLoad: () => {
+    // Programação desligada: a rotina agora é o controle do laboratório.
+    if (!PROGRAMACAO_ATIVA) throw redirect({ to: "/dashboard/laboratorio" });
+  },
   component: GruposPage,
   head: () => ({
     meta: [

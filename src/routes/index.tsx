@@ -1,10 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   BookOpen,
   CalendarClock,
-  CalendarDays,
-  CalendarX2,
   ChevronRight,
   Clock3,
   ExternalLink,
@@ -15,7 +13,6 @@ import {
   MonitorSmartphone,
   Play,
   ShieldCheck,
-  Sparkles,
   Timer,
   Users2,
   Youtube,
@@ -26,32 +23,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
-import { LiveSessionPanel } from "@/components/school/live-session-panel";
+import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialog";
+import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { WeatherWidget } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
 import { PageBackground } from "@/components/school/page-background";
-import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
 import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
-import { WeeklySchedule } from "@/components/school/weekly-schedule";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
-import { SuspenderAulaDialog } from "@/components/school/suspender-aula-dialog";
-import {
-  aplicarExcecoesDeData,
-  buildWeeklySchedule,
-  currentWeekdayLabel,
-  getWeekIndex,
-  nextAssignmentsForDay,
-  proximaDataDoDia,
-  proximoDiaLetivo,
-  suspensaoKey,
-  reprogramacoesParaData,
-  toDateKey,
-  agoraNaEscola,
-} from "@/lib/schedule-engine";
-import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
-import type { Assignment } from "@/lib/types";
+import { useSessoesLab } from "@/lib/laboratorio";
 import { cn } from "@/lib/utils";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
@@ -63,7 +44,6 @@ import alunoSorridenteImg from "@/assets/image10.jpeg";
 import homePageBgImg from "@/assets/homepage-bg.svg";
 import heroTechBgImg from "@/assets/feature-tools.jpg";
 import featureKidsBgImg from "@/assets/feature-kids-learning.jpg";
-import darkTechBgImg from "@/assets/programacao-semana-bg.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -75,13 +55,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Agenda profissional das aulas de informática: cronograma automático, revezamento por grupos e cronômetro ao vivo.",
+          "Laboratório de informática da Escola Dr. Eiraldo: veja quais alunos estão no laboratório agora, até que horas, e como a escola organiza o revezamento.",
       },
       { property: "og:title", content: "Agenda de Informática · Dr. Eiraldo Carneiro de França" },
       {
         property: "og:description",
         content:
-          "Agenda profissional das aulas de informática: cronograma automático, revezamento por grupos e cronômetro ao vivo.",
+          "Laboratório de informática da Escola Dr. Eiraldo: veja quais alunos estão no laboratório agora, até que horas, e como a escola organiza o revezamento.",
       },
       { property: "og:type", content: "website" },
       // twitter:card e og:image vêm do __root — um lugar só para o formato
@@ -107,6 +87,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { turmas, config, isReady } = useAppStore();
+  const { isAuthenticated } = useAuth();
+  const lab = useSessoesLab();
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
 
   return (
@@ -147,7 +129,7 @@ function Index() {
           <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 lg:grid-cols-2 lg:items-center lg:py-10">
             <div>
               <Badge className="mb-3 gap-1.5 rounded-full border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
-                <MonitorSmartphone className="size-4" /> Agenda online
+                <MonitorSmartphone className="size-4" /> Laboratório de informática
               </Badge>
               <h1 className="text-[2rem] font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                 Informática na <span className="text-primary">Escola</span>
@@ -161,15 +143,15 @@ function Index() {
                 {config.nomeEscola}
               </p>
               <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-muted-foreground sm:text-lg">
-                Cronograma automático por turma, revezamento justo entre alunos nos{" "}
-                {config.numeroComputadores} computadores e cronômetro ao vivo — com o professor{" "}
-                {config.professorInformatica}.
+                O professor {config.professorInformatica} escolhe os alunos de cada turma que vão ao
+                laboratório, define o tempo de cada grupo e o painel abaixo mostra, ao vivo, quem
+                está lá e até que horas.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Button asChild size="lg">
-                  <Link to="/agenda">
-                    <CalendarClock /> Ver agenda da semana
-                  </Link>
+                  <a href="#laboratorio-agora">
+                    <MonitorSmartphone /> Ver quem está no laboratório
+                  </a>
                 </Button>
                 <Button asChild size="lg" variant="outline">
                   <Link to="/dashboard">
@@ -283,6 +265,16 @@ function Index() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+            <PainelLaboratorioAgora dados={lab} logado={isAuthenticated} />
+            <div className="space-y-4">
+              {isAuthenticated ? <MarcarAlunosCartao dados={lab} /> : null}
+              <WeatherWidget />
+            </div>
+          </div>
+        </section>
+
         <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
           <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <MonitorSmartphone className="size-3.5 text-primary" /> Nosso laboratório
@@ -302,18 +294,6 @@ function Index() {
           <AvisoDireitosImagem className="mt-1.5" />
         </RevealSection>
 
-        {/* Aula ao vivo em destaque, na largura toda; clima e próximas turmas
-            logo abaixo, lado a lado — cada bloco com espaço para respirar. */}
-        <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6">
-          <div id="aula-ao-vivo" className="scroll-mt-28">
-            <LiveSessionPanel />
-          </div>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:items-start">
-            <WeatherWidget />
-            <ProximasTurmasPanel />
-          </div>
-        </section>
-
         <RevealSection className="relative mx-auto max-w-6xl overflow-hidden px-4 py-6 sm:px-6">
           {/* Foto de ambiente infantil/educacional, bem apagada — só um toque de
               cor atrás dos cards, coerente com o tema "aprendizado digital". */}
@@ -325,13 +305,12 @@ function Index() {
           <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
               <h2 className="text-2xl font-semibold text-foreground">
-                Como a agenda organiza tudo
+                Como funciona o laboratório
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Grupos de {config.numeroComputadores} alunos revezam a cada{" "}
-                {config.duracaoGrupoMinutos} minutos, dentro de janelas de{" "}
-                {config.duracaoSlotMinutos} minutos por turma, de {config.horaInicio} às{" "}
-                {config.horaFim}.
+                O professor de informática escolhe os alunos do dia, define o tempo de cada grupo e
+                o painel mostra quem está no laboratório e até que horas. O sistema também conta
+                quantas vezes cada aluno já foi na semana e no mês, para o revezamento ser justo.
               </p>
             </div>
             {/* Fotos reais dos alunos usando o laboratório — discreto, sem virar mosaico. */}
@@ -367,43 +346,23 @@ function Index() {
             <FeatureCard
               icon={<CalendarClock className="size-5" />}
               iconClassName="border-violet-400/25 bg-violet-500/10 text-violet-600 dark:border-violet-400/20 dark:bg-violet-500/20 dark:text-violet-300"
-              title="Rodízio automático"
-              description="O sistema distribui e gira os grupos sozinho, sem favorecer ninguém."
+              title="Escolha do dia"
+              description="O professor marca os alunos de cada turma que vão ao laboratório."
             />
             <FeatureCard
               icon={<Timer className="size-5" />}
               iconClassName="border-amber-400/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/20 dark:text-amber-300"
-              title="Cronômetro ao vivo"
-              description="Contagem regressiva em tempo real de quando o grupo troca."
+              title="Tempo de cada grupo"
+              description="Início e fim definidos pelo professor, com contagem regressiva ao vivo."
             />
             <FeatureCard
               icon={<ShieldCheck className="size-5" />}
               iconClassName="border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/20 dark:text-emerald-300"
-              title="Painel de gestão"
-              description="Turmas, professores, fotos e alunos com acesso restrito por login."
+              title="Revezamento justo"
+              description="Aviso quando um aluno já foi ao laboratório na semana ou no mês."
             />
           </div>
         </RevealSection>
-
-        <RevealSection className="bg-gradient-to-b from-transparent via-transparent to-slate-900/[0.03] dark:to-slate-950/20">
-          <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-            <div className="mb-4 max-w-2xl">
-              <Badge className="mb-2 gap-1.5 rounded-full border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-700 shadow-sm backdrop-blur-md dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
-                <CalendarDays className="size-4" /> Grade completa
-              </Badge>
-              <h2 className="text-2xl font-semibold text-foreground">
-                A semana inteira, num só olhar
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Cada cor representa uma série (do 1º ao 5º ano) — quanto mais escura, mais adiantada
-                a turma. Gerado automaticamente a partir da agenda cadastrada no sistema.
-              </p>
-            </div>
-            <WeeklySchedule />
-          </div>
-        </RevealSection>
-
-        <ProgramacaoSemanalDestaque />
 
         <CanalYoutubeSection />
 
@@ -431,384 +390,6 @@ function Index() {
   );
 }
 
-/**
- * Shows which turmas are scheduled for the next school day, so professors
- * can plan ahead — displayed right below the live session on the homepage.
- * Each row is clickable and opens the same "alunos previstos" preview used
- * everywhere else in the app, for a consistent experience.
- */
-function ProximasTurmasPanel() {
-  const { turmas, config } = useAppStore();
-  const { isAuthenticated } = useAuth();
-  const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
-
-  // A data atual difere entre servidor e navegador; só renderizamos após montar
-  // para evitar erro de hidratação.
-  const [montado, setMontado] = useState(false);
-  useEffect(() => setMontado(true), []);
-
-  const proximo = useMemo(
-    () => (montado ? proximoDiaLetivo(config, agoraNaEscola()) : null),
-    [config, montado],
-  );
-  const assignmentsDoProximoDia = useMemo(() => {
-    if (!proximo) return [];
-    const dataKey = toDateKey(proximo.data);
-    const assignments = aplicarExcecoesDeData(
-      buildWeeklySchedule(turmas, config, getWeekIndex(proximo.data)),
-      config,
-      turmas,
-      dataKey,
-    );
-    // Reposições marcadas para esse dia entram na lista (e ganham selo próprio).
-    const reposicoes = reprogramacoesParaData(turmas, config, proximo.data);
-    return nextAssignmentsForDay([...reposicoes, ...assignments], proximo.dia).filter(
-      (a) =>
-        reposicoes.includes(a) || !config.suspensoes?.[suspensaoKey(dataKey, a.dia, a.slot.inicio)],
-    );
-  }, [turmas, config, proximo]);
-
-  const reposicaoDe = (a: Assignment) =>
-    proximo
-      ? (config.reprogramacoes ?? []).find(
-          (r) =>
-            r.dataNova === toDateKey(proximo.data) &&
-            r.turmaId === a.turma.id &&
-            r.inicio === a.slot.inicio,
-        )
-      : undefined;
-
-  if (!montado || !proximo || assignmentsDoProximoDia.length === 0) return null;
-
-  return (
-    <Card className="border-border/60">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <CalendarDays className="size-4 text-primary" />
-          Próximas turmas ·{" "}
-          {proximo.data.toLocaleDateString("pt-BR", {
-            weekday: "long",
-            day: "2-digit",
-            month: "long",
-          })}
-        </CardTitle>
-        <p className="text-[13px] text-muted-foreground">
-          Toque numa turma para ver os alunos previstos.
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col divide-y divide-border/60">
-          {assignmentsDoProximoDia.map((assignment) =>
-            assignment.misto ? (
-              <div
-                key={`${assignment.dia}-${assignment.slot.inicio}`}
-                className="flex flex-col gap-1.5 py-2.5"
-              >
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="outline" className="text-xs">
-                    horário misto
-                  </Badge>
-                  <Badge variant="secondary" className="font-mono text-sm font-bold">
-                    {assignment.slot.inicio} – {assignment.slot.fim}
-                  </Badge>
-                </div>
-                <p className="text-[13px] text-muted-foreground">
-                  Grupo que sobrou de cada turma, 30 min cada:{" "}
-                  {assignment.misto.map((m) => `${m.turma.serie} "${m.turma.letra}"`).join(", ")}
-                </p>
-              </div>
-            ) : (
-              <div
-                key={`${assignment.dia}-${assignment.slot.inicio}`}
-                className="flex items-center gap-1"
-              >
-                <button
-                  type="button"
-                  onClick={() => setAssignmentSelecionado(assignment)}
-                  className="group flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left transition-colors duration-200 hover:bg-primary/5"
-                >
-                  <div className="flex items-center gap-3">
-                    {assignment.turma.imagem ? (
-                      <img
-                        src={assignment.turma.imagem}
-                        alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
-                        className="size-11 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <span
-                        className={cn(
-                          "flex size-11 items-center justify-center rounded-lg text-sm font-semibold",
-                          serieClasses(serieIndexPorNumero(assignment.turma.serie)).bg,
-                          serieClasses(serieIndexPorNumero(assignment.turma.serie)).text,
-                        )}
-                      >
-                        {assignment.turma.letra}
-                      </span>
-                    )}
-                    <div>
-                      <p className="flex flex-wrap items-center gap-1.5 text-sm font-medium text-foreground group-hover:text-primary">
-                        {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
-                        {reposicaoDe(assignment) ? (
-                          <Badge
-                            className="bg-amber-500/15 text-[11px] text-amber-700 hover:bg-amber-500/15 dark:text-amber-300"
-                            title={reposicaoDe(assignment)?.motivo}
-                          >
-                            Reposição
-                          </Badge>
-                        ) : null}
-                      </p>
-                      <p className="text-[13px] text-muted-foreground">
-                        Prof(a). {assignment.turma.professorRegente} ·{" "}
-                        {assignment.turma.alunos.length} alunos
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Badge variant="secondary" className="font-mono text-sm font-bold">
-                      {assignment.slot.inicio} – {assignment.slot.fim}
-                    </Badge>
-                    <ChevronRight className="size-4 text-muted-foreground/50 transition-all duration-300 group-hover:translate-x-1 group-hover:text-primary" />
-                  </div>
-                </button>
-                {isAuthenticated ? (
-                  <SuspenderAulaDialog assignment={assignment} data={proximo.data}>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="size-9 shrink-0 text-muted-foreground hover:text-amber-600"
-                      title="Turma não pode ter esta aula — suspender e reprogramar"
-                      aria-label={`Suspender aula de ${assignment.turma.serie} ${assignment.turma.letra}`}
-                    >
-                      <CalendarX2 className="size-4" />
-                    </Button>
-                  </SuspenderAulaDialog>
-                ) : null}
-              </div>
-            ),
-          )}
-        </div>
-      </CardContent>
-
-      <PreviaAlunosDialog
-        assignment={assignmentSelecionado}
-        data={proximo.data}
-        onOpenChange={(open) => {
-          if (!open) setAssignmentSelecionado(null);
-        }}
-      />
-    </Card>
-  );
-}
-
-/**
- * A prominent, glassmorphism-styled weekly schedule so anyone on the
- * homepage can see at a glance which turma uses the lab on any given day —
- * with today visually called out.
- */
-function ProgramacaoSemanalDestaque() {
-  const { turmas, config } = useAppStore();
-  // A data só é lida depois da montagem: o dia da semana do servidor pode
-  // diferir do navegador (fuso), o que quebraria a hidratação.
-  const [todayLabel, setTodayLabel] = useState("");
-  const [diaSelecionado, setDiaSelecionado] = useState(config.diasSemana[0] ?? "");
-  useEffect(() => {
-    const label = currentWeekdayLabel(agoraNaEscola());
-    setTodayLabel(label);
-    if (config.diasSemana.includes(label)) setDiaSelecionado(label);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const [assignmentSelecionado, setAssignmentSelecionado] = useState<Assignment | null>(null);
-
-  const dataDoDia = useMemo(
-    () => proximaDataDoDia(diaSelecionado, agoraNaEscola()),
-    [diaSelecionado],
-  );
-  const assignments = useMemo(
-    () =>
-      aplicarExcecoesDeData(
-        buildWeeklySchedule(turmas, config, getWeekIndex(dataDoDia)),
-        config,
-        turmas,
-        toDateKey(dataDoDia),
-      ),
-    [turmas, config, dataDoDia],
-  );
-  const assignmentsDoDia = useMemo(() => {
-    // Reposições marcadas para o dia entram no lugar do horário cedido.
-    const reposicoes = reprogramacoesParaData(turmas, config, dataDoDia);
-    return nextAssignmentsForDay([...reposicoes, ...assignments], diaSelecionado).filter(
-      (a) =>
-        reposicoes.includes(a) ||
-        !config.suspensoes?.[suspensaoKey(toDateKey(dataDoDia), a.dia, a.slot.inicio)],
-    );
-  }, [turmas, config, assignments, diaSelecionado, dataDoDia]);
-  const dataFormatada = useMemo(() => {
-    if (!todayLabel) return "";
-    return dataDoDia.toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-    });
-  }, [dataDoDia, todayLabel]);
-
-  if (turmas.length === 0) return null;
-
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 sm:py-10">
-      {/* Foto de ambiente tech (laptop + hexágonos), já escura e azulada —
-          combina direto com o gradiente slate da seção, sem precisar de véu
-          colorido por cima. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-cover bg-right opacity-[0.22]"
-        style={{ backgroundImage: `url("${darkTechBgImg}")` }}
-      />
-      {/* Brilhos suaves atrás dos cartões de vidro, só em tons de azul — dão
-          profundidade sem se misturar com o amarelo da ilustração acima. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-24 -top-24 size-96 rounded-full bg-slate-700/20 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 bottom-0 size-96 rounded-full bg-blue-500/15 blur-3xl"
-      />
-
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mb-5 max-w-2xl">
-          <Badge className="mb-3 gap-1.5 rounded-full border-cyan-300/30 bg-cyan-400/15 px-3 py-1.5 text-sm text-cyan-100 shadow-sm backdrop-blur-md">
-            <Sparkles className="size-4" /> Programação da semana
-          </Badge>
-          <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            Veja quem usa o laboratório em cada dia
-          </h2>
-          <p className="mt-2 text-sm text-white/90">
-            Clique num dia para ver as turmas, e num card para ver os alunos previstos.
-          </p>
-        </div>
-
-        <div className="mb-3 flex flex-wrap gap-2">
-          {config.diasSemana.map((dia) => {
-            const ativo = dia === diaSelecionado;
-            const hoje = dia === todayLabel;
-            return (
-              <button
-                key={dia}
-                type="button"
-                onClick={() => setDiaSelecionado(dia)}
-                className={`relative cursor-pointer rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-all duration-300 ease-out ${
-                  ativo
-                    ? "border-white bg-white text-slate-900 shadow-lg scale-105"
-                    : "border-white/25 bg-white/10 text-white [@media(hover:hover)]:hover:bg-white/20 [@media(hover:hover)]:hover:border-white/50 [@media(hover:hover)]:hover:shadow-lg"
-                }`}
-              >
-                {dia}
-                {hoje ? (
-                  <span
-                    className={`ml-1.5 inline-block size-1.5 rounded-full ${ativo ? "bg-slate-900" : "bg-amber-300"}`}
-                  />
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-
-        <p className="mb-4 flex items-center gap-1.5 text-sm text-white/90">
-          <CalendarDays className="size-4" />
-          {diaSelecionado}, {dataFormatada}
-          {diaSelecionado === todayLabel ? (
-            <span className="ml-1 rounded-full bg-amber-400/20 px-2 py-0.5 text-xs font-medium text-amber-200">
-              hoje
-            </span>
-          ) : null}
-        </p>
-
-        {assignmentsDoDia.length === 0 ? (
-          <div className="rounded-2xl border border-white/20 bg-white/10 p-8 text-center backdrop-blur-md">
-            <p className="text-sm text-white/90">Nenhuma turma programada para {diaSelecionado}.</p>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            {assignmentsDoDia.map((assignment) =>
-              assignment.misto ? (
-                <div
-                  key={`${assignment.dia}-${assignment.slot.inicio}`}
-                  className="rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span className="rounded-full border border-white/30 px-2 py-0.5 text-xs font-medium text-white">
-                      horário misto
-                    </span>
-                    <span className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">
-                      <Clock3 className="size-3.5 text-amber-300" />
-                      {assignment.slot.inicio} – {assignment.slot.fim}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-[13px] text-blue-100/80">
-                    Grupo que sobrou de cada turma, 30 min cada:{" "}
-                    {assignment.misto.map((m) => `${m.turma.serie} "${m.turma.letra}"`).join(", ")}
-                  </p>
-                </div>
-              ) : (
-                <button
-                  key={`${assignment.dia}-${assignment.slot.inicio}`}
-                  type="button"
-                  onClick={() => setAssignmentSelecionado(assignment)}
-                  className="group cursor-pointer rounded-2xl border border-white/20 bg-white/10 p-4 text-left shadow-xl backdrop-blur-md transition-all duration-300 ease-out [@media(hover:hover)]:hover:scale-105 [@media(hover:hover)]:hover:border-white/40 [@media(hover:hover)]:hover:bg-white/20 [@media(hover:hover)]:hover:shadow-2xl [@media(hover:hover)]:hover:shadow-white/10"
-                >
-                  <div className="flex items-center gap-3">
-                    {assignment.turma.imagem ? (
-                      <img
-                        src={assignment.turma.imagem}
-                        alt={`Foto da turma ${assignment.turma.serie} "${assignment.turma.letra}"`}
-                        className="size-14 rounded-xl object-cover ring-2 ring-white/30"
-                      />
-                    ) : (
-                      <span className="flex size-14 items-center justify-center rounded-xl bg-white/20 text-base font-bold text-white ring-2 ring-white/30">
-                        {assignment.turma.letra}
-                      </span>
-                    )}
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-white">
-                        {assignment.turma.serie} &quot;{assignment.turma.letra}&quot;
-                      </p>
-                      <p className="truncate text-[13px] text-white/85">
-                        Prof(a). {assignment.turma.professorRegente}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between border-t border-white/15 pt-3">
-                    <span className="flex items-center gap-1.5 font-mono text-sm font-medium text-white">
-                      <Clock3 className="size-3.5 text-amber-300" />
-                      {assignment.slot.inicio} – {assignment.slot.fim}
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-white/80">
-                      <Users2 className="size-3.5" />
-                      {assignment.turma.alunos.length}
-                    </span>
-                  </div>
-                  {/* Dica só faz sentido onde existe cursor; no celular ela
-                      ficava invisível ocupando altura à toa. */}
-                  <p className="mt-2 hidden text-[11px] text-white/70 opacity-0 transition-all duration-300 ease-out group-hover:opacity-100 [@media(hover:hover)]:block">
-                    Clique para ver os alunos previstos
-                  </p>
-                </button>
-              ),
-            )}
-          </div>
-        )}
-      </div>
-
-      <PreviaAlunosDialog
-        assignment={assignmentSelecionado}
-        data={proximaDataDoDia(diaSelecionado, agoraNaEscola())}
-        onOpenChange={(open) => {
-          if (!open) setAssignmentSelecionado(null);
-        }}
-      />
-    </section>
-  );
-}
-
 const CANAL_YOUTUBE_URL = "https://www.youtube.com/@DrEiraldoIntegral";
 
 const VIDEOS_DESTAQUE = [
@@ -818,9 +399,8 @@ const VIDEOS_DESTAQUE = [
 ];
 
 /**
- * Divulgação discreta do canal oficial da escola no YouTube — miniaturas
- * reais (sem incorporar o player, mais leve) que abrem o vídeo em uma nova
- * aba. Fica perto do rodapé, como um convite a mais, não como destaque.
+ * Divulgação discreta do canal oficial da escola no YouTube: miniaturas reais
+ * (sem incorporar o player, mais leve) que abrem o vídeo em uma nova aba.
  */
 function CanalYoutubeSection() {
   return (

@@ -33,6 +33,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { FaixaAulaAgora } from "@/components/school/faixa-aula-agora";
+import { PROGRAMACAO_ATIVA } from "@/lib/recursos";
 import { HeaderRadioPlayer } from "@/components/school/header-radio-player";
 import { PresencaOnline } from "@/components/school/presenca-online";
 import { ThemeToggle } from "@/components/school/theme-toggle";
@@ -483,7 +484,7 @@ export function NavBar() {
           </Sheet>
         </nav>
       </div>
-      <FaixaAulaAgora />
+      {PROGRAMACAO_ATIVA ? <FaixaAulaAgora /> : null}
     </header>
   );
 }
