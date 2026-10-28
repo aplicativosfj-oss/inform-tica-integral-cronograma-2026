@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, CalendarDays, IdCard, MonitorSmartphone, Radio } from "lucide-react";
+import { CalendarDays, ClipboardCheck, IdCard, MonitorSmartphone, Radio } from "lucide-react";
 
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { AniversariantesHoje } from "@/components/school/laboratorio/aniversariantes";
@@ -7,7 +7,7 @@ import { CalendarioLab } from "@/components/school/laboratorio/calendario-lab";
 import { ControleLaboratorio } from "@/components/school/laboratorio/controle";
 import { BuscaAlunos } from "@/components/school/laboratorio/ficha-aluno";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
-import { RelatorioUso } from "@/components/school/laboratorio/relatorio-uso";
+import { FrequenciaLab } from "@/components/school/laboratorio/frequencia-lab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { estadoDaSessao, useAgora, useSessoesLab } from "@/lib/laboratorio";
 
@@ -58,15 +58,15 @@ function LaboratorioPage() {
         <AniversariantesHoje />
 
         <Tabs defaultValue="marcar" className="space-y-3">
-          <TabsList>
+          <TabsList className="h-auto flex-wrap justify-start">
             <TabsTrigger value="marcar" className="gap-1.5">
               <MonitorSmartphone className="size-4" aria-hidden /> Marcar alunos
             </TabsTrigger>
+            <TabsTrigger value="uso" className="gap-1.5">
+              <ClipboardCheck className="size-4" aria-hidden /> Frequência
+            </TabsTrigger>
             <TabsTrigger value="aovivo" className="gap-1.5">
               <Radio className="size-4" aria-hidden /> Ao vivo
-            </TabsTrigger>
-            <TabsTrigger value="uso" className="gap-1.5">
-              <BarChart3 className="size-4" aria-hidden /> Semana e mês
             </TabsTrigger>
             <TabsTrigger value="calendario" className="gap-1.5">
               <CalendarDays className="size-4" aria-hidden /> Calendário e relatório
@@ -88,7 +88,7 @@ function LaboratorioPage() {
             <BuscaAlunos />
           </TabsContent>
           <TabsContent value="uso">
-            <RelatorioUso dados={dados} />
+            <FrequenciaLab dados={dados} />
           </TabsContent>
         </Tabs>
       </div>
