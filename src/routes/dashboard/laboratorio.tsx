@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, CalendarDays, IdCard, MonitorSmartphone, Radio } from "lucide-react";
 
 import { DashboardShell } from "@/components/school/dashboard-shell";
+import { AniversariantesHoje } from "@/components/school/laboratorio/aniversariantes";
 import { CalendarioLab } from "@/components/school/laboratorio/calendario-lab";
 import { ControleLaboratorio } from "@/components/school/laboratorio/controle";
 import { BuscaAlunos } from "@/components/school/laboratorio/ficha-aluno";
@@ -53,6 +54,8 @@ function LaboratorioPage() {
               : "Laboratório livre agora"}
           </p>
         </header>
+
+        <AniversariantesHoje />
 
         <Tabs defaultValue="marcar" className="space-y-3">
           <TabsList>

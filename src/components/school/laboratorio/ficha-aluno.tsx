@@ -38,6 +38,10 @@ import {
   TABELA_AUSENTE,
   type SessaoLab,
 } from "@/lib/laboratorio";
+import {
+  SeloAniversario,
+  AniversariantesHoje,
+} from "@/components/school/laboratorio/aniversariantes";
 import { infoAniversario, textoIdade } from "@/lib/aniversario";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { imagemDaSerie } from "@/lib/serie-imagens";
@@ -256,27 +260,19 @@ export function FichaAluno({
                     Hoje é aniversário!
                   </p>
                   <p className="font-heading text-lg font-extrabold leading-tight">
-                    {aluno.nome.split(" ")[0]} está completando {aniv.completa}{" "}
-                    {aniv.completa === 1 ? "ano" : "anos"}
+                    {aluno.nome.split(" ")[0]} está fazendo {aniv.anos}{" "}
+                    {aniv.anos === 1 ? "ano" : "anos"} hoje
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <p
-              className={`flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-sm ${aniv.emDias <= 7 ? "border-fuchsia-500/50 bg-fuchsia-500/10" : "bg-muted/40"}`}
-            >
-              <Cake
-                className={`size-4 ${aniv.emDias <= 7 ? "text-fuchsia-500" : "text-muted-foreground"}`}
-                aria-hidden
-              />
+            <p className="flex flex-wrap items-center gap-2 rounded-xl border bg-muted/40 px-3 py-2 text-sm">
+              <Cake className="size-4 text-muted-foreground" aria-hidden />
               <span>
-                Aniversário em <strong>{aniv.diaMes}</strong>
+                Aniversário: <strong>{aniv.diaMes}</strong>
               </span>
-              <span className="text-muted-foreground">
-                · faz {aniv.completa} {aniv.completa === 1 ? "ano" : "anos"}{" "}
-                {aniv.emDias === 1 ? "amanhã" : `em ${aniv.emDias} dias`}
-              </span>
+              <span className="text-muted-foreground">· hoje tem {textoIdade(aniv)}</span>
             </p>
           )
         ) : null}
@@ -626,8 +622,10 @@ export function BuscaAlunos() {
     );
   const mostrarAlunos = turma !== null || termo !== "";
 
+  const hoje = hojeNaEscola();
   return (
     <div className="space-y-4">
+      <AniversariantesHoje />
       <div className="flex flex-wrap items-center gap-2">
         {turma ? (
           <Button type="button" variant="outline" size="sm" onClick={() => setTurmaId(null)}>
@@ -656,6 +654,9 @@ export function BuscaAlunos() {
             const ativos = t.alunos.filter((a) => !a.situacao || a.situacao === "ativo");
             const sairam = t.alunos.length - ativos.length;
             const suspensos = ativos.filter((a) => a.impedido).length;
+            const aniversariantes = ativos.filter(
+              (a) => infoAniversario(a.nascimento, hoje)?.hoje,
+            ).length;
             return (
               <li key={t.id}>
                 <button
@@ -690,6 +691,12 @@ export function BuscaAlunos() {
                       aluno{ativos.length === 1 ? "" : "s"}
                       {sairam > 0 ? (
                         <span className="block text-white/70">{sairam} transf./desist.</span>
+                      ) : null}
+                      {aniversariantes > 0 ? (
+                        <span className="flex items-center justify-end gap-1 font-semibold text-fuchsia-300">
+                          <Cake className="size-3" aria-hidden /> {aniversariantes} aniversariante
+                          {aniversariantes === 1 ? "" : "s"}
+                        </span>
                       ) : null}
                       {suspensos > 0 ? (
                         <span className="block text-amber-300">{suspensos} suspenso(s)</span>
@@ -729,12 +736,7 @@ export function BuscaAlunos() {
                     <span className="min-w-0">
                       <span className="flex items-center gap-1.5 truncate text-sm font-medium">
                         {a.nome}
-                        {infoAniversario(a.nascimento, hojeNaEscola())?.hoje ? (
-                          <Cake
-                            className="size-4 shrink-0 text-fuchsia-500"
-                            aria-label="aniversariante de hoje"
-                          />
-                        ) : null}
+                        <SeloAniversario nascimento={a.nascimento} />
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {turma ? "toque para abrir a ficha" : rotuloTurma(t.serie, t.letra)}
