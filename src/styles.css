@@ -732,10 +732,57 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
 .lab-varredura {
   animation: lab-varredura 2.6s ease-in-out infinite;
 }
+/* Relógio da aula: halo que respira, alerta do último minuto e dígitos que deslizam. */
+@keyframes relogio-respira {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.34;
+    transform: scale(1.04);
+  }
+}
+@keyframes relogio-alerta {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+}
+@keyframes relogio-digito {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35em);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.relogio-respira {
+  animation: relogio-respira 3.2s ease-in-out infinite;
+}
+.relogio-alerta {
+  animation: relogio-alerta 0.9s ease-in-out infinite;
+}
+.relogio-digito {
+  animation: relogio-digito 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
 @media (prefers-reduced-motion: reduce) {
   .lab-aluno,
   .lab-brilho,
-  .lab-varredura {
+  .lab-varredura,
+  .relogio-respira,
+  .relogio-alerta,
+  .relogio-digito {
     animation: none;
   }
 }

@@ -38,6 +38,7 @@ export function BotaoAusencia({
   ausencia,
   ausenciaMotivo,
   aoMudar,
+  soIcone = false,
   className,
 }: {
   /** A linha que já tem (ou vai ter) a falta. Sem ela, `novo` cria a falta. */
@@ -52,6 +53,8 @@ export function BotaoAusencia({
   ausencia: TipoAusencia | null;
   ausenciaMotivo: string | null;
   aoMudar: () => void;
+  /** Sem falta registrada, mostra só o ícone (para listas apertadas). */
+  soIcone?: boolean;
   className?: string;
 }) {
   const [aberto, setAberto] = useState(false);
@@ -123,7 +126,13 @@ export function BotaoAusencia({
         )}
       >
         <UserX className="size-3.5" aria-hidden />
-        {ausencia ? ROTULO_AUSENCIA[ausencia] : "Falta"}
+        {ausencia ? (
+          ROTULO_AUSENCIA[ausencia]
+        ) : soIcone ? (
+          <span className="sr-only">Falta</span>
+        ) : (
+          "Falta"
+        )}
       </button>
 
       <Dialog open={aberto} onOpenChange={setAberto}>

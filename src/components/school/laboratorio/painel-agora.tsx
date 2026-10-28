@@ -165,7 +165,7 @@ export function PainelLaboratorioAgora({
         </div>
       </CardHeader>
       <CardContent
-        className={`space-y-4 ${rolar ? "max-h-[calc(100svh-19rem)] min-h-32 overflow-y-auto" : ""}`}
+        className={`space-y-4 ${rolar ? "lg:max-h-[calc(100svh-16rem)] lg:min-h-32 lg:overflow-y-auto" : ""}`}
       >
         {dados.erro === TABELA_AUSENTE ? (
           logado ? (

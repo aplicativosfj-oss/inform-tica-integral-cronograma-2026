@@ -83,145 +83,175 @@ export function PalcoGrupo({
   const serieDaImagem = mista ? null : turmas.find((t) => t.id === g.turmaId)?.serie;
   const foto = serieDaImagem ? imagemDaSerie(serieDaImagem) : labFotoImg;
 
+  const minutosTotal = Math.round((fim - ini) / 60_000);
+  const minutosPassados = Math.min(minutosTotal, Math.max(0, Math.floor((efetivo - ini) / 60_000)));
+
   return (
-    <article className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink via-ink to-primary/50 p-4 text-white shadow-xl sm:p-5">
+    <article className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-ink text-white shadow-xl">
       <img
         src={foto}
         alt=""
         aria-hidden
         loading="lazy"
-        className="absolute inset-0 -z-20 size-full object-cover opacity-40 transition-transform duration-[2500ms] ease-out hover:scale-105"
+        className="absolute inset-0 -z-20 size-full object-cover opacity-25"
       />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-br from-ink/90 via-ink/80 to-primary/60"
+        className="absolute inset-0 -z-10 bg-gradient-to-br from-ink/95 via-ink/90 to-primary/55"
       />
-      <div aria-hidden className="fundo-pixel absolute inset-0 -z-10 opacity-20" />
       <div
         aria-hidden
-        className="lab-brilho absolute -right-16 -top-16 -z-10 size-56 rounded-full bg-primary/50 blur-3xl"
+        className="lab-brilho absolute -left-20 -top-20 -z-10 size-64 rounded-full bg-primary/40 blur-3xl"
       />
 
-      <header className="flex flex-wrap items-center gap-4">
-        <RelogioAula inicioMs={ini} fimMs={fim} agoraMs={efetivo} pausada={pausada} tamanho={168} />
-
-        <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-mint">
+      <div className="grid md:grid-cols-[17rem_minmax(0,1fr)]">
+        {/* Coluna do relógio: tempo, horário e controles da aula. */}
+        <aside className="flex flex-col items-center gap-4 border-b border-white/10 p-5 text-center md:border-b-0 md:border-r">
+          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-mint">
             <span className="relative flex size-2.5">
               <span
                 className={cn(
-                  "absolute inline-flex size-full rounded-full bg-emerald-400 opacity-70",
-                  !pausada && "animate-ping",
+                  "absolute inline-flex size-full rounded-full opacity-70",
+                  pausada ? "bg-sun" : "animate-ping bg-emerald-400",
                 )}
               />
-              <span className="relative inline-flex size-2.5 rounded-full bg-emerald-400" />
+              <span
+                className={cn(
+                  "relative inline-flex size-2.5 rounded-full",
+                  pausada ? "bg-sun" : "bg-emerald-400",
+                )}
+              />
             </span>
-            {pausada ? "Pausada" : "Ao vivo"} · {horaNaEscola(g.inicio)} às {horaNaEscola(g.fim)}
+            {pausada ? "Pausada" : "Ao vivo"}
           </p>
-          <h3 className="mt-1 flex flex-wrap items-center gap-2 font-heading text-2xl font-extrabold sm:text-3xl">
-            {mista ? <Shuffle className="size-6 text-sun" aria-hidden /> : null}
-            {mista ? "Aula mista" : g.turmaRotulo}
-            <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-sm font-semibold">
-              {g.alunos.length} aluno{g.alunos.length === 1 ? "" : "s"}
-            </span>
-          </h3>
-          {!mista && participantes[0]?.professor ? (
-            <p className="mt-0.5 flex items-center gap-1.5 text-sm text-white/75">
-              <GraduationCap className="size-4 text-sun" aria-hidden /> Professor(a){" "}
-              {participantes[0].professor}
-            </p>
-          ) : null}
-        </div>
+          <RelogioAula
+            inicioMs={ini}
+            fimMs={fim}
+            agoraMs={efetivo}
+            pausada={pausada}
+            tamanho={196}
+          />
+          <dl className="grid w-full grid-cols-2 gap-2 text-left text-xs">
+            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+              <dt className="text-white/55">Horário</dt>
+              <dd className="mt-0.5 font-semibold tabular-nums">
+                {horaNaEscola(g.inicio)}–{horaNaEscola(g.fim)}
+              </dd>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+              <dt className="text-white/55">Andamento</dt>
+              <dd className="mt-0.5 font-semibold tabular-nums">
+                {minutosPassados} de {minutosTotal} min
+              </dd>
+            </div>
+          </dl>
+          <ControleAula g={g} aoMudar={aoMudar} compacto className="justify-center" />
+        </aside>
 
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-col sm:items-end">
-          <ControleAula g={g} aoMudar={aoMudar} compacto />
-          {logado ? (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-white/70 hover:bg-white/10 hover:text-white"
-              aria-label="Remover marcação"
-              onClick={() => void remover()}
-            >
-              <Trash2 className="size-3.5" /> remover
-            </Button>
-          ) : null}
-        </div>
-      </header>
-
-      {mista ? (
-        <ul className="mt-4 flex flex-wrap gap-2" aria-label="Turmas participando">
-          {participantes.map((p) => {
-            const cor = serieClasses(serieIndexPorNumero(p.rotulo));
-            return (
-              <li
-                key={p.id}
-                className="flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 py-1 pl-1 pr-3 text-sm backdrop-blur"
-              >
-                <span
-                  className={`rounded-xl px-2 py-0.5 text-xs font-extrabold ${cor.bg} ${cor.text}`}
-                >
-                  {p.rotulo}
+        {/* Coluna da turma e dos alunos. */}
+        <section className="min-w-0 p-5">
+          <header className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="flex flex-wrap items-center gap-2 font-heading text-2xl font-extrabold">
+                {mista ? <Shuffle className="size-5 text-sun" aria-hidden /> : null}
+                {mista ? "Aula mista" : g.turmaRotulo}
+                <span className="rounded-full bg-white/12 px-2.5 py-0.5 text-xs font-semibold text-white/85">
+                  {g.alunos.length} aluno{g.alunos.length === 1 ? "" : "s"}
                 </span>
-                <span className="text-white/85">
-                  {p.qtd} aluno{p.qtd === 1 ? "" : "s"}
-                  {p.professor ? ` · ${p.professor}` : ""}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      ) : null}
-
-      <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {g.alunos.map((a, i) => {
-          const cor = serieClasses(serieIndexPorNumero(a.turmaRotulo));
-          const foto = fotoDe(a.id, a.turmaId);
-          return (
-            <li
-              key={a.sessaoId}
-              style={{ animationDelay: `${Math.min(i, 14) * 70}ms` }}
-              className="lab-aluno group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.07] p-2.5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/15"
-            >
-              <span
-                aria-hidden
-                className="lab-varredura pointer-events-none absolute inset-y-0 left-0 w-1/4 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100"
-              />
-              <span
-                className={`relative flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-extrabold ring-2 ring-white/30 transition duration-300 group-hover:scale-110 group-hover:ring-mint ${cor.bg} ${cor.text}`}
-              >
-                {foto ? (
-                  <img src={foto} alt="" className="size-full rounded-full object-cover" />
-                ) : (
-                  iniciais(a.nome)
-                )}
-                <MonitorSmartphone
-                  className="absolute -bottom-0.5 -right-0.5 size-4 rounded-full bg-ink p-0.5 text-mint"
-                  aria-hidden
-                />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-semibold">
-                  {nomeExibido(a.nome, logado)}
-                </span>
-                <span className="block text-xs text-white/60">
-                  {mista ? a.turmaRotulo : "no computador"}
-                </span>
-              </span>
-              {logado ? (
-                <BotaoAusencia
-                  sessaoId={a.sessaoId}
-                  nome={a.nome}
-                  ausencia={a.ausencia}
-                  ausenciaMotivo={a.ausenciaMotivo}
-                  aoMudar={aoMudar}
-                  className="relative shrink-0 text-white"
-                />
+              </h3>
+              {!mista && participantes[0]?.professor ? (
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-white/70">
+                  <GraduationCap className="size-4 text-sun" aria-hidden /> Professor(a){" "}
+                  {participantes[0].professor}
+                </p>
               ) : null}
-            </li>
-          );
-        })}
-      </ul>
+            </div>
+            {logado ? (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 text-white/60 hover:bg-white/10 hover:text-white"
+                aria-label="Remover marcação"
+                onClick={() => void remover()}
+              >
+                <Trash2 className="size-3.5" /> Remover
+              </Button>
+            ) : null}
+          </header>
+
+          {mista ? (
+            <ul className="mt-3 flex flex-wrap gap-2" aria-label="Turmas participando">
+              {participantes.map((p) => {
+                const cor = serieClasses(serieIndexPorNumero(p.rotulo));
+                return (
+                  <li
+                    key={p.id}
+                    className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-0.5 pl-0.5 pr-3 text-xs"
+                  >
+                    <span
+                      className={`rounded-full px-2 py-0.5 font-extrabold ${cor.bg} ${cor.text}`}
+                    >
+                      {p.rotulo}
+                    </span>
+                    <span className="text-white/80">
+                      {p.qtd} aluno{p.qtd === 1 ? "" : "s"}
+                      {p.professor ? ` · ${p.professor}` : ""}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+
+          <ul className="mt-4 grid gap-1.5 sm:grid-cols-2" aria-label="Alunos no laboratório">
+            {g.alunos.map((a, i) => {
+              const cor = serieClasses(serieIndexPorNumero(a.turmaRotulo));
+              const foto = fotoDe(a.id, a.turmaId);
+              return (
+                <li
+                  key={a.sessaoId}
+                  style={{ animationDelay: `${Math.min(i, 14) * 60}ms` }}
+                  className="lab-aluno flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 transition-colors hover:bg-white/[0.11]"
+                >
+                  <span
+                    className={`relative flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ring-1 ring-white/25 ${cor.bg} ${cor.text}`}
+                  >
+                    {foto ? (
+                      <img src={foto} alt="" className="size-full rounded-full object-cover" />
+                    ) : (
+                      iniciais(a.nome)
+                    )}
+                    <MonitorSmartphone
+                      className="absolute -bottom-1 -right-1 size-4 rounded-full bg-ink p-0.5 text-mint"
+                      aria-hidden
+                    />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    {/* Nome inteiro, quebrando linha se precisar: nada de reticências. */}
+                    <span className="block text-sm font-semibold leading-snug [overflow-wrap:anywhere]">
+                      {nomeExibido(a.nome, logado)}
+                    </span>
+                    {mista ? (
+                      <span className="block text-[11px] text-white/55">{a.turmaRotulo}</span>
+                    ) : null}
+                  </span>
+                  {logado ? (
+                    <BotaoAusencia
+                      sessaoId={a.sessaoId}
+                      nome={a.nome}
+                      ausencia={a.ausencia}
+                      ausenciaMotivo={a.ausenciaMotivo}
+                      aoMudar={aoMudar}
+                      soIcone
+                      className="shrink-0 border-white/20 p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
+                    />
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </div>
     </article>
   );
 }

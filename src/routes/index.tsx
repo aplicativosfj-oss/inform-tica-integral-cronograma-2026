@@ -271,7 +271,7 @@ function Index() {
         {/* ───────── Laboratório ao vivo ───────── */}
         <section className="secao-janela">
           {" "}
-          <div className="mx-auto w-full max-w-6xl px-4 py-[clamp(1rem,4svh,2.5rem)] sm:px-6">
+          <div className="mx-auto w-full max-w-7xl px-4 py-[clamp(1rem,4svh,2.5rem)] sm:px-6">
             {" "}
             <div className="mb-5 max-w-2xl">
               {" "}
@@ -280,7 +280,7 @@ function Index() {
                 Quem está no laboratório neste minuto
               </h2>
             </div>
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
               <PainelLaboratorioAgora dados={lab} logado={isAuthenticated} rolar />
               <div className="space-y-4">
                 {isAuthenticated ? <MarcarAlunosCartao dados={lab} /> : null}

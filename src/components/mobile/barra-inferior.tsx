@@ -57,21 +57,19 @@ export function BarraInferior() {
   return (
     <>
       {/* Reserva o espaço da barra no fim da página, para nada ficar escondido atrás dela. */}
-      <div aria-hidden className="h-[calc(4.5rem+env(safe-area-inset-bottom))] xl:hidden" />
+      <div aria-hidden className="h-[calc(4.75rem+env(safe-area-inset-bottom))] xl:hidden" />
       <nav
         aria-label="Navegação principal"
-        className={cn(
-          "fixed inset-x-0 bottom-0 z-40 border-t pb-[env(safe-area-inset-bottom)] transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 xl:hidden",
-          rolou
-            ? "border-white/20 bg-background/55 shadow-[0_-8px_30px_-12px_rgb(0_0_0/0.45)] backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-950/45"
-            : "border-border/60 bg-background/90 backdrop-blur-md",
-        )}
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] xl:hidden"
       >
-        <span
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent"
-        />
-        <ul className="mx-auto flex h-[4.5rem] max-w-lg items-stretch justify-around px-1">
+        <ul
+          className={cn(
+            "pointer-events-auto mx-auto flex h-14 max-w-md items-stretch rounded-2xl border px-1 transition-[background-color,box-shadow,border-color] duration-300",
+            rolou
+              ? "border-white/25 bg-background/60 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.45)] backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/55"
+              : "border-border/70 bg-background/85 shadow-sm backdrop-blur-md",
+          )}
+        >
           {ITENS.map(({ to, label, Icone }) => {
             const ativo = to === "/" ? caminho === "/" : caminho.startsWith(to);
             return (
@@ -80,18 +78,19 @@ export function BarraInferior() {
                   to={to}
                   aria-current={ativo ? "page" : undefined}
                   className={cn(
-                    "group flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors",
+                    "relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium tracking-wide transition-colors active:scale-95",
                     ativo ? "text-primary" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
+                  {/* Indicador discreto da página atual: um traço curto no alto. */}
                   <span
+                    aria-hidden
                     className={cn(
-                      "flex h-8 w-14 items-center justify-center rounded-full transition-all duration-300",
-                      ativo ? "bg-primary/15 ring-1 ring-primary/30" : "group-active:scale-90",
+                      "absolute top-1 h-0.5 rounded-full bg-primary transition-all duration-300",
+                      ativo ? "w-5 opacity-100" : "w-0 opacity-0",
                     )}
-                  >
-                    <Icone className="size-5" aria-hidden />
-                  </span>
+                  />
+                  <Icone className="size-[18px]" strokeWidth={ativo ? 2.4 : 1.8} aria-hidden />
                   {label}
                 </Link>
               </li>
