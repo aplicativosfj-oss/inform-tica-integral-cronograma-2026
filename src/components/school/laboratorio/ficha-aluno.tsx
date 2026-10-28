@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   Ban,
   CalendarDays,
   Clock3,
@@ -33,6 +34,8 @@ import {
   type SessaoLab,
 } from "@/lib/laboratorio";
 import { idadeEmAnos } from "@/lib/profissional-acesso";
+import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
+import { imagemDaSerie } from "@/lib/serie-imagens";
 import type { AnotacaoAluno } from "@/lib/types";
 
 export const rotuloTurma = (serie: string, letra: string) =>
@@ -391,57 +394,133 @@ export function FichaAluno({
   );
 }
 
-/** Lista de todos os alunos com busca; tocar no nome abre a ficha. */
+/**
+ * Fichas por turma: primeiro se escolhe a turma, depois o aluno. A busca por
+ * nome funciona nos dois passos (na tela das turmas, procura na escola toda).
+ */
 export function BuscaAlunos() {
   const { turmas } = useAppStore();
+  const [turmaId, setTurmaId] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState<{ turmaId: string; alunoId: string } | null>(null);
   const termo = busca.trim().toLowerCase();
-  const lista = turmas
+  const turma = turmas.find((t) => t.id === turmaId) ?? null;
+
+  const lista = (turma ? [turma] : turmas)
     .flatMap((t) => t.alunos.map((a) => ({ t, a })))
     .filter(({ a }) => !termo || a.nome.toLowerCase().includes(termo))
     .sort((x, y) => x.a.nome.localeCompare(y.a.nome, "pt-BR"));
+  const mostrarAlunos = turma !== null || termo !== "";
+
   return (
-    <div className="space-y-3">
-      <div className="relative max-w-sm">
-        <Search
-          className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          aria-hidden
-        />
-        <Input
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          placeholder="Buscar aluno pelo nome…"
-          className="pl-8"
-          aria-label="Buscar aluno"
-        />
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        {turma ? (
+          <Button type="button" variant="outline" size="sm" onClick={() => setTurmaId(null)}>
+            <ArrowLeft /> Todas as turmas
+          </Button>
+        ) : null}
+        <div className="relative w-full max-w-sm">
+          <Search
+            className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <Input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder={turma ? "Buscar nesta turma…" : "Buscar aluno em toda a escola…"}
+            className="pl-8"
+            aria-label="Buscar aluno"
+          />
+        </div>
       </div>
-      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {lista.map(({ t, a }) => (
-          <li key={a.id}>
-            <button
-              type="button"
-              onClick={() => setAberto({ turmaId: t.id, alunoId: a.id })}
-              className="flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left transition hover:bg-muted/50"
-            >
-              <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
-                {a.foto ? (
-                  <img src={a.foto} alt="" className="size-full object-cover" />
-                ) : (
-                  <UserRound className="size-5 text-muted-foreground" aria-hidden />
-                )}
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium">{a.nome}</span>
-                <span className="text-xs text-muted-foreground">
-                  {rotuloTurma(t.serie, t.letra)}
-                  {a.impedido ? " · suspenso" : ""}
-                </span>
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
+
+      {!mostrarAlunos ? (
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {turmas.map((t) => {
+            const cor = serieClasses(serieIndexPorNumero(t.serie));
+            const suspensos = t.alunos.filter((a) => a.impedido).length;
+            return (
+              <li key={t.id}>
+                <button
+                  type="button"
+                  onClick={() => setTurmaId(t.id)}
+                  className="group relative isolate flex min-h-28 w-full flex-col justify-end overflow-hidden rounded-2xl border text-left text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+                >
+                  <img
+                    src={t.imagem ?? imagemDaSerie(t.serie)}
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    className="absolute inset-0 -z-20 size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/95 via-ink/60 to-ink/20"
+                  />
+                  <span className="flex items-end justify-between gap-2 p-3">
+                    <span>
+                      <span
+                        className={`rounded-lg px-2 py-0.5 text-sm font-extrabold ${cor.bg} ${cor.text}`}
+                      >
+                        {rotuloTurma(t.serie, t.letra)}
+                      </span>
+                      <span className="mt-1.5 block text-xs text-white/80">
+                        {t.professorRegente || "sem professor(a) cadastrado(a)"}
+                      </span>
+                    </span>
+                    <span className="text-right text-xs">
+                      <strong className="block font-heading text-xl">{t.alunos.length}</strong>
+                      aluno{t.alunos.length === 1 ? "" : "s"}
+                      {suspensos > 0 ? (
+                        <span className="block text-amber-300">{suspensos} suspenso(s)</span>
+                      ) : null}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <>
+          <h3 className="text-sm font-semibold text-muted-foreground">
+            {turma
+              ? `${rotuloTurma(turma.serie, turma.letra)} · ${turma.professorRegente} · ${lista.length} aluno${lista.length === 1 ? "" : "s"}`
+              : `${lista.length} resultado${lista.length === 1 ? "" : "s"} na escola toda`}
+          </h3>
+          {lista.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum aluno encontrado.</p>
+          ) : (
+            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {lista.map(({ t, a }) => (
+                <li key={a.id}>
+                  <button
+                    type="button"
+                    onClick={() => setAberto({ turmaId: t.id, alunoId: a.id })}
+                    className="flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left transition hover:border-primary hover:bg-muted/50"
+                  >
+                    <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+                      {a.foto ? (
+                        <img src={a.foto} alt="" className="size-full object-cover" />
+                      ) : (
+                        <UserRound className="size-5 text-muted-foreground" aria-hidden />
+                      )}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium">{a.nome}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {turma ? "toque para abrir a ficha" : rotuloTurma(t.serie, t.letra)}
+                        {a.impedido ? " · suspenso" : ""}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
       {aberto ? <FichaAluno {...aberto} aberto aoFechar={() => setAberto(null)} /> : null}
     </div>
   );
