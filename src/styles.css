@@ -804,3 +804,14 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
     animation: none;
   }
 }
+
+/* Painel de gestão: títulos das páginas com o mesmo peso e espaçamento. */
+.painel-conteudo h1 {
+  font-size: 1.625rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.painel-conteudo h1 + p {
+  margin-top: 0.25rem;
+}
