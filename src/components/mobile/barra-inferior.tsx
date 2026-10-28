@@ -80,20 +80,25 @@ export function BarraInferior() {
 
   return (
     <>
-      {/* Reserva o espaço da barra no fim da página, para nada ficar escondido atrás dela. */}
-      <div aria-hidden className="h-[calc(4.25rem+env(safe-area-inset-bottom))] xl:hidden" />
+      {/* Reserva o espaço da barra no fim da página, para nada ficar escondido atrás dela.
+          No app instalado do iPhone, a faixa do gesto de início já dá espaço: só usamos
+          parte dela, para a barra não ficar alta demais. */}
+      <div
+        aria-hidden
+        className="h-[calc(3.625rem_+_max(0.375rem,calc(env(safe-area-inset-bottom)_-_1rem)))] xl:hidden"
+      />
       <nav
         aria-label="Navegação principal"
         // Ocupa a largura toda e é quase opaca: o conteúdo não aparece por baixo,
         // fica só o acabamento de vidro fosco.
-        className="fixed inset-x-0 bottom-0 z-40 bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-12px_rgb(0_0_0/0.35)] backdrop-blur-2xl backdrop-saturate-150 dark:bg-slate-950/95 xl:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 bg-background/95 pb-[max(0.375rem,calc(env(safe-area-inset-bottom)_-_1rem))] shadow-[0_-8px_30px_-12px_rgb(0_0_0/0.35)] backdrop-blur-2xl backdrop-saturate-150 dark:bg-slate-950/95 xl:hidden"
       >
         {/* fio colorido no alto, com as cores dos atalhos */}
         <div
           aria-hidden
           className="h-0.5 bg-gradient-to-r from-violet-500 via-emerald-400 via-40% to-pink-500 opacity-80"
         />
-        <ul className="mx-auto flex h-[4.25rem] max-w-lg items-stretch px-1">
+        <ul className="mx-auto flex h-14 max-w-lg items-stretch px-1">
           {ITENS.map(({ to, label, Icone, icone, pilula }) => {
             const ativo = to === "/" ? caminho === "/" : caminho.startsWith(to);
             return (
@@ -102,17 +107,17 @@ export function BarraInferior() {
                   to={to}
                   aria-current={ativo ? "page" : undefined}
                   className={cn(
-                    "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold leading-none transition-colors active:scale-95",
+                    "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10.5px] font-semibold leading-none transition-colors active:scale-95",
                     ativo ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <span
                     className={cn(
-                      "flex h-8 w-14 items-center justify-center rounded-full transition-all duration-300",
+                      "flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300",
                       ativo ? cn("bg-gradient-to-br text-white shadow-lg", pilula) : icone,
                     )}
                   >
-                    <Icone className="size-6" strokeWidth={ativo ? 2.3 : 2} aria-hidden />
+                    <Icone className="size-[22px]" strokeWidth={ativo ? 2.3 : 2} aria-hidden />
                   </span>
                   {label}
                 </Link>
