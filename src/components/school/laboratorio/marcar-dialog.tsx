@@ -34,14 +34,18 @@ export function MarcarAlunosCartao({ dados }: { dados: DadosLab }) {
         </CardContent>
       </Card>
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogContent className="max-h-[94svh] max-w-6xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Quem vai ao laboratório?</DialogTitle>
             <DialogDescription>
               Se alguém já foi nesta semana ou neste mês, a gente avisa.
             </DialogDescription>
           </DialogHeader>
-          <ControleLaboratorio dados={dados} aoMarcar={() => setAberto(false)} />
+          <ControleLaboratorio
+            dados={dados}
+            aoMarcar={() => setAberto(false)}
+            className="lg:h-[72svh]"
+          />
         </DialogContent>
       </Dialog>
     </>

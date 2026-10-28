@@ -132,7 +132,20 @@ export function buscarDesde(hoje: string): string {
   const d = chaveParaData(hoje);
   d.setDate(d.getDate() - 1);
   const ontem = toDateKey(d);
-  return [s, m, ontem].sort()[0]!;
+  // 60 dias para trás: dá para saber quem está há muito tempo sem ir ao laboratório.
+  const longe = chaveParaData(hoje);
+  longe.setDate(longe.getDate() - JANELA_HISTORICO_DIAS);
+  return [s, m, ontem, toDateKey(longe)].sort()[0]!;
+}
+
+/** Até onde o painel olha para trás para achar a última ida de cada aluno. */
+export const JANELA_HISTORICO_DIAS = 60;
+
+/** Dias inteiros entre duas datas YYYY-MM-DD (b − a). */
+export function diasEntre(a: string, b: string): number {
+  const [ay, am, ad] = a.split("-").map(Number);
+  const [by, bm, bd] = b.split("-").map(Number);
+  return Math.round((Date.UTC(by!, bm! - 1, bd!) - Date.UTC(ay!, am! - 1, ad!)) / 86_400_000);
 }
 
 /** Aulas encerradas nas últimas 24 horas, agrupadas por dia (a mais recente primeiro). */
@@ -543,7 +556,19 @@ export interface SituacaoAluno {
   semana: number;
   mes: number;
   hoje: boolean;
+  /** Dias diferentes desta semana em que foi, contando hoje. */
+  idasSemana: number;
+  /** Foi em 2 ou mais dias diferentes desta semana. */
+  repetiuSemana: boolean;
+  /** Dia da última ida (dentro dos últimos 60 dias) ou null. */
+  ultimaIda: string | null;
+  /** Dias desde a última ida; null = não foi nos últimos 60 dias. */
+  diasSemIr: number | null;
+  /** Está na frente da fila: nunca foi no período ou está há 14+ dias sem ir (e não foi esta semana). */
+  prioridade: boolean;
 }
+
+export const DIAS_SEM_IR_PRIORIDADE = 14;
 
 /** Média de idas no mês (dias distintos por aluno) entre todos os alunos cadastrados. */
 export function mediaIdasNoMes(sessoes: SessaoLab[], totalAlunos: number, hoje: string): number {
@@ -564,9 +589,19 @@ export function situacaoDoAluno(
 ): SituacaoAluno {
   const uso = usoDoAluno(sessoes, alunoId, hoje);
   const semana = uso.semana - (uso.hoje ? 1 : 0);
+  const datas = sessoes.filter((s) => s.alunoId === alunoId && s.data <= hoje).map((s) => s.data);
+  const ultimaIda = datas.length ? datas.reduce((a, b) => (a > b ? a : b)) : null;
+  const diasSemIr = ultimaIda ? diasEntre(ultimaIda, hoje) : null;
+  const naSemana = semana >= 1;
   return {
+    idasSemana: uso.semana,
+    repetiuSemana: uso.semana >= 2,
+    ultimaIda,
+    diasSemIr,
+    prioridade:
+      !naSemana && !uso.hoje && (diasSemIr === null || diasSemIr >= DIAS_SEM_IR_PRIORIDADE),
     nunca: uso.mes === 0,
-    naSemana: semana >= 1,
+    naSemana,
     acima: uso.mes >= Math.max(2, Math.ceil(media) + 1),
     semana,
     mes: uso.mes - (uso.hoje ? 1 : 0),
