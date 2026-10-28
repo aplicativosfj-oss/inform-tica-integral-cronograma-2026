@@ -42,7 +42,7 @@ import {
   SeloAniversario,
   AniversariantesHoje,
 } from "@/components/school/laboratorio/aniversariantes";
-import { infoAniversario, textoIdade } from "@/lib/aniversario";
+import { defasagemIdadeSerie, infoAniversario, textoIdade } from "@/lib/aniversario";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { imagemDaSerie } from "@/lib/serie-imagens";
 import type { AnotacaoAluno, SituacaoMatricula } from "@/lib/types";
@@ -607,25 +607,101 @@ export function BuscaAlunos() {
   const { todasTurmas: turmas } = useAppStore();
   const [turmaId, setTurmaId] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
+  const [ordem, setOrdem] = useState<"az" | "velhos" | "novos">("az");
+  const [faixa, setFaixa] = useState<number | "distorcao" | null>(null);
   const [aberto, setAberto] = useState<{ turmaId: string; alunoId: string } | null>(null);
   const termo = busca.trim().toLowerCase();
   const turma = turmas.find((t) => t.id === turmaId) ?? null;
-
-  const lista = (turma ? [turma] : turmas)
-    .flatMap((t) => t.alunos.map((a) => ({ t, a })))
-    .filter(({ a }) => !termo || a.nome.toLowerCase().includes(termo))
-    .sort(
-      (x, y) =>
-        Number(Boolean(x.a.situacao && x.a.situacao !== "ativo")) -
-          Number(Boolean(y.a.situacao && y.a.situacao !== "ativo")) ||
-        x.a.nome.localeCompare(y.a.nome, "pt-BR"),
-    );
-  const mostrarAlunos = turma !== null || termo !== "";
-
   const hoje = hojeNaEscola();
+
+  const estaAtivo = (a: { situacao?: string | undefined }) => !a.situacao || a.situacao === "ativo";
+
+  /** Todos os alunos do escopo (turma ou escola), com idade e defasagem já calculadas. */
+  const base = useMemo(
+    () =>
+      (turma ? [turma] : turmas).flatMap((t) =>
+        t.alunos.map((a) => ({
+          t,
+          a,
+          info: infoAniversario(a.nascimento, hoje),
+          defas: defasagemIdadeSerie(a.nascimento, t.serie, hoje),
+        })),
+      ),
+    [turma, turmas, hoje],
+  );
+
+  /** Quem é o mais velho e o mais novo da escola (só quem está estudando). */
+  const extremos = useMemo(() => {
+    const comData = turmas
+      .flatMap((t) => t.alunos.filter((a) => estaAtivo(a) && a.nascimento).map((a) => ({ t, a })))
+      .sort((x, y) => x.a.nascimento!.localeCompare(y.a.nascimento!));
+    if (comData.length === 0) return null;
+    const velho = comData[0]!;
+    const novo = comData[comData.length - 1]!;
+    return { velho, novo };
+  }, [turmas]);
+
+  const idadesPresentes = useMemo(() => {
+    const m = new Map<number, number>();
+    for (const x of base)
+      if (estaAtivo(x.a) && x.info) m.set(x.info.anos, (m.get(x.info.anos) ?? 0) + 1);
+    return [...m.entries()].sort((p, q) => p[0] - q[0]);
+  }, [base]);
+  const nDistorcao = base.filter((x) => estaAtivo(x.a) && (x.defas ?? 0) >= 2).length;
+
+  const lista = base
+    .filter(({ a }) => !termo || a.nome.toLowerCase().includes(termo))
+    .filter(({ info, defas }) =>
+      faixa === null ? true : faixa === "distorcao" ? (defas ?? 0) >= 2 : info?.anos === faixa,
+    )
+    .sort((x, y) => {
+      const sai = Number(!estaAtivo(x.a)) - Number(!estaAtivo(y.a));
+      if (sai) return sai;
+      if (ordem !== "az") {
+        const nx = x.a.nascimento ?? (ordem === "velhos" ? "9999" : "0000");
+        const ny = y.a.nascimento ?? (ordem === "velhos" ? "9999" : "0000");
+        const c = ordem === "velhos" ? nx.localeCompare(ny) : ny.localeCompare(nx);
+        if (c) return c;
+      }
+      return x.a.nome.localeCompare(y.a.nome, "pt-BR");
+    });
+  const filtrando = ordem !== "az" || faixa !== null;
+  const mostrarAlunos = turma !== null || termo !== "" || filtrando;
+
   return (
     <div className="space-y-4">
       <AniversariantesHoje />
+      {extremos ? (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {(
+            [
+              ["Mais velho(a) da escola", extremos.velho],
+              ["Mais novo(a) da escola", extremos.novo],
+            ] as const
+          ).map(([rotulo, { t, a }]) => (
+            <button
+              key={rotulo}
+              type="button"
+              onClick={() => setAberto({ turmaId: t.id, alunoId: a.id })}
+              className="flex items-center gap-3 rounded-xl border bg-card px-3 py-2 text-left transition hover:border-indigo-500"
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-extrabold text-white">
+                {rotulo.startsWith("Mais velho") ? "↑" : "↓"}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {rotulo}
+                </span>
+                <span className="block truncate text-sm font-semibold">{a.nome}</span>
+                <span className="text-xs text-muted-foreground">
+                  {rotuloTurma(t.serie, t.letra)} ·{" "}
+                  {textoIdade(infoAniversario(a.nascimento, hoje)!)}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2">
         {turma ? (
           <Button type="button" variant="outline" size="sm" onClick={() => setTurmaId(null)}>
@@ -645,6 +721,70 @@ export function BuscaAlunos() {
             aria-label="Buscar aluno"
           />
         </div>
+        <div
+          className="flex gap-1 rounded-lg border bg-card/60 p-1 text-xs font-semibold"
+          role="group"
+          aria-label="Ordenar"
+        >
+          {(
+            [
+              ["az", "A–Z"],
+              ["velhos", "Mais velhos"],
+              ["novos", "Mais novos"],
+            ] as const
+          ).map(([id, rotulo]) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={ordem === id}
+              onClick={() => setOrdem(id)}
+              className={`rounded-md px-3 py-1.5 transition ${ordem === id ? "bg-indigo-600 text-white" : "hover:bg-muted"}`}
+            >
+              {rotulo}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div
+        className="flex flex-wrap items-center gap-1.5"
+        role="group"
+        aria-label="Filtrar por idade"
+      >
+        <button
+          type="button"
+          aria-pressed={faixa === null}
+          onClick={() => setFaixa(null)}
+          className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${faixa === null ? "border-indigo-600 bg-indigo-600 text-white" : "bg-card/60 hover:bg-muted"}`}
+        >
+          Todas as idades
+        </button>
+        {idadesPresentes.map(([anos, n]) => (
+          <button
+            key={anos}
+            type="button"
+            aria-pressed={faixa === anos}
+            onClick={() => setFaixa(faixa === anos ? null : anos)}
+            className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${faixa === anos ? "border-indigo-600 bg-indigo-600 text-white" : "bg-card/60 hover:bg-muted"}`}
+          >
+            {anos} anos{" "}
+            <span className="rounded-full bg-black/15 px-1.5 tabular-nums dark:bg-white/15">
+              {n}
+            </span>
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-pressed={faixa === "distorcao"}
+          onClick={() => setFaixa(faixa === "distorcao" ? null : "distorcao")}
+          title="Alunos com 2 anos ou mais acima da idade esperada para a série (idade em 31 de março)"
+          className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${faixa === "distorcao" ? "border-amber-600 bg-amber-600 text-white" : "border-amber-500/60 bg-card/60 text-amber-700 hover:bg-muted dark:text-amber-300"}`}
+        >
+          Distorção idade-série{" "}
+          <span className="rounded-full bg-black/15 px-1.5 tabular-nums dark:bg-white/15">
+            {nDistorcao}
+          </span>
+        </button>
       </div>
 
       {!mostrarAlunos ? (
@@ -713,13 +853,13 @@ export function BuscaAlunos() {
           <h3 className="text-sm font-semibold text-muted-foreground">
             {turma
               ? `${rotuloTurma(turma.serie, turma.letra)} · ${turma.professorRegente} · ${lista.length} aluno${lista.length === 1 ? "" : "s"}`
-              : `${lista.length} resultado${lista.length === 1 ? "" : "s"} na escola toda`}
+              : `${lista.length} aluno${lista.length === 1 ? "" : "s"} na escola toda${ordem === "velhos" ? " · do mais velho ao mais novo" : ordem === "novos" ? " · do mais novo ao mais velho" : ""}`}
           </h3>
           {lista.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum aluno encontrado.</p>
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {lista.map(({ t, a }) => (
+              {lista.map(({ t, a, info }) => (
                 <li key={a.id}>
                   <button
                     type="button"
@@ -739,7 +879,8 @@ export function BuscaAlunos() {
                         <SeloAniversario nascimento={a.nascimento} />
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {turma ? "toque para abrir a ficha" : rotuloTurma(t.serie, t.letra)}
+                        {turma ? "" : `${rotuloTurma(t.serie, t.letra)} · `}
+                        {info ? textoIdade(info) : "sem data de nascimento"}
                         {a.situacao === "transferido" ? " · transferido(a)" : ""}
                         {a.situacao === "desistente" ? " · desistente" : ""}
                         {a.impedido ? " · suspenso" : ""}

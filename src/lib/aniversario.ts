@@ -75,3 +75,21 @@ export const textoIdade = (i: InfoAniversario) =>
   i.meses > 0
     ? `${i.anos} ${i.anos === 1 ? "ano" : "anos"} e ${i.meses} ${i.meses === 1 ? "mês" : "meses"}`
     : `${i.anos} ${i.anos === 1 ? "ano" : "anos"}`;
+
+/**
+ * Anos de defasagem entre a idade do aluno em 31 de março do ano e a idade
+ * esperada para a série (1º ano = 6 anos). 2 ou mais = distorção idade-série.
+ */
+export function defasagemIdadeSerie(
+  nascimento: string | undefined,
+  serie: string,
+  hoje: string,
+): number | null {
+  const num = Number(serie.match(/\d+/)?.[0]);
+  if (!nascimento || !num) return null;
+  const [ny, nm, nd] = nascimento.split("-").map(Number);
+  const ano = Number(hoje.slice(0, 4));
+  if (!ny || !nm || !nd) return null;
+  const idadeMarco = ano - ny - (nm > 3 || (nm === 3 && nd > 31) ? 1 : 0);
+  return idadeMarco - (num + 5);
+}
