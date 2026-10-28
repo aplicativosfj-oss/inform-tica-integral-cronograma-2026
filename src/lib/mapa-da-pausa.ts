@@ -27,7 +27,14 @@ export const DIAS: { dia: DiaUtil; nome: string; curto: string }[] = [
 
 export const ESPACOS: Record<
   Espaco,
-  { nome: string; chamada: string; texto: string; dias: string }
+  {
+    nome: string;
+    chamada: string;
+    texto: string;
+    dias: string;
+    /** Quem cuida do espaço, quando não são os monitores da própria turma. */
+    responsavel?: string;
+  }
 > = {
   aula: {
     nome: "Sala de aula",
@@ -49,6 +56,7 @@ export const ESPACOS: Record<
     texto:
       "Cada ano escolar tem o seu dia na sala de jogos. Os jogos trabalham regras, raciocínio, paciência, a vez do colega e o convívio em grupo.",
     dias: "1 dia por semana",
+    responsavel: "Professor Benedito",
   },
 };
 

@@ -264,6 +264,14 @@ export function MapaDaPausa() {
                   </div>
                   <h3 className="mt-3 text-xl font-extrabold">{ESPACOS[e].chamada}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/75">{ESPACOS[e].texto}</p>
+                  {ESPACOS[e].responsavel ? (
+                    <p className="mt-3 flex items-center gap-2 rounded-xl bg-white/[0.07] px-3 py-2 text-sm">
+                      <HandHeart className={cn("size-4 shrink-0", v.texto)} aria-hidden />
+                      <span>
+                        Responsável: <strong>{ESPACOS[e].responsavel}</strong>
+                      </span>
+                    </p>
+                  ) : null}
                   {e === "jogos" ? (
                     <ul className="mt-3 grid grid-cols-5 gap-1 text-center text-[11px]">
                       {DIAS.map((d) => (
@@ -344,6 +352,7 @@ export function MapaDaPausa() {
                       <h3 className="font-extrabold">{ESPACOS[e].nome}</h3>
                       <p className="text-xs text-white/60">
                         {lista.length} {lista.length === 1 ? "turma" : "turmas"}
+                        {ESPACOS[e].responsavel ? ` · com ${ESPACOS[e].responsavel}` : ""}
                       </p>
                     </div>
                   </div>
@@ -363,9 +372,11 @@ export function MapaDaPausa() {
                         </span>
                         <span className="min-w-0 text-sm">
                           <span className="block text-[11px] uppercase tracking-wider text-white/50">
-                            Monitores
+                            {ESPACOS[e].responsavel ? "Responsável" : "Monitores"}
                           </span>
-                          <span className="font-semibold">{juntarNomes(t.monitores)}</span>
+                          <span className="font-semibold">
+                            {ESPACOS[e].responsavel ?? juntarNomes(t.monitores)}
+                          </span>
                         </span>
                       </li>
                     ))}
@@ -386,7 +397,8 @@ export function MapaDaPausa() {
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Quadro da semana</h2>
         <p className="mt-1 text-sm text-white/70">
-          Cada linha é uma turma; cada coluna, um dia. Os monitores acompanham a sua turma.
+          Cada linha é uma turma; cada coluna, um dia. Os monitores acompanham a sua turma; na sala
+          de jogos, quem recebe as turmas é o {ESPACOS.jogos.responsavel}.
         </p>
 
         {CHOQUES.length ? (
@@ -502,8 +514,18 @@ export function MapaDaPausa() {
             Quem cuida de cada turma
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-white/70">
-            Os monitores ficam com a sua turma durante as duas horas do intervalo. Em caso de
-            dúvida, procure a coordenação da escola.
+            Os monitores ficam com a sua turma durante as duas horas do intervalo. Na sala de jogos,
+            as turmas ficam com o {ESPACOS.jogos.responsavel}. Em caso de dúvida, procure a
+            coordenação da escola.
+          </p>
+          <p className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 sm:max-w-md">
+            <IlustracaoEspaco espaco="jogos" className="h-12 w-16 shrink-0 rounded-lg" />
+            <span>
+              <span className="block text-xs font-bold uppercase tracking-wider text-emerald-300">
+                Sala de jogos · todos os dias
+              </span>
+              <span className="text-base font-extrabold">{ESPACOS.jogos.responsavel}</span>
+            </span>
           </p>
           <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {TURMAS_PAUSA.map((t) => (
@@ -620,11 +642,15 @@ function VersaoImpressa() {
               {ESPACOS[e].nome} · {ESPACOS[e].dias}
             </p>
             <p>{ESPACOS[e].texto}</p>
+            {ESPACOS[e].responsavel ? (
+              <p className="mt-1 font-bold">Responsável: {ESPACOS[e].responsavel}</p>
+            ) : null}
           </div>
         ))}
       </div>
       <p className="mt-2 text-[9px] text-slate-500">
-        Sala de jogos: segunda 1º ano, terça 2º, quarta 3º, quinta 4º e sexta 5º ano.
+        Sala de jogos ({ESPACOS.jogos.responsavel}): segunda 1º ano, terça 2º, quarta 3º, quinta 4º
+        e sexta 5º ano. Nos outros dias, a turma fica com os seus monitores.
         {CHOQUES.length
           ? ` Dias com dois espaços (a confirmar): ${CHOQUES.map((c) => `${c.turma} ${c.dia}`).join("; ")}.`
           : ""}
