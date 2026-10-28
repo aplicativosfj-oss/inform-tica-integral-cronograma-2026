@@ -19,7 +19,7 @@ export const Route = createFileRoute("/resultados")({
 
 function ResultadosPublicos() {
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-ink">
       <NavBar />
       <PainelPublico />
     </div>
