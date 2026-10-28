@@ -20,7 +20,6 @@ import {
   Youtube,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCountUp } from "@/hooks/use-count-up";
@@ -379,45 +378,63 @@ const VIDEOS_DESTAQUE = [
 ];
 
 /**
- * Divulgação discreta do canal oficial da escola no YouTube: miniaturas reais
- * (sem incorporar o player, mais leve) que abrem o vídeo em uma nova aba.
+ * Vitrine do canal oficial da escola no YouTube: três vídeos em pé, grandes,
+ * no formato dos Shorts. São só miniaturas (sem incorporar o player, mais
+ * leve) que abrem o vídeo em uma nova aba.
  */
 function CanalYoutubeCard() {
   return (
-    <div className="h-full">
-      {" "}
-      <div className="h-full overflow-hidden rounded-[2rem] border border-red-400/20 bg-gradient-to-br from-red-500/[0.06] via-transparent to-transparent p-4 dark:border-red-400/15 dark:from-red-400/[0.05] sm:p-6">
-        <div className="grid gap-4">
-          <div>
-            <Badge className="mb-2 gap-1.5 rounded-full border-red-400/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-700 shadow-sm backdrop-blur-md dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">
-              <Youtube className="size-4" /> Canal da escola
-            </Badge>
-            <h2 className="text-xl font-semibold text-foreground">
-              A escola também está no YouTube
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Aulas, visitas e o dia a dia da escola, em vídeo. Vem ver!
-            </p>
-            <Button asChild variant="outline" size="sm" className="mt-4 w-fit text-sm">
-              <a href={CANAL_YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-                Abrir o canal <ExternalLink className="size-4" />
-              </a>
-            </Button>
-          </div>
+    <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-ink p-5 text-white sm:p-7 dark:bg-card">
+      <div
+        aria-hidden
+        className="absolute -left-20 -top-24 size-72 rounded-full bg-red-600/35 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="fundo-pixel absolute inset-0 opacity-20 [mask-image:linear-gradient(to_bottom,black,transparent_60%)]"
+      />
 
-          <div className="grid grid-cols-3 gap-2">
-            {VIDEOS_DESTAQUE.map((video) => (
-              <VideoThumb key={video.id} video={video} />
-            ))}
-          </div>
-        </div>{" "}
-      </div>{" "}
+      <div className="relative flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-red-400">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-red-600 text-white shadow-lg shadow-red-600/40">
+              <Youtube className="size-4" aria-hidden />
+            </span>
+            Canal da escola
+          </p>
+          <h2 className="mt-3 text-2xl font-extrabold sm:text-3xl">
+            A escola também está no YouTube
+          </h2>
+          <p className="mt-1.5 text-sm text-white/70">
+            Aulas, visitas e o dia a dia da escola, em vídeo.
+          </p>
+        </div>
+        <Button
+          asChild
+          size="lg"
+          className="rounded-full bg-red-600 px-5 text-white shadow-lg shadow-red-600/30 hover:bg-red-500"
+        >
+          <a href={CANAL_YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
+            Inscreva-se <ExternalLink className="size-4" />
+          </a>
+        </Button>
+      </div>
+
+      <div className="relative mt-6 grid flex-1 grid-cols-3 gap-2.5 sm:gap-3.5">
+        {VIDEOS_DESTAQUE.map((video) => (
+          <VideoThumb key={video.id} video={video} />
+        ))}
+      </div>
     </div>
   );
-} /** * Miniatura de um vídeo do canal. Redes de escola costumam bloquear o
- * domínio do YouTube (inclusive o CDN de miniaturas `i.ytimg.com`) — quando a
- * imagem falha ao carregar, mostramos um cartão simples no lugar de um ícone
- * de imagem quebrada, sem afetar o resto da página.
+}
+
+/**
+ * Miniatura de um vídeo do canal, em pé (9:16). A miniatura dos Shorts vem
+ * com faixas pretas dos lados; o corte "cover" nesse formato tira as faixas.
+ * Redes de escola costumam bloquear o domínio do YouTube (inclusive o CDN de
+ * miniaturas `i.ytimg.com`) — quando a imagem falha, mostramos um cartão
+ * simples no lugar de um ícone de imagem quebrada.
  */
 function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
   const [imagemFalhou, setImagemFalhou] = useState(false);
@@ -427,12 +444,13 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
       href={`https://www.youtube.com/shorts/${video.id}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative block aspect-video overflow-hidden rounded-xl border border-border/60 bg-muted shadow-sm transition-shadow hover:shadow-md"
+      aria-label={`Assistir: ${video.titulo}`}
+      className="group relative block aspect-[9/16] overflow-hidden rounded-2xl bg-white/5 shadow-xl ring-1 ring-white/10 transition duration-300 hover:-translate-y-1 hover:ring-red-500/70"
     >
       {imagemFalhou ? (
-        <div className="flex size-full flex-col items-center justify-center gap-1 bg-red-500/10 p-1.5 text-center dark:bg-red-500/15">
-          <Youtube className="size-4 text-red-600 dark:text-red-400" />
-          <span className="line-clamp-2 text-xs font-medium leading-tight text-muted-foreground">
+        <div className="flex size-full flex-col items-center justify-center gap-2 bg-gradient-to-b from-red-600/30 to-transparent p-3 text-center">
+          <Youtube className="size-8 text-red-400" aria-hidden />
+          <span className="line-clamp-3 text-sm font-semibold leading-tight text-white/85">
             {video.titulo}
           </span>
         </div>
@@ -440,20 +458,23 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
         <>
           <img
             src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
-            alt={video.titulo}
+            alt=""
             loading="lazy"
             width={480}
             height={360}
             onError={() => setImagemFalhou(true)}
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <span className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/30">
-            <Play
-              className="size-6 text-white opacity-90 drop-shadow transition-transform group-hover:scale-110"
-              fill="currentColor"
-            />
+          <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/20" />
+          <span className="absolute left-2 top-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide backdrop-blur">
+            Shorts
           </span>
-          <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/75 to-transparent p-1.5 text-[13px] font-medium leading-tight text-white">
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="flex size-11 items-center justify-center rounded-full bg-red-600/90 shadow-lg shadow-black/40 transition-transform duration-300 group-hover:scale-110 sm:size-14">
+              <Play className="ml-0.5 size-5 text-white sm:size-6" fill="currentColor" />
+            </span>
+          </span>
+          <span className="absolute inset-x-0 bottom-0 line-clamp-3 p-2.5 text-xs font-semibold leading-snug text-white sm:p-3 sm:text-sm">
             {video.titulo}
           </span>
         </>
