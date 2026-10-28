@@ -219,7 +219,9 @@ export function ControleLaboratorio({
                   "min-w-16 rounded-lg px-3 py-2 text-sm font-bold ring-offset-2 transition",
                   cor.bg,
                   cor.text,
-                  ativa ? "ring-2 ring-foreground" : "opacity-80 hover:opacity-100",
+                  ativa
+                    ? "scale-105 shadow-md ring-2 ring-foreground"
+                    : "opacity-60 hover:opacity-100",
                 )}
               >
                 {t.serie.replace(/\D+/g, "")}º {t.letra}
@@ -231,8 +233,10 @@ export function ControleLaboratorio({
             aria-pressed={mista}
             onClick={() => trocarTurma(MISTA)}
             className={cn(
-              "flex items-center gap-1.5 rounded-lg border-2 border-dashed border-primary px-3 py-2 text-sm font-bold text-primary ring-offset-2 transition",
-              mista ? "bg-primary/10 ring-2 ring-foreground" : "hover:bg-primary/5",
+              "flex items-center gap-1.5 rounded-lg border-2 border-dashed border-primary px-3 py-2 text-sm font-bold ring-offset-2 transition",
+              mista
+                ? "bg-primary text-primary-foreground ring-2 ring-foreground"
+                : "hover:bg-primary/5",
             )}
           >
             <Shuffle className="size-4" aria-hidden /> Aula mista
@@ -312,7 +316,7 @@ export function ControleLaboratorio({
                       className={cn(
                         "flex w-full flex-col gap-1.5 rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50",
                         marcado
-                          ? "border-primary bg-primary/10 ring-1 ring-primary"
+                          ? "border-primary bg-primary/25 font-semibold ring-2 ring-primary"
                           : "bg-card hover:bg-muted/50",
                       )}
                     >
@@ -320,7 +324,7 @@ export function ControleLaboratorio({
                         {marcado ? (
                           <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
                         ) : null}
-                        <span className="truncate pr-7">{nomeExibido(a.nome, true)}</span>
+                        <span className="truncate">{nomeExibido(a.nome, true)}</span>
                       </span>
                       <span className="flex flex-wrap gap-1 text-[11px]">
                         {mista ? (
@@ -360,11 +364,11 @@ export function ControleLaboratorio({
                     <button
                       type="button"
                       aria-label={`Abrir a ficha de ${a.nome}`}
-                      title="Ficha do aluno"
+                      title="Abrir a ficha do aluno"
                       onClick={() => setFicha({ turmaId: t.id, alunoId: a.id })}
-                      className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                      className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md border bg-background/80 px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-primary"
                     >
-                      <IdCard className="size-4" aria-hidden />
+                      <IdCard className="size-3.5" aria-hidden /> ficha
                     </button>
                   </li>
                 );
