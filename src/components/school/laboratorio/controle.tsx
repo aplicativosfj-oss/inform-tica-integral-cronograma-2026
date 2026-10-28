@@ -8,6 +8,7 @@ import {
   Play,
   Shuffle,
   Users2,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -45,7 +46,7 @@ import {
   somarMinutos,
   usoDoAluno,
 } from "@/lib/laboratorio";
-import { LIMITE_IDAS_MES, LIMITE_IDAS_SEMANA } from "@/lib/recursos";
+import { LIMITE_ALUNOS_LAB, LIMITE_IDAS_MES, LIMITE_IDAS_SEMANA } from "@/lib/recursos";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { cn } from "@/lib/utils";
 
@@ -86,6 +87,7 @@ export function ControleLaboratorio({
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [busca, setBusca] = useState("");
+  const [navTurma, setNavTurma] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const [menosPrimeiro, setMenosPrimeiro] = useState(false);
   const [ficha, setFicha] = useState<{ turmaId: string; alunoId: string } | null>(null);
@@ -93,14 +95,30 @@ export function ControleLaboratorio({
   const hoje = hojeNaEscola();
   const mista = turmaId === MISTA;
   const turma = turmas.find((t) => t.id === turmaId) ?? null;
-  /** Quem pode ser escolhido: a turma toda ou, na aula mista, alunos de todas as turmas. */
+  /**
+   * Quem aparece para escolher: a turma toda ou, na aula mista, a turma que se
+   * está folheando (ou, se há busca, alunos de qualquer turma).
+   */
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    return (mista ? turmas : turma ? [turma] : [])
+    const fonte = mista
+      ? termo
+        ? turmas
+        : turmas.filter((t) => t.id === navTurma)
+      : turma
+        ? [turma]
+        : [];
+    return fonte
       .flatMap((t) => t.alunos.map((a) => ({ a, t })))
       .filter(({ a }) => !mista || !termo || a.nome.toLowerCase().includes(termo))
       .sort((x, y) => (mista ? x.a.nome.localeCompare(y.a.nome, "pt-BR") : 0));
-  }, [mista, turma, turmas, busca]);
+  }, [mista, turma, turmas, busca, navTurma]);
+  /** Todos os alunos escolhidos, de qualquer turma (a aula mista atravessa turmas). */
+  const selecionados = useMemo(
+    () =>
+      turmas.flatMap((t) => t.alunos.filter((a) => escolhidos.has(a.id)).map((a) => ({ a, t }))),
+    [turmas, escolhidos],
+  );
   const agora = Date.now();
 
   const totalAlunos = useMemo(() => turmas.reduce((n, t) => n + t.alunos.length, 0), [turmas]);
@@ -109,8 +127,13 @@ export function ControleLaboratorio({
     [dados.sessoes, totalAlunos, hoje],
   );
   const situacoes = useMemo(
-    () => new Map(lista.map(({ a }) => [a.id, situacaoDoAluno(dados.sessoes, a.id, hoje, media)])),
-    [lista, dados.sessoes, hoje, media],
+    () =>
+      new Map(
+        turmas.flatMap((t) =>
+          t.alunos.map((a) => [a.id, situacaoDoAluno(dados.sessoes, a.id, hoje, media)] as const),
+        ),
+      ),
+    [turmas, dados.sessoes, hoje, media],
   );
   const contagem = useMemo(() => {
     const c = { todos: lista.length, nunca: 0, naoSemana: 0, naSemana: 0, acima: 0 };
@@ -183,6 +206,25 @@ export function ControleLaboratorio({
 
   const janela = calcularJanela();
 
+  /** Alunos que já estarão no laboratório durante a janela escolhida (ao vivo, pausados ou agendados). */
+  const ocupadosNaJanela = (() => {
+    const ini = typeof janela === "string" ? agora : janela.inicio.getTime();
+    const fimJ = typeof janela === "string" ? ini + 30 * 60_000 : janela.fim.getTime();
+    return new Set(
+      dados.sessoes
+        .filter(
+          (s) =>
+            estadoDaSessao(s, agora) !== "encerrada" &&
+            new Date(s.inicio).getTime() < fimJ &&
+            (s.pausadoEm ? Infinity : new Date(s.fim).getTime()) > ini,
+        )
+        .map((s) => s.alunoId),
+    ).size;
+  })();
+  const vagas = Math.max(0, LIMITE_ALUNOS_LAB - ocupadosNaJanela);
+  const noLimite = escolhidos.size >= vagas;
+  const passouDoLimite = escolhidos.size > vagas;
+
   function alternar(id: string) {
     setEscolhidos((anterior) => {
       const novo = new Set(anterior);
@@ -195,13 +237,12 @@ export function ControleLaboratorio({
   function trocarTurma(id: string) {
     setTurmaId(id);
     setBusca("");
-    // Na aula mista a escolha atravessa turmas, então só zera ao sair dela ou entrar nela.
-    if (id !== MISTA || turmaId !== MISTA) setEscolhidos(new Set());
+    setNavTurma(null);
+    setEscolhidos(new Set());
   }
 
   function levantarAvisos(): Aviso[] {
-    return lista
-      .filter(({ a }) => escolhidos.has(a.id))
+    return selecionados
       .map(({ a }) => {
         // A ida de hoje é a mesma visita, não uma repetição (situacaoDoAluno já desconta).
         const x = situacoes.get(a.id)!;
@@ -214,16 +255,18 @@ export function ControleLaboratorio({
 
   async function gravar() {
     if (!turmaId || typeof janela === "string") return;
+    if (passouDoLimite) {
+      toast.error(`O laboratório comporta ${LIMITE_ALUNOS_LAB} alunos por vez.`);
+      return;
+    }
     setSalvando(true);
     try {
       await marcarGrupo({
-        alunos: lista
-          .filter(({ a }) => escolhidos.has(a.id))
-          .map(({ a, t }) => ({
-            id: a.id,
-            nome: a.nome,
-            turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
-          })),
+        alunos: selecionados.map(({ a, t }) => ({
+          id: a.id,
+          nome: a.nome,
+          turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
+        })),
         inicio: janela.inicio,
         fim: janela.fim,
         criadoPor: email,
@@ -265,44 +308,76 @@ export function ControleLaboratorio({
         <div className="flex flex-wrap gap-2">
           {turmas.map((t) => {
             const cor = serieClasses(serieIndexPorNumero(t.serie));
-            const ativa = t.id === turmaId;
+            const ativa = mista ? t.id === navTurma : t.id === turmaId;
+            const escolhidosDaTurma = mista
+              ? t.alunos.filter((a) => escolhidos.has(a.id)).length
+              : 0;
             return (
               <button
                 key={t.id}
                 type="button"
                 aria-pressed={ativa}
-                onClick={() => trocarTurma(t.id)}
+                onClick={() => (mista ? (setNavTurma(t.id), setBusca("")) : trocarTurma(t.id))}
                 className={cn(
-                  "min-w-16 rounded-lg px-3 py-2 text-sm font-bold ring-offset-2 transition",
+                  "relative min-w-16 rounded-lg px-3 py-2 text-sm font-bold ring-offset-2 transition",
                   cor.bg,
                   cor.text,
                   ativa
                     ? "scale-105 shadow-md ring-2 ring-foreground"
-                    : "opacity-60 hover:opacity-100",
+                    : mista && escolhidosDaTurma === 0
+                      ? "opacity-60 hover:opacity-100"
+                      : !mista
+                        ? "opacity-60 hover:opacity-100"
+                        : "",
+                  escolhidosDaTurma > 0 && "ring-2 ring-emerald-500",
                 )}
               >
                 {t.serie.replace(/\D+/g, "")}º {t.letra}
+                {escolhidosDaTurma > 0 ? (
+                  <span
+                    className="absolute -right-2 -top-2 flex min-w-5 items-center justify-center gap-0.5 rounded-full bg-emerald-600 px-1 text-[10px] font-extrabold text-white shadow"
+                    title={`${escolhidosDaTurma} escolhido(s) desta turma`}
+                  >
+                    <CheckCircle2 className="size-3" aria-hidden /> {escolhidosDaTurma}
+                  </span>
+                ) : null}
               </button>
             );
           })}
           <button
             type="button"
             aria-pressed={mista}
-            onClick={() => trocarTurma(MISTA)}
-            className={cn(
-              "flex items-center gap-1.5 rounded-lg border-2 border-dashed border-primary px-3 py-2 text-sm font-bold ring-offset-2 transition",
+            onClick={() =>
               mista
-                ? "bg-primary text-primary-foreground ring-2 ring-foreground"
-                : "hover:bg-primary/5",
+                ? (setTurmaId(null), setNavTurma(null), setEscolhidos(new Set()))
+                : trocarTurma(MISTA)
+            }
+            className={cn(
+              "group relative flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition hover:scale-[1.03] active:scale-95",
+              "bg-gradient-to-r from-violet-600 via-primary to-emerald-500",
+              mista && "ring-2 ring-foreground ring-offset-2",
             )}
           >
-            <Shuffle className="size-4" aria-hidden /> Aula mista
+            <span
+              aria-hidden
+              className="lab-varredura pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            />
+            <Shuffle
+              className={cn(
+                "relative size-4 transition-transform duration-500",
+                mista && "rotate-180",
+              )}
+              aria-hidden
+            />
+            <span className="relative">
+              {mista ? "Aula mista ligada · tocar para sair" : "Aula mista"}
+            </span>
           </button>
         </div>
         {mista ? (
           <p className="text-xs text-muted-foreground">
-            Monte um grupo com alunos de qualquer turma. Busque pelo nome; a escolha fica guardada
-            enquanto você procura.
+            Toque numa turma para ver os alunos e escolha quem for. Pode trocar de turma à vontade:
+            a escolha fica guardada, e cada turma com alunos escolhidos fica marcada em verde.
           </p>
         ) : null}
       </section>
@@ -311,23 +386,28 @@ export function ControleLaboratorio({
         <section aria-label="Escolher os alunos" className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-muted-foreground">
-              2. Quem vai? Toque nos nomes ({escolhidos.size} de {visiveis.length})
+              2. Quem vai? Toque nos nomes ({escolhidos.size} escolhido
+              {escolhidos.size === 1 ? "" : "s"})
             </h3>
             <div className="flex gap-2">
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
-                disabled={mista && filtro === "todos"}
-                onClick={() =>
-                  setEscolhidos(
-                    new Set(
-                      visiveis
-                        .filter(({ a }) => !a.impedido && !noLabAgora.has(a.id))
-                        .map(({ a }) => a.id),
-                    ),
-                  )
-                }
+                disabled={mista && filtro === "todos" && !busca.trim()}
+                onClick={() => {
+                  const livres = visiveis
+                    .filter(({ a }) => !a.impedido && !noLabAgora.has(a.id))
+                    .map(({ a }) => a.id);
+                  const base = new Set(escolhidos);
+                  for (const id of livres) {
+                    if (base.size >= vagas) break;
+                    base.add(id);
+                  }
+                  setEscolhidos(base);
+                  if (livres.some((id) => !base.has(id)))
+                    toast.info(`Marquei só até o limite de ${LIMITE_ALUNOS_LAB} alunos.`);
+                }}
               >
                 {filtro === "todos" ? "Todos" : "Marcar os filtrados"}
               </Button>
@@ -341,6 +421,44 @@ export function ControleLaboratorio({
               </Button>
             </div>
           </div>
+          {mista && selecionados.length > 0 ? (
+            <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-2.5">
+              <p className="mb-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                Escolhidos ({selecionados.length})
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {selecionados.map(({ a, t }) => (
+                  <span
+                    key={a.id}
+                    className="flex items-center gap-1 rounded-full border border-emerald-500/50 bg-background py-0.5 pl-2 pr-1 text-xs"
+                  >
+                    <strong>{rotuloTurma(t.serie, t.letra)}</strong> {a.nome}
+                    <button
+                      type="button"
+                      aria-label={`Tirar ${a.nome}`}
+                      onClick={() => alternar(a.id)}
+                      className="rounded-full p-0.5 hover:bg-muted"
+                    >
+                      <X className="size-3" aria-hidden />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <p
+            className={cn(
+              "text-xs transition-colors",
+              noLimite ? "font-medium text-amber-700 dark:text-amber-300" : "text-muted-foreground",
+            )}
+            role={noLimite ? "status" : undefined}
+          >
+            {escolhidos.size} de {vagas} vaga{vagas === 1 ? "" : "s"}
+            {ocupadosNaJanela > 0 ? ` (${ocupadosNaJanela} já no laboratório nesse horário)` : ""}
+            {noLimite
+              ? ` · limite de ${LIMITE_ALUNOS_LAB} alunos por vez: as demais escolhas ficam desativadas.`
+              : "."}
+          </p>
           <div
             className="flex flex-wrap items-center gap-1.5"
             role="group"
@@ -415,9 +533,11 @@ export function ControleLaboratorio({
           ) : null}
           {visiveis.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {lista.length === 0
-                ? "Esta turma ainda não tem alunos cadastrados."
-                : "Ninguém se encaixa neste filtro."}
+              {mista && !busca.trim() && !navTurma
+                ? "Toque numa turma lá em cima para ver os alunos."
+                : lista.length === 0
+                  ? "Esta turma ainda não tem alunos cadastrados."
+                  : "Ninguém se encaixa neste filtro."}
             </p>
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -428,13 +548,15 @@ export function ControleLaboratorio({
                 const mes = sit.mes;
                 const marcado = escolhidos.has(a.id);
                 const ocupado = noLabAgora.has(a.id);
-                const bloqueado = Boolean(a.impedido) || ocupado;
+                const noTeto = !marcado && noLimite;
+                const bloqueado = Boolean(a.impedido) || ocupado || noTeto;
                 return (
                   <li key={a.id} className="relative">
                     <button
                       type="button"
                       aria-pressed={marcado}
                       disabled={bloqueado}
+                      title={noTeto ? `Limite de ${LIMITE_ALUNOS_LAB} alunos por vez` : undefined}
                       onClick={() => alternar(a.id)}
                       className={cn(
                         "flex w-full flex-col gap-1.5 rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50",
@@ -634,7 +756,7 @@ export function ControleLaboratorio({
           <Button
             type="button"
             size="lg"
-            disabled={salvando || typeof janela === "string"}
+            disabled={salvando || typeof janela === "string" || passouDoLimite}
             onClick={confirmar}
           >
             <Play /> Mandar {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} para o

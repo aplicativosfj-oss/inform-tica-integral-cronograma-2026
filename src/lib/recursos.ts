@@ -21,3 +21,6 @@ export const NOMES_NA_HOME = "completo" as "completo" | "inicial" | "oculto";
 /** Alerta de repetição: a partir de quantas idas já feitas o aluno chama atenção. */
 export const LIMITE_IDAS_SEMANA = 1;
 export const LIMITE_IDAS_MES = 1;
+
+/** Quantos alunos cabem no laboratório ao mesmo tempo (hoje são poucos computadores). */
+export const LIMITE_ALUNOS_LAB = 10;

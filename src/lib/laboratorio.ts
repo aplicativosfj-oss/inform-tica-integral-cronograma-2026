@@ -323,6 +323,39 @@ export async function carregarHistoricoAluno(alunoId: string): Promise<SessaoLab
   return ((data ?? []) as Linha[]).map(deLinha);
 }
 
+export interface PresencaAntiga {
+  id: string;
+  data: string;
+  status: "presente" | "faltou" | "substituido";
+  motivo: string | null;
+  turmaId: string;
+}
+
+/** Frequência do sistema anterior (tabela `presencas`), da mais recente para a mais antiga. */
+export async function carregarPresencasAluno(alunoId: string): Promise<PresencaAntiga[]> {
+  const { data, error } = await supabase
+    .from("presencas")
+    .select("id, data, status, motivo, turma_id")
+    .eq("aluno_id", alunoId)
+    .order("data", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (
+    (data ?? []) as {
+      id: string;
+      data: string;
+      status: PresencaAntiga["status"];
+      motivo: string | null;
+      turma_id: string;
+    }[]
+  ).map((p) => ({
+    id: p.id,
+    data: p.data,
+    status: p.status,
+    motivo: p.motivo,
+    turmaId: p.turma_id,
+  }));
+}
+
 /** Cada aluno leva a própria turma: numa aula mista os grupos misturam turmas. */
 export async function marcarGrupo(entrada: {
   alunos: { id: string; nome: string; turma: { id: string; rotulo: string } }[];

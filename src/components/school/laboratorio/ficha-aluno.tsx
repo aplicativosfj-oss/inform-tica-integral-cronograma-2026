@@ -29,6 +29,8 @@ import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
 import {
   carregarHistoricoAluno,
+  carregarPresencasAluno,
+  type PresencaAntiga,
   horaNaEscola,
   TABELA_AUSENTE,
   type SessaoLab,
@@ -72,7 +74,7 @@ export function FichaAluno({
   aberto: boolean;
   aoFechar: () => void;
 }) {
-  const { turmas, updateAluno } = useAppStore();
+  const { turmas, updateAluno, config } = useAppStore();
   const { email } = useAuth();
   const turma = turmas.find((t) => t.id === turmaId);
   const aluno = turma?.alunos.find((a) => a.id === alunoId);
@@ -84,7 +86,9 @@ export function FichaAluno({
     endereco: "",
     especialidade: "",
     observacoesNecessidade: "",
+    necessidadeEspecial: false,
   });
+  const [presencas, setPresencas] = useState<PresencaAntiga[] | null>(null);
   const [nota, setNota] = useState("");
   const [motivo, setMotivo] = useState("");
   const [historico, setHistorico] = useState<SessaoLab[] | null>(null);
@@ -99,11 +103,16 @@ export function FichaAluno({
       endereco: aluno.endereco ?? "",
       especialidade: aluno.especialidade ?? "",
       observacoesNecessidade: aluno.observacoesNecessidade ?? "",
+      necessidadeEspecial: aluno.necessidadeEspecial ?? false,
     });
     setMotivo(aluno.motivoImpedimento ?? "");
     setNota("");
     setHistorico(null);
     setErroHistorico(null);
+    setPresencas(null);
+    carregarPresencasAluno(alunoId)
+      .then(setPresencas)
+      .catch(() => setPresencas([]));
     carregarHistoricoAluno(alunoId)
       .then(setHistorico)
       .catch((e: Error) => setErroHistorico(e.message));
@@ -125,6 +134,9 @@ export function FichaAluno({
 
   if (!turma || !aluno) return null;
   const idade = idadeEmAnos(aluno.nascimento);
+  const antigas = (presencas ?? []).filter(
+    (p) => !config.dataInicioOperacao || p.data >= config.dataInicioOperacao,
+  );
   const dias = new Set((historico ?? []).map((s) => s.data)).size;
   const totalMin = (historico ?? []).reduce((soma, s) => soma + minutosDe(s), 0);
 
@@ -136,6 +148,7 @@ export function FichaAluno({
       endereco: rascunho.endereco.trim() || undefined,
       especialidade: rascunho.especialidade.trim() || undefined,
       observacoesNecessidade: rascunho.observacoesNecessidade.trim() || undefined,
+      necessidadeEspecial: rascunho.necessidadeEspecial,
     });
     toast.success("Dados do aluno salvos.");
   }
@@ -233,6 +246,23 @@ export function FichaAluno({
                 onChange={(e) => setRascunho((r) => ({ ...r, endereco: e.target.value }))}
                 placeholder="se tiver"
               />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="f-especialidade">Especialidade / laudo</Label>
+              <Input
+                id="f-especialidade"
+                value={rascunho.especialidade}
+                onChange={(e) => setRascunho((r) => ({ ...r, especialidade: e.target.value }))}
+                placeholder="Ex.: TEA, deficiência auditiva"
+              />
+            </div>
+            <div className="flex items-center gap-3 self-end pb-2">
+              <Switch
+                id="f-aee"
+                checked={rascunho.necessidadeEspecial}
+                onCheckedChange={(v) => setRascunho((r) => ({ ...r, necessidadeEspecial: v }))}
+              />
+              <Label htmlFor="f-aee">Atendimento especializado (mediador/cuidador)</Label>
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="f-esp">Informações específicas (laudo, cuidados, adaptações)</Label>
@@ -387,6 +417,58 @@ export function FichaAluno({
                 ))}
               </div>
             ))
+          )}
+        </section>
+
+        <section className="space-y-3 rounded-xl border p-4">
+          <h3 className="text-sm font-semibold">Frequência no sistema anterior</h3>
+          {presencas === null ? (
+            <p className="text-sm text-muted-foreground">Carregando…</p>
+          ) : antigas.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem registros de frequência.</p>
+          ) : (
+            <>
+              <p className="flex flex-wrap gap-1.5 text-sm">
+                <Badge variant="outline">
+                  {antigas.filter((p) => p.status === "presente").length} presenças
+                </Badge>
+                <Badge variant="outline">
+                  {antigas.filter((p) => p.status === "faltou").length} faltas
+                </Badge>
+                {antigas.some((p) => p.status === "substituido") ? (
+                  <Badge variant="outline">
+                    {antigas.filter((p) => p.status === "substituido").length} substituído(s)
+                  </Badge>
+                ) : null}
+              </p>
+              <details>
+                <summary className="cursor-pointer text-xs font-semibold text-muted-foreground">
+                  Ver dia a dia
+                </summary>
+                <ul className="mt-2 divide-y rounded-lg border text-sm">
+                  {antigas.map((p) => (
+                    <li
+                      key={p.id}
+                      className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5"
+                    >
+                      <span>{dataBR(p.data)}</span>
+                      <span className="flex items-center gap-1.5">
+                        <Badge variant={p.status === "faltou" ? "destructive" : "secondary"}>
+                          {p.status === "presente"
+                            ? "presente"
+                            : p.status === "faltou"
+                              ? "faltou"
+                              : "substituído"}
+                        </Badge>
+                        {p.motivo ? (
+                          <span className="text-xs italic text-muted-foreground">{p.motivo}</span>
+                        ) : null}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </>
           )}
         </section>
       </DialogContent>
