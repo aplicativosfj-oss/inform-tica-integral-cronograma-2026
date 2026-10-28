@@ -146,7 +146,7 @@ function Index() {
               </p>
               <h1 className="mt-[clamp(0.75rem,2.5svh,1.25rem)] text-[clamp(2rem,min(7.4vw,8svh),4.1rem)] font-bold leading-[1.18] tracking-[-0.035em] text-white [text-shadow:0_2px_28px_rgb(0_0_0/0.45)]">
                 Todo dia tem criança{" "}
-                <span className="text-sun underline decoration-mint decoration-wavy decoration-2 underline-offset-[0.18em]">
+                <span className="text-sun">
                   descobrindo o mundo
                 </span>{" "}
                 aqui

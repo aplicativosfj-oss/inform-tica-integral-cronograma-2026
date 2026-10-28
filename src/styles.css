@@ -685,3 +685,10 @@ html.home-snap {
   justify-content: center;
   scroll-snap-align: start;
 }
+
+/* Esconde o selo "Edit with Lovable" que a plataforma injeta no site publicado. */
+#lovable-badge,
+[id*="lovable-badge"],
+a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
+  display: none !important;
+}
