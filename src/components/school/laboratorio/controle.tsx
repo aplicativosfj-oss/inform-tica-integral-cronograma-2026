@@ -48,6 +48,7 @@ import {
   mediaIdasNoMes,
   situacaoDoAluno,
   somarMinutos,
+  type SessaoLab,
 } from "@/lib/laboratorio";
 import { LIMITE_ALUNOS_LAB, LIMITE_IDAS_MES, LIMITE_IDAS_SEMANA } from "@/lib/recursos";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
@@ -88,6 +89,12 @@ const dataCurta = (c: string) => c.slice(5).split("-").reverse().join("/");
 
 /** Quem já foi ao laboratório nesta semana, contando hoje: não pode ser escolhido de novo. */
 const jaFoiNaSemana = (sit: { naSemana: boolean; hoje: boolean }) => sit.naSemana || sit.hoje;
+
+/**
+ * Chave de um aluno no painel. O id sozinho não basta: no cadastro, alunos de
+ * turmas diferentes podem ter o mesmo id, e escolher um marcava o outro junto.
+ */
+const chave = (turmaId: string, alunoId: string) => `${turmaId}:${alunoId}`;
 
 /**
  * Onde o professor marca quem vai ao laboratório, tudo numa janela só: à
@@ -136,15 +143,21 @@ export function ControleLaboratorio({
     () => mediaIdasNoMes(dados.sessoes, totalAlunos, hoje),
     [dados.sessoes, totalAlunos, hoje],
   );
-  const situacoes = useMemo(
-    () =>
-      new Map(
-        turmas.flatMap((t) =>
-          t.alunos.map((a) => [a.id, situacaoDoAluno(dados.sessoes, a.id, hoje, media)] as const),
+  const situacoes = useMemo(() => {
+    const porTurma = new Map<string, SessaoLab[]>();
+    for (const s of dados.sessoes) porTurma.set(s.turmaId, [...(porTurma.get(s.turmaId) ?? []), s]);
+    return new Map(
+      turmas.flatMap((t) =>
+        t.alunos.map(
+          (a) =>
+            [
+              chave(t.id, a.id),
+              situacaoDoAluno(porTurma.get(t.id) ?? [], a.id, hoje, media),
+            ] as const,
         ),
       ),
-    [turmas, dados.sessoes, hoje, media],
-  );
+    );
+  }, [turmas, dados.sessoes, hoje, media]);
 
   /** Quem aparece: a turma atual ou, se há busca na aula mista, alunos de qualquer turma. */
   const lista = useMemo(() => {
@@ -157,7 +170,9 @@ export function ControleLaboratorio({
 
   const selecionados = useMemo(
     () =>
-      turmas.flatMap((t) => t.alunos.filter((a) => escolhidos.has(a.id)).map((a) => ({ a, t }))),
+      turmas.flatMap((t) =>
+        t.alunos.filter((a) => escolhidos.has(chave(t.id, a.id))).map((a) => ({ a, t })),
+      ),
     [turmas, escolhidos],
   );
 
@@ -166,7 +181,7 @@ export function ControleLaboratorio({
       new Set(
         dados.sessoes
           .filter((s) => s.data === hoje && estadoDaSessao(s, agora) !== "encerrada")
-          .map((s) => s.alunoId),
+          .map((s) => chave(s.turmaId, s.alunoId)),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dados.sessoes, hoje],
@@ -182,8 +197,8 @@ export function ControleLaboratorio({
       repetiu: 0,
       acima: 0,
     };
-    for (const { a } of lista) {
-      const x = situacoes.get(a.id)!;
+    for (const { a, t } of lista) {
+      const x = situacoes.get(chave(t.id, a.id))!;
       if (x.prioridade) c.prioridade++;
       if (x.nunca) c.nunca++;
       if (jaFoiNaSemana(x)) c.naSemana++;
@@ -205,8 +220,8 @@ export function ControleLaboratorio({
   };
 
   const visiveis = useMemo(() => {
-    const ok = lista.filter(({ a }) => {
-      const x = situacoes.get(a.id)!;
+    const ok = lista.filter(({ a, t }) => {
+      const x = situacoes.get(chave(t.id, a.id))!;
       return (
         filtro === "todos" ||
         (filtro === "prioridade" && x.prioridade) ||
@@ -220,7 +235,8 @@ export function ControleLaboratorio({
     return [...ok].sort((p, q) =>
       ordem === "az"
         ? p.a.nome.localeCompare(q.a.nome, "pt-BR")
-        : pontos(q.a.id) - pontos(p.a.id) || p.a.nome.localeCompare(q.a.nome, "pt-BR"),
+        : pontos(chave(q.t.id, q.a.id)) - pontos(chave(p.t.id, p.a.id)) ||
+          p.a.nome.localeCompare(q.a.nome, "pt-BR"),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lista, situacoes, filtro, ordem]);
@@ -229,8 +245,11 @@ export function ControleLaboratorio({
   const posicaoFila = useMemo(() => {
     const m = new Map<string, number>();
     let n = 0;
-    for (const { a } of [...lista].sort((p, q) => pontos(q.a.id) - pontos(p.a.id))) {
-      if (situacoes.get(a.id)!.prioridade) m.set(a.id, ++n);
+    for (const { a, t } of [...lista].sort(
+      (p, q) => pontos(chave(q.t.id, q.a.id)) - pontos(chave(p.t.id, p.a.id)),
+    )) {
+      const k = chave(t.id, a.id);
+      if (situacoes.get(k)!.prioridade) m.set(k, ++n);
     }
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -276,7 +295,7 @@ export function ControleLaboratorio({
             new Date(s.inicio).getTime() < fimJ &&
             (s.pausadoEm ? Infinity : new Date(s.fim).getTime()) > ini,
         )
-        .map((s) => s.alunoId),
+        .map((s) => chave(s.turmaId, s.alunoId)),
     ).size;
   })();
   const vagas = Math.max(0, LIMITE_ALUNOS_LAB - ocupadosNaJanela);
@@ -318,10 +337,12 @@ export function ControleLaboratorio({
   function marcarFiltrados() {
     const livres = visiveis
       .filter(
-        ({ a }) =>
-          !a.impedido && !noLabAgora.has(a.id) && (liberar || !jaFoiNaSemana(situacoes.get(a.id)!)),
+        ({ a, t }) =>
+          !a.impedido &&
+          !noLabAgora.has(chave(t.id, a.id)) &&
+          (liberar || !jaFoiNaSemana(situacoes.get(chave(t.id, a.id))!)),
       )
-      .map(({ a }) => a.id);
+      .map(({ a, t }) => chave(t.id, a.id));
     const base = new Set(escolhidos);
     for (const id of livres) {
       if (base.size >= vagas) break;
@@ -334,9 +355,9 @@ export function ControleLaboratorio({
 
   function levantarAvisos(): Aviso[] {
     return selecionados
-      .map(({ a }) => {
+      .map(({ a, t }) => {
         // A ida de hoje é a mesma visita, não uma repetição (situacaoDoAluno já desconta).
-        const x = situacoes.get(a.id)!;
+        const x = situacoes.get(chave(t.id, a.id))!;
         return { nome: a.nome, semana: x.semana, mes: x.mes, hoje: x.hoje, acima: x.acima };
       })
       .filter(
@@ -394,15 +415,15 @@ export function ControleLaboratorio({
   }
 
   const doTurmaFila = turma
-    ? turma.alunos.filter((a) => situacoes.get(a.id)!.prioridade).length
+    ? turma.alunos.filter((a) => situacoes.get(chave(turma.id, a.id))!.prioridade).length
     : 0;
   const doTurmaSemana = turma
-    ? turma.alunos.filter((a) => jaFoiNaSemana(situacoes.get(a.id)!)).length
+    ? turma.alunos.filter((a) => jaFoiNaSemana(situacoes.get(chave(turma.id, a.id))!)).length
     : 0;
 
   /** Escolhidos agrupados por turma, para a página de confirmação. */
   const porTurma = turmas
-    .map((t) => ({ t, alunos: t.alunos.filter((a) => escolhidos.has(a.id)) }))
+    .map((t) => ({ t, alunos: t.alunos.filter((a) => escolhidos.has(chave(t.id, a.id))) }))
     .filter((x) => x.alunos.length > 0);
 
   return (
@@ -451,7 +472,7 @@ export function ControleLaboratorio({
               {turmas.map((t) => {
                 const cor = serieClasses(serieIndexPorNumero(t.serie));
                 const ativa = t.id === idAtual;
-                const nEsc = t.alunos.filter((a) => escolhidos.has(a.id)).length;
+                const nEsc = t.alunos.filter((a) => escolhidos.has(chave(t.id, a.id))).length;
                 return (
                   <button
                     key={t.id}
@@ -619,13 +640,14 @@ export function ControleLaboratorio({
             ) : (
               <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {visiveis.map(({ a, t }) => {
-                  const sit = situacoes.get(a.id)!;
-                  const marcado = escolhidos.has(a.id);
-                  const ocupado = noLabAgora.has(a.id);
+                  const k = chave(t.id, a.id);
+                  const sit = situacoes.get(k)!;
+                  const marcado = escolhidos.has(k);
+                  const ocupado = noLabAgora.has(k);
                   const travadoSemana = jaFoiNaSemana(sit) && !liberar;
                   const noTeto = !marcado && noLimite;
                   const bloqueado = Boolean(a.impedido) || ocupado || travadoSemana || noTeto;
-                  const fila = posicaoFila.get(a.id);
+                  const fila = posicaoFila.get(k);
                   const ring = sit.repetiuSemana
                     ? "ring-red-500"
                     : jaFoiNaSemana(sit)
@@ -634,12 +656,12 @@ export function ControleLaboratorio({
                         ? "ring-indigo-500"
                         : "ring-emerald-500/60";
                   return (
-                    <li key={a.id} className="relative">
+                    <li key={k} className="relative">
                       <button
                         type="button"
                         aria-pressed={marcado}
                         disabled={bloqueado}
-                        onClick={() => alternar(a.id)}
+                        onClick={() => alternar(k)}
                         title={
                           travadoSemana
                             ? "Já foi ao laboratório esta semana — ligue “Liberar quem já foi na semana” para escolher"
@@ -883,14 +905,14 @@ export function ControleLaboratorio({
                   <ul className="flex flex-wrap gap-1.5">
                     {alunos.map((a) => (
                       <li
-                        key={a.id}
+                        key={chave(t.id, a.id)}
                         className="flex items-center gap-1 rounded-full border bg-background py-1 pl-3 pr-1.5 text-sm"
                       >
                         {a.nome}
                         <button
                           type="button"
                           aria-label={`Tirar ${a.nome}`}
-                          onClick={() => alternar(a.id)}
+                          onClick={() => alternar(chave(t.id, a.id))}
                           className="rounded-full p-1 hover:bg-muted"
                         >
                           <X className="size-3.5" aria-hidden />
