@@ -102,12 +102,12 @@ export function LinhaDoAno({
               <span className="text-right">
                 <b className="block text-base tabular-nums">{porcento(f.leem)}</b>
                 {i > 0 ? (
-                  <span className="block text-[10px] text-muted-foreground">
+                  <span className="block text-[11px] text-muted-foreground">
                     {Math.round((f.leem - leitura[i - 1]!.leem) * 100) >= 0 ? "+" : ""}
                     {Math.round((f.leem - leitura[i - 1]!.leem) * 100)} pts
                   </span>
                 ) : (
-                  <span className="block text-[10px] text-muted-foreground">leem bem</span>
+                  <span className="block text-[11px] text-muted-foreground">leem bem</span>
                 )}
               </span>
             </li>
@@ -144,7 +144,7 @@ export function LinhaDoAno({
                     style={{ height: `${c.valor * 100}%`, animationDelay: `${i * 150}ms` }}
                   />
                 ) : (
-                  <span className="m-auto text-[10px] text-muted-foreground">carregando…</span>
+                  <span className="m-auto text-[11px] text-muted-foreground">carregando…</span>
                 )}
               </div>
               <span className="text-xs font-semibold text-muted-foreground">

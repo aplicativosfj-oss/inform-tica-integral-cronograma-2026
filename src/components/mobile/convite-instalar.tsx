@@ -64,7 +64,7 @@ export function ConviteInstalar() {
     <div
       role="dialog"
       aria-label="Instalar o aplicativo"
-      className="fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md animate-in slide-in-from-bottom-4 fade-in rounded-2xl border border-white/20 bg-background/80 p-4 shadow-2xl backdrop-blur-2xl duration-300 xl:bottom-6"
+      className="fixed inset-x-3 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md animate-in slide-in-from-bottom-4 fade-in rounded-2xl border border-white/20 bg-background/80 p-4 shadow-2xl backdrop-blur-2xl duration-300 xl:bottom-6"
     >
       <button
         type="button"

@@ -319,14 +319,14 @@ function Numero({
   vivo?: boolean;
 }) {
   return (
-    <div className="hero-subir flex items-center gap-3 rounded-2xl border border-border/70 bg-card/95 p-4 shadow-lg backdrop-blur-xl">
+    <div className="hero-subir flex flex-col items-start gap-2.5 rounded-2xl border border-border/70 bg-card/95 p-3.5 shadow-lg backdrop-blur-xl sm:flex-row sm:items-center sm:gap-3 sm:p-4">
       <span
         className={cn(
-          "relative flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br to-transparent",
+          "relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br to-transparent sm:size-12 sm:rounded-2xl",
           CORES_NUMERO[cor],
         )}
       >
-        <Icone className="size-6" aria-hidden />
+        <Icone className="size-5 sm:size-6" aria-hidden />
         {vivo ? (
           <span className="absolute -right-0.5 -top-0.5 size-3 animate-pulse rounded-full bg-emerald-500 ring-2 ring-card" />
         ) : null}

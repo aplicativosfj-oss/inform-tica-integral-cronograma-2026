@@ -6,14 +6,15 @@ import { useAppStore } from "@/lib/app-store";
 
 const ANO_ATUAL = new Date().getFullYear();
 
+/** `naBarra`: já está na barra inferior do celular, então o rodapé só mostra no computador. */
 const LINKS = [
-  { to: "/", rotulo: "Início" },
-  { to: "/agenda", rotulo: "Laboratório" },
-  { to: "/resultados", rotulo: "Resultados" },
-  { to: "/avaliacao", rotulo: "Avaliações" },
-  { to: "/infoteca", rotulo: "Infoteca" },
-  { to: "/entre-turnos", rotulo: "Entre Turnos" },
-  { to: "/sobre", rotulo: "Sobre" },
+  { to: "/", rotulo: "Início", naBarra: true },
+  { to: "/agenda", rotulo: "Laboratório", naBarra: true },
+  { to: "/resultados", rotulo: "Resultados", naBarra: true },
+  { to: "/avaliacao", rotulo: "Avaliações", naBarra: false },
+  { to: "/infoteca", rotulo: "Infoteca", naBarra: true },
+  { to: "/entre-turnos", rotulo: "Entre Turnos", naBarra: false },
+  { to: "/sobre", rotulo: "Sobre", naBarra: false },
 ] as const;
 
 /**
@@ -36,7 +37,7 @@ export function SiteFooter() {
         <nav aria-label="Atalhos do rodapé">
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/75">
             {LINKS.map((l) => (
-              <li key={l.to}>
+              <li key={l.to} className={l.naBarra ? "max-xl:hidden" : undefined}>
                 <Link
                   to={l.to}
                   className="underline-offset-4 transition-colors hover:text-white hover:underline"

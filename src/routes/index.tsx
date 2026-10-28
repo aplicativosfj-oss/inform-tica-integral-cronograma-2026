@@ -121,7 +121,7 @@ function Index() {
             className="absolute inset-x-0 bottom-0 -z-10 hidden h-24 bg-gradient-to-t from-background to-transparent dark:block"
           />
 
-          <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-4 py-[clamp(1.25rem,5svh,4rem)] sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-4 py-[clamp(1.25rem,5svh,4rem)] sm:px-6 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:gap-10">
             <div>
               <p className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-white/90 backdrop-blur sm:inline-flex [@media(max-height:640px)]:!hidden">
                 <GraduationCap className="size-4 text-sun" aria-hidden />
