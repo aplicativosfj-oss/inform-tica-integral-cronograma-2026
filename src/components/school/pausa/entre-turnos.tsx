@@ -13,7 +13,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { CompartilharRedes } from "@/components/school/pausa/compartilhar-redes";
@@ -113,51 +113,6 @@ const CHOQUES = TURMAS_PAUSA.flatMap((t) =>
   })),
 );
 
-/** Os quatro passos da explicação "Como funciona". */
-const PASSOS: {
-  desenho: Espaco | "repouso";
-  titulo: string;
-  frequencia: string;
-  texto: string;
-  quem: string;
-  cor: string;
-}[] = [
-  {
-    desenho: "aula",
-    titulo: "Descanso na sala",
-    frequencia: "3 dias por semana",
-    texto: "A turma descansa na própria sala, num ambiente calmo.",
-    quem: "Monitores da turma",
-    cor: "text-indigo-700 dark:text-indigo-300",
-  },
-  {
-    desenho: "filme",
-    titulo: "Sala de filme",
-    frequencia: "1 dia por semana",
-    texto: "A turma assiste a um filme ou desenho.",
-    quem: "Monitores da turma",
-    cor: "text-rose-700 dark:text-rose-300",
-  },
-  {
-    desenho: "jogos",
-    titulo: "Sala de jogos",
-    frequencia: "1 dia por semana",
-    texto: "Cada ano escolar tem o seu dia: jogos de regras, raciocínio e convívio.",
-    quem: ESPACOS.jogos.responsavel ?? "",
-    cor: "text-emerald-700 dark:text-emerald-300",
-  },
-  {
-    desenho: "repouso",
-    titulo: SALA_REPOUSO.nome,
-    frequencia: "Opcional, todo dia",
-    texto: "Para quem realmente quer dormir. Não faz parte da escala.",
-    quem: SALA_REPOUSO.grupos
-      .map((g) => `${g.responsavel} (${g.publico.toLowerCase()})`)
-      .join(" · "),
-    cor: "text-sky-700 dark:text-sky-300",
-  },
-];
-
 type Modo = "dia" | "turma";
 
 /**
@@ -214,16 +169,17 @@ export function EntreTurnos() {
               Entre <span className="text-sun">Turnos</span>
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-white/80 sm:text-lg">
-              Entre a aula da manhã e a da tarde, as crianças têm duas horas de intervalo. Aqui você
-              descobre <strong className="text-white">onde cada turma fica</strong> em cada dia e{" "}
-              <strong className="text-white">quem cuida dela</strong>.
+              Das 11h às 13h, depois do almoço, as crianças ficam em{" "}
+              <strong className="text-white">quatro lugares</strong> da escola. Veja abaixo, de
+              forma simples, <strong className="text-white">quais turmas</strong> vão para cada
+              lugar e <strong className="text-white">quem cuida</strong> delas.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-2.5">
               <a
-                href="#consulta"
+                href="#espacos"
                 className="inline-flex h-11 items-center gap-2 rounded-full bg-sun px-5 text-sm font-bold text-sun-foreground shadow-lg shadow-sun/20 transition-transform hover:-translate-y-0.5"
               >
-                <Search className="size-4" aria-hidden /> Consultar por dia ou por turma
+                <Search className="size-4" aria-hidden /> Ver os lugares e os responsáveis
               </a>
               <button
                 type="button"
@@ -262,45 +218,8 @@ export function EntreTurnos() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------- como funciona */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
-          Como funciona
-        </p>
-        <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
-          Cada turma passa por três lugares na semana
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Três dias de descanso na própria sala, um dia de filme e um dia de jogos. Quem quiser
-          dormir pode ir à sala de repouso em qualquer dia.
-        </p>
-        <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {PASSOS.map((p, i) => (
-            <li
-              key={p.titulo}
-              className="flex flex-col overflow-hidden rounded-3xl border border-border bg-card"
-            >
-              <IlustracaoEspaco espaco={p.desenho} className="aspect-[16/9] w-full" />
-              <div className="flex flex-1 flex-col p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="grid size-7 place-items-center rounded-full bg-muted text-xs font-extrabold">
-                    {i + 1}
-                  </span>
-                  <span className={cn("text-xs font-bold", p.cor)}>{p.frequencia}</span>
-                </div>
-                <h3 className="mt-3 text-lg font-extrabold">{p.titulo}</h3>
-                <p className="mt-1 flex-1 text-sm leading-relaxed text-muted-foreground">
-                  {p.texto}
-                </p>
-                <p className="mt-3 flex items-start gap-2 border-t border-border pt-3 text-sm">
-                  <HandHeart className={cn("mt-0.5 size-4 shrink-0", p.cor)} aria-hidden />
-                  <span className="font-semibold">{p.quem}</span>
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+      {/* --------------------------------------------------------- os espaços */}
+      <OsEspacos />
 
       {/* ------------------------------------------------------------ consulta */}
       <section id="consulta" className="scroll-mt-20 border-y border-border bg-muted/40">
@@ -317,7 +236,7 @@ export function EntreTurnos() {
                 Consulte
               </p>
               <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
-                {modo === "dia" ? "O que acontece em cada dia" : "A semana de cada turma"}
+                {modo === "dia" ? "Escolha um dia" : "Escolha uma turma"}
               </h2>
             </div>
             <div
@@ -510,90 +429,178 @@ export function EntreTurnos() {
         </div>
       </section>
 
-      {/* -------------------------------------------------------------- equipe */}
-      <section className="border-t border-border bg-muted/40">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
-            Equipe
-          </p>
-          <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
-            Quem cuida das crianças
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Cada turma tem os seus monitores. A sala de jogos e a sala de repouso têm responsáveis
-            próprios. Em caso de dúvida, procure a coordenação da escola.
-          </p>
-
-          <h3 className="mt-6 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Espaços com responsável próprio
-          </h3>
-          <ul className="mt-3 grid gap-3 md:grid-cols-3">
-            {[
-              {
-                desenho: "jogos" as const,
-                rotulo: "Sala de jogos",
-                detalhe: "um ano escolar por dia",
-                nome: ESPACOS.jogos.responsavel,
-                cor: "border-emerald-400/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-              },
-              ...SALA_REPOUSO.grupos.map((g) => ({
-                desenho: "repouso" as const,
-                rotulo: `Repouso · ${g.publico.toLowerCase()}`,
-                detalhe: g.local.toLowerCase(),
-                nome: g.responsavel,
-                cor: "border-sky-400/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
-              })),
-            ].map((c) => (
-              <li
-                key={c.rotulo}
-                className={cn("flex items-center gap-3 rounded-2xl border p-4", c.cor)}
-              >
-                <IlustracaoEspaco espaco={c.desenho} className="h-12 w-16 shrink-0 rounded-lg" />
-                <span>
-                  <span className="block text-xs font-bold uppercase tracking-wider">
-                    {c.rotulo}
-                  </span>
-                  <span className="block text-base font-extrabold text-foreground">{c.nome}</span>
-                  <span className="block text-xs text-muted-foreground">{c.detalhe}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-
-          <h3 className="mt-8 text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Monitores de cada turma
-          </h3>
-          <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {TURMAS_PAUSA.map((t) => (
-              <li key={t.turma}>
-                <button
-                  type="button"
-                  onClick={() => abrir({ modo: "turma", turma: t.turma })}
-                  className="h-full w-full cursor-pointer rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-sun/50"
-                >
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-sun">
-                    {t.turma}
-                  </span>
-                  <span className="mt-1.5 block space-y-0.5 text-sm font-semibold">
-                    {t.monitores.map((n) => (
-                      <span key={n} className="block">
-                        {n}
-                      </span>
-                    ))}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-8 text-xs text-muted-foreground">
-            Fonte: Cronograma de Atendimento às turmas no período de repouso após o almoço e escala
-            da sala de jogos · {ESCOLA}.
-          </p>
-        </div>
-      </section>
+      <p className="mx-auto max-w-6xl px-4 pb-10 text-xs text-muted-foreground sm:px-6">
+        Fonte: Cronograma de Atendimento às turmas no período de repouso após o almoço e escala da
+        sala de jogos · {ESCOLA}.
+      </p>
 
       {montado ? createPortal(<VersaoImpressa />, document.body) : null}
     </div>
+  );
+}
+
+/** Turmas de cada dia num espaço da escala, ex.: "Segunda-feira: 5º A e 5º B". */
+function turmasPorDia(e: Espaco) {
+  return DIAS.map((d) => ({
+    dia: d.nome,
+    turmas: juntarNomes(turmasNoDia(d.dia)[e].map((t) => t.turma)),
+  })).filter((x) => x.turmas);
+}
+
+function ListaDias({ e }: { e: Espaco }) {
+  return (
+    <ul className="space-y-1">
+      {turmasPorDia(e).map((x) => (
+        <li
+          key={x.dia}
+          className="flex justify-between gap-3 border-b border-border/60 pb-1 last:border-0"
+        >
+          <span className="text-muted-foreground">{x.dia}</span>
+          <strong>{x.turmas}</strong>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Um lugar do intervalo: quando funciona, quais turmas atende e quem cuida. */
+function CartaoEspaco({
+  numero,
+  desenho,
+  nome,
+  resumo,
+  cor,
+  quando,
+  turmas,
+  responsavel,
+}: {
+  numero: number;
+  desenho: Espaco | "repouso";
+  nome: string;
+  resumo: string;
+  cor: string;
+  quando: ReactNode;
+  turmas: ReactNode;
+  responsavel: ReactNode;
+}) {
+  return (
+    <article className="grid overflow-hidden rounded-3xl border border-border bg-card shadow-sm md:grid-cols-[15rem_minmax(0,1fr)]">
+      <IlustracaoEspaco
+        espaco={desenho}
+        className="aspect-[16/8] w-full md:aspect-auto md:h-full"
+      />
+      <div className="p-5 sm:p-6">
+        <div className="flex items-center gap-3">
+          <span
+            className={cn(
+              "grid size-9 shrink-0 place-items-center rounded-xl text-base font-extrabold",
+              cor,
+            )}
+          >
+            {numero}
+          </span>
+          <div>
+            <h3 className="text-xl font-extrabold leading-tight">{nome}</h3>
+            <p className="text-sm text-muted-foreground">{resumo}</p>
+          </div>
+        </div>
+        <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-3">
+          {(
+            [
+              [Clock, "Quando", quando],
+              [Users, "Turmas atendidas", turmas],
+              [HandHeart, "Quem é responsável", responsavel],
+            ] as const
+          ).map(([Icone, rotulo, valor]) => (
+            <div key={rotulo} className="rounded-2xl bg-muted/50 p-3.5">
+              <dt className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Icone className="size-3.5" aria-hidden /> {rotulo}
+              </dt>
+              <dd className="mt-1.5 leading-relaxed">{valor}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </article>
+  );
+}
+
+/** Os quatro lugares do intervalo, cada um com a mesma estrutura simples. */
+function OsEspacos() {
+  return (
+    <section id="espacos" className="scroll-mt-20 mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+        Os quatro lugares
+      </p>
+      <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
+        Onde as crianças ficam e quem cuida delas
+      </h2>
+      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+        Cada turma passa 3 dias da semana na própria sala, 1 dia na sala de filme e 1 dia na sala de
+        jogos. A sala de repouso é para quem quer dormir.
+      </p>
+      <div className="mt-6 space-y-4">
+        <CartaoEspaco
+          numero={1}
+          desenho="aula"
+          nome="Sala de aula"
+          resumo="A turma descansa na própria sala."
+          cor="bg-indigo-500 text-white"
+          quando={<>3 dias por semana</>}
+          turmas={<>Todas as turmas, do 1º ao 5º ano</>}
+          responsavel={
+            <ul className="space-y-1">
+              {TURMAS_PAUSA.map((t) => (
+                <li key={t.turma}>
+                  <strong>{t.turma}:</strong> {juntarNomes(t.monitores)}
+                </li>
+              ))}
+            </ul>
+          }
+        />
+        <CartaoEspaco
+          numero={2}
+          desenho="filme"
+          nome="Sala de filme"
+          resumo="A turma assiste a um filme ou desenho."
+          cor="bg-rose-500 text-white"
+          quando={<>1 dia por semana para cada turma</>}
+          turmas={<ListaDias e="filme" />}
+          responsavel={<>Os monitores da própria turma (os mesmos da sala de aula)</>}
+        />
+        <CartaoEspaco
+          numero={3}
+          desenho="jogos"
+          nome="Sala de jogos"
+          resumo="Jogos de tabuleiro e brincadeiras com regras."
+          cor="bg-emerald-500 text-white"
+          quando={<>Todos os dias, um ano escolar por dia</>}
+          turmas={<ListaDias e="jogos" />}
+          responsavel={<strong className="text-base">{ESPACOS.jogos.responsavel}</strong>}
+        />
+        <CartaoEspaco
+          numero={4}
+          desenho="repouso"
+          nome={SALA_REPOUSO.nome}
+          resumo="Para o aluno que quer dormir. É opcional."
+          cor="bg-sky-500 text-white"
+          quando={<>Todos os dias, só para quem quiser</>}
+          turmas={<>Alunos de qualquer turma</>}
+          responsavel={
+            <ul className="space-y-1.5">
+              {SALA_REPOUSO.grupos.map((g) => (
+                <li key={g.publico}>
+                  <strong className="text-base">{g.responsavel}</strong>
+                  <span className="block text-muted-foreground">
+                    {g.publico}, na {g.local.toLowerCase()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          }
+        />
+      </div>
+    </section>
   );
 }
 
