@@ -521,7 +521,7 @@ export function ControleLaboratorio({
                     já foram na semana
                   </span>
                   <span className="text-muted-foreground">
-                    <strong className="text-rose-600 dark:text-rose-400">{doTurmaFila}</strong> na
+                    <strong className="text-sky-600 dark:text-sky-400">{doTurmaFila}</strong> na
                     fila de prioridade
                   </span>
                   <span className="text-xs text-muted-foreground">
@@ -629,7 +629,7 @@ export function ControleLaboratorio({
                     : sit.naSemana
                       ? "ring-amber-500"
                       : sit.prioridade
-                        ? "ring-rose-400"
+                        ? "ring-primary/70"
                         : "ring-emerald-500/60";
                   return (
                     <li key={a.id} className="relative">
@@ -652,7 +652,7 @@ export function ControleLaboratorio({
                             : "bg-card hover:-translate-y-0.5 hover:shadow-md",
                           !marcado &&
                             sit.prioridade &&
-                            "border-rose-400/60 bg-gradient-to-r from-rose-500/10 to-transparent",
+                            "border-primary/40 bg-gradient-to-r from-primary/10 to-transparent",
                           travadoSemana &&
                             "cursor-not-allowed border-dashed opacity-50 grayscale [background-image:repeating-linear-gradient(135deg,transparent_0_7px,rgb(120_120_120/0.12)_7px_14px)]",
                           bloqueado && !travadoSemana && "cursor-not-allowed opacity-45",
@@ -687,7 +687,7 @@ export function ControleLaboratorio({
                             ) : null}
                             {fila && fila <= 10 && !marcado ? (
                               <span
-                                className="shrink-0 rounded-md bg-rose-600 px-1.5 text-[10px] font-extrabold text-white"
+                                className="shrink-0 rounded-md bg-primary px-1.5 text-[10px] font-extrabold text-primary-foreground"
                                 title={`${fila}º na fila de prioridade`}
                               >
                                 {fila}º
@@ -721,14 +721,13 @@ export function ControleLaboratorio({
                                 {sit.ultimaIda ? ` (${dataCurta(sit.ultimaIda)})` : ""}
                               </span>
                             ) : sit.diasSemIr === null ? (
-                              <span className="font-semibold text-rose-600 dark:text-rose-400">
-                                não vai há mais de {JANELA_HISTORICO_DIAS} dias
+                              <span className="font-semibold text-sky-600 dark:text-sky-300">
+                                ainda não foi em {JANELA_HISTORICO_DIAS} dias
                               </span>
                             ) : (
                               <span
                                 className={cn(
-                                  sit.prioridade &&
-                                    "font-semibold text-rose-600 dark:text-rose-400",
+                                  sit.prioridade && "font-semibold text-sky-600 dark:text-sky-300",
                                 )}
                               >
                                 {sit.diasSemIr === 0
