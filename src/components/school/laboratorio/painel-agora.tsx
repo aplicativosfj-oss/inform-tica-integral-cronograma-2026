@@ -1,6 +1,7 @@
 import { Clock3, History, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
+import fotoLabLivre from "@/assets/laboratorio-moderno.jpg";
 import fotoLaboratorio from "@/assets/laboratorio-informatica-turma.jpg";
 import { PalcoGrupo } from "@/components/school/laboratorio/palco-grupo";
 import { Badge } from "@/components/ui/badge";
@@ -124,6 +125,67 @@ function CartaoGrupo({
 }
 
 /**
+ * Destaque de quando não há turma no laboratório: foto do laboratório ao
+ * fundo e um painel de vidro dizendo que os computadores estão livres, qual
+ * é a próxima turma marcada e quanto o laboratório já foi usado hoje.
+ */
+function LaboratorioLivre({
+  proximo,
+  aulasHoje,
+  alunosHoje,
+}: {
+  proximo: GrupoLab | null;
+  aulasHoje: number;
+  alunosHoje: number;
+}) {
+  return (
+    <div className="dark relative isolate overflow-hidden rounded-2xl border border-white/15 text-white shadow-lg">
+      <img
+        src={fotoLabLivre}
+        alt=""
+        aria-hidden
+        loading="lazy"
+        className="hero-zoom absolute inset-0 -z-20 size-full object-cover"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink via-ink/70 to-indigo-950/40"
+      />
+      <div className="flex min-h-56 flex-col justify-end gap-3 p-4 sm:p-5">
+        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200 backdrop-blur-xl">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+          </span>
+          Laboratório livre
+        </span>
+        <div className="rounded-2xl border border-white/20 bg-white/[0.12] p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_32px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl backdrop-saturate-150">
+          <p className="font-heading text-xl font-extrabold leading-tight sm:text-2xl">
+            Computadores prontos para a próxima turma
+          </p>
+          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/85">
+            <Clock3 className="size-4 shrink-0 text-sun" aria-hidden />
+            {proximo
+              ? `Próxima: ${proximo.turmaId === "mista" ? "aula mista" : proximo.turmaRotulo}, às ${horaNaEscola(proximo.inicio)}`
+              : "Nenhuma turma marcada para agora."}
+          </p>
+          {aulasHoje > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-white/15 pt-3 text-xs font-semibold">
+              <span className="rounded-full bg-white/15 px-2.5 py-1">
+                {aulasHoje} aula{aulasHoje === 1 ? "" : "s"} hoje
+              </span>
+              <span className="rounded-full bg-white/15 px-2.5 py-1">
+                {alunosHoje} aluno{alunosHoje === 1 ? "" : "s"} já usaram
+              </span>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Painel ao vivo: quem está no laboratório agora, quem vem em seguida e quem
  * já passou hoje. Público; só quem está logado vê os botões de encerrar.
  */
@@ -189,9 +251,15 @@ export function PainelLaboratorioAgora({
         ) : (
           <>
             {aoVivo.length === 0 ? (
-              <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
-                Ninguém no laboratório agora. A próxima turma já pode chegar!
-              </p>
+              <LaboratorioLivre
+                proximo={proximos[0] ?? null}
+                aulasHoje={grupos.filter((g) => estado(g) === "encerrada").length}
+                alunosHoje={
+                  new Set(
+                    doDia.filter((s) => s.ausencia === null).map((s) => s.turmaId + s.alunoId),
+                  ).size
+                }
+              />
             ) : (
               <div className="space-y-3">
                 {aoVivo.map((g) => (
