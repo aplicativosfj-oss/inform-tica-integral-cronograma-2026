@@ -384,20 +384,6 @@ function Index() {
 
         <CanalYoutubeSection />
 
-        <section className="border-t border-border/60 bg-muted/40">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-6 text-center sm:px-6">
-            <MarcaLogo tamanho={44} />
-            <h2 className="text-base font-bold">{config.nomeEscola}</h2>
-            <p className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground/80">INEP {config.inep}</span>
-              <span aria-hidden>·</span>
-              <span className="flex items-center gap-1">
-                <MapPin className="size-3.5 shrink-0" /> {config.endereco}
-              </span>
-            </p>
-          </div>
-        </section>
-
         <SiteFooter />
       </div>
     </div>
