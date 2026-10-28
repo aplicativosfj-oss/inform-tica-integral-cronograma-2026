@@ -240,7 +240,7 @@ function RootComponent() {
                 <BarraInferior />
                 <ConviteInstalar />
                 {/* No celular, os avisos sobem acima da barra inferior. */}
-                <Toaster mobileOffset={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))" }} />
+                <Toaster mobileOffset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }} />
                 {PROGRAMACAO_ATIVA ? <AvisoAulaEmBreve /> : null}
                 <AlunoSessaoGuard />
               </JovemPanRadioProvider>

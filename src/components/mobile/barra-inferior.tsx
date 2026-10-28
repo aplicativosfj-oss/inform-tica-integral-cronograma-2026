@@ -57,19 +57,17 @@ export function BarraInferior() {
   return (
     <>
       {/* Reserva o espaço da barra no fim da página, para nada ficar escondido atrás dela. */}
-      <div aria-hidden className="h-[calc(4.75rem+env(safe-area-inset-bottom))] xl:hidden" />
+      <div aria-hidden className="h-[calc(3.5rem+env(safe-area-inset-bottom))] xl:hidden" />
       <nav
         aria-label="Navegação principal"
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] xl:hidden"
+        // Ocupa a largura toda e é quase opaca: o conteúdo não aparece por baixo,
+        // fica só o acabamento de vidro fosco. Ao rolar, ganha uma sombra leve.
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl backdrop-saturate-150 transition-shadow duration-300 dark:bg-slate-950/95 xl:hidden",
+          rolou && "shadow-[0_-6px_24px_-12px_rgb(0_0_0/0.45)]",
+        )}
       >
-        <ul
-          className={cn(
-            "pointer-events-auto mx-auto flex h-14 max-w-md items-stretch rounded-2xl border px-1 transition-[background-color,box-shadow,border-color] duration-300",
-            rolou
-              ? "border-white/25 bg-background/60 shadow-[0_10px_30px_-10px_rgb(0_0_0/0.45)] backdrop-blur-2xl backdrop-saturate-150 dark:border-white/10 dark:bg-slate-900/55"
-              : "border-border/70 bg-background/85 shadow-sm backdrop-blur-md",
-          )}
-        >
+        <ul className="mx-auto flex h-14 max-w-xl items-stretch px-1">
           {ITENS.map(({ to, label, Icone }) => {
             const ativo = to === "/" ? caminho === "/" : caminho.startsWith(to);
             return (
