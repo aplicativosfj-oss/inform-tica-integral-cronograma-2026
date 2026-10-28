@@ -12,11 +12,13 @@ import {
   HandHeart,
   Home,
   Info,
+  LayoutGrid,
   LayoutDashboard,
   LogIn,
   ListChecks,
   LogOut,
   Menu,
+  MonitorSmartphone,
   Presentation,
   Puzzle,
   Users2,
@@ -43,6 +45,7 @@ import { useAppStore } from "@/lib/app-store";
 import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
 import { useConfirmar } from "@/lib/confirm-store";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
+import { cn } from "@/lib/utils";
 import { Marca, MarcaLogo } from "@/components/school/marca";
 import {
   DropdownMenu,
@@ -51,28 +54,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function NavLink({ to, label }: { to: string; label: string }) {
+function NavLink({ to, label, Icone }: { to: string; label: string; Icone: LucideIcon }) {
   const location = useLocation();
   const isActive = location.pathname === to || (to === "/" && location.pathname === "");
 
   return (
-    <Button
-      asChild
-      variant="ghost"
-      size="sm"
-      className={`relative hidden whitespace-nowrap px-1.5 text-[15px] transition-all duration-300 xl:inline-flex ${
+    <Link
+      to={to}
+      aria-current={isActive ? "page" : undefined}
+      className={cn(
+        "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold transition-colors xl:inline-flex",
         isActive
-          ? "text-slate-900 bg-blue-400/40 font-semibold dark:text-white dark:bg-cyan-400/30"
-          : "text-slate-700 hover:text-white hover:bg-blue-600 hover:shadow-md hover:scale-105 dark:text-white/80 dark:hover:text-slate-900 dark:hover:bg-cyan-300 dark:hover:shadow-lg dark:hover:scale-105"
-      }`}
+          ? "bg-primary text-primary-foreground shadow-sm"
+          : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
+      )}
     >
-      <Link to={to}>
-        {label}
-        {isActive && (
-          <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/50 dark:from-blue-400 dark:to-cyan-400 dark:shadow-blue-400/50" />
-        )}
-      </Link>
-    </Button>
+      <Icone className="size-4" aria-hidden />
+      {label}
+    </Link>
   );
 }
 
@@ -102,12 +101,12 @@ function tituloDaPagina(pathname: string): string {
   return "Laboratório de informática";
 }
 
-const LINKS_MAIS = [
-  { to: "/coordenacao", label: "Coordenação" },
-  { to: "/professor", label: "Professor" },
-  { to: "/mediador", label: "Mediadores" },
-  { to: "/sobre", label: "Sobre" },
-] as const;
+const LINKS_MAIS: { to: string; label: string; Icone: LucideIcon }[] = [
+  { to: "/coordenacao", label: "Coordenação", Icone: Users2 },
+  { to: "/professor", label: "Professor", Icone: Presentation },
+  { to: "/mediador", label: "Mediadores", Icone: HandHeart },
+  { to: "/sobre", label: "Sobre", Icone: Info },
+];
 
 /** Atalhos de equipe e institucionais, guardados num menu para o cabeçalho caber na janela. */
 function MaisLinks() {
@@ -116,22 +115,25 @@ function MaisLinks() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`hidden gap-1 whitespace-nowrap px-2 text-[15px] xl:inline-flex ${
+        <button
+          type="button"
+          className={cn(
+            "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold transition-colors xl:inline-flex",
             ativo
-              ? "bg-primary/15 font-semibold text-foreground"
-              : "text-slate-700 dark:text-white/80"
-          }`}
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
+          )}
         >
-          Mais <ChevronDown className="size-4" aria-hidden />
-        </Button>
+          <LayoutGrid className="size-4" aria-hidden /> Mais{" "}
+          <ChevronDown className="size-3.5 opacity-70" aria-hidden />
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {LINKS_MAIS.map((l) => (
-          <DropdownMenuItem key={l.to} asChild>
-            <Link to={l.to}>{l.label}</Link>
+      <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5">
+        {LINKS_MAIS.map(({ to, label, Icone }) => (
+          <DropdownMenuItem key={to} asChild className="gap-2.5 rounded-lg py-2 font-medium">
+            <Link to={to}>
+              <Icone className="size-4 text-primary" aria-hidden /> {label}
+            </Link>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
@@ -327,7 +329,7 @@ export function NavBar() {
   }
 
   return (
-    <header className="relative sticky top-0 z-40 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 text-slate-900 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white dark:shadow-black/40">
+    <header className="relative sticky top-0 z-40 border-b border-border/60 bg-background/80 text-foreground shadow-sm backdrop-blur-xl">
       {/* Filete da marca rente à base: é o que separa a barra do
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
       <span
@@ -339,14 +341,16 @@ export function NavBar() {
           <Marca curto />
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5 xl:gap-0">
-          <NavLink to="/" label="Início" />
-          <NavLink to="/agenda" label="Laboratório" />
-          <NavLink to="/resultados" label="Resultados" />
-          <NavLink to="/avaliacao" label="Avaliações" />
-          <NavLink to="/infoteca" label="Infoteca" />
-          <NavLink to="/aluno" label="Área do Aluno" />
-          <MaisLinks />
+        <nav className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <div className="hidden items-center gap-0.5 rounded-full border border-border/60 bg-muted/60 p-1 xl:flex">
+            <NavLink to="/" label="Início" Icone={Home} />
+            <NavLink to="/agenda" label="Laboratório" Icone={MonitorSmartphone} />
+            <NavLink to="/resultados" label="Resultados" Icone={BarChart3} />
+            <NavLink to="/avaliacao" label="Avaliações" Icone={ListChecks} />
+            <NavLink to="/infoteca" label="Infoteca" Icone={Puzzle} />
+            <NavLink to="/aluno" label="Área do Aluno" Icone={GraduationCap} />
+            <MaisLinks />
+          </div>
           <span className="hidden 2xl:contents">
             <HeaderRadioPlayer />
           </span>
@@ -358,7 +362,7 @@ export function NavBar() {
                 asChild
                 variant="ghost"
                 size="sm"
-                className="relative hidden text-slate-700 transition-all duration-300 hover:text-slate-900 hover:bg-slate-100/50 dark:text-white/80 dark:hover:text-white dark:hover:bg-white/10 sm:inline-flex"
+                className="relative hidden rounded-full text-foreground/80 hover:bg-foreground/10 hover:text-foreground sm:inline-flex"
               >
                 <Link to="/dashboard">
                   <LayoutDashboard />
@@ -378,7 +382,7 @@ export function NavBar() {
             <Button
               asChild
               size="sm"
-              className="hidden bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg sm:inline-flex"
+              className="hidden rounded-full bg-primary px-4 text-primary-foreground shadow-sm hover:bg-primary/90 sm:inline-flex"
             >
               <Link to="/login">Entrar</Link>
             </Button>

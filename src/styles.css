@@ -18,7 +18,6 @@
  * 2. Register it in @theme inline as --color-<name>: var(--<name>)
  */
 
-
 /*
  * IDENTIDADE 2026 — "Tinta & Sol".
  * Índigo-tinta como cor da marca, âmbar-sol como destaque, menta como apoio.
@@ -594,12 +593,22 @@
    As cores vêm das variáveis --jf-a / --jf-b definidas pela própria janela. */
 .jf-grande .jf-corpo {
   background-image:
-    radial-gradient(circle at 0% 0%, color-mix(in oklab, var(--jf-a) 10%, transparent), transparent 55%),
-    radial-gradient(circle at 100% 100%, color-mix(in oklab, var(--jf-b) 8%, transparent), transparent 55%);
+    radial-gradient(
+      circle at 0% 0%,
+      color-mix(in oklab, var(--jf-a) 10%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      color-mix(in oklab, var(--jf-b) 8%, transparent),
+      transparent 55%
+    );
   font-size: 1.125rem;
 }
 /* Nenhum texto do conteúdo fica minúsculo (exceto desenhos em SVG). */
-.jf-grande .jf-corpo :is(
+.jf-grande
+  .jf-corpo
+  :is(
     .text-xs,
     [class*="text-[9px]"],
     [class*="text-[10px]"],
@@ -652,10 +661,27 @@
   color: #fff;
 }
 
-
 /* Grade pontilhada da identidade: lembra a tela de um monitor antigo e o
    caderno quadriculado ao mesmo tempo. Usada de fundo nas seções de destaque. */
 .fundo-pixel {
-  background-image: radial-gradient(color-mix(in oklch, var(--foreground) 14%, transparent) 1.1px, transparent 1.1px);
+  background-image: radial-gradient(
+    color-mix(in oklch, var(--foreground) 14%, transparent) 1.1px,
+    transparent 1.1px
+  );
   background-size: 22px 22px;
+}
+
+/* Página inicial: cada seção ocupa uma janela inteira (menos a barra do topo),
+   com o conteúdo centralizado, e a rolagem "encaixa" de uma seção na outra.
+   `proximity` só ajuda quando a pessoa para perto de uma seção; não prende. */
+html.home-snap {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 4rem;
+}
+.secao-janela {
+  min-height: calc(100svh - 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  scroll-snap-align: start;
 }

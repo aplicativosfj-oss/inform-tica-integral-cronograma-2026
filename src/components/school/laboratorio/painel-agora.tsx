@@ -122,7 +122,16 @@ function CartaoGrupo({
  * Painel ao vivo: quem está no laboratório agora, quem vem em seguida e quem
  * já passou hoje. Público; só quem está logado vê os botões de encerrar.
  */
-export function PainelLaboratorioAgora({ dados, logado }: { dados: DadosLab; logado: boolean }) {
+export function PainelLaboratorioAgora({
+  dados,
+  logado,
+  rolar = false,
+}: {
+  dados: DadosLab;
+  logado: boolean;
+  /** Limita a altura à janela e rola por dentro, para a seção caber numa tela. */
+  rolar?: boolean;
+}) {
   const agora = useAgora(1000);
   const hoje = hojeNaEscola();
   const doDia = dados.sessoes.filter((s) => s.data === hoje);
@@ -151,7 +160,9 @@ export function PainelLaboratorioAgora({ dados, logado }: { dados: DadosLab; log
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent
+        className={`space-y-4 ${rolar ? "max-h-[calc(100svh-19rem)] min-h-32 overflow-y-auto" : ""}`}
+      >
         {dados.erro === TABELA_AUSENTE ? (
           logado ? (
             <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">

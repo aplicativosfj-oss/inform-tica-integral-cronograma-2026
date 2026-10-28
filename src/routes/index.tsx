@@ -101,6 +101,10 @@ function Index() {
   const lab = useSessoesLab();
   const agora = useAgora(30_000);
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
+  useEffect(() => {
+    document.documentElement.classList.add("home-snap");
+    return () => document.documentElement.classList.remove("home-snap");
+  }, []);
   const noLabAgora = new Set(
     lab.sessoes.filter((x) => estadoDaSessao(x, agora) === "ao-vivo").map((x) => x.alunoId),
   ).size;
@@ -115,7 +119,7 @@ function Index() {
         <NavBar />
 
         {/* ───────── Hero: foto do laboratório de fundo ───────── */}
-        <section className="relative isolate overflow-hidden border-b border-border/60 text-white">
+        <section className="secao-janela relative isolate overflow-hidden border-b border-border/60 text-white">
           <div
             aria-hidden
             className="absolute inset-0 -z-30 bg-cover bg-[position:62%_35%]"
@@ -134,26 +138,26 @@ function Index() {
             className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-background to-transparent"
           />
 
-          <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:px-6 lg:min-h-[min(38rem,calc(100svh-4.5rem))] lg:grid-cols-[1.2fr_0.8fr] lg:gap-10 lg:py-16">
+          <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-4 py-[clamp(1.25rem,5svh,4rem)] sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-white/90 backdrop-blur">
+              <p className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-white/90 backdrop-blur sm:inline-flex [@media(max-height:640px)]:!hidden">
                 <GraduationCap className="size-4 text-sun" aria-hidden />
                 Escola Dr. Eiraldo Carneiro de França · Feijó, Acre
               </p>
-              <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.02] text-white sm:text-6xl lg:text-7xl">
+              <h1 className="mt-[clamp(0.75rem,2.5svh,1.25rem)] text-[clamp(2.1rem,min(8.5vw,9svh),4.6rem)] font-extrabold leading-[1.02] text-white">
                 Todo dia tem criança{" "}
                 <span className="bg-[linear-gradient(transparent_62%,color-mix(in_oklch,var(--color-sun)_85%,transparent)_62%)] px-1">
                   descobrindo o mundo
                 </span>{" "}
                 aqui.
               </h1>
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
+              <p className="mt-[clamp(0.75rem,2.5svh,1.25rem)] max-w-xl text-[clamp(1rem,2.4svh,1.125rem)] leading-relaxed text-white/80">
                 Este é o cantinho da informática da nossa escola. O professor{" "}
                 {config.professorInformatica} escolhe quem vai, marca quanto tempo cada grupo fica e
                 você acompanha tudo daqui, em tempo real.
               </p>
 
-              <div className="mt-7 flex flex-wrap gap-3">
+              <div className="mt-[clamp(1rem,3svh,1.75rem)] flex flex-wrap gap-3">
                 <Button
                   asChild
                   size="lg"
@@ -175,13 +179,13 @@ function Index() {
                 </Button>
               </div>
 
-              <dl className="mt-8 grid max-w-xl grid-cols-2 divide-x divide-y divide-white/15 overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur sm:grid-cols-4 sm:divide-y-0">
+              <dl className="mt-[clamp(1rem,3.5svh,2rem)] grid max-w-xl grid-cols-4 divide-x divide-white/15 overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur [@media(max-height:640px)]:hidden">
                 {[
                   { rotulo: "Turmas", valor: turmas.length },
                   { rotulo: "Alunos", valor: totalAlunos },
                   { rotulo: "Máquinas", valor: config.numeroComputadores },
                 ].map((d) => (
-                  <div key={d.rotulo} className="px-4 py-3">
+                  <div key={d.rotulo} className="px-2 py-2 sm:px-4 sm:py-3">
                     <dt className="text-xs font-semibold uppercase tracking-wider text-white/65">
                       {d.rotulo}
                     </dt>
@@ -196,7 +200,7 @@ function Index() {
                   <dt className="text-xs font-semibold uppercase tracking-wider text-white/65">
                     Horário
                   </dt>
-                  <dd className="font-heading text-xl font-bold leading-tight">
+                  <dd className="font-heading text-sm font-bold leading-tight sm:text-xl">
                     {config.horaInicio}–{config.horaFim}
                   </dd>
                 </div>
@@ -204,7 +208,7 @@ function Index() {
             </div>
 
             {/* Cartão de vidro: o laboratório agora, em uma olhada. */}
-            <div className="rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md">
+            <div className="hidden rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md lg:block">
               <div className="flex items-center justify-between gap-3">
                 <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-sun">
                   <span className="relative flex size-2.5">
@@ -252,137 +256,150 @@ function Index() {
               </a>
             </div>
           </div>
-          <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 text-white/60 sm:px-6" />
+          <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 text-white/60 sm:px-6 [@media(max-height:800px)]:hidden" />
         </section>
 
         {/* ───────── Laboratório ao vivo ───────── */}
-        <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <div className="mb-5 max-w-2xl">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">Ao vivo</p>
-            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
-              Quem está no laboratório neste minuto
-            </h2>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
-            <PainelLaboratorioAgora dados={lab} logado={isAuthenticated} />
-            <div className="space-y-4">
-              {isAuthenticated ? <MarcarAlunosCartao dados={lab} /> : null}
-              <WeatherWidget />
+        <section className="secao-janela">
+          {" "}
+          <div className="mx-auto w-full max-w-6xl px-4 py-[clamp(1rem,4svh,2.5rem)] sm:px-6">
+            {" "}
+            <div className="mb-5 max-w-2xl">
+              {" "}
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">Ao vivo</p>
+              <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
+                Quem está no laboratório neste minuto
+              </h2>
             </div>
-          </div>
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+              <PainelLaboratorioAgora dados={lab} logado={isAuthenticated} rolar />
+              <div className="space-y-4">
+                {isAuthenticated ? <MarcarAlunosCartao dados={lab} /> : null}
+                <WeatherWidget />{" "}
+              </div>{" "}
+            </div>{" "}
+          </div>{" "}
         </section>
 
         {/* ───────── Como funciona ───────── */}
-        <RevealSection className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <div className="mb-6 max-w-2xl">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">
-              Nos bastidores{" "}
-            </p>
-            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
-              Sem fila, sem confusão, sem ninguém esquecido
-            </h2>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                n: "01",
-                Icone: Users2,
-                titulo: "Quem vai hoje",
-                texto: "O professor escolhe, turma por turma, quem vai ao laboratório no dia.",
-                cor: "bg-primary text-primary-foreground",
-              },
-              {
-                n: "02",
-                Icone: Timer,
-                titulo: "Relógio na mão",
-                texto:
-                  "Cada grupo tem hora para entrar e para sair, e a contagem regressiva aparece ao vivo.",
-                cor: "bg-sun text-sun-foreground",
-              },
-              {
-                n: "03",
-                Icone: ShieldCheck,
-                titulo: "A vez de todo mundo",
-                texto: "Se um aluno já foi nesta semana ou neste mês, o professor recebe um aviso.",
-                cor: "bg-mint text-ink",
-              },
-              {
-                n: "04",
-                Icone: Gamepad2,
-                titulo: "Brincar também ensina",
-                texto: "Jogos, trilhas e atividades para praticar na escola ou em casa.",
-                cor: "bg-ink text-white dark:bg-secondary",
-              },
-            ].map(({ n, Icone, titulo, texto, cor }) => (
-              <div
-                key={n}
-                className="group relative overflow-hidden rounded-3xl border border-border bg-card p-5 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg"
-              >
-                <span className="absolute right-4 top-3 font-heading text-5xl font-extrabold text-foreground/[0.06]">
-                  {n}
-                </span>
-                <span className={`flex size-11 items-center justify-center rounded-2xl ${cor}`}>
-                  <Icone className="size-5" aria-hidden />
-                </span>
-                <h3 className="mt-4 text-lg font-bold">{titulo}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{texto}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 flex items-center gap-2">
-            {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map(
-              (src, i) => (
-                <SiteImage
-                  key={i}
-                  src={src}
-                  alt="Aluno usando um computador do laboratório de informática"
-                  legenda="Aluno usando um computador do laboratório de informática da escola."
-                  loading="lazy"
-                  width={64}
-                  height={64}
-                  className="size-14 rounded-2xl border-2 border-card shadow-sm sm:size-16"
-                />
-              ),
-            )}
+        <RevealSection className="secao-janela">
+          {" "}
+          <div className="mx-auto w-full max-w-6xl px-4 py-[clamp(1rem,4svh,2.5rem)] sm:px-6">
+            {" "}
+            <div className="mb-6 max-w-2xl">
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">
+                Nos bastidores{" "}
+              </p>
+              <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
+                Sem fila, sem confusão, sem ninguém esquecido
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+              {[
+                {
+                  n: "01",
+                  Icone: Users2,
+                  titulo: "Quem vai hoje",
+                  texto: "O professor escolhe, turma por turma, quem vai ao laboratório no dia.",
+                  cor: "bg-primary text-primary-foreground",
+                },
+                {
+                  n: "02",
+                  Icone: Timer,
+                  titulo: "Relógio na mão",
+                  texto:
+                    "Cada grupo tem hora para entrar e para sair, e a contagem regressiva aparece ao vivo.",
+                  cor: "bg-sun text-sun-foreground",
+                },
+                {
+                  n: "03",
+                  Icone: ShieldCheck,
+                  titulo: "A vez de todo mundo",
+                  texto:
+                    "Se um aluno já foi nesta semana ou neste mês, o professor recebe um aviso.",
+                  cor: "bg-mint text-ink",
+                },
+                {
+                  n: "04",
+                  Icone: Gamepad2,
+                  titulo: "Brincar também ensina",
+                  texto: "Jogos, trilhas e atividades para praticar na escola ou em casa.",
+                  cor: "bg-ink text-white dark:bg-secondary",
+                },
+              ].map(({ n, Icone, titulo, texto, cor }) => (
+                <div
+                  key={n}
+                  className="group relative overflow-hidden rounded-3xl border border-border bg-card p-3.5 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-5"
+                >
+                  <span className="absolute right-4 top-3 font-heading text-5xl font-extrabold text-foreground/[0.06]">
+                    {n}
+                  </span>
+                  <span className={`flex size-11 items-center justify-center rounded-2xl ${cor}`}>
+                    <Icone className="size-5" aria-hidden />
+                  </span>
+                  <h3 className="mt-4 text-lg font-bold">{titulo}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{texto}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 hidden items-center gap-2 sm:flex [@media(max-height:700px)]:!hidden">
+              {[alunosImg1, alunosImg2, alunosImg3, alunoJogoImg, alunoSorridenteImg].map(
+                (src, i) => (
+                  <SiteImage
+                    key={i}
+                    src={src}
+                    alt="Aluno usando um computador do laboratório de informática"
+                    legenda="Aluno usando um computador do laboratório de informática da escola."
+                    loading="lazy"
+                    width={64}
+                    height={64}
+                    className="size-14 rounded-2xl border-2 border-card shadow-sm sm:size-16"
+                  />
+                ),
+              )}
+            </div>
           </div>
         </RevealSection>
 
         {/* ───────── Resultados ───────── */}
-        <RevealSection className="px-4 py-6 sm:px-6">
-          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-ink p-8 text-white sm:p-12 dark:bg-card">
-            <div
-              aria-hidden
-              className="fundo-pixel absolute inset-0 opacity-30 [mask-image:linear-gradient(to_left,black,transparent_70%)]"
-            />
-            <div
-              aria-hidden
-              className="absolute -right-16 -top-16 size-64 rounded-full bg-sun/30 blur-3xl"
-            />
-            <div className="relative max-w-2xl">
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-sun">
-                Prestando contas{" "}
-              </p>
-              <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
-                Como a turma está lendo, escrevendo e aprendendo
-              </h2>
-              <p className="mt-3 text-white/75">
-                Os números do 3º bimestre, turma por turma, e o que cada resultado pede da escola.
-                Nenhuma criança é identificada.
-              </p>
-              <Button
-                asChild
-                size="lg"
-                className="mt-6 rounded-full bg-sun px-6 text-sun-foreground hover:bg-sun/90"
-              >
-                <Link to="/resultados">
-                  Abrir os resultados <ArrowRight />
-                </Link>
-              </Button>
-            </div>
-          </div>
+        <RevealSection className="secao-janela">
+          {" "}
+          <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-[clamp(1rem,4svh,2.5rem)] sm:px-6 lg:grid-cols-2">
+            {" "}
+            <div className="relative flex flex-col justify-center overflow-hidden rounded-[2rem] bg-ink p-6 text-white sm:p-10 dark:bg-card">
+              <div
+                aria-hidden
+                className="fundo-pixel absolute inset-0 opacity-30 [mask-image:linear-gradient(to_left,black,transparent_70%)]"
+              />
+              <div
+                aria-hidden
+                className="absolute -right-16 -top-16 size-64 rounded-full bg-sun/30 blur-3xl"
+              />
+              <div className="relative max-w-2xl">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-sun">
+                  Prestando contas{" "}
+                </p>
+                <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
+                  Como a turma está lendo, escrevendo e aprendendo
+                </h2>
+                <p className="mt-3 text-white/75">
+                  Os números do 3º bimestre, turma por turma, e o que cada resultado pede da escola.
+                  Nenhuma criança é identificada.
+                </p>
+                <Button
+                  asChild
+                  size="lg"
+                  className="mt-6 rounded-full bg-sun px-6 text-sun-foreground hover:bg-sun/90"
+                >
+                  <Link to="/resultados">
+                    Abrir os resultados <ArrowRight />
+                  </Link>
+                </Button>
+              </div>
+            </div>{" "}
+            <CanalYoutubeCard />{" "}
+          </div>{" "}
         </RevealSection>
-
-        <CanalYoutubeSection />
 
         <SiteFooter />
       </div>
@@ -402,11 +419,12 @@ const VIDEOS_DESTAQUE = [
  * Divulgação discreta do canal oficial da escola no YouTube: miniaturas reais
  * (sem incorporar o player, mais leve) que abrem o vídeo em uma nova aba.
  */
-function CanalYoutubeSection() {
+function CanalYoutubeCard() {
   return (
-    <RevealSection className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
-      <div className="overflow-hidden rounded-3xl border border-red-400/20 bg-gradient-to-br from-red-500/[0.06] via-transparent to-transparent p-4 dark:border-red-400/15 dark:from-red-400/[0.05] sm:p-6">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] lg:items-center">
+    <div className="h-full">
+      {" "}
+      <div className="h-full overflow-hidden rounded-[2rem] border border-red-400/20 bg-gradient-to-br from-red-500/[0.06] via-transparent to-transparent p-4 dark:border-red-400/15 dark:from-red-400/[0.05] sm:p-6">
+        <div className="grid gap-4">
           <div>
             <Badge className="mb-2 gap-1.5 rounded-full border-red-400/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-700 shadow-sm backdrop-blur-md dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">
               <Youtube className="size-4" /> Canal da escola
@@ -424,19 +442,16 @@ function CanalYoutubeSection() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2">
             {VIDEOS_DESTAQUE.map((video) => (
               <VideoThumb key={video.id} video={video} />
             ))}
           </div>
-        </div>
-      </div>
-    </RevealSection>
+        </div>{" "}
+      </div>{" "}
+    </div>
   );
-}
-
-/**
- * Miniatura de um vídeo do canal. Redes de escola costumam bloquear o
+} /** * Miniatura de um vídeo do canal. Redes de escola costumam bloquear o
  * domínio do YouTube (inclusive o CDN de miniaturas `i.ytimg.com`) — quando a
  * imagem falha ao carregar, mostramos um cartão simples no lugar de um ícone
  * de imagem quebrada, sem afetar o resto da página.
