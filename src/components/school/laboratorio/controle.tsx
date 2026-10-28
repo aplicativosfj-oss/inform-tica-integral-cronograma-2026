@@ -422,7 +422,7 @@ export function ControleLaboratorio({
               className={cn(
                 "flex items-center gap-2 rounded-full border px-3 py-1.5 transition disabled:opacity-40",
                 passo === n
-                  ? "border-primary bg-primary text-primary-foreground shadow"
+                  ? "border-indigo-600 bg-indigo-600 text-white shadow"
                   : "bg-card hover:bg-muted",
               )}
             >
@@ -484,7 +484,7 @@ export function ControleLaboratorio({
                 onClick={alternarMista}
                 className={cn(
                   "group relative ml-1 flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition hover:scale-[1.03] active:scale-95",
-                  "bg-gradient-to-r from-violet-600 via-primary to-emerald-500",
+                  "bg-gradient-to-r from-violet-600 via-indigo-500 to-emerald-500",
                   mista && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
                 )}
               >
@@ -520,8 +520,8 @@ export function ControleLaboratorio({
                     já foram na semana
                   </span>
                   <span className="text-muted-foreground">
-                    <strong className="text-sky-600 dark:text-sky-400">{doTurmaFila}</strong> na
-                    fila de prioridade
+                    <strong className="text-indigo-700 dark:text-indigo-300">{doTurmaFila}</strong>{" "}
+                    na fila de prioridade
                   </span>
                   <span className="text-xs text-muted-foreground">
                     Professor(a) {turma.professorRegente}
@@ -566,7 +566,7 @@ export function ControleLaboratorio({
                     onClick={() => setOrdem(id)}
                     className={cn(
                       "rounded-md px-3 py-1.5 transition",
-                      ordem === id ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+                      ordem === id ? "bg-indigo-600 text-white" : "hover:bg-muted",
                     )}
                   >
                     {rotulo}
@@ -593,7 +593,7 @@ export function ControleLaboratorio({
                   className={cn(
                     "flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
                     filtro === id
-                      ? "border-primary bg-primary text-primary-foreground shadow"
+                      ? "border-indigo-600 bg-indigo-600 text-white shadow"
                       : "bg-card/60 hover:bg-muted",
                   )}
                 >
@@ -628,7 +628,7 @@ export function ControleLaboratorio({
                     : sit.naSemana
                       ? "ring-amber-500"
                       : sit.prioridade
-                        ? "ring-primary/70"
+                        ? "ring-indigo-500"
                         : "ring-emerald-500/60";
                   return (
                     <li key={a.id} className="relative">
@@ -647,11 +647,11 @@ export function ControleLaboratorio({
                         className={cn(
                           "flex w-full items-center gap-3.5 rounded-xl border p-3.5 pr-10 text-left transition",
                           marcado
-                            ? "border-primary bg-primary text-primary-foreground shadow-md"
+                            ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
                             : "bg-card hover:-translate-y-0.5 hover:shadow-md",
                           !marcado &&
                             sit.prioridade &&
-                            "border-primary/40 bg-gradient-to-r from-primary/10 to-transparent",
+                            "border-indigo-500/50 bg-gradient-to-r from-indigo-500/10 to-transparent",
                           travadoSemana &&
                             "cursor-not-allowed border-dashed opacity-50 grayscale [background-image:repeating-linear-gradient(135deg,transparent_0_7px,rgb(120_120_120/0.12)_7px_14px)]",
                           bloqueado && !travadoSemana && "cursor-not-allowed opacity-45",
@@ -660,7 +660,7 @@ export function ControleLaboratorio({
                         <span
                           className={cn(
                             "relative flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-extrabold text-foreground ring-2",
-                            marcado ? "bg-white/25 text-primary-foreground ring-white/60" : ring,
+                            marcado ? "bg-white/25 text-white ring-white/60" : ring,
                           )}
                         >
                           {marcado ? (
@@ -677,7 +677,7 @@ export function ControleLaboratorio({
                             <SeloAniversario nascimento={a.nascimento} />
                             {fila && fila <= 10 && !marcado ? (
                               <span
-                                className="shrink-0 rounded-md bg-primary px-1.5 text-[10px] font-extrabold text-primary-foreground"
+                                className="shrink-0 rounded-md bg-indigo-600 px-1.5 text-[10px] font-extrabold text-white"
                                 title={`${fila}º na fila de prioridade`}
                               >
                                 {fila}º
@@ -687,7 +687,7 @@ export function ControleLaboratorio({
                           <span
                             className={cn(
                               "mt-1 flex flex-wrap items-center gap-x-1.5 text-xs",
-                              marcado ? "text-primary-foreground/85" : "text-muted-foreground",
+                              marcado ? "text-white/85" : "text-muted-foreground",
                             )}
                           >
                             {mista || busca.trim() ? (
@@ -711,13 +711,14 @@ export function ControleLaboratorio({
                                 {sit.ultimaIda ? ` (${dataCurta(sit.ultimaIda)})` : ""}
                               </span>
                             ) : sit.diasSemIr === null ? (
-                              <span className="font-semibold text-sky-600 dark:text-sky-300">
+                              <span className="font-semibold text-indigo-700 dark:text-indigo-300">
                                 ainda não foi em {JANELA_HISTORICO_DIAS} dias
                               </span>
                             ) : (
                               <span
                                 className={cn(
-                                  sit.prioridade && "font-semibold text-sky-600 dark:text-sky-300",
+                                  sit.prioridade &&
+                                    "font-semibold text-indigo-700 dark:text-indigo-300",
                                 )}
                               >
                                 {sit.diasSemIr === 0
@@ -737,7 +738,7 @@ export function ControleLaboratorio({
                         aria-label={`Abrir a ficha de ${a.nome}`}
                         title="Abrir a ficha do aluno"
                         onClick={() => setFicha({ turmaId: t.id, alunoId: a.id })}
-                        className="absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-primary"
+                        className="absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-indigo-600 dark:hover:text-indigo-300"
                       >
                         <IdCard className="size-4" aria-hidden />
                       </button>
@@ -768,7 +769,7 @@ export function ControleLaboratorio({
                         : i < ocupadosNaJanela + escolhidos.size
                           ? passouDoLimite
                             ? "bg-red-500"
-                            : "bg-primary"
+                            : "bg-indigo-600"
                           : "bg-muted",
                     )}
                   />
@@ -796,6 +797,7 @@ export function ControleLaboratorio({
             <Button
               type="button"
               size="lg"
+              className="bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
               disabled={escolhidos.size === 0}
               onClick={() => setPasso(2)}
             >
@@ -832,7 +834,7 @@ export function ControleLaboratorio({
                         : i < ocupadosNaJanela + escolhidos.size
                           ? passouDoLimite
                             ? "bg-red-500"
-                            : "bg-primary"
+                            : "bg-indigo-600"
                           : "bg-muted",
                     )}
                   />
@@ -905,7 +907,7 @@ export function ControleLaboratorio({
                 onClick={() => setModo("duracao")}
                 className={cn(
                   "rounded-md py-2 transition",
-                  modo === "duracao" ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+                  modo === "duracao" ? "bg-indigo-600 text-white" : "hover:bg-muted",
                 )}
               >
                 Por minutos
@@ -920,7 +922,7 @@ export function ControleLaboratorio({
                 }}
                 className={cn(
                   "rounded-md py-2 transition",
-                  modo === "horario" ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+                  modo === "horario" ? "bg-indigo-600 text-white" : "hover:bg-muted",
                 )}
               >
                 Escolher o horário
@@ -939,7 +941,7 @@ export function ControleLaboratorio({
                       className={cn(
                         "rounded-full border px-4 py-2 text-sm font-semibold tabular-nums transition",
                         minutos === d
-                          ? "border-primary bg-primary text-primary-foreground shadow"
+                          ? "border-indigo-600 bg-indigo-600 text-white shadow"
                           : "bg-card hover:bg-muted",
                       )}
                     >
@@ -999,7 +1001,10 @@ export function ControleLaboratorio({
             )}
 
             <p className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2.5 text-sm">
-              <Clock3 className="size-4 shrink-0 text-primary" aria-hidden />
+              <Clock3
+                className="size-4 shrink-0 text-indigo-600 dark:text-indigo-300"
+                aria-hidden
+              />
               {typeof janela === "string" ? (
                 <span className="text-muted-foreground">{janela}</span>
               ) : (
@@ -1017,7 +1022,7 @@ export function ControleLaboratorio({
               <Button
                 type="button"
                 size="lg"
-                className="flex-1"
+                className="flex-1 bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
                 disabled={
                   salvando || escolhidos.size === 0 || typeof janela === "string" || passouDoLimite
                 }
