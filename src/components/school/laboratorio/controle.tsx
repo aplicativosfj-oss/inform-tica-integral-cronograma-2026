@@ -129,6 +129,8 @@ export function ControleLaboratorio({
   const [ficha, setFicha] = useState<{ turmaId: string; alunoId: string } | null>(null);
   /** Página 1: escolher os alunos. Página 2: confirmar e definir o tempo. */
   const [passo, setPasso] = useState<1 | 2>(1);
+  /** Trava da aula mista: só entra nela depois de confirmar. */
+  const [confirmarMista, setConfirmarMista] = useState(false);
 
   const hoje = hojeNaEscola();
   const agora = Date.now();
@@ -322,6 +324,12 @@ export function ControleLaboratorio({
     setEscolhidos(new Set());
   }
 
+  /** Sair da aula mista é direto; entrar pede confirmação, para não ligar por engano. */
+  function pedirMista() {
+    if (mista) alternarMista();
+    else setConfirmarMista(true);
+  }
+
   function alternarMista() {
     setBusca("");
     setEscolhidos(new Set());
@@ -367,6 +375,13 @@ export function ControleLaboratorio({
 
   async function gravar() {
     if (selecionados.length === 0 || typeof janela === "string") return;
+    // Trava: alunos de mais de uma turma só podem ser marcados juntos na aula mista.
+    if (!mista && new Set(selecionados.map(({ t }) => t.id)).size > 1) {
+      toast.error(
+        "Há alunos de turmas diferentes escolhidos. Tire os de outra turma ou ative a aula mista.",
+      );
+      return;
+    }
     if (passouDoLimite) {
       toast.error(`O laboratório comporta ${LIMITE_ALUNOS_LAB} alunos por vez.`);
       return;
@@ -505,7 +520,7 @@ export function ControleLaboratorio({
               <button
                 type="button"
                 aria-pressed={mista}
-                onClick={alternarMista}
+                onClick={pedirMista}
                 className={cn(
                   "group relative ml-1 flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition hover:scale-[1.03] active:scale-95",
                   "bg-gradient-to-r from-violet-600 via-indigo-500 to-emerald-500",
@@ -1064,6 +1079,22 @@ export function ControleLaboratorio({
       )}
 
       {ficha ? <FichaAluno {...ficha} aberto aoFechar={() => setFicha(null)} /> : null}
+
+      <AlertDialog open={confirmarMista} onOpenChange={setConfirmarMista}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ativar a aula mista?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Na aula mista dá para juntar alunos de turmas diferentes na mesma marcação. Os alunos
+              já escolhidos serão desmarcados. Para marcar só uma turma, continue sem a aula mista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Não, continuar com uma turma</AlertDialogCancel>
+            <AlertDialogAction onClick={alternarMista}>Sim, ativar aula mista</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={avisos !== null}
