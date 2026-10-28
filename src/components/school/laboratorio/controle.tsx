@@ -1,7 +1,8 @@
-import { AlertTriangle, CheckCircle2, Clock3, Play, Users2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock3, IdCard, Play, Shuffle, Users2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { FichaAluno, rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import type { DadosLab } from "@/components/school/laboratorio/painel-agora";
 import {
   AlertDialog,
@@ -37,6 +38,7 @@ import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { cn } from "@/lib/utils";
 
 const DURACOES = [15, 20, 25, 30, 40, 50];
+const MISTA = "mista";
 
 interface Aviso {
   nome: string;
@@ -68,9 +70,20 @@ export function ControleLaboratorio({
   const [aposAtual, setAposAtual] = useState(false);
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const [salvando, setSalvando] = useState(false);
+  const [busca, setBusca] = useState("");
+  const [ficha, setFicha] = useState<{ turmaId: string; alunoId: string } | null>(null);
 
   const hoje = hojeNaEscola();
+  const mista = turmaId === MISTA;
   const turma = turmas.find((t) => t.id === turmaId) ?? null;
+  /** Quem pode ser escolhido: a turma toda ou, na aula mista, alunos de todas as turmas. */
+  const lista = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    return (mista ? turmas : turma ? [turma] : [])
+      .flatMap((t) => t.alunos.map((a) => ({ a, t })))
+      .filter(({ a }) => !mista || !termo || a.nome.toLowerCase().includes(termo))
+      .sort((x, y) => (mista ? x.a.nome.localeCompare(y.a.nome, "pt-BR") : 0));
+  }, [mista, turma, turmas, busca]);
   const agora = Date.now();
 
   const noLabAgora = useMemo(
@@ -124,14 +137,15 @@ export function ControleLaboratorio({
 
   function trocarTurma(id: string) {
     setTurmaId(id);
-    setEscolhidos(new Set());
+    setBusca("");
+    // Na aula mista a escolha atravessa turmas, então só zera ao sair dela ou entrar nela.
+    if (id !== MISTA || turmaId !== MISTA) setEscolhidos(new Set());
   }
 
   function levantarAvisos(): Aviso[] {
-    if (!turma) return [];
-    return turma.alunos
-      .filter((a) => escolhidos.has(a.id))
-      .map((a) => {
+    return lista
+      .filter(({ a }) => escolhidos.has(a.id))
+      .map(({ a }) => {
         const uso = usoDoAluno(dados.sessoes, a.id, hoje);
         // A ida de hoje é a mesma visita, não uma repetição.
         const semana = uso.semana - (uso.hoje ? 1 : 0);
@@ -142,14 +156,17 @@ export function ControleLaboratorio({
   }
 
   async function gravar() {
-    if (!turma || typeof janela === "string") return;
+    if (!turmaId || typeof janela === "string") return;
     setSalvando(true);
     try {
       await marcarGrupo({
-        turma: { id: turma.id, rotulo: `${turma.serie.replace(/\D+/g, "")}º ${turma.letra}` },
-        alunos: turma.alunos
-          .filter((a) => escolhidos.has(a.id))
-          .map((a) => ({ id: a.id, nome: a.nome })),
+        alunos: lista
+          .filter(({ a }) => escolhidos.has(a.id))
+          .map(({ a, t }) => ({
+            id: a.id,
+            nome: a.nome,
+            turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
+          })),
         inicio: janela.inicio,
         fim: janela.fim,
         criadoPor: email,
@@ -209,26 +226,44 @@ export function ControleLaboratorio({
               </button>
             );
           })}
+          <button
+            type="button"
+            aria-pressed={mista}
+            onClick={() => trocarTurma(MISTA)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-lg border-2 border-dashed border-primary px-3 py-2 text-sm font-bold text-primary ring-offset-2 transition",
+              mista ? "bg-primary/10 ring-2 ring-foreground" : "hover:bg-primary/5",
+            )}
+          >
+            <Shuffle className="size-4" aria-hidden /> Aula mista
+          </button>
         </div>
+        {mista ? (
+          <p className="text-xs text-muted-foreground">
+            Monte um grupo com alunos de qualquer turma. Busque pelo nome; a escolha fica guardada
+            enquanto você procura.
+          </p>
+        ) : null}
       </section>
 
-      {turma ? (
+      {turmaId ? (
         <section aria-label="Escolher os alunos" className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-muted-foreground">
-              2. Quem vai? Toque nos nomes ({escolhidos.size} de {turma.alunos.length})
+              2. Quem vai? Toque nos nomes ({escolhidos.size} de {lista.length})
             </h3>
             <div className="flex gap-2">
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
+                disabled={mista}
                 onClick={() =>
                   setEscolhidos(
                     new Set(
-                      turma.alunos
-                        .filter((a) => !a.impedido && !noLabAgora.has(a.id))
-                        .map((a) => a.id),
+                      lista
+                        .filter(({ a }) => !a.impedido && !noLabAgora.has(a.id))
+                        .map(({ a }) => a.id),
                     ),
                   )
                 }
@@ -245,13 +280,22 @@ export function ControleLaboratorio({
               </Button>
             </div>
           </div>
-          {turma.alunos.length === 0 ? (
+          {mista ? (
+            <Input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar aluno pelo nome…"
+              aria-label="Buscar aluno"
+              className="max-w-sm"
+            />
+          ) : null}
+          {lista.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Esta turma ainda não tem alunos cadastrados.
             </p>
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {turma.alunos.map((a) => {
+              {lista.map(({ a, t }) => {
                 const uso = usoDoAluno(dados.sessoes, a.id, hoje);
                 const semana = uso.semana - (uso.hoje ? 1 : 0);
                 const mes = uso.mes - (uso.hoje ? 1 : 0);
@@ -259,7 +303,7 @@ export function ControleLaboratorio({
                 const ocupado = noLabAgora.has(a.id);
                 const bloqueado = Boolean(a.impedido) || ocupado;
                 return (
-                  <li key={a.id}>
+                  <li key={a.id} className="relative">
                     <button
                       type="button"
                       aria-pressed={marcado}
@@ -276,10 +320,13 @@ export function ControleLaboratorio({
                         {marcado ? (
                           <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
                         ) : null}
-                        <span className="truncate">{nomeExibido(a.nome, true)}</span>
+                        <span className="truncate pr-7">{nomeExibido(a.nome, true)}</span>
                       </span>
                       <span className="flex flex-wrap gap-1 text-[11px]">
-                        {a.impedido ? <Badge variant="outline">impedido(a)</Badge> : null}
+                        {mista ? (
+                          <Badge variant="secondary">{rotuloTurma(t.serie, t.letra)}</Badge>
+                        ) : null}
+                        {a.impedido ? <Badge variant="outline">suspenso(a)</Badge> : null}
                         {ocupado ? (
                           <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
                             no laboratório
@@ -310,6 +357,15 @@ export function ControleLaboratorio({
                         </Badge>
                       </span>
                     </button>
+                    <button
+                      type="button"
+                      aria-label={`Abrir a ficha de ${a.nome}`}
+                      title="Ficha do aluno"
+                      onClick={() => setFicha({ turmaId: t.id, alunoId: a.id })}
+                      className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-primary"
+                    >
+                      <IdCard className="size-4" aria-hidden />
+                    </button>
                   </li>
                 );
               })}
@@ -318,7 +374,7 @@ export function ControleLaboratorio({
         </section>
       ) : null}
 
-      {turma && escolhidos.size > 0 ? (
+      {turmaId && escolhidos.size > 0 ? (
         <section aria-label="Definir o tempo" className="space-y-3 rounded-xl border p-4">
           <h3 className="text-sm font-semibold text-muted-foreground">3. Por quanto tempo?</h3>
           <div className="flex gap-2">
@@ -435,11 +491,13 @@ export function ControleLaboratorio({
             laboratório
           </Button>
         </section>
-      ) : turma ? null : (
+      ) : turmaId ? null : (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Users2 className="size-4" aria-hidden /> Escolha uma turma e os alunos aparecem aqui.
         </p>
       )}
+
+      {ficha ? <FichaAluno {...ficha} aberto aoFechar={() => setFicha(null)} /> : null}
 
       <AlertDialog
         open={avisos !== null}

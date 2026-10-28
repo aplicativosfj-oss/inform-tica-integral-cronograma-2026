@@ -21,6 +21,20 @@ export interface Aluno {
   nascimento?: string | undefined;
   /** Especialidade/laudo do atendimento especializado (ex.: TEA, deficiência auditiva). */
   especialidade?: string | undefined;
+  /** Código INEP do aluno, quando a escola tiver. */
+  inep?: string | undefined;
+  /** Endereço do aluno, quando a escola tiver. */
+  endereco?: string | undefined;
+  /** Anotações do(a) professor(a) de informática sobre o aluno, da mais nova para a mais antiga. */
+  anotacoes?: AnotacaoAluno[] | undefined;
+}
+
+export interface AnotacaoAluno {
+  id: string;
+  texto: string;
+  /** Instante ISO em que foi escrita. */
+  em: string;
+  autor?: string | undefined;
 }
 
 /** Profissional de apoio (mediador/cuidador) designado oficialmente para a turma. */
@@ -154,7 +168,10 @@ export interface ScheduleConfig {
    * semanas anteriores continuam como foram.
    */
   diasIndisponiveis?:
-    | Record<string, { dias: string[]; motivo?: string | undefined; aPartirDe?: string | undefined }>
+    | Record<
+        string,
+        { dias: string[]; motivo?: string | undefined; aPartirDe?: string | undefined }
+      >
     | undefined;
   /** Sessões reprogramadas a partir da tela "Faltas do mês". */
   reprogramacoes?: Reprogramacao[] | undefined;

@@ -152,8 +152,14 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
   const mapa = new Map<string, GrupoLab>();
   for (const s of sessoes) {
     const g = mapa.get(s.grupoId);
-    if (g) g.alunos.push({ id: s.alunoId, nome: s.alunoNome });
-    else
+    if (g) {
+      g.alunos.push({ id: s.alunoId, nome: s.alunoNome });
+      // Alunos de turmas diferentes no mesmo grupo = aula mista.
+      if (g.turmaId !== s.turmaId) {
+        g.turmaId = "mista";
+        g.turmaRotulo = "Aula mista";
+      }
+    } else
       mapa.set(s.grupoId, {
         grupoId: s.grupoId,
         turmaId: s.turmaId,
@@ -255,9 +261,21 @@ export async function carregarSessoesDoMes(mes: string): Promise<SessaoLab[]> {
   return todas;
 }
 
+/** Todas as idas de um aluno ao laboratório, da mais recente para a mais antiga. */
+export async function carregarHistoricoAluno(alunoId: string): Promise<SessaoLab[]> {
+  const { data, error } = await supabase
+    .from("laboratorio_sessoes")
+    .select("*")
+    .eq("aluno_id", alunoId)
+    .order("inicio", { ascending: false })
+    .limit(1000);
+  if (error) throw new Error(eTabelaAusente(error) ? TABELA_AUSENTE : error.message);
+  return ((data ?? []) as Linha[]).map(deLinha);
+}
+
+/** Cada aluno leva a própria turma: numa aula mista os grupos misturam turmas. */
 export async function marcarGrupo(entrada: {
-  turma: { id: string; rotulo: string };
-  alunos: { id: string; nome: string }[];
+  alunos: { id: string; nome: string; turma: { id: string; rotulo: string } }[];
   inicio: Date;
   fim: Date;
   criadoPor: string | null;
@@ -270,8 +288,8 @@ export async function marcarGrupo(entrada: {
   const linhas = entrada.alunos.map((a) => ({
     data: dataNaEscola(entrada.inicio),
     grupo_id: grupoId,
-    turma_id: entrada.turma.id,
-    turma_rotulo: entrada.turma.rotulo,
+    turma_id: a.turma.id,
+    turma_rotulo: a.turma.rotulo,
     aluno_id: a.id,
     aluno_nome: a.nome,
     inicio: entrada.inicio.toISOString(),
