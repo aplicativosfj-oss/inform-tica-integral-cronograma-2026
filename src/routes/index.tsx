@@ -27,6 +27,7 @@ import { useCountUp } from "@/hooks/use-count-up";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { MarcaLogo } from "@/components/school/marca";
 import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialog";
+import { CartaoAoVivoHome } from "@/components/school/laboratorio/cartao-ao-vivo-home";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { WeatherWidget } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
@@ -36,15 +37,7 @@ import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
-import {
-  agruparSessoes,
-  estadoDaSessao,
-  hojeNaEscola,
-  horaNaEscola,
-  textoRestante,
-  useAgora,
-  useSessoesLab,
-} from "@/lib/laboratorio";
+import { useSessoesLab } from "@/lib/laboratorio";
 import { cn } from "@/lib/utils";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
@@ -101,18 +94,11 @@ function Index() {
   const { turmas, config, isReady } = useAppStore();
   const { isAuthenticated } = useAuth();
   const lab = useSessoesLab();
-  const agora = useAgora(30_000);
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
   useEffect(() => {
     document.documentElement.classList.add("home-snap");
     return () => document.documentElement.classList.remove("home-snap");
   }, []);
-  const noLabAgora = new Set(
-    lab.sessoes.filter((x) => estadoDaSessao(x, agora) === "ao-vivo").map((x) => x.alunoId),
-  ).size;
-  const grupos = agruparSessoes(lab.sessoes.filter((x) => x.data === hojeNaEscola()));
-  const gruposAoVivo = grupos.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
-  const proximoGrupo = grupos.find((g) => estadoDaSessao(g, agora) === "agendada");
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -231,63 +217,8 @@ function Index() {
               </dl>
             </div>
 
-            {/* Cartão de vidro: o laboratório agora, em uma olhada. */}
-            <div className="hidden rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md lg:block">
-              <div className="flex items-center justify-between gap-3">
-                <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-sun">
-                  <span className="relative flex size-2.5">
-                    <span
-                      className={`absolute inline-flex size-full rounded-full opacity-60 ${noLabAgora > 0 ? "animate-ping bg-emerald-400" : "bg-white/40"}`}
-                    />
-                    <span
-                      className={`relative inline-flex size-2.5 rounded-full ${noLabAgora > 0 ? "bg-emerald-400" : "bg-white/50"}`}
-                    />
-                  </span>
-                  Agora
-                </p>
-                <span className="text-sm tabular-nums text-white/70">{horaNaEscola(agora)}</span>
-              </div>
-              {gruposAoVivo.length > 0 ? (
-                <ul className="mt-4 space-y-3">
-                  {gruposAoVivo.slice(0, 3).map((g) => (
-                    <li key={g.grupoId} className="rounded-2xl bg-white/10 p-3">
-                      <p className="flex items-baseline justify-between gap-2">
-                        <span className="font-heading text-xl font-bold">
-                          {g.turmaId === "mista" ? "Aula mista" : g.turmaRotulo}
-                        </span>
-                        <span className="text-sm text-white/75">até {horaNaEscola(g.fim)}</span>
-                      </p>
-                      <p className="mt-0.5 text-sm text-white/70">
-                        {g.alunos.length} aluno{g.alunos.length === 1 ? "" : "s"} ·{" "}
-                        {g.pausadoEm
-                          ? "aula pausada"
-                          : `faltam ${textoRestante(new Date(g.fim).getTime() - agora)}`}
-                      </p>
-                      <p className="mt-1 truncate text-xs text-white/60">
-                        {g.turmaId === "mista"
-                          ? [...new Set(g.alunos.map((x) => x.turmaRotulo))].join(" · ")
-                          : (turmas.find((t) => t.id === g.turmaId)?.professorRegente ?? "")}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="mt-4 rounded-2xl bg-white/10 p-4">
-                  <p className="font-heading text-xl font-bold">Laboratório livre por enquanto</p>
-                  <p className="mt-1 text-sm text-white/70">
-                    {proximoGrupo
-                      ? `Daqui a pouco: ${proximoGrupo.turmaRotulo}, às ${horaNaEscola(proximoGrupo.inicio)}`
-                      : "Ninguém marcado para agora."}
-                  </p>
-                </div>
-              )}
-              <a
-                href="#laboratorio-agora"
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-sun underline-offset-4 hover:underline"
-              >
-                Ver todo mundo <ArrowRight className="size-4" aria-hidden />
-              </a>
-            </div>
+            {/* Cartão de vidro: o laboratório agora. Com aula, vira o destaque com o relógio. */}
+            <CartaoAoVivoHome sessoes={lab.sessoes} logado={isAuthenticated} />
           </div>
           <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 text-white/60 sm:px-6 [@media(max-height:800px)]:hidden" />
         </section>
