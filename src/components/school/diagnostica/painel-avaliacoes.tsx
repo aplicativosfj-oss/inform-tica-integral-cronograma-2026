@@ -63,12 +63,15 @@ const nomeTurma = (ano: number, turma: string) => `${ano}º ano ${turma}`;
 export function PainelAvaliacoes({
   provas,
   comAlunos = false,
+  semAbertura = false,
   aoAbrirDetalhes,
 }: {
   provas: ProvaII[];
   /** Mostra a lista de alunos dentro do raio-X da turma (e permite abrir a
    *  ficha de cada um) — liberado também na página pública. */
   comAlunos?: boolean;
+  /** A página já abre com os números principais (hero), então pula a abertura. */
+  semAbertura?: boolean;
   /** Leva para a aba "Detalhes da 2ª avaliação", opcionalmente já numa
    *  sub-aba específica (plano de ação, comparar). Só existe quando este
    *  painel roda dentro da página que tem as duas abas. */
@@ -100,7 +103,9 @@ export function PainelAvaliacoes({
 
   return (
     <div className="space-y-10">
-      <Abertura mediaI={mediaI} mediaII={mediaII} subiram={subiram} total={comparaveis.length} />
+      {semAbertura ? null : (
+        <Abertura mediaI={mediaI} mediaII={mediaII} subiram={subiram} total={comparaveis.length} />
+      )}
 
       <Secao
         titulo="Como a escola foi nas duas avaliações"
@@ -117,17 +122,18 @@ export function PainelAvaliacoes({
         titulo="Turma por turma"
         explicacao="O anel mostra o acerto na 2ª avaliação; a frase abaixo compara com a 1ª. Toque num card para abrir o raio-X."
       >
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="mb-5 inline-flex flex-wrap gap-1 rounded-full border border-border bg-muted/50 p-1">
           {DISCIPLINAS.map((d) => (
             <button
               key={d.id}
               type="button"
+              aria-pressed={disc === d.id}
               onClick={() => setDisc(d.id)}
               className={cn(
-                "rounded-full border px-4 py-1.5 text-sm font-semibold transition",
+                "rounded-full px-4 py-1.5 text-sm font-semibold transition",
                 disc === d.id
-                  ? "border-transparent bg-foreground text-background"
-                  : "border-border text-muted-foreground hover:text-foreground",
+                  ? "bg-primary text-primary-foreground shadow"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {d.nome}
@@ -156,9 +162,20 @@ export function PainelAvaliacoes({
                 className="text-left"
                 aria-label={`Abrir o raio-X do ${nomeTurma(a.ano, a.turma)}`}
               >
-                <Card className="h-full transition hover:border-primary hover:shadow-md">
+                <Card className="h-full rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg">
                   <CardContent className="space-y-3 py-4">
-                    <p className="font-semibold">{nomeTurma(a.ano, a.turma)}</p>
+                    <p className="flex items-center gap-2 font-bold">
+                      <span
+                        className={cn(
+                          "rounded-md px-1.5 py-0.5 text-xs font-extrabold",
+                          serieClasses(a.ano - 1).bg,
+                          serieClasses(a.ano - 1).text,
+                        )}
+                      >
+                        {a.ano}º {a.turma}
+                      </span>
+                      {nomeTurma(a.ano, a.turma)}
+                    </p>
                     <BarraDupla i={a.i} ii={a.ii} />
                     <Veredito delta={a.delta} sufixo="de alunos alfabéticos" />
                   </CardContent>
@@ -183,9 +200,20 @@ export function PainelAvaliacoes({
                 className="text-left"
                 aria-label={`Abrir o raio-X do ${nomeTurma(o.ano, o.turma)}`}
               >
-                <Card className="h-full transition hover:border-primary hover:shadow-md">
+                <Card className="h-full rounded-2xl transition duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg">
                   <CardContent className="space-y-3 py-4">
-                    <p className="font-semibold">{nomeTurma(o.ano, o.turma)}</p>
+                    <p className="flex items-center gap-2 font-bold">
+                      <span
+                        className={cn(
+                          "rounded-md px-1.5 py-0.5 text-xs font-extrabold",
+                          serieClasses(o.ano - 1).bg,
+                          serieClasses(o.ano - 1).text,
+                        )}
+                      >
+                        {o.ano}º {o.turma}
+                      </span>
+                      {nomeTurma(o.ano, o.turma)}
+                    </p>
                     <BarraDupla i={o.i} ii={o.ii} />
                     <Veredito delta={o.delta} sufixo="de alunos que escrevem com poucos erros" />
                   </CardContent>
@@ -380,8 +408,16 @@ function Secao({
 }) {
   return (
     <section>
-      <h2 className="text-xl font-bold tracking-tight sm:text-2xl">{titulo}</h2>
-      <p className="mb-4 mt-1 max-w-3xl text-sm text-muted-foreground">{explicacao}</p>
+      <div className="mb-5 flex items-start gap-3">
+        <span
+          aria-hidden
+          className="mt-1.5 h-7 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-sky-400 to-violet-500"
+        />
+        <div>
+          <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">{titulo}</h2>
+          <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{explicacao}</p>
+        </div>
+      </div>
       {children}
     </section>
   );
@@ -396,26 +432,45 @@ function CartaoComparacao({
   valor: number;
   tom: "antes" | "agora";
 }) {
+  const agora = tom === "agora";
   return (
-    <Card>
-      <CardContent className="flex items-center gap-4 py-5">
-        <AnelPercentual valor={valor} tamanho={72} espessura={8} rotulo={rotulo} />
-        <div className="min-w-0 flex-1 space-y-2">
-          <p className="text-sm font-semibold text-muted-foreground">{rotulo}</p>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-3xl border p-5 sm:p-6",
+        agora
+          ? "border-sky-400/40 bg-gradient-to-br from-sky-500/15 via-card to-violet-500/10"
+          : "border-border bg-card",
+      )}
+    >
+      <div className="flex items-center gap-5">
+        <AnelPercentual valor={valor} tamanho={84} espessura={9} rotulo={rotulo} />
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+            {rotulo}
+          </p>
           <p
             className={cn(
-              "text-3xl font-bold tabular-nums",
-              tom === "agora" && "text-sky-600 dark:text-sky-400",
+              "mt-1 text-4xl font-extrabold tabular-nums leading-none",
+              agora && "text-sky-600 dark:text-sky-400",
             )}
           >
             {porcento(valor)}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="mt-2 text-xs text-muted-foreground">
             de cada 100 questões, {Math.round(valor * 100)} foram acertadas
           </p>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+        <div
+          className={cn(
+            "hero-barra h-full origin-left rounded-full",
+            agora ? "bg-gradient-to-r from-sky-500 to-violet-500" : "bg-muted-foreground/50",
+          )}
+          style={{ width: `${valor * 100}%` }}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -473,24 +528,33 @@ function ListaDeTurmas({
             className="text-left"
             aria-label={`Abrir o raio-X do ${nomeTurma(d.ano, d.turma)}`}
           >
-            <Card className="h-full overflow-hidden transition hover:border-primary hover:shadow-md">
-              <div className={cn("h-1.5 w-full", cores.bg)} aria-hidden />
-              <CardContent className="flex items-center gap-3 py-4">
-                <AnelPercentual valor={d.acerto} tamanho={60} espessura={7} />
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-semibold">{nomeTurma(d.ano, d.turma)}</p>
-                    <p className="shrink-0 text-xs text-muted-foreground">
-                      {d.participantes} alunos
-                    </p>
-                  </div>
-                  <Veredito delta={delta} sufixo="de acerto" />
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                    <Search className="size-3.5" /> Ver raio-X
-                  </span>
+            <div className="group flex h-full flex-col gap-4 rounded-2xl border border-border bg-card p-4 transition duration-300 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg">
+              <div className="flex items-center gap-3">
+                <span
+                  className={cn(
+                    "flex size-11 shrink-0 flex-col items-center justify-center rounded-xl text-center font-extrabold leading-none",
+                    cores.bg,
+                    cores.text,
+                  )}
+                >
+                  <span className="text-base">{d.ano}º</span>
+                  <span className="text-[11px]">{d.turma}</span>
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold">{nomeTurma(d.ano, d.turma)}</p>
+                  <p className="text-xs text-muted-foreground">{d.participantes} alunos na 2ª</p>
                 </div>
-              </CardContent>
-            </Card>
+                <AnelPercentual valor={d.acerto} tamanho={52} espessura={6} />
+              </div>
+              <BarraDupla i={antes?.acerto ?? null} ii={d.acerto} compacta />
+              <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/70 pt-3">
+                <Veredito delta={delta} sufixo="" curto />
+                <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary">
+                  <Search className="size-3.5" /> Raio-X
+                  <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" />
+                </span>
+              </div>
+            </div>
           </button>
         );
       })}
@@ -499,17 +563,36 @@ function ListaDeTurmas({
 }
 
 /** Duas barras empilhadas: a 1ª avaliação em cinza, a 2ª em azul. */
-function BarraDupla({ i, ii }: { i: number | null; ii: number | null }) {
+function BarraDupla({
+  i,
+  ii,
+  compacta = false,
+}: {
+  i: number | null;
+  ii: number | null;
+  compacta?: boolean;
+}) {
   const linhas = [
-    { rotulo: "1ª avaliação", valor: i, classe: "bg-muted-foreground/50" },
-    { rotulo: "2ª avaliação", valor: ii, classe: "bg-sky-500" },
+    { rotulo: compacta ? "1ª" : "1ª avaliação", valor: i, classe: "bg-muted-foreground/50" },
+    {
+      rotulo: compacta ? "2ª" : "2ª avaliação",
+      valor: ii,
+      classe: "bg-gradient-to-r from-sky-500 to-violet-500",
+    },
   ];
   return (
     <div className="space-y-2">
       {linhas.map((l) => (
         <div key={l.rotulo} className="flex items-center gap-3">
-          <span className="w-24 shrink-0 text-xs text-muted-foreground">{l.rotulo}</span>
-          <div className="h-4 flex-1 overflow-hidden rounded-full bg-muted">
+          <span className={cn("shrink-0 text-xs text-muted-foreground", compacta ? "w-5" : "w-24")}>
+            {l.rotulo}
+          </span>
+          <div
+            className={cn(
+              "flex-1 overflow-hidden rounded-full bg-muted",
+              compacta ? "h-2.5" : "h-4",
+            )}
+          >
             {l.valor != null && (
               <div
                 className={cn("h-full rounded-full", l.classe)}
@@ -527,11 +610,22 @@ function BarraDupla({ i, ii }: { i: number | null; ii: number | null }) {
 }
 
 /** Frase curta dizendo o que aconteceu — é o que a maioria vai ler. */
-function Veredito({ delta, sufixo }: { delta: number | null; sufixo: string }) {
+function Veredito({
+  delta,
+  sufixo,
+  curto = false,
+}: {
+  delta: number | null;
+  sufixo: string;
+  curto?: boolean;
+}) {
   if (delta == null) {
     return (
       <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Minus className="size-4" /> Esta turma não tem resultado na 1ª avaliação para comparar.
+        <Minus className="size-4" />{" "}
+        {curto
+          ? "Sem a 1ª para comparar"
+          : "Esta turma não tem resultado na 1ª avaliação para comparar."}
       </p>
     );
   }
@@ -552,7 +646,7 @@ function Veredito({ delta, sufixo }: { delta: number | null; sufixo: string }) {
       )}
     >
       {subiu ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
-      {subiu ? "Subiu" : "Caiu"} {pontos} pontos {sufixo}
+      {subiu ? "Subiu" : "Caiu"} {pontos} pontos{sufixo ? ` ${sufixo}` : ""}
     </p>
   );
 }

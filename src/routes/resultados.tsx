@@ -11,7 +11,7 @@ export const Route = createFileRoute("/resultados")({
       {
         name: "description",
         content:
-          "Como as turmas da Escola Dr. Eiraldo estão lendo, escrevendo e aprendendo no 3º bimestre de 2026, com a data de cada avaliação.",
+          "Como as turmas da Escola Dr. Eiraldo estão lendo, escrevendo e aprendendo no 3º bimestre de 2026, comparado com o 1º e o 2º bimestre e com as duas avaliações diagnósticas.",
       },
     ],
   }),

@@ -1,9 +1,11 @@
 import { DADOS_I } from "@/lib/diagnostica/dados-i";
+import type { ProvaII } from "@/lib/diagnostica/tipos";
 import { MAPA_CLASSE_3_BIM } from "@/lib/mapa-classe/dados-3bim";
 import { escritaDoAno } from "@/lib/mapa-classe/niveis";
 import type { EvolucaoLeitura } from "@/lib/mapa-classe/tipos";
 import { RENDIMENTO_3_BIMESTRE } from "@/lib/rendimento/dados-3bim";
 import { percentuais } from "@/lib/rendimento/tipos";
+import { diagnosticaDaEscola, turmasNoAno } from "@/lib/resultados/linha-do-tempo";
 
 export interface Destaque {
   id: string;
@@ -22,7 +24,7 @@ const nome = (chave: string) => `${chave[0]}º ${chave.slice(1)}`;
  * Tudo é calculado a partir dos mesmos dados das telas, então não envelhece
  * sozinho e não afirma nada que os números não mostrem.
  */
-export function gerarDestaques(): Destaque[] {
+export function gerarDestaques(provas: ProvaII[] | null = null): Destaque[] {
   const out: Destaque[] = [];
   const evol = MAPA_CLASSE_3_BIM.evolucaoLeitura;
   const chaves = Object.keys(evol);
@@ -73,6 +75,33 @@ export function gerarDestaques(): Destaque[] {
         : `Nenhuma turma recuou entre o 1º e o 3º bimestre.`),
     tom: pior.diff < 0 ? "atencao" : "positivo",
   });
+
+  // 1b. O bimestre mais recente contra o anterior (2º → 3º).
+  const e2 = somar(2);
+  const recente = leitoresAB(e3) - leitoresAB(e2);
+  const recuaram = turmasNoAno(null).filter((t) => t.desde2 < 0);
+  out.push({
+    id: "leitura-recente",
+    titulo: "Do 2º para o 3º bimestre",
+    texto:
+      `Leitores com fluência ou pausados: ${leitoresAB(e2)}% no 2º bimestre e ${leitoresAB(e3)}% no 3º (${recente > 0 ? "+" : ""}${recente} pontos). ` +
+      (recuaram.length
+        ? `Recuaram nesse intervalo: ${recuaram.map((t) => `${nome(t.chave)} (${t.desde2} pontos)`).join(", ")}.`
+        : "Nenhuma turma recuou nesse intervalo."),
+    tom: recente >= 0 && !recuaram.length ? "positivo" : "atencao",
+  });
+
+  // 1c. As duas avaliações diagnósticas, quando a II já carregou.
+  const diag = diagnosticaDaEscola(provas);
+  if (diag.ii != null) {
+    const d = Math.round((diag.ii - diag.i) * 100);
+    out.push({
+      id: "diagnostica",
+      titulo: "Avaliações diagnósticas: 1ª e 2ª",
+      texto: `Na 1ª avaliação diagnóstica, os alunos acertaram ${Math.round(diag.i * 100)}% das questões. Na 2ª, ${Math.round(diag.ii * 100)}% (${d > 0 ? "+" : ""}${d} pontos), com a mesma régua de Português e Matemática.`,
+      tom: d >= 0 ? "positivo" : "atencao",
+    });
+  }
 
   // 2. Onde há mais alunos que só leem sílabas ou não leem.
   const de = MAPA_CLASSE_3_BIM.turmas

@@ -1,67 +1,42 @@
 import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
+  ArrowDown,
   ArrowRight,
   BookOpenText,
   CalendarDays,
   ClipboardCheck,
-  LineChart,
+  GraduationCap,
   ListChecks,
-  PenLine,
+  MessageCircle,
+  Target,
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 
-import alunos2 from "@/assets/alunos-2.jpg";
+import alunos1 from "@/assets/alunos-1.jpg";
 import alunos3 from "@/assets/alunos-3.jpg";
-import cadernoImg from "@/assets/caderno-mesa.webp";
-import fundoImg from "@/assets/feature-kids-learning.jpg";
+import fotoTurma from "@/assets/laboratorio-informatica-turma.jpg";
 import { PainelMapaClasse } from "@/components/school/mapa-classe/painel";
 import { PainelRendimento } from "@/components/school/rendimento/painel";
+import { HeroResultados } from "@/components/school/resultados/hero";
+import { LinhaDoAno, TurmasNoAnoGrade } from "@/components/school/resultados/linha-do-tempo";
+import { useProvasII } from "@/lib/diagnostica/use-provas";
+import { RENDIMENTO_3_BIMESTRE } from "@/lib/rendimento/dados-3bim";
 import { gerarDestaques, type Destaque } from "@/lib/resultados/destaques";
-import { REFERENCIA, instrumento, textoAplicacao } from "@/lib/resultados/referencia";
+import { diagnosticaDaEscola, leituraDaEscola, turmasNoAno } from "@/lib/resultados/linha-do-tempo";
+import { REFERENCIA, textoAplicacao } from "@/lib/resultados/referencia";
 import { cn } from "@/lib/utils";
 
-type Aba = "resumo" | "mapa" | "notas";
+type Aba = "mapa" | "notas";
 
-const ABAS: {
-  id: Aba;
-  nome: string;
-  legenda: string;
-  Icone: LucideIcon;
-  img: string;
-  instrumento?: "mapa" | "rendimento";
-}[] = [
-  {
-    id: "resumo",
-    nome: "Resumo",
-    legenda: "o que os números contam",
-    Icone: LineChart,
-    img: fundoImg,
-  },
-  {
-    id: "mapa",
-    nome: "Leitura e escrita",
-    legenda: "níveis por turma",
-    Icone: BookOpenText,
-    img: alunos2,
-    instrumento: "mapa",
-  },
-  {
-    id: "notas",
-    nome: "Notas do bimestre",
-    legenda: "disciplina por disciplina",
-    Icone: ClipboardCheck,
-    img: cadernoImg,
-    instrumento: "rendimento",
-  },
-];
-
-/** Para onde cada leitura do Resumo leva quando é tocada. */
-const DESTINO: Record<string, Aba> = {
-  "leitura-escola": "mapa",
-  "leitura-turmas": "mapa",
+/** Para onde cada leitura do resumo leva quando é tocada. */
+const DESTINO: Record<string, Aba | "turmas"> = {
+  "leitura-escola": "turmas",
+  "leitura-turmas": "turmas",
+  "leitura-recente": "turmas",
+  diagnostica: "turmas",
   "leitura-prioridade": "mapa",
   "escrita-prioridade": "mapa",
   notas: "notas",
@@ -70,216 +45,288 @@ const DESTINO: Record<string, Aba> = {
 
 const TOM: Record<
   Destaque["tom"],
-  { faixa: string; icone: string; Icone: LucideIcon; rotulo: string }
+  { cartao: string; selo: string; Icone: LucideIcon; rotulo: string }
 > = {
   positivo: {
-    faixa: "from-emerald-400 to-emerald-600",
-    icone: "bg-emerald-400/20 text-emerald-300",
+    cartao: "from-emerald-500/20",
+    selo: "bg-emerald-400/15 text-emerald-300",
     Icone: TrendingUp,
     rotulo: "Boa notícia",
   },
   atencao: {
-    faixa: "from-amber-300 to-orange-500",
-    icone: "bg-amber-400/20 text-amber-300",
+    cartao: "from-amber-500/20",
+    selo: "bg-amber-400/15 text-amber-300",
     Icone: AlertTriangle,
     rotulo: "Ponto de atenção",
   },
   neutro: {
-    faixa: "from-sky-300 to-indigo-500",
-    icone: "bg-sky-400/20 text-sky-300",
-    Icone: PenLine,
+    cartao: "from-sky-500/20",
+    selo: "bg-sky-400/15 text-sky-300",
+    Icone: MessageCircle,
     rotulo: "Para conversar",
   },
 };
 
+const porcento = (v: number | null | undefined) => (v == null ? "—" : `${Math.round(v * 100)}%`);
+
 /**
- * Página pública dos resultados do bimestre, numa janela só: título, quatro
- * portas (resumo, leitura e escrita, notas e a área de Avaliações) e, embaixo,
- * o conteúdo da porta escolhida, que rola por dentro. Sempre em tema escuro,
- * sobre uma imagem de fundo da escola.
+ * Página pública dos resultados do bimestre. Abre com os números principais,
+ * mostra o ano inteiro (leitura do 1º ao 3º bimestre e as duas avaliações
+ * diagnósticas), cada turma nesse percurso, as leituras automáticas e, por
+ * fim, os detalhes do bimestre atual. Sempre em tema escuro.
  */
 export function PainelPublico() {
-  const [aba, setAba] = useState<Aba>("resumo");
-  const destaques = useMemo(() => gerarDestaques(), []);
-  const diag = instrumento("diagnostica");
+  const { provas } = useProvasII();
+  const [aba, setAba] = useState<Aba>("mapa");
+  const detalhesRef = useRef<HTMLElement>(null);
+  const turmasRef = useRef<HTMLElement>(null);
+
+  const leitura = useMemo(() => leituraDaEscola(), []);
+  const turmas = useMemo(() => turmasNoAno(provas), [provas]);
+  const diag = useMemo(() => diagnosticaDaEscola(provas), [provas]);
+  const destaques = useMemo(() => gerarDestaques(provas), [provas]);
+
+  const notas = useMemo(() => {
+    const ds = RENDIMENTO_3_BIMESTRE.turmas.flatMap((t) => t.disciplinas);
+    const total = ds.reduce((s, d) => s + d.total, 0);
+    const padrao = ds.reduce((s, d) => s + d.padrao, 0);
+    const cem = RENDIMENTO_3_BIMESTRE.turmas.filter((t) =>
+      t.disciplinas.every((d) => d.padrao === d.total),
+    ).length;
+    return { parte: total ? padrao / total : 0, cem, turmas: RENDIMENTO_3_BIMESTRE.turmas.length };
+  }, []);
+
+  const [b1, , b3] = leitura;
+  const dLeem = Math.round(((b3?.leem ?? 0) - (b1?.leem ?? 0)) * 100);
+  const dPrior = Math.round(((b3?.prioridade ?? 0) - (b1?.prioridade ?? 0)) * 100);
+  const dDiag = diag.ii != null ? Math.round((diag.ii - diag.i) * 100) : null;
+
+  function irPara(destino: Aba | "turmas") {
+    if (destino === "turmas") {
+      turmasRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    setAba(destino);
+    detalhesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
-    <div className="dark relative isolate flex flex-col overflow-hidden text-white lg:h-[calc(100svh-4rem)]">
-      <img
-        src={fundoImg}
-        alt=""
-        aria-hidden
-        className="absolute inset-0 -z-30 size-full scale-110 object-cover blur-[2px]"
+    <div className="dark bg-ink text-white">
+      <HeroResultados
+        selo={
+          <>
+            <CalendarDays className="size-3.5" aria-hidden /> Resultados · {REFERENCIA.bimestre}
+          </>
+        }
+        titulo={
+          <>
+            Como as nossas crianças <span className="text-sun">estão aprendendo</span>
+          </>
+        }
+        texto={
+          <>
+            O 3º bimestre comparado com o 1º e o 2º, e as duas avaliações diagnósticas do ano.{" "}
+            {REFERENCIA.escola} · {REFERENCIA.municipio}. Os números são por turma: ninguém é
+            identificado.
+          </>
+        }
+        foto={fotoTurma}
+        mosaico={[alunos1, alunos3]}
+        barras={leitura.map((f) => ({ rotulo: `${f.bim}º bim.`, valor: f.leem }))}
+        indicadores={[
+          {
+            Icone: BookOpenText,
+            rotulo: "Leem bem",
+            valor: porcento(b3?.leem),
+            detalhe: `${dLeem >= 0 ? "+" : ""}${dLeem} pts desde o 1º bim. (${porcento(b1?.leem)})`,
+            tom: dLeem >= 0 ? "sobe" : "desce",
+          },
+          {
+            Icone: Target,
+            rotulo: "Prioridade na leitura",
+            valor: porcento(b3?.prioridade),
+            detalhe: `${dPrior > 0 ? "+" : ""}${dPrior} pts desde o 1º bim. (${porcento(b1?.prioridade)})`,
+            tom: dPrior <= 0 ? "sobe" : "desce",
+          },
+          {
+            Icone: ListChecks,
+            rotulo: "2ª diagnóstica",
+            valor: porcento(diag.ii),
+            detalhe:
+              dDiag == null
+                ? `1ª avaliação: ${porcento(diag.i)}`
+                : `${dDiag >= 0 ? "+" : ""}${dDiag} pts sobre a 1ª (${porcento(diag.i)})`,
+            tom: dDiag == null ? "neutro" : dDiag >= 0 ? "sobe" : "desce",
+          },
+          {
+            Icone: GraduationCap,
+            rotulo: "Notas de 7,0 a 10,0",
+            valor: porcento(notas.parte),
+            detalhe: `${notas.cem} de ${notas.turmas} turmas com todos acima de 7,0`,
+            tom: "neutro",
+          },
+        ]}
+        acoes={
+          <>
+            <button
+              type="button"
+              onClick={() => irPara("turmas")}
+              className="inline-flex items-center gap-2 rounded-full bg-sun px-5 py-2.5 text-sm font-bold text-sun-foreground shadow-lg transition hover:brightness-110"
+            >
+              Ver turma por turma <ArrowDown className="size-4" aria-hidden />
+            </button>
+            <Link
+              to="/avaliacao"
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-semibold backdrop-blur transition hover:bg-white/20"
+            >
+              Avaliações diagnósticas <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </>
+        }
       />
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-20 bg-gradient-to-b from-ink/85 via-ink/70 to-ink/95"
-      />
-      <div aria-hidden className="fundo-pixel absolute inset-0 -z-10 opacity-25" />
 
-      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col gap-[clamp(0.6rem,1.8svh,1.1rem)] px-4 py-[clamp(0.75rem,2.5svh,1.5rem)] sm:px-6">
-        {/* título */}
-        <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-sun">
-              Resultados · {REFERENCIA.bimestre}
-            </p>
-            <h1 className="mt-1 text-[clamp(1.6rem,4.6svh,2.6rem)] font-extrabold leading-tight tracking-tight">
-              Como as nossas crianças estão aprendendo
-            </h1>
-            <p className="mt-1 max-w-2xl text-[clamp(0.8rem,1.9svh,0.95rem)] text-white/70">
-              {REFERENCIA.escola} · {REFERENCIA.municipio}. Os números são por turma: ninguém é
-              identificado.
-            </p>
-          </div>
-          <p className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-white/80 backdrop-blur">
-            <CalendarDays className="size-3.5 text-sun" aria-hidden />
-            publicado em {REFERENCIA.publicadoEm}
-          </p>
-        </header>
-
-        {/* as quatro portas */}
-        <nav
-          aria-label="Seções dos resultados"
-          className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4"
+      <div className="mx-auto max-w-6xl space-y-14 px-4 py-12 sm:px-6">
+        <Secao
+          selo="O ano até aqui"
+          titulo="O 3º bimestre ao lado dos anteriores"
+          texto="A leitura medida no mapa de classe de cada bimestre e as duas avaliações diagnósticas, na mesma tela."
         >
-          {ABAS.map(({ id, nome, legenda, Icone, img, instrumento: ins }) => {
-            const ativa = aba === id;
-            const info = ins ? instrumento(ins) : null;
-            return (
+          <LinhaDoAno leitura={leitura} diagnostica={diag} />
+        </Secao>
+
+        <Secao
+          ref={turmasRef}
+          selo="Turma por turma"
+          titulo="Cada turma do 1º ao 3º bimestre"
+          texto="As três barras são a leitura em cada bimestre; o selo no alto mostra quanto a parte que lê bem mudou desde o 1º. Embaixo, o acerto na 1ª e na 2ª avaliação diagnóstica."
+        >
+          <TurmasNoAnoGrade turmas={turmas} />
+        </Secao>
+
+        <Secao
+          selo="Leituras dos números"
+          titulo="O que os números contam"
+          texto="Frases calculadas a partir dos mesmos dados das tabelas. Toque num cartão para ver de onde vem."
+        >
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {destaques.map((d, i) => {
+              const tom = TOM[d.tom];
+              return (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => irPara(DESTINO[d.id] ?? "mapa")}
+                  style={{ animationDelay: `${i * 60}ms` }}
+                  className={cn(
+                    "lab-aluno group flex flex-col gap-3 rounded-2xl border border-white/10 bg-gradient-to-br to-white/[0.03] p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-white/30",
+                    tom.cartao,
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide",
+                      tom.selo,
+                    )}
+                  >
+                    <tom.Icone className="size-3.5" aria-hidden /> {tom.rotulo}
+                  </span>
+                  <span className="text-lg font-bold leading-snug">{d.titulo}</span>
+                  <span className="text-sm leading-relaxed text-white/70">{d.texto}</span>
+                  <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-sun opacity-70 transition group-hover:opacity-100">
+                    Ver os dados
+                    <ArrowRight
+                      className="size-3.5 transition group-hover:translate-x-1"
+                      aria-hidden
+                    />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </Secao>
+
+        <Secao
+          ref={detalhesRef}
+          selo={REFERENCIA.bimestre}
+          titulo="Detalhes do bimestre"
+          texto="Níveis de leitura e escrita de cada turma e as notas, disciplina por disciplina."
+        >
+          <div
+            role="tablist"
+            aria-label="Detalhes do bimestre"
+            className="mb-5 inline-flex rounded-full border border-white/15 bg-white/[0.06] p-1"
+          >
+            {(
+              [
+                ["mapa", "Leitura e escrita", BookOpenText],
+                ["notas", "Notas do bimestre", ClipboardCheck],
+              ] as const
+            ).map(([id, nome, Icone]) => (
               <button
                 key={id}
                 type="button"
-                aria-pressed={ativa}
+                role="tab"
+                aria-selected={aba === id}
                 onClick={() => setAba(id)}
                 className={cn(
-                  "group relative isolate flex min-h-[clamp(4.5rem,11svh,6.5rem)] flex-col justify-end overflow-hidden rounded-2xl border text-left transition duration-300",
-                  ativa
-                    ? "border-sun shadow-[0_0_0_1px_var(--color-sun),0_12px_40px_-12px_rgb(0_0_0/0.8)]"
-                    : "border-white/15 hover:-translate-y-0.5 hover:border-white/40",
+                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
+                  aba === id
+                    ? "bg-sun text-sun-foreground shadow"
+                    : "text-white/70 hover:text-white",
                 )}
               >
-                <img
-                  src={img}
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 -z-20 size-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute inset-0 -z-10 bg-gradient-to-t transition-opacity",
-                    ativa
-                      ? "from-ink/95 via-ink/70 to-primary/40"
-                      : "from-ink/95 via-ink/75 to-ink/40",
-                  )}
-                />
-                <span className="flex items-start gap-2.5 p-3">
-                  <span
-                    className={cn(
-                      "flex size-8 shrink-0 items-center justify-center rounded-xl transition",
-                      ativa ? "bg-sun text-sun-foreground" : "bg-white/15 text-white",
-                    )}
-                  >
-                    <Icone className="size-4" aria-hidden />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-sm font-bold leading-tight">{nome}</span>
-                    <span className="block text-[11px] text-white/65">
-                      {info ? `aplicada: ${textoAplicacao(info)}` : legenda}
-                    </span>
-                  </span>
-                </span>
+                <Icone className="size-4" aria-hidden /> {nome}
               </button>
-            );
-          })}
+            ))}
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3 sm:p-5">
+            {aba === "mapa" ? (
+              <PainelMapaClasse mostrarProfessor={false} semCabecalho />
+            ) : (
+              <PainelRendimento mostrarProfessor={false} semCabecalho />
+            )}
+          </div>
+        </Secao>
 
-          <Link
-            to="/avaliacao"
-            className="group relative isolate flex min-h-[clamp(4.5rem,11svh,6.5rem)] flex-col justify-end overflow-hidden rounded-2xl border border-dashed border-white/30 text-left transition duration-300 hover:-translate-y-0.5 hover:border-white/60"
-          >
-            <img
-              src={alunos3}
-              alt=""
-              aria-hidden
-              className="absolute inset-0 -z-20 size-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            <span
-              aria-hidden
-              className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/95 via-ink/75 to-violet-900/40"
-            />
-            <span className="flex items-start gap-2.5 p-3">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/15">
-                <ListChecks className="size-4" aria-hidden />
-              </span>
-              <span className="min-w-0">
-                <span className="flex items-center gap-1 text-sm font-bold leading-tight">
-                  Avaliações diagnósticas
-                  <ArrowRight
-                    className="size-3.5 transition-transform group-hover:translate-x-1"
-                    aria-hidden
-                  />
-                </span>
-                <span className="block text-[11px] text-white/65">I e II · {diag.periodo}</span>
-              </span>
-            </span>
-          </Link>
-        </nav>
-
-        {/* conteúdo da porta escolhida */}
-        <section
-          aria-label={ABAS.find((a) => a.id === aba)?.nome}
-          className="min-h-0 flex-1 overflow-y-auto rounded-2xl pr-1"
-        >
-          {aba === "resumo" ? (
-            <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {destaques.map((d, i) => {
-                const tom = TOM[d.tom];
-                const destino = DESTINO[d.id] ?? "mapa";
-                return (
-                  <button
-                    key={d.id}
-                    type="button"
-                    onClick={() => setAba(destino)}
-                    style={{ animationDelay: `${i * 70}ms` }}
-                    className="lab-aluno group relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-3.5 pl-5 text-left backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-white/30 hover:bg-white/10"
-                  >
-                    <span
-                      aria-hidden
-                      className={cn("absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b", tom.faixa)}
-                    />
-                    <span className="flex items-start gap-2.5 pr-5">
-                      <span
-                        title={tom.rotulo}
-                        className={cn(
-                          "flex size-7 shrink-0 items-center justify-center rounded-lg",
-                          tom.icone,
-                        )}
-                      >
-                        <tom.Icone className="size-4" aria-hidden />
-                      </span>
-                      <span className="font-heading text-[clamp(0.85rem,2svh,1rem)] font-bold leading-snug">
-                        {d.titulo}
-                      </span>
-                    </span>
-                    <span className="text-[clamp(11.5px,1.75svh,13px)] leading-snug text-white/75">
-                      {d.texto}
-                    </span>
-                    <ArrowRight
-                      className="absolute right-3 top-3.5 size-4 text-sun opacity-50 transition group-hover:translate-x-1 group-hover:opacity-100"
-                      aria-hidden
-                    />
-                  </button>
-                );
-              })}
+        <footer className="grid gap-3 rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-sm sm:grid-cols-3">
+          {REFERENCIA.instrumentos.map((i) => (
+            <div key={i.id}>
+              <p className="font-semibold">{i.nome}</p>
+              <p className="text-xs text-white/60">
+                {i.periodo} · aplicação: {textoAplicacao(i)}
+              </p>
+              <p className="mt-1 text-[11px] text-white/45">Fonte: {i.fonte}</p>
             </div>
-          ) : aba === "mapa" ? (
-            <PainelMapaClasse mostrarProfessor={false} semCabecalho />
-          ) : (
-            <PainelRendimento mostrarProfessor={false} semCabecalho />
-          )}
-        </section>
+          ))}
+          <p className="text-xs text-white/50 sm:col-span-3">
+            Publicado em {REFERENCIA.publicadoEm}. Os bimestres anteriores vêm do próprio mapa de
+            classe; a 2ª avaliação diagnóstica, da tabulação por aluno publicada em Avaliações.
+          </p>
+        </footer>
       </div>
     </div>
+  );
+}
+
+function Secao({
+  ref,
+  selo,
+  titulo,
+  texto,
+  children,
+}: {
+  ref?: React.Ref<HTMLElement>;
+  selo: ReactNode;
+  titulo: string;
+  texto: string;
+  children: ReactNode;
+}) {
+  return (
+    <section ref={ref} className="scroll-mt-20">
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-sun">{selo}</p>
+      <h2 className="mt-1.5 text-2xl font-extrabold tracking-tight sm:text-3xl">{titulo}</h2>
+      <p className="mb-6 mt-2 max-w-3xl text-sm text-white/65">{texto}</p>
+      {children}
+    </section>
   );
 }

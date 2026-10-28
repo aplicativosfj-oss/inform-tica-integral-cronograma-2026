@@ -787,6 +787,52 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   }
 }
 
+/* Abertura de Resultados e Avaliações: foto que aproxima devagar, textos que
+   sobem ao entrar e barras que crescem a partir da base. */
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.12);
+  }
+  to {
+    transform: scale(1.02);
+  }
+}
+@keyframes hero-subir {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hero-barra {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.hero-zoom {
+  animation: hero-zoom 14s ease-out both;
+}
+.hero-subir {
+  animation: hero-subir 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.hero-barra {
+  transform-origin: bottom;
+  animation: hero-barra 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-zoom,
+  .hero-subir,
+  .hero-barra {
+    animation: none;
+  }
+}
+
 /* Nome da música no player da rádio: rola devagar, em laço contínuo. */
 @keyframes radio-marquee {
   from {
