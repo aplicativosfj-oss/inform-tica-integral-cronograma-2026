@@ -1,4 +1,4 @@
-import { Clock3, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
+import { Clock3, History, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { PalcoGrupo } from "@/components/school/laboratorio/palco-grupo";
@@ -10,6 +10,7 @@ import {
   agruparSessoes,
   encerrarGrupo,
   estadoDaSessao,
+  historico24h,
   hojeNaEscola,
   horaNaEscola,
   nomeExibido,
@@ -140,7 +141,7 @@ export function PainelLaboratorioAgora({
   const estado = (g: GrupoLab) => estadoDaSessao(g, agora);
   const aoVivo = grupos.filter((g) => estado(g) === "ao-vivo");
   const proximos = grupos.filter((g) => estado(g) === "agendada");
-  const passados = grupos.filter((g) => estado(g) === "encerrada");
+  const historico = historico24h(dados.sessoes, agora);
   const alunosAgora = new Set(aoVivo.flatMap((g) => g.alunos.map((a) => a.id))).size;
 
   return (
@@ -217,21 +218,55 @@ export function PainelLaboratorioAgora({
               </div>
             ) : null}
 
-            {passados.length > 0 ? (
-              <details className="rounded-lg border p-3">
-                <summary className="cursor-pointer text-sm font-semibold text-muted-foreground">
-                  Já passaram por aqui hoje ({passados.reduce((n, g) => n + g.alunos.length, 0)})
-                </summary>
-                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                  {passados.map((g) => (
-                    <li key={g.grupoId}>
-                      <strong className="text-foreground">{g.turmaRotulo}</strong> ·{" "}
-                      {horaNaEscola(g.inicio)}–{horaNaEscola(g.fim)} ·{" "}
-                      {g.alunos.map((a) => nomeExibido(a.nome, logado)).join(", ")}
-                    </li>
-                  ))}
-                </ul>
-              </details>
+            {historico.length > 0 ? (
+              <section className="space-y-2" aria-label="Aulas das últimas 24 horas">
+                <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+                  <History className="size-4" aria-hidden /> Aulas das últimas 24 horas
+                </h3>
+                {historico.map(({ data, grupos: gs }) => {
+                  const turmasDoDia = new Map<string, string>();
+                  for (const g of gs)
+                    for (const a of g.alunos) turmasDoDia.set(a.turmaId, a.turmaRotulo);
+                  return (
+                    <div key={data} className="rounded-xl border bg-muted/30 p-3">
+                      <p className="flex flex-wrap items-center gap-2 text-sm">
+                        <strong>{data === hoje ? "Hoje" : "Ontem"}</strong>
+                        <span className="text-muted-foreground">
+                          {data.split("-").reverse().join("/")}
+                        </span>
+                        <span className="text-muted-foreground">· turmas que participaram:</span>
+                        {[...turmasDoDia.values()].map((r) => (
+                          <Etiqueta key={r} rotulo={r} />
+                        ))}
+                      </p>
+                      <ul className="mt-2 space-y-1.5">
+                        {gs.map((g) => (
+                          <li key={g.grupoId} className="rounded-lg border bg-card p-2 text-sm">
+                            <details>
+                              <summary className="cursor-pointer">
+                                <strong>
+                                  {g.turmaId === "mista" ? "Aula mista" : g.turmaRotulo}
+                                </strong>{" "}
+                                · {horaNaEscola(g.inicio)}–{horaNaEscola(g.fim)} · {g.alunos.length}{" "}
+                                aluno
+                                {g.alunos.length === 1 ? "" : "s"}
+                                {g.motivoParada ? (
+                                  <span className="ml-1 text-xs italic text-amber-700 dark:text-amber-300">
+                                    · parada: {g.motivoParada}
+                                  </span>
+                                ) : null}
+                              </summary>
+                              <p className="mt-1.5 text-xs text-muted-foreground">
+                                {g.alunos.map((a) => nomeExibido(a.nome, logado)).join(", ")}
+                              </p>
+                            </details>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </section>
             ) : null}
           </>
         )}

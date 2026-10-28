@@ -129,7 +129,26 @@ export const inicioDoMes = (chave: string) => `${chave.slice(0, 7)}-01`;
 export function buscarDesde(hoje: string): string {
   const s = inicioDaSemana(hoje);
   const m = inicioDoMes(hoje);
-  return s < m ? s : m;
+  const d = chaveParaData(hoje);
+  d.setDate(d.getDate() - 1);
+  const ontem = toDateKey(d);
+  return [s, m, ontem].sort()[0]!;
+}
+
+/** Aulas encerradas nas últimas 24 horas, agrupadas por dia (a mais recente primeiro). */
+export function historico24h(
+  sessoes: SessaoLab[],
+  agora: number,
+): { data: string; grupos: GrupoLab[] }[] {
+  const corte = agora - 24 * 3_600_000;
+  const recentes = sessoes.filter(
+    (s) => estadoDaSessao(s, agora) === "encerrada" && new Date(s.fim).getTime() >= corte,
+  );
+  const porDia = new Map<string, SessaoLab[]>();
+  for (const s of recentes) porDia.set(s.data, [...(porDia.get(s.data) ?? []), s]);
+  return [...porDia.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([data, lista]) => ({ data, grupos: agruparSessoes(lista) }));
 }
 
 export function textoRestante(ms: number): string {
@@ -165,6 +184,7 @@ export interface GrupoLab {
   inicio: string;
   fim: string;
   pausadoEm: string | null;
+  motivoParada: string | null;
   alunos: { id: string; nome: string; turmaId: string; turmaRotulo: string }[];
 }
 
@@ -193,6 +213,7 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
         inicio: s.inicio,
         fim: s.fim,
         pausadoEm: s.pausadoEm,
+        motivoParada: s.motivoParada,
         alunos: [
           { id: s.alunoId, nome: s.alunoNome, turmaId: s.turmaId, turmaRotulo: s.turmaRotulo },
         ],

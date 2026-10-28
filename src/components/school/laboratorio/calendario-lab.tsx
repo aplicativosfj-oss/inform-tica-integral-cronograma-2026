@@ -158,6 +158,19 @@ export function CalendarioLab() {
     });
   }, [sessoes, turmas, de, ate]);
 
+  /** Dias úteis (seg–sex) já passados, dentro do período, em que ninguém foi ao laboratório. */
+  const semAula = useMemo(() => {
+    const dias: string[] = [];
+    let atual = de;
+    while (atual <= ate && atual <= hoje) {
+      const dow = new Date(`${atual}T12:00:00`).getDay();
+      if (dow !== 0 && dow !== 6 && !porDia.has(atual)) dias.push(atual);
+      const [y, m, d] = atual.split("-").map(Number);
+      atual = chave(new Date(y!, m! - 1, d! + 1));
+    }
+    return dias;
+  }, [de, ate, hoje, porDia]);
+
   const sessoesDoDia = porDia.get(dia) ?? [];
   const gruposDoDia = agruparSessoes(sessoesDoDia);
 
@@ -177,6 +190,7 @@ export function CalendarioLab() {
               ? "acima da turma"
               : "foi",
         ]);
+    linhas.push([], ["Dias úteis sem aula registrada"], ...semAula.map((d) => [dataBR(d)]));
     const csv =
       "﻿" + linhas.map((l) => l.map((x) => `"${x.replace(/"/g, '""')}"`).join(";")).join("\r\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
@@ -281,6 +295,11 @@ export function CalendarioLab() {
                       <Etiqueta key={r} rotulo={r} />
                     ))}
                   </span>
+                  {alunosDoDia === 0 && !fimDeSemana && d <= hoje && !foraDoMes ? (
+                    <span className="mt-auto rounded bg-red-500/15 px-1 text-[10px] font-semibold text-red-600 dark:text-red-400">
+                      sem aula
+                    </span>
+                  ) : null}
                   {alunosDoDia > 0 ? (
                     <span className="mt-auto text-[10px] text-muted-foreground">
                       {alunosDoDia} aluno{alunosDoDia === 1 ? "" : "s"}
@@ -295,7 +314,9 @@ export function CalendarioLab() {
             <h3 className="text-sm font-semibold">{dataBR(dia)}</h3>
             {gruposDoDia.length === 0 ? (
               <p className="mt-1 text-sm text-muted-foreground">
-                Ninguém foi ao laboratório neste dia.
+                {dia <= hoje && !porDia.has(dia)
+                  ? "Sem aula registrada neste dia."
+                  : "Ninguém foi ao laboratório neste dia."}
               </p>
             ) : (
               <ul className="mt-2 space-y-2">
@@ -365,6 +386,30 @@ export function CalendarioLab() {
           <p className="text-sm text-muted-foreground">
             {totalFoi} de {totalAlunos} alunos já foram ao laboratório neste período.
           </p>
+          <div
+            className={cn(
+              "rounded-lg border p-2.5 text-sm",
+              semAula.length > 0
+                ? "border-red-500/40 bg-red-500/10"
+                : "border-emerald-500/40 bg-emerald-500/10",
+            )}
+          >
+            {semAula.length === 0 ? (
+              <span>Houve aula em todos os dias úteis deste período. 🎉</span>
+            ) : (
+              <>
+                <strong>
+                  {semAula.length} dia{semAula.length === 1 ? "" : "s"} útil
+                  {semAula.length === 1 ? "" : "eis"} sem aula registrada:
+                </strong>{" "}
+                {semAula.map(dataCurta).join(", ")}
+                <span className="block text-xs text-muted-foreground">
+                  Feriados e recessos também aparecem aqui, pois o sistema só sabe quando alguém foi
+                  ao laboratório.
+                </span>
+              </>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="grid gap-3 lg:grid-cols-2">
           {sessoes === null ? (
