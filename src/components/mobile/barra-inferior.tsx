@@ -57,7 +57,7 @@ export function BarraInferior() {
   return (
     <>
       {/* Reserva o espaço da barra no fim da página, para nada ficar escondido atrás dela. */}
-      <div aria-hidden className="h-[calc(3.5rem+env(safe-area-inset-bottom))] xl:hidden" />
+      <div aria-hidden className="h-[calc(3.75rem+env(safe-area-inset-bottom))] xl:hidden" />
       <nav
         aria-label="Navegação principal"
         // Ocupa a largura toda e é quase opaca: o conteúdo não aparece por baixo,
@@ -67,7 +67,7 @@ export function BarraInferior() {
           rolou && "shadow-[0_-6px_24px_-12px_rgb(0_0_0/0.45)]",
         )}
       >
-        <ul className="mx-auto flex h-14 max-w-xl items-stretch px-1">
+        <ul className="mx-auto flex h-[3.75rem] max-w-xl items-stretch px-1">
           {ITENS.map(({ to, label, Icone }) => {
             const ativo = to === "/" ? caminho === "/" : caminho.startsWith(to);
             return (
@@ -76,7 +76,7 @@ export function BarraInferior() {
                   to={to}
                   aria-current={ativo ? "page" : undefined}
                   className={cn(
-                    "relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium tracking-wide transition-colors active:scale-95",
+                    "relative flex flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium tracking-wide transition-colors active:scale-95",
                     ativo ? "text-primary" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -88,7 +88,7 @@ export function BarraInferior() {
                       ativo ? "w-5 opacity-100" : "w-0 opacity-0",
                     )}
                   />
-                  <Icone className="size-[18px]" strokeWidth={ativo ? 2.4 : 1.8} aria-hidden />
+                  <Icone className="size-[22px]" strokeWidth={ativo ? 2.4 : 1.8} aria-hidden />
                   {label}
                 </Link>
               </li>
