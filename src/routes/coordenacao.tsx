@@ -19,6 +19,8 @@ import { DiarioAulas } from "@/components/school/diario-aulas";
 import { NavBar } from "@/components/school/nav-bar";
 import { Paginacao } from "@/components/school/paginacao";
 import { paginar } from "@/lib/paginar";
+import { PainelCoordenacaoLab } from "@/components/school/laboratorio/painel-coordenacao";
+import { PROGRAMACAO_ATIVA } from "@/lib/recursos";
 import { PageBackground } from "@/components/school/page-background";
 import { SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -33,7 +35,7 @@ export const Route = createFileRoute("/coordenacao")({
   head: () => ({
     meta: [
       ...imagemCompartilhar("/og/secao-coordenacao.jpg", "Coordenação"),
-      { title: "Coordenação · Frequência das aulas de informática" },
+      { title: "Coordenação · Uso do laboratório de informática" },
       {
         name: "description",
         content:
@@ -64,7 +66,7 @@ function intervaloDoMes(mes: string): { inicio: string; fim: string } {
  * calendário das aulas da semana, participação por turma e grupo no mês e
  * o histórico de faltas. Somente leitura — nada aqui altera a agenda.
  */
-function CoordenacaoPage() {
+function CoordenacaoAntiga() {
   const { turmas, config } = useAppStore();
   const [mes, setMes] = useState(mesAtual);
   const [registros, setRegistros] = useState<Presenca[] | null>(null);
@@ -401,4 +403,22 @@ function CoordenacaoPage() {
       </div>
     </div>
   );
+}
+
+function CoordenacaoPage() {
+  if (!PROGRAMACAO_ATIVA) {
+    return (
+      <div className="relative min-h-screen bg-background">
+        <PageBackground />
+        <div className="relative z-10">
+          <NavBar />
+          <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+            <PainelCoordenacaoLab />
+          </main>
+          <SiteFooter />
+        </div>
+      </div>
+    );
+  }
+  return <CoordenacaoAntiga />;
 }

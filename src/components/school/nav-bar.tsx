@@ -4,6 +4,7 @@ import {
   ArrowRight,
   BarChart3,
   CalendarDays,
+  ChevronDown,
   ChevronRight,
   Compass,
   ClipboardList,
@@ -43,6 +44,12 @@ import { encerrarAlunoSessao, lerAlunoSessao } from "@/lib/aluno-session";
 import { useConfirmar } from "@/lib/confirm-store";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { Marca, MarcaLogo } from "@/components/school/marca";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function NavLink({ to, label }: { to: string; label: string }) {
   const location = useLocation();
@@ -95,9 +102,46 @@ function tituloDaPagina(pathname: string): string {
   return "Laboratório de informática";
 }
 
+const LINKS_MAIS = [
+  { to: "/coordenacao", label: "Coordenação" },
+  { to: "/professor", label: "Professor" },
+  { to: "/mediador", label: "Mediadores" },
+  { to: "/sobre", label: "Sobre" },
+] as const;
+
+/** Atalhos de equipe e institucionais, guardados num menu para o cabeçalho caber na janela. */
+function MaisLinks() {
+  const location = useLocation();
+  const ativo = LINKS_MAIS.some((l) => location.pathname.startsWith(l.to));
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`hidden gap-1 whitespace-nowrap px-2 text-[15px] xl:inline-flex ${
+            ativo
+              ? "bg-primary/15 font-semibold text-foreground"
+              : "text-slate-700 dark:text-white/80"
+          }`}
+        >
+          Mais <ChevronDown className="size-4" aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        {LINKS_MAIS.map((l) => (
+          <DropdownMenuItem key={l.to} asChild>
+            <Link to={l.to}>{l.label}</Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 const LINKS = [
   { to: "/", label: "Início" },
-  { to: "/agenda", label: "Agenda" },
+  { to: "/agenda", label: "Laboratório" },
   { to: "/coordenacao", label: "Coordenação" },
   { to: "/infoteca", label: "Infoteca" },
   { to: "/avaliacao", label: "Avaliações" },
@@ -297,16 +341,15 @@ export function NavBar() {
 
         <nav className="flex min-w-0 items-center gap-1 sm:gap-1.5 xl:gap-0">
           <NavLink to="/" label="Início" />
-          <NavLink to="/agenda" label="Agenda" />
-          <NavLink to="/coordenacao" label="Coordenação" />
-          <NavLink to="/infoteca" label="Infoteca" />
-          <NavLink to="/avaliacao" label="Avaliações" />
+          <NavLink to="/agenda" label="Laboratório" />
           <NavLink to="/resultados" label="Resultados" />
+          <NavLink to="/avaliacao" label="Avaliações" />
+          <NavLink to="/infoteca" label="Infoteca" />
           <NavLink to="/aluno" label="Área do Aluno" />
-          <NavLink to="/professor" label="Professor" />
-          <NavLink to="/mediador" label="Mediadores" />
-          <NavLink to="/sobre" label="Sobre" />
-          <HeaderRadioPlayer />
+          <MaisLinks />
+          <span className="hidden 2xl:contents">
+            <HeaderRadioPlayer />
+          </span>
           <PresencaOnline />
           <ThemeToggle />
           {isReady && isAuthenticated ? (

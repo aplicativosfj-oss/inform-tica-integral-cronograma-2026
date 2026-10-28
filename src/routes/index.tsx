@@ -34,13 +34,21 @@ import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
-import { estadoDaSessao, useAgora, useSessoesLab } from "@/lib/laboratorio";
+import {
+  agruparSessoes,
+  estadoDaSessao,
+  hojeNaEscola,
+  horaNaEscola,
+  textoRestante,
+  useAgora,
+  useSessoesLab,
+} from "@/lib/laboratorio";
 import { cn } from "@/lib/utils";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import alunosImg1 from "@/assets/alunos-1.jpg";
 import alunosImg2 from "@/assets/alunos-2.jpg";
 import alunosImg3 from "@/assets/alunos-3.jpg";
-import laboratorioTurmaFotoImg from "@/assets/image3.png";
+import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
 import alunoJogoImg from "@/assets/image2.jpeg";
 import alunoSorridenteImg from "@/assets/image10.jpeg";
 import homePageBgImg from "@/assets/homepage-bg.svg";
@@ -96,48 +104,61 @@ function Index() {
   const noLabAgora = new Set(
     lab.sessoes.filter((x) => estadoDaSessao(x, agora) === "ao-vivo").map((x) => x.alunoId),
   ).size;
+  const grupos = agruparSessoes(lab.sessoes.filter((x) => x.data === hojeNaEscola()));
+  const gruposAoVivo = grupos.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
+  const proximoGrupo = grupos.find((g) => estadoDaSessao(g, agora) === "agendada");
 
   return (
     <div className="relative min-h-screen bg-background">
+      <PageBackground />
       <div className="relative z-10">
         <NavBar />
 
-        {/* ───────── Hero ───────── */}
-        <section className="relative overflow-hidden border-b border-border/60">
+        {/* ───────── Hero: foto do laboratório de fundo ───────── */}
+        <section className="relative isolate overflow-hidden border-b border-border/60 text-white">
           <div
             aria-hidden
-            className="fundo-pixel pointer-events-none absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
+            className="absolute inset-0 -z-30 bg-cover bg-[position:62%_35%]"
+            style={{ backgroundImage: `url("${labFotoImg}")` }}
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -left-24 -top-24 -z-10 size-96 rounded-full bg-primary/20 blur-3xl"
+            className="absolute inset-0 -z-20 bg-gradient-to-r from-ink/95 via-ink/80 to-ink/35"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-32 right-0 -z-10 size-96 rounded-full bg-sun/30 blur-3xl"
+            className="fundo-pixel absolute inset-0 -z-10 opacity-40 [mask-image:linear-gradient(to_right,black,transparent_75%)]"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-background to-transparent"
           />
 
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12 lg:py-20">
+          <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 sm:px-6 lg:min-h-[min(38rem,calc(100svh-4.5rem))] lg:grid-cols-[1.2fr_0.8fr] lg:gap-10 lg:py-16">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3.5 py-1.5 text-sm font-semibold text-muted-foreground shadow-sm backdrop-blur">
-                <GraduationCap className="size-4 text-primary" aria-hidden />
+              <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-white/90 backdrop-blur">
+                <GraduationCap className="size-4 text-sun" aria-hidden />
                 Escola Dr. Eiraldo Carneiro de França · Feijó, Acre
               </p>
-              <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.02] sm:text-6xl lg:text-7xl">
+              <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.02] text-white sm:text-6xl lg:text-7xl">
                 Onde a escola aprende com{" "}
-                <span className="bg-[linear-gradient(transparent_62%,var(--color-sun)_62%)] px-1">
+                <span className="bg-[linear-gradient(transparent_62%,color-mix(in_oklch,var(--color-sun)_85%,transparent)_62%)] px-1">
                   tecnologia
                 </span>
                 .
               </h1>
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
                 O laboratório de informática da nossa escola. O professor{" "}
                 {config.professorInformatica} escolhe quem vai, define o tempo de cada grupo e todo
                 mundo acompanha, ao vivo, quem está no laboratório.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="rounded-full px-6">
+                <Button
+                  asChild
+                  size="lg"
+                  className="rounded-full bg-sun px-6 text-sun-foreground hover:bg-sun/90"
+                >
                   <a href="#laboratorio-agora">
                     <MonitorSmartphone /> Ver quem está no laboratório
                   </a>
@@ -146,7 +167,7 @@ function Index() {
                   asChild
                   size="lg"
                   variant="outline"
-                  className="rounded-full bg-card/70 px-6"
+                  className="rounded-full border-white/30 bg-white/10 px-6 text-white backdrop-blur hover:bg-white/20 hover:text-white"
                 >
                   <Link to="/resultados">
                     Resultados do bimestre <ArrowRight />
@@ -154,39 +175,25 @@ function Index() {
                 </Button>
               </div>
 
-              <p className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                <span className="relative flex size-2.5">
-                  <span
-                    className={`absolute inline-flex size-full rounded-full opacity-60 ${noLabAgora > 0 ? "animate-ping bg-emerald-500" : "bg-muted-foreground/40"}`}
-                  />
-                  <span
-                    className={`relative inline-flex size-2.5 rounded-full ${noLabAgora > 0 ? "bg-emerald-500" : "bg-muted-foreground/50"}`}
-                  />
-                </span>
-                {noLabAgora > 0
-                  ? `${noLabAgora} aluno${noLabAgora === 1 ? "" : "s"} no laboratório agora`
-                  : "Laboratório livre neste momento"}
-              </p>
-
-              <dl className="mt-8 grid grid-cols-2 divide-x divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/80 shadow-sm backdrop-blur sm:grid-cols-4 sm:divide-y-0">
+              <dl className="mt-8 grid max-w-xl grid-cols-2 divide-x divide-y divide-white/15 overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur sm:grid-cols-4 sm:divide-y-0">
                 {[
                   { rotulo: "Turmas", valor: turmas.length },
                   { rotulo: "Alunos", valor: totalAlunos },
                   { rotulo: "Máquinas", valor: config.numeroComputadores },
                 ].map((d) => (
                   <div key={d.rotulo} className="px-4 py-3">
-                    <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-xs font-semibold uppercase tracking-wider text-white/65">
                       {d.rotulo}
                     </dt>
                     {isReady ? (
                       <StatCounter valor={d.valor} />
                     ) : (
-                      <div className="mt-1.5 h-7 w-10 animate-pulse rounded bg-muted-foreground/20" />
+                      <div className="mt-1.5 h-7 w-10 animate-pulse rounded bg-white/20" />
                     )}
                   </div>
                 ))}
                 <div className="px-4 py-3">
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-white/65">
                     Horário
                   </dt>
                   <dd className="font-heading text-xl font-bold leading-tight">
@@ -196,42 +203,56 @@ function Index() {
               </dl>
             </div>
 
-            <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
-              <div
-                aria-hidden
-                className="absolute -bottom-4 -right-4 size-full rounded-[2rem] bg-sun"
-              />
-              <div
-                aria-hidden
-                className="absolute -left-3 -top-3 size-14 rounded-2xl border-4 border-primary/60"
-              />
-              <div className="relative overflow-hidden rounded-[2rem] border-4 border-card bg-card shadow-2xl">
-                <SiteImage
-                  src={laboratorioTurmaFotoImg}
-                  alt={`Turma da ${config.nomeEscola} durante a aula de informática, cada aluno em seu computador`}
-                  legenda={`Turma da ${config.nomeEscola} em aula de informática.`}
-                  width={1280}
-                  height={720}
-                  className="aspect-[4/3] w-full object-cover"
-                  loading="eager"
-                  decoding="async"
-                  fetchPriority="high"
-                />
+            {/* Cartão de vidro: o laboratório agora, em uma olhada. */}
+            <div className="rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md">
+              <div className="flex items-center justify-between gap-3">
+                <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-sun">
+                  <span className="relative flex size-2.5">
+                    <span
+                      className={`absolute inline-flex size-full rounded-full opacity-60 ${noLabAgora > 0 ? "animate-ping bg-emerald-400" : "bg-white/40"}`}
+                    />
+                    <span
+                      className={`relative inline-flex size-2.5 rounded-full ${noLabAgora > 0 ? "bg-emerald-400" : "bg-white/50"}`}
+                    />
+                  </span>
+                  Agora
+                </p>
+                <span className="text-sm tabular-nums text-white/70">{horaNaEscola(agora)}</span>
               </div>
-              <div className="absolute -bottom-6 left-4 hidden items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-xl sm:flex">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                  <Users2 className="size-5" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    1º ao 5º ano
+              {gruposAoVivo.length > 0 ? (
+                <ul className="mt-4 space-y-3">
+                  {gruposAoVivo.slice(0, 3).map((g) => (
+                    <li key={g.grupoId} className="rounded-2xl bg-white/10 p-3">
+                      <p className="flex items-baseline justify-between gap-2">
+                        <span className="font-heading text-xl font-bold">{g.turmaRotulo}</span>
+                        <span className="text-sm text-white/75">até {horaNaEscola(g.fim)}</span>
+                      </p>
+                      <p className="mt-0.5 text-sm text-white/70">
+                        {g.alunos.length} aluno{g.alunos.length === 1 ? "" : "s"} · faltam{" "}
+                        {textoRestante(new Date(g.fim).getTime() - agora)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="mt-4 rounded-2xl bg-white/10 p-4">
+                  <p className="font-heading text-xl font-bold">Laboratório livre</p>
+                  <p className="mt-1 text-sm text-white/70">
+                    {proximoGrupo
+                      ? `Próximo grupo: ${proximoGrupo.turmaRotulo} às ${horaNaEscola(proximoGrupo.inicio)}`
+                      : "Nenhum grupo marcado para agora."}
                   </p>
-                  <p className="font-heading text-sm font-bold">Todas as turmas, todo dia</p>
                 </div>
-              </div>
+              )}
+              <a
+                href="#laboratorio-agora"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-sun underline-offset-4 hover:underline"
+              >
+                Ver o painel completo <ArrowRight className="size-4" aria-hidden />
+              </a>
             </div>
           </div>
-          <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 sm:px-6" />
+          <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 text-white/60 sm:px-6" />
         </section>
 
         {/* ───────── Laboratório ao vivo ───────── */}

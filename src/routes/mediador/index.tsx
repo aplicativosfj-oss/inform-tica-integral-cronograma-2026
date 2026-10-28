@@ -180,7 +180,7 @@ function MediadorPicker() {
                     key={`${item.turma.id}-${item.indice}`}
                     type="button"
                     onClick={() => (sessaoAEE ? abrirArea(item, sessaoAEE) : setEscolhido(item))}
-                    className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 text-left shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                    className="group flex w-full min-w-0 cursor-pointer items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 text-left shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
                   >
                     <span
                       className={`flex size-12 shrink-0 items-center justify-center rounded-full text-base font-bold ring-1 ring-inset ring-black/5 dark:ring-white/10 ${cor.bg} ${cor.text}`}

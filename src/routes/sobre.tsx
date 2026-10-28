@@ -110,12 +110,12 @@ function SobrePage() {
                 <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
                   <MonitorSmartphone className="size-4" />
                 </span>
-                <CardTitle className="text-base">Cronograma automático</CardTitle>
+                <CardTitle className="text-base">Escolha do dia</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Distribui todas as turmas nos horários disponíveis da semana, respeitando o
-                  intervalo do almoço, o recreio e o número de computadores do laboratório.
+                  O professor de informática escolhe, turma por turma, os alunos que vão ao
+                  laboratório e define o tempo de cada grupo, com início e fim.
                 </p>
               </CardContent>
             </Card>
@@ -128,9 +128,8 @@ function SobrePage() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Divide cada turma em grupos e faz o rodízio entre eles semana a semana,
-                  priorizando quem está há mais tempo sem participar — sem repetir e sem deixar
-                  ninguém de fora.
+                  Conta quantas vezes cada aluno foi ao laboratório na semana e no mês e avisa o
+                  professor quando alguém repete, para ninguém ficar de fora.
                 </p>
               </CardContent>
             </Card>
@@ -143,8 +142,8 @@ function SobrePage() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Qualquer pessoa — pais, professores(as) regentes e a coordenação — pode consultar
-                  a agenda e ver exatamente qual turma tem aula, em qual data e horário.
+                  Qualquer pessoa — pais, professores(as) regentes e a coordenação — vê no site, ao
+                  vivo, quem está no laboratório e até que horas.
                 </p>
               </CardContent>
             </Card>
@@ -153,12 +152,12 @@ function SobrePage() {
                 <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-amber-400/25 bg-amber-500/10 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
                   <GraduationCap className="size-4" />
                 </span>
-                <CardTitle className="text-base">Frequência e reprogramação</CardTitle>
+                <CardTitle className="text-base">Acompanhamento</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Registra presenças e faltas de cada aula e permite reprogramar automaticamente uma
-                  sessão perdida, sem bagunçar o rodízio das semanas seguintes.
+                  Guarda o histórico de cada ida ao laboratório e mostra à coordenação o uso por
+                  turma e por aluno, semana a semana e mês a mês.
                 </p>
               </CardContent>
             </Card>

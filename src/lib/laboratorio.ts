@@ -234,6 +234,27 @@ export async function carregarSessoes(desde: string): Promise<SessaoLab[]> {
   return todas;
 }
 
+/** Todas as marcações de um mês ("YYYY-MM"), para a coordenação. */
+export async function carregarSessoesDoMes(mes: string): Promise<SessaoLab[]> {
+  const [y, m] = mes.split("-").map(Number);
+  const ultimo = new Date(y!, m!, 0).getDate();
+  const todas: SessaoLab[] = [];
+  for (let inicio = 0; ; inicio += PAGINA) {
+    const { data, error } = await supabase
+      .from("laboratorio_sessoes")
+      .select("*")
+      .gte("data", `${mes}-01`)
+      .lte("data", `${mes}-${String(ultimo).padStart(2, "0")}`)
+      .order("inicio")
+      .order("id")
+      .range(inicio, inicio + PAGINA - 1);
+    if (error) throw new Error(eTabelaAusente(error) ? TABELA_AUSENTE : error.message);
+    todas.push(...((data ?? []) as Linha[]).map(deLinha));
+    if (!data || data.length < PAGINA) break;
+  }
+  return todas;
+}
+
 export async function marcarGrupo(entrada: {
   turma: { id: string; rotulo: string };
   alunos: { id: string; nome: string }[];
