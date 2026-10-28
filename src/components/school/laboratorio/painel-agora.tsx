@@ -24,6 +24,8 @@ import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 
 export interface DadosLab {
   sessoes: SessaoLab[];
+  /** Faltas e impedimentos registrados (não contam como ida). */
+  ausencias?: SessaoLab[];
   erro: string | null;
   carregando: boolean;
   recarregar: () => Promise<void>;

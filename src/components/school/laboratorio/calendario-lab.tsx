@@ -358,6 +358,7 @@ export function CalendarioLab() {
                           </button>
                           <BotaoAusencia
                             sessaoId={a.sessaoId}
+                            semMarcacao={a.semMarcacao}
                             nome={a.nome}
                             ausencia={a.ausencia}
                             ausenciaMotivo={a.ausenciaMotivo}

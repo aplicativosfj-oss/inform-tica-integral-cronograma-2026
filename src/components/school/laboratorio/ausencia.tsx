@@ -17,24 +17,37 @@ import {
   ROTULO_AUSENCIA,
   desfazerAusencia,
   marcarAusencia,
+  registrarAusenciaSemMarcacao,
+  removerAusenciaSemMarcacao,
   type TipoAusencia,
 } from "@/lib/laboratorio";
 import { cn } from "@/lib/utils";
 
 /**
- * Botão "Falta" de um aluno marcado: registra que ele faltou ou que o
- * professor não autorizou a ida naquele dia (com o motivo). A marcação fica
- * guardada, mas deixa de contar como ida. Se já tem falta, permite desfazer.
+ * Botão "Falta" de um aluno: registra que ele faltou ou que está impedido
+ * (o professor não autorizou a ida naquele dia, com o motivo). Num aluno já
+ * marcado, a marcação fica guardada mas deixa de contar como ida; num aluno
+ * ainda não marcado (`novo`), a falta é registrada antes, e o painel não
+ * deixa escolhê-lo no dia. Se já tem falta, permite desfazer.
  */
 export function BotaoAusencia({
   sessaoId,
+  semMarcacao = false,
+  novo,
   nome,
   ausencia,
   ausenciaMotivo,
   aoMudar,
   className,
 }: {
-  sessaoId: string;
+  /** A linha que já tem (ou vai ter) a falta. Sem ela, `novo` cria a falta. */
+  sessaoId?: string | undefined;
+  semMarcacao?: boolean;
+  novo?: {
+    aluno: { id: string; nome: string };
+    turma: { id: string; rotulo: string };
+    criadoPor: string | null;
+  };
   nome: string;
   ausencia: TipoAusencia | null;
   ausenciaMotivo: string | null;
@@ -57,8 +70,15 @@ export function BotaoAusencia({
     if (faltaMotivo) return;
     setSalvando(true);
     try {
-      await marcarAusencia(sessaoId, tipo, tipo === "nao_autorizado" ? motivo : null);
-      toast.success(`${ROTULO_AUSENCIA[tipo]}: ${nome}. Não conta como ida ao laboratório.`);
+      const motivoFinal = tipo === "nao_autorizado" ? motivo : null;
+      if (sessaoId) await marcarAusencia(sessaoId, tipo, motivoFinal);
+      else if (novo) await registrarAusenciaSemMarcacao({ ...novo, tipo, motivo: motivoFinal });
+      else return;
+      toast.success(
+        sessaoId
+          ? `${ROTULO_AUSENCIA[tipo]}: ${nome}. Não conta como ida ao laboratório.`
+          : `${ROTULO_AUSENCIA[tipo]}: ${nome}. Não poderá ser escolhido(a) hoje.`,
+      );
       setAberto(false);
       aoMudar();
     } catch (e) {
@@ -71,8 +91,14 @@ export function BotaoAusencia({
   async function desfazer() {
     setSalvando(true);
     try {
-      await desfazerAusencia(sessaoId);
-      toast.success(`Falta desfeita: ${nome} volta a contar como ida.`);
+      if (!sessaoId) return;
+      if (semMarcacao) {
+        await removerAusenciaSemMarcacao(sessaoId);
+        toast.success(`Falta desfeita: ${nome} pode ser escolhido(a) de novo.`);
+      } else {
+        await desfazerAusencia(sessaoId);
+        toast.success(`Falta desfeita: ${nome} volta a contar como ida.`);
+      }
       setAberto(false);
       aoMudar();
     } catch (e) {
@@ -87,7 +113,7 @@ export function BotaoAusencia({
       <button
         type="button"
         onClick={abrir}
-        title={ausencia ? "Ver ou desfazer a falta" : "Registrar falta ou não autorização"}
+        title={ausencia ? "Ver ou desfazer a falta" : "Registrar falta ou impedimento"}
         className={cn(
           "flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold transition",
           ausencia
@@ -107,7 +133,9 @@ export function BotaoAusencia({
               <UserX className="size-5 text-red-600" aria-hidden /> {nome}
             </DialogTitle>
             <DialogDescription>
-              O aluno continua na lista do dia, mas não conta como ida ao laboratório.
+              {sessaoId && !semMarcacao
+                ? "O aluno continua na lista do dia, mas não conta como ida ao laboratório."
+                : "Fica registrado no dia de hoje, e o aluno não pode ser escolhido por engano."}
             </DialogDescription>
           </DialogHeader>
 
@@ -115,7 +143,7 @@ export function BotaoAusencia({
             {(
               [
                 ["faltou", UserX, "Não veio à aula"],
-                ["nao_autorizado", Ban, "Não foi liberado neste dia"],
+                ["nao_autorizado", Ban, "O professor não autorizou neste dia"],
               ] as const
             ).map(([t, Icone, dica]) => (
               <button

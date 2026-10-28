@@ -110,3 +110,8 @@ alter table public.laboratorio_sessoes
 alter table public.laboratorio_sessoes
   add constraint laboratorio_ausencia_valida
   check (ausencia is null or ausencia in ('faltou', 'nao_autorizado'));
+
+-- sem_marcacao: falta ou impedimento registrado antes de marcar o aluno
+-- (não há aula por trás). Desfazer essa falta apaga a linha.
+alter table public.laboratorio_sessoes
+  add column if not exists sem_marcacao boolean not null default false;

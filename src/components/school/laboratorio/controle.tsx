@@ -17,6 +17,7 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { BotaoAusencia } from "@/components/school/laboratorio/ausencia";
 import { FichaAluno, rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import type { DadosLab } from "@/components/school/laboratorio/painel-agora";
 import {
@@ -44,6 +45,8 @@ import {
   horaNaEscola,
   hojeNaEscola,
   instanteNaEscola,
+  ROTULO_AUSENCIA,
+  acrescentarAoGrupo,
   marcarGrupo,
   mediaIdasNoMes,
   situacaoDoAluno,
@@ -257,6 +260,41 @@ export function ControleLaboratorio({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lista, situacoes]);
 
+  /** Quem já tem falta ou impedimento registrado hoje: não pode ser escolhido. */
+  const ausentesHoje = useMemo(
+    () =>
+      new Map(
+        (dados.ausencias ?? [])
+          .filter((s) => s.data === hoje)
+          .map((s) => [chave(s.turmaId, s.alunoId), s] as const),
+      ),
+    [dados.ausencias, hoje],
+  );
+
+  /**
+   * A aula de hoje que ainda não acabou (ao vivo, pausada ou para começar).
+   * Enquanto ela existe, não se cria outra: só se acrescentam alunos a ela.
+   */
+  const grupoEmAndamento = useMemo(() => {
+    const abertas = dados.sessoes.filter(
+      (s) => s.data === hoje && estadoDaSessao(s, agora) !== "encerrada",
+    );
+    if (abertas.length === 0) return null;
+    return abertas.reduce((a, b) => (b.inicio > a.inicio ? b : a));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dados.sessoes, hoje]);
+  const turmasDoGrupoEmAndamento = useMemo(
+    () =>
+      new Set(
+        grupoEmAndamento
+          ? dados.sessoes
+              .filter((s) => s.grupoId === grupoEmAndamento.grupoId)
+              .map((s) => s.turmaId)
+          : [],
+      ),
+    [dados.sessoes, grupoEmAndamento],
+  );
+
   const fimDoGrupoAtual = useMemo(() => {
     const fins = dados.sessoes
       .filter((s) => s.data === hoje && estadoDaSessao(s, agora) !== "encerrada")
@@ -267,6 +305,8 @@ export function ControleLaboratorio({
 
   /** Início e fim que serão gravados, conforme o modo escolhido. */
   function calcularJanela(): { inicio: Date; fim: Date } | string {
+    if (grupoEmAndamento)
+      return { inicio: new Date(grupoEmAndamento.inicio), fim: new Date(grupoEmAndamento.fim) };
     if (modo === "horario") {
       if (!inicioManual || !fimManual) return "Preencha a hora de início e a de fim.";
       const inicio = instanteNaEscola(hoje, inicioManual);
@@ -348,6 +388,7 @@ export function ControleLaboratorio({
         ({ a, t }) =>
           !a.impedido &&
           !noLabAgora.has(chave(t.id, a.id)) &&
+          !ausentesHoje.has(chave(t.id, a.id)) &&
           (liberar || !jaFoiNaSemana(situacoes.get(chave(t.id, a.id))!)),
       )
       .map(({ a, t }) => chave(t.id, a.id));
@@ -375,10 +416,17 @@ export function ControleLaboratorio({
 
   async function gravar() {
     if (selecionados.length === 0 || typeof janela === "string") return;
-    // Trava: alunos de mais de uma turma só podem ser marcados juntos na aula mista.
-    if (!mista && new Set(selecionados.map(({ t }) => t.id)).size > 1) {
+    // Trava: alunos de mais de uma turma só podem ficar juntos na aula mista
+    // (contando quem já está na aula em andamento).
+    const turmasJuntas = new Set([
+      ...turmasDoGrupoEmAndamento,
+      ...selecionados.map(({ t }) => t.id),
+    ]);
+    if (!mista && turmasJuntas.size > 1) {
       toast.error(
-        "Há alunos de turmas diferentes escolhidos. Tire os de outra turma ou ative a aula mista.",
+        grupoEmAndamento
+          ? "A aula em andamento é de outra turma. Para juntar turmas, ative a aula mista."
+          : "Há alunos de turmas diferentes escolhidos. Tire os de outra turma ou ative a aula mista.",
       );
       return;
     }
@@ -388,19 +436,22 @@ export function ControleLaboratorio({
     }
     setSalvando(true);
     try {
-      await marcarGrupo({
-        alunos: selecionados.map(({ a, t }) => ({
-          id: a.id,
-          nome: a.nome,
-          turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
-        })),
-        inicio: janela.inicio,
-        fim: janela.fim,
-        criadoPor: email,
-      });
-      toast.success(
-        `${escolhidos.size} aluno${escolhidos.size === 1 ? "" : "s"} no laboratório das ${horaNaEscola(janela.inicio)} às ${horaNaEscola(janela.fim)}.`,
-      );
+      const alunos = selecionados.map(({ a, t }) => ({
+        id: a.id,
+        nome: a.nome,
+        turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
+      }));
+      if (grupoEmAndamento) {
+        await acrescentarAoGrupo({ grupo: grupoEmAndamento, alunos, criadoPor: email });
+        toast.success(
+          `${alunos.length} aluno${alunos.length === 1 ? "" : "s"} acrescentado${alunos.length === 1 ? "" : "s"} à aula em andamento (até ${horaNaEscola(janela.fim)}). O tempo continua correndo.`,
+        );
+      } else {
+        await marcarGrupo({ alunos, inicio: janela.inicio, fim: janela.fim, criadoPor: email });
+        toast.success(
+          `${alunos.length} aluno${alunos.length === 1 ? "" : "s"} no laboratório das ${horaNaEscola(janela.inicio)} às ${horaNaEscola(janela.fim)}.`,
+        );
+      }
       setEscolhidos(new Set());
       setAvisos(null);
       setPasso(1);
@@ -659,9 +710,11 @@ export function ControleLaboratorio({
                   const sit = situacoes.get(k)!;
                   const marcado = escolhidos.has(k);
                   const ocupado = noLabAgora.has(k);
+                  const ausente = ausentesHoje.get(k) ?? null;
                   const travadoSemana = jaFoiNaSemana(sit) && !liberar;
                   const noTeto = !marcado && noLimite;
-                  const bloqueado = Boolean(a.impedido) || ocupado || travadoSemana || noTeto;
+                  const bloqueado =
+                    Boolean(a.impedido) || ocupado || Boolean(ausente) || travadoSemana || noTeto;
                   const fila = posicaoFila.get(k);
                   const ring = sit.repetiuSemana
                     ? "ring-red-500"
@@ -678,14 +731,16 @@ export function ControleLaboratorio({
                         disabled={bloqueado}
                         onClick={() => alternar(k)}
                         title={
-                          travadoSemana
-                            ? "Já foi ao laboratório esta semana — ligue “Liberar quem já foi na semana” para escolher"
-                            : noTeto
-                              ? `Limite de ${LIMITE_ALUNOS_LAB} alunos por vez`
-                              : undefined
+                          ausente
+                            ? `${ROTULO_AUSENCIA[ausente.ausencia!]} hoje${ausente.ausenciaMotivo ? `: ${ausente.ausenciaMotivo}` : ""}`
+                            : travadoSemana
+                              ? "Já foi ao laboratório esta semana — ligue “Liberar quem já foi na semana” para escolher"
+                              : noTeto
+                                ? `Limite de ${LIMITE_ALUNOS_LAB} alunos por vez`
+                                : undefined
                         }
                         className={cn(
-                          "flex w-full items-center gap-3.5 rounded-xl border p-3.5 pr-10 text-left transition",
+                          "flex w-full items-center gap-3.5 rounded-xl border p-3.5 pb-10 pr-10 text-left transition",
                           marcado
                             ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
                             : "bg-card hover:-translate-y-0.5 hover:shadow-md",
@@ -735,6 +790,10 @@ export function ControleLaboratorio({
                             ) : null}
                             {a.impedido ? (
                               <span>suspenso(a)</span>
+                            ) : ausente ? (
+                              <span className="font-semibold text-red-600 dark:text-red-400">
+                                {ausente.ausencia === "faltou" ? "faltou hoje" : "impedido hoje"}
+                              </span>
                             ) : ocupado ? (
                               <span className="font-semibold text-emerald-500">
                                 no laboratório agora
@@ -784,6 +843,30 @@ export function ControleLaboratorio({
                       >
                         <IdCard className="size-4" aria-hidden />
                       </button>
+                      <BotaoAusencia
+                        sessaoId={ausente?.id}
+                        semMarcacao={ausente?.semMarcacao ?? false}
+                        novo={{
+                          aluno: { id: a.id, nome: a.nome },
+                          turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
+                          criadoPor: email,
+                        }}
+                        nome={a.nome}
+                        ausencia={ausente?.ausencia ?? null}
+                        ausenciaMotivo={ausente?.ausenciaMotivo ?? null}
+                        aoMudar={() => {
+                          setEscolhidos((anterior) => {
+                            const novo = new Set(anterior);
+                            novo.delete(k);
+                            return novo;
+                          });
+                          void dados.recarregar();
+                        }}
+                        className={cn(
+                          "absolute bottom-2.5 right-2.5",
+                          marcado && !ausente && "text-white",
+                        )}
+                      />
                     </li>
                   );
                 })}
@@ -941,105 +1024,117 @@ export function ControleLaboratorio({
           </section>
 
           <section aria-label="Tempo" className="space-y-5 rounded-2xl border bg-card p-5">
-            <h3 className="font-heading text-lg font-bold">Quando e por quanto tempo?</h3>
-            <div className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1 text-sm font-semibold">
-              <button
-                type="button"
-                aria-pressed={modo === "duracao"}
-                onClick={() => setModo("duracao")}
-                className={cn(
-                  "rounded-md py-2 transition",
-                  modo === "duracao" ? "bg-indigo-600 text-white" : "hover:bg-muted",
-                )}
-              >
-                Por minutos
-              </button>
-              <button
-                type="button"
-                aria-pressed={modo === "horario"}
-                onClick={() => {
-                  setModo("horario");
-                  setInicioManual(horaAgoraNaEscola());
-                  setFimManual(horaNaEscola(somarMinutos(new Date(), minutos)));
-                }}
-                className={cn(
-                  "rounded-md py-2 transition",
-                  modo === "horario" ? "bg-indigo-600 text-white" : "hover:bg-muted",
-                )}
-              >
-                Escolher o horário
-              </button>
-            </div>
-
-            {modo === "duracao" ? (
-              <div className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {DURACOES.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      aria-pressed={minutos === d}
-                      onClick={() => setMinutos(d)}
-                      className={cn(
-                        "rounded-full border px-4 py-2 text-sm font-semibold tabular-nums transition",
-                        minutos === d
-                          ? "border-indigo-600 bg-indigo-600 text-white shadow"
-                          : "bg-card hover:bg-muted",
-                      )}
-                    >
-                      {d} min
-                    </button>
-                  ))}
-                  <div className="flex items-center gap-1.5">
-                    <Input
-                      aria-label="Outra duração em minutos"
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      max={240}
-                      value={minutos}
-                      onChange={(e) => setMinutos(Number(e.target.value))}
-                      className="h-9 w-20"
-                    />
-                    <span className="text-xs text-muted-foreground">min</span>
-                  </div>
-                </div>
-                {fimDoGrupoAtual && fimDoGrupoAtual.getTime() > Date.now() ? (
-                  <div className="flex items-center gap-2.5">
-                    <Switch id="lab-apos" checked={aposAtual} onCheckedChange={setAposAtual} />
-                    <Label htmlFor="lab-apos" className="text-sm">
-                      Entrar só quando o grupo de agora sair ({horaNaEscola(fimDoGrupoAtual)})
-                    </Label>
-                  </div>
-                ) : null}
-              </div>
+            <h3 className="font-heading text-lg font-bold">
+              {grupoEmAndamento ? "Aula em andamento" : "Quando e por quanto tempo?"}
+            </h3>
+            {grupoEmAndamento ? (
+              <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-sm">
+                Já existe uma aula em andamento ({horaNaEscola(grupoEmAndamento.inicio)}–
+                {horaNaEscola(grupoEmAndamento.fim)}). Não dá para criar outra agora: os alunos
+                escolhidos entram nessa aula, no mesmo horário, e o tempo dela não para.
+              </p>
             ) : (
-              <div className="flex items-end gap-3">
-                <div className="space-y-1">
-                  <Label htmlFor="lab-ini" className="text-xs text-muted-foreground">
-                    Início
-                  </Label>
-                  <Input
-                    id="lab-ini"
-                    type="time"
-                    value={inicioManual}
-                    onChange={(e) => setInicioManual(e.target.value)}
-                    className="h-10 w-32"
-                  />
+              <>
+                <div className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1 text-sm font-semibold">
+                  <button
+                    type="button"
+                    aria-pressed={modo === "duracao"}
+                    onClick={() => setModo("duracao")}
+                    className={cn(
+                      "rounded-md py-2 transition",
+                      modo === "duracao" ? "bg-indigo-600 text-white" : "hover:bg-muted",
+                    )}
+                  >
+                    Por minutos
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={modo === "horario"}
+                    onClick={() => {
+                      setModo("horario");
+                      setInicioManual(horaAgoraNaEscola());
+                      setFimManual(horaNaEscola(somarMinutos(new Date(), minutos)));
+                    }}
+                    className={cn(
+                      "rounded-md py-2 transition",
+                      modo === "horario" ? "bg-indigo-600 text-white" : "hover:bg-muted",
+                    )}
+                  >
+                    Escolher o horário
+                  </button>
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="lab-fim" className="text-xs text-muted-foreground">
-                    Fim
-                  </Label>
-                  <Input
-                    id="lab-fim"
-                    type="time"
-                    value={fimManual}
-                    onChange={(e) => setFimManual(e.target.value)}
-                    className="h-10 w-32"
-                  />
-                </div>
-              </div>
+
+                {modo === "duracao" ? (
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {DURACOES.map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          aria-pressed={minutos === d}
+                          onClick={() => setMinutos(d)}
+                          className={cn(
+                            "rounded-full border px-4 py-2 text-sm font-semibold tabular-nums transition",
+                            minutos === d
+                              ? "border-indigo-600 bg-indigo-600 text-white shadow"
+                              : "bg-card hover:bg-muted",
+                          )}
+                        >
+                          {d} min
+                        </button>
+                      ))}
+                      <div className="flex items-center gap-1.5">
+                        <Input
+                          aria-label="Outra duração em minutos"
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          max={240}
+                          value={minutos}
+                          onChange={(e) => setMinutos(Number(e.target.value))}
+                          className="h-9 w-20"
+                        />
+                        <span className="text-xs text-muted-foreground">min</span>
+                      </div>
+                    </div>
+                    {fimDoGrupoAtual && fimDoGrupoAtual.getTime() > Date.now() ? (
+                      <div className="flex items-center gap-2.5">
+                        <Switch id="lab-apos" checked={aposAtual} onCheckedChange={setAposAtual} />
+                        <Label htmlFor="lab-apos" className="text-sm">
+                          Entrar só quando o grupo de agora sair ({horaNaEscola(fimDoGrupoAtual)})
+                        </Label>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="flex items-end gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="lab-ini" className="text-xs text-muted-foreground">
+                        Início
+                      </Label>
+                      <Input
+                        id="lab-ini"
+                        type="time"
+                        value={inicioManual}
+                        onChange={(e) => setInicioManual(e.target.value)}
+                        className="h-10 w-32"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="lab-fim" className="text-xs text-muted-foreground">
+                        Fim
+                      </Label>
+                      <Input
+                        id="lab-fim"
+                        type="time"
+                        value={fimManual}
+                        onChange={(e) => setFimManual(e.target.value)}
+                        className="h-10 w-32"
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             <p className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2.5 text-sm">
@@ -1070,8 +1165,10 @@ export function ControleLaboratorio({
                 }
                 onClick={confirmar}
               >
-                <Play /> Mandar {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} para o
-                laboratório
+                <Play />{" "}
+                {grupoEmAndamento
+                  ? `Acrescentar ${escolhidos.size} aluno${escolhidos.size === 1 ? "" : "s"} à aula em andamento`
+                  : `Mandar ${escolhidos.size} aluno${escolhidos.size === 1 ? "" : "s"} para o laboratório`}
               </Button>
             </div>
           </section>

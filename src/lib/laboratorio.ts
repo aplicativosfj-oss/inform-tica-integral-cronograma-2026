@@ -16,7 +16,7 @@ export type TipoAusencia = "faltou" | "nao_autorizado";
 
 export const ROTULO_AUSENCIA: Record<TipoAusencia, string> = {
   faltou: "Faltou",
-  nao_autorizado: "Professor não autorizou",
+  nao_autorizado: "Impedido",
 };
 
 export interface SessaoLab {
@@ -41,6 +41,8 @@ export interface SessaoLab {
   /** Marcado, mas não foi: não conta como ida ao laboratório. */
   ausencia: TipoAusencia | null;
   ausenciaMotivo: string | null;
+  /** Falta registrada antes de marcar o aluno: não existe aula por trás dela. */
+  semMarcacao: boolean;
 }
 
 interface Linha {
@@ -59,6 +61,7 @@ interface Linha {
   motivo_parada?: string | null;
   ausencia?: TipoAusencia | null;
   ausencia_motivo?: string | null;
+  sem_marcacao?: boolean | null;
 }
 
 const deLinha = (l: Linha): SessaoLab => ({
@@ -77,6 +80,7 @@ const deLinha = (l: Linha): SessaoLab => ({
   motivoParada: l.motivo_parada ?? null,
   ausencia: l.ausencia ?? null,
   ausenciaMotivo: l.ausencia_motivo ?? null,
+  semMarcacao: l.sem_marcacao ?? false,
 });
 
 /** A marcação valeu como ida (o aluno não faltou nem foi barrado). */
@@ -224,6 +228,7 @@ export interface GrupoLab {
     sessaoId: string;
     ausencia: TipoAusencia | null;
     ausenciaMotivo: string | null;
+    semMarcacao: boolean;
   }[];
 }
 
@@ -235,6 +240,7 @@ const alunoDoGrupo = (s: SessaoLab): GrupoLab["alunos"][number] => ({
   sessaoId: s.id,
   ausencia: s.ausencia,
   ausenciaMotivo: s.ausenciaMotivo,
+  semMarcacao: s.semMarcacao,
 });
 
 /** Junta as linhas de um mesmo clique ("grupo") em um cartão só. */
@@ -431,7 +437,7 @@ const COLUNA_AUSENTE =
 function erroDeColuna(erro: { message?: string; code?: string }): Error {
   const m = erro.message ?? "";
   return new Error(
-    /pausado_em|pausa_segundos|motivo_parada|ausencia/.test(m) || erro.code === "42703"
+    /pausado_em|pausa_segundos|motivo_parada|ausencia|sem_marcacao/.test(m) || erro.code === "42703"
       ? COLUNA_AUSENTE
       : m || "Não foi possível concluir.",
   );
@@ -531,6 +537,73 @@ export async function marcarAusencia(
     .from("laboratorio_sessoes")
     .update({ ausencia: tipo, ausencia_motivo: motivo?.trim() || null })
     .eq("id", sessaoId);
+  if (error) throw erroDeColuna(error);
+}
+
+/**
+ * Falta registrada antes de marcar: o professor já anota que o aluno faltou
+ * ou está impedido hoje, e o painel não deixa escolhê-lo por engano no dia.
+ */
+export async function registrarAusenciaSemMarcacao(entrada: {
+  aluno: { id: string; nome: string };
+  turma: { id: string; rotulo: string };
+  tipo: TipoAusencia;
+  motivo: string | null;
+  criadoPor: string | null;
+}): Promise<void> {
+  const agora = new Date();
+  const { error } = await supabase.from("laboratorio_sessoes").insert({
+    data: dataNaEscola(agora),
+    turma_id: entrada.turma.id,
+    turma_rotulo: entrada.turma.rotulo,
+    aluno_id: entrada.aluno.id,
+    aluno_nome: entrada.aluno.nome,
+    // A tabela exige um intervalo; um minuto simbólico, que nunca conta como ida.
+    inicio: agora.toISOString(),
+    fim: somarMinutos(agora, 1).toISOString(),
+    criado_por: entrada.criadoPor,
+    ausencia: entrada.tipo,
+    ausencia_motivo: entrada.motivo?.trim() || null,
+    sem_marcacao: true,
+  });
+  if (error) throw erroDeColuna(error);
+}
+
+/** Apaga uma falta registrada antes de marcar (o aluno volta a poder ser escolhido). */
+export async function removerAusenciaSemMarcacao(sessaoId: string): Promise<void> {
+  const { error } = await supabase
+    .from("laboratorio_sessoes")
+    .delete()
+    .eq("id", sessaoId)
+    .eq("sem_marcacao", true);
+  if (error) throw erroDeColuna(error);
+}
+
+/**
+ * Acrescenta alunos a uma aula que já está em andamento: entram no mesmo
+ * grupo, com o mesmo horário e a mesma pausa, então o tempo da aula não para.
+ */
+export async function acrescentarAoGrupo(entrada: {
+  grupo: SessaoLab;
+  alunos: { id: string; nome: string; turma: { id: string; rotulo: string } }[];
+  criadoPor: string | null;
+}): Promise<void> {
+  const { grupo } = entrada;
+  if (entrada.alunos.length === 0) throw new Error("Escolha pelo menos um aluno.");
+  const linhas = entrada.alunos.map((a) => ({
+    data: grupo.data,
+    grupo_id: grupo.grupoId,
+    turma_id: a.turma.id,
+    turma_rotulo: a.turma.rotulo,
+    aluno_id: a.id,
+    aluno_nome: a.nome,
+    inicio: grupo.inicio,
+    fim: grupo.fim,
+    pausado_em: grupo.pausadoEm,
+    pausa_segundos: grupo.pausaSegundos,
+    criado_por: entrada.criadoPor,
+  }));
+  const { error } = await supabase.from("laboratorio_sessoes").insert(linhas);
   if (error) throw erroDeColuna(error);
 }
 
