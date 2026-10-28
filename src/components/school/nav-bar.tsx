@@ -64,13 +64,14 @@ function NavLink({ to, label, Icone }: { to: string; label: string; Icone: Lucid
       to={to}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold transition-colors xl:inline-flex",
+        "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-semibold transition-colors xl:inline-flex 2xl:px-3",
         isActive
           ? "bg-primary text-primary-foreground shadow-sm"
           : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
       )}
     >
-      <Icone className="size-4" aria-hidden />
+      {/* Entre 1280 e 1535 px os ícones saem para todos os atalhos caberem. */}
+      <Icone className="hidden size-4 2xl:block" aria-hidden />
       {label}
     </Link>
   );
@@ -107,7 +108,6 @@ const LINKS_MAIS: { to: string; label: string; Icone: LucideIcon }[] = [
   { to: "/coordenacao", label: "Coordenação", Icone: Users2 },
   { to: "/professor", label: "Professor", Icone: Presentation },
   { to: "/mediador", label: "Mediadores", Icone: HandHeart },
-  { to: "/entre-turnos", label: "Entre Turnos", Icone: Clock },
   { to: "/sobre", label: "Sobre", Icone: Info },
 ];
 
@@ -351,6 +351,7 @@ export function NavBar() {
           <div className="hidden items-center gap-0.5 rounded-full border border-border/60 bg-muted/60 p-1 xl:flex">
             <NavLink to="/" label="Início" Icone={Home} />
             <NavLink to="/agenda" label="Laboratório" Icone={MonitorSmartphone} />
+            <NavLink to="/entre-turnos" label="Entre Turnos" Icone={Clock} />
             <NavLink to="/resultados" label="Resultados" Icone={BarChart3} />
             <NavLink to="/avaliacao" label="Avaliações" Icone={ListChecks} />
             <NavLink to="/infoteca" label="Infoteca" Icone={Puzzle} />

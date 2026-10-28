@@ -83,6 +83,21 @@ export const TURMAS_PAUSA: TurmaPausa[] = [
   { turma: "5º B", ano: 5, aula: [2, 3, 4], filme: 1, monitores: ["Raimundo"] },
 ];
 
+/**
+ * Sala de repouso: não entra na escala. Fica aberta todos os dias, no mesmo
+ * horário, para quem realmente quer dormir ou descansar.
+ */
+export const SALA_REPOUSO = {
+  nome: "Sala de repouso",
+  chamada: "Para quem quer dormir",
+  texto:
+    "Não faz parte da escala: fica aberta todos os dias, de segunda a sexta, para o aluno que realmente quer dormir ou descansar. É uma alternativa, não uma obrigação.",
+  grupos: [
+    { publico: "Meninas", local: "Sala de informática", responsavel: "Émily" },
+    { publico: "Meninos", local: "Biblioteca", responsavel: "Mônica" },
+  ],
+} as const;
+
 /** Dia da sala de jogos de cada ano escolar. */
 export const JOGOS_POR_ANO: Record<number, DiaUtil> = { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 };
 

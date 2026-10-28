@@ -1,11 +1,20 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BedDouble, Clapperboard, Clock, Dices, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  BedDouble,
+  Clapperboard,
+  Clock,
+  Dices,
+  Moon,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { IlustracaoEspaco } from "@/components/school/pausa/ilustracoes";
 import {
   DIAS,
   ESPACOS,
+  SALA_REPOUSO,
   HORARIO,
   diaUtilDeHoje,
   turmasNoDia,
@@ -96,6 +105,17 @@ export function BannerEntreTurnos() {
                 );
               })}
             </ul>
+            <p className="mt-2 flex items-center gap-2 text-xs text-white/70">
+              <Moon className="size-3.5 shrink-0 text-sky-300" aria-hidden />
+              <span>
+                <strong className="text-white">{SALA_REPOUSO.nome}</strong> aberta todo dia para
+                quem quer dormir:{" "}
+                {SALA_REPOUSO.grupos
+                  .map((g) => `${g.publico.toLowerCase()} na ${g.local.toLowerCase()}`)
+                  .join(", ")}
+                .
+              </span>
+            </p>
 
             <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-sun px-5 py-2.5 text-sm font-bold text-sun-foreground">
               Ver o cronograma da semana

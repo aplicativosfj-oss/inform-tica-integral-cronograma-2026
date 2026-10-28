@@ -207,19 +207,87 @@ function SalaDeJogos() {
   );
 }
 
-const DESENHO: Record<Espaco, () => React.JSX.Element> = {
+function SalaDeRepouso() {
+  return (
+    <>
+      <rect width="320" height="200" fill="#1e293b" />
+      <rect y="142" width="320" height="58" fill="#334155" />
+      {/* janela com lua e estrelas */}
+      <rect
+        x="30"
+        y="24"
+        width="88"
+        height="70"
+        rx="6"
+        fill="#312e81"
+        stroke="#cbd5e1"
+        strokeWidth="4"
+      />
+      <circle cx="88" cy="50" r="15" fill="#fde68a" />
+      <circle cx="96" cy="44" r="13" fill="#312e81" />
+      {[
+        [46, 40],
+        [58, 74],
+        [104, 78],
+        [70, 34],
+      ].map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="2.2" fill="#fef9c3" />
+      ))}
+      {/* luminária */}
+      <path d="M262 30h28l8 22h-44z" fill="#fbbf24" />
+      <path d="M254 52h44l30 90H224z" fill="#fde68a" opacity=".12" />
+      <rect x="274" y="52" width="4" height="40" fill="#94a3b8" />
+      {/* camas */}
+      {[
+        { x: 40, cor: "#a78bfa", manta: "#c4b5fd" },
+        { x: 170, cor: "#38bdf8", manta: "#7dd3fc" },
+      ].map((c) => (
+        <g key={c.x}>
+          <rect x={c.x} y="118" width="110" height="34" rx="8" fill={c.cor} />
+          <rect x={c.x} y="104" width="12" height="56" rx="4" fill="#475569" />
+          <rect x={c.x + 98} y="122" width="12" height="38" rx="4" fill="#475569" />
+          <ellipse cx={c.x + 32} cy="118" rx="18" ry="9" fill="#fff" />
+          <circle cx={c.x + 34} cy="110" r="10" fill="#92400e" />
+          <path d={`M${c.x + 46} 124c14-20 50-20 62 0z`} fill={c.manta} />
+          <rect x={c.x + 46} y="118" width="62" height="14" rx="6" fill={c.manta} />
+        </g>
+      ))}
+      <text x="128" y="84" fill="#e2e8f0" fontSize="18" fontWeight="700" fontFamily="inherit">
+        z
+      </text>
+      <text x="142" y="70" fill="#e2e8f0" fontSize="24" fontWeight="700" fontFamily="inherit">
+        z
+      </text>
+      <text x="160" y="54" fill="#e2e8f0" fontSize="30" fontWeight="700" fontFamily="inherit">
+        Z
+      </text>
+    </>
+  );
+}
+
+type Desenhavel = Espaco | "repouso";
+
+const DESENHO: Record<Desenhavel, () => React.JSX.Element> = {
   aula: SalaDeAula,
   filme: SalaDeFilme,
   jogos: SalaDeJogos,
+  repouso: SalaDeRepouso,
 };
 
-const TITULO: Record<Espaco, string> = {
+const TITULO: Record<Desenhavel, string> = {
   aula: "Desenho de uma sala de aula com colchonetes, onde as crianças descansam",
   filme: "Desenho de uma sala de filme, com telão, poltronas e pipoca",
   jogos: "Desenho de uma sala de jogos, com tabuleiro de damas, dados e dominós",
+  repouso: "Desenho de uma sala de repouso à meia-luz, com camas e uma janela com a lua",
 };
 
-export function IlustracaoEspaco({ espaco, className }: { espaco: Espaco; className?: string }) {
+export function IlustracaoEspaco({
+  espaco,
+  className,
+}: {
+  espaco: Desenhavel;
+  className?: string;
+}) {
   const Desenho = DESENHO[espaco];
   return (
     <svg

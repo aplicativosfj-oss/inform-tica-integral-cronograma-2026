@@ -7,6 +7,7 @@ import {
   Dices,
   FileDown,
   HandHeart,
+  Moon,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -21,6 +22,7 @@ import {
   ESPACOS,
   HORARIO,
   JOGOS_POR_ANO,
+  SALA_REPOUSO,
   TOTAL_MONITORES,
   TURMAS_PAUSA,
   diaUtilDeHoje,
@@ -176,7 +178,7 @@ export function EntreTurnos() {
             <dl className="mt-8 grid max-w-lg grid-cols-3 gap-2.5">
               {[
                 { Icone: Users, valor: TURMAS_PAUSA.length, rotulo: "turmas" },
-                { Icone: CalendarDays, valor: 3, rotulo: "espaços" },
+                { Icone: CalendarDays, valor: 4, rotulo: "espaços" },
                 { Icone: HandHeart, valor: TOTAL_MONITORES, rotulo: "monitores" },
               ].map(({ Icone, valor, rotulo }) => (
                 <div
@@ -290,6 +292,42 @@ export function EntreTurnos() {
             );
           })}
         </div>
+
+        {/* sala de repouso: fora da escala, aberta todo dia */}
+        <article className="mt-5 grid overflow-hidden rounded-3xl border border-sky-400/40 bg-gradient-to-r from-sky-500/20 to-transparent md:grid-cols-[18rem_minmax(0,1fr)]">
+          <IlustracaoEspaco
+            espaco="repouso"
+            className="aspect-[16/10] w-full md:aspect-auto md:h-full"
+          />
+          <div className="p-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-sky-500 px-2 py-0.5 text-[11px] font-bold text-white">
+                <Moon className="size-3.5" aria-hidden /> {SALA_REPOUSO.nome}
+              </span>
+              <span className="text-xs font-semibold text-white/60">Opcional · todos os dias</span>
+            </div>
+            <h3 className="mt-3 text-xl font-extrabold">{SALA_REPOUSO.chamada}</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/75">
+              {SALA_REPOUSO.texto}
+            </p>
+            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+              {SALA_REPOUSO.grupos.map((g) => (
+                <li
+                  key={g.publico}
+                  className="rounded-2xl bg-ink/60 px-4 py-3 ring-1 ring-white/10"
+                >
+                  <p className="text-xs font-bold uppercase tracking-wider text-sky-300">
+                    {g.publico} · {g.local}
+                  </p>
+                  <p className="mt-1 flex items-center gap-2 text-sm">
+                    <HandHeart className="size-4 text-sky-300" aria-hidden />
+                    Responsável: <strong>{g.responsavel}</strong>
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </article>
       </section>
 
       {/* ------------------------------------------------------------- o dia */}
@@ -399,6 +437,16 @@ export function EntreTurnos() {
               );
             })}
           </div>
+          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-sky-400/30 bg-sky-500/10 px-4 py-3 text-sm text-white/80">
+            <Moon className="size-4 text-sky-300" aria-hidden />
+            <strong className="text-white">Também aberta hoje:</strong> {SALA_REPOUSO.nome}, para
+            quem quer dormir.
+            {SALA_REPOUSO.grupos.map((g) => (
+              <span key={g.publico}>
+                {g.publico} na {g.local.toLowerCase()} ({g.responsavel}).
+              </span>
+            ))}
+          </p>
         </div>
       </section>
 
@@ -525,15 +573,35 @@ export function EntreTurnos() {
             Os monitores ficam com a sua turma durante as duas horas do intervalo. Em caso de
             dúvida, procure a coordenação da escola.
           </p>
-          <p className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 sm:max-w-md">
-            <IlustracaoEspaco espaco="jogos" className="h-12 w-16 shrink-0 rounded-lg" />
-            <span>
-              <span className="block text-xs font-bold uppercase tracking-wider text-emerald-300">
-                Sala de jogos · todos os dias
-              </span>
-              <span className="text-base font-extrabold">{ESPACOS.jogos.responsavel}</span>
-            </span>
-          </p>
+          <ul className="mt-5 grid gap-3 md:grid-cols-3">
+            {[
+              {
+                desenho: "jogos" as const,
+                rotulo: "Sala de jogos · uma turma por dia",
+                nome: ESPACOS.jogos.responsavel,
+                cor: "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
+              },
+              ...SALA_REPOUSO.grupos.map((g) => ({
+                desenho: "repouso" as const,
+                rotulo: `Repouso ${g.publico.toLowerCase()} · ${g.local.toLowerCase()}`,
+                nome: g.responsavel,
+                cor: "border-sky-400/40 bg-sky-500/10 text-sky-300",
+              })),
+            ].map((c) => (
+              <li
+                key={c.rotulo}
+                className={cn("flex items-center gap-3 rounded-2xl border p-4", c.cor)}
+              >
+                <IlustracaoEspaco espaco={c.desenho} className="h-12 w-16 shrink-0 rounded-lg" />
+                <span>
+                  <span className="block text-xs font-bold uppercase tracking-wider">
+                    {c.rotulo}
+                  </span>
+                  <span className="text-base font-extrabold text-white">{c.nome}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
           <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {TURMAS_PAUSA.map((t) => (
               <li key={t.turma} className="rounded-2xl border border-white/10 bg-ink/60 p-4">
@@ -657,7 +725,12 @@ function VersaoImpressa() {
       </div>
       <p className="mt-2 text-[9px] text-slate-500">
         Sala de jogos ({ESPACOS.jogos.responsavel}): segunda 1º ano, terça 2º, quarta 3º, quinta 4º
-        e sexta 5º ano. Nos outros dias, a turma fica com os seus monitores.
+        e sexta 5º ano. Nos outros dias, a turma fica com os seus monitores. {SALA_REPOUSO.nome}{" "}
+        (opcional, todos os dias, para quem quer dormir):{" "}
+        {SALA_REPOUSO.grupos
+          .map((g) => `${g.publico.toLowerCase()} na ${g.local.toLowerCase()} com ${g.responsavel}`)
+          .join("; ")}
+        .
         {CHOQUES.length
           ? ` Dias com dois espaços (a confirmar): ${CHOQUES.map((c) => `${c.turma} ${c.dia}`).join("; ")}.`
           : ""}

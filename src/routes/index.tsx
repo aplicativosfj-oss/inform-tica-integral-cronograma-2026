@@ -5,6 +5,7 @@ import {
   BookOpen,
   CalendarClock,
   ChevronRight,
+  Clock,
   Clock3,
   ExternalLink,
   Gamepad2,
@@ -179,6 +180,28 @@ function Index() {
                   </Link>
                 </Button>
               </div>
+
+              {/* Atalho para o Entre Turnos, o intervalo das 11h às 13h. */}
+              <Link
+                to="/entre-turnos"
+                className="group mt-[clamp(0.75rem,2.5svh,1.25rem)] flex max-w-xl items-center gap-3 rounded-2xl border border-sun/40 bg-ink/50 p-2.5 pr-4 backdrop-blur transition-colors hover:border-sun hover:bg-ink/70"
+              >
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sun text-sun-foreground">
+                  <Clock className="size-5" aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1 text-sm leading-snug">
+                  <span className="block font-bold text-white">
+                    Entre Turnos <span className="font-semibold text-sun">· 11h às 13h</span>
+                  </span>
+                  <span className="block truncate text-white/70">
+                    Onde cada turma descansa, vê filme ou brinca depois do almoço
+                  </span>
+                </span>
+                <ArrowRight
+                  className="size-4 shrink-0 text-sun transition-transform group-hover:translate-x-1"
+                  aria-hidden
+                />
+              </Link>
 
               <dl className="mt-[clamp(1rem,3.5svh,2rem)] grid max-w-xl grid-cols-4 divide-x divide-white/15 overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur [@media(max-height:640px)]:hidden">
                 {[
