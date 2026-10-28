@@ -1,6 +1,7 @@
 import { Clock3, History, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
+import fotoLaboratorio from "@/assets/laboratorio-informatica-turma.jpg";
 import { PalcoGrupo } from "@/components/school/laboratorio/palco-grupo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -221,29 +222,51 @@ export function PainelLaboratorioAgora({
             ) : null}
 
             {historico.length > 0 ? (
-              <section className="space-y-2" aria-label="Aulas das últimas 24 horas">
-                <h3 className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
-                  <History className="size-4" aria-hidden /> Aulas das últimas 24 horas
+              // Sempre escuro: foto do laboratório ao fundo e os dias em painéis de vidro.
+              <section
+                className="dark relative isolate flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/15 p-3 text-white sm:p-4"
+                aria-label="Aulas das últimas 24 horas"
+              >
+                <img
+                  src={fotoLaboratorio}
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  className="absolute inset-0 -z-20 size-full object-cover"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 -z-10 bg-gradient-to-b from-indigo-950/70 via-ink/75 to-ink/90"
+                />
+                <h3 className="flex items-center gap-2 text-base font-bold">
+                  <span className="flex size-8 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-xl">
+                    <History className="size-4 text-sun" aria-hidden />
+                  </span>
+                  Aulas das últimas 24 horas
                 </h3>
                 {historico.map(({ data, grupos: gs }) => {
                   const turmasDoDia = new Map<string, string>();
                   for (const g of gs)
                     for (const a of g.alunos) turmasDoDia.set(a.turmaId, a.turmaRotulo);
                   return (
-                    <div key={data} className="rounded-xl border bg-muted/30 p-3">
+                    <div
+                      key={data}
+                      className="rounded-xl border border-white/15 bg-white/10 p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] backdrop-blur-xl backdrop-saturate-150"
+                    >
                       <p className="flex flex-wrap items-center gap-2 text-sm">
                         <strong>{data === hoje ? "Hoje" : "Ontem"}</strong>
-                        <span className="text-muted-foreground">
-                          {data.split("-").reverse().join("/")}
-                        </span>
-                        <span className="text-muted-foreground">· turmas que participaram:</span>
+                        <span className="text-white/70">{data.split("-").reverse().join("/")}</span>
+                        <span className="text-white/70">· turmas que participaram:</span>
                         {[...turmasDoDia.values()].map((r) => (
                           <Etiqueta key={r} rotulo={r} />
                         ))}
                       </p>
                       <ul className="mt-2 space-y-1.5">
                         {gs.map((g) => (
-                          <li key={g.grupoId} className="rounded-lg border bg-card p-2 text-sm">
+                          <li
+                            key={g.grupoId}
+                            className="rounded-lg border border-white/10 bg-white/[0.08] px-2.5 py-2 text-sm backdrop-blur-md transition-colors hover:bg-white/[0.14]"
+                          >
                             <details>
                               <summary className="cursor-pointer">
                                 <strong>
@@ -258,7 +281,7 @@ export function PainelLaboratorioAgora({
                                   </span>
                                 ) : null}
                               </summary>
-                              <p className="mt-1.5 text-xs text-muted-foreground">
+                              <p className="mt-1.5 text-xs text-white/75">
                                 {g.alunos.map((a) => nomeExibido(a.nome, logado)).join(", ")}
                               </p>
                             </details>

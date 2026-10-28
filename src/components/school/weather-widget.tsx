@@ -1,6 +1,7 @@
 import { CloudDrizzle, CloudFog, CloudLightning, Cloudy, MapPin, Sun, Wind } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import ceuFeijo from "@/assets/ceu-feijo.svg";
 import { Card, CardContent } from "@/components/ui/card";
 import { gravarCache, lerCache } from "@/lib/offline-queue";
 import { categoriaClima, descricaoClima, fetchClima, type Clima } from "@/lib/weather";
@@ -57,7 +58,7 @@ function Termometro({
   const alturaMercurioPx = (alturaPct / 100) * alturaTubo;
 
   return (
-    <svg viewBox="0 0 44 190" className="h-40 w-auto shrink-0" role="img" aria-label="Termômetro">
+    <svg viewBox="0 0 44 190" className="h-32 w-auto shrink-0" role="img" aria-label="Termômetro">
       {/* Tubo de vidro */}
       <rect
         x={12}
@@ -166,15 +167,29 @@ export function WeatherWidget() {
     : null;
 
   return (
-    <Card className="overflow-hidden border-sky-400/30 bg-gradient-to-br from-sky-500/10 via-card to-card shadow-sm dark:border-sky-400/20 dark:from-sky-400/10">
-      <CardContent className="flex flex-wrap items-center gap-5 py-5">
-        <Termometro temperatura={clima?.temperatura ?? null} carregando={carregando && !clima} />
+    // Sempre escuro: céu de Feijó com a floresta no horizonte ao fundo e os
+    // dados num painel de vidro fosco por cima, para ler bem sobre a imagem.
+    <Card className="dark relative isolate overflow-hidden border-white/15 text-white shadow-lg">
+      <img
+        src={ceuFeijo}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 -z-20 size-full object-cover"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent"
+      />
+      <CardContent className="flex items-center gap-4 py-5">
+        <span className="rounded-2xl border border-white/20 bg-white/10 px-1.5 py-2 backdrop-blur-xl">
+          <Termometro temperatura={clima?.temperatura ?? null} carregando={carregando && !clima} />
+        </span>
 
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <MapPin className="size-3.5 text-primary" /> Feijó, Acre
+        <div className="min-w-0 flex-1 rounded-2xl border border-white/20 bg-white/[0.12] p-3.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_32px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl backdrop-saturate-150">
+          <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/85">
+            <MapPin className="size-3.5 text-sun" /> Feijó, Acre
             {horaAtualizada ? (
-              <span className="ml-1 inline-flex items-center rounded-full border border-sky-400/30 bg-sky-500/10 px-2 py-0.5 text-[11px] font-normal normal-case text-sky-700 backdrop-blur-md dark:border-sky-400/25 dark:bg-sky-400/10 dark:text-sky-200">
+              <span className="ml-1 inline-flex items-center rounded-full border border-white/25 bg-white/15 px-2 py-0.5 text-[11px] font-normal normal-case text-white/90">
                 atualizado {horaAtualizada}
               </span>
             ) : null}
@@ -185,13 +200,15 @@ export function WeatherWidget() {
               <div className="flex items-center gap-2">
                 <IconeClima codigo={clima.codigo} className="size-9" />
                 <div>
-                  <p className="text-3xl font-bold leading-none text-foreground">
+                  <p className="text-4xl font-extrabold leading-none text-white [text-shadow:0_2px_12px_rgb(0_0_0/0.35)]">
                     {Math.round(clima.temperatura)}°C
                   </p>
-                  <p className="text-sm text-muted-foreground">{descricaoClima(clima.codigo)}</p>
+                  <p className="text-sm font-medium text-white/85">
+                    {descricaoClima(clima.codigo)}
+                  </p>
                 </div>
               </div>
-              <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+              <div className="flex flex-col gap-0.5 text-xs text-white/85">
                 <span>Sensação: {Math.round(clima.sensacao)}°C</span>
                 <span>Umidade: {Math.round(clima.umidade)}%</span>
                 <span className="flex items-center gap-1">
@@ -200,13 +217,13 @@ export function WeatherWidget() {
               </div>
             </div>
           ) : erro ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/85">
               Não foi possível carregar o clima agora. Tente recarregar a página.
             </p>
           ) : (
             <div className="flex flex-col gap-2" role="status" aria-label="Consultando o clima">
-              <div className="h-8 w-24 animate-pulse rounded bg-muted-foreground/15" />
-              <div className="h-3.5 w-32 animate-pulse rounded bg-muted-foreground/15" />
+              <div className="h-8 w-24 animate-pulse rounded bg-white/20" />
+              <div className="h-3.5 w-32 animate-pulse rounded bg-white/20" />
             </div>
           )}
         </div>
