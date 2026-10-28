@@ -131,3 +131,41 @@ export function diaUtilDeHoje(agora = new Date()): DiaUtil | null {
 
 export const juntarNomes = (nomes: string[]) =>
   nomes.length <= 1 ? (nomes[0] ?? "") : `${nomes.slice(0, -1).join(", ")} e ${nomes.at(-1)}`;
+
+export type FaseIntervalo = "antes" | "agora" | "encerrado" | "fim-de-semana";
+
+export interface MomentoIntervalo {
+  fase: FaseIntervalo;
+  /** Dia útil de hoje, ou `null` no fim de semana. */
+  hoje: DiaUtil | null;
+  /** Dia que a página deve mostrar: hoje, ou o próximo dia letivo depois que o intervalo acabou. */
+  diaEmFoco: DiaUtil;
+  /** Próximo dia com intervalo depois de hoje. */
+  proximo: DiaUtil;
+  /** O próximo dia é literalmente amanhã (não é sexta nem fim de semana). */
+  proximoEhAmanha: boolean;
+}
+
+/** Início e fim do intervalo em minutos do dia. */
+const INICIO_MIN = 11 * 60;
+const FIM_MIN = 13 * 60;
+
+/** Em que pé está o intervalo, a partir de um horário já no relógio da escola. */
+export function momentoDoIntervalo(agoraEscola: Date): MomentoIntervalo {
+  const d = agoraEscola.getDay();
+  const min = agoraEscola.getHours() * 60 + agoraEscola.getMinutes();
+  const hoje = d >= 1 && d <= 5 ? (d as DiaUtil) : null;
+  const proximo = (hoje && hoje < 5 ? hoje + 1 : 1) as DiaUtil;
+  const proximoEhAmanha = d >= 0 && d <= 4;
+  if (!hoje)
+    return { fase: "fim-de-semana", hoje, diaEmFoco: 1, proximo: 1, proximoEhAmanha: d === 0 };
+  if (min < INICIO_MIN) return { fase: "antes", hoje, diaEmFoco: hoje, proximo, proximoEhAmanha };
+  if (min < FIM_MIN) return { fase: "agora", hoje, diaEmFoco: hoje, proximo, proximoEhAmanha };
+  return { fase: "encerrado", hoje, diaEmFoco: proximo, proximo, proximoEhAmanha };
+}
+
+/** "amanhã (quinta-feira)" ou "na segunda-feira". */
+export function quandoEhProximo(m: MomentoIntervalo): string {
+  const nome = DIAS.find((x) => x.dia === m.proximo)!.nome.toLowerCase();
+  return m.proximoEhAmanha ? `amanhã (${nome})` : `na ${nome}`;
+}

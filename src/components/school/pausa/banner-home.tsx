@@ -8,19 +8,17 @@ import {
   Moon,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-
 import { IlustracaoEspaco } from "@/components/school/pausa/ilustracoes";
+import { SeloIntervalo } from "@/components/school/pausa/status-intervalo";
 import {
-  DIAS,
   ESPACOS,
   SALA_REPOUSO,
   HORARIO,
-  diaUtilDeHoje,
+  quandoEhProximo,
   turmasNoDia,
-  type DiaUtil,
   type Espaco,
 } from "@/lib/entre-turnos";
+import { useMomentoIntervalo } from "@/lib/use-momento-intervalo";
 import { cn } from "@/lib/utils";
 
 const ESTILO: Record<Espaco, { Icone: LucideIcon; ponto: string; chip: string }> = {
@@ -31,20 +29,15 @@ const ESTILO: Record<Espaco, { Icone: LucideIcon; ponto: string; chip: string }>
 
 /**
  * Faixa da página inicial que leva ao "Entre Turnos": mostra, em uma olhada,
- * para onde vão as turmas no intervalo de hoje (ou de segunda, no fim de
- * semana). Fica entre a abertura e o laboratório ao vivo, sem tomar a tela.
+ * para onde vão as turmas no intervalo de hoje. Depois das 13h (e no fim de
+ * semana) avisa que o dia acabou e já mostra a programação do próximo dia
+ * letivo. Fica entre a abertura e o laboratório ao vivo, sem tomar a tela.
  */
 export function BannerEntreTurnos() {
-  const [dia, setDia] = useState<DiaUtil | null>(null);
-  const [ehHoje, setEhHoje] = useState(true);
-  useEffect(() => {
-    const hoje = diaUtilDeHoje();
-    setEhHoje(hoje !== null);
-    setDia(hoje ?? 1);
-  }, []);
-
-  const doDia = dia ? turmasNoDia(dia) : null;
-  const nomeDia = DIAS.find((d) => d.dia === dia)?.nome.toLowerCase();
+  const m = useMomentoIntervalo();
+  const doDia = m ? turmasNoDia(m.diaEmFoco) : null;
+  const encerrado = !!m && (m.fase === "encerrado" || m.fase === "fim-de-semana");
+  const quando = m ? quandoEhProximo(m) : "";
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
@@ -63,17 +56,34 @@ export function BannerEntreTurnos() {
 
         <div className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-sun">
-              <Clock className="size-3.5" aria-hidden /> Entre Turnos · {HORARIO.inicio} às{" "}
-              {HORARIO.fim}
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] text-sun">
+                <Clock className="size-3.5" aria-hidden /> Entre Turnos · {HORARIO.inicio} às{" "}
+                {HORARIO.fim}
+              </p>
+              {m ? <SeloIntervalo m={m} /> : null}
+            </div>
             <h2 className="mt-3 text-2xl font-extrabold leading-tight sm:text-3xl">
-              {ehHoje ? "Hoje, depois do almoço," : `Na ${nomeDia ?? "segunda-feira"},`}{" "}
-              <span className="text-sun">cada turma tem o seu lugar</span>
+              {encerrado ? (
+                <>
+                  {m?.fase === "fim-de-semana" ? "Bom fim de semana!" : "Hoje já encerrou."}{" "}
+                  <span className="text-sun">
+                    {m?.proximoEhAmanha
+                      ? "Amanhã já está programado"
+                      : "A segunda-feira já está programada"}
+                  </span>
+                </>
+              ) : (
+                <>
+                  Hoje, depois do almoço,{" "}
+                  <span className="text-sun">cada turma tem o seu lugar</span>
+                </>
+              )}
             </h2>
             <p className="mt-2 max-w-xl text-sm text-white/70">
-              Descanso na sala, cinema ou sala de jogos: veja onde está cada turma no intervalo e
-              quem cuida dela.
+              {encerrado
+                ? `As turmas voltaram para as aulas da tarde. Veja onde cada uma vai ficar ${quando}, das ${HORARIO.inicio} às ${HORARIO.fim}.`
+                : "Descanso na sala, cinema ou sala de jogos: veja onde está cada turma no intervalo e quem cuida dela."}
             </p>
 
             <ul className="mt-4 grid gap-2 sm:grid-cols-3">
@@ -118,7 +128,7 @@ export function BannerEntreTurnos() {
             </p>
 
             <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-sun px-5 py-2.5 text-sm font-bold text-sun-foreground">
-              Ver o cronograma da semana
+              {encerrado ? "Ver a programação completa" : "Ver o cronograma da semana"}
               <ArrowRight
                 className="size-4 transition-transform group-hover:translate-x-1"
                 aria-hidden

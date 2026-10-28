@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 
 import { CompartilharRedes } from "@/components/school/pausa/compartilhar-redes";
 import { IlustracaoEspaco } from "@/components/school/pausa/ilustracoes";
+import { AvisoDiaEncerrado, SeloIntervalo } from "@/components/school/pausa/status-intervalo";
 import {
   DIAS,
   ESCOLA,
@@ -25,13 +26,14 @@ import {
   SALA_REPOUSO,
   TOTAL_MONITORES,
   TURMAS_PAUSA,
-  diaUtilDeHoje,
   espacosDoDia,
   juntarNomes,
+  quandoEhProximo,
   turmasNoDia,
   type DiaUtil,
   type Espaco,
 } from "@/lib/entre-turnos";
+import { useMomentoIntervalo } from "@/lib/use-momento-intervalo";
 import { cn } from "@/lib/utils";
 
 /** Cor e ícone de cada espaço: os mesmos no desenho, nas etiquetas e no PDF. */
@@ -95,13 +97,6 @@ function Etiqueta({ espaco, curta = false }: { espaco: Espaco; curta?: boolean }
   );
 }
 
-/** Dia útil de hoje, só no navegador (no servidor o "hoje" pode ser outro). */
-function useHoje() {
-  const [hoje, setHoje] = useState<DiaUtil | null>(null);
-  useEffect(() => setHoje(diaUtilDeHoje()), []);
-  return hoje;
-}
-
 /** Choques entre a escala da sala de jogos e a do cronograma (dia com dois espaços). */
 const CHOQUES = TURMAS_PAUSA.flatMap((t) =>
   DIAS.filter((d) => espacosDoDia(t, d.dia).length > 1).map((d) => ({
@@ -118,16 +113,21 @@ const CHOQUES = TURMAS_PAUSA.flatMap((t) =>
  * própria para impressão, em uma folha A4 deitada.
  */
 export function EntreTurnos() {
-  const hoje = useHoje();
+  const m = useMomentoIntervalo();
+  const hoje = m?.hoje ?? null;
   const [dia, setDia] = useState<DiaUtil>(1);
   const [montado, setMontado] = useState(false);
 
   useEffect(() => {
     setMontado(true);
   }, []);
+  // Leva a escala para hoje e, depois das 13h, para o próximo dia letivo.
+  const foco = m?.diaEmFoco;
   useEffect(() => {
-    if (hoje) setDia(hoje);
-  }, [hoje]);
+    if (foco) setDia(foco);
+  }, [foco]);
+  const mostrandoProximo =
+    !!m && (m.fase === "encerrado" || m.fase === "fim-de-semana") && dia === m.proximo;
 
   const doDia = turmasNoDia(dia);
   const nomeDia = DIAS.find((d) => d.dia === dia)!.nome;
@@ -147,6 +147,7 @@ export function EntreTurnos() {
               <Clock className="size-3.5" aria-hidden /> Das {HORARIO.inicio} às {HORARIO.fim} ·
               depois do almoço
             </div>
+            {m ? <SeloIntervalo m={m} className="ml-2 mt-2 align-middle sm:mt-0" /> : null}
             <h1 className="mt-4 text-balance text-[clamp(2.4rem,6vw,4rem)] font-extrabold leading-[1.02] tracking-tight">
               Entre <span className="text-sun">Turnos</span>
             </h1>
@@ -160,7 +161,10 @@ export function EntreTurnos() {
                 href="#hoje"
                 className="inline-flex h-10 items-center gap-2 rounded-full bg-sun px-4 text-sm font-bold text-sun-foreground shadow-lg shadow-sun/20 transition-transform hover:-translate-y-0.5"
               >
-                <CalendarDays className="size-4" aria-hidden /> Ver onde cada turma está hoje
+                <CalendarDays className="size-4" aria-hidden />{" "}
+                {m && (m.fase === "encerrado" || m.fase === "fim-de-semana")
+                  ? `Ver a programação de ${m.proximoEhAmanha ? "amanhã" : DIAS.find((d) => d.dia === m.proximo)!.nome.toLowerCase()}`
+                  : "Ver onde cada turma está hoje"}
               </a>
               <button
                 type="button"
@@ -333,10 +337,17 @@ export function EntreTurnos() {
       {/* ------------------------------------------------------------- o dia */}
       <section id="hoje" className="scroll-mt-20 border-y border-white/10 bg-white/[0.03]">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+          {m && (m.fase === "encerrado" || m.fase === "fim-de-semana") ? (
+            <div className="mb-8">
+              <AvisoDiaEncerrado m={m} />
+            </div>
+          ) : null}
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-                Onde está cada turma{hoje === dia ? " hoje" : ""}
+                {mostrandoProximo && m
+                  ? `Onde cada turma vai ficar ${quandoEhProximo(m)}`
+                  : `Onde está cada turma${hoje === dia ? " hoje" : ""}`}
               </h2>
               <p className="mt-1 text-sm text-white/70">
                 {nomeDia}, das {HORARIO.inicio} às {HORARIO.fim}. Toque em outro dia para ver a
@@ -439,7 +450,7 @@ export function EntreTurnos() {
           </div>
           <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl border border-sky-400/30 bg-sky-500/10 px-4 py-3 text-sm text-white/80">
             <Moon className="size-4 text-sky-300" aria-hidden />
-            <strong className="text-white">Também aberta hoje:</strong> {SALA_REPOUSO.nome}, para
+            <strong className="text-white">Aberta todos os dias:</strong> {SALA_REPOUSO.nome}, para
             quem quer dormir.
             {SALA_REPOUSO.grupos.map((g) => (
               <span key={g.publico}>
