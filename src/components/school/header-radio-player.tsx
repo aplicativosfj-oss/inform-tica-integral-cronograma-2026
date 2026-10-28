@@ -1,9 +1,19 @@
-import { AlertTriangle, Loader2, Music2, Pause, Play, Radio } from "lucide-react";
+import { AlertTriangle, Loader2, Music2, Play, Radio, Square } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useJovemPanRadio } from "@/lib/jovem-pan-radio-store";
 import { cn } from "@/lib/utils";
+
+/** "TEARS FOR FEARS - SHOUT" → "Tears For Fears - Shout". */
+function legivel(titulo: string) {
+  return titulo
+    .toLowerCase()
+    .replace(
+      /(^|[\s(\-/'])(\p{L})/gu,
+      (_, sep: string, letra: string) => sep + letra.toUpperCase(),
+    );
+}
 
 /**
  * Barrinhas de espectro: um VU-meter de verdade tocando, e uma respiração
@@ -86,8 +96,8 @@ export function HeaderRadioPlayer() {
     status === "erro"
       ? "Sinal indisponível no momento"
       : tocando
-        ? "Jovem Pan News · ao vivo"
-        : "Ouvir Jovem Pan News ao vivo";
+        ? "Jovem Pan FM · ao vivo"
+        : "Ouvir Jovem Pan FM ao vivo";
 
   return (
     <div className="relative">
@@ -97,7 +107,7 @@ export function HeaderRadioPlayer() {
             <button
               type="button"
               onClick={alternarReproducao}
-              aria-label={tocando ? "Parar Jovem Pan News" : "Ouvir Jovem Pan News ao vivo"}
+              aria-label={tocando ? "Parar a rádio Jovem Pan FM" : "Ouvir Jovem Pan FM ao vivo"}
               className={cn(
                 "group cursor-pointer relative flex items-center gap-1 overflow-hidden rounded-full border px-2 py-1 text-xs font-medium transition-all sm:gap-1.5 sm:px-2.5",
                 "border-blue-400/30 dark:border-transparent bg-gradient-to-r from-blue-500/10 dark:from-cyan-500/15 via-emerald-500/10 dark:via-blue-500/10 to-emerald-500/10 dark:to-fuchsia-500/15",
@@ -119,19 +129,39 @@ export function HeaderRadioPlayer() {
                 ) : status === "erro" ? (
                   <AlertTriangle className="size-4 text-amber-400 sm:size-3.5" />
                 ) : tocando ? (
-                  <Pause className="size-4 sm:size-3.5" />
+                  <Square className="size-3.5 fill-current sm:size-3" />
                 ) : (
                   <Play className="size-4 translate-x-0.5 sm:size-3.5" />
                 )}
               </span>
 
-              <span className="hidden flex-col items-start leading-none sm:flex">
+              <span className="hidden min-w-0 flex-col items-start gap-0.5 leading-none xl:flex">
                 <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-cyan-400">
-                  <Radio className="size-2.5" /> JP News
+                  <Radio className="size-2.5" /> Jovem Pan FM
                 </span>
-                <span className="text-[10px] text-blue-700/70 dark:text-foreground/75">
-                  {status === "erro" ? "sinal indisponível" : tocando ? "ao vivo" : "ouvir agora"}
-                </span>
+                {tocando && streamTitle ? (
+                  <span
+                    className="relative block w-32 overflow-hidden text-[10.5px] text-blue-800/80 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] dark:text-foreground/85"
+                    title={legivel(streamTitle)}
+                  >
+                    <span className="radio-marquee inline-flex whitespace-nowrap">
+                      <span className="pr-8">♪ {legivel(streamTitle)}</span>
+                      <span aria-hidden className="pr-8">
+                        ♪ {legivel(streamTitle)}
+                      </span>
+                    </span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-blue-700/70 dark:text-foreground/75">
+                    {status === "erro"
+                      ? "sinal indisponível"
+                      : status === "carregando"
+                        ? "conectando…"
+                        : tocando
+                          ? "ao vivo"
+                          : "ouvir agora"}
+                  </span>
+                )}
               </span>
 
               <Espectro ativo={tocando} />
@@ -142,7 +172,7 @@ export function HeaderRadioPlayer() {
             {tocando && streamTitle ? (
               <p className="mt-0.5 flex items-center justify-center gap-1 text-[11px] font-normal opacity-90">
                 <Music2 className="size-3 shrink-0" />
-                <span className="truncate">{streamTitle}</span>
+                <span className="truncate">{legivel(streamTitle)}</span>
               </p>
             ) : null}
           </TooltipContent>
@@ -163,7 +193,7 @@ export function HeaderRadioPlayer() {
             <Music2 className="size-3" /> Tocando agora
           </span>
           <span className="block truncate text-[11px] font-medium text-slate-700 dark:text-white/90">
-            {troca.titulo}
+            {legivel(troca.titulo)}
           </span>
         </div>
       ) : null}

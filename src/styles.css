@@ -739,3 +739,21 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
     animation: none;
   }
 }
+
+/* Nome da música no player da rádio: rola devagar, em laço contínuo. */
+@keyframes radio-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.radio-marquee {
+  animation: radio-marquee 14s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .radio-marquee {
+    animation: none;
+  }
+}

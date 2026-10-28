@@ -321,6 +321,7 @@ export function NavBar() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
+          <HeaderRadioPlayer />
           <PresencaOnline />
           <ThemeToggle />
         </div>
@@ -351,7 +352,7 @@ export function NavBar() {
             <NavLink to="/aluno" label="Área do Aluno" Icone={GraduationCap} />
             <MaisLinks />
           </div>
-          <span className="hidden 2xl:contents">
+          <span className="hidden lg:contents">
             <HeaderRadioPlayer />
           </span>
           <PresencaOnline />
