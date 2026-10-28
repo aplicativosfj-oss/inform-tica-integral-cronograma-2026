@@ -52,6 +52,7 @@ import {
   situacaoDoAluno,
   somarMinutos,
   type SessaoLab,
+  type TipoAusencia,
 } from "@/lib/laboratorio";
 import { LIMITE_ALUNOS_LAB, LIMITE_IDAS_MES, LIMITE_IDAS_SEMANA } from "@/lib/recursos";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
@@ -92,6 +93,36 @@ const dataCurta = (c: string) => c.slice(5).split("-").reverse().join("/");
 
 /** Quem já foi ao laboratório nesta semana, contando hoje: não pode ser escolhido de novo. */
 const jaFoiNaSemana = (sit: { naSemana: boolean; hoje: boolean }) => sit.naSemana || sit.hoje;
+
+/** Como o aluno ficou hoje: cada situação tem a sua cor no cartão e na legenda. */
+type PresencaHoje = "participou" | "faltou" | "impedido";
+
+const PRESENCA: Record<
+  PresencaHoje,
+  { rotulo: string; cartao: string; barra: string; texto: string; ponto: string }
+> = {
+  participou: {
+    rotulo: "Participou",
+    cartao: "border-emerald-500/60 bg-emerald-500/10 dark:bg-emerald-500/15",
+    barra: "bg-emerald-500",
+    texto: "text-emerald-700 dark:text-emerald-300",
+    ponto: "bg-emerald-500",
+  },
+  faltou: {
+    rotulo: "Faltou",
+    cartao: "border-rose-500/60 bg-rose-500/10 dark:bg-rose-500/15",
+    barra: "bg-rose-500",
+    texto: "text-rose-700 dark:text-rose-300",
+    ponto: "bg-rose-500",
+  },
+  impedido: {
+    rotulo: "Impedido",
+    cartao: "border-amber-500/70 bg-amber-400/15 dark:bg-amber-500/15",
+    barra: "bg-amber-500",
+    texto: "text-amber-700 dark:text-amber-300",
+    ponto: "bg-amber-500",
+  },
+};
 
 /**
  * Chave de um aluno no painel. O id sozinho não basta: no cadastro, alunos de
@@ -697,6 +728,21 @@ export function ControleLaboratorio({
               ))}
             </div>
 
+            <LegendaPresenca
+              contagem={lista.reduce(
+                (c, { a, t }) => {
+                  const k = chave(t.id, a.id);
+                  const p = presencaHoje(
+                    ausentesHoje.get(k)?.ausencia ?? null,
+                    noLabAgora.has(k) || situacoes.get(k)!.hoje,
+                  );
+                  if (p) c[p]++;
+                  return c;
+                },
+                { participou: 0, faltou: 0, impedido: 0 } as Record<PresencaHoje, number>,
+              )}
+            />
+
             {visiveis.length === 0 ? (
               <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
                 {lista.length === 0
@@ -716,6 +762,8 @@ export function ControleLaboratorio({
                   const bloqueado =
                     Boolean(a.impedido) || ocupado || Boolean(ausente) || travadoSemana || noTeto;
                   const fila = posicaoFila.get(k);
+                  const presenca = presencaHoje(ausente?.ausencia ?? null, ocupado || sit.hoje);
+                  const cor = presenca ? PRESENCA[presenca] : null;
                   const ring = sit.repetiuSemana
                     ? "ring-red-500"
                     : jaFoiNaSemana(sit)
@@ -725,6 +773,15 @@ export function ControleLaboratorio({
                         : "ring-emerald-500/60";
                   return (
                     <li key={k} className="relative">
+                      {cor && !marcado ? (
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "absolute inset-y-2 left-0 z-10 w-1.5 rounded-r-full",
+                            cor.barra,
+                          )}
+                        />
+                      ) : null}
                       <button
                         type="button"
                         aria-pressed={marcado}
@@ -747,9 +804,11 @@ export function ControleLaboratorio({
                           !marcado &&
                             sit.prioridade &&
                             "border-indigo-500/50 bg-gradient-to-r from-indigo-500/10 to-transparent",
-                          travadoSemana &&
+                          cor && !marcado && cn("cursor-not-allowed", cor.cartao),
+                          !cor &&
+                            travadoSemana &&
                             "cursor-not-allowed border-dashed opacity-50 grayscale [background-image:repeating-linear-gradient(135deg,transparent_0_7px,rgb(120_120_120/0.12)_7px_14px)]",
-                          bloqueado && !travadoSemana && "cursor-not-allowed opacity-45",
+                          !cor && bloqueado && !travadoSemana && "cursor-not-allowed opacity-45",
                         )}
                       >
                         <span
@@ -791,16 +850,16 @@ export function ControleLaboratorio({
                             {a.impedido ? (
                               <span>suspenso(a)</span>
                             ) : ausente ? (
-                              <span className="font-semibold text-red-600 dark:text-red-400">
+                              <span className={cn("font-semibold", cor?.texto)}>
                                 {ausente.ausencia === "faltou" ? "faltou hoje" : "impedido hoje"}
                               </span>
                             ) : ocupado ? (
-                              <span className="font-semibold text-emerald-500">
+                              <span className={cn("font-semibold", PRESENCA.participou.texto)}>
                                 no laboratório agora
                               </span>
                             ) : sit.hoje ? (
-                              <span className="font-semibold text-amber-600 dark:text-amber-400">
-                                já foi hoje
+                              <span className={cn("font-semibold", PRESENCA.participou.texto)}>
+                                participou hoje
                               </span>
                             ) : sit.repetiuSemana ? (
                               <span className="font-semibold text-red-500">
@@ -1248,6 +1307,35 @@ export function ControleLaboratorio({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+function presencaHoje(ausencia: TipoAusencia | null, foi: boolean): PresencaHoje | null {
+  if (ausencia === "faltou") return "faltou";
+  if (ausencia === "nao_autorizado") return "impedido";
+  return foi ? "participou" : null;
+}
+
+/** Legenda das cores do dia, com quantos alunos há em cada situação. */
+function LegendaPresenca({ contagem }: { contagem: Record<PresencaHoje, number> }) {
+  return (
+    <div
+      className="flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border bg-card/60 px-3.5 py-2 text-xs"
+      aria-label="Legenda das cores de hoje"
+    >
+      <span className="font-semibold text-muted-foreground">Hoje:</span>
+      {(Object.keys(PRESENCA) as PresencaHoje[]).map((p) => (
+        <span key={p} className="flex items-center gap-1.5">
+          <span className={cn("size-2.5 rounded-full", PRESENCA[p].ponto)} aria-hidden />
+          <span className={cn("font-semibold", PRESENCA[p].texto)}>{PRESENCA[p].rotulo}</span>
+          <span className="tabular-nums text-muted-foreground">{contagem[p]}</span>
+        </span>
+      ))}
+      <span className="flex items-center gap-1.5">
+        <span className="size-2.5 rounded-full border border-muted-foreground/50" aria-hidden />
+        <span className="text-muted-foreground">Sem registro</span>
+      </span>
     </div>
   );
 }
