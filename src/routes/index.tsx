@@ -60,18 +60,18 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "Agenda de Informática · Dr. Eiraldo Carneiro de França",
+        title: "Informática · Escola Dr. Eiraldo Carneiro de França",
       },
       {
         name: "description",
         content:
-          "Laboratório de informática da Escola Dr. Eiraldo: veja quais alunos estão no laboratório agora, até que horas, e como a escola organiza o revezamento.",
+          "Veja quem está no laboratório de informática da Escola Dr. Eiraldo agora, até que horas, e como a escola faz para todo aluno ter a sua vez.",
       },
-      { property: "og:title", content: "Agenda de Informática · Dr. Eiraldo Carneiro de França" },
+      { property: "og:title", content: "Informática · Escola Dr. Eiraldo Carneiro de França" },
       {
         property: "og:description",
         content:
-          "Laboratório de informática da Escola Dr. Eiraldo: veja quais alunos estão no laboratório agora, até que horas, e como a escola organiza o revezamento.",
+          "Veja quem está no laboratório de informática da Escola Dr. Eiraldo agora, até que horas, e como a escola faz para todo aluno ter a sua vez.",
       },
       { property: "og:type", content: "website" },
       // twitter:card e og:image vêm do __root — um lugar só para o formato
@@ -141,16 +141,16 @@ function Index() {
                 Escola Dr. Eiraldo Carneiro de França · Feijó, Acre
               </p>
               <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.02] text-white sm:text-6xl lg:text-7xl">
-                Onde a escola aprende com{" "}
+                Todo dia tem criança{" "}
                 <span className="bg-[linear-gradient(transparent_62%,color-mix(in_oklch,var(--color-sun)_85%,transparent)_62%)] px-1">
-                  tecnologia
-                </span>
-                .
+                  descobrindo o mundo
+                </span>{" "}
+                aqui.
               </h1>
               <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/80">
-                O laboratório de informática da nossa escola. O professor{" "}
-                {config.professorInformatica} escolhe quem vai, define o tempo de cada grupo e todo
-                mundo acompanha, ao vivo, quem está no laboratório.
+                Este é o cantinho da informática da nossa escola. O professor{" "}
+                {config.professorInformatica} escolhe quem vai, marca quanto tempo cada grupo fica e
+                você acompanha tudo daqui, em tempo real.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
@@ -160,7 +160,7 @@ function Index() {
                   className="rounded-full bg-sun px-6 text-sun-foreground hover:bg-sun/90"
                 >
                   <a href="#laboratorio-agora">
-                    <MonitorSmartphone /> Ver quem está no laboratório
+                    <MonitorSmartphone /> Quem está lá agora?
                   </a>
                 </Button>
                 <Button
@@ -170,7 +170,7 @@ function Index() {
                   className="rounded-full border-white/30 bg-white/10 px-6 text-white backdrop-blur hover:bg-white/20 hover:text-white"
                 >
                   <Link to="/resultados">
-                    Resultados do bimestre <ArrowRight />
+                    Como foi o bimestre <ArrowRight />
                   </Link>
                 </Button>
               </div>
@@ -236,11 +236,11 @@ function Index() {
                 </ul>
               ) : (
                 <div className="mt-4 rounded-2xl bg-white/10 p-4">
-                  <p className="font-heading text-xl font-bold">Laboratório livre</p>
+                  <p className="font-heading text-xl font-bold">Laboratório livre por enquanto</p>
                   <p className="mt-1 text-sm text-white/70">
                     {proximoGrupo
-                      ? `Próximo grupo: ${proximoGrupo.turmaRotulo} às ${horaNaEscola(proximoGrupo.inicio)}`
-                      : "Nenhum grupo marcado para agora."}
+                      ? `Daqui a pouco: ${proximoGrupo.turmaRotulo}, às ${horaNaEscola(proximoGrupo.inicio)}`
+                      : "Ninguém marcado para agora."}
                   </p>
                 </div>
               )}
@@ -248,7 +248,7 @@ function Index() {
                 href="#laboratorio-agora"
                 className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-sun underline-offset-4 hover:underline"
               >
-                Ver o painel completo <ArrowRight className="size-4" aria-hidden />
+                Ver todo mundo <ArrowRight className="size-4" aria-hidden />
               </a>
             </div>
           </div>
@@ -259,7 +259,9 @@ function Index() {
         <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="mb-5 max-w-2xl">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">Ao vivo</p>
-            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Quem está no laboratório</h2>
+            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
+              Quem está no laboratório neste minuto
+            </h2>
           </div>
           <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
             <PainelLaboratorioAgora dados={lab} logado={isAuthenticated} />
@@ -274,10 +276,10 @@ function Index() {
         <RevealSection className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="mb-6 max-w-2xl">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">
-              Como funciona
+              Nos bastidores{" "}
             </p>
             <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
-              Simples, justo e à vista de todos
+              Sem fila, sem confusão, sem ninguém esquecido
             </h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -285,29 +287,30 @@ function Index() {
               {
                 n: "01",
                 Icone: Users2,
-                titulo: "Escolha do dia",
-                texto: "O professor marca, turma por turma, os alunos que vão ao laboratório.",
+                titulo: "Quem vai hoje",
+                texto: "O professor escolhe, turma por turma, quem vai ao laboratório no dia.",
                 cor: "bg-primary text-primary-foreground",
               },
               {
                 n: "02",
                 Icone: Timer,
-                titulo: "Tempo de cada grupo",
-                texto: "Início e fim definidos pelo professor, com contagem regressiva ao vivo.",
+                titulo: "Relógio na mão",
+                texto:
+                  "Cada grupo tem hora para entrar e para sair, e a contagem regressiva aparece ao vivo.",
                 cor: "bg-sun text-sun-foreground",
               },
               {
                 n: "03",
                 Icone: ShieldCheck,
-                titulo: "Revezamento justo",
-                texto: "O sistema avisa quando um aluno já foi na semana ou no mês.",
+                titulo: "A vez de todo mundo",
+                texto: "Se um aluno já foi nesta semana ou neste mês, o professor recebe um aviso.",
                 cor: "bg-mint text-ink",
               },
               {
                 n: "04",
                 Icone: Gamepad2,
-                titulo: "Aprender brincando",
-                texto: "Jogos, trilhas e atividades para praticar também fora do laboratório.",
+                titulo: "Brincar também ensina",
+                texto: "Jogos, trilhas e atividades para praticar na escola ou em casa.",
                 cor: "bg-ink text-white dark:bg-secondary",
               },
             ].map(({ n, Icone, titulo, texto, cor }) => (
@@ -357,14 +360,14 @@ function Index() {
             />
             <div className="relative max-w-2xl">
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-sun">
-                Transparência
+                Prestando contas{" "}
               </p>
               <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
-                Como estão a leitura, a escrita e as notas
+                Como a turma está lendo, escrevendo e aprendendo
               </h2>
               <p className="mt-3 text-white/75">
-                Os resultados do 3º bimestre, turma por turma, com o que cada nível pede da escola.
-                Nenhum aluno é identificado.
+                Os números do 3º bimestre, turma por turma, e o que cada resultado pede da escola.
+                Nenhuma criança é identificada.
               </p>
               <Button
                 asChild
@@ -372,7 +375,7 @@ function Index() {
                 className="mt-6 rounded-full bg-sun px-6 text-sun-foreground hover:bg-sun/90"
               >
                 <Link to="/resultados">
-                  Ver os resultados <ArrowRight />
+                  Abrir os resultados <ArrowRight />
                 </Link>
               </Button>
             </div>
@@ -422,13 +425,15 @@ function CanalYoutubeSection() {
             <Badge className="mb-2 gap-1.5 rounded-full border-red-400/30 bg-red-500/10 px-3 py-1.5 text-sm text-red-700 shadow-sm backdrop-blur-md dark:border-red-400/25 dark:bg-red-400/10 dark:text-red-300">
               <Youtube className="size-4" /> Canal da escola
             </Badge>
-            <h2 className="text-xl font-semibold text-foreground">Acompanhe no YouTube</h2>
+            <h2 className="text-xl font-semibold text-foreground">
+              A escola também está no YouTube
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Bastidores das aulas de informática e da rotina da escola, em vídeo.
+              Aulas, visitas e o dia a dia da escola, em vídeo. Vem ver!
             </p>
             <Button asChild variant="outline" size="sm" className="mt-4 w-fit text-sm">
               <a href={CANAL_YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
-                Ver canal completo <ExternalLink className="size-4" />
+                Abrir o canal <ExternalLink className="size-4" />
               </a>
             </Button>
           </div>

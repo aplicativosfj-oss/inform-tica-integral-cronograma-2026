@@ -4,7 +4,7 @@
  * telas leem daqui.
  *
  * `aplicadoEm` aceita texto livre ("14/10/2026", "de 05 a 09/10/2026").
- * Enquanto estiver `null`, a tela mostra "data de aplicação a confirmar",
+ * Enquanto estiver `null`, a tela mostra "a escola vai informar a data",
  * em vez de deixar o leitor achar que o dado é de outro período.
  */
 export interface Instrumento {
@@ -25,14 +25,14 @@ export const REFERENCIA = {
   instrumentos: [
     {
       id: "mapa",
-      nome: "Mapa de classe de leitura e escrita",
+      nome: "Leitura e escrita",
       periodo: "3º bimestre de 2026",
       aplicadoEm: null,
       fonte: "Mapa de classe do 3º bimestre, preenchido pelos professores de cada turma",
     },
     {
       id: "rendimento",
-      nome: "Rendimento das notas",
+      nome: "Notas do bimestre",
       periodo: "3º bimestre de 2026",
       aplicadoEm: null,
       fonte: "Planilha de rendimento bimestral da coordenação",
@@ -40,7 +40,7 @@ export const REFERENCIA = {
     {
       id: "diagnostica",
       nome: "I Avaliação Diagnóstica",
-      periodo: "início do ano letivo de 2026",
+      periodo: "começo do ano letivo de 2026",
       aplicadoEm: null,
       fonte: "Tabulação da rede municipal (Secretaria de Educação)",
     },
@@ -51,4 +51,4 @@ export function instrumento(id: Instrumento["id"]): Instrumento {
   return REFERENCIA.instrumentos.find((i) => i.id === id)!;
 }
 
-export const textoAplicacao = (i: Instrumento) => i.aplicadoEm ?? "data de aplicação a confirmar";
+export const textoAplicacao = (i: Instrumento) => i.aplicadoEm ?? "a escola vai informar a data";

@@ -26,7 +26,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { useAppStore } from "@/lib/app-store";
 import { useConfirmar } from "@/lib/confirm-store";
-import { buildWeeklySchedule, currentWeekdayLabel, getWeekIndex, agoraNaEscola } from "@/lib/schedule-engine";
+import {
+  buildWeeklySchedule,
+  currentWeekdayLabel,
+  getWeekIndex,
+  agoraNaEscola,
+} from "@/lib/schedule-engine";
 import type { Assignment } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +43,7 @@ export const Route = createFileRoute("/dashboard/programacao")({
   component: ProgramacaoPage,
   head: () => ({
     meta: [
-      { title: "Programação · Agenda de Informática" },
+      { title: "Programação · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

@@ -56,9 +56,9 @@ export function RelatorioUso({ dados }: { dados: DadosLab }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Semana de {dataCurta(inicioDaSemana(hoje))} em diante · mês de {mes}. Cada dia conta uma
-        ida, mesmo que o aluno tenha ido em dois grupos no mesmo dia. Destaque em âmbar: mais de{" "}
-        {LIMITE_IDAS_SEMANA} ida na semana ou mais de {LIMITE_IDAS_MES} no mês.
+        Semana de {dataCurta(inicioDaSemana(hoje))} em diante · mês de {mes}. Cada dia vale uma ida,
+        mesmo que o aluno tenha ido em dois grupos. Destaque em âmbar: mais de {LIMITE_IDAS_SEMANA}{" "}
+        ida na semana ou mais de {LIMITE_IDAS_MES} no mês.
       </p>
       <div className="flex gap-2">
         <Button

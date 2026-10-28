@@ -27,7 +27,7 @@ export const Route = createFileRoute("/aluno/$turmaId/$alunoId/simulado")({
   component: SimuladoAluno,
   head: () => ({
     meta: [
-      { title: "Simulado · Agenda de Informática" },
+      { title: "Simulado · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

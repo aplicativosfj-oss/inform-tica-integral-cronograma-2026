@@ -15,7 +15,7 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
   head: () => ({
     meta: [
-      { title: "Entrar · Agenda de Informática" },
+      { title: "Entrar · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -41,13 +41,13 @@ function LoginPage() {
     const errorMessage = await login(email, password);
     setSubmitting(false);
     if (!errorMessage) {
-      toast.success("Login realizado com sucesso.");
+      toast.success("Pronto, você entrou!");
       navigate({ to: "/dashboard" });
     } else {
       setError(
         errorMessage.toLowerCase().includes("confirm")
-          ? "Confirme seu e-mail antes de entrar (verifique sua caixa de entrada)."
-          : "E-mail ou senha inválidos.",
+          ? "Falta confirmar o seu e-mail. Dê uma olhada na caixa de entrada."
+          : "E-mail ou senha não conferem. Tente de novo.",
       );
     }
   }
@@ -79,7 +79,7 @@ function LoginPage() {
               </span>
               <CardTitle className="text-xl">Painel de gestão</CardTitle>
               <CardDescription>
-                Acesso exclusivo do professor responsável pela sala de informática.
+                Esta porta é do professor responsável pelo laboratório de informática.
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
@@ -113,7 +113,7 @@ function LoginPage() {
                   <LogIn /> {submitting ? "Entrando..." : "Entrar"}
                 </Button>
                 <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                  <LockKeyhole className="size-3.5" /> Acesso restrito à gestão da escola
+                  <LockKeyhole className="size-3.5" /> Só a gestão da escola entra por aqui
                 </p>
               </form>
             </CardContent>

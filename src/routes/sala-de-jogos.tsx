@@ -16,7 +16,7 @@ export const Route = createFileRoute("/sala-de-jogos")({
   component: SalaDeJogosApp,
   head: () => ({
     meta: [
-      { title: "Sala de Jogos · Agenda de Informática" },
+      { title: "Sala de Jogos · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:

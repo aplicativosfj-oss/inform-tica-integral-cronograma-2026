@@ -39,7 +39,7 @@ export const Route = createFileRoute("/coordenacao")({
       {
         name: "description",
         content:
-          "Painel aberto da coordenação: participação e faltas por turma e grupo nas aulas de informática.",
+          "Como o laboratório de informática foi usado no mês: quem foi, por quanto tempo e quantas vezes, turma por turma.",
       },
       // A página fala de frequência de crianças. Mesmo sem nomes, ela não
       // tem por que aparecer em busca — some do índice junto com as demais

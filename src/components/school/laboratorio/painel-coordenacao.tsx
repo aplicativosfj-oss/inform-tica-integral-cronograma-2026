@@ -116,8 +116,8 @@ export function PainelCoordenacaoLab() {
         <div>
           <h1 className="text-3xl font-extrabold">Coordenação</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Como o laboratório de informática foi usado no mês, por turma e por aluno. Acesso
-            aberto, somente leitura.
+            Como o laboratório de informática foi usado no mês, turma por turma e aluno por aluno.
+            Qualquer pessoa pode olhar; ninguém pode alterar.
           </p>
         </div>
         <div className="space-y-1.5">
@@ -134,10 +134,10 @@ export function PainelCoordenacaoLab() {
 
       {erro === TABELA_AUSENTE ? (
         <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-          O controle do laboratório ainda não foi ligado ao banco.
+          O controle do laboratório ainda está sendo ligado. Volte daqui a pouco.
         </p>
       ) : erro ? (
-        <p className="text-sm text-destructive">Não foi possível carregar o mês agora: {erro}</p>
+        <p className="text-sm text-destructive">Não consegui carregar o mês agora: {erro}</p>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -199,11 +199,11 @@ export function PainelCoordenacaoLab() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Quem foi mais de {LIMITE_IDAS_MES} vez no mês</CardTitle>
+          <CardTitle className="text-base">Quem foi mais de uma vez no mês</CardTitle>
         </CardHeader>
         <CardContent>
           {resumo.ranking.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum aluno repetiu neste mês.</p>
+            <p className="text-sm text-muted-foreground">Ninguém repetiu neste mês. Que bom!</p>
           ) : (
             <ol className="space-y-1.5 text-sm">
               {resumo.ranking.map((r, i) => (

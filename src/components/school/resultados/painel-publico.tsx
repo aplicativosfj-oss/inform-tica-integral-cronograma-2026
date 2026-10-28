@@ -47,9 +47,9 @@ export function PainelPublico() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Resultados do {REFERENCIA.bimestre}</h1>
         <p className="mt-1 text-muted-foreground">
-          {REFERENCIA.escola} · {REFERENCIA.municipio}. Quantos alunos estão em cada nível de
-          leitura e de escrita, como foram as notas e o que isso pede de cada turma. Os números são
-          por turma: nenhum aluno é identificado.
+          {REFERENCIA.escola} · {REFERENCIA.municipio}. Quantas crianças estão em cada nível de
+          leitura e de escrita, como foram as notas e o que cada turma está pedindo. Os números são
+          por turma: ninguém é identificado.
         </p>
       </div>
 
@@ -70,12 +70,12 @@ export function PainelPublico() {
 
         <TabsContent value="resumo" className="space-y-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <PenLine className="size-5" aria-hidden /> O que os números dizem
+            <PenLine className="size-5" aria-hidden /> O que os números estão contando
           </h2>
           <Destaques />
           <p className="text-xs text-muted-foreground">
-            Estes textos são gerados a partir dos mesmos números das abas ao lado e se atualizam
-            quando os dados mudam.
+            Estes textos nascem dos mesmos números das outras abas e se atualizam sozinhos quando os
+            dados mudam.
           </p>
         </TabsContent>
 

@@ -14,7 +14,7 @@ export function QuadroReferencia({ ids }: { ids?: Instrumento["id"][] }) {
       <CardContent className="space-y-3 p-4">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <CalendarDays className="size-4 text-primary" aria-hidden />
-          <p className="text-sm font-semibold">Referência: {REFERENCIA.bimestre}</p>
+          <p className="text-sm font-semibold">Estes números são do {REFERENCIA.bimestre}</p>
           <p className="text-xs text-muted-foreground">
             {REFERENCIA.escola} · {REFERENCIA.municipio} · publicado em {REFERENCIA.publicadoEm}
           </p>

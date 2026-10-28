@@ -187,7 +187,7 @@ export function ControleLaboratorio({
   return (
     <div className="space-y-5">
       <section aria-label="Escolher a turma" className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground">1. Escolha a turma</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground">1. De qual turma?</h3>
         <div className="flex flex-wrap gap-2">
           {turmas.map((t) => {
             const cor = serieClasses(serieIndexPorNumero(t.serie));
@@ -216,7 +216,7 @@ export function ControleLaboratorio({
         <section aria-label="Escolher os alunos" className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-muted-foreground">
-              2. Toque nos alunos que vão ({escolhidos.size} de {turma.alunos.length})
+              2. Quem vai? Toque nos nomes ({escolhidos.size} de {turma.alunos.length})
             </h3>
             <div className="flex gap-2">
               <Button
@@ -320,7 +320,7 @@ export function ControleLaboratorio({
 
       {turma && escolhidos.size > 0 ? (
         <section aria-label="Definir o tempo" className="space-y-3 rounded-xl border p-4">
-          <h3 className="text-sm font-semibold text-muted-foreground">3. Defina o tempo</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">3. Por quanto tempo?</h3>
           <div className="flex gap-2">
             <Button
               type="button"
@@ -328,7 +328,7 @@ export function ControleLaboratorio({
               variant={modo === "duracao" ? "default" : "outline"}
               onClick={() => setModo("duracao")}
             >
-              Por duração
+              Por minutos
             </Button>
             <Button
               type="button"
@@ -340,7 +340,7 @@ export function ControleLaboratorio({
                 setFimManual(horaNaEscola(somarMinutos(new Date(), minutos)));
               }}
             >
-              Hora de início e fim
+              Escolher o horário
             </Button>
           </div>
 
@@ -379,7 +379,7 @@ export function ControleLaboratorio({
                 <div className="flex items-center gap-2">
                   <Switch id="lab-apos" checked={aposAtual} onCheckedChange={setAposAtual} />
                   <Label htmlFor="lab-apos" className="text-sm">
-                    Começar quando o grupo atual terminar ({horaNaEscola(fimDoGrupoAtual)})
+                    Entrar só quando o grupo de agora sair ({horaNaEscola(fimDoGrupoAtual)})
                   </Label>
                 </div>
               ) : null}
@@ -431,13 +431,13 @@ export function ControleLaboratorio({
             disabled={salvando || typeof janela === "string"}
             onClick={confirmar}
           >
-            <Play /> Colocar {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} no
+            <Play /> Mandar {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} para o
             laboratório
           </Button>
         </section>
       ) : turma ? null : (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users2 className="size-4" aria-hidden /> Escolha uma turma para ver os alunos.
+          <Users2 className="size-4" aria-hidden /> Escolha uma turma e os alunos aparecem aqui.
         </p>
       )}
 
@@ -448,12 +448,12 @@ export function ControleLaboratorio({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="size-5 text-amber-500" aria-hidden /> Atenção: alunos que já
-              foram
+              <AlertTriangle className="size-5 text-amber-500" aria-hidden /> Opa, esse pessoal já
+              foi
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-2 text-sm">
-                <p>Estes alunos já foram ao laboratório. Confira antes de marcar de novo:</p>
+                <p>Dê uma olhadinha antes de marcar de novo:</p>
                 <ul className="space-y-1">
                   {avisos?.map((x) => (
                     <li key={x.nome} className="rounded-md border p-2">
@@ -469,7 +469,7 @@ export function ControleLaboratorio({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Voltar e trocar</AlertDialogCancel>
+            <AlertDialogCancel>Voltar e trocar alguém</AlertDialogCancel>
             <AlertDialogAction onClick={() => void gravar()}>Marcar mesmo assim</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

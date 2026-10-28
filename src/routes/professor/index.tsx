@@ -25,7 +25,7 @@ export const Route = createFileRoute("/professor/")({
   component: ProfessorPicker,
   head: () => ({
     meta: [
-      { title: "Espaço do Professor · Agenda de Informática" },
+      { title: "Espaço do Professor · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
@@ -56,7 +56,7 @@ function ProfessorPicker() {
             etiqueta="Espaço do Professor"
             EtiquetaIcon={Presentation}
             titulo="A sua turma, do seu jeito"
-            subtitulo="Cada professor(a) regente entra com a própria senha e encontra aqui os alunos, os grupos do rodízio, a frequência do mês, as atividades e as mesmas ferramentas que a turma usa no laboratório."
+            subtitulo="Cada professor(a) regente entra com a própria senha e encontra aqui os alunos, as atividades e as mesmas ferramentas que a turma usa no laboratório."
             indicadores={[
               { rotulo: "Turmas", valor: turmas.length, icon: Users2 },
               { rotulo: "Alunos", valor: totalAlunos, icon: GraduationCap },
@@ -65,16 +65,14 @@ function ProfessorPicker() {
             ]}
           />
 
-          <h2 className="mb-1 mt-8 text-lg font-semibold text-foreground">
-            Escolha sua turma para começar
-          </h2>
+          <h2 className="mb-1 mt-8 text-lg font-semibold text-foreground">Qual é a sua turma?</h2>
           <p className="mb-5 text-sm text-muted-foreground">
-            Clique no seu nome e digite a senha que a coordenação entregou.
+            Clique no seu nome e digite a senha que a coordenação deu a você.
           </p>
 
           {turmas.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              Nenhuma turma cadastrada ainda.
+              Ainda não há turmas por aqui.
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

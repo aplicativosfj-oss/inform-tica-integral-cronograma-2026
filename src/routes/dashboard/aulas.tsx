@@ -36,7 +36,7 @@ export const Route = createFileRoute("/dashboard/aulas")({
   component: AulasPage,
   head: () => ({
     meta: [
-      { title: "Aulas · Agenda de Informática" },
+      { title: "Aulas · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -222,7 +222,8 @@ function AulasPage() {
 
           <div className="flex gap-2 sm:col-span-2 lg:col-span-3">
             <Button onClick={salvar}>
-              <CalendarPlus className="size-4" /> {editandoId ? "Salvar alterações" : "Cadastrar aula"}
+              <CalendarPlus className="size-4" />{" "}
+              {editandoId ? "Salvar alterações" : "Cadastrar aula"}
             </Button>
             {editandoId ? (
               <Button variant="outline" onClick={limparFormulario}>

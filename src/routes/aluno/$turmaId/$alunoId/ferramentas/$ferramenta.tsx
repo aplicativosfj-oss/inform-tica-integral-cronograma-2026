@@ -15,7 +15,7 @@ export const Route = createFileRoute("/aluno/$turmaId/$alunoId/ferramentas/$ferr
   component: FerramentaPage,
   head: () => ({
     meta: [
-      { title: "Ferramentas e exercícios · Agenda de Informática" },
+      { title: "Ferramentas e exercícios · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

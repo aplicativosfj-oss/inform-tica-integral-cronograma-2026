@@ -262,9 +262,10 @@ export async function marcarGrupo(entrada: {
   fim: Date;
   criadoPor: string | null;
 }): Promise<void> {
-  if (entrada.alunos.length === 0) throw new Error("Escolha pelo menos um aluno.");
+  if (entrada.alunos.length === 0)
+    throw new Error("Escolha pelo menos um aluno para mandar ao laboratório.");
   if (entrada.fim <= entrada.inicio)
-    throw new Error("O horário de fim precisa ser depois do início.");
+    throw new Error("O horário de fim tem que vir depois do início.");
   const grupoId = crypto.randomUUID();
   const linhas = entrada.alunos.map((a) => ({
     data: dataNaEscola(entrada.inicio),

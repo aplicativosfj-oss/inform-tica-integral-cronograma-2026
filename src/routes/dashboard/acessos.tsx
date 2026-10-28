@@ -36,7 +36,7 @@ export const Route = createFileRoute("/dashboard/acessos")({
   component: AcessosPage,
   head: () => ({
     meta: [
-      { title: "Senhas de acesso · Agenda de Informática" },
+      { title: "Senhas de acesso · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

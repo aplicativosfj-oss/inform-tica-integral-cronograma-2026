@@ -33,7 +33,7 @@ export const Route = createFileRoute("/dashboard/atividades")({
   component: AtividadesPage,
   head: () => ({
     meta: [
-      { title: "Área do Aluno · Agenda de Informática" },
+      { title: "Área do Aluno · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

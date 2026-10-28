@@ -81,7 +81,7 @@ function CartaoGrupo({
             faltam {textoRestante(fim - agora)}
           </Badge>
         ) : (
-          <Badge variant="secondary">começa em {textoRestante(ini - agora)}</Badge>
+          <Badge variant="secondary">entra em {textoRestante(ini - agora)}</Badge>
         )}
         {logado ? (
           <span className="ml-auto flex gap-1">
@@ -161,12 +161,12 @@ export function PainelLaboratorioAgora({ dados, logado }: { dados: DadosLab; log
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              O painel do laboratório está sendo preparado.
+              Estamos preparando o painel do laboratório. Volte daqui a pouquinho!
             </p>
           )
         ) : dados.erro ? (
           <p className="text-sm text-muted-foreground">
-            Não foi possível atualizar agora. Tentando de novo em instantes.
+            Não deu para atualizar agora, mas já já a gente tenta de novo.
           </p>
         ) : dados.carregando ? (
           <div className="h-16 animate-pulse rounded-xl bg-muted" />
@@ -174,7 +174,7 @@ export function PainelLaboratorioAgora({ dados, logado }: { dados: DadosLab; log
           <>
             {aoVivo.length === 0 ? (
               <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
-                Nenhum aluno no laboratório neste momento.
+                Ninguém no laboratório agora. A próxima turma já pode chegar!
               </p>
             ) : (
               <div className="space-y-3">
@@ -192,7 +192,7 @@ export function PainelLaboratorioAgora({ dados, logado }: { dados: DadosLab; log
 
             {proximos.length > 0 ? (
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-muted-foreground">Em seguida</h3>
+                <h3 className="text-sm font-semibold text-muted-foreground">Logo mais</h3>
                 {proximos.map((g) => (
                   <CartaoGrupo
                     key={g.grupoId}
@@ -208,7 +208,7 @@ export function PainelLaboratorioAgora({ dados, logado }: { dados: DadosLab; log
             {passados.length > 0 ? (
               <details className="rounded-lg border p-3">
                 <summary className="cursor-pointer text-sm font-semibold text-muted-foreground">
-                  Já passaram hoje ({passados.reduce((n, g) => n + g.alunos.length, 0)} alunos)
+                  Já passaram por aqui hoje ({passados.reduce((n, g) => n + g.alunos.length, 0)})
                 </summary>
                 <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                   {passados.map((g) => (

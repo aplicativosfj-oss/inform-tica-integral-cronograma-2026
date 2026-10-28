@@ -51,7 +51,7 @@ export const Route = createFileRoute("/dashboard/faltas")({
   component: FaltasPage,
   head: () => ({
     meta: [
-      { title: "Faltas do mês · Agenda de Informática" },
+      { title: "Faltas do mês · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

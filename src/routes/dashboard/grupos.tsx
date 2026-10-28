@@ -22,7 +22,7 @@ export const Route = createFileRoute("/dashboard/grupos")({
   component: GruposPage,
   head: () => ({
     meta: [
-      { title: "Turmas e grupos · Agenda de Informática" },
+      { title: "Turmas e grupos · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

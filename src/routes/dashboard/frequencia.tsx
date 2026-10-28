@@ -39,7 +39,7 @@ export const Route = createFileRoute("/dashboard/frequencia")({
   component: FrequenciaPage,
   head: () => ({
     meta: [
-      { title: "Frequência · Agenda de Informática" },
+      { title: "Frequência · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

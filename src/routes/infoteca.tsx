@@ -37,16 +37,16 @@ export const Route = createFileRoute("/infoteca")({
   head: () => ({
     meta: [
       ...imagemCompartilhar("/og/secao-infoteca.jpg", "Infoteca: jogos e ferramentas educativas"),
-      { title: "Infoteca · Agenda de Informática" },
+      { title: "Infoteca · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
-          "Infoteca: espaço lúdico e de apoio pedagógico digital com ferramentas, jogos e plataformas educativas selecionadas para alunos, professores, pais e comunidade — incluindo opções para alunos com necessidades especiais.",
+          "A Infoteca reúne jogos, ferramentas e plataformas educativas escolhidos a dedo para alunos, professores e famílias, com opções para crianças com necessidades especiais.",
       },
-      { property: "og:title", content: "Infoteca · Agenda de Informática" },
+      { property: "og:title", content: "Infoteca · Informática Dr. Eiraldo" },
       {
         property: "og:description",
-        content: "Jogos e ferramentas educativas selecionadas, organizadas por área de ensino.",
+        content: "Jogos e ferramentas educativas escolhidos a dedo, separados por assunto.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -307,9 +307,7 @@ function CabecalhoSecao({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
       <div className="max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-          {numero}
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{numero}</p>
         <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           {titulo}
         </h2>
@@ -344,9 +342,7 @@ function Grupo({
   return (
     <div id={id} className="grid scroll-mt-32 gap-5 py-8 lg:grid-cols-[17rem_1fr] lg:gap-10">
       <div className="lg:sticky lg:top-32 lg:self-start">
-        <span
-          className={`flex size-10 items-center justify-center rounded-xl border ${c.chip}`}
-        >
+        <span className={`flex size-10 items-center justify-center rounded-xl border ${c.chip}`}>
           <Icon className="size-5" />
         </span>
         <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">{titulo}</h3>
@@ -374,8 +370,8 @@ function InfotecaPage() {
           <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
             <p className="flex items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-xs text-sky-800 dark:text-sky-200">
               <WifiOff className="size-4 shrink-0" />
-              Sem internet: as ferramentas da escola (como a Sala de Jogos) continuam funcionando.
-              Os sites externos abaixo só abrem quando a conexão voltar.
+              Sem internet? As ferramentas da escola, como a Sala de Jogos, continuam funcionando.
+              Os sites de fora só abrem quando a conexão voltar.
             </p>
           </div>
         )}
@@ -386,14 +382,14 @@ function InfotecaPage() {
             <div>
               <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
                 <span className="h-px w-8 bg-primary" aria-hidden />
-                Acervo digital de aprendizagem
+                Um acervo para aprender e brincar
               </p>
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
                 Infoteca
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Ferramentas, jogos e plataformas educativas selecionadas para alunos, professores,
-                famílias e comunidade — com atenção especial a alunos com necessidades especiais.
+                Ferramentas, jogos e plataformas educativas escolhidos a dedo para alunos,
+                professores e famílias, com atenção especial às crianças com necessidades especiais.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="gap-2">

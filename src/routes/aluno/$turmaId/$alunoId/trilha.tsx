@@ -34,7 +34,7 @@ export const Route = createFileRoute("/aluno/$turmaId/$alunoId/trilha")({
   component: MinhaTrilha,
   head: () => ({
     meta: [
-      { title: "Minha trilha · Agenda de Informática" },
+      { title: "Minha trilha · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

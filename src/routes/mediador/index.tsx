@@ -38,7 +38,7 @@ export const Route = createFileRoute("/mediador/")({
   component: MediadorPicker,
   head: () => ({
     meta: [
-      { title: "Espaço do Mediador e do Cuidador · Agenda de Informática" },
+      { title: "Espaço do Mediador e do Cuidador · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
@@ -106,7 +106,7 @@ function MediadorPicker() {
             etiqueta="Espaço do Mediador e do Cuidador"
             EtiquetaIcon={HandHeart}
             titulo="Quem acompanha de perto"
-            subtitulo="Cada mediador(a) e cuidador(a) da escola entra com a própria senha e encontra aqui as crianças que acompanha — série, idade, o que consta do atendimento — e as ferramentas adaptadas ao ritmo delas."
+            subtitulo="Cada mediador(a) e cuidador(a) da escola entra com a própria senha e encontra aqui as crianças que acompanha (série, idade e o que consta do atendimento) e as ferramentas adaptadas ao ritmo de cada uma."
             indicadores={[
               { rotulo: "Mediadores", valor: mediadores, icon: HeartHandshake },
               { rotulo: "Cuidadores", valor: cuidadores, icon: HandHeart },
@@ -155,12 +155,12 @@ function MediadorPicker() {
 
           <h2 className="mb-1 mt-8 text-lg font-semibold text-foreground">Encontre seu nome</h2>
           <p className="mb-3 text-sm text-muted-foreground">
-            Clique em você e digite a senha que a coordenação entregou.
+            Clique no seu nome e digite a senha que a coordenação deu a você.
           </p>
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar pelo nome ou pela turma..."
+            placeholder="Procure pelo nome ou pela turma..."
             className="mb-5 max-w-sm"
           />
 

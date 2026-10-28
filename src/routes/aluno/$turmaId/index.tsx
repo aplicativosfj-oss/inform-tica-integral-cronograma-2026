@@ -26,7 +26,7 @@ export const Route = createFileRoute("/aluno/$turmaId/")({
   component: AlunoPicker,
   head: () => ({
     meta: [
-      { title: "Área do Aluno · Agenda de Informática" },
+      { title: "Área do Aluno · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/dashboard/fichas-acesso")({
   component: AcessosPage,
   head: () => ({
     meta: [
-      { title: "Fichas de acesso · Agenda de Informática" },
+      { title: "Fichas de acesso · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -155,7 +155,7 @@ function AcessosPage() {
                 <header className="flex items-start justify-between gap-4 border-b-2 border-blue-700 pb-3">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-700">
-                      Agenda de Informática
+                      Informática Dr. Eiraldo
                     </p>
                     <p className="text-sm font-medium">{config.nomeEscola}</p>
                   </div>

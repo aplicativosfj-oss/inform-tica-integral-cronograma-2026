@@ -58,7 +58,7 @@ export function FaleComProfessor({
   const professor = config.professorInformatica || "professor de informática";
 
   function linkEmail(assunto: (typeof ASSUNTOS)[number]) {
-    const titulo = `[Agenda de Informática] ${assunto.rotulo}${remetente ? ` — ${remetente}` : ""}`;
+    const titulo = `[Informática Dr. Eiraldo] ${assunto.rotulo}${remetente ? ` — ${remetente}` : ""}`;
     const corpo = [
       `Olá, professor ${professor}!`,
       "",

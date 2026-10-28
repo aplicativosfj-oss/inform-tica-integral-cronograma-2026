@@ -34,18 +34,18 @@ export const Route = createFileRoute("/sobre")({
   component: SobrePage,
   head: () => ({
     meta: [
-      ...imagemCompartilhar("/og/secao-sobre.jpg", "Sobre a Agenda de Informática"),
-      { title: "Sobre a plataforma · Agenda de Informática" },
+      ...imagemCompartilhar("/og/secao-sobre.jpg", "Sobre o laboratório de informática"),
+      { title: "A gente e o laboratório · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
-          "Conheça a Agenda de Informática: para que serve, como organiza as aulas de informática da Escola Municipal em Tempo Integral Dr. Eiraldo Carneiro de França, e quem está por trás do projeto.",
+          "Conheça o laboratório de informática da Escola Dr. Eiraldo Carneiro de França: como funciona, quem está por trás e por que tudo isso existe.",
       },
-      { property: "og:title", content: "Sobre a plataforma · Agenda de Informática" },
+      { property: "og:title", content: "A gente e o laboratório · Informática Dr. Eiraldo" },
       {
         property: "og:description",
         content:
-          "Para que serve a Agenda de Informática e como ela organiza as aulas de informática na escola.",
+          "Como funciona o laboratório de informática da Escola Dr. Eiraldo, em Feijó, e quem faz isso acontecer.",
       },
       { property: "og:type", content: "website" },
     ],
@@ -69,13 +69,13 @@ function SobrePage() {
           />
           <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6 lg:py-12">
             <Badge className="mb-3 gap-1.5 rounded-full border-blue-400/30 bg-blue-500/10 px-3 py-1.5 text-sm text-blue-700 shadow-sm backdrop-blur-md dark:border-blue-400/25 dark:bg-blue-400/10 dark:text-blue-200">
-              <Sparkles className="size-4" /> Sobre a plataforma
+              <Sparkles className="size-4" /> Prazer, a gente
             </Badge>
             <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Agenda de Informática
+              Informática com cara de escola
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-balance text-base text-muted-foreground sm:text-lg">
-              Começou para organizar, com transparência e justiça, as aulas de informática da{" "}
+              Isso começou como um jeito de organizar, com justiça, quem usa os computadores da{" "}
               {config.nomeEscola}. Hoje também mostra o que a escola aprendeu e devolve isso em
               atividade para a criança treinar.
             </p>
@@ -97,11 +97,10 @@ function SobrePage() {
         {/* Para que serve */}
         <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
           <div className="mb-5 text-center">
-            <h2 className="text-2xl font-semibold text-foreground">Para que serve</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Por que isso existe</h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
-              O laboratório de informática tem um número limitado de computadores e várias turmas
-              para atender durante a semana. A Agenda de Informática resolve esse desafio de forma
-              automática e justa.
+              O laboratório tem poucos computadores e muita criança querendo usar. Aqui você vê como
+              a escola resolve isso de um jeito justo, que todo mundo consegue acompanhar.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -114,8 +113,8 @@ function SobrePage() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  O professor de informática escolhe, turma por turma, os alunos que vão ao
-                  laboratório e define o tempo de cada grupo, com início e fim.
+                  A cada dia, o professor escolhe quem vai. Ele marca os alunos da turma e diz por
+                  quanto tempo cada grupo fica.
                 </p>
               </CardContent>
             </Card>
@@ -128,8 +127,8 @@ function SobrePage() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Conta quantas vezes cada aluno foi ao laboratório na semana e no mês e avisa o
-                  professor quando alguém repete, para ninguém ficar de fora.
+                  O sistema lembra quantas vezes cada criança já foi na semana e no mês, e avisa
+                  quando alguém está repetindo. Assim ninguém fica de fora.
                 </p>
               </CardContent>
             </Card>
@@ -138,12 +137,12 @@ function SobrePage() {
                 <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
                   <ShieldCheck className="size-4" />
                 </span>
-                <CardTitle className="text-base">Transparência pública</CardTitle>
+                <CardTitle className="text-base">Tudo à vista</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Qualquer pessoa — pais, professores(as) regentes e a coordenação — vê no site, ao
-                  vivo, quem está no laboratório e até que horas.
+                  Pais, professores e coordenação veem tudo no site, ao vivo: quem está no
+                  laboratório e até que horas.
                 </p>
               </CardContent>
             </Card>
@@ -156,8 +155,8 @@ function SobrePage() {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <p className="text-sm text-muted-foreground">
-                  Guarda o histórico de cada ida ao laboratório e mostra à coordenação o uso por
-                  turma e por aluno, semana a semana e mês a mês.
+                  Cada ida ao laboratório fica registrada. A coordenação enxerga o uso por turma e
+                  por aluno, semana a semana.
                 </p>
               </CardContent>
             </Card>
@@ -172,15 +171,15 @@ function SobrePage() {
           <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
             <div className="mb-5 text-center">
               <Badge className="mb-3 gap-1.5 rounded-full border-indigo-400/30 bg-indigo-500/10 px-3 py-1.5 text-sm text-indigo-700 shadow-sm backdrop-blur-md dark:border-indigo-400/25 dark:bg-indigo-400/10 dark:text-indigo-200">
-                <Target className="size-4" /> Novo na plataforma
+                <Target className="size-4" /> Novidade
               </Badge>
               <h2 className="text-2xl font-semibold text-foreground">
-                Da avaliação para a sala de aula
+                Da prova para a sala de aula
               </h2>
               <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">
                 Duas vezes por ano, todos os alunos do 1º ao 5º ano fazem a mesma prova da
-                Secretaria de Educação. O site passou a publicar esse resultado em linguagem simples
-                — e, a partir dele, a oferecer atividade para treinar o que ainda não foi aprendido.
+                Secretaria de Educação. Agora o site mostra esse resultado em linguagem simples e, a
+                partir dele, oferece atividades para treinar o que ainda não ficou firme.
               </p>
             </div>
 
@@ -190,12 +189,12 @@ function SobrePage() {
                   <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-blue-400/25 bg-blue-500/10 text-blue-600 dark:border-blue-400/20 dark:bg-blue-400/10 dark:text-blue-300">
                     <BarChart3 className="size-4" />
                   </span>
-                  <CardTitle className="text-base">Resultado da escola, aberto a todos</CardTitle>
+                  <CardTitle className="text-base">O resultado da escola, para todos</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <p className="text-sm text-muted-foreground">
-                    Quanto cada turma acertou na 1ª e na 2ª avaliação, o que melhorou e o que ainda
-                    precisa de atenção — sem jargão e sem login. Para quem quiser ir a fundo, há um
+                    Quanto cada turma acertou na 1ª e na 2ª avaliação, o que melhorou e onde ainda
+                    precisa de atenção. Sem jargão e sem login. Quem quiser mergulhar fundo tem um
                     observatório com o detalhe por turma, questão e habilidade.
                   </p>
                 </CardContent>
@@ -212,7 +211,7 @@ function SobrePage() {
                   <p className="text-sm text-muted-foreground">
                     As 120 habilidades cobradas na avaliação, explicadas uma a uma: o que se espera
                     de quem já aprendeu, como perceber isso na prática e o que fazer com quem ainda
-                    está no caminho. Serve ao professor regente e também a quem acompanha em casa.
+                    está a caminho. Ajuda o professor e também quem acompanha em casa.
                   </p>
                 </CardContent>
               </Card>
@@ -222,13 +221,13 @@ function SobrePage() {
                   <span className="mb-1.5 flex size-9 items-center justify-center rounded-full border border-rose-400/25 bg-rose-500/10 text-rose-600 dark:border-rose-400/20 dark:bg-rose-400/10 dark:text-rose-300">
                     <Target className="size-4" />
                   </span>
-                  <CardTitle className="text-base">Atividades para recompor</CardTitle>
+                  <CardTitle className="text-base">Atividades para reforçar</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <p className="text-sm text-muted-foreground">
-                    O que a escola errou mais vem primeiro. Cada atividade tem três níveis, o nível
-                    indicado já vem sugerido pelo resultado, e há um mini-teste para ver se a
-                    criança avançou. Tudo pode ser impresso como folha, para quem prefere papel.
+                    O que a escola mais errou vem primeiro. Cada atividade tem três níveis, o nível
+                    certo já vem sugerido pelo resultado, e um mini-teste mostra se a criança
+                    avançou. Dá para imprimir em folha, para quem prefere papel.
                   </p>
                 </CardContent>
               </Card>
@@ -242,9 +241,8 @@ function SobrePage() {
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
                   <p className="text-sm text-muted-foreground">
-                    Damas, dominó, jogo da velha, memória e quebra-cabeça — contra o computador ou
-                    contra um colega da turma. Cada partida ganha vale estrelas no ranking da
-                    escola.
+                    Damas, dominó, jogo da velha, memória e quebra-cabeça, contra o computador ou
+                    contra um colega. Cada partida ganha vale estrelas no ranking da escola.
                   </p>
                 </CardContent>
               </Card>
@@ -272,9 +270,9 @@ function SobrePage() {
             </div>
 
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              Os percentuais dizem quantas questões os alunos acertaram em cada 100 — não são nota
-              de boletim. O raio-X de cada turma lista os alunos pelo nome, para o trabalho da
-              escola.
+              Os percentuais mostram quantas questões os alunos acertaram a cada 100. Não são nota
+              de boletim. O raio-X de cada turma mostra os nomes dos alunos só para o trabalho
+              interno da escola.
             </p>
           </div>
         </section>
@@ -302,18 +300,17 @@ function SobrePage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
               <div>
                 <Badge className="mb-3 gap-1.5 rounded-full border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-sm text-violet-700 shadow-sm backdrop-blur-md dark:border-violet-400/25 dark:bg-violet-400/10 dark:text-violet-200">
-                  <BookOpen className="size-4" /> Ferramenta pedagógica
+                  <BookOpen className="size-4" /> Nossa ferramenta
                 </Badge>
                 <h2 className="text-xl font-semibold text-foreground">
-                  As aulas de informática usam o GCompris
+                  O GCompris está nas nossas aulas
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Nas aulas de informática da escola, os alunos utilizam o{" "}
-                  <strong className="text-foreground">GCompris</strong>, um pacote educacional livre
-                  e gratuito com dezenas de atividades — matemática, leitura, ciências, lógica, arte
-                  e muito mais — voltado para crianças a partir dos 2 anos. É uma ferramenta
-                  consolidada, usada em escolas de vários países, que ajuda a transformar o tempo no
-                  laboratório em aprendizado de verdade, de um jeito lúdico e acessível.
+                  Nas aulas, a criançada usa o <strong className="text-foreground">GCompris</strong>
+                  , um pacote educacional livre e gratuito com dezenas de atividades de matemática,
+                  leitura, ciências, lógica, arte e muito mais, pensado para crianças a partir dos 2
+                  anos. É usado em escolas de vários países e transforma o tempo no laboratório em
+                  aprendizado de verdade, com leveza.
                 </p>
                 <Button asChild variant="outline" className="mt-4 gap-1.5">
                   <a
@@ -350,16 +347,16 @@ function SobrePage() {
               <Badge className="mb-3 gap-1.5 rounded-full border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-sm text-amber-800 shadow-sm backdrop-blur-md dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-300">
                 <Puzzle className="size-4" /> Novidade
               </Badge>
-              <h2 className="text-2xl font-semibold text-foreground">Conheça a Infoteca</h2>
+              <h2 className="text-2xl font-semibold text-foreground">Dê uma volta pela Infoteca</h2>
             </div>
             <Card>
               <CardContent className="p-5 text-center">
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  Além da agenda das aulas, o site tem um espaço próprio chamado{" "}
+                  Além do laboratório, o site tem a{" "}
                   <strong className="text-foreground">Infoteca</strong>: uma seleção de jogos e
-                  ferramentas educativas gratuitas, organizadas por área (alfabetização, matemática,
-                  digitação, raciocínio lógico e mais), pensada para alunos, professores, pais e
-                  também para alunos com necessidades especiais.
+                  ferramentas educativas gratuitas, separadas por assunto (alfabetização,
+                  matemática, digitação, raciocínio lógico e mais). Foi pensada para alunos,
+                  professores, famílias e também para crianças com necessidades especiais.
                 </p>
                 <Button asChild className="mt-4 gap-1.5">
                   <Link to="/infoteca">
@@ -375,7 +372,7 @@ function SobrePage() {
         <section className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
           <div className="mb-4 text-center">
             <Badge className="mb-3 gap-1.5 rounded-full border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-800 shadow-sm backdrop-blur-md dark:border-cyan-400/25 dark:bg-cyan-400/10 dark:text-cyan-200">
-              <UserRound className="size-4" /> Quem leciona
+              <UserRound className="size-4" /> Quem está por trás
             </Badge>
             <h2 className="text-2xl font-semibold text-foreground">
               Professor {config.professorInformatica}
@@ -386,16 +383,15 @@ function SobrePage() {
               <p className="text-sm leading-relaxed text-muted-foreground">
                 O professor <strong className="text-foreground">Franc D&apos;nis</strong> faz parte
                 do quadro efetivo da {config.nomeEscola} desde{" "}
-                <strong className="text-foreground">2018</strong>, atuando nas aulas de informática.
-                É formado em <strong className="text-foreground">Pedagogia</strong> e pós-graduado
+                <strong className="text-foreground">2018</strong>, dando aulas de informática. É
+                formado em <strong className="text-foreground">Pedagogia</strong> e pós-graduado
                 pela faculdade <strong className="text-foreground">ProMinas</strong> em{" "}
                 <strong className="text-foreground">
                   Informática e suas Tecnologias na Educação
                 </strong>
-                . Essa formação une o olhar pedagógico ao uso prático da tecnologia em sala de aula
-                — e foi o que motivou a criação desta própria plataforma, pensada para tornar a
-                rotina do laboratório de informática mais organizada, justa e transparente para toda
-                a comunidade escolar.
+                . Foi essa mistura de olhar pedagógico com tecnologia que fez nascer este site, para
+                deixar a rotina do laboratório mais organizada, justa e transparente para toda a
+                comunidade escolar.
               </p>
             </CardContent>
           </Card>
@@ -426,10 +422,9 @@ function SobrePage() {
             <Badge className="mb-3 gap-1.5 rounded-full border-rose-400/30 bg-rose-500/10 px-3 py-1.5 text-sm text-rose-700 shadow-sm backdrop-blur-md dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-300">
               <Mail className="size-4" /> Contato
             </Badge>
-            <h2 className="text-2xl font-semibold text-foreground">Fale conosco</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Fale com a gente</h2>
             <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-              Dúvidas, sugestões ou relatos sobre a plataforma podem ser enviados diretamente por
-              e-mail.
+              Tem uma dúvida, uma sugestão ou uma história para contar? Escreva para nós por e-mail.
             </p>
             <Button asChild className="mt-5 gap-1.5">
               <a href="mailto:aplicativosfj@gmail.com">

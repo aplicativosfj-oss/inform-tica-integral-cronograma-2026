@@ -51,7 +51,7 @@ export const Route = createFileRoute("/dashboard/turmas/$turmaId")({
   component: TurmaAlunosPage,
   head: () => ({
     meta: [
-      { title: "Alunos da turma · Agenda de Informática" },
+      { title: "Alunos da turma · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

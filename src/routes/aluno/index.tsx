@@ -14,7 +14,7 @@ export const Route = createFileRoute("/aluno/")({
   component: AlunoTurmaPicker,
   head: () => ({
     meta: [
-      { title: "Área do Aluno · Agenda de Informática" },
+      { title: "Área do Aluno · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
@@ -56,10 +56,10 @@ function AlunoTurmaPicker() {
                   <GraduationCap className="size-3.5" /> Área do Aluno
                 </Badge>
                 <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
-                  Escolha sua turma
+                  Em qual turma você está?
                 </h1>
                 <p className="text-balance text-xs text-white/90">
-                  Encontre a sua turma, depois clique no seu nome para acessar suas atividades.
+                  Ache a sua turma e depois clique no seu nome. As suas atividades estão esperando!
                 </p>
               </div>
             </div>
@@ -69,7 +69,7 @@ function AlunoTurmaPicker() {
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           {turmas.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              Nenhuma turma cadastrada ainda.
+              Ainda não há turmas por aqui.
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

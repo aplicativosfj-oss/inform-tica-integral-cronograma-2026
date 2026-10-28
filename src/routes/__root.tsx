@@ -96,92 +96,95 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // nome próprios: só ela troca o manifesto e o ícone do site.
     const appJogos = matches.some((m) => (m.routeId as string) === "/sala-de-jogos");
     return {
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Agenda de Informática · Dr. Eiraldo Carneiro de França" },
-      {
-        name: "description",
-        content:
-          "Agenda profissional das aulas de informática: turmas, horários, revezamento e cronômetro ao vivo.",
-      },
-      { name: "author", content: "Escola Dr. Eiraldo Carneiro de França" },
-      { name: "robots", content: "index, follow" },
-      { property: "og:title", content: "Agenda de Informática" },
-      {
-        property: "og:description",
-        content: "Cronograma das aulas de informática por turma, dia e horário.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:site_name", content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro" },
-      { property: "og:locale", content: "pt_BR" },
-      // Imagem quadrada + twitter:card "summary" = card compacto, com a
-      // miniatura ao lado do texto. Com a arte 1200x630 e "summary_large_image"
-      // o link virava um banner ocupando a conversa inteira.
-      //
-      // O ?v= força Facebook/WhatsApp/LinkedIn a rebaixar o card em cache;
-      // sem ele, a arte antiga continua aparecendo por semanas nos
-      // compartilhamentos. Suba o número sempre que a arte mudar.
-      { property: "og:image", content: "/og-thumb.jpg?v=9" },
-      { property: "og:image:type", content: "image/jpeg" },
-      { property: "og:image:width", content: "600" },
-      { property: "og:image:height", content: "600" },
-      {
-        property: "og:image:alt",
-        content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro",
-      },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Agenda de Informática" },
-      {
-        name: "twitter:description",
-        content: "Cronograma das aulas de informática por turma, dia e horário.",
-      },
-      { name: "twitter:image", content: "/og-thumb.jpg?v=9" },
-      {
-        name: "twitter:image:alt",
-        content: "Agenda de Informática · Escola Dr. Eiraldo Carneiro",
-      },
-      { name: "theme-color", content: appJogos ? "#047857" : "#2b2470" },
-      { name: "mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
-      {
-        name: "apple-mobile-web-app-title",
-        content: appJogos ? "Sala de Jogos" : "Agenda Informática",
-      },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      {
-        rel: "manifest",
-        href: appJogos ? "/manifest-jogos.webmanifest" : "/manifest.webmanifest",
-      },
-      // Resource hints for performance optimization
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      // Sora (títulos) + Nunito Sans (corpo) — mesma dupla já usada no
-      // observatório de Avaliações (src/lib/observatorio-template.html),
-      // aqui carregada pro site inteiro falar a mesma tipografia.
-      {
-        rel: "stylesheet",
-        href: FONTES_CSS,
-      },
-      { rel: "dns-prefetch", href: "https://cdn.example.com" },
-      // Prefetch next likely routes
-      { rel: "prefetch", href: "/agenda", as: "fetch" },
-      { rel: "prefetch", href: "/dashboard", as: "fetch" },
-      // Favicon profissional com gradiente
-      { rel: "icon", href: "/favicon.svg?v=5", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon-32.png?v=5", type: "image/png", sizes: "32x32" },
-      { rel: "icon", href: "/favicon-16.png?v=5", type: "image/png", sizes: "16x16" },
-      {
-        rel: "apple-touch-icon",
-        href: appJogos ? "/icons/jogos-apple-touch.png" : "/icons/apple-touch-icon.png?v=5",
-      },
-    ],
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { title: "Informática Dr. Eiraldo · Dr. Eiraldo Carneiro de França" },
+        {
+          name: "description",
+          content:
+            "Agenda profissional das aulas de informática: turmas, horários, revezamento e cronômetro ao vivo.",
+        },
+        { name: "author", content: "Escola Dr. Eiraldo Carneiro de França" },
+        { name: "robots", content: "index, follow" },
+        { property: "og:title", content: "Informática Dr. Eiraldo" },
+        {
+          property: "og:description",
+          content: "Cronograma das aulas de informática por turma, dia e horário.",
+        },
+        { property: "og:type", content: "website" },
+        {
+          property: "og:site_name",
+          content: "Informática Dr. Eiraldo · Escola Dr. Eiraldo Carneiro",
+        },
+        { property: "og:locale", content: "pt_BR" },
+        // Imagem quadrada + twitter:card "summary" = card compacto, com a
+        // miniatura ao lado do texto. Com a arte 1200x630 e "summary_large_image"
+        // o link virava um banner ocupando a conversa inteira.
+        //
+        // O ?v= força Facebook/WhatsApp/LinkedIn a rebaixar o card em cache;
+        // sem ele, a arte antiga continua aparecendo por semanas nos
+        // compartilhamentos. Suba o número sempre que a arte mudar.
+        { property: "og:image", content: "/og-thumb.jpg?v=9" },
+        { property: "og:image:type", content: "image/jpeg" },
+        { property: "og:image:width", content: "600" },
+        { property: "og:image:height", content: "600" },
+        {
+          property: "og:image:alt",
+          content: "Informática Dr. Eiraldo · Escola Dr. Eiraldo Carneiro",
+        },
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: "Informática Dr. Eiraldo" },
+        {
+          name: "twitter:description",
+          content: "Cronograma das aulas de informática por turma, dia e horário.",
+        },
+        { name: "twitter:image", content: "/og-thumb.jpg?v=9" },
+        {
+          name: "twitter:image:alt",
+          content: "Informática Dr. Eiraldo · Escola Dr. Eiraldo Carneiro",
+        },
+        { name: "theme-color", content: appJogos ? "#047857" : "#2b2470" },
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+        {
+          name: "apple-mobile-web-app-title",
+          content: appJogos ? "Sala de Jogos" : "Agenda Informática",
+        },
+      ],
+      links: [
+        {
+          rel: "stylesheet",
+          href: appCss,
+        },
+        {
+          rel: "manifest",
+          href: appJogos ? "/manifest-jogos.webmanifest" : "/manifest.webmanifest",
+        },
+        // Resource hints for performance optimization
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        // Sora (títulos) + Nunito Sans (corpo) — mesma dupla já usada no
+        // observatório de Avaliações (src/lib/observatorio-template.html),
+        // aqui carregada pro site inteiro falar a mesma tipografia.
+        {
+          rel: "stylesheet",
+          href: FONTES_CSS,
+        },
+        { rel: "dns-prefetch", href: "https://cdn.example.com" },
+        // Prefetch next likely routes
+        { rel: "prefetch", href: "/agenda", as: "fetch" },
+        { rel: "prefetch", href: "/dashboard", as: "fetch" },
+        // Favicon profissional com gradiente
+        { rel: "icon", href: "/favicon.svg?v=5", type: "image/svg+xml" },
+        { rel: "icon", href: "/favicon-32.png?v=5", type: "image/png", sizes: "32x32" },
+        { rel: "icon", href: "/favicon-16.png?v=5", type: "image/png", sizes: "16x16" },
+        {
+          rel: "apple-touch-icon",
+          href: appJogos ? "/icons/jogos-apple-touch.png" : "/icons/apple-touch-icon.png?v=5",
+        },
+      ],
     };
   },
   shellComponent: RootShell,

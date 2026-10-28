@@ -59,13 +59,13 @@ export function gerarDestaques(): Destaque[] {
   const pior = [...variacoes].sort((a, b) => a.diff - b.diff)[0]!;
   out.push({
     id: "leitura-escola",
-    titulo: "A leitura avançou na escola",
-    texto: `Alunos que leem com fluência ou pausadamente: ${leitoresAB(e1)}% no 1º bimestre e ${leitoresAB(e3)}% no 3º. Os alunos que só leem sílabas ou não leem caíram de ${pct(e1.D + e1.E, total(e1))}% para ${pct(e3.D + e3.E, total(e3))}%.`,
+    titulo: "Mais crianças lendo bem",
+    texto: `No 1º bimestre, ${leitoresAB(e1)}% das crianças liam com fluência ou pausadamente. No 3º, já são ${leitoresAB(e3)}%. E quem só lê sílabas ou ainda não lê foi de ${pct(e1.D + e1.E, total(e1))}% para ${pct(e3.D + e3.E, total(e3))}%.`,
     tom: leitoresAB(e3) >= leitoresAB(e1) ? "positivo" : "atencao",
   });
   out.push({
     id: "leitura-turmas",
-    titulo: "Maior avanço e maior atenção na leitura",
+    titulo: "Quem mais avançou na leitura",
     texto:
       `Maior avanço: ${nome(melhor.k)}, de ${melhor.de}% para ${melhor.para}% (${melhor.diff > 0 ? "+" : ""}${melhor.diff} pontos). ` +
       (pior.diff < 0
@@ -80,7 +80,7 @@ export function gerarDestaques(): Destaque[] {
     .sort((a, b) => b.n - a.n)[0]!;
   out.push({
     id: "leitura-prioridade",
-    titulo: "Onde agir primeiro na leitura",
+    titulo: "Por onde começar na leitura",
     texto: `${de.t.ano}º ${de.t.turma} tem ${de.n} aluno${de.n === 1 ? "" : "s"} que só leem sílabas ou não leem, o maior número entre as turmas (${pct(de.n, de.t.avaliadosLeitura)}% dos avaliados).`,
     tom: "atencao",
   });
@@ -96,7 +96,7 @@ export function gerarDestaques(): Destaque[] {
     .sort((a, b) => b.p - a.p)[0]!;
   out.push({
     id: "escrita-prioridade",
-    titulo: "Onde agir primeiro na escrita",
+    titulo: "Por onde começar na escrita",
     texto: `${esc.t.ano}º ${esc.t.turma} tem ${esc.n} aluno${esc.n === 1 ? "" : "s"} em nível de prioridade na escrita (${esc.p}% dos avaliados), a maior proporção entre as turmas.`,
     tom: "atencao",
   });
@@ -112,7 +112,7 @@ export function gerarDestaques(): Destaque[] {
   const maisAbaixo = [...abaixo].sort((a, b) => b.n / b.d.total - a.n / a.d.total)[0];
   out.push({
     id: "notas",
-    titulo: "Notas do 3º bimestre",
+    titulo: "E as notas?",
     texto:
       `${cem.length} das ${turmasNotas.length} turmas têm todos os alunos com nota de 7,0 a 10,0 em todas as disciplinas.` +
       (maisAbaixo
@@ -136,7 +136,7 @@ export function gerarDestaques(): Destaque[] {
   if (contraste.length) {
     out.push({
       id: "contraste",
-      titulo: "Notas altas e diagnóstica mais baixa",
+      titulo: "Nota alta, diagnóstica mais baixa",
       texto: `Em Língua Portuguesa, quase todos os alunos de ${contraste.join(", ")} tiraram 7,0 ou mais no bimestre, enquanto menos da metade passou de 50% na I Avaliação Diagnóstica (entre parênteses). São provas de momentos e objetivos diferentes, então o contraste é um ponto para conversar, não uma conclusão.`,
       tom: "neutro",
     });

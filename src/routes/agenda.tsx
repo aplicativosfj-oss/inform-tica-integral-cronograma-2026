@@ -23,11 +23,11 @@ export const Route = createFileRoute("/agenda")({
   head: () => ({
     meta: [
       ...imagemCompartilhar("/og/secao-agenda.jpg", "Laboratório de informática"),
-      { title: "Laboratório de informática · quem está lá e quem já foi" },
+      { title: "O laboratório ao vivo · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
-          "Veja quais alunos estão no laboratório de informática agora e quem foi nos outros dias da semana.",
+          "Veja quem está no laboratório de informática agora e quem já foi nos outros dias da semana.",
       },
     ],
   }),
@@ -58,10 +58,10 @@ function AgendaPage() {
         <NavBar />
         <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Laboratório de informática</h1>
+            <h1 className="text-3xl font-bold tracking-tight">O laboratório, ao vivo</h1>
             <p className="mt-1 text-muted-foreground">
-              Os alunos são escolhidos pelo professor de informática a cada dia. Aqui você vê quem
-              está no laboratório agora, até que horas, e quem já foi nesta semana.
+              Todo dia o professor escolhe quem vai ao laboratório. Aqui você vê quem está lá agora,
+              até que horas e quem já passou por lá nesta semana.
             </p>
           </div>
 
@@ -76,7 +76,7 @@ function AgendaPage() {
             <CardContent className="space-y-4">
               {dias.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Ainda não há alunos marcados nesta semana.
+                  Ninguém foi ao laboratório nesta semana, por enquanto.
                 </p>
               ) : (
                 dias.map((dia) => (

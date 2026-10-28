@@ -367,7 +367,7 @@ export function PainelMapaClasse({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Users2 className="size-4" aria-hidden /> Onde agir primeiro
+            <Users2 className="size-4" aria-hidden /> Por onde começar
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             Turmas ordenadas pelo total de alunos em nível de prioridade: na leitura, os que só leem
@@ -402,7 +402,9 @@ export function PainelMapaClasse({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Guia dos níveis e ações em sala</CardTitle>
+          <CardTitle className="text-base">
+            O que cada nível significa e o que fazer em sala
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {[
@@ -434,7 +436,7 @@ export function PainelMapaClasse({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Info className="size-4" aria-hidden /> Sobre os dados
+            <Info className="size-4" aria-hidden /> De onde vêm esses números
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
@@ -457,7 +459,8 @@ export function PainelMapaClasse({
             isso não aparece aqui.
           </p>
           <p>
-            Alunos sem nenhuma marcação aparecem como "sem registro" e não entram nos percentuais.
+            Alunos sem nenhuma marcação aparecem como "sem registro" e ficam de fora dos
+            percentuais.
           </p>
         </CardContent>
       </Card>

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/resultados")({
       {
         name: "description",
         content:
-          "Resultados do 3º bimestre de 2026 da Escola Dr. Eiraldo Carneiro de França: mapa de leitura e escrita por turma e notas do bimestre, com a data de cada aplicação.",
+          "Como as turmas da Escola Dr. Eiraldo estão lendo, escrevendo e aprendendo no 3º bimestre de 2026, com a data de cada avaliação.",
       },
     ],
   }),

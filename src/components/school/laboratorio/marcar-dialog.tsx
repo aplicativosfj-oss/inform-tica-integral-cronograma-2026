@@ -23,9 +23,10 @@ export function MarcarAlunosCartao({ dados }: { dados: DadosLab }) {
     <>
       <Card className="border-primary/40 bg-primary/5">
         <CardContent className="space-y-3 p-4">
-          <p className="text-sm font-semibold">Professor(a): marque os alunos do dia</p>
+          <p className="text-sm font-semibold">Professor(a), quem vai ao laboratório hoje?</p>
           <p className="text-sm text-muted-foreground">
-            Escolha a turma, toque nos alunos e defina o tempo. O painel ao lado atualiza na hora.
+            Escolha a turma, toque nos nomes e diga por quanto tempo. O painel aqui ao lado muda na
+            hora.
           </p>
           <Button size="lg" className="w-full" onClick={() => setAberto(true)}>
             <MonitorSmartphone /> Marcar alunos
@@ -35,9 +36,9 @@ export function MarcarAlunosCartao({ dados }: { dados: DadosLab }) {
       <Dialog open={aberto} onOpenChange={setAberto}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Marcar alunos no laboratório</DialogTitle>
+            <DialogTitle>Quem vai ao laboratório?</DialogTitle>
             <DialogDescription>
-              O sistema avisa se o aluno já foi ao laboratório nesta semana ou neste mês.
+              Se alguém já foi nesta semana ou neste mês, a gente avisa.
             </DialogDescription>
           </DialogHeader>
           <ControleLaboratorio dados={dados} aoMarcar={() => setAberto(false)} />

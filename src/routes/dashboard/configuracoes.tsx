@@ -29,7 +29,7 @@ export const Route = createFileRoute("/dashboard/configuracoes")({
   component: ConfiguracoesPage,
   head: () => ({
     meta: [
-      { title: "Configurações · Agenda de Informática" },
+      { title: "Configurações · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

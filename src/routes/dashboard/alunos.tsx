@@ -26,7 +26,7 @@ export const Route = createFileRoute("/dashboard/alunos")({
   component: AlunosPage,
   head: () => ({
     meta: [
-      { title: "Buscar aluno · Agenda de Informática" },
+      { title: "Buscar aluno · Informática Dr. Eiraldo" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

@@ -55,7 +55,7 @@ export function PainelRendimento({
 
       <Card>
         <CardHeader>
-          <CardTitle>Onde há alunos abaixo de 7,0</CardTitle>
+          <CardTitle>Onde ainda há alunos abaixo de 7,0</CardTitle>
         </CardHeader>
         <CardContent>
           {alertas.length === 0 ? (

@@ -29,14 +29,14 @@ export function SiteFooter() {
         <div className="space-y-3">
           <Marca className="[&_span]:!text-white [&_span.text-sun]:!text-sun" />
           <p className="max-w-xs text-sm text-white/65">
-            O laboratório de informática da Escola Municipal em Tempo Integral Dr. Eiraldo Carneiro
-            de França.
+            Onde as crianças da Escola Dr. Eiraldo descobrem o computador, o teclado e um monte de
+            coisa nova.
           </p>
         </div>
 
         <nav aria-label="Atalhos do rodapé">
           <h2 className="font-heading text-sm font-bold uppercase tracking-[0.16em] text-sun">
-            Navegue
+            Para onde ir
           </h2>
           <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-white/75">
             {LINKS.map((l) => (
@@ -54,7 +54,7 @@ export function SiteFooter() {
 
         <div>
           <h2 className="font-heading text-sm font-bold uppercase tracking-[0.16em] text-sun">
-            Contato
+            Fale com a gente
           </h2>
           <ul className="mt-3 space-y-2 text-sm text-white/75">
             <li className="flex items-center gap-2">
@@ -73,9 +73,10 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-white/10">
         <p className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-white/55 sm:px-6">
-          <span>© {ANO_ATUAL} Escola Dr. Eiraldo Carneiro de França</span>
+          <span>© {ANO_ATUAL} Escola Dr. Eiraldo Carneiro de França · Feijó, Acre</span>
           <span>
-            Desenvolvido por <span className="font-semibold text-white/80">Franc D&apos;nis</span>
+            Feito com carinho por{" "}
+            <span className="font-semibold text-white/80">Franc D&apos;nis</span>
           </span>
         </p>
       </div>
