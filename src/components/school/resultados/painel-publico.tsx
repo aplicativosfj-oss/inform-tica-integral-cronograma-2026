@@ -49,19 +49,19 @@ const TOM: Record<
 > = {
   positivo: {
     cartao: "from-emerald-500/20",
-    selo: "bg-emerald-400/15 text-emerald-300",
+    selo: "bg-emerald-400/15 text-emerald-700 dark:text-emerald-300",
     Icone: TrendingUp,
     rotulo: "Boa notícia",
   },
   atencao: {
     cartao: "from-amber-500/20",
-    selo: "bg-amber-400/15 text-amber-300",
+    selo: "bg-amber-400/15 text-amber-700 dark:text-amber-300",
     Icone: AlertTriangle,
     rotulo: "Ponto de atenção",
   },
   neutro: {
     cartao: "from-sky-500/20",
-    selo: "bg-sky-400/15 text-sky-300",
+    selo: "bg-sky-400/15 text-sky-700 dark:text-sky-300",
     Icone: MessageCircle,
     rotulo: "Para conversar",
   },
@@ -73,7 +73,7 @@ const porcento = (v: number | null | undefined) => (v == null ? "—" : `${Math.
  * Página pública dos resultados do bimestre. Abre com os números principais,
  * mostra o ano inteiro (leitura do 1º ao 3º bimestre e as duas avaliações
  * diagnósticas), cada turma nesse percurso, as leituras automáticas e, por
- * fim, os detalhes do bimestre atual. Sempre em tema escuro.
+ * fim, os detalhes do bimestre atual. A abertura é sempre escura; o resto segue o tema.
  */
 export function PainelPublico() {
   const { provas } = useProvasII();
@@ -111,7 +111,7 @@ export function PainelPublico() {
   }
 
   return (
-    <div className="dark bg-ink text-white">
+    <div className="text-foreground">
       <HeroResultados
         selo={
           <>
@@ -218,7 +218,7 @@ export function PainelPublico() {
                   onClick={() => irPara(DESTINO[d.id] ?? "mapa")}
                   style={{ animationDelay: `${i * 60}ms` }}
                   className={cn(
-                    "lab-aluno group flex flex-col gap-3 rounded-2xl border border-white/10 bg-gradient-to-br to-white/[0.03] p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-white/30",
+                    "lab-aluno group flex flex-col gap-3 rounded-2xl border border-border bg-gradient-to-br to-card p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-primary/40",
                     tom.cartao,
                   )}
                 >
@@ -231,8 +231,8 @@ export function PainelPublico() {
                     <tom.Icone className="size-3.5" aria-hidden /> {tom.rotulo}
                   </span>
                   <span className="text-lg font-bold leading-snug">{d.titulo}</span>
-                  <span className="text-sm leading-relaxed text-white/70">{d.texto}</span>
-                  <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-sun opacity-70 transition group-hover:opacity-100">
+                  <span className="text-sm leading-relaxed text-muted-foreground">{d.texto}</span>
+                  <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-semibold text-amber-600 dark:text-sun opacity-70 transition group-hover:opacity-100">
                     Ver os dados
                     <ArrowRight
                       className="size-3.5 transition group-hover:translate-x-1"
@@ -254,7 +254,7 @@ export function PainelPublico() {
           <div
             role="tablist"
             aria-label="Detalhes do bimestre"
-            className="mb-5 inline-flex rounded-full border border-white/15 bg-white/[0.06] p-1"
+            className="mb-5 inline-flex rounded-full border border-border bg-card p-1"
           >
             {(
               [
@@ -271,15 +271,15 @@ export function PainelPublico() {
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition",
                   aba === id
-                    ? "bg-sun text-sun-foreground shadow"
-                    : "text-white/70 hover:text-white",
+                    ? "bg-sun text-amber-600 dark:text-sun-foreground shadow"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <Icone className="size-4" aria-hidden /> {nome}
               </button>
             ))}
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3 sm:p-5">
+          <div className="rounded-3xl border border-border bg-card p-3 sm:p-5">
             {aba === "mapa" ? (
               <PainelMapaClasse mostrarProfessor={false} semCabecalho />
             ) : (
@@ -288,17 +288,17 @@ export function PainelPublico() {
           </div>
         </Secao>
 
-        <footer className="grid gap-3 rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-sm sm:grid-cols-3">
+        <footer className="grid gap-3 rounded-3xl border border-border bg-card p-5 text-sm sm:grid-cols-3">
           {REFERENCIA.instrumentos.map((i) => (
             <div key={i.id}>
               <p className="font-semibold">{i.nome}</p>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-muted-foreground">
                 {i.periodo} · aplicação: {textoAplicacao(i)}
               </p>
-              <p className="mt-1 text-[11px] text-white/45">Fonte: {i.fonte}</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Fonte: {i.fonte}</p>
             </div>
           ))}
-          <p className="text-xs text-white/50 sm:col-span-3">
+          <p className="text-xs text-muted-foreground sm:col-span-3">
             Publicado em {REFERENCIA.publicadoEm}. Os bimestres anteriores vêm do próprio mapa de
             classe; a 2ª avaliação diagnóstica, da tabulação por aluno publicada em Avaliações.
           </p>
@@ -323,9 +323,11 @@ function Secao({
 }) {
   return (
     <section ref={ref} className="scroll-mt-20">
-      <p className="text-xs font-bold uppercase tracking-[0.18em] text-sun">{selo}</p>
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+        {selo}
+      </p>
       <h2 className="mt-1.5 text-2xl font-extrabold tracking-tight sm:text-3xl">{titulo}</h2>
-      <p className="mb-6 mt-2 max-w-3xl text-sm text-white/65">{texto}</p>
+      <p className="mb-6 mt-2 max-w-3xl text-sm text-muted-foreground">{texto}</p>
       {children}
     </section>
   );

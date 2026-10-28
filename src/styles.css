@@ -672,18 +672,14 @@
 }
 
 /* Página inicial: cada seção ocupa uma janela inteira (menos a barra do topo),
-   com o conteúdo centralizado, e a rolagem "encaixa" de uma seção na outra.
-   `proximity` só ajuda quando a pessoa para perto de uma seção; não prende. */
-html.home-snap {
-  scroll-snap-type: y proximity;
-  scroll-padding-top: 4rem;
-}
+   com o conteúdo centralizado. Não usamos mais scroll-snap: perto do rodapé,
+   que não é ponto de encaixe, o navegador puxava a página de volta para a
+   última seção e não deixava chegar ao fim. */
 .secao-janela {
   min-height: calc(100svh - 4rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  scroll-snap-align: start;
 }
 
 /* Esconde o selo "Edit with Lovable" que a plataforma injeta no site publicado. */

@@ -95,10 +95,6 @@ function Index() {
   const { isAuthenticated } = useAuth();
   const lab = useSessoesLab();
   const totalAlunos = turmas.reduce((sum, t) => sum + t.alunos.length, 0);
-  useEffect(() => {
-    document.documentElement.classList.add("home-snap");
-    return () => document.documentElement.classList.remove("home-snap");
-  }, []);
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -480,7 +476,7 @@ function RevealSection({ className, children }: { className?: string; children: 
 function StatCounter({ valor }: { valor: number }) {
   const { ref, exibido } = useCountUp(valor);
   return (
-    <dd ref={ref} className="text-2xl font-semibold text-foreground">
+    <dd ref={ref} className="text-2xl font-semibold text-white">
       {exibido}
     </dd>
   );
