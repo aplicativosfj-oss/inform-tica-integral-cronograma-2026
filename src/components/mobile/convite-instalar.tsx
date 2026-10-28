@@ -8,6 +8,7 @@ import { usePWAInstall } from "@/lib/use-pwa-install";
 
 const CHAVE_DISPENSA = "convite-instalar-dispensado-em";
 const DIAS_SEM_INSISTIR = 7;
+const CHAVE_TOQUE = "convite-instalar-toque";
 
 function dispensadoRecentemente(): boolean {
   try {
@@ -42,10 +43,36 @@ export function ConviteInstalar() {
   useEffect(() => {
     if (dispensadoRecentemente()) return;
     setIos(eIOSNoNavegador());
-    // Espera a pessoa ver a página antes de oferecer o app.
-    const id = window.setTimeout(() => setVisivel(true), 2500);
+    // Na página inicial o convite aparece logo; nas outras, depois de a
+    // pessoa ver a página.
+    const id = window.setTimeout(() => setVisivel(true), pathname === "/" ? 600 : 2500);
     return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Na página inicial, o primeiro toque na tela já abre a instalação do
+  // navegador. Instalar sozinho, sem nenhum toque, nenhum navegador permite:
+  // o pedido precisa vir de um gesto da pessoa. Só uma vez por visita.
+  useEffect(() => {
+    if (pathname !== "/" || !canInstall || isInstalled || dispensadoRecentemente()) return;
+    try {
+      if (sessionStorage.getItem(CHAVE_TOQUE)) return;
+    } catch {
+      // Sem armazenamento: segue, o próprio evento só pode ser usado uma vez.
+    }
+    const aoTocar = async () => {
+      try {
+        sessionStorage.setItem(CHAVE_TOQUE, "1");
+      } catch {
+        // ignora
+      }
+      const ok = await triggerInstall();
+      if (!ok) dispensar();
+    };
+    window.addEventListener("pointerup", aoTocar, { once: true });
+    return () => window.removeEventListener("pointerup", aoTocar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, canInstall, isInstalled]);
 
   // A sala de jogos tem o próprio app e a TV não é celular.
   if (pathname.startsWith("/sala-de-jogos") || pathname.startsWith("/tv")) return null;
