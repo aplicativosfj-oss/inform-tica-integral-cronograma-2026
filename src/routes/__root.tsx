@@ -16,6 +16,8 @@ import { AuthProvider } from "../lib/auth-store";
 import { ConfirmProvider } from "../lib/confirm-store";
 import { JovemPanRadioProvider } from "../lib/jovem-pan-radio-store";
 import { ThemeProvider } from "../lib/theme-store";
+import { BarraInferior } from "../components/mobile/barra-inferior";
+import { ConviteInstalar } from "../components/mobile/convite-instalar";
 import { Toaster } from "../components/ui/sonner";
 import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
@@ -98,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     return {
       meta: [
         { charSet: "utf-8" },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
         { title: "Informática Dr. Eiraldo · Dr. Eiraldo Carneiro de França" },
         {
           name: "description",
@@ -235,7 +237,10 @@ function RootComponent() {
               <JovemPanRadioProvider>
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                 <Outlet />
-                <Toaster />
+                <BarraInferior />
+                <ConviteInstalar />
+                {/* No celular, os avisos sobem acima da barra inferior. */}
+                <Toaster mobileOffset={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))" }} />
                 {PROGRAMACAO_ATIVA ? <AvisoAulaEmBreve /> : null}
                 <AlunoSessaoGuard />
               </JovemPanRadioProvider>

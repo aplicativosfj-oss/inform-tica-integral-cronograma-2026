@@ -352,10 +352,12 @@ export function NavBar() {
             <NavLink to="/aluno" label="Área do Aluno" Icone={GraduationCap} />
             <MaisLinks />
           </div>
-          <span className="hidden lg:contents">
-            <HeaderRadioPlayer />
+          {/* O rádio aparece também no celular (em versão compacta); o contador
+              de quem está online cede o lugar a ele nas telas pequenas. */}
+          <HeaderRadioPlayer />
+          <span className="hidden sm:contents">
+            <PresencaOnline />
           </span>
-          <PresencaOnline />
           <ThemeToggle />
           {isReady && isAuthenticated ? (
             <>
