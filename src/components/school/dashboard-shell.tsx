@@ -101,8 +101,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       <div className="relative z-10">
         <NavBar />
         <Protected>
-          <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
-            <aside className="lg:w-56 lg:shrink-0">
+          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:gap-0">
+            <aside className="lg:w-60 lg:shrink-0 lg:border-r lg:border-border/70 lg:pr-5">
               <nav className="flex gap-1 overflow-x-auto lg:flex-col lg:gap-4 lg:overflow-visible">
                 {NAV_GROUPS.map((group, groupIndex) => (
                   <div key={group.label ?? groupIndex} className="flex gap-1 lg:flex-col lg:gap-1">
@@ -140,7 +140,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 ))}
               </nav>
             </aside>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 lg:pl-8">
               {email ? (
                 <SessaoAtiva
                   nome={email}

@@ -73,11 +73,7 @@ function LaboratorioPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="marcar">
-            {/* Tudo numa janela só: a lista de alunos rola por dentro. */}
-            <ControleLaboratorio
-              dados={dados}
-              className="lg:h-[calc(100svh-12.5rem)] lg:min-h-[28rem]"
-            />
+            <ControleLaboratorio dados={dados} />
           </TabsContent>
           <TabsContent value="aovivo">
             <PainelLaboratorioAgora dados={dados} logado />

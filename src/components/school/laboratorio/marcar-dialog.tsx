@@ -41,11 +41,7 @@ export function MarcarAlunosCartao({ dados }: { dados: DadosLab }) {
               Se alguém já foi nesta semana ou neste mês, a gente avisa.
             </DialogDescription>
           </DialogHeader>
-          <ControleLaboratorio
-            dados={dados}
-            aoMarcar={() => setAberto(false)}
-            className="lg:h-[72svh]"
-          />
+          <ControleLaboratorio dados={dados} aoMarcar={() => setAberto(false)} />
         </DialogContent>
       </Dialog>
     </>

@@ -1,5 +1,7 @@
 import {
   AlarmClock,
+  ArrowLeft,
+  ArrowRight,
   AlertTriangle,
   CheckCircle2,
   Clock3,
@@ -114,6 +116,8 @@ export function ControleLaboratorio({
   const [ordem, setOrdem] = useState<"prioridade" | "az">("prioridade");
   const [liberar, setLiberar] = useState(false);
   const [ficha, setFicha] = useState<{ turmaId: string; alunoId: string } | null>(null);
+  /** Página 1: escolher os alunos. Página 2: confirmar e definir o tempo. */
+  const [passo, setPasso] = useState<1 | 2>(1);
 
   const hoje = hojeNaEscola();
   const agora = Date.now();
@@ -359,6 +363,7 @@ export function ControleLaboratorio({
       );
       setEscolhidos(new Set());
       setAvisos(null);
+      setPasso(1);
       await dados.recarregar();
       aoMarcar?.();
     } catch (e) {
@@ -391,524 +396,639 @@ export function ControleLaboratorio({
     ? turma.alunos.filter((a) => situacoes.get(a.id)!.naSemana).length
     : 0;
 
+  /** Escolhidos agrupados por turma, para a página de confirmação. */
+  const porTurma = turmas
+    .map((t) => ({ t, alunos: t.alunos.filter((a) => escolhidos.has(a.id)) }))
+    .filter((x) => x.alunos.length > 0);
+
   return (
-    <div className={cn("grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1fr)_21rem]", className)}>
-      {/* ─────────── Coluna da esquerda: turmas e alunos ─────────── */}
-      <section aria-label="Turmas e alunos" className="flex min-h-0 flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Turmas">
-          {turmas.map((t) => {
-            const cor = serieClasses(serieIndexPorNumero(t.serie));
-            const ativa = t.id === idAtual;
-            const nEsc = t.alunos.filter((a) => escolhidos.has(a.id)).length;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                aria-selected={ativa}
-                onClick={() => escolherTurma(t.id)}
-                className={cn(
-                  "relative flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold transition",
-                  cor.bg,
-                  cor.text,
-                  ativa
-                    ? "scale-105 shadow-lg ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                    : "opacity-55 hover:opacity-100",
-                  nEsc > 0 && !ativa && "opacity-100 ring-2 ring-emerald-500",
-                )}
-              >
-                {rotuloTurma(t.serie, t.letra)}
-                <span className="rounded-md bg-black/20 px-1.5 text-[11px] font-semibold tabular-nums">
-                  {t.alunos.length}
-                </span>
-                {nEsc > 0 ? (
-                  <span className="absolute -right-1.5 -top-1.5 flex items-center gap-0.5 rounded-full bg-emerald-600 px-1.5 text-[10px] font-extrabold text-white shadow">
-                    <CheckCircle2 className="size-3" aria-hidden /> {nEsc}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            aria-pressed={mista}
-            onClick={alternarMista}
-            className={cn(
-              "group relative ml-1 flex items-center gap-2 overflow-hidden rounded-full px-4 py-1.5 text-sm font-bold text-white shadow-md transition hover:scale-[1.03] active:scale-95",
-              "bg-gradient-to-r from-violet-600 via-primary to-emerald-500",
-              mista && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
-            )}
-          >
-            <span
-              aria-hidden
-              className="lab-varredura pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            />
-            <Shuffle
-              className={cn(
-                "relative size-4 transition-transform duration-500",
-                mista && "rotate-180",
-              )}
-              aria-hidden
-            />
-            <span className="relative">{mista ? "Aula mista · sair" : "Aula mista"}</span>
-          </button>
-        </div>
-
-        {/* resumo da turma que está na tela */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border bg-card/60 px-3 py-2 text-sm">
-          {busca.trim() ? (
-            <strong>{lista.length} resultado(s) na escola toda</strong>
-          ) : turma ? (
-            <>
-              <strong className="font-heading text-base">
-                {rotuloTurma(turma.serie, turma.letra)}
-              </strong>
-              <span className="flex items-center gap-1 text-muted-foreground">
-                <Users2 className="size-4" aria-hidden />
-                <strong className="text-foreground">{turma.alunos.length}</strong> alunos
-              </span>
-              <span className="text-muted-foreground">
-                <strong className="text-amber-600 dark:text-amber-400">{doTurmaSemana}</strong> já
-                foram na semana
-              </span>
-              <span className="text-muted-foreground">
-                <strong className="text-rose-600 dark:text-rose-400">{doTurmaFila}</strong> na fila
-                de prioridade
-              </span>
-              <span className="text-xs text-muted-foreground">· {turma.professorRegente}</span>
-            </>
-          ) : (
-            <span className="text-muted-foreground">Nenhuma turma cadastrada.</span>
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-44 flex-1 sm:max-w-xs">
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
-            />
-            <Input
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder={mista ? "Buscar em qualquer turma…" : "Buscar nesta turma…"}
-              aria-label="Buscar aluno"
-              className="h-9 pl-8"
-            />
-          </div>
-          <div className="flex items-center gap-2 rounded-lg border bg-card/60 px-2.5 py-1.5">
-            <Switch id="lab-liberar" checked={liberar} onCheckedChange={setLiberar} />
-            <Label htmlFor="lab-liberar" className="text-xs">
-              Liberar quem já foi na semana
-            </Label>
-          </div>
-          <div className="ml-auto flex gap-1 rounded-lg border bg-card/60 p-0.5 text-xs font-semibold">
-            {(
-              [
-                ["prioridade", "Fila de prioridade"],
-                ["az", "A–Z"],
-              ] as const
-            ).map(([id, rotulo]) => (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={ordem === id}
-                onClick={() => setOrdem(id)}
-                className={cn(
-                  "rounded-md px-2.5 py-1 transition",
-                  ordem === id ? "bg-primary text-primary-foreground" : "hover:bg-muted",
-                )}
-              >
-                {rotulo}
-              </button>
-            ))}
-          </div>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={marcarFiltrados}
-            disabled={mista && filtro === "todos" && !busca.trim()}
-          >
-            {filtro === "todos" ? "Marcar todos" : "Marcar os filtrados"}
-          </Button>
-        </div>
-
-        <div
-          className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1"
-          role="group"
-          aria-label="Filtros rápidos"
-        >
-          {FILTROS.map(({ id, rotulo }) => (
+    <div className={cn("space-y-4", className)}>
+      {/* ─────────── Passos ─────────── */}
+      <ol className="flex items-center gap-2 text-sm font-semibold" aria-label="Passos">
+        {(
+          [
+            [1, "Escolher os alunos"],
+            [2, "Confirmar e definir o tempo"],
+          ] as const
+        ).map(([n, rotulo], i) => (
+          <li key={n} className="flex items-center gap-2">
+            {i > 0 ? <span aria-hidden className="h-px w-8 bg-border" /> : null}
             <button
-              key={id}
               type="button"
-              aria-pressed={filtro === id}
-              onClick={() => setFiltro(id)}
+              aria-current={passo === n ? "step" : undefined}
+              disabled={n === 2 && escolhidos.size === 0}
+              onClick={() => setPasso(n)}
               className={cn(
-                "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-semibold transition",
-                filtro === id
+                "flex items-center gap-2 rounded-full border px-3 py-1.5 transition disabled:opacity-40",
+                passo === n
                   ? "border-primary bg-primary text-primary-foreground shadow"
-                  : "bg-card/60 hover:bg-muted",
+                  : "bg-card hover:bg-muted",
               )}
             >
-              {id === "prioridade" ? <AlarmClock className="size-3.5" aria-hidden /> : null}
-              {id === "repetiu" ? <Flame className="size-3.5" aria-hidden /> : null}
-              {rotulo}
-              <span className="rounded-full bg-black/15 px-1.5 tabular-nums dark:bg-white/15">
-                {contagem[id]}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-xl pr-1 max-lg:max-h-[55svh]">
-          {visiveis.length === 0 ? (
-            <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-              {lista.length === 0
-                ? "Esta turma ainda não tem alunos cadastrados."
-                : "Ninguém se encaixa neste filtro."}
-            </p>
-          ) : (
-            <ul className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-              {visiveis.map(({ a, t }) => {
-                const sit = situacoes.get(a.id)!;
-                const marcado = escolhidos.has(a.id);
-                const ocupado = noLabAgora.has(a.id);
-                const travadoSemana = sit.naSemana && !liberar;
-                const noTeto = !marcado && noLimite;
-                const bloqueado = Boolean(a.impedido) || ocupado || travadoSemana || noTeto;
-                const fila = posicaoFila.get(a.id);
-                const ring = sit.repetiuSemana
-                  ? "ring-red-500"
-                  : sit.naSemana
-                    ? "ring-amber-500"
-                    : sit.prioridade
-                      ? "ring-rose-400"
-                      : "ring-emerald-500/60";
-                return (
-                  <li key={a.id} className="relative">
-                    <button
-                      type="button"
-                      aria-pressed={marcado}
-                      disabled={bloqueado}
-                      onClick={() => alternar(a.id)}
-                      title={
-                        travadoSemana
-                          ? "Já foi esta semana — ligue “Liberar quem já foi na semana” para escolher"
-                          : noTeto
-                            ? `Limite de ${LIMITE_ALUNOS_LAB} alunos por vez`
-                            : undefined
-                      }
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-xl border p-2.5 pr-9 text-left transition",
-                        marcado
-                          ? "border-primary bg-primary text-primary-foreground shadow-md"
-                          : "bg-card hover:-translate-y-0.5 hover:shadow-md",
-                        !marcado &&
-                          sit.prioridade &&
-                          "border-rose-400/60 bg-gradient-to-r from-rose-500/10 to-transparent",
-                        travadoSemana &&
-                          "cursor-not-allowed border-dashed opacity-50 grayscale [background-image:repeating-linear-gradient(135deg,transparent_0_7px,rgb(120_120_120/0.12)_7px_14px)]",
-                        bloqueado && !travadoSemana && "cursor-not-allowed opacity-45",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "relative flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-extrabold text-foreground ring-2",
-                          marcado ? "bg-white/25 text-primary-foreground ring-white/60" : ring,
-                        )}
-                      >
-                        {marcado ? (
-                          <CheckCircle2 className="size-5" aria-hidden />
-                        ) : travadoSemana ? (
-                          <Lock className="size-4" aria-hidden />
-                        ) : (
-                          iniciais(a.nome)
-                        )}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-1.5">
-                          <span className="truncate text-sm font-semibold">{a.nome}</span>
-                          {fila && fila <= 10 && !marcado ? (
-                            <span
-                              className="shrink-0 rounded-md bg-rose-600 px-1 text-[10px] font-extrabold text-white"
-                              title={`${fila}º na fila de prioridade`}
-                            >
-                              {fila}º
-                            </span>
-                          ) : null}
-                        </span>
-                        <span
-                          className={cn(
-                            "mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px]",
-                            marcado ? "text-primary-foreground/85" : "text-muted-foreground",
-                          )}
-                        >
-                          {mista || busca.trim() ? (
-                            <strong>{rotuloTurma(t.serie, t.letra)}</strong>
-                          ) : null}
-                          {a.impedido ? (
-                            <span>suspenso(a)</span>
-                          ) : ocupado ? (
-                            <span className="font-semibold text-emerald-500">
-                              no laboratório agora
-                            </span>
-                          ) : sit.hoje ? (
-                            <span>marcado para hoje</span>
-                          ) : sit.repetiuSemana ? (
-                            <span className="font-semibold text-red-500">
-                              foi {sit.idasSemana}× na semana
-                            </span>
-                          ) : sit.naSemana ? (
-                            <span className="font-semibold text-amber-600 dark:text-amber-400">
-                              foi na semana
-                              {sit.ultimaIda ? ` (${dataCurta(sit.ultimaIda)})` : ""}
-                            </span>
-                          ) : sit.diasSemIr === null ? (
-                            <span className="font-semibold text-rose-600 dark:text-rose-400">
-                              não vai há mais de {JANELA_HISTORICO_DIAS} dias
-                            </span>
-                          ) : (
-                            <span
-                              className={cn(
-                                sit.prioridade && "font-semibold text-rose-600 dark:text-rose-400",
-                              )}
-                            >
-                              {sit.diasSemIr === 0 ? "foi hoje" : `há ${sit.diasSemIr} dias sem ir`}
-                            </span>
-                          )}
-                          <span>· mês {sit.mes}×</span>
-                          {sit.acima ? (
-                            <span className="font-semibold text-red-500">· acima da média</span>
-                          ) : null}
-                        </span>
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Abrir a ficha de ${a.nome}`}
-                      title="Abrir a ficha do aluno"
-                      onClick={() => setFicha({ turmaId: t.id, alunoId: a.id })}
-                      className="absolute right-1.5 top-1.5 rounded-md p-1 text-muted-foreground transition hover:bg-muted hover:text-primary"
-                    >
-                      <IdCard className="size-4" aria-hidden />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      </section>
-
-      {/* ─────────── Coluna da direita: vagas, escolhidos, tempo ─────────── */}
-      <aside
-        aria-label="Resumo da marcação"
-        className="flex min-h-0 flex-col gap-3 overflow-y-auto rounded-2xl border bg-gradient-to-b from-card to-muted/30 p-4 shadow-sm"
-      >
-        <div>
-          <p className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Vagas no laboratório
-            <span className="tabular-nums text-foreground">
-              {Math.min(escolhidos.size, vagas) + ocupadosNaJanela}/{LIMITE_ALUNOS_LAB}
-            </span>
-          </p>
-          <div className="mt-2 grid grid-cols-10 gap-1" aria-hidden>
-            {Array.from({ length: LIMITE_ALUNOS_LAB }, (_, i) => (
               <span
-                key={i}
                 className={cn(
-                  "h-2.5 rounded-full transition-colors duration-300",
-                  i < ocupadosNaJanela
-                    ? "bg-slate-500"
-                    : i < ocupadosNaJanela + escolhidos.size
-                      ? passouDoLimite
-                        ? "bg-red-500"
-                        : "bg-primary"
-                      : "bg-muted",
+                  "flex size-5 items-center justify-center rounded-full text-xs",
+                  passo === n ? "bg-white/25" : "bg-muted",
                 )}
-              />
-            ))}
-          </div>
-          <p
-            className={cn(
-              "mt-1.5 text-[11px] transition-colors",
-              noLimite ? "font-medium text-amber-600 dark:text-amber-400" : "text-muted-foreground",
-            )}
-            role={noLimite ? "status" : undefined}
-          >
-            {ocupadosNaJanela > 0 ? `${ocupadosNaJanela} já no laboratório nesse horário · ` : ""}
-            {noLimite
-              ? `limite de ${LIMITE_ALUNOS_LAB} por vez atingido; as demais escolhas ficam desativadas.`
-              : `${vagas - escolhidos.size} vaga(s) livre(s).`}
-          </p>
-        </div>
+              >
+                {n}
+              </span>
+              {rotulo}
+            </button>
+          </li>
+        ))}
+      </ol>
 
-        <div className="min-h-24 flex-1 overflow-y-auto">
-          <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Escolhidos ({escolhidos.size})
-          </p>
-          {selecionados.length === 0 ? (
-            <p className="rounded-lg border border-dashed p-3 text-center text-xs text-muted-foreground">
-              Toque nos alunos ao lado. Quem está há mais tempo sem ir aparece primeiro.
-            </p>
-          ) : (
-            <ul className="space-y-1">
-              {selecionados.map(({ a, t }) => (
-                <li
-                  key={a.id}
-                  className="flex items-center justify-between gap-2 rounded-lg border bg-background/70 py-1 pl-2 pr-1 text-xs"
-                >
-                  <span className="truncate">
-                    <strong>{rotuloTurma(t.serie, t.letra)}</strong> {a.nome}
-                  </span>
+      {passo === 1 ? (
+        <>
+          {/* ─────────── Página 1: turmas e alunos ─────────── */}
+          <section aria-label="Turmas e alunos" className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Turmas">
+              {turmas.map((t) => {
+                const cor = serieClasses(serieIndexPorNumero(t.serie));
+                const ativa = t.id === idAtual;
+                const nEsc = t.alunos.filter((a) => escolhidos.has(a.id)).length;
+                return (
                   <button
+                    key={t.id}
                     type="button"
-                    aria-label={`Tirar ${a.nome}`}
-                    onClick={() => alternar(a.id)}
-                    className="rounded-md p-1 hover:bg-muted"
-                  >
-                    <X className="size-3.5" aria-hidden />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {selecionados.length > 0 ? (
-            <button
-              type="button"
-              onClick={() => setEscolhidos(new Set())}
-              className="mt-1.5 text-xs text-muted-foreground underline-offset-4 hover:underline"
-            >
-              Limpar tudo
-            </button>
-          ) : null}
-        </div>
-
-        <div className="space-y-2.5 border-t pt-3">
-          <div className="grid grid-cols-2 gap-1 rounded-lg border bg-card/60 p-0.5 text-xs font-semibold">
-            <button
-              type="button"
-              aria-pressed={modo === "duracao"}
-              onClick={() => setModo("duracao")}
-              className={cn(
-                "rounded-md py-1.5 transition",
-                modo === "duracao" ? "bg-primary text-primary-foreground" : "hover:bg-muted",
-              )}
-            >
-              Por minutos
-            </button>
-            <button
-              type="button"
-              aria-pressed={modo === "horario"}
-              onClick={() => {
-                setModo("horario");
-                setInicioManual(horaAgoraNaEscola());
-                setFimManual(horaNaEscola(somarMinutos(new Date(), minutos)));
-              }}
-              className={cn(
-                "rounded-md py-1.5 transition",
-                modo === "horario" ? "bg-primary text-primary-foreground" : "hover:bg-muted",
-              )}
-            >
-              Escolher horário
-            </button>
-          </div>
-
-          {modo === "duracao" ? (
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-1.5">
-                {DURACOES.map((d) => (
-                  <button
-                    key={d}
-                    type="button"
-                    aria-pressed={minutos === d}
-                    onClick={() => setMinutos(d)}
+                    role="tab"
+                    aria-selected={ativa}
+                    onClick={() => escolherTurma(t.id)}
                     className={cn(
-                      "rounded-full border px-2.5 py-1 text-xs font-semibold tabular-nums transition",
-                      minutos === d
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "bg-card hover:bg-muted",
+                      "relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-bold transition",
+                      cor.bg,
+                      cor.text,
+                      ativa
+                        ? "scale-105 shadow-lg ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                        : "opacity-55 hover:opacity-100",
+                      nEsc > 0 && !ativa && "opacity-100 ring-2 ring-emerald-500",
                     )}
                   >
-                    {d} min
+                    {rotuloTurma(t.serie, t.letra)}
+                    <span className="rounded-md bg-black/20 px-1.5 text-[11px] font-semibold tabular-nums">
+                      {t.alunos.length}
+                    </span>
+                    {nEsc > 0 ? (
+                      <span className="absolute -right-1.5 -top-1.5 flex items-center gap-0.5 rounded-full bg-emerald-600 px-1.5 text-[10px] font-extrabold text-white shadow">
+                        <CheckCircle2 className="size-3" aria-hidden /> {nEsc}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                aria-pressed={mista}
+                onClick={alternarMista}
+                className={cn(
+                  "group relative ml-1 flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition hover:scale-[1.03] active:scale-95",
+                  "bg-gradient-to-r from-violet-600 via-primary to-emerald-500",
+                  mista && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
+                )}
+              >
+                <span
+                  aria-hidden
+                  className="lab-varredura pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                />
+                <Shuffle
+                  className={cn(
+                    "relative size-4 transition-transform duration-500",
+                    mista && "rotate-180",
+                  )}
+                  aria-hidden
+                />
+                <span className="relative">{mista ? "Aula mista · sair" : "Aula mista"}</span>
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-xl border bg-card/60 px-4 py-3 text-sm">
+              {busca.trim() ? (
+                <strong>{lista.length} resultado(s) na escola toda</strong>
+              ) : turma ? (
+                <>
+                  <strong className="font-heading text-lg">
+                    {rotuloTurma(turma.serie, turma.letra)}
+                  </strong>
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <Users2 className="size-4" aria-hidden />
+                    <strong className="text-foreground">{turma.alunos.length}</strong> alunos
+                  </span>
+                  <span className="text-muted-foreground">
+                    <strong className="text-amber-600 dark:text-amber-400">{doTurmaSemana}</strong>{" "}
+                    já foram na semana
+                  </span>
+                  <span className="text-muted-foreground">
+                    <strong className="text-rose-600 dark:text-rose-400">{doTurmaFila}</strong> na
+                    fila de prioridade
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Professor(a) {turma.professorRegente}
+                  </span>
+                </>
+              ) : (
+                <span className="text-muted-foreground">Nenhuma turma cadastrada.</span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative min-w-52 flex-1 sm:max-w-sm">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+                <Input
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                  placeholder={mista ? "Buscar em qualquer turma…" : "Buscar nesta turma…"}
+                  aria-label="Buscar aluno"
+                  className="h-10 pl-9"
+                />
+              </div>
+              <div className="flex items-center gap-2.5 rounded-lg border bg-card/60 px-3 py-2">
+                <Switch id="lab-liberar" checked={liberar} onCheckedChange={setLiberar} />
+                <Label htmlFor="lab-liberar" className="text-xs">
+                  Liberar quem já foi na semana
+                </Label>
+              </div>
+              <div className="flex gap-1 rounded-lg border bg-card/60 p-1 text-xs font-semibold">
+                {(
+                  [
+                    ["prioridade", "Fila de prioridade"],
+                    ["az", "A–Z"],
+                  ] as const
+                ).map(([id, rotulo]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    aria-pressed={ordem === id}
+                    onClick={() => setOrdem(id)}
+                    className={cn(
+                      "rounded-md px-3 py-1.5 transition",
+                      ordem === id ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+                    )}
+                  >
+                    {rotulo}
                   </button>
                 ))}
-                <Input
-                  aria-label="Outra duração em minutos"
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={240}
-                  value={minutos}
-                  onChange={(e) => setMinutos(Number(e.target.value))}
-                  className="h-7 w-16 px-2 text-xs"
-                />
               </div>
-              {fimDoGrupoAtual && fimDoGrupoAtual.getTime() > Date.now() ? (
-                <div className="flex items-center gap-2">
-                  <Switch id="lab-apos" checked={aposAtual} onCheckedChange={setAposAtual} />
-                  <Label htmlFor="lab-apos" className="text-xs">
-                    Entrar só quando o grupo de agora sair ({horaNaEscola(fimDoGrupoAtual)})
-                  </Label>
-                </div>
-              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={marcarFiltrados}
+                disabled={mista && filtro === "todos" && !busca.trim()}
+              >
+                {filtro === "todos" ? "Marcar todos" : "Marcar os filtrados"}
+              </Button>
             </div>
-          ) : (
-            <div className="flex items-end gap-2">
-              <div className="space-y-1">
-                <Label htmlFor="lab-ini" className="text-[11px] text-muted-foreground">
-                  Início
-                </Label>
-                <Input
-                  id="lab-ini"
-                  type="time"
-                  value={inicioManual}
-                  onChange={(e) => setInicioManual(e.target.value)}
-                  className="h-8 w-28"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="lab-fim" className="text-[11px] text-muted-foreground">
-                  Fim
-                </Label>
-                <Input
-                  id="lab-fim"
-                  type="time"
-                  value={fimManual}
-                  onChange={(e) => setFimManual(e.target.value)}
-                  className="h-8 w-28"
-                />
-              </div>
-            </div>
-          )}
 
-          <p className="flex items-center gap-2 text-xs">
-            <Clock3 className="size-4 shrink-0 text-primary" aria-hidden />
-            {typeof janela === "string" ? (
-              <span className="text-muted-foreground">{janela}</span>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Filtros rápidos">
+              {FILTROS.map(({ id, rotulo }) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={filtro === id}
+                  onClick={() => setFiltro(id)}
+                  className={cn(
+                    "flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
+                    filtro === id
+                      ? "border-primary bg-primary text-primary-foreground shadow"
+                      : "bg-card/60 hover:bg-muted",
+                  )}
+                >
+                  {id === "prioridade" ? <AlarmClock className="size-3.5" aria-hidden /> : null}
+                  {id === "repetiu" ? <Flame className="size-3.5" aria-hidden /> : null}
+                  {rotulo}
+                  <span className="rounded-full bg-black/15 px-1.5 tabular-nums dark:bg-white/15">
+                    {contagem[id]}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {visiveis.length === 0 ? (
+              <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+                {lista.length === 0
+                  ? "Esta turma ainda não tem alunos cadastrados."
+                  : "Ninguém se encaixa neste filtro."}
+              </p>
             ) : (
-              <span>
-                Das <strong>{horaNaEscola(janela.inicio)}</strong> às{" "}
-                <strong>{horaNaEscola(janela.fim)}</strong>
-              </span>
+              <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {visiveis.map(({ a, t }) => {
+                  const sit = situacoes.get(a.id)!;
+                  const marcado = escolhidos.has(a.id);
+                  const ocupado = noLabAgora.has(a.id);
+                  const travadoSemana = sit.naSemana && !liberar;
+                  const noTeto = !marcado && noLimite;
+                  const bloqueado = Boolean(a.impedido) || ocupado || travadoSemana || noTeto;
+                  const fila = posicaoFila.get(a.id);
+                  const ring = sit.repetiuSemana
+                    ? "ring-red-500"
+                    : sit.naSemana
+                      ? "ring-amber-500"
+                      : sit.prioridade
+                        ? "ring-rose-400"
+                        : "ring-emerald-500/60";
+                  return (
+                    <li key={a.id} className="relative">
+                      <button
+                        type="button"
+                        aria-pressed={marcado}
+                        disabled={bloqueado}
+                        onClick={() => alternar(a.id)}
+                        title={
+                          travadoSemana
+                            ? "Já foi esta semana — ligue “Liberar quem já foi na semana” para escolher"
+                            : noTeto
+                              ? `Limite de ${LIMITE_ALUNOS_LAB} alunos por vez`
+                              : undefined
+                        }
+                        className={cn(
+                          "flex w-full items-center gap-3.5 rounded-xl border p-3.5 pr-10 text-left transition",
+                          marcado
+                            ? "border-primary bg-primary text-primary-foreground shadow-md"
+                            : "bg-card hover:-translate-y-0.5 hover:shadow-md",
+                          !marcado &&
+                            sit.prioridade &&
+                            "border-rose-400/60 bg-gradient-to-r from-rose-500/10 to-transparent",
+                          travadoSemana &&
+                            "cursor-not-allowed border-dashed opacity-50 grayscale [background-image:repeating-linear-gradient(135deg,transparent_0_7px,rgb(120_120_120/0.12)_7px_14px)]",
+                          bloqueado && !travadoSemana && "cursor-not-allowed opacity-45",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "relative flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-extrabold text-foreground ring-2",
+                            marcado ? "bg-white/25 text-primary-foreground ring-white/60" : ring,
+                          )}
+                        >
+                          {marcado ? (
+                            <CheckCircle2 className="size-5" aria-hidden />
+                          ) : travadoSemana ? (
+                            <Lock className="size-4" aria-hidden />
+                          ) : (
+                            iniciais(a.nome)
+                          )}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-1.5">
+                            <span className="truncate text-sm font-semibold">{a.nome}</span>
+                            {fila && fila <= 10 && !marcado ? (
+                              <span
+                                className="shrink-0 rounded-md bg-rose-600 px-1.5 text-[10px] font-extrabold text-white"
+                                title={`${fila}º na fila de prioridade`}
+                              >
+                                {fila}º
+                              </span>
+                            ) : null}
+                          </span>
+                          <span
+                            className={cn(
+                              "mt-1 flex flex-wrap items-center gap-x-1.5 text-xs",
+                              marcado ? "text-primary-foreground/85" : "text-muted-foreground",
+                            )}
+                          >
+                            {mista || busca.trim() ? (
+                              <strong>{rotuloTurma(t.serie, t.letra)}</strong>
+                            ) : null}
+                            {a.impedido ? (
+                              <span>suspenso(a)</span>
+                            ) : ocupado ? (
+                              <span className="font-semibold text-emerald-500">
+                                no laboratório agora
+                              </span>
+                            ) : sit.hoje ? (
+                              <span>marcado para hoje</span>
+                            ) : sit.repetiuSemana ? (
+                              <span className="font-semibold text-red-500">
+                                foi {sit.idasSemana}× na semana
+                              </span>
+                            ) : sit.naSemana ? (
+                              <span className="font-semibold text-amber-600 dark:text-amber-400">
+                                foi na semana
+                                {sit.ultimaIda ? ` (${dataCurta(sit.ultimaIda)})` : ""}
+                              </span>
+                            ) : sit.diasSemIr === null ? (
+                              <span className="font-semibold text-rose-600 dark:text-rose-400">
+                                não vai há mais de {JANELA_HISTORICO_DIAS} dias
+                              </span>
+                            ) : (
+                              <span
+                                className={cn(
+                                  sit.prioridade &&
+                                    "font-semibold text-rose-600 dark:text-rose-400",
+                                )}
+                              >
+                                {sit.diasSemIr === 0
+                                  ? "foi hoje"
+                                  : `há ${sit.diasSemIr} dias sem ir`}
+                              </span>
+                            )}
+                            <span>· mês {sit.mes}×</span>
+                            {sit.acima ? (
+                              <span className="font-semibold text-red-500">· acima da média</span>
+                            ) : null}
+                          </span>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Abrir a ficha de ${a.nome}`}
+                        title="Abrir a ficha do aluno"
+                        onClick={() => setFicha({ turmaId: t.id, alunoId: a.id })}
+                        className="absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-primary"
+                      >
+                        <IdCard className="size-4" aria-hidden />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
-          </p>
+          </section>
 
-          <Button
-            type="button"
-            size="lg"
-            className="w-full"
-            disabled={
-              salvando || escolhidos.size === 0 || typeof janela === "string" || passouDoLimite
-            }
-            onClick={confirmar}
-          >
-            <Play /> Mandar {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"}
-          </Button>
+          {/* barra fixa embaixo: vagas e botão para a página 2 */}
+          <div className="sticky bottom-3 z-20 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border bg-card/95 px-4 py-3 shadow-xl backdrop-blur">
+            <div className="min-w-40">
+              <p className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Vagas
+                <span className="tabular-nums text-foreground">
+                  {Math.min(escolhidos.size, vagas) + ocupadosNaJanela}/{LIMITE_ALUNOS_LAB}
+                </span>
+              </p>
+              <div className="mt-1.5 grid grid-cols-10 gap-1" aria-hidden>
+                {Array.from({ length: LIMITE_ALUNOS_LAB }, (_, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "h-2 rounded-full transition-colors duration-300",
+                      i < ocupadosNaJanela
+                        ? "bg-slate-500"
+                        : i < ocupadosNaJanela + escolhidos.size
+                          ? passouDoLimite
+                            ? "bg-red-500"
+                            : "bg-primary"
+                          : "bg-muted",
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+            <p
+              className={cn(
+                "min-w-0 flex-1 truncate text-xs",
+                noLimite
+                  ? "font-medium text-amber-600 dark:text-amber-400"
+                  : "text-muted-foreground",
+              )}
+              role={noLimite ? "status" : undefined}
+            >
+              {noLimite
+                ? `Limite de ${LIMITE_ALUNOS_LAB} alunos por vez atingido: as demais escolhas ficam desativadas.`
+                : escolhidos.size === 0
+                  ? "Toque nos alunos para escolher. Quem está há mais tempo sem ir aparece primeiro."
+                  : `${escolhidos.size} escolhido${escolhidos.size === 1 ? "" : "s"}: ${selecionados
+                      .slice(0, 3)
+                      .map(({ a }) => a.nome.split(" ")[0])
+                      .join(", ")}${selecionados.length > 3 ? "…" : ""}`}
+            </p>
+            <Button
+              type="button"
+              size="lg"
+              disabled={escolhidos.size === 0}
+              onClick={() => setPasso(2)}
+            >
+              Continuar <ArrowRight />
+            </Button>
+          </div>
+        </>
+      ) : (
+        /* ─────────── Página 2: confirmar e definir o tempo ─────────── */
+        <div className="grid gap-5 lg:grid-cols-2">
+          <section aria-label="Escolhidos" className="space-y-4 rounded-2xl border bg-card p-5">
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading text-lg font-bold">
+                {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} escolhido
+                {escolhidos.size === 1 ? "" : "s"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEscolhidos(new Set())}
+                className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+              >
+                Limpar tudo
+              </button>
+            </div>
+            <div>
+              <div className="grid grid-cols-10 gap-1.5" aria-hidden>
+                {Array.from({ length: LIMITE_ALUNOS_LAB }, (_, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "h-2.5 rounded-full transition-colors duration-300",
+                      i < ocupadosNaJanela
+                        ? "bg-slate-500"
+                        : i < ocupadosNaJanela + escolhidos.size
+                          ? passouDoLimite
+                            ? "bg-red-500"
+                            : "bg-primary"
+                          : "bg-muted",
+                    )}
+                  />
+                ))}
+              </div>
+              <p
+                className={cn(
+                  "mt-1.5 text-xs",
+                  passouDoLimite
+                    ? "font-medium text-red-600 dark:text-red-400"
+                    : "text-muted-foreground",
+                )}
+                role={passouDoLimite ? "alert" : undefined}
+              >
+                {ocupadosNaJanela > 0
+                  ? `${ocupadosNaJanela} já no laboratório nesse horário · `
+                  : ""}
+                {passouDoLimite
+                  ? `passou do limite de ${LIMITE_ALUNOS_LAB}: tire ${escolhidos.size - vagas} aluno(s) para continuar.`
+                  : `${vagas - escolhidos.size} vaga(s) livre(s) de ${LIMITE_ALUNOS_LAB}.`}
+              </p>
+            </div>
+            {porTurma.map(({ t, alunos }) => {
+              const cor = serieClasses(serieIndexPorNumero(t.serie));
+              return (
+                <div key={t.id} className="space-y-1.5">
+                  <p className="flex items-center gap-2 text-sm font-semibold">
+                    <span
+                      className={cn(
+                        "rounded-md px-2 py-0.5 text-xs font-extrabold",
+                        cor.bg,
+                        cor.text,
+                      )}
+                    >
+                      {rotuloTurma(t.serie, t.letra)}
+                    </span>
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {t.professorRegente} · {alunos.length}
+                    </span>
+                  </p>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {alunos.map((a) => (
+                      <li
+                        key={a.id}
+                        className="flex items-center gap-1 rounded-full border bg-background py-1 pl-3 pr-1.5 text-sm"
+                      >
+                        {a.nome}
+                        <button
+                          type="button"
+                          aria-label={`Tirar ${a.nome}`}
+                          onClick={() => alternar(a.id)}
+                          className="rounded-full p-1 hover:bg-muted"
+                        >
+                          <X className="size-3.5" aria-hidden />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </section>
+
+          <section aria-label="Tempo" className="space-y-5 rounded-2xl border bg-card p-5">
+            <h3 className="font-heading text-lg font-bold">Quando e por quanto tempo?</h3>
+            <div className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-1 text-sm font-semibold">
+              <button
+                type="button"
+                aria-pressed={modo === "duracao"}
+                onClick={() => setModo("duracao")}
+                className={cn(
+                  "rounded-md py-2 transition",
+                  modo === "duracao" ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+                )}
+              >
+                Por minutos
+              </button>
+              <button
+                type="button"
+                aria-pressed={modo === "horario"}
+                onClick={() => {
+                  setModo("horario");
+                  setInicioManual(horaAgoraNaEscola());
+                  setFimManual(horaNaEscola(somarMinutos(new Date(), minutos)));
+                }}
+                className={cn(
+                  "rounded-md py-2 transition",
+                  modo === "horario" ? "bg-primary text-primary-foreground" : "hover:bg-muted",
+                )}
+              >
+                Escolher o horário
+              </button>
+            </div>
+
+            {modo === "duracao" ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  {DURACOES.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      aria-pressed={minutos === d}
+                      onClick={() => setMinutos(d)}
+                      className={cn(
+                        "rounded-full border px-4 py-2 text-sm font-semibold tabular-nums transition",
+                        minutos === d
+                          ? "border-primary bg-primary text-primary-foreground shadow"
+                          : "bg-card hover:bg-muted",
+                      )}
+                    >
+                      {d} min
+                    </button>
+                  ))}
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      aria-label="Outra duração em minutos"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={240}
+                      value={minutos}
+                      onChange={(e) => setMinutos(Number(e.target.value))}
+                      className="h-9 w-20"
+                    />
+                    <span className="text-xs text-muted-foreground">min</span>
+                  </div>
+                </div>
+                {fimDoGrupoAtual && fimDoGrupoAtual.getTime() > Date.now() ? (
+                  <div className="flex items-center gap-2.5">
+                    <Switch id="lab-apos" checked={aposAtual} onCheckedChange={setAposAtual} />
+                    <Label htmlFor="lab-apos" className="text-sm">
+                      Entrar só quando o grupo de agora sair ({horaNaEscola(fimDoGrupoAtual)})
+                    </Label>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="flex items-end gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="lab-ini" className="text-xs text-muted-foreground">
+                    Início
+                  </Label>
+                  <Input
+                    id="lab-ini"
+                    type="time"
+                    value={inicioManual}
+                    onChange={(e) => setInicioManual(e.target.value)}
+                    className="h-10 w-32"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="lab-fim" className="text-xs text-muted-foreground">
+                    Fim
+                  </Label>
+                  <Input
+                    id="lab-fim"
+                    type="time"
+                    value={fimManual}
+                    onChange={(e) => setFimManual(e.target.value)}
+                    className="h-10 w-32"
+                  />
+                </div>
+              </div>
+            )}
+
+            <p className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2.5 text-sm">
+              <Clock3 className="size-4 shrink-0 text-primary" aria-hidden />
+              {typeof janela === "string" ? (
+                <span className="text-muted-foreground">{janela}</span>
+              ) : (
+                <span>
+                  Começa às <strong>{horaNaEscola(janela.inicio)}</strong> e termina às{" "}
+                  <strong>{horaNaEscola(janela.fim)}</strong>
+                </span>
+              )}
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" size="lg" onClick={() => setPasso(1)}>
+                <ArrowLeft /> Voltar e escolher
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                className="flex-1"
+                disabled={
+                  salvando || escolhidos.size === 0 || typeof janela === "string" || passouDoLimite
+                }
+                onClick={confirmar}
+              >
+                <Play /> Mandar {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} para o
+                laboratório
+              </Button>
+            </div>
+          </section>
         </div>
-      </aside>
+      )}
 
       {ficha ? <FichaAluno {...ficha} aberto aoFechar={() => setFicha(null)} /> : null}
 
