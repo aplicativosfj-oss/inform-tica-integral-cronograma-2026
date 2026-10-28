@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { imagemCompartilhar } from "@/lib/compartilhar";
+import { metaCompartilhar } from "@/lib/compartilhar";
 import { CalendarDays, ClipboardList, GraduationCap, UserCheck, UserX, Users2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -34,13 +34,13 @@ export const Route = createFileRoute("/coordenacao")({
   component: CoordenacaoPage,
   head: () => ({
     meta: [
-      ...imagemCompartilhar("/og/secao-coordenacao.jpg", "Coordenação"),
-      { title: "Coordenação · Uso do laboratório de informática" },
-      {
-        name: "description",
-        content:
+      ...metaCompartilhar({
+        titulo: "Coordenação · Uso do laboratório de informática",
+        descricao:
           "Como o laboratório de informática foi usado no mês: quem foi, por quanto tempo e quantas vezes, turma por turma.",
-      },
+        imagem: "/og/secao-coordenacao.jpg",
+        alt: "Coordenação: uso do laboratório de informática",
+      }),
       // A página fala de frequência de crianças. Mesmo sem nomes, ela não
       // tem por que aparecer em busca — some do índice junto com as demais
       // áreas internas do site.

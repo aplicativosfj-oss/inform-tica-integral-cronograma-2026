@@ -2,7 +2,8 @@
  * Metadados de compartilhamento (Open Graph e Twitter).
  *
  * Cada jogo, ferramenta e seção tem a sua própria imagem 1200x630 em
- * `public/og/`, gerada por `scripts/build-share-images.mjs`. Quando alguém
+ * `public/og/`: as das seções saem de `scripts/build-section-cards.mjs`, as de
+ * jogos e ferramentas de `scripts/build-share-images.mjs`. Quando alguém
  * manda o link no WhatsApp, no Facebook ou no Telegram, o cartão mostra aquele
  * item — e não a arte genérica da página inicial.
  *
@@ -11,7 +12,7 @@
  * que rodar o script e a arte mudar.
  */
 
-export const VERSAO_ARTE = 3;
+export const VERSAO_ARTE = 4;
 
 type Meta = Record<string, string>;
 

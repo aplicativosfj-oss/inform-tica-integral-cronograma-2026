@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { imagemCompartilhar } from "@/lib/compartilhar";
+import { metaCompartilhar } from "@/lib/compartilhar";
 import {
   BarChart3,
   BookOpenText,
@@ -45,15 +45,13 @@ export const Route = createFileRoute("/avaliacao")({
     abaValida(search["aba"]) ? { aba: search["aba"] } : {},
   component: AvaliacaoPublica,
   head: () => ({
-    meta: [
-      ...imagemCompartilhar("/og/secao-avaliacao.jpg", "Avaliação diagnóstica"),
-      { title: "Avaliações Diagnósticas · Escola Dr. Eiraldo" },
-      {
-        name: "description",
-        content:
-          "I e II Avaliação Diagnóstica 2026 da Escola Dr. Eiraldo Carneiro de França: quanto cada turma avançou, o que já foi aprendido e o que precisa ser retomado.",
-      },
-    ],
+    meta: metaCompartilhar({
+      titulo: "Avaliações Diagnósticas · Escola Dr. Eiraldo",
+      descricao:
+        "I e II Avaliação Diagnóstica 2026 da Escola Dr. Eiraldo Carneiro de França: quanto cada turma avançou, o que já foi aprendido e o que precisa ser retomado.",
+      imagem: "/og/secao-avaliacao.jpg",
+      alt: "Avaliações Diagnósticas 2026",
+    }),
   }),
 });
 

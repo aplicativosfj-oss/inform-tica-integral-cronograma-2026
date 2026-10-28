@@ -5,6 +5,7 @@ import { CreditoFerramenta } from "@/components/school/ferramentas/credito";
 import { InstalarSalaDeJogos } from "@/components/school/jogos/instalar-sala-de-jogos";
 import { SalaDeJogos } from "@/components/school/jogos/sala-de-jogos";
 import { PageBackground } from "@/components/school/page-background";
+import { metaCompartilhar } from "@/lib/compartilhar";
 import { useOnline } from "@/lib/use-online";
 
 /**
@@ -15,14 +16,13 @@ import { useOnline } from "@/lib/use-online";
 export const Route = createFileRoute("/sala-de-jogos")({
   component: SalaDeJogosApp,
   head: () => ({
-    meta: [
-      { title: "Sala de Jogos · Informática Dr. Eiraldo" },
-      {
-        name: "description",
-        content:
-          "Damas, dominó, jogo da velha, memória, quebra-cabeça, digitação e mais. Instale no celular ou no computador e jogue sem internet.",
-      },
-    ],
+    meta: metaCompartilhar({
+      titulo: "Sala de Jogos · Informática Dr. Eiraldo",
+      descricao:
+        "Damas, dominó, jogo da velha, memória, quebra-cabeça, digitação e mais. Instale no celular ou no computador e jogue sem internet.",
+      imagem: "/og/secao-sala-de-jogos.jpg",
+      alt: "Sala de Jogos: instale no celular e jogue sem internet",
+    }),
   }),
 });
 

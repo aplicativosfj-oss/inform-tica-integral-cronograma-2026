@@ -1,11 +1,11 @@
 /**
- * Gera uma imagem de compartilhamento (1200x630) para cada jogo, cada
- * ferramenta e cada seção do site — assim, quando alguém manda um link no
- * WhatsApp, o cartão mostra aquele jogo ou atividade, e não a arte genérica
- * da página inicial.
+ * Gera uma imagem de compartilhamento (1200x630) para cada jogo e cada
+ * ferramenta do site — assim, quando alguém manda um link no WhatsApp, o
+ * cartão mostra aquele jogo ou atividade, e não a arte genérica da página
+ * inicial. As artes das seções ficam em build-section-cards.mjs.
  *
  * Saída: public/og/<tipo>-<id>.jpg
- *   jogo-corrida.jpg, ferramenta-parque-letras.jpg, secao-infoteca.jpg …
+ *   jogo-corrida.jpg, ferramenta-parque-letras.jpg …
  *
  * Como funciona: painel azul/colorido à esquerda com a marca da escola, o
  * título e a descrição; à direita, a arte do item — foto (jogos com arte
@@ -213,17 +213,6 @@ const JOGOS = [
   { id: "quebra-cabeca", nome: "Quebra-cabeça", sub: "Arraste as peças até a figura aparecer inteira.", cores: ["#0f766e", "#14b8a6"], arte: arteQuebra, selo: "Sala de Jogos" },
 ];
 
-const SECOES = [
-  { id: "infoteca", nome: "Infoteca", sub: "Espaço lúdico e de apoio pedagógico digital: jogos e ferramentas educativas para alunos, professores e famílias.", icone: "Library" },
-  { id: "ferramentas", nome: "Ferramentas abertas", sub: "Ferramentas educativas de acesso livre: matemática, leitura, jogos e muito mais.", icone: "Wrench" },
-  { id: "sobre", nome: "Sobre o projeto", sub: "Conheça a Agenda de Informática e o professor que a criou.", icone: "Info" },
-  { id: "agenda", nome: "Agenda de aulas", sub: "Cronograma das aulas de informática por turma, dia e horário.", icone: "CalendarDays" },
-  { id: "evolucao", nome: "Evolução dos alunos", sub: "Acompanhe o avanço de cada turma e de cada aluno.", icone: "TrendingUp" },
-  { id: "descritores", nome: "Descritores de aprendizagem", sub: "Matriz de descritores para planejar e acompanhar a aprendizagem.", icone: "Target" },
-  { id: "avaliacao", nome: "Avaliação diagnóstica", sub: "Avaliação para conhecer o que cada aluno já sabe e onde precisa avançar.", icone: "ClipboardCheck" },
-  { id: "coordenacao", nome: "Coordenação", sub: "Visão da coordenação: turmas, frequência e indicadores.", icone: "Users" },
-  { id: "tv", nome: "Painel da TV", sub: "A aula ao vivo, com cronômetro e grupos, para exibir na televisão do laboratório.", icone: "Tv" },
-];
 
 /** Lê as ferramentas do registro (slug, título, descrição, categoria e ícone). */
 function lerFerramentas() {
@@ -333,10 +322,6 @@ async function cartao({ tipo, id, titulo, sub, tag, cores, foto, arte, icone, se
 let n = 0;
 for (const j of JOGOS) {
   await cartao({ tipo: "jogo", id: j.id, titulo: j.nome, sub: j.sub, tag: "JOGO", cores: j.cores, foto: j.foto, arte: j.arte, selo: j.selo, extra: j.extra });
-  n++;
-}
-for (const s of SECOES) {
-  await cartao({ tipo: "secao", id: s.id, titulo: s.nome, sub: s.sub, tag: "AGENDA DE INFORMÁTICA", cores: CATEGORIAS.Site, icone: s.icone });
   n++;
 }
 for (const f of lerFerramentas()) {

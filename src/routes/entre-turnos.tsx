@@ -13,7 +13,7 @@ export const Route = createFileRoute("/entre-turnos")({
       descricao:
         "Onde cada turma descansa, assiste a um filme ou brinca no intervalo do almoço, e quais monitores cuidam dela em cada dia da semana.",
       imagem: "/og/secao-entre-turnos.jpg",
-      alt: "Entre Turnos: sala de aula, sala de filme e sala de jogos",
+      alt: "Entre Turnos, das 11h às 13h: sala de aula, sala de filme e sala de jogos",
     }),
   }),
 });
