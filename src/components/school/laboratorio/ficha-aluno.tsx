@@ -30,7 +30,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
 import {
+  ROTULO_AUSENCIA,
   carregarHistoricoAluno,
+  carregarOcorrenciasAluno,
   carregarPresencasAluno,
   type PresencaAntiga,
   hojeNaEscola,
@@ -101,6 +103,7 @@ export function FichaAluno({
   const [motivo, setMotivo] = useState("");
   const [historico, setHistorico] = useState<SessaoLab[] | null>(null);
   const [erroHistorico, setErroHistorico] = useState<string | null>(null);
+  const [ocorrencias, setOcorrencias] = useState<SessaoLab[] | null>(null);
 
   useEffect(() => {
     if (!aberto || !aluno) return;
@@ -125,6 +128,10 @@ export function FichaAluno({
     carregarHistoricoAluno(alunoId)
       .then(setHistorico)
       .catch((e: Error) => setErroHistorico(e.message));
+    setOcorrencias(null);
+    carregarOcorrenciasAluno(turmaId, alunoId)
+      .then(setOcorrencias)
+      .catch(() => setOcorrencias([]));
     // Recarrega só ao abrir ou trocar de aluno, não a cada gravação.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aberto, alunoId]);
@@ -483,6 +490,44 @@ export function FichaAluno({
                   >
                     <Trash2 className="size-4" />
                   </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="space-y-3 rounded-xl border p-4">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <Ban className="size-4 text-red-600" aria-hidden /> Faltas e impedimentos
+            {ocorrencias && ocorrencias.length > 0 ? (
+              <Badge variant="secondary">{ocorrencias.length}</Badge>
+            ) : null}
+          </h3>
+          {ocorrencias === null ? (
+            <p className="text-sm text-muted-foreground">Carregando…</p>
+          ) : ocorrencias.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhuma falta ou impedimento registrado.
+            </p>
+          ) : (
+            <ul className="divide-y rounded-lg border">
+              {ocorrencias.map((o) => (
+                <li key={o.id} className="flex flex-wrap items-start gap-x-3 gap-y-1 p-2.5 text-sm">
+                  <span className="w-20 shrink-0 tabular-nums text-muted-foreground">
+                    {dataBR(o.data)}
+                  </span>
+                  <span
+                    className={
+                      o.ausencia === "nao_autorizado"
+                        ? "rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-300"
+                        : "rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-300"
+                    }
+                  >
+                    {o.ausencia ? ROTULO_AUSENCIA[o.ausencia] : ""}
+                  </span>
+                  <span className="min-w-0 flex-1 text-muted-foreground">
+                    {o.ausenciaMotivo || "Sem anotação"}
+                  </span>
                 </li>
               ))}
             </ul>

@@ -843,30 +843,51 @@ export function ControleLaboratorio({
                       >
                         <IdCard className="size-4" aria-hidden />
                       </button>
-                      <BotaoAusencia
-                        sessaoId={ausente?.id}
-                        semMarcacao={ausente?.semMarcacao ?? false}
-                        novo={{
-                          aluno: { id: a.id, nome: a.nome },
-                          turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
-                          criadoPor: email,
-                        }}
-                        nome={a.nome}
-                        ausencia={ausente?.ausencia ?? null}
-                        ausenciaMotivo={ausente?.ausenciaMotivo ?? null}
-                        aoMudar={() => {
-                          setEscolhidos((anterior) => {
-                            const novo = new Set(anterior);
-                            novo.delete(k);
-                            return novo;
-                          });
-                          void dados.recarregar();
-                        }}
-                        className={cn(
-                          "absolute bottom-2.5 right-2.5",
-                          marcado && !ausente && "text-white",
-                        )}
-                      />
+                      <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
+                        <BotaoAusencia
+                          modo="impedido"
+                          sessaoId={ausente?.id}
+                          semMarcacao={ausente?.semMarcacao ?? false}
+                          novo={{
+                            aluno: { id: a.id, nome: a.nome },
+                            turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
+                            criadoPor: email,
+                          }}
+                          nome={a.nome}
+                          ausencia={ausente?.ausencia ?? null}
+                          ausenciaMotivo={ausente?.ausenciaMotivo ?? null}
+                          aoMudar={() => {
+                            setEscolhidos((anterior) => {
+                              const novo = new Set(anterior);
+                              novo.delete(k);
+                              return novo;
+                            });
+                            void dados.recarregar();
+                          }}
+                          className={cn(marcado && !ausente && "text-white")}
+                        />
+                        <BotaoAusencia
+                          sessaoId={ausente?.id}
+                          semMarcacao={ausente?.semMarcacao ?? false}
+                          novo={{
+                            aluno: { id: a.id, nome: a.nome },
+                            turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
+                            criadoPor: email,
+                          }}
+                          nome={a.nome}
+                          ausencia={ausente?.ausencia ?? null}
+                          ausenciaMotivo={ausente?.ausenciaMotivo ?? null}
+                          aoMudar={() => {
+                            setEscolhidos((anterior) => {
+                              const novo = new Set(anterior);
+                              novo.delete(k);
+                              return novo;
+                            });
+                            void dados.recarregar();
+                          }}
+                          className={cn(marcado && !ausente && "text-white")}
+                        />
+                      </div>
                     </li>
                   );
                 })}

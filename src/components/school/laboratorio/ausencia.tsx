@@ -23,6 +23,13 @@ import {
 } from "@/lib/laboratorio";
 import { cn } from "@/lib/utils";
 
+const MOTIVOS_IMPEDIMENTO = [
+  "Não cumpriu regra da sala de aula",
+  "Comportamento na sala de informática",
+  "Comportamento em sala de aula",
+  "Atividade não entregue",
+];
+
 /**
  * Botão "Falta" de um aluno: registra que ele faltou ou que está impedido
  * (o professor não autorizou a ida naquele dia, com o motivo). Num aluno já
@@ -39,6 +46,7 @@ export function BotaoAusencia({
   ausenciaMotivo,
   aoMudar,
   soIcone = false,
+  modo = "falta",
   className,
 }: {
   /** A linha que já tem (ou vai ter) a falta. Sem ela, `novo` cria a falta. */
@@ -55,25 +63,34 @@ export function BotaoAusencia({
   aoMudar: () => void;
   /** Sem falta registrada, mostra só o ícone (para listas apertadas). */
   soIcone?: boolean;
+  /**
+   * "impedido": botão discreto só com ícone, que já abre no "Impedido" com
+   * motivos rápidos (regra da sala, comportamento). A anotação é opcional.
+   */
+  modo?: "falta" | "impedido";
   className?: string;
 }) {
   const [aberto, setAberto] = useState(false);
   const [tipo, setTipo] = useState<TipoAusencia>("faltou");
   const [motivo, setMotivo] = useState("");
   const [salvando, setSalvando] = useState(false);
-  const faltaMotivo = tipo === "nao_autorizado" && motivo.trim().length < 3;
+  const [razao, setRazao] = useState<string | null>(null);
 
   function abrir() {
-    setTipo(ausencia ?? "faltou");
+    setTipo(ausencia ?? (modo === "impedido" ? "nao_autorizado" : "faltou"));
     setMotivo(ausenciaMotivo ?? "");
+    setRazao(null);
     setAberto(true);
   }
 
   async function salvar() {
-    if (faltaMotivo) return;
     setSalvando(true);
     try {
-      const motivoFinal = tipo === "nao_autorizado" ? motivo : null;
+      // Motivo rápido + anotação livre, os dois opcionais.
+      const motivoFinal =
+        tipo === "nao_autorizado"
+          ? [razao, motivo.trim()].filter(Boolean).join(" — ") || null
+          : null;
       if (sessaoId) await marcarAusencia(sessaoId, tipo, motivoFinal);
       else if (novo) await registrarAusenciaSemMarcacao({ ...novo, tipo, motivo: motivoFinal });
       else return;
@@ -111,35 +128,62 @@ export function BotaoAusencia({
     }
   }
 
+  // Com falta já registrada, quem mostra (e desfaz) é o botão "Falta" ao lado.
+  if (modo === "impedido" && ausencia) return null;
+
   return (
     <>
-      <button
-        type="button"
-        onClick={abrir}
-        title={ausencia ? "Ver ou desfazer a falta" : "Registrar falta ou impedimento"}
-        className={cn(
-          "flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold transition",
-          ausencia
-            ? "border-red-500/60 bg-red-500/15 text-red-700 dark:text-red-300"
-            : "border-current/30 opacity-80 hover:opacity-100",
-          className,
-        )}
-      >
-        <UserX className="size-3.5" aria-hidden />
-        {ausencia ? (
-          ROTULO_AUSENCIA[ausencia]
-        ) : soIcone ? (
-          <span className="sr-only">Falta</span>
-        ) : (
-          "Falta"
-        )}
-      </button>
+      {modo === "impedido" ? (
+        <button
+          type="button"
+          onClick={abrir}
+          title="Marcar como impedido (regra da sala ou comportamento)"
+          aria-label={`Marcar ${nome} como impedido`}
+          className={cn(
+            "flex items-center justify-center rounded-full border border-current/30 p-1 opacity-60 transition hover:opacity-100",
+            className,
+          )}
+        >
+          <Ban className="size-3.5" aria-hidden />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={abrir}
+          title={ausencia ? "Ver ou desfazer a falta" : "Registrar falta ou impedimento"}
+          className={cn(
+            "flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold transition",
+            ausencia
+              ? "border-red-500/60 bg-red-500/15 text-red-700 dark:text-red-300"
+              : "border-current/30 opacity-80 hover:opacity-100",
+            className,
+          )}
+        >
+          {ausencia === "nao_autorizado" ? (
+            <Ban className="size-3.5" aria-hidden />
+          ) : (
+            <UserX className="size-3.5" aria-hidden />
+          )}
+          {ausencia ? (
+            ROTULO_AUSENCIA[ausencia]
+          ) : soIcone ? (
+            <span className="sr-only">Falta</span>
+          ) : (
+            "Falta"
+          )}
+        </button>
+      )}
 
       <Dialog open={aberto} onOpenChange={setAberto}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserX className="size-5 text-red-600" aria-hidden /> {nome}
+              {tipo === "nao_autorizado" ? (
+                <Ban className="size-5 text-amber-600" aria-hidden />
+              ) : (
+                <UserX className="size-5 text-red-600" aria-hidden />
+              )}{" "}
+              {nome}
             </DialogTitle>
             <DialogDescription>
               {sessaoId && !semMarcacao
@@ -152,7 +196,7 @@ export function BotaoAusencia({
             {(
               [
                 ["faltou", UserX, "Não veio à aula"],
-                ["nao_autorizado", Ban, "O professor não autorizou neste dia"],
+                ["nao_autorizado", Ban, "Não cumpriu uma regra ou por comportamento"],
               ] as const
             ).map(([t, Icone, dica]) => (
               <button
@@ -178,15 +222,38 @@ export function BotaoAusencia({
           </div>
 
           {tipo === "nao_autorizado" ? (
-            <div className="space-y-1.5">
-              <Label htmlFor={`aus-motivo-${sessaoId}`}>Motivo (obrigatório)</Label>
-              <Textarea
-                id={`aus-motivo-${sessaoId}`}
-                rows={3}
-                value={motivo}
-                onChange={(e) => setMotivo(e.target.value)}
-                placeholder="Ex.: comportamento, atividade atrasada, pedido da coordenação…"
-              />
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <p className="text-sm font-medium">Motivo (opcional)</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {MOTIVOS_IMPEDIMENTO.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      aria-pressed={razao === m}
+                      onClick={() => setRazao(razao === m ? null : m)}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-xs font-medium transition",
+                        razao === m ? "border-amber-600 bg-amber-600 text-white" : "hover:bg-muted",
+                      )}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor={`aus-motivo-${sessaoId ?? novo?.aluno.id}`}>
+                  Anotação (opcional)
+                </Label>
+                <Textarea
+                  id={`aus-motivo-${sessaoId ?? novo?.aluno.id}`}
+                  rows={3}
+                  value={motivo}
+                  onChange={(e) => setMotivo(e.target.value)}
+                  placeholder="Se quiser, descreva o que aconteceu. Fica no relatório do aluno."
+                />
+              </div>
             </div>
           ) : null}
 
@@ -208,7 +275,7 @@ export function BotaoAusencia({
             <Button
               type="button"
               variant="destructive"
-              disabled={salvando || faltaMotivo}
+              disabled={salvando}
               onClick={() => void salvar()}
             >
               Registrar

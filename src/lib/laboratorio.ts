@@ -371,6 +371,26 @@ export async function carregarHistoricoAluno(alunoId: string): Promise<SessaoLab
   return ((data ?? []) as Linha[]).map(deLinha).filter(foiAoLab);
 }
 
+/**
+ * Faltas e impedimentos de um aluno, do mais recente para o mais antigo. O
+ * `aluno_id` pode se repetir entre turmas, então filtra também pela turma.
+ */
+export async function carregarOcorrenciasAluno(
+  turmaId: string,
+  alunoId: string,
+): Promise<SessaoLab[]> {
+  const { data, error } = await supabase
+    .from("laboratorio_sessoes")
+    .select("*")
+    .eq("aluno_id", alunoId)
+    .eq("turma_id", turmaId)
+    .not("ausencia", "is", null)
+    .order("inicio", { ascending: false })
+    .limit(500);
+  if (error) throw new Error(eTabelaAusente(error) ? TABELA_AUSENTE : error.message);
+  return ((data ?? []) as Linha[]).map(deLinha).filter((s) => !foiAoLab(s));
+}
+
 export interface PresencaAntiga {
   id: string;
   data: string;
