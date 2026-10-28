@@ -145,11 +145,7 @@ function Index() {
                 Escola Dr. Eiraldo Carneiro de França · Feijó, Acre
               </p>
               <h1 className="mt-[clamp(0.75rem,2.5svh,1.25rem)] text-[clamp(2rem,min(7.4vw,8svh),4.1rem)] font-bold leading-[1.18] tracking-[-0.035em] text-white [text-shadow:0_2px_28px_rgb(0_0_0/0.45)]">
-                Todo dia tem criança{" "}
-                <span className="text-sun">
-                  descobrindo o mundo
-                </span>{" "}
-                aqui
+                Todo dia tem criança <span className="text-sun">descobrindo o mundo</span> aqui
                 <span
                   aria-hidden
                   className="ml-1.5 inline-block h-[0.78em] w-[0.1em] translate-y-[0.08em] animate-pulse rounded-sm bg-sun"
@@ -232,12 +228,19 @@ function Index() {
                   {gruposAoVivo.slice(0, 3).map((g) => (
                     <li key={g.grupoId} className="rounded-2xl bg-white/10 p-3">
                       <p className="flex items-baseline justify-between gap-2">
-                        <span className="font-heading text-xl font-bold">{g.turmaRotulo}</span>
+                        <span className="font-heading text-xl font-bold">
+                          {g.turmaId === "mista" ? "Aula mista" : g.turmaRotulo}
+                        </span>
                         <span className="text-sm text-white/75">até {horaNaEscola(g.fim)}</span>
                       </p>
                       <p className="mt-0.5 text-sm text-white/70">
                         {g.alunos.length} aluno{g.alunos.length === 1 ? "" : "s"} · faltam{" "}
                         {textoRestante(new Date(g.fim).getTime() - agora)}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-white/60">
+                        {g.turmaId === "mista"
+                          ? [...new Set(g.alunos.map((x) => x.turmaRotulo))].join(" · ")
+                          : (turmas.find((t) => t.id === g.turmaId)?.professorRegente ?? "")}
                       </p>
                     </li>
                   ))}

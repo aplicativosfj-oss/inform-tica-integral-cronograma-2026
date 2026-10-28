@@ -1,6 +1,7 @@
 import { Clock3, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { PalcoGrupo } from "@/components/school/laboratorio/palco-grupo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -190,7 +191,7 @@ export function PainelLaboratorioAgora({
             ) : (
               <div className="space-y-3">
                 {aoVivo.map((g) => (
-                  <CartaoGrupo
+                  <PalcoGrupo
                     key={g.grupoId}
                     g={g}
                     agora={agora}

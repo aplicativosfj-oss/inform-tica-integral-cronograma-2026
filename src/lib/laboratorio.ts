@@ -144,7 +144,7 @@ export interface GrupoLab {
   turmaRotulo: string;
   inicio: string;
   fim: string;
-  alunos: { id: string; nome: string }[];
+  alunos: { id: string; nome: string; turmaId: string; turmaRotulo: string }[];
 }
 
 /** Junta as linhas de um mesmo clique ("grupo") em um cartão só. */
@@ -153,7 +153,12 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
   for (const s of sessoes) {
     const g = mapa.get(s.grupoId);
     if (g) {
-      g.alunos.push({ id: s.alunoId, nome: s.alunoNome });
+      g.alunos.push({
+        id: s.alunoId,
+        nome: s.alunoNome,
+        turmaId: s.turmaId,
+        turmaRotulo: s.turmaRotulo,
+      });
       // Alunos de turmas diferentes no mesmo grupo = aula mista.
       if (g.turmaId !== s.turmaId) {
         g.turmaId = "mista";
@@ -166,7 +171,9 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
         turmaRotulo: s.turmaRotulo,
         inicio: s.inicio,
         fim: s.fim,
-        alunos: [{ id: s.alunoId, nome: s.alunoNome }],
+        alunos: [
+          { id: s.alunoId, nome: s.alunoNome, turmaId: s.turmaId, turmaRotulo: s.turmaRotulo },
+        ],
       });
   }
   return [...mapa.values()].sort((a, b) => a.inicio.localeCompare(b.inicio));

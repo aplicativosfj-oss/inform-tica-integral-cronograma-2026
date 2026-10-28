@@ -692,3 +692,50 @@ html.home-snap {
 a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   display: none !important;
 }
+
+/* Palco do laboratório: entrada escalonada dos alunos, brilho e varredura. */
+@keyframes lab-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lab-brilho {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.12);
+  }
+}
+@keyframes lab-varredura {
+  from {
+    transform: translateX(-120%) skewX(-12deg);
+  }
+  to {
+    transform: translateX(420%) skewX(-12deg);
+  }
+}
+.lab-aluno {
+  animation: lab-entrar 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.lab-brilho {
+  animation: lab-brilho 5s ease-in-out infinite;
+}
+.lab-varredura {
+  animation: lab-varredura 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lab-aluno,
+  .lab-brilho,
+  .lab-varredura {
+    animation: none;
+  }
+}
