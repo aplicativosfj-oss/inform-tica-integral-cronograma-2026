@@ -20,7 +20,7 @@ export const Route = createFileRoute("/entre-turnos")({
 
 function EntreTurnosPage() {
   return (
-    <div className="min-h-dvh bg-ink">
+    <div className="min-h-dvh bg-background">
       <NavBar />
       <EntreTurnos />
       <SiteFooter />

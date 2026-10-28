@@ -68,27 +68,27 @@ export function AvisoDiaEncerrado({ m }: { m: MomentoIntervalo }) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-sky-400/20 ring-1 ring-sky-300/40">
           {fimDeSemana ? (
-            <CalendarCheck className="size-7 text-sky-200" aria-hidden />
+            <CalendarCheck className="size-7 text-sky-700 dark:text-sky-200" aria-hidden />
           ) : (
-            <CheckCircle2 className="size-7 text-sky-200" aria-hidden />
+            <CheckCircle2 className="size-7 text-sky-700 dark:text-sky-200" aria-hidden />
           )}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-200">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-700 dark:text-sky-200">
             {fimDeSemana ? "Bom fim de semana" : "Encerrado por hoje"}
           </p>
           <p className="mt-1 text-lg font-extrabold leading-snug sm:text-xl">
             {fimDeSemana
               ? "Sem intervalo no fim de semana."
               : "O Entre Turnos de hoje terminou e as turmas voltaram para as aulas da tarde."}{" "}
-            <span className="text-sun">
+            <span className="text-amber-600 dark:text-sun">
               {m.proximoEhAmanha ? "Amanhã" : `Na ${proximoNome.toLowerCase()}`} já está tudo
               programado.
             </span>
           </p>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold sm:self-center">
-          <CalendarCheck className="size-4 text-sun" aria-hidden />
+        <span className="inline-flex shrink-0 items-center gap-2 self-start rounded-2xl bg-muted px-4 py-2 text-sm font-bold sm:self-center">
+          <CalendarCheck className="size-4 text-amber-600 dark:text-sun" aria-hidden />
           {proximoNome} · {HORARIO.inicio} às {HORARIO.fim}
         </span>
       </div>

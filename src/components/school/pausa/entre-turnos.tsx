@@ -53,7 +53,7 @@ const VISUAL: Record<
     Icone: BedDouble,
     etiqueta: "bg-indigo-500 text-white",
     borda: "border-indigo-400/50",
-    texto: "text-indigo-300",
+    texto: "text-indigo-700 dark:text-indigo-300",
     fundo: "from-indigo-500/25",
     impresso: "#e0e7ff",
   },
@@ -61,7 +61,7 @@ const VISUAL: Record<
     Icone: Clapperboard,
     etiqueta: "bg-rose-500 text-white",
     borda: "border-rose-400/50",
-    texto: "text-rose-300",
+    texto: "text-rose-700 dark:text-rose-300",
     fundo: "from-rose-500/25",
     impresso: "#ffe4e6",
   },
@@ -69,7 +69,7 @@ const VISUAL: Record<
     Icone: Dices,
     etiqueta: "bg-emerald-500 text-white",
     borda: "border-emerald-400/50",
-    texto: "text-emerald-300",
+    texto: "text-emerald-700 dark:text-emerald-300",
     fundo: "from-emerald-500/25",
     impresso: "#d1fae5",
   },
@@ -128,7 +128,7 @@ const PASSOS: {
     frequencia: "3 dias por semana",
     texto: "A turma descansa na própria sala, num ambiente calmo.",
     quem: "Monitores da turma",
-    cor: "text-indigo-300",
+    cor: "text-indigo-700 dark:text-indigo-300",
   },
   {
     desenho: "filme",
@@ -136,7 +136,7 @@ const PASSOS: {
     frequencia: "1 dia por semana",
     texto: "A turma assiste a um filme ou desenho.",
     quem: "Monitores da turma",
-    cor: "text-rose-300",
+    cor: "text-rose-700 dark:text-rose-300",
   },
   {
     desenho: "jogos",
@@ -144,7 +144,7 @@ const PASSOS: {
     frequencia: "1 dia por semana",
     texto: "Cada ano escolar tem o seu dia: jogos de regras, raciocínio e convívio.",
     quem: ESPACOS.jogos.responsavel ?? "",
-    cor: "text-emerald-300",
+    cor: "text-emerald-700 dark:text-emerald-300",
   },
   {
     desenho: "repouso",
@@ -154,7 +154,7 @@ const PASSOS: {
     quem: SALA_REPOUSO.grupos
       .map((g) => `${g.responsavel} (${g.publico.toLowerCase()})`)
       .join(" · "),
-    cor: "text-sky-300",
+    cor: "text-sky-700 dark:text-sky-300",
   },
 ];
 
@@ -193,9 +193,9 @@ export function EntreTurnos() {
   }
 
   return (
-    <div className="dark bg-ink text-white">
+    <div className="text-foreground">
       {/* ------------------------------------------------------------ abertura */}
-      <section className="relative isolate overflow-hidden border-b border-white/10">
+      <section className="dark relative isolate overflow-hidden border-b border-white/10 bg-ink text-white">
         <div aria-hidden className="fundo-pixel absolute inset-0 -z-10 opacity-20" />
         <div
           aria-hidden
@@ -264,11 +264,13 @@ export function EntreTurnos() {
 
       {/* ------------------------------------------------------- como funciona */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-sun">Como funciona</p>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+          Como funciona
+        </p>
         <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
           Cada turma passa por três lugares na semana
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
           Três dias de descanso na própria sala, um dia de filme e um dia de jogos. Quem quiser
           dormir pode ir à sala de repouso em qualquer dia.
         </p>
@@ -276,19 +278,21 @@ export function EntreTurnos() {
           {PASSOS.map((p, i) => (
             <li
               key={p.titulo}
-              className="flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]"
+              className="flex flex-col overflow-hidden rounded-3xl border border-border bg-card"
             >
               <IlustracaoEspaco espaco={p.desenho} className="aspect-[16/9] w-full" />
               <div className="flex flex-1 flex-col p-4">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="grid size-7 place-items-center rounded-full bg-white/10 text-xs font-extrabold">
+                  <span className="grid size-7 place-items-center rounded-full bg-muted text-xs font-extrabold">
                     {i + 1}
                   </span>
                   <span className={cn("text-xs font-bold", p.cor)}>{p.frequencia}</span>
                 </div>
                 <h3 className="mt-3 text-lg font-extrabold">{p.titulo}</h3>
-                <p className="mt-1 flex-1 text-sm leading-relaxed text-white/70">{p.texto}</p>
-                <p className="mt-3 flex items-start gap-2 border-t border-white/10 pt-3 text-sm">
+                <p className="mt-1 flex-1 text-sm leading-relaxed text-muted-foreground">
+                  {p.texto}
+                </p>
+                <p className="mt-3 flex items-start gap-2 border-t border-border pt-3 text-sm">
                   <HandHeart className={cn("mt-0.5 size-4 shrink-0", p.cor)} aria-hidden />
                   <span className="font-semibold">{p.quem}</span>
                 </p>
@@ -299,7 +303,7 @@ export function EntreTurnos() {
       </section>
 
       {/* ------------------------------------------------------------ consulta */}
-      <section id="consulta" className="scroll-mt-20 border-y border-white/10 bg-white/[0.03]">
+      <section id="consulta" className="scroll-mt-20 border-y border-border bg-muted/40">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
           {encerrado && m ? (
             <div className="mb-8">
@@ -309,7 +313,9 @@ export function EntreTurnos() {
 
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-sun">Consulte</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+                Consulte
+              </p>
               <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
                 {modo === "dia" ? "O que acontece em cada dia" : "A semana de cada turma"}
               </h2>
@@ -317,7 +323,7 @@ export function EntreTurnos() {
             <div
               role="tablist"
               aria-label="Forma de consulta"
-              className="grid grid-cols-2 rounded-2xl bg-white/10 p-1 text-sm font-bold"
+              className="grid grid-cols-2 rounded-2xl bg-muted p-1 text-sm font-bold"
             >
               {(
                 [
@@ -333,7 +339,9 @@ export function EntreTurnos() {
                   onClick={() => setModo(v)}
                   className={cn(
                     "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors",
-                    modo === v ? "bg-sun text-sun-foreground" : "text-white/70 hover:text-white",
+                    modo === v
+                      ? "bg-sun text-sun-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <Icone className="size-4" aria-hidden /> {rotulo}
@@ -369,16 +377,18 @@ export function EntreTurnos() {
 
       {/* -------------------------------------------------- quadro da semana */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-sun">Visão geral</p>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+          Visão geral
+        </p>
         <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
           Quadro da semana
         </h2>
-        <p className="mt-1 text-sm text-white/70">
+        <p className="mt-1 text-sm text-muted-foreground">
           Toque no nome de uma turma para ver a semana dela, ou num dia para ver quem está onde.
         </p>
 
         {CHOQUES.length ? (
-          <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-200">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
             Atenção: {CHOQUES.map((c) => `${c.turma} na ${c.dia.toLowerCase()}`).join("; ")} aparece
             em dois espaços ao mesmo tempo. A coordenação vai confirmar.
@@ -386,9 +396,9 @@ export function EntreTurnos() {
         ) : null}
 
         {/* computador: tabela */}
-        <div className="mt-5 hidden overflow-hidden rounded-3xl border border-white/10 md:block">
+        <div className="mt-5 hidden overflow-hidden rounded-3xl border border-border md:block">
           <table className="w-full text-sm">
-            <thead className="bg-white/[0.06] text-left text-xs uppercase tracking-wider text-white/60">
+            <thead className="bg-muted/70 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-bold">Turma</th>
                 {DIAS.map((d) => (
@@ -400,8 +410,8 @@ export function EntreTurnos() {
                       type="button"
                       onClick={() => abrir({ modo: "dia", dia: d.dia })}
                       className={cn(
-                        "cursor-pointer rounded-lg px-2 py-1 font-bold uppercase hover:bg-white/10",
-                        hoje === d.dia ? "text-sun" : "hover:text-white",
+                        "cursor-pointer rounded-lg px-2 py-1 font-bold uppercase hover:bg-muted",
+                        hoje === d.dia ? "text-amber-600 dark:text-sun" : "hover:text-foreground",
                       )}
                     >
                       {d.curto}
@@ -414,15 +424,12 @@ export function EntreTurnos() {
             </thead>
             <tbody>
               {TURMAS_PAUSA.map((t, i) => (
-                <tr
-                  key={t.turma}
-                  className={cn("border-t border-white/10", i % 2 && "bg-white/[0.02]")}
-                >
+                <tr key={t.turma} className={cn("border-t border-border", i % 2 && "bg-muted/30")}>
                   <th scope="row" className="px-2 py-1.5 text-left">
                     <button
                       type="button"
                       onClick={() => abrir({ modo: "turma", turma: t.turma })}
-                      className="cursor-pointer rounded-lg px-2 py-1 text-base font-extrabold hover:bg-white/10 hover:text-sun"
+                      className="cursor-pointer rounded-lg px-2 py-1 text-base font-extrabold hover:bg-muted hover:text-amber-600 dark:hover:text-sun"
                     >
                       {t.turma}
                     </button>
@@ -439,7 +446,7 @@ export function EntreTurnos() {
                       </span>
                     </td>
                   ))}
-                  <td className="px-4 py-2.5 font-medium text-white/85">
+                  <td className="px-4 py-2.5 font-medium text-foreground/85">
                     {juntarNomes(t.monitores)}
                   </td>
                 </tr>
@@ -455,11 +462,13 @@ export function EntreTurnos() {
               <button
                 type="button"
                 onClick={() => abrir({ modo: "turma", turma: t.turma })}
-                className="w-full cursor-pointer rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 text-left transition-colors hover:border-sun/50"
+                className="w-full cursor-pointer rounded-2xl border border-border bg-card p-3.5 text-left transition-colors hover:border-sun/50"
               >
                 <span className="flex items-baseline justify-between gap-2">
                   <span className="text-lg font-extrabold">{t.turma}</span>
-                  <span className="truncate text-xs text-white/60">{juntarNomes(t.monitores)}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {juntarNomes(t.monitores)}
+                  </span>
                 </span>
                 <span className="mt-2.5 grid grid-cols-5 gap-1">
                   {DIAS.map((d) => (
@@ -467,10 +476,10 @@ export function EntreTurnos() {
                       key={d.dia}
                       className={cn(
                         "flex flex-col items-center gap-1 rounded-lg py-1.5",
-                        hoje === d.dia ? "bg-sun/15 ring-1 ring-sun/50" : "bg-white/[0.05]",
+                        hoje === d.dia ? "bg-sun/15 ring-1 ring-sun/50" : "bg-muted/60",
                       )}
                     >
-                      <span className="text-[10px] font-bold text-white/60">{d.curto}</span>
+                      <span className="text-[10px] font-bold text-muted-foreground">{d.curto}</span>
                       {espacosDoDia(t, d.dia).map((e) => {
                         const I = VISUAL[e].Icone;
                         return (
@@ -502,18 +511,20 @@ export function EntreTurnos() {
       </section>
 
       {/* -------------------------------------------------------------- equipe */}
-      <section className="border-t border-white/10 bg-white/[0.03]">
+      <section className="border-t border-border bg-muted/40">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-sun">Equipe</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+            Equipe
+          </p>
           <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
             Quem cuida das crianças
           </h2>
-          <p className="mt-1 max-w-2xl text-sm text-white/70">
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Cada turma tem os seus monitores. A sala de jogos e a sala de repouso têm responsáveis
             próprios. Em caso de dúvida, procure a coordenação da escola.
           </p>
 
-          <h3 className="mt-6 text-sm font-bold uppercase tracking-wider text-white/60">
+          <h3 className="mt-6 text-sm font-bold uppercase tracking-wider text-muted-foreground">
             Espaços com responsável próprio
           </h3>
           <ul className="mt-3 grid gap-3 md:grid-cols-3">
@@ -523,14 +534,14 @@ export function EntreTurnos() {
                 rotulo: "Sala de jogos",
                 detalhe: "um ano escolar por dia",
                 nome: ESPACOS.jogos.responsavel,
-                cor: "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
+                cor: "border-emerald-400/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
               },
               ...SALA_REPOUSO.grupos.map((g) => ({
                 desenho: "repouso" as const,
                 rotulo: `Repouso · ${g.publico.toLowerCase()}`,
                 detalhe: g.local.toLowerCase(),
                 nome: g.responsavel,
-                cor: "border-sky-400/40 bg-sky-500/10 text-sky-300",
+                cor: "border-sky-400/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
               })),
             ].map((c) => (
               <li
@@ -542,14 +553,14 @@ export function EntreTurnos() {
                   <span className="block text-xs font-bold uppercase tracking-wider">
                     {c.rotulo}
                   </span>
-                  <span className="block text-base font-extrabold text-white">{c.nome}</span>
-                  <span className="block text-xs text-white/60">{c.detalhe}</span>
+                  <span className="block text-base font-extrabold text-foreground">{c.nome}</span>
+                  <span className="block text-xs text-muted-foreground">{c.detalhe}</span>
                 </span>
               </li>
             ))}
           </ul>
 
-          <h3 className="mt-8 text-sm font-bold uppercase tracking-wider text-white/60">
+          <h3 className="mt-8 text-sm font-bold uppercase tracking-wider text-muted-foreground">
             Monitores de cada turma
           </h3>
           <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -558,9 +569,9 @@ export function EntreTurnos() {
                 <button
                   type="button"
                   onClick={() => abrir({ modo: "turma", turma: t.turma })}
-                  className="h-full w-full cursor-pointer rounded-2xl border border-white/10 bg-ink/60 p-4 text-left transition-colors hover:border-sun/50"
+                  className="h-full w-full cursor-pointer rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-sun/50"
                 >
-                  <span className="text-xs font-bold uppercase tracking-wider text-sun">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-sun">
                     {t.turma}
                   </span>
                   <span className="mt-1.5 block space-y-0.5 text-sm font-semibold">
@@ -574,7 +585,7 @@ export function EntreTurnos() {
               </li>
             ))}
           </ul>
-          <p className="mt-8 text-xs text-white/45">
+          <p className="mt-8 text-xs text-muted-foreground">
             Fonte: Cronograma de Atendimento às turmas no período de repouso após o almoço e escala
             da sala de jogos · {ESCOLA}.
           </p>
@@ -609,7 +620,7 @@ function SeletorDia({
             "relative cursor-pointer rounded-2xl border px-1 py-2.5 text-center transition-colors",
             dia === d.dia
               ? "border-sun bg-sun text-sun-foreground"
-              : "border-white/10 bg-white/[0.04] text-white/80 hover:border-white/30",
+              : "border-border bg-card text-muted-foreground hover:border-primary/40",
           )}
         >
           <span className="block text-sm font-extrabold sm:hidden">{d.curto}</span>
@@ -644,8 +655,8 @@ function ConsultaPorDia({
   return (
     <div className="mt-6">
       <SeletorDia dia={dia} hoje={hoje} onDia={onDia} />
-      <p className="mt-5 text-sm text-white/70">
-        <strong className="text-white">
+      <p className="mt-5 text-sm text-muted-foreground">
+        <strong className="text-foreground">
           {nomeDoDia(dia)}
           {hoje === dia ? " (hoje)" : rotuloProximo ? ` (${rotuloProximo})` : ""}
         </strong>
@@ -672,13 +683,13 @@ function ConsultaPorDia({
                 <IlustracaoEspaco espaco={e} className="h-14 w-20 shrink-0 rounded-xl" />
                 <div className="min-w-0">
                   <h3 className="font-extrabold">{ESPACOS[e].nome}</h3>
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-muted-foreground">
                     {lista.length} {lista.length === 1 ? "turma" : "turmas"}
                   </p>
                 </div>
               </div>
               {proprio && lista.length ? (
-                <p className="mt-4 flex items-center gap-2 rounded-2xl bg-white/10 px-3 py-2.5 text-sm">
+                <p className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-3 py-2.5 text-sm">
                   <HandHeart className={cn("size-4 shrink-0", v.texto)} aria-hidden />
                   <span>
                     Responsável: <strong>{proprio}</strong>
@@ -691,7 +702,7 @@ function ConsultaPorDia({
                     <button
                       type="button"
                       onClick={() => onTurma(t.turma)}
-                      className="group flex w-full cursor-pointer items-center gap-3 rounded-2xl bg-ink/60 px-3 py-2.5 text-left ring-1 ring-white/10 transition hover:ring-white/40"
+                      className="group flex w-full cursor-pointer items-center gap-3 rounded-2xl bg-card px-3 py-2.5 text-left ring-1 ring-border transition hover:ring-primary/40"
                     >
                       <span
                         className={cn(
@@ -702,7 +713,7 @@ function ConsultaPorDia({
                         {t.turma}
                       </span>
                       <span className="min-w-0 flex-1 text-sm">
-                        <span className="block text-[11px] uppercase tracking-wider text-white/50">
+                        <span className="block text-[11px] uppercase tracking-wider text-muted-foreground">
                           {proprio ? `${t.ano}º ano` : "Monitores"}
                         </span>
                         <span className="block truncate font-semibold">
@@ -710,14 +721,14 @@ function ConsultaPorDia({
                         </span>
                       </span>
                       <ArrowRight
-                        className="size-4 shrink-0 text-white/30 transition group-hover:translate-x-0.5 group-hover:text-white"
+                        className="size-4 shrink-0 text-muted-foreground/60 transition group-hover:translate-x-0.5 group-hover:text-foreground"
                         aria-hidden
                       />
                     </button>
                   </li>
                 ))}
                 {lista.length === 0 ? (
-                  <li className="rounded-2xl border border-dashed border-white/15 px-3 py-4 text-center text-sm text-white/50">
+                  <li className="rounded-2xl border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">
                     Nenhuma turma neste dia
                   </li>
                 ) : null}
@@ -739,22 +750,19 @@ function FaixaRepouso() {
       <IlustracaoEspaco espaco="repouso" className="h-14 w-20 shrink-0 rounded-xl" />
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-2 font-extrabold">
-          <Moon className="size-4 text-sky-300" aria-hidden /> {SALA_REPOUSO.nome}
-          <span className="rounded-full bg-sky-400/20 px-2 py-0.5 text-[11px] font-bold text-sky-200">
+          <Moon className="size-4 text-sky-700 dark:text-sky-300" aria-hidden /> {SALA_REPOUSO.nome}
+          <span className="rounded-full bg-sky-400/20 px-2 py-0.5 text-[11px] font-bold text-sky-700 dark:text-sky-200">
             opcional · todo dia
           </span>
         </p>
-        <p className="mt-0.5 text-sm text-white/70">
+        <p className="mt-0.5 text-sm text-muted-foreground">
           Para o aluno de qualquer turma que realmente queira dormir.
         </p>
       </div>
       <ul className="grid gap-2 sm:grid-cols-2">
         {SALA_REPOUSO.grupos.map((g) => (
-          <li
-            key={g.publico}
-            className="rounded-2xl bg-ink/60 px-3 py-2 text-sm ring-1 ring-white/10"
-          >
-            <span className="block text-[11px] font-bold uppercase tracking-wider text-sky-300">
+          <li key={g.publico} className="rounded-2xl bg-card px-3 py-2 text-sm ring-1 ring-border">
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
               {g.publico} · {g.local}
             </span>
             <span className="font-semibold">{g.responsavel}</span>
@@ -794,7 +802,7 @@ function ConsultaPorTurma({
               "cursor-pointer rounded-2xl border py-2.5 text-sm font-extrabold transition-colors",
               x.turma === t.turma
                 ? "border-sun bg-sun text-sun-foreground"
-                : "border-white/10 bg-white/[0.04] text-white/80 hover:border-white/30",
+                : "border-border bg-card text-muted-foreground hover:border-primary/40",
             )}
           >
             {x.turma}
@@ -802,18 +810,18 @@ function ConsultaPorTurma({
         ))}
       </div>
 
-      <div className="mt-5 flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-5 flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-3xl font-extrabold">{t.turma}</p>
-          <p className="mt-1 text-sm text-white/70">
+          <p className="mt-1 text-sm text-muted-foreground">
             Sala de aula em 3 dias · filme na {filme.nome.toLowerCase()} · jogos na{" "}
             {jogos.nome.toLowerCase()}
           </p>
         </div>
-        <p className="flex items-center gap-3 rounded-2xl bg-ink/60 px-4 py-3 ring-1 ring-white/10">
-          <HandHeart className="size-5 shrink-0 text-sun" aria-hidden />
+        <p className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3 ring-1 ring-border">
+          <HandHeart className="size-5 shrink-0 text-amber-600 dark:text-sun" aria-hidden />
           <span>
-            <span className="block text-[11px] font-bold uppercase tracking-wider text-white/50">
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Monitores da turma
             </span>
             <span className="font-extrabold">{juntarNomes(t.monitores)}</span>
@@ -831,7 +839,7 @@ function ConsultaPorTurma({
                 onClick={() => onDia(d.dia)}
                 className={cn(
                   "flex h-full w-full cursor-pointer overflow-hidden rounded-3xl border text-left transition hover:-translate-y-0.5 sm:flex-col",
-                  hoje === d.dia ? "border-sun ring-2 ring-sun/40" : "border-white/10",
+                  hoje === d.dia ? "border-sun ring-2 ring-sun/40" : "border-border",
                   es[0] ? VISUAL[es[0]].fundo : "",
                   "bg-gradient-to-b to-transparent",
                 )}
@@ -856,10 +864,10 @@ function ConsultaPorTurma({
                       <Etiqueta key={e} espaco={e} />
                     ))}
                   </span>
-                  <span className="mt-auto text-xs text-white/60">
+                  <span className="mt-auto text-xs text-muted-foreground">
                     {es.map((e) => (
                       <span key={e} className="block">
-                        Com <strong className="text-white">{responsavel(t, e)}</strong>
+                        Com <strong className="text-foreground">{responsavel(t, e)}</strong>
                       </span>
                     ))}
                   </span>
@@ -870,8 +878,8 @@ function ConsultaPorTurma({
         })}
       </ol>
 
-      <p className="mt-4 flex items-start gap-2 text-sm text-white/70">
-        <Moon className="mt-0.5 size-4 shrink-0 text-sky-300" aria-hidden />
+      <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground">
+        <Moon className="mt-0.5 size-4 shrink-0 text-sky-700 dark:text-sky-300" aria-hidden />
         <span>
           Em qualquer dia, quem quiser dormir pode ir à {SALA_REPOUSO.nome.toLowerCase()}:{" "}
           {SALA_REPOUSO.grupos
