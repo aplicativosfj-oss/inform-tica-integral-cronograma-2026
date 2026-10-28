@@ -352,11 +352,18 @@ export function EntreTurnos() {
                       <h3 className="font-extrabold">{ESPACOS[e].nome}</h3>
                       <p className="text-xs text-white/60">
                         {lista.length} {lista.length === 1 ? "turma" : "turmas"}
-                        {ESPACOS[e].responsavel ? ` · com ${ESPACOS[e].responsavel}` : ""}
                       </p>
                     </div>
                   </div>
-                  <ul className="mt-4 space-y-2">
+                  {ESPACOS[e].responsavel && lista.length ? (
+                    <p className="mt-4 flex items-center gap-2 rounded-2xl bg-emerald-400/15 px-3 py-2.5 text-sm">
+                      <HandHeart className="size-4 shrink-0 text-emerald-300" aria-hidden />
+                      <span>
+                        Responsável: <strong>{ESPACOS[e].responsavel}</strong>
+                      </span>
+                    </p>
+                  ) : null}
+                  <ul className={cn("space-y-2", ESPACOS[e].responsavel ? "mt-2" : "mt-4")}>
                     {lista.map((t) => (
                       <li
                         key={t.turma}
@@ -372,10 +379,12 @@ export function EntreTurnos() {
                         </span>
                         <span className="min-w-0 text-sm">
                           <span className="block text-[11px] uppercase tracking-wider text-white/50">
-                            {ESPACOS[e].responsavel ? "Responsável" : "Monitores"}
+                            {ESPACOS[e].responsavel ? `${t.ano}º ano` : "Monitores"}
                           </span>
                           <span className="font-semibold">
-                            {ESPACOS[e].responsavel ?? juntarNomes(t.monitores)}
+                            {ESPACOS[e].responsavel
+                              ? `Turma ${t.turma.slice(-1)}`
+                              : juntarNomes(t.monitores)}
                           </span>
                         </span>
                       </li>
@@ -397,8 +406,7 @@ export function EntreTurnos() {
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Quadro da semana</h2>
         <p className="mt-1 text-sm text-white/70">
-          Cada linha é uma turma; cada coluna, um dia. Os monitores acompanham a sua turma; na sala
-          de jogos, quem recebe as turmas é o {ESPACOS.jogos.responsavel}.
+          Cada linha é uma turma; cada coluna, um dia. Os monitores acompanham a sua turma.
         </p>
 
         {CHOQUES.length ? (
@@ -514,9 +522,8 @@ export function EntreTurnos() {
             Quem cuida de cada turma
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-white/70">
-            Os monitores ficam com a sua turma durante as duas horas do intervalo. Na sala de jogos,
-            as turmas ficam com o {ESPACOS.jogos.responsavel}. Em caso de dúvida, procure a
-            coordenação da escola.
+            Os monitores ficam com a sua turma durante as duas horas do intervalo. Em caso de
+            dúvida, procure a coordenação da escola.
           </p>
           <p className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-4 sm:max-w-md">
             <IlustracaoEspaco espaco="jogos" className="h-12 w-16 shrink-0 rounded-lg" />

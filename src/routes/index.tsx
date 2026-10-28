@@ -29,6 +29,7 @@ import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialo
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { WeatherWidget } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
+import { BannerEntreTurnos } from "@/components/school/pausa/banner-home";
 import { PageBackground } from "@/components/school/page-background";
 import { AvisoDireitosImagem, SiteImage } from "@/components/school/site-image";
 import { SiteFooter } from "@/components/school/site-footer";
@@ -267,6 +268,9 @@ function Index() {
           </div>
           <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 text-white/60 sm:px-6 [@media(max-height:800px)]:hidden" />
         </section>
+
+        {/* ───────── Entre Turnos: o intervalo das 11h às 13h ───────── */}
+        <BannerEntreTurnos />
 
         {/* ───────── Laboratório ao vivo ───────── */}
         <section className="secao-janela">
