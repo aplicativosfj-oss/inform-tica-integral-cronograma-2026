@@ -833,6 +833,38 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   }
 }
 
+/* Agenda: ícones que flutuam devagar no topo e os dois-pontos do relógio piscando. */
+@keyframes agenda-flutua {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(6deg);
+  }
+}
+@keyframes agenda-pisca {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.agenda-flutua {
+  animation: agenda-flutua 6s ease-in-out infinite;
+}
+.agenda-pisca {
+  animation: agenda-pisca 1s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agenda-flutua,
+  .agenda-pisca {
+    animation: none;
+  }
+}
+
 /* Nome da música no player da rádio: rola devagar, em laço contínuo. */
 @keyframes radio-marquee {
   from {
