@@ -17,6 +17,7 @@ import { Route as DescritoresRouteImport } from './routes/descritores'
 import { Route as EvolucaoRouteImport } from './routes/evolucao'
 import { Route as InfotecaRouteImport } from './routes/infoteca'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MapaDaPausaRouteImport } from './routes/mapa-da-pausa'
 import { Route as OperacaoPlantaoRouteImport } from './routes/operacao-plantao'
 import { Route as ResultadosRouteImport } from './routes/resultados'
 import { Route as SalaDeJogosRouteImport } from './routes/sala-de-jogos'
@@ -103,6 +104,11 @@ const InfotecaRoute = InfotecaRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapaDaPausaRoute = MapaDaPausaRouteImport.update({
+  id: '/mapa-da-pausa',
+  path: '/mapa-da-pausa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OperacaoPlantaoRoute = OperacaoPlantaoRouteImport.update({
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
+  '/mapa-da-pausa': typeof MapaDaPausaRoute
   '/operacao-plantao': typeof OperacaoPlantaoRoute
   '/resultados': typeof ResultadosRoute
   '/sala-de-jogos': typeof SalaDeJogosRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
+  '/mapa-da-pausa': typeof MapaDaPausaRoute
   '/operacao-plantao': typeof OperacaoPlantaoRoute
   '/resultados': typeof ResultadosRoute
   '/sala-de-jogos': typeof SalaDeJogosRoute
@@ -477,6 +485,7 @@ export interface FileRoutesById {
   '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
+  '/mapa-da-pausa': typeof MapaDaPausaRoute
   '/operacao-plantao': typeof OperacaoPlantaoRoute
   '/resultados': typeof ResultadosRoute
   '/sala-de-jogos': typeof SalaDeJogosRoute
@@ -536,6 +545,7 @@ export interface FileRouteTypes {
     | '/evolucao'
     | '/infoteca'
     | '/login'
+    | '/mapa-da-pausa'
     | '/operacao-plantao'
     | '/resultados'
     | '/sala-de-jogos'
@@ -593,6 +603,7 @@ export interface FileRouteTypes {
     | '/evolucao'
     | '/infoteca'
     | '/login'
+    | '/mapa-da-pausa'
     | '/operacao-plantao'
     | '/resultados'
     | '/sala-de-jogos'
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/evolucao'
     | '/infoteca'
     | '/login'
+    | '/mapa-da-pausa'
     | '/operacao-plantao'
     | '/resultados'
     | '/sala-de-jogos'
@@ -708,6 +720,7 @@ export interface RootRouteChildren {
   EvolucaoRoute: typeof EvolucaoRoute
   InfotecaRoute: typeof InfotecaRoute
   LoginRoute: typeof LoginRoute
+  MapaDaPausaRoute: typeof MapaDaPausaRoute
   OperacaoPlantaoRoute: typeof OperacaoPlantaoRoute
   ResultadosRoute: typeof ResultadosRoute
   SalaDeJogosRoute: typeof SalaDeJogosRoute
@@ -813,6 +826,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mapa-da-pausa': {
+      id: '/mapa-da-pausa'
+      path: '/mapa-da-pausa'
+      fullPath: '/mapa-da-pausa'
+      preLoaderRoute: typeof MapaDaPausaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/operacao-plantao': {
@@ -1156,6 +1176,7 @@ const rootRouteChildren: RootRouteChildren = {
   EvolucaoRoute: EvolucaoRoute,
   InfotecaRoute: InfotecaRoute,
   LoginRoute: LoginRoute,
+  MapaDaPausaRoute: MapaDaPausaRoute,
   OperacaoPlantaoRoute: OperacaoPlantaoRoute,
   ResultadosRoute: ResultadosRoute,
   SalaDeJogosRoute: SalaDeJogosRoute,

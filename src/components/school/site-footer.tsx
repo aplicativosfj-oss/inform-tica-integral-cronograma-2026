@@ -12,6 +12,7 @@ const LINKS = [
   { to: "/resultados", rotulo: "Resultados" },
   { to: "/avaliacao", rotulo: "Avaliações" },
   { to: "/infoteca", rotulo: "Infoteca" },
+  { to: "/mapa-da-pausa", rotulo: "Mapa da Pausa" },
   { to: "/sobre", rotulo: "Sobre" },
 ] as const;
 
