@@ -6,6 +6,7 @@ import {
   MessageSquarePlus,
   Search,
   Trash2,
+  UserMinus,
   UserRound,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -38,7 +39,7 @@ import {
 import { idadeEmAnos } from "@/lib/profissional-acesso";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { imagemDaSerie } from "@/lib/serie-imagens";
-import type { AnotacaoAluno } from "@/lib/types";
+import type { AnotacaoAluno, SituacaoMatricula } from "@/lib/types";
 
 export const rotuloTurma = (serie: string, letra: string) =>
   `${serie.replace(/\D+/g, "")}º ${letra}`;
@@ -74,7 +75,7 @@ export function FichaAluno({
   aberto: boolean;
   aoFechar: () => void;
 }) {
-  const { turmas, updateAluno, config } = useAppStore();
+  const { todasTurmas: turmas, updateAluno, config } = useAppStore();
   const { email } = useAuth();
   const turma = turmas.find((t) => t.id === turmaId);
   const aluno = turma?.alunos.find((a) => a.id === alunoId);
@@ -90,6 +91,7 @@ export function FichaAluno({
   });
   const [presencas, setPresencas] = useState<PresencaAntiga[] | null>(null);
   const [nota, setNota] = useState("");
+  const [saida, setSaida] = useState({ em: "", obs: "" });
   const [motivo, setMotivo] = useState("");
   const [historico, setHistorico] = useState<SessaoLab[] | null>(null);
   const [erroHistorico, setErroHistorico] = useState<string | null>(null);
@@ -106,6 +108,7 @@ export function FichaAluno({
       necessidadeEspecial: aluno.necessidadeEspecial ?? false,
     });
     setMotivo(aluno.motivoImpedimento ?? "");
+    setSaida({ em: aluno.situacaoEm ?? "", obs: aluno.situacaoObs ?? "" });
     setNota("");
     setHistorico(null);
     setErroHistorico(null);
@@ -151,6 +154,20 @@ export function FichaAluno({
       necessidadeEspecial: rascunho.necessidadeEspecial,
     });
     toast.success("Dados do aluno salvos.");
+  }
+
+  function registrarSituacao(nova: SituacaoMatricula) {
+    const saiu = nova !== "ativo";
+    updateAluno(turmaId, alunoId, {
+      situacao: saiu ? nova : undefined,
+      situacaoEm: saiu ? saida.em || new Date().toISOString().slice(0, 10) : undefined,
+      situacaoObs: saiu ? saida.obs.trim() || undefined : undefined,
+    });
+    toast.success(
+      nova === "ativo"
+        ? "Aluno voltou a contar na turma."
+        : `Registrado como ${nova === "transferido" ? "transferido" : "desistente"}. Ele não conta mais na turma.`,
+    );
   }
 
   function alternarSuspensao(valor: boolean) {
@@ -201,6 +218,12 @@ export function FichaAluno({
             </span>
           </DialogTitle>
           <DialogDescription className="flex flex-wrap gap-1.5">
+            {aluno.situacao === "transferido" || aluno.situacao === "desistente" ? (
+              <Badge className="bg-slate-600 text-white hover:bg-slate-600">
+                {aluno.situacao === "transferido" ? "transferido(a)" : "desistente"}
+                {aluno.situacaoEm ? ` em ${dataBR(aluno.situacaoEm)}` : ""}
+              </Badge>
+            ) : null}
             {aluno.impedido ? <Badge variant="destructive">suspenso das aulas</Badge> : null}
             {aluno.necessidadeEspecial ? (
               <Badge variant="secondary">atendimento especializado</Badge>
@@ -314,6 +337,64 @@ export function FichaAluno({
               placeholder="Ex.: não cumpriu as tarefas em sala"
             />
           </div>
+        </section>
+
+        <section className="space-y-3 rounded-xl border p-4">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <UserMinus className="size-4 text-slate-500" aria-hidden /> Situação na escola
+          </h3>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Situação da matrícula">
+            {(
+              [
+                ["ativo", "Estudando"],
+                ["transferido", "Foi transferido"],
+                ["desistente", "Desistiu"],
+              ] as const
+            ).map(([valor, rotulo]) => {
+              const atual = aluno.situacao ?? "ativo";
+              return (
+                <Button
+                  key={valor}
+                  type="button"
+                  size="sm"
+                  variant={atual === valor ? "default" : "outline"}
+                  aria-pressed={atual === valor}
+                  onClick={() => registrarSituacao(valor)}
+                >
+                  {rotulo}
+                </Button>
+              );
+            })}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
+            <div className="space-y-1">
+              <Label htmlFor="f-sai-em" className="text-xs text-muted-foreground">
+                Data da saída
+              </Label>
+              <Input
+                id="f-sai-em"
+                type="date"
+                value={saida.em}
+                onChange={(e) => setSaida((x) => ({ ...x, em: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="f-sai-obs" className="text-xs text-muted-foreground">
+                Observação (para onde foi, motivo…)
+              </Label>
+              <Input
+                id="f-sai-obs"
+                value={saida.obs}
+                onChange={(e) => setSaida((x) => ({ ...x, obs: e.target.value }))}
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Preencha a data e a observação e depois toque em &quot;Foi transferido&quot; ou
+            &quot;Desistiu&quot;. Quem saiu deixa de contar nos totais, no rodízio e no laboratório,
+            mas a ficha e o histórico continuam guardados. Para desfazer, toque em
+            &quot;Estudando&quot;.
+          </p>
         </section>
 
         <section className="space-y-3 rounded-xl border p-4">
@@ -481,7 +562,7 @@ export function FichaAluno({
  * nome funciona nos dois passos (na tela das turmas, procura na escola toda).
  */
 export function BuscaAlunos() {
-  const { turmas } = useAppStore();
+  const { todasTurmas: turmas } = useAppStore();
   const [turmaId, setTurmaId] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState<{ turmaId: string; alunoId: string } | null>(null);
@@ -491,7 +572,12 @@ export function BuscaAlunos() {
   const lista = (turma ? [turma] : turmas)
     .flatMap((t) => t.alunos.map((a) => ({ t, a })))
     .filter(({ a }) => !termo || a.nome.toLowerCase().includes(termo))
-    .sort((x, y) => x.a.nome.localeCompare(y.a.nome, "pt-BR"));
+    .sort(
+      (x, y) =>
+        Number(Boolean(x.a.situacao && x.a.situacao !== "ativo")) -
+          Number(Boolean(y.a.situacao && y.a.situacao !== "ativo")) ||
+        x.a.nome.localeCompare(y.a.nome, "pt-BR"),
+    );
   const mostrarAlunos = turma !== null || termo !== "";
 
   return (
@@ -521,7 +607,9 @@ export function BuscaAlunos() {
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {turmas.map((t) => {
             const cor = serieClasses(serieIndexPorNumero(t.serie));
-            const suspensos = t.alunos.filter((a) => a.impedido).length;
+            const ativos = t.alunos.filter((a) => !a.situacao || a.situacao === "ativo");
+            const sairam = t.alunos.length - ativos.length;
+            const suspensos = ativos.filter((a) => a.impedido).length;
             return (
               <li key={t.id}>
                 <button
@@ -552,8 +640,11 @@ export function BuscaAlunos() {
                       </span>
                     </span>
                     <span className="text-right text-xs">
-                      <strong className="block font-heading text-xl">{t.alunos.length}</strong>
-                      aluno{t.alunos.length === 1 ? "" : "s"}
+                      <strong className="block font-heading text-xl">{ativos.length}</strong>
+                      aluno{ativos.length === 1 ? "" : "s"}
+                      {sairam > 0 ? (
+                        <span className="block text-white/70">{sairam} transf./desist.</span>
+                      ) : null}
                       {suspensos > 0 ? (
                         <span className="block text-amber-300">{suspensos} suspenso(s)</span>
                       ) : null}
@@ -580,7 +671,7 @@ export function BuscaAlunos() {
                   <button
                     type="button"
                     onClick={() => setAberto({ turmaId: t.id, alunoId: a.id })}
-                    className="flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left transition hover:border-primary hover:bg-muted/50"
+                    className={`flex w-full items-center gap-3 rounded-xl border bg-card p-3 text-left transition hover:border-primary hover:bg-muted/50 ${a.situacao && a.situacao !== "ativo" ? "border-dashed opacity-60" : ""}`}
                   >
                     <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                       {a.foto ? (
@@ -593,6 +684,8 @@ export function BuscaAlunos() {
                       <span className="block truncate text-sm font-medium">{a.nome}</span>
                       <span className="text-xs text-muted-foreground">
                         {turma ? "toque para abrir a ficha" : rotuloTurma(t.serie, t.letra)}
+                        {a.situacao === "transferido" ? " · transferido(a)" : ""}
+                        {a.situacao === "desistente" ? " · desistente" : ""}
                         {a.impedido ? " · suspenso" : ""}
                       </span>
                     </span>

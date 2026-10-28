@@ -1,3 +1,6 @@
+/** Situação da matrícula. Sem valor = estudando normalmente. */
+export type SituacaoMatricula = "ativo" | "transferido" | "desistente";
+
 export interface Aluno {
   id: string;
   nome: string;
@@ -21,6 +24,12 @@ export interface Aluno {
   nascimento?: string | undefined;
   /** Especialidade/laudo do atendimento especializado (ex.: TEA, deficiência auditiva). */
   especialidade?: string | undefined;
+  /** Transferido ou desistente deixa de contar na turma (rodízio, laboratório, totais). */
+  situacao?: SituacaoMatricula | undefined;
+  /** Dia (YYYY-MM-DD) da transferência ou da desistência. */
+  situacaoEm?: string | undefined;
+  /** Observação: para onde foi, motivo etc. */
+  situacaoObs?: string | undefined;
   /** Código INEP do aluno, quando a escola tiver. */
   inep?: string | undefined;
   /** Endereço do aluno, quando a escola tiver. */

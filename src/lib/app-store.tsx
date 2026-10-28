@@ -20,7 +20,10 @@ import type { Aluno, AulaManual, Grupo, Reprogramacao, ScheduleConfig, Turma } f
 const ROW_ID = "default";
 
 interface AppState {
+  /** Só quem está estudando: transferidos e desistentes ficam de fora de todas as contas. */
   turmas: Turma[];
+  /** Cadastro completo, incluindo transferidos e desistentes (fichas e gestão). */
+  todasTurmas: Turma[];
   config: ScheduleConfig;
   /** False while the initial data is still being loaded from Supabase. */
   isReady: boolean;
@@ -149,7 +152,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (!emCache) toast.error(`Não foi possível carregar os dados: ${error.message}`);
         } else if (data) {
           const proximasTurmas = (data.turmas as Turma[] | null) ?? SEED_TURMAS;
-          const proximaConfig = comRegrasPadrao((data.config as ScheduleConfig | null) ?? SEED_CONFIG);
+          const proximaConfig = comRegrasPadrao(
+            (data.config as ScheduleConfig | null) ?? SEED_CONFIG,
+          );
           setTurmas(proximasTurmas);
           setConfig(proximaConfig);
           gravarCache("app_state", { turmas: proximasTurmas, config: proximaConfig });
@@ -193,7 +198,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(
     () => ({
-      turmas,
+      turmas: turmas.map((t) => ({
+        ...t,
+        alunos: t.alunos.filter((a) => !a.situacao || a.situacao === "ativo"),
+      })),
+      todasTurmas: turmas,
       config,
       isReady,
       addTurma: (turma) => {
