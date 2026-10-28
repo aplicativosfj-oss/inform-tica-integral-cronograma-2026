@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, IdCard, MonitorSmartphone } from "lucide-react";
+import { BarChart3, CalendarDays, IdCard, MonitorSmartphone } from "lucide-react";
 
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { ControleLaboratorio } from "@/components/school/laboratorio/controle";
+import { CalendarioLab } from "@/components/school/laboratorio/calendario-lab";
 import { BuscaAlunos } from "@/components/school/laboratorio/ficha-aluno";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { RelatorioUso } from "@/components/school/laboratorio/relatorio-uso";
@@ -44,6 +45,9 @@ function LaboratorioPage() {
             <TabsTrigger value="uso" className="gap-1.5">
               <BarChart3 className="size-4" aria-hidden /> Semana e mês
             </TabsTrigger>
+            <TabsTrigger value="calendario" className="gap-1.5">
+              <CalendarDays className="size-4" aria-hidden /> Calendário e relatório
+            </TabsTrigger>
             <TabsTrigger value="alunos" className="gap-1.5">
               <IdCard className="size-4" aria-hidden /> Fichas dos alunos
             </TabsTrigger>
@@ -57,6 +61,9 @@ function LaboratorioPage() {
                 <ControleLaboratorio dados={dados} />
               </CardContent>
             </Card>
+          </TabsContent>
+          <TabsContent value="calendario">
+            <CalendarioLab />
           </TabsContent>
           <TabsContent value="alunos">
             <BuscaAlunos />

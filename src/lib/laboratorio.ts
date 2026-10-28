@@ -386,3 +386,46 @@ export function useSessoesLab() {
 
   return { sessoes, erro, carregando, recarregar };
 }
+
+/* ───────────────────────── situação de cada aluno ───────────────────────── */
+
+export interface SituacaoAluno {
+  /** Ainda não foi ao laboratório neste mês. */
+  nunca: boolean;
+  /** Já foi em outro dia desta semana (a marcação de hoje não conta). */
+  naSemana: boolean;
+  /** Foi mais vezes no mês do que a maioria dos colegas. */
+  acima: boolean;
+  semana: number;
+  mes: number;
+  hoje: boolean;
+}
+
+/** Média de idas no mês (dias distintos por aluno) entre todos os alunos cadastrados. */
+export function mediaIdasNoMes(sessoes: SessaoLab[], totalAlunos: number, hoje: string): number {
+  if (totalAlunos === 0) return 0;
+  const mes = hoje.slice(0, 7);
+  const pares = new Set(
+    sessoes.filter((s) => s.data.slice(0, 7) === mes).map((s) => `${s.alunoId}|${s.data}`),
+  );
+  return pares.size / totalAlunos;
+}
+
+/** "Acima": pelo menos 2 idas e mais que a média arredondada para cima. */
+export function situacaoDoAluno(
+  sessoes: SessaoLab[],
+  alunoId: string,
+  hoje: string,
+  media: number,
+): SituacaoAluno {
+  const uso = usoDoAluno(sessoes, alunoId, hoje);
+  const semana = uso.semana - (uso.hoje ? 1 : 0);
+  return {
+    nunca: uso.mes === 0,
+    naSemana: semana >= 1,
+    acima: uso.mes >= Math.max(2, Math.ceil(media) + 1),
+    semana,
+    mes: uso.mes - (uso.hoje ? 1 : 0),
+    hoje: uso.hoje,
+  };
+}

@@ -1,4 +1,14 @@
-import { AlertTriangle, CheckCircle2, Clock3, IdCard, Play, Shuffle, Users2 } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  CircleDashed,
+  Clock3,
+  Flame,
+  IdCard,
+  Play,
+  Shuffle,
+  Users2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -28,6 +38,8 @@ import {
   horaNaEscola,
   hojeNaEscola,
   instanteNaEscola,
+  mediaIdasNoMes,
+  situacaoDoAluno,
   marcarGrupo,
   nomeExibido,
   somarMinutos,
@@ -45,7 +57,10 @@ interface Aviso {
   semana: number;
   mes: number;
   hoje: boolean;
+  acima: boolean;
 }
+
+type Filtro = "todos" | "nunca" | "naoSemana" | "naSemana" | "acima";
 
 /**
  * Onde o professor marca os alunos: escolhe a turma, toca nos nomes, define
@@ -71,6 +86,8 @@ export function ControleLaboratorio({
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [busca, setBusca] = useState("");
+  const [filtro, setFiltro] = useState<Filtro>("todos");
+  const [menosPrimeiro, setMenosPrimeiro] = useState(false);
   const [ficha, setFicha] = useState<{ turmaId: string; alunoId: string } | null>(null);
 
   const hoje = hojeNaEscola();
@@ -85,6 +102,46 @@ export function ControleLaboratorio({
       .sort((x, y) => (mista ? x.a.nome.localeCompare(y.a.nome, "pt-BR") : 0));
   }, [mista, turma, turmas, busca]);
   const agora = Date.now();
+
+  const totalAlunos = useMemo(() => turmas.reduce((n, t) => n + t.alunos.length, 0), [turmas]);
+  const media = useMemo(
+    () => mediaIdasNoMes(dados.sessoes, totalAlunos, hoje),
+    [dados.sessoes, totalAlunos, hoje],
+  );
+  const situacoes = useMemo(
+    () => new Map(lista.map(({ a }) => [a.id, situacaoDoAluno(dados.sessoes, a.id, hoje, media)])),
+    [lista, dados.sessoes, hoje, media],
+  );
+  const contagem = useMemo(() => {
+    const c = { todos: lista.length, nunca: 0, naoSemana: 0, naSemana: 0, acima: 0 };
+    for (const { a } of lista) {
+      const x = situacoes.get(a.id)!;
+      if (x.nunca) c.nunca++;
+      if (x.naSemana) c.naSemana++;
+      else c.naoSemana++;
+      if (x.acima) c.acima++;
+    }
+    return c;
+  }, [lista, situacoes]);
+  /** A lista já filtrada pelo atalho escolhido e, se pedido, com quem foi menos primeiro. */
+  const visiveis = useMemo(() => {
+    const ok = lista.filter(({ a }) => {
+      const x = situacoes.get(a.id)!;
+      return (
+        filtro === "todos" ||
+        (filtro === "nunca" && x.nunca) ||
+        (filtro === "naSemana" && x.naSemana) ||
+        (filtro === "naoSemana" && !x.naSemana) ||
+        (filtro === "acima" && x.acima)
+      );
+    });
+    if (!menosPrimeiro) return ok;
+    return [...ok].sort((p, q) => {
+      const x = situacoes.get(p.a.id)!;
+      const y = situacoes.get(q.a.id)!;
+      return x.mes - y.mes || x.semana - y.semana;
+    });
+  }, [lista, situacoes, filtro, menosPrimeiro]);
 
   const noLabAgora = useMemo(
     () =>
@@ -146,13 +203,13 @@ export function ControleLaboratorio({
     return lista
       .filter(({ a }) => escolhidos.has(a.id))
       .map(({ a }) => {
-        const uso = usoDoAluno(dados.sessoes, a.id, hoje);
-        // A ida de hoje é a mesma visita, não uma repetição.
-        const semana = uso.semana - (uso.hoje ? 1 : 0);
-        const mes = uso.mes - (uso.hoje ? 1 : 0);
-        return { nome: a.nome, semana, mes, hoje: uso.hoje };
+        // A ida de hoje é a mesma visita, não uma repetição (situacaoDoAluno já desconta).
+        const x = situacoes.get(a.id)!;
+        return { nome: a.nome, semana: x.semana, mes: x.mes, hoje: x.hoje, acima: x.acima };
       })
-      .filter((x) => x.semana >= LIMITE_IDAS_SEMANA || x.mes >= LIMITE_IDAS_MES || x.hoje);
+      .filter(
+        (x) => x.semana >= LIMITE_IDAS_SEMANA || x.mes >= LIMITE_IDAS_MES || x.hoje || x.acima,
+      );
   }
 
   async function gravar() {
@@ -254,25 +311,25 @@ export function ControleLaboratorio({
         <section aria-label="Escolher os alunos" className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-muted-foreground">
-              2. Quem vai? Toque nos nomes ({escolhidos.size} de {lista.length})
+              2. Quem vai? Toque nos nomes ({escolhidos.size} de {visiveis.length})
             </h3>
             <div className="flex gap-2">
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
-                disabled={mista}
+                disabled={mista && filtro === "todos"}
                 onClick={() =>
                   setEscolhidos(
                     new Set(
-                      lista
+                      visiveis
                         .filter(({ a }) => !a.impedido && !noLabAgora.has(a.id))
                         .map(({ a }) => a.id),
                     ),
                   )
                 }
               >
-                Todos
+                {filtro === "todos" ? "Todos" : "Marcar os filtrados"}
               </Button>
               <Button
                 type="button"
@@ -284,6 +341,69 @@ export function ControleLaboratorio({
               </Button>
             </div>
           </div>
+          <div
+            className="flex flex-wrap items-center gap-1.5"
+            role="group"
+            aria-label="Filtros rápidos"
+          >
+            {(
+              [
+                ["todos", "Todos", null, ""],
+                ["nunca", "Ainda não foram no mês", CircleDashed, "emerald"],
+                ["naoSemana", "Não foram na semana", null, "sky"],
+                ["naSemana", "Já foram na semana", CheckCircle2, "amber"],
+                ["acima", "Acima da média", Flame, "red"],
+              ] as const
+            ).map(([id, rotulo, Icone, cor]) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={filtro === id}
+                onClick={() => setFiltro(id)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition",
+                  filtro === id
+                    ? "border-primary bg-primary text-primary-foreground shadow"
+                    : "bg-card hover:bg-muted",
+                  filtro !== id &&
+                    cor === "emerald" &&
+                    "border-emerald-500/50 text-emerald-700 dark:text-emerald-300",
+                  filtro !== id &&
+                    cor === "sky" &&
+                    "border-sky-500/50 text-sky-700 dark:text-sky-300",
+                  filtro !== id &&
+                    cor === "amber" &&
+                    "border-amber-500/50 text-amber-700 dark:text-amber-300",
+                  filtro !== id &&
+                    cor === "red" &&
+                    "border-red-500/50 text-red-700 dark:text-red-300",
+                )}
+              >
+                {Icone ? <Icone className="size-3.5" aria-hidden /> : null}
+                {rotulo}
+                <span className="rounded-full bg-black/10 px-1.5 tabular-nums dark:bg-white/15">
+                  {contagem[id]}
+                </span>
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-pressed={menosPrimeiro}
+              onClick={() => setMenosPrimeiro((v) => !v)}
+              className={cn(
+                "ml-auto rounded-full border px-3 py-1 text-xs font-semibold transition",
+                menosPrimeiro
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "bg-card hover:bg-muted",
+              )}
+            >
+              Quem foi menos primeiro
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Média da escola neste mês: {media.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}{" "}
+            ida(s) por aluno.
+          </p>
           {mista ? (
             <Input
               value={busca}
@@ -293,16 +413,19 @@ export function ControleLaboratorio({
               className="max-w-sm"
             />
           ) : null}
-          {lista.length === 0 ? (
+          {visiveis.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Esta turma ainda não tem alunos cadastrados.
+              {lista.length === 0
+                ? "Esta turma ainda não tem alunos cadastrados."
+                : "Ninguém se encaixa neste filtro."}
             </p>
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {lista.map(({ a, t }) => {
-                const uso = usoDoAluno(dados.sessoes, a.id, hoje);
-                const semana = uso.semana - (uso.hoje ? 1 : 0);
-                const mes = uso.mes - (uso.hoje ? 1 : 0);
+              {visiveis.map(({ a, t }) => {
+                const sit = situacoes.get(a.id)!;
+                const uso = { hoje: sit.hoje };
+                const semana = sit.semana;
+                const mes = sit.mes;
                 const marcado = escolhidos.has(a.id);
                 const ocupado = noLabAgora.has(a.id);
                 const bloqueado = Boolean(a.impedido) || ocupado;
@@ -315,6 +438,14 @@ export function ControleLaboratorio({
                       onClick={() => alternar(a.id)}
                       className={cn(
                         "flex w-full flex-col gap-1.5 rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50",
+                        "border-l-4",
+                        sit.acima
+                          ? "border-l-red-500"
+                          : sit.naSemana
+                            ? "border-l-amber-500"
+                            : sit.nunca
+                              ? "border-l-emerald-500"
+                              : "border-l-sky-500",
                         marcado
                           ? "border-primary bg-primary/25 font-semibold ring-2 ring-primary"
                           : "bg-card hover:bg-muted/50",
@@ -338,6 +469,21 @@ export function ControleLaboratorio({
                         ) : null}
                         {!ocupado && uso.hoje ? (
                           <Badge variant="secondary">já marcado hoje</Badge>
+                        ) : null}
+                        {sit.nunca ? (
+                          <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
+                            ainda não foi no mês
+                          </Badge>
+                        ) : null}
+                        {sit.naSemana ? (
+                          <Badge className="bg-amber-500 text-black hover:bg-amber-500">
+                            já foi nesta semana
+                          </Badge>
+                        ) : null}
+                        {sit.acima ? (
+                          <Badge className="bg-red-600 text-white hover:bg-red-600">
+                            acima da média
+                          </Badge>
                         ) : null}
                         <Badge
                           variant="outline"
@@ -524,6 +670,7 @@ export function ControleLaboratorio({
                       {x.hoje ? "já está marcado hoje · " : ""}
                       {x.semana >= LIMITE_IDAS_SEMANA ? `${x.semana}× nesta semana · ` : ""}
                       {x.mes >= LIMITE_IDAS_MES ? `${x.mes}× neste mês` : ""}
+                      {x.acima ? " · foi mais que a maioria da escola" : ""}
                     </li>
                   ))}
                 </ul>
