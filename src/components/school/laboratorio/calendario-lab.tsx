@@ -34,7 +34,12 @@ const chave = (d: Date) =>
 const dataBR = (c: string) => c.split("-").reverse().join("/");
 const dataCurta = (c: string) => c.slice(5).split("-").reverse().join("/");
 const minutosDe = (s: SessaoLab) =>
-  Math.round((new Date(s.fim).getTime() - new Date(s.inicio).getTime()) / 60_000);
+  Math.max(
+    0,
+    Math.round(
+      (new Date(s.fim).getTime() - new Date(s.inicio).getTime()) / 60_000 - s.pausaSegundos / 60,
+    ),
+  );
 const textoMin = (m: number) =>
   m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`;
 

@@ -234,8 +234,10 @@ function Index() {
                         <span className="text-sm text-white/75">até {horaNaEscola(g.fim)}</span>
                       </p>
                       <p className="mt-0.5 text-sm text-white/70">
-                        {g.alunos.length} aluno{g.alunos.length === 1 ? "" : "s"} · faltam{" "}
-                        {textoRestante(new Date(g.fim).getTime() - agora)}
+                        {g.alunos.length} aluno{g.alunos.length === 1 ? "" : "s"} ·{" "}
+                        {g.pausadoEm
+                          ? "aula pausada"
+                          : `faltam ${textoRestante(new Date(g.fim).getTime() - agora)}`}
                       </p>
                       <p className="mt-1 truncate text-xs text-white/60">
                         {g.turmaId === "mista"

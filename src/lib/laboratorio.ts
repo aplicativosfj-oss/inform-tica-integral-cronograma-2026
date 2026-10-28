@@ -24,6 +24,12 @@ export interface SessaoLab {
   inicio: string;
   fim: string;
   criadoEm: string;
+  /** Quando a aula foi pausada (null = rodando). Enquanto pausada, o relógio fica parado. */
+  pausadoEm: string | null;
+  /** Soma, em segundos, das pausas já encerradas. */
+  pausaSegundos: number;
+  /** Justificativa de quem parou a aula antes da hora. */
+  motivoParada: string | null;
 }
 
 interface Linha {
@@ -37,6 +43,9 @@ interface Linha {
   inicio: string;
   fim: string;
   criado_em: string;
+  pausado_em?: string | null;
+  pausa_segundos?: number | null;
+  motivo_parada?: string | null;
 }
 
 const deLinha = (l: Linha): SessaoLab => ({
@@ -50,6 +59,9 @@ const deLinha = (l: Linha): SessaoLab => ({
   inicio: l.inicio,
   fim: l.fim,
   criadoEm: l.criado_em,
+  pausadoEm: l.pausado_em ?? null,
+  pausaSegundos: l.pausa_segundos ?? 0,
+  motivoParada: l.motivo_parada ?? null,
 });
 
 /* ───────────────────────── datas e horas ───────────────────────── */
@@ -132,9 +144,17 @@ export function textoRestante(ms: number): string {
 
 export type EstadoSessao = "agendada" | "ao-vivo" | "encerrada";
 
-export function estadoDaSessao(s: Pick<SessaoLab, "inicio" | "fim">, agora: number): EstadoSessao {
-  if (new Date(s.fim).getTime() <= agora) return "encerrada";
-  if (new Date(s.inicio).getTime() > agora) return "agendada";
+type ComPausa = Pick<SessaoLab, "inicio" | "fim"> & { pausadoEm?: string | null | undefined };
+
+/** Instante que vale para a contagem: parado no momento da pausa enquanto a aula está pausada. */
+export function instanteEfetivo(s: ComPausa, agora: number): number {
+  return s.pausadoEm ? Math.min(agora, new Date(s.pausadoEm).getTime()) : agora;
+}
+
+export function estadoDaSessao(s: ComPausa, agora: number): EstadoSessao {
+  const t = instanteEfetivo(s, agora);
+  if (new Date(s.fim).getTime() <= t) return "encerrada";
+  if (new Date(s.inicio).getTime() > t) return "agendada";
   return "ao-vivo";
 }
 
@@ -144,6 +164,7 @@ export interface GrupoLab {
   turmaRotulo: string;
   inicio: string;
   fim: string;
+  pausadoEm: string | null;
   alunos: { id: string; nome: string; turmaId: string; turmaRotulo: string }[];
 }
 
@@ -171,6 +192,7 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
         turmaRotulo: s.turmaRotulo,
         inicio: s.inicio,
         fim: s.fim,
+        pausadoEm: s.pausadoEm,
         alunos: [
           { id: s.alunoId, nome: s.alunoNome, turmaId: s.turmaId, turmaRotulo: s.turmaRotulo },
         ],
@@ -307,16 +329,84 @@ export async function marcarGrupo(entrada: {
   if (error) throw new Error(eTabelaAusente(error) ? TABELA_AUSENTE : error.message);
 }
 
+const COLUNA_AUSENTE =
+  "Falta rodar o SQL novo do laboratório no Supabase (arquivo supabase/laboratorio.sql).";
+
+function erroDeColuna(erro: { message?: string; code?: string }): Error {
+  const m = erro.message ?? "";
+  return new Error(
+    /pausado_em|pausa_segundos|motivo_parada/.test(m) || erro.code === "42703"
+      ? COLUNA_AUSENTE
+      : m || "Não foi possível concluir.",
+  );
+}
+
+/** Congela a contagem do grupo no instante do clique. */
+export async function pausarGrupo(grupoId: string): Promise<void> {
+  const { error } = await supabase
+    .from("laboratorio_sessoes")
+    .update({ pausado_em: new Date().toISOString() })
+    .eq("grupo_id", grupoId)
+    .is("pausado_em", null);
+  if (error) throw erroDeColuna(error);
+}
+
+/** Retoma: o fim anda para frente pelo tempo parado, e a contagem segue de onde estava. */
+export async function retomarGrupo(grupoId: string): Promise<void> {
+  const lidas = await supabase
+    .from("laboratorio_sessoes")
+    .select("id, fim, pausado_em, pausa_segundos")
+    .eq("grupo_id", grupoId)
+    .not("pausado_em", "is", null);
+  if (lidas.error) throw erroDeColuna(lidas.error);
+  const agora = Date.now();
+  for (const l of (lidas.data ?? []) as {
+    id: string;
+    fim: string;
+    pausado_em: string;
+    pausa_segundos: number | null;
+  }[]) {
+    const parado = Math.max(0, agora - new Date(l.pausado_em).getTime());
+    const { error } = await supabase
+      .from("laboratorio_sessoes")
+      .update({
+        fim: new Date(new Date(l.fim).getTime() + parado).toISOString(),
+        pausado_em: null,
+        pausa_segundos: (l.pausa_segundos ?? 0) + Math.round(parado / 1000),
+      })
+      .eq("id", l.id);
+    if (error) throw erroDeColuna(error);
+  }
+}
+
 /** Encerra o grupo agora: quem já começou termina neste instante; quem ainda não começou é desmarcado. */
-export async function encerrarGrupo(grupoId: string): Promise<void> {
+export async function encerrarGrupo(grupoId: string, motivo?: string): Promise<void> {
   const agora = new Date().toISOString();
+  if (motivo) {
+    // Grupo pausado: a aula termina no instante congelado, não agora.
+    const pausados = await supabase
+      .from("laboratorio_sessoes")
+      .select("id, pausado_em")
+      .eq("grupo_id", grupoId)
+      .not("pausado_em", "is", null);
+    if (pausados.error) throw erroDeColuna(pausados.error);
+    for (const l of (pausados.data ?? []) as { id: string; pausado_em: string }[]) {
+      const r = await supabase
+        .from("laboratorio_sessoes")
+        .update({ fim: l.pausado_em, pausado_em: null, motivo_parada: motivo.trim() })
+        .eq("id", l.id);
+      if (r.error) throw erroDeColuna(r.error);
+    }
+  }
   const a = await supabase
     .from("laboratorio_sessoes")
-    .update({ fim: agora })
+    .update(
+      motivo ? { fim: agora, pausado_em: null, motivo_parada: motivo.trim() } : { fim: agora },
+    )
     .eq("grupo_id", grupoId)
     .lte("inicio", agora)
     .gt("fim", agora);
-  if (a.error) throw new Error(a.error.message);
+  if (a.error) throw erroDeColuna(a.error);
   const b = await supabase
     .from("laboratorio_sessoes")
     .delete()

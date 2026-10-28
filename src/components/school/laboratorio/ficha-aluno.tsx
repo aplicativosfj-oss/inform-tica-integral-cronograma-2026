@@ -40,7 +40,12 @@ export const rotuloTurma = (serie: string, letra: string) =>
 
 const dataBR = (chave: string) => chave.split("-").reverse().join("/");
 const minutosDe = (s: SessaoLab) =>
-  Math.round((new Date(s.fim).getTime() - new Date(s.inicio).getTime()) / 60_000);
+  Math.max(
+    0,
+    Math.round(
+      (new Date(s.fim).getTime() - new Date(s.inicio).getTime()) / 60_000 - s.pausaSegundos / 60,
+    ),
+  );
 const textoMinutos = (m: number) =>
   m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min`;
 const nomeDoMes = (ym: string) => {
@@ -366,6 +371,11 @@ export function FichaAluno({
                             <Clock3 className="size-3.5" aria-hidden /> {horaNaEscola(s.inicio)}–
                             {horaNaEscola(s.fim)} · {textoMinutos(minutosDe(s))}
                             <Badge variant="outline">{s.turmaRotulo}</Badge>
+                            {s.motivoParada ? (
+                              <span className="italic" title="Justificativa de quem parou a aula">
+                                parada: {s.motivoParada}
+                              </span>
+                            ) : null}
                           </span>
                         </li>
                       ))}

@@ -76,3 +76,20 @@ create policy "laboratorio: gestao apaga"
   on public.laboratorio_sessoes for delete
   to authenticated
   using (true);
+
+-- ============================================================
+-- PAUSAR E PARAR A AULA (acrescentado depois)
+-- pausado_em: quando a aula foi pausada (null = rodando).
+-- pausa_segundos: soma das pausas já encerradas.
+-- motivo_parada: justificativa de quem parou a aula antes da hora.
+-- O limite de duração sobe para 8 h porque a pausa empurra o horário de fim.
+-- ============================================================
+alter table public.laboratorio_sessoes
+  add column if not exists pausado_em     timestamptz,
+  add column if not exists pausa_segundos integer not null default 0,
+  add column if not exists motivo_parada  text;
+
+alter table public.laboratorio_sessoes
+  drop constraint if exists laboratorio_duracao_maxima;
+alter table public.laboratorio_sessoes
+  add constraint laboratorio_duracao_maxima check (fim - inicio <= interval '8 hours');

@@ -1,21 +1,22 @@
-import { GraduationCap, MonitorSmartphone, Shuffle, Square, Trash2 } from "lucide-react";
+import { GraduationCap, MonitorSmartphone, Shuffle, Trash2 } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
+import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
+import { ControleAula } from "@/components/school/laboratorio/controle-aula";
+import { RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/app-store";
 import {
-  encerrarGrupo,
   horaNaEscola,
+  instanteEfetivo,
   nomeExibido,
   removerGrupo,
-  textoRestante,
   type GrupoLab,
 } from "@/lib/laboratorio";
+import { cn } from "@/lib/utils";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
-
-const RAIO = 34;
-const CIRCUNFERENCIA = 2 * Math.PI * RAIO;
+import { imagemDaSerie } from "@/lib/serie-imagens";
 
 function iniciais(nome: string) {
   const p = nome
@@ -45,7 +46,8 @@ export function PalcoGrupo({
   const { turmas } = useAppStore();
   const ini = new Date(g.inicio).getTime();
   const fim = new Date(g.fim).getTime();
-  const passado = Math.min(1, Math.max(0, (agora - ini) / (fim - ini)));
+  const efetivo = instanteEfetivo(g, agora);
+  const pausada = g.pausadoEm !== null;
   const mista = g.turmaId === "mista";
 
   /** Turmas presentes no grupo, com professor e quantos alunos cada uma trouxe. */
@@ -67,19 +69,32 @@ export function PalcoGrupo({
       ? turmas.find((t) => t.id === turmaId)?.alunos.find((a) => a.id === alunoId)?.foto
       : undefined;
 
-  async function agir(acao: "encerrar" | "remover") {
+  async function remover() {
     try {
-      if (acao === "encerrar") await encerrarGrupo(g.grupoId);
-      else await removerGrupo(g.grupoId);
-      toast.success(acao === "encerrar" ? "Grupo encerrado." : "Marcação removida.");
+      await removerGrupo(g.grupoId);
+      toast.success("Marcação removida.");
       aoMudar();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível concluir.");
     }
   }
 
+  const serieDaImagem = mista ? null : turmas.find((t) => t.id === g.turmaId)?.serie;
+  const foto = serieDaImagem ? imagemDaSerie(serieDaImagem) : labFotoImg;
+
   return (
     <article className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink via-ink to-primary/50 p-4 text-white shadow-xl sm:p-5">
+      <img
+        src={foto}
+        alt=""
+        aria-hidden
+        loading="lazy"
+        className="absolute inset-0 -z-20 size-full object-cover opacity-40 transition-transform duration-[2500ms] ease-out hover:scale-105"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10 bg-gradient-to-br from-ink/90 via-ink/80 to-primary/60"
+      />
       <div aria-hidden className="fundo-pixel absolute inset-0 -z-10 opacity-20" />
       <div
         aria-hidden
@@ -87,43 +102,20 @@ export function PalcoGrupo({
       />
 
       <header className="flex flex-wrap items-center gap-4">
-        <div className="relative size-[84px] shrink-0">
-          <svg viewBox="0 0 84 84" className="size-full -rotate-90" aria-hidden>
-            <circle
-              cx="42"
-              cy="42"
-              r={RAIO}
-              fill="none"
-              strokeWidth="6"
-              className="stroke-white/15"
-            />
-            <circle
-              cx="42"
-              cy="42"
-              r={RAIO}
-              fill="none"
-              strokeWidth="6"
-              strokeLinecap="round"
-              className="stroke-mint transition-[stroke-dashoffset] duration-1000"
-              strokeDasharray={CIRCUNFERENCIA}
-              strokeDashoffset={CIRCUNFERENCIA * passado}
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center leading-tight">
-            <span className="font-heading text-sm font-bold tabular-nums">
-              {textoRestante(fim - agora)}
-            </span>
-            <span className="text-[10px] uppercase tracking-wider text-white/60">restam</span>
-          </div>
-        </div>
+        <RelogioAula inicioMs={ini} fimMs={fim} agoraMs={efetivo} pausada={pausada} tamanho={168} />
 
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-mint">
             <span className="relative flex size-2.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+              <span
+                className={cn(
+                  "absolute inline-flex size-full rounded-full bg-emerald-400 opacity-70",
+                  !pausada && "animate-ping",
+                )}
+              />
               <span className="relative inline-flex size-2.5 rounded-full bg-emerald-400" />
             </span>
-            Ao vivo · {horaNaEscola(g.inicio)} às {horaNaEscola(g.fim)}
+            {pausada ? "Pausada" : "Ao vivo"} · {horaNaEscola(g.inicio)} às {horaNaEscola(g.fim)}
           </p>
           <h3 className="mt-1 flex flex-wrap items-center gap-2 font-heading text-2xl font-extrabold sm:text-3xl">
             {mista ? <Shuffle className="size-6 text-sun" aria-hidden /> : null}
@@ -140,22 +132,20 @@ export function PalcoGrupo({
           ) : null}
         </div>
 
-        {logado ? (
-          <span className="flex gap-1">
-            <Button size="sm" variant="secondary" onClick={() => void agir("encerrar")}>
-              <Square className="size-3.5" /> Encerrar
-            </Button>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-col sm:items-end">
+          <ControleAula g={g} aoMudar={aoMudar} compacto />
+          {logado ? (
             <Button
               size="sm"
               variant="ghost"
-              className="text-white hover:bg-white/10 hover:text-white"
+              className="text-white/70 hover:bg-white/10 hover:text-white"
               aria-label="Remover marcação"
-              onClick={() => void agir("remover")}
+              onClick={() => void remover()}
             >
-              <Trash2 className="size-3.5" />
+              <Trash2 className="size-3.5" /> remover
             </Button>
-          </span>
-        ) : null}
+          ) : null}
+        </div>
       </header>
 
       {mista ? (
