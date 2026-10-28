@@ -85,7 +85,7 @@ export function BarraInferior() {
           parte dela, para a barra não ficar alta demais. */}
       <div
         aria-hidden
-        className="h-[calc(3.625rem_+_max(0.375rem,calc(env(safe-area-inset-bottom)_-_1rem)))] xl:hidden"
+        className="h-[calc(4.125rem_+_max(0.375rem,calc(env(safe-area-inset-bottom)_-_1rem)))] xl:hidden"
       />
       <nav
         aria-label="Navegação principal"
@@ -98,7 +98,7 @@ export function BarraInferior() {
           aria-hidden
           className="h-0.5 bg-gradient-to-r from-violet-500 via-emerald-400 via-40% to-pink-500 opacity-80"
         />
-        <ul className="mx-auto flex h-14 max-w-lg items-stretch px-1">
+        <ul className="mx-auto flex h-16 max-w-lg items-stretch px-1">
           {ITENS.map(({ to, label, Icone, icone, pilula }) => {
             const ativo = to === "/" ? caminho === "/" : caminho.startsWith(to);
             return (
@@ -107,17 +107,17 @@ export function BarraInferior() {
                   to={to}
                   aria-current={ativo ? "page" : undefined}
                   className={cn(
-                    "flex flex-1 flex-col items-center justify-center gap-0.5 text-[10.5px] font-semibold leading-none transition-colors active:scale-95",
+                    "flex flex-1 flex-col items-center justify-center gap-1 text-xs font-semibold leading-none transition-colors active:scale-95",
                     ativo ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <span
                     className={cn(
-                      "flex h-7 w-12 items-center justify-center rounded-full transition-all duration-300",
+                      "flex h-8 w-14 items-center justify-center rounded-full transition-all duration-300",
                       ativo ? cn("bg-gradient-to-br text-white shadow-lg", pilula) : icone,
                     )}
                   >
-                    <Icone className="size-[22px]" strokeWidth={ativo ? 2.3 : 2} aria-hidden />
+                    <Icone className="size-[26px]" strokeWidth={ativo ? 2.3 : 2} aria-hidden />
                   </span>
                   {label}
                 </Link>

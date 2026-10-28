@@ -212,7 +212,7 @@ export function NavBar() {
     }
 
     return (
-      <header className="relative sticky top-0 z-40 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 text-slate-900 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white dark:shadow-black/40">
+      <header className="relative sticky top-0 z-40 border-b border-blue-300/45 pt-[env(safe-area-inset-top)] bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 text-slate-900 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white dark:shadow-black/40">
         {/* Filete da marca rente à base: é o que separa a barra do
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
         <span
@@ -282,7 +282,7 @@ export function NavBar() {
   // sem competir com a atividade.
   if (location.pathname !== "/") {
     return (
-      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-1.5 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 px-2 text-slate-900 shadow-sm backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white sm:px-3">
+      <header className="sticky top-0 z-40 flex h-[calc(3.5rem_+_env(safe-area-inset-top))] shrink-0 pt-[env(safe-area-inset-top)] items-center gap-1.5 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 px-2 text-slate-900 shadow-sm backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white sm:px-3">
         <Button
           variant="ghost"
           size="icon"
@@ -335,7 +335,7 @@ export function NavBar() {
   }
 
   return (
-    <header className="relative sticky top-0 z-40 border-b border-border/60 bg-background/80 text-foreground shadow-sm backdrop-blur-xl">
+    <header className="relative sticky top-0 z-40 border-b border-border/60 pt-[env(safe-area-inset-top)] bg-background/80 text-foreground shadow-sm backdrop-blur-xl">
       {/* Filete da marca rente à base: é o que separa a barra do
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
       <span
@@ -410,7 +410,7 @@ export function NavBar() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="flex w-[19rem] flex-col gap-0 border-l border-border/60 bg-background/95 p-0 backdrop-blur-xl"
+              className="flex w-[19rem] flex-col gap-0 border-l border-border/60 bg-background/95 p-0 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] backdrop-blur-xl [&>button.absolute]:top-[calc(1rem_+_env(safe-area-inset-top))]"
             >
               {/* Cabeçalho do menu: marca da escola, para o painel lateral ter
                   a mesma identidade do topo do site. */}
