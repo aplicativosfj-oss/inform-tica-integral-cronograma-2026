@@ -29,7 +29,7 @@ import {
   turmasNoDia,
   type DiaUtil,
   type Espaco,
-} from "@/lib/mapa-da-pausa";
+} from "@/lib/entre-turnos";
 import { cn } from "@/lib/utils";
 
 /** Cor e ícone de cada espaço: os mesmos no desenho, nas etiquetas e no PDF. */
@@ -71,9 +71,9 @@ const VISUAL: Record<
 };
 
 const ORDEM: Espaco[] = ["aula", "filme", "jogos"];
-const CAMINHO = "/mapa-da-pausa";
+const CAMINHO = "/entre-turnos";
 const TEXTO_COMPARTILHAR =
-  "Mapa da Pausa: onde cada turma da Escola Dr. Eiraldo fica no intervalo das 11h às 13h e quem cuida dela.";
+  "Entre Turnos: onde cada turma da Escola Dr. Eiraldo fica no intervalo das 11h às 13h e quem cuida dela.";
 
 /** Etiqueta curta de um espaço: ícone + nome. */
 function Etiqueta({ espaco, curta = false }: { espaco: Espaco; curta?: boolean }) {
@@ -109,13 +109,13 @@ const CHOQUES = TURMAS_PAUSA.flatMap((t) =>
 );
 
 /**
- * Página pública "Mapa da Pausa": o intervalo das 11h às 13h explicado para
+ * Página pública "Entre Turnos": o intervalo das 11h às 13h explicado para
  * famílias, equipe e comunidade. Abre com os três espaços desenhados, mostra
  * onde cada turma está no dia escolhido (hoje, por padrão), o quadro da
  * semana inteira e quem acompanha cada turma. O PDF sai de uma versão
  * própria para impressão, em uma folha A4 deitada.
  */
-export function MapaDaPausa() {
+export function EntreTurnos() {
   const hoje = useHoje();
   const [dia, setDia] = useState<DiaUtil>(1);
   const [montado, setMontado] = useState(false);
@@ -146,12 +146,12 @@ export function MapaDaPausa() {
               depois do almoço
             </div>
             <h1 className="mt-4 text-balance text-[clamp(2.4rem,6vw,4rem)] font-extrabold leading-[1.02] tracking-tight">
-              Mapa da <span className="text-sun">Pausa</span>
+              Entre <span className="text-sun">Turnos</span>
             </h1>
             <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-white/80 sm:text-lg">
-              Onde cada turma descansa, vai ao cinema ou brinca no intervalo do almoço, e quem cuida
-              dela em cada dia. Um guia para famílias, professores, mediadores, cuidadores, gestão e
-              comunidade.
+              O que acontece entre a manhã e a tarde: onde cada turma descansa, vai ao cinema ou
+              brinca no intervalo do almoço, e quem cuida dela em cada dia. Um guia para famílias,
+              professores, mediadores, cuidadores, gestão e comunidade.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-2.5">
               <a
@@ -564,13 +564,13 @@ export function MapaDaPausa() {
  */
 function VersaoImpressa() {
   return (
-    <div id="mapa-pausa-impressao" className="hidden bg-white text-slate-900 print:block">
+    <div id="entre-turnos-impressao" className="hidden bg-white text-slate-900 print:block">
       <style>{`
         @page { size: A4 landscape; margin: 10mm; }
         @media print {
-          body > *:not(#mapa-pausa-impressao) { display: none !important; }
+          body > *:not(#entre-turnos-impressao) { display: none !important; }
           body { background: #fff !important; }
-          #mapa-pausa-impressao { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          #entre-turnos-impressao { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
       `}</style>
       <header className="flex items-end justify-between border-b-2 border-slate-900 pb-2">
@@ -578,7 +578,7 @@ function VersaoImpressa() {
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
             {ESCOLA}
           </p>
-          <h1 className="text-3xl font-extrabold leading-tight">Mapa da Pausa</h1>
+          <h1 className="text-3xl font-extrabold leading-tight">Entre Turnos</h1>
           <p className="text-xs text-slate-600">
             Onde cada turma fica no intervalo das {HORARIO.inicio} às {HORARIO.fim}, depois do
             almoço, e quem acompanha cada uma.

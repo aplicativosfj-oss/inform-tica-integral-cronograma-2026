@@ -1,5 +1,5 @@
 /**
- * Mapa da Pausa: onde cada turma fica no intervalo das 11h às 13h, depois do
+ * Entre Turnos: onde cada turma fica no intervalo das 11h às 13h, depois do
  * almoço, e quem acompanha cada uma.
  *
  * Fonte: "Cronograma de Atendimento às turmas, durante o período de 2h

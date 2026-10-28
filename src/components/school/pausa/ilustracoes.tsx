@@ -1,4 +1,4 @@
-import type { Espaco } from "@/lib/mapa-da-pausa";
+import type { Espaco } from "@/lib/entre-turnos";
 import { cn } from "@/lib/utils";
 
 /**

@@ -14,6 +14,7 @@ import { Route as AgendaRouteImport } from './routes/agenda'
 import { Route as AvaliacaoRouteImport } from './routes/avaliacao'
 import { Route as CoordenacaoRouteImport } from './routes/coordenacao'
 import { Route as DescritoresRouteImport } from './routes/descritores'
+import { Route as EntreTurnosRouteImport } from './routes/entre-turnos'
 import { Route as EvolucaoRouteImport } from './routes/evolucao'
 import { Route as InfotecaRouteImport } from './routes/infoteca'
 import { Route as LoginRouteImport } from './routes/login'
@@ -89,6 +90,11 @@ const CoordenacaoRoute = CoordenacaoRouteImport.update({
 const DescritoresRoute = DescritoresRouteImport.update({
   id: '/descritores',
   path: '/descritores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntreTurnosRoute = EntreTurnosRouteImport.update({
+  id: '/entre-turnos',
+  path: '/entre-turnos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EvolucaoRoute = EvolucaoRouteImport.update({
@@ -365,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/descritores': typeof DescritoresRoute
+  '/entre-turnos': typeof EntreTurnosRoute
   '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
@@ -423,6 +430,7 @@ export interface FileRoutesByTo {
   '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/descritores': typeof DescritoresRoute
+  '/entre-turnos': typeof EntreTurnosRoute
   '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
@@ -482,6 +490,7 @@ export interface FileRoutesById {
   '/avaliacao': typeof AvaliacaoRoute
   '/coordenacao': typeof CoordenacaoRoute
   '/descritores': typeof DescritoresRoute
+  '/entre-turnos': typeof EntreTurnosRoute
   '/evolucao': typeof EvolucaoRoute
   '/infoteca': typeof InfotecaRoute
   '/login': typeof LoginRoute
@@ -542,6 +551,7 @@ export interface FileRouteTypes {
     | '/avaliacao'
     | '/coordenacao'
     | '/descritores'
+    | '/entre-turnos'
     | '/evolucao'
     | '/infoteca'
     | '/login'
@@ -600,6 +610,7 @@ export interface FileRouteTypes {
     | '/avaliacao'
     | '/coordenacao'
     | '/descritores'
+    | '/entre-turnos'
     | '/evolucao'
     | '/infoteca'
     | '/login'
@@ -658,6 +669,7 @@ export interface FileRouteTypes {
     | '/avaliacao'
     | '/coordenacao'
     | '/descritores'
+    | '/entre-turnos'
     | '/evolucao'
     | '/infoteca'
     | '/login'
@@ -717,6 +729,7 @@ export interface RootRouteChildren {
   AvaliacaoRoute: typeof AvaliacaoRoute
   CoordenacaoRoute: typeof CoordenacaoRoute
   DescritoresRoute: typeof DescritoresRoute
+  EntreTurnosRoute: typeof EntreTurnosRoute
   EvolucaoRoute: typeof EvolucaoRoute
   InfotecaRoute: typeof InfotecaRoute
   LoginRoute: typeof LoginRoute
@@ -805,6 +818,13 @@ declare module '@tanstack/react-router' {
       path: '/descritores'
       fullPath: '/descritores'
       preLoaderRoute: typeof DescritoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entre-turnos': {
+      id: '/entre-turnos'
+      path: '/entre-turnos'
+      fullPath: '/entre-turnos'
+      preLoaderRoute: typeof EntreTurnosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/evolucao': {
@@ -1173,6 +1193,7 @@ const rootRouteChildren: RootRouteChildren = {
   AvaliacaoRoute: AvaliacaoRoute,
   CoordenacaoRoute: CoordenacaoRoute,
   DescritoresRoute: DescritoresRoute,
+  EntreTurnosRoute: EntreTurnosRoute,
   EvolucaoRoute: EvolucaoRoute,
   InfotecaRoute: InfotecaRoute,
   LoginRoute: LoginRoute,

@@ -90,7 +90,7 @@ function tituloDaPagina(pathname: string): string {
     "/avaliacao": "Avaliações diagnósticas",
     "/descritores": "Guia de habilidades",
     "/sobre": "Sobre o projeto",
-    "/mapa-da-pausa": "Mapa da Pausa",
+    "/entre-turnos": "Entre Turnos",
     "/login": "Entrar no painel",
     "/tv": "Modo TV",
   };
@@ -107,7 +107,7 @@ const LINKS_MAIS: { to: string; label: string; Icone: LucideIcon }[] = [
   { to: "/coordenacao", label: "Coordenação", Icone: Users2 },
   { to: "/professor", label: "Professor", Icone: Presentation },
   { to: "/mediador", label: "Mediadores", Icone: HandHeart },
-  { to: "/mapa-da-pausa", label: "Mapa da Pausa", Icone: Clock },
+  { to: "/entre-turnos", label: "Entre Turnos", Icone: Clock },
   { to: "/sobre", label: "Sobre", Icone: Info },
 ];
 
@@ -154,7 +154,7 @@ const LINKS = [
   { to: "/aluno", label: "Área do Aluno" },
   { to: "/professor", label: "Professor" },
   { to: "/mediador", label: "Mediadores" },
-  { to: "/mapa-da-pausa", label: "Mapa da Pausa" },
+  { to: "/entre-turnos", label: "Entre Turnos" },
   { to: "/sobre", label: "Sobre" },
 ] as const;
 
@@ -167,7 +167,7 @@ const LINK_ICONS: Record<string, LucideIcon> = {
   "/aluno": GraduationCap,
   "/professor": Presentation,
   "/mediador": HandHeart,
-  "/mapa-da-pausa": Clock,
+  "/entre-turnos": Clock,
   "/sobre": Info,
 };
 
