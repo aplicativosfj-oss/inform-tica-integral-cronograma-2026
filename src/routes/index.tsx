@@ -144,12 +144,16 @@ function Index() {
                 <GraduationCap className="size-4 text-sun" aria-hidden />
                 Escola Dr. Eiraldo Carneiro de França · Feijó, Acre
               </p>
-              <h1 className="mt-[clamp(0.75rem,2.5svh,1.25rem)] text-[clamp(2.1rem,min(8.5vw,9svh),4.6rem)] font-extrabold leading-[1.02] text-white">
+              <h1 className="mt-[clamp(0.75rem,2.5svh,1.25rem)] text-[clamp(2rem,min(7.4vw,8svh),4.1rem)] font-bold leading-[1.18] tracking-[-0.035em] text-white [text-shadow:0_2px_28px_rgb(0_0_0/0.45)]">
                 Todo dia tem criança{" "}
-                <span className="bg-[linear-gradient(transparent_62%,color-mix(in_oklch,var(--color-sun)_85%,transparent)_62%)] px-1">
+                <span className="text-sun underline decoration-mint decoration-wavy decoration-2 underline-offset-[0.18em]">
                   descobrindo o mundo
                 </span>{" "}
-                aqui.
+                aqui
+                <span
+                  aria-hidden
+                  className="ml-1.5 inline-block h-[0.78em] w-[0.1em] translate-y-[0.08em] animate-pulse rounded-sm bg-sun"
+                />
               </h1>
               <p className="mt-[clamp(0.75rem,2.5svh,1.25rem)] max-w-xl text-[clamp(1rem,2.4svh,1.125rem)] leading-relaxed text-white/80">
                 Este é o cantinho da informática da nossa escola. O professor{" "}
