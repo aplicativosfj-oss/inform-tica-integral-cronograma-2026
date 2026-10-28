@@ -86,6 +86,9 @@ const iniciais = (nome: string) => {
 
 const dataCurta = (c: string) => c.slice(5).split("-").reverse().join("/");
 
+/** Quem já foi ao laboratório nesta semana, contando hoje: não pode ser escolhido de novo. */
+const jaFoiNaSemana = (sit: { naSemana: boolean; hoje: boolean }) => sit.naSemana || sit.hoje;
+
 /**
  * Onde o professor marca quem vai ao laboratório, tudo numa janela só: à
  * esquerda as turmas e os alunos (os que estão há mais tempo sem ir vêm na
@@ -183,7 +186,7 @@ export function ControleLaboratorio({
       const x = situacoes.get(a.id)!;
       if (x.prioridade) c.prioridade++;
       if (x.nunca) c.nunca++;
-      if (x.naSemana) c.naSemana++;
+      if (jaFoiNaSemana(x)) c.naSemana++;
       else c.naoSemana++;
       if (x.repetiuSemana) c.repetiu++;
       if (x.acima) c.acima++;
@@ -208,8 +211,8 @@ export function ControleLaboratorio({
         filtro === "todos" ||
         (filtro === "prioridade" && x.prioridade) ||
         (filtro === "nunca" && x.nunca) ||
-        (filtro === "naSemana" && x.naSemana) ||
-        (filtro === "naoSemana" && !x.naSemana) ||
+        (filtro === "naSemana" && jaFoiNaSemana(x)) ||
+        (filtro === "naoSemana" && !jaFoiNaSemana(x)) ||
         (filtro === "repetiu" && x.repetiuSemana) ||
         (filtro === "acima" && x.acima)
       );
@@ -316,7 +319,7 @@ export function ControleLaboratorio({
     const livres = visiveis
       .filter(
         ({ a }) =>
-          !a.impedido && !noLabAgora.has(a.id) && (liberar || !situacoes.get(a.id)!.naSemana),
+          !a.impedido && !noLabAgora.has(a.id) && (liberar || !jaFoiNaSemana(situacoes.get(a.id)!)),
       )
       .map(({ a }) => a.id);
     const base = new Set(escolhidos);
@@ -394,7 +397,7 @@ export function ControleLaboratorio({
     ? turma.alunos.filter((a) => situacoes.get(a.id)!.prioridade).length
     : 0;
   const doTurmaSemana = turma
-    ? turma.alunos.filter((a) => situacoes.get(a.id)!.naSemana).length
+    ? turma.alunos.filter((a) => jaFoiNaSemana(situacoes.get(a.id)!)).length
     : 0;
 
   /** Escolhidos agrupados por turma, para a página de confirmação. */
@@ -619,13 +622,13 @@ export function ControleLaboratorio({
                   const sit = situacoes.get(a.id)!;
                   const marcado = escolhidos.has(a.id);
                   const ocupado = noLabAgora.has(a.id);
-                  const travadoSemana = sit.naSemana && !liberar;
+                  const travadoSemana = jaFoiNaSemana(sit) && !liberar;
                   const noTeto = !marcado && noLimite;
                   const bloqueado = Boolean(a.impedido) || ocupado || travadoSemana || noTeto;
                   const fila = posicaoFila.get(a.id);
                   const ring = sit.repetiuSemana
                     ? "ring-red-500"
-                    : sit.naSemana
+                    : jaFoiNaSemana(sit)
                       ? "ring-amber-500"
                       : sit.prioridade
                         ? "ring-indigo-500"
@@ -639,7 +642,7 @@ export function ControleLaboratorio({
                         onClick={() => alternar(a.id)}
                         title={
                           travadoSemana
-                            ? "Já foi esta semana — ligue “Liberar quem já foi na semana” para escolher"
+                            ? "Já foi ao laboratório esta semana — ligue “Liberar quem já foi na semana” para escolher"
                             : noTeto
                               ? `Limite de ${LIMITE_ALUNOS_LAB} alunos por vez`
                               : undefined
@@ -700,7 +703,9 @@ export function ControleLaboratorio({
                                 no laboratório agora
                               </span>
                             ) : sit.hoje ? (
-                              <span>marcado para hoje</span>
+                              <span className="font-semibold text-amber-600 dark:text-amber-400">
+                                já foi hoje
+                              </span>
                             ) : sit.repetiuSemana ? (
                               <span className="font-semibold text-red-500">
                                 foi {sit.idasSemana}× na semana
