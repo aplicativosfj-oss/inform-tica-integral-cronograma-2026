@@ -119,7 +119,7 @@ function Index() {
           />
           <div
             aria-hidden
-            className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-t from-background to-transparent"
+            className="absolute inset-x-0 bottom-0 -z-10 hidden h-24 bg-gradient-to-t from-background to-transparent dark:block"
           />
 
           <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-4 py-[clamp(1.25rem,5svh,4rem)] sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
