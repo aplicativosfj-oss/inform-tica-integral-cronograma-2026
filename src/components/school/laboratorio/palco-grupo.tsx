@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { toast } from "sonner";
 
 import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
+import { BotaoAusencia } from "@/components/school/laboratorio/ausencia";
 import { ControleAula } from "@/components/school/laboratorio/controle-aula";
 import { RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { Button } from "@/components/ui/button";
@@ -178,7 +179,7 @@ export function PalcoGrupo({
           const foto = fotoDe(a.id, a.turmaId);
           return (
             <li
-              key={a.id}
+              key={a.sessaoId}
               style={{ animationDelay: `${Math.min(i, 14) * 70}ms` }}
               className="lab-aluno group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.07] p-2.5 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/15"
             >
@@ -199,7 +200,7 @@ export function PalcoGrupo({
                   aria-hidden
                 />
               </span>
-              <span className="min-w-0">
+              <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold">
                   {nomeExibido(a.nome, logado)}
                 </span>
@@ -207,6 +208,16 @@ export function PalcoGrupo({
                   {mista ? a.turmaRotulo : "no computador"}
                 </span>
               </span>
+              {logado ? (
+                <BotaoAusencia
+                  sessaoId={a.sessaoId}
+                  nome={a.nome}
+                  ausencia={a.ausencia}
+                  ausenciaMotivo={a.ausenciaMotivo}
+                  aoMudar={aoMudar}
+                  className="relative shrink-0 text-white"
+                />
+              ) : null}
             </li>
           );
         })}

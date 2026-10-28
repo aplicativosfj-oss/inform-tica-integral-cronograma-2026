@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { BotaoAusencia } from "@/components/school/laboratorio/ausencia";
 import { FichaAluno, rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   agruparSessoes,
   carregarSessoes,
   fimDaSemana,
+  foiAoLab,
   horaNaEscola,
   hojeNaEscola,
   inicioDaSemana,
@@ -96,26 +98,30 @@ export function CalendarioLab() {
   const [mes, setMes] = useState(hoje.slice(0, 7));
   const [dia, setDia] = useState(hoje);
   const [periodo, setPeriodo] = useState<"mes" | "semana">("mes");
-  const [sessoes, setSessoes] = useState<SessaoLab[] | null>(null);
+  /** Todas as marcações, inclusive faltas; `sessoes` são só as idas. */
+  const [todas, setTodas] = useState<SessaoLab[] | null>(null);
+  const [versao, setVersao] = useState(0);
+  const sessoes = useMemo(() => todas?.filter(foiAoLab) ?? null, [todas]);
   const [erro, setErro] = useState<string | null>(null);
   const [ficha, setFicha] = useState<{ turmaId: string; alunoId: string } | null>(null);
 
   useEffect(() => {
     let vivo = true;
-    setSessoes(null);
     setErro(null);
     // Carrega desde a segunda-feira da primeira semana da grade, para a semana não ficar cortada.
     carregarSessoes(inicioDaSemana(`${mes}-01`))
-      .then((s) => vivo && setSessoes(s))
+      .then((s) => vivo && setTodas(s))
       .catch((e: Error) => {
         if (!vivo) return;
         setErro(e.message);
-        setSessoes([]);
+        setTodas([]);
       });
     return () => {
       vivo = false;
     };
-  }, [mes]);
+  }, [mes, versao]);
+
+  useEffect(() => setTodas(null), [mes]);
 
   const grade = useMemo(() => diasDaGrade(mes), [mes]);
   const porDia = useMemo(() => {
@@ -171,8 +177,8 @@ export function CalendarioLab() {
     return dias;
   }, [de, ate, hoje, porDia]);
 
-  const sessoesDoDia = porDia.get(dia) ?? [];
-  const gruposDoDia = agruparSessoes(sessoesDoDia);
+  // O dia escolhido mostra também quem faltou, para registrar ou desfazer a falta.
+  const gruposDoDia = agruparSessoes((todas ?? []).filter((s) => s.data === dia));
 
   function baixarCsv() {
     const linhas = [["Turma", "Aluno", "Dias no laboratório", "Minutos", "Última ida", "Situação"]];
@@ -337,15 +343,26 @@ export function CalendarioLab() {
                     </p>
                     <ul className="mt-1.5 flex flex-wrap gap-1.5">
                       {g.alunos.map((a) => (
-                        <li key={a.id}>
+                        <li key={a.sessaoId} className="flex items-center gap-1">
                           <button
                             type="button"
                             onClick={() => setFicha({ turmaId: a.turmaId, alunoId: a.id })}
-                            className="rounded-full border bg-background px-2.5 py-0.5 text-xs hover:border-primary hover:text-primary"
+                            title={a.ausenciaMotivo ?? undefined}
+                            className={cn(
+                              "rounded-full border bg-background px-2.5 py-0.5 text-xs hover:border-primary hover:text-primary",
+                              a.ausencia && "text-muted-foreground line-through",
+                            )}
                           >
                             {a.nome}
                             {g.turmaId === "mista" ? ` · ${a.turmaRotulo}` : ""}
                           </button>
+                          <BotaoAusencia
+                            sessaoId={a.sessaoId}
+                            nome={a.nome}
+                            ausencia={a.ausencia}
+                            ausenciaMotivo={a.ausenciaMotivo}
+                            aoMudar={() => setVersao((v) => v + 1)}
+                          />
                         </li>
                       ))}
                     </ul>

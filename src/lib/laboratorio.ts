@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { NOMES_NA_HOME } from "@/lib/recursos";
 import { FUSO_ESCOLA, agoraNaEscola, toDateKey } from "@/lib/schedule-engine";
@@ -10,6 +10,14 @@ import { supabase } from "@/lib/supabase-client";
  * home quem está lá agora e conta quantas vezes cada aluno já foi na semana
  * e no mês. Tabela: supabase/laboratorio.sql.
  */
+
+/** Por que um aluno marcado não ficou no laboratório. */
+export type TipoAusencia = "faltou" | "nao_autorizado";
+
+export const ROTULO_AUSENCIA: Record<TipoAusencia, string> = {
+  faltou: "Faltou",
+  nao_autorizado: "Professor não autorizou",
+};
 
 export interface SessaoLab {
   id: string;
@@ -30,6 +38,9 @@ export interface SessaoLab {
   pausaSegundos: number;
   /** Justificativa de quem parou a aula antes da hora. */
   motivoParada: string | null;
+  /** Marcado, mas não foi: não conta como ida ao laboratório. */
+  ausencia: TipoAusencia | null;
+  ausenciaMotivo: string | null;
 }
 
 interface Linha {
@@ -46,6 +57,8 @@ interface Linha {
   pausado_em?: string | null;
   pausa_segundos?: number | null;
   motivo_parada?: string | null;
+  ausencia?: TipoAusencia | null;
+  ausencia_motivo?: string | null;
 }
 
 const deLinha = (l: Linha): SessaoLab => ({
@@ -62,7 +75,12 @@ const deLinha = (l: Linha): SessaoLab => ({
   pausadoEm: l.pausado_em ?? null,
   pausaSegundos: l.pausa_segundos ?? 0,
   motivoParada: l.motivo_parada ?? null,
+  ausencia: l.ausencia ?? null,
+  ausenciaMotivo: l.ausencia_motivo ?? null,
 });
+
+/** A marcação valeu como ida (o aluno não faltou nem foi barrado). */
+export const foiAoLab = (s: SessaoLab) => s.ausencia === null;
 
 /* ───────────────────────── datas e horas ───────────────────────── */
 
@@ -198,8 +216,26 @@ export interface GrupoLab {
   fim: string;
   pausadoEm: string | null;
   motivoParada: string | null;
-  alunos: { id: string; nome: string; turmaId: string; turmaRotulo: string }[];
+  alunos: {
+    id: string;
+    nome: string;
+    turmaId: string;
+    turmaRotulo: string;
+    sessaoId: string;
+    ausencia: TipoAusencia | null;
+    ausenciaMotivo: string | null;
+  }[];
 }
+
+const alunoDoGrupo = (s: SessaoLab): GrupoLab["alunos"][number] => ({
+  id: s.alunoId,
+  nome: s.alunoNome,
+  turmaId: s.turmaId,
+  turmaRotulo: s.turmaRotulo,
+  sessaoId: s.id,
+  ausencia: s.ausencia,
+  ausenciaMotivo: s.ausenciaMotivo,
+});
 
 /** Junta as linhas de um mesmo clique ("grupo") em um cartão só. */
 export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
@@ -207,12 +243,7 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
   for (const s of sessoes) {
     const g = mapa.get(s.grupoId);
     if (g) {
-      g.alunos.push({
-        id: s.alunoId,
-        nome: s.alunoNome,
-        turmaId: s.turmaId,
-        turmaRotulo: s.turmaRotulo,
-      });
+      g.alunos.push(alunoDoGrupo(s));
       // Alunos de turmas diferentes no mesmo grupo = aula mista.
       if (g.turmaId !== s.turmaId) {
         g.turmaId = "mista";
@@ -227,9 +258,7 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
         fim: s.fim,
         pausadoEm: s.pausadoEm,
         motivoParada: s.motivoParada,
-        alunos: [
-          { id: s.alunoId, nome: s.alunoNome, turmaId: s.turmaId, turmaRotulo: s.turmaRotulo },
-        ],
+        alunos: [alunoDoGrupo(s)],
       });
   }
   return [...mapa.values()].sort((a, b) => a.inicio.localeCompare(b.inicio));
@@ -303,7 +332,7 @@ export async function carregarSessoes(desde: string): Promise<SessaoLab[]> {
   return todas;
 }
 
-/** Todas as marcações de um mês ("YYYY-MM"), para a coordenação. */
+/** Todas as idas de um mês ("YYYY-MM"), para a coordenação. Faltas não entram. */
 export async function carregarSessoesDoMes(mes: string): Promise<SessaoLab[]> {
   const [y, m] = mes.split("-").map(Number);
   const ultimo = new Date(y!, m!, 0).getDate();
@@ -321,7 +350,7 @@ export async function carregarSessoesDoMes(mes: string): Promise<SessaoLab[]> {
     todas.push(...((data ?? []) as Linha[]).map(deLinha));
     if (!data || data.length < PAGINA) break;
   }
-  return todas;
+  return todas.filter(foiAoLab);
 }
 
 /** Todas as idas de um aluno ao laboratório, da mais recente para a mais antiga. */
@@ -333,7 +362,7 @@ export async function carregarHistoricoAluno(alunoId: string): Promise<SessaoLab
     .order("inicio", { ascending: false })
     .limit(1000);
   if (error) throw new Error(eTabelaAusente(error) ? TABELA_AUSENTE : error.message);
-  return ((data ?? []) as Linha[]).map(deLinha);
+  return ((data ?? []) as Linha[]).map(deLinha).filter(foiAoLab);
 }
 
 export interface PresencaAntiga {
@@ -402,7 +431,7 @@ const COLUNA_AUSENTE =
 function erroDeColuna(erro: { message?: string; code?: string }): Error {
   const m = erro.message ?? "";
   return new Error(
-    /pausado_em|pausa_segundos|motivo_parada/.test(m) || erro.code === "42703"
+    /pausado_em|pausa_segundos|motivo_parada|ausencia/.test(m) || erro.code === "42703"
       ? COLUNA_AUSENTE
       : m || "Não foi possível concluir.",
   );
@@ -488,6 +517,32 @@ export async function removerGrupo(grupoId: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/**
+ * Registra que o aluno marcado não ficou no laboratório: faltou, ou o
+ * professor não autorizou (com o motivo). A marcação fica guardada, mas
+ * deixa de contar como ida.
+ */
+export async function marcarAusencia(
+  sessaoId: string,
+  tipo: TipoAusencia,
+  motivo: string | null,
+): Promise<void> {
+  const { error } = await supabase
+    .from("laboratorio_sessoes")
+    .update({ ausencia: tipo, ausencia_motivo: motivo?.trim() || null })
+    .eq("id", sessaoId);
+  if (error) throw erroDeColuna(error);
+}
+
+/** Desfaz a falta: a marcação volta a contar como ida. */
+export async function desfazerAusencia(sessaoId: string): Promise<void> {
+  const { error } = await supabase
+    .from("laboratorio_sessoes")
+    .update({ ausencia: null, ausencia_motivo: null })
+    .eq("id", sessaoId);
+  if (error) throw erroDeColuna(error);
+}
+
 /** Tira só um aluno de um grupo. */
 export async function removerAlunoDoGrupo(sessaoId: string): Promise<void> {
   const { error } = await supabase.from("laboratorio_sessoes").delete().eq("id", sessaoId);
@@ -512,14 +567,18 @@ const RELER_A_CADA_MS = 15_000;
  * Sessões da semana e do mês, relidas a cada 15 s e quando a aba volta ao
  * foco. `erro` vale `TABELA_AUSENTE` até o script SQL ser rodado no Supabase.
  */
+/**
+ * Marcações recentes do laboratório. `sessoes` traz só quem foi (faltas não
+ * contam nas idas nem ocupam vaga); `ausencias` traz as faltas registradas.
+ */
 export function useSessoesLab() {
-  const [sessoes, setSessoes] = useState<SessaoLab[]>([]);
+  const [todas, setTodas] = useState<SessaoLab[]>([]);
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   const recarregar = useCallback(async () => {
     try {
-      setSessoes(await carregarSessoes(buscarDesde(hojeNaEscola())));
+      setTodas(await carregarSessoes(buscarDesde(hojeNaEscola())));
       setErro(null);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Erro ao carregar o laboratório.");
@@ -541,7 +600,9 @@ export function useSessoesLab() {
     };
   }, [recarregar]);
 
-  return { sessoes, erro, carregando, recarregar };
+  const sessoes = useMemo(() => todas.filter(foiAoLab), [todas]);
+  const ausencias = useMemo(() => todas.filter((s) => !foiAoLab(s)), [todas]);
+  return { sessoes, ausencias, erro, carregando, recarregar };
 }
 
 /* ───────────────────────── situação de cada aluno ───────────────────────── */

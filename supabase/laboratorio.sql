@@ -93,3 +93,20 @@ alter table public.laboratorio_sessoes
   drop constraint if exists laboratorio_duracao_maxima;
 alter table public.laboratorio_sessoes
   add constraint laboratorio_duracao_maxima check (fim - inicio <= interval '8 hours');
+
+-- ============================================================
+-- FALTA E NÃO AUTORIZAÇÃO (acrescentado depois)
+-- ausencia: o aluno foi marcado mas não ficou no laboratório:
+--   'faltou' (não veio) ou 'nao_autorizado' (o professor não liberou).
+-- ausencia_motivo: por que o professor não autorizou.
+-- A marcação fica guardada, mas não conta como ida.
+-- ============================================================
+alter table public.laboratorio_sessoes
+  add column if not exists ausencia        text,
+  add column if not exists ausencia_motivo text;
+
+alter table public.laboratorio_sessoes
+  drop constraint if exists laboratorio_ausencia_valida;
+alter table public.laboratorio_sessoes
+  add constraint laboratorio_ausencia_valida
+  check (ausencia is null or ausencia in ('faltou', 'nao_autorizado'));
