@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   Ban,
+  Cake,
   CalendarDays,
   Clock3,
   MessageSquarePlus,
@@ -32,11 +33,12 @@ import {
   carregarHistoricoAluno,
   carregarPresencasAluno,
   type PresencaAntiga,
+  hojeNaEscola,
   horaNaEscola,
   TABELA_AUSENTE,
   type SessaoLab,
 } from "@/lib/laboratorio";
-import { idadeEmAnos } from "@/lib/profissional-acesso";
+import { infoAniversario, textoIdade } from "@/lib/aniversario";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { imagemDaSerie } from "@/lib/serie-imagens";
 import type { AnotacaoAluno, SituacaoMatricula } from "@/lib/types";
@@ -136,7 +138,7 @@ export function FichaAluno({
   }, [historico]);
 
   if (!turma || !aluno) return null;
-  const idade = idadeEmAnos(aluno.nascimento);
+  const aniv = infoAniversario(aluno.nascimento, hojeNaEscola());
   const antigas = (presencas ?? []).filter(
     (p) => !config.dataInicioOperacao || p.data >= config.dataInicioOperacao,
   );
@@ -212,7 +214,7 @@ export function FichaAluno({
               {aluno.nome}
               <span className="block text-sm font-normal text-muted-foreground">
                 {rotuloTurma(turma.serie, turma.letra)}
-                {idade !== null ? ` · ${idade} anos` : ""}
+                {aniv ? ` · ${textoIdade(aniv)}` : ""}
                 {aluno.nascimento ? ` · nasceu em ${dataBR(aluno.nascimento)}` : ""}
               </span>
             </span>
@@ -234,6 +236,50 @@ export function FichaAluno({
             <Badge variant="outline">{textoMinutos(totalMin)} no total</Badge>
           </DialogDescription>
         </DialogHeader>
+
+        {aniv ? (
+          aniv.hoje ? (
+            <div
+              role="status"
+              className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-fuchsia-600 via-rose-500 to-amber-400 p-4 text-white shadow-lg"
+            >
+              <span
+                aria-hidden
+                className="lab-varredura absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              />
+              <div className="relative flex items-center gap-3">
+                <span className="lab-brilho flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/25 text-white">
+                  <Cake className="size-7" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+                    Hoje é aniversário!
+                  </p>
+                  <p className="font-heading text-lg font-extrabold leading-tight">
+                    {aluno.nome.split(" ")[0]} está completando {aniv.completa}{" "}
+                    {aniv.completa === 1 ? "ano" : "anos"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p
+              className={`flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-sm ${aniv.emDias <= 7 ? "border-fuchsia-500/50 bg-fuchsia-500/10" : "bg-muted/40"}`}
+            >
+              <Cake
+                className={`size-4 ${aniv.emDias <= 7 ? "text-fuchsia-500" : "text-muted-foreground"}`}
+                aria-hidden
+              />
+              <span>
+                Aniversário em <strong>{aniv.diaMes}</strong>
+              </span>
+              <span className="text-muted-foreground">
+                · faz {aniv.completa} {aniv.completa === 1 ? "ano" : "anos"}{" "}
+                {aniv.emDias === 1 ? "amanhã" : `em ${aniv.emDias} dias`}
+              </span>
+            </p>
+          )
+        ) : null}
 
         <section className="space-y-3 rounded-xl border p-4">
           <h3 className="text-sm font-semibold">Dados do aluno</h3>
@@ -681,7 +727,15 @@ export function BuscaAlunos() {
                       )}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium">{a.nome}</span>
+                      <span className="flex items-center gap-1.5 truncate text-sm font-medium">
+                        {a.nome}
+                        {infoAniversario(a.nascimento, hojeNaEscola())?.hoje ? (
+                          <Cake
+                            className="size-4 shrink-0 text-fuchsia-500"
+                            aria-label="aniversariante de hoje"
+                          />
+                        ) : null}
+                      </span>
                       <span className="text-xs text-muted-foreground">
                         {turma ? "toque para abrir a ficha" : rotuloTurma(t.serie, t.letra)}
                         {a.situacao === "transferido" ? " · transferido(a)" : ""}

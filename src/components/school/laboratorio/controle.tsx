@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   ArrowRight,
   AlertTriangle,
+  Cake,
   CheckCircle2,
   Clock3,
   Flame,
@@ -33,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { infoAniversario } from "@/lib/aniversario";
 import { useAppStore } from "@/lib/app-store";
 import { useAuth } from "@/lib/auth-store";
 import {
@@ -673,6 +675,16 @@ export function ControleLaboratorio({
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1.5">
                             <span className="truncate text-sm font-semibold">{a.nome}</span>
+                            {infoAniversario(a.nascimento, hojeNaEscola())?.hoje ? (
+                              <span
+                                className="shrink-0 text-fuchsia-500"
+                                title="Hoje é aniversário!"
+                                role="img"
+                                aria-label="aniversariante de hoje"
+                              >
+                                <Cake className="size-4" aria-hidden />
+                              </span>
+                            ) : null}
                             {fila && fila <= 10 && !marcado ? (
                               <span
                                 className="shrink-0 rounded-md bg-rose-600 px-1.5 text-[10px] font-extrabold text-white"
