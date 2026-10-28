@@ -134,7 +134,7 @@ function Index() {
                   className="ml-1.5 inline-block h-[0.78em] w-[0.1em] translate-y-[0.08em] animate-pulse rounded-sm bg-sun"
                 />
               </h1>
-              <p className="mt-[clamp(0.75rem,2.5svh,1.25rem)] max-w-xl text-[clamp(1rem,2.4svh,1.125rem)] leading-relaxed text-white/80">
+              <p className="mt-[clamp(0.75rem,2.5svh,1.25rem)] max-w-xl rounded-2xl border border-white/15 bg-white/[0.08] px-4 py-3 text-[clamp(1rem,2.4svh,1.125rem)] leading-relaxed text-white/85 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_8px_32px_-12px_rgb(0_0_0/0.5)] sm:px-5 sm:py-4">
                 Este é o cantinho da informática da nossa escola. O professor{" "}
                 {config.professorInformatica} escolhe quem vai, marca quanto tempo cada grupo fica e
                 você acompanha tudo daqui, em tempo real.
@@ -154,7 +154,7 @@ function Index() {
                   asChild
                   size="lg"
                   variant="outline"
-                  className="rounded-full border-white/30 bg-white/10 px-6 text-white backdrop-blur hover:bg-white/20 hover:text-white"
+                  className="rounded-full border-white/25 bg-white/10 px-6 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_8px_32px_-12px_rgb(0_0_0/0.5)] hover:bg-white/20 hover:text-white"
                 >
                   <Link to="/resultados">
                     Como foi o bimestre <ArrowRight />
@@ -165,7 +165,7 @@ function Index() {
               {/* Atalho para o Entre Turnos, o intervalo das 11h às 13h. */}
               <Link
                 to="/entre-turnos"
-                className="group mt-[clamp(0.75rem,2.5svh,1.25rem)] flex max-w-xl items-center gap-3 rounded-2xl border border-sun/40 bg-ink/50 p-2.5 pr-4 backdrop-blur transition-colors hover:border-sun hover:bg-ink/70"
+                className="group mt-[clamp(0.75rem,2.5svh,1.25rem)] flex max-w-xl items-center gap-3 rounded-2xl border border-sun/35 bg-white/[0.08] p-2.5 pr-4 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_8px_32px_-12px_rgb(0_0_0/0.5)] transition-colors hover:border-sun hover:bg-white/[0.14]"
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sun text-sun-foreground">
                   <Clock className="size-5" aria-hidden />
@@ -184,7 +184,7 @@ function Index() {
                 />
               </Link>
 
-              <dl className="mt-[clamp(1rem,3.5svh,2rem)] grid max-w-xl grid-cols-4 divide-x divide-white/15 overflow-hidden rounded-2xl border border-white/20 bg-white/10 backdrop-blur [@media(max-height:640px)]:hidden">
+              <dl className="mt-[clamp(1rem,3.5svh,2rem)] grid max-w-xl grid-cols-4 divide-x divide-white/15 overflow-hidden rounded-2xl border border-white/15 bg-white/[0.08] backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_8px_32px_-12px_rgb(0_0_0/0.5)] [@media(max-height:640px)]:hidden">
                 {[
                   { rotulo: "Turmas", valor: turmas.length },
                   { rotulo: "Alunos", valor: totalAlunos },
