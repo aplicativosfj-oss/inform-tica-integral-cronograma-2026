@@ -24,6 +24,7 @@ import {
 } from "@/lib/laboratorio";
 import { useAppStore } from "@/lib/app-store";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
+import { cn } from "@/lib/utils";
 
 export interface DadosLab {
   sessoes: SessaoLab[];
@@ -134,13 +135,21 @@ function LaboratorioLivre({
   proximo,
   aulasHoje,
   alunosHoje,
+  cheio = false,
 }: {
+  /** Ocupa a altura toda da coluna (home no computador). */
+  cheio?: boolean;
   proximo: GrupoLab | null;
   aulasHoje: number;
   alunosHoje: number;
 }) {
   return (
-    <div className="dark relative isolate overflow-hidden rounded-2xl border border-white/15 text-white shadow-lg">
+    <div
+      className={cn(
+        "dark relative isolate overflow-hidden rounded-2xl border border-white/15 text-white shadow-lg",
+        cheio && "lg:flex lg:h-full lg:flex-col",
+      )}
+    >
       <img
         src={fundoLabLivre}
         alt=""
@@ -151,7 +160,7 @@ function LaboratorioLivre({
         aria-hidden
         className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent"
       />
-      <div className="flex min-h-56 flex-col justify-end gap-3 p-4 sm:p-5">
+      <div className="flex min-h-56 flex-1 flex-col justify-end gap-3 p-4 sm:p-5">
         <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200 backdrop-blur-xl">
           <span className="relative flex size-2">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
@@ -232,11 +241,17 @@ export function PainelLaboratorioAgora({
   dados,
   logado,
   rolar = false,
+  className,
 }: {
   dados: DadosLab;
   logado: boolean;
-  /** Limita a altura à janela e rola por dentro, para a seção caber numa tela. */
+  /**
+   * Cabe na altura de quem o contém (a seção da home tem a altura da janela):
+   * no computador vira duas colunas, o destaque à esquerda e a agenda à
+   * direita, cada uma rolando por dentro.
+   */
   rolar?: boolean;
+  className?: string;
 }) {
   const agora = useAgora(1000);
   const hoje = hojeNaEscola();
@@ -252,9 +267,12 @@ export function PainelLaboratorioAgora({
   ]);
 
   return (
-    <Card id="laboratorio-agora" className="scroll-mt-28">
+    <Card
+      id="laboratorio-agora"
+      className={cn("scroll-mt-28", rolar && "lg:flex lg:flex-col lg:overflow-hidden", className)}
+    >
       {telaCheia.tela}
-      <CardHeader className="px-3 pb-3 sm:px-6">
+      <CardHeader className={cn("px-3 pb-3 sm:px-6", rolar && "lg:shrink-0 lg:pb-4")}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-xl">
             <MonitorSmartphone className="size-5 text-primary" aria-hidden /> No laboratório agora
@@ -271,7 +289,11 @@ export function PainelLaboratorioAgora({
         </div>
       </CardHeader>
       <CardContent
-        className={`space-y-4 px-3 sm:px-6 ${rolar ? "lg:max-h-[calc(100svh-16rem)] lg:min-h-32 lg:overflow-y-auto" : ""}`}
+        className={cn(
+          "space-y-4 px-3 sm:px-6",
+          rolar &&
+            "lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-5 lg:space-y-0",
+        )}
       >
         {dados.erro === TABELA_AUSENTE ? (
           logado ? (
@@ -293,47 +315,69 @@ export function PainelLaboratorioAgora({
           <div className="h-16 animate-pulse rounded-xl bg-muted" />
         ) : (
           <>
-            {aoVivo.length === 0 ? (
-              <LaboratorioLivre
-                proximo={proximos[0] ?? null}
-                aulasHoje={grupos.filter((g) => estado(g) === "encerrada").length}
-                alunosHoje={
-                  new Set(
-                    doDia.filter((s) => s.ausencia === null).map((s) => s.turmaId + s.alunoId),
-                  ).size
-                }
+            <div
+              className={cn(
+                "space-y-3",
+                rolar && "lg:min-h-0 lg:[scrollbar-width:thin] lg:overflow-y-auto lg:pr-1",
+              )}
+            >
+              {aoVivo.length === 0 ? (
+                <LaboratorioLivre
+                  cheio={rolar}
+                  proximo={proximos[0] ?? null}
+                  aulasHoje={grupos.filter((g) => estado(g) === "encerrada").length}
+                  alunosHoje={
+                    new Set(
+                      doDia.filter((s) => s.ausencia === null).map((s) => s.turmaId + s.alunoId),
+                    ).size
+                  }
+                />
+              ) : (
+                <div className={cn("space-y-3", rolar && aoVivo.length === 1 && "lg:h-full")}>
+                  {aoVivo.map((g) => (
+                    <PalcoGrupo
+                      key={g.grupoId}
+                      g={g}
+                      agora={agora}
+                      logado={logado}
+                      aoMudar={() => void dados.recarregar()}
+                      aoTelaCheia={() => telaCheia.abrir(g)}
+                      cheio={rolar && aoVivo.length === 1}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div
+              className={cn(
+                "space-y-4",
+                rolar &&
+                  "lg:flex lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0 lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin]",
+              )}
+            >
+              {proximos.length > 0 ? (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-muted-foreground">Logo mais</h3>
+                  {proximos.map((g) => (
+                    <CartaoGrupo
+                      key={g.grupoId}
+                      g={g}
+                      agora={agora}
+                      logado={logado}
+                      aoMudar={() => void dados.recarregar()}
+                    />
+                  ))}
+                </div>
+              ) : null}
+
+              <SemanaNoLaboratorio
+                sessoes={dados.sessoes}
+                agora={agora}
+                logado={logado}
+                className={cn(rolar && "lg:flex-1")}
               />
-            ) : (
-              <div className="space-y-3">
-                {aoVivo.map((g) => (
-                  <PalcoGrupo
-                    key={g.grupoId}
-                    g={g}
-                    agora={agora}
-                    logado={logado}
-                    aoMudar={() => void dados.recarregar()}
-                    aoTelaCheia={() => telaCheia.abrir(g)}
-                  />
-                ))}
-              </div>
-            )}
-
-            {proximos.length > 0 ? (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-muted-foreground">Logo mais</h3>
-                {proximos.map((g) => (
-                  <CartaoGrupo
-                    key={g.grupoId}
-                    g={g}
-                    agora={agora}
-                    logado={logado}
-                    aoMudar={() => void dados.recarregar()}
-                  />
-                ))}
-              </div>
-            ) : null}
-
-            <SemanaNoLaboratorio sessoes={dados.sessoes} agora={agora} logado={logado} />
+            </div>
           </>
         )}
       </CardContent>

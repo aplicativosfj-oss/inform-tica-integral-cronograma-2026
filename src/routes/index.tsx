@@ -28,7 +28,7 @@ import { MarcaLogo } from "@/components/school/marca";
 import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialog";
 import { CartaoAoVivoHome } from "@/components/school/laboratorio/cartao-ao-vivo-home";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
-import { WeatherWidget } from "@/components/school/weather-widget";
+import { ClimaCompacto } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
 import { BannerEntreTurnos } from "@/components/school/pausa/banner-home";
 import { PageBackground } from "@/components/school/page-background";
@@ -226,25 +226,33 @@ function Index() {
         <BannerEntreTurnos />
 
         {/* ───────── Laboratório ao vivo ───────── */}
-        <section className="secao-janela">
-          {" "}
-          <div className="mx-auto w-full max-w-7xl px-4 py-[clamp(1rem,4svh,2.5rem)] sm:px-6">
-            {" "}
-            <div className="mb-5 max-w-2xl">
-              {" "}
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-primary">Ao vivo</p>
-              <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">
+        {/* Largura toda e altura de uma janela: no computador o painel rola por dentro. */}
+        <section className="secao-janela lg:h-[calc(100svh-4rem)] lg:min-h-[34rem]">
+          <div className="mx-auto flex w-full max-w-[110rem] flex-col px-4 py-[clamp(1rem,3svh,2rem)] sm:px-6 lg:h-full lg:min-h-0 lg:px-8">
+            {/* Clima discreto no canto de cima, à direita. */}
+            <div className="flex items-center justify-between gap-3">
+              <p className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-primary">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                </span>
+                Ao vivo
+              </p>
+              <ClimaCompacto />
+            </div>
+            <div className="mb-4 mt-1 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+              <h2 className="min-w-0 text-2xl font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
                 Quem está no laboratório neste minuto
               </h2>
+              {isAuthenticated ? <MarcarAlunosCartao dados={lab} compacto /> : null}
             </div>
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
-              <PainelLaboratorioAgora dados={lab} logado={isAuthenticated} rolar />
-              <div className="space-y-4">
-                {isAuthenticated ? <MarcarAlunosCartao dados={lab} /> : null}
-                <WeatherWidget />{" "}
-              </div>{" "}
-            </div>{" "}
-          </div>{" "}
+            <PainelLaboratorioAgora
+              dados={lab}
+              logado={isAuthenticated}
+              rolar
+              className="lg:min-h-0 lg:flex-1"
+            />
+          </div>
         </section>
 
         {/* ───────── Como funciona ───────── */}

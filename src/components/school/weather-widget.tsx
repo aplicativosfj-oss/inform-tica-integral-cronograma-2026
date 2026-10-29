@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ceuFeijo from "@/assets/ceu-feijo.svg";
 import { Card, CardContent } from "@/components/ui/card";
 import { gravarCache, lerCache } from "@/lib/offline-queue";
+import { cn } from "@/lib/utils";
 import { categoriaClima, descricaoClima, fetchClima, type Clima } from "@/lib/weather";
 
 const CACHE_KEY = "clima-feijo";
@@ -120,7 +121,8 @@ function Termometro({
   );
 }
 
-export function WeatherWidget() {
+/** Busca o clima de Feijó, com cache para abrir já preenchido e atualização a cada 15 min. */
+function useClima() {
   // Começa nulo nos dois lados (servidor e primeira pintura do cliente) —
   // ler o cache aqui direto no useState fazia a 1ª renderização do cliente já
   // sair com dados que o servidor nunca viu, gerando erro de hidratação.
@@ -158,6 +160,54 @@ export function WeatherWidget() {
       window.clearInterval(id);
     };
   }, []);
+
+  return { clima, erro, carregando };
+}
+
+/**
+ * Versão discreta do clima, uma pílula para o canto de cima de uma seção:
+ * termômetro pequeno, ícone, temperatura e cidade. Detalhes no title.
+ */
+export function ClimaCompacto({ className }: { className?: string }) {
+  const { clima, erro, carregando } = useClima();
+  if (erro && !clima) return null;
+  const titulo = clima
+    ? `${descricaoClima(clima.codigo)} · sensação ${Math.round(clima.sensacao)}°C · umidade ${Math.round(clima.umidade)}% · vento ${Math.round(clima.ventoKmh)} km/h`
+    : "Consultando o clima";
+  return (
+    <div
+      title={titulo}
+      className={cn(
+        "inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card/80 pl-1.5 pr-3 text-sm shadow-sm backdrop-blur",
+        className,
+      )}
+    >
+      <span className="[&_svg]:h-7">
+        <Termometro temperatura={clima?.temperatura ?? null} carregando={carregando && !clima} />
+      </span>
+      {clima ? (
+        <>
+          <IconeClima codigo={clima.codigo} className="size-4" />
+          <span className="font-heading font-extrabold tabular-nums">
+            {Math.round(clima.temperatura)}°C
+          </span>
+          <span className="hidden text-xs text-muted-foreground sm:inline">
+            {descricaoClima(clima.codigo)} · Feijó
+          </span>
+        </>
+      ) : (
+        <span
+          className="h-4 w-12 animate-pulse rounded bg-muted"
+          role="status"
+          aria-label="Consultando o clima"
+        />
+      )}
+    </div>
+  );
+}
+
+export function WeatherWidget() {
+  const { clima, erro, carregando } = useClima();
 
   const horaAtualizada = clima
     ? new Date(clima.atualizadoEm).toLocaleTimeString("pt-BR", {

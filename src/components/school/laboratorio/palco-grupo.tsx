@@ -41,6 +41,19 @@ function useCelular() {
   return celular;
 }
 
+/** Tela de computador (lg para cima): o palco cheio da home ganha relógio maior. */
+function useTelaGrande() {
+  const [grande, setGrande] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const mudou = () => setGrande(mq.matches);
+    mudou();
+    mq.addEventListener("change", mudou);
+    return () => mq.removeEventListener("change", mudou);
+  }, []);
+  return grande;
+}
+
 /**
  * Palco de um grupo que está no laboratório agora: anel com a contagem
  * regressiva, turma(s) e professor(a), e um cartão por aluno. Se os alunos vêm
@@ -53,7 +66,10 @@ export function PalcoGrupo({
   logado,
   aoMudar,
   aoTelaCheia,
+  cheio = false,
 }: {
+  /** Ocupa a altura toda de quem o contém (home no computador): relógio e nomes maiores. */
+  cheio?: boolean;
   g: GrupoLab;
   agora: number;
   logado: boolean;
@@ -63,6 +79,7 @@ export function PalcoGrupo({
 }) {
   const { turmas } = useAppStore();
   const celular = useCelular();
+  const grande = useTelaGrande();
   const ini = new Date(g.inicio).getTime();
   const fim = new Date(g.fim).getTime();
   const efetivo = instanteEfetivo(g, agora);
@@ -105,7 +122,12 @@ export function PalcoGrupo({
   const minutosPassados = Math.min(minutosTotal, Math.max(0, Math.floor((efetivo - ini) / 60_000)));
 
   return (
-    <article className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-ink text-white shadow-xl">
+    <article
+      className={cn(
+        "relative isolate overflow-hidden rounded-3xl border border-white/10 bg-ink text-white shadow-xl",
+        cheio && "lg:flex lg:h-full lg:flex-col",
+      )}
+    >
       <img
         src={foto}
         alt=""
@@ -122,9 +144,19 @@ export function PalcoGrupo({
         className="lab-brilho absolute -left-20 -top-20 -z-10 size-64 rounded-full bg-primary/40 blur-3xl"
       />
 
-      <div className="grid md:grid-cols-[17rem_minmax(0,1fr)]">
+      <div
+        className={cn(
+          "grid md:grid-cols-[17rem_minmax(0,1fr)]",
+          cheio && "lg:min-h-0 lg:flex-1 xl:grid-cols-[19rem_minmax(0,1fr)]",
+        )}
+      >
         {/* Coluna do relógio: tempo, horário e controles da aula. */}
-        <aside className="flex flex-col gap-3 border-b border-white/10 p-4 md:items-center md:gap-4 md:border-b-0 md:border-r md:p-5 md:text-center">
+        <aside
+          className={cn(
+            "flex flex-col gap-3 border-b border-white/10 p-4 md:items-center md:gap-4 md:border-b-0 md:border-r md:p-5 md:text-center",
+            cheio && "lg:justify-center",
+          )}
+        >
           {/* No celular, relógio e dados lado a lado, como num aplicativo. */}
           <div className="flex items-center gap-4 md:flex-col">
             <RelogioAula
@@ -132,7 +164,7 @@ export function PalcoGrupo({
               fimMs={fim}
               agoraMs={efetivo}
               pausada={pausada}
-              tamanho={celular ? 128 : 196}
+              tamanho={celular ? 128 : cheio && grande ? 228 : 196}
             />
             <div className="min-w-0 flex-1 space-y-2 md:w-full md:flex-none">
               <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-mint md:justify-center">
@@ -179,7 +211,7 @@ export function PalcoGrupo({
         </aside>
 
         {/* Coluna da turma e dos alunos. */}
-        <section className="min-w-0 p-4 md:p-5">
+        <section className={cn("min-w-0 p-4 md:p-5", cheio && "lg:overflow-y-auto lg:p-6")}>
           <header className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
               <h3 className="flex flex-wrap items-center gap-2 font-heading text-xl font-extrabold md:text-2xl">
@@ -233,7 +265,14 @@ export function PalcoGrupo({
             </ul>
           ) : null}
 
-          <ul className="mt-3 grid grid-cols-2 gap-1.5 md:mt-4" aria-label="Alunos no laboratório">
+          <ul
+            className={cn(
+              "mt-3 grid grid-cols-2 gap-1.5 md:mt-4",
+              cheio &&
+                "lg:mt-5 lg:gap-2.5 [&_.lab-aluno]:lg:py-3 [&_.lab-aluno_.block.text-xs]:lg:text-base",
+            )}
+            aria-label="Alunos no laboratório"
+          >
             {g.alunos.map((a, i) => {
               const cor = serieClasses(serieIndexPorNumero(a.turmaRotulo));
               const foto = fotoDe(a.id, a.turmaId);

@@ -54,10 +54,12 @@ export function SemanaNoLaboratorio({
   sessoes,
   agora,
   logado,
+  className,
 }: {
   sessoes: SessaoLab[];
   agora: number;
   logado: boolean;
+  className?: string;
 }) {
   const hoje = hojeNaEscola();
   const segunda = inicioDaSemana(hoje);
@@ -91,7 +93,10 @@ export function SemanaNoLaboratorio({
   return (
     // Sempre escuro: foto do laboratório ao fundo e o quadro em vidro fosco.
     <section
-      className="dark relative isolate flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/15 p-3 text-white sm:p-4"
+      className={cn(
+        "dark relative isolate flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/15 p-3 text-white sm:p-4",
+        className,
+      )}
       aria-label="A semana no laboratório"
     >
       <img

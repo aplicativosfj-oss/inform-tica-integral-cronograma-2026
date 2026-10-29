@@ -17,22 +17,35 @@ import {
  * Atalho da home para o professor logado: abre o controle numa janela, sem
  * sair da página, para marcar os alunos e ver o painel mudar na hora.
  */
-export function MarcarAlunosCartao({ dados }: { dados: DadosLab }) {
+export function MarcarAlunosCartao({
+  dados,
+  compacto = false,
+}: {
+  dados: DadosLab;
+  /** Só o botão, para caber no cabeçalho de uma seção. */
+  compacto?: boolean;
+}) {
   const [aberto, setAberto] = useState(false);
   return (
     <>
-      <Card className="border-primary/40 bg-primary/5">
-        <CardContent className="space-y-3 p-4">
-          <p className="text-sm font-semibold">Professor(a), quem vai ao laboratório hoje?</p>
-          <p className="text-sm text-muted-foreground">
-            Escolha a turma, toque nos nomes e diga por quanto tempo. O painel aqui ao lado muda na
-            hora.
-          </p>
-          <Button size="lg" className="w-full" onClick={() => setAberto(true)}>
-            <MonitorSmartphone /> Marcar alunos
-          </Button>
-        </CardContent>
-      </Card>
+      {compacto ? (
+        <Button size="sm" className="h-9 rounded-full px-4" onClick={() => setAberto(true)}>
+          <MonitorSmartphone /> Marcar alunos
+        </Button>
+      ) : (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="space-y-3 p-4">
+            <p className="text-sm font-semibold">Professor(a), quem vai ao laboratório hoje?</p>
+            <p className="text-sm text-muted-foreground">
+              Escolha a turma, toque nos nomes e diga por quanto tempo. O painel aqui ao lado muda
+              na hora.
+            </p>
+            <Button size="lg" className="w-full" onClick={() => setAberto(true)}>
+              <MonitorSmartphone /> Marcar alunos
+            </Button>
+          </CardContent>
+        </Card>
+      )}
       <Dialog open={aberto} onOpenChange={setAberto}>
         <DialogContent className="max-h-[94svh] max-w-6xl overflow-y-auto">
           <DialogHeader>
