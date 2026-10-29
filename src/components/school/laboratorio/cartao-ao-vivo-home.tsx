@@ -23,11 +23,20 @@ import { cn } from "@/lib/utils";
  * laboratório está livre). Tem relógio próprio, de segundo em segundo, para
  * a contagem não pular.
  */
-export function CartaoAoVivoHome({ sessoes, logado }: { sessoes: SessaoLab[]; logado: boolean }) {
+export function CartaoAoVivoHome({
+  sessoes,
+  ausencias = [],
+  logado,
+}: {
+  sessoes: SessaoLab[];
+  /** Faltas, impedimentos e recusas, para a ficha do aluno na tela cheia. */
+  ausencias?: SessaoLab[];
+  logado: boolean;
+}) {
   const { turmas } = useAppStore();
   const agora = useAgora(1000);
   const grupos = agruparSessoes(sessoes.filter((s) => s.data === hojeNaEscola()));
-  const telaCheia = useTelaCheiaAula(grupos, logado);
+  const telaCheia = useTelaCheiaAula(grupos, logado, [...sessoes, ...ausencias]);
   const aoVivo = grupos.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
   const proximo = grupos
     .filter((g) => estadoDaSessao(g, agora) === "agendada")

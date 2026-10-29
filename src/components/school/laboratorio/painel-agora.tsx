@@ -246,7 +246,10 @@ export function PainelLaboratorioAgora({
   const aoVivo = grupos.filter((g) => estado(g) === "ao-vivo");
   const proximos = grupos.filter((g) => estado(g) === "agendada");
   const alunosAgora = new Set(aoVivo.flatMap((g) => g.alunos.map((a) => a.id))).size;
-  const telaCheia = useTelaCheiaAula(grupos, logado);
+  const telaCheia = useTelaCheiaAula(grupos, logado, [
+    ...dados.sessoes,
+    ...(dados.ausencias ?? []),
+  ]);
 
   return (
     <Card id="laboratorio-agora" className="scroll-mt-28">

@@ -19,7 +19,9 @@ import {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { FichaTelaCheia } from "@/components/school/laboratorio/ficha-tela-cheia";
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
+import { MarcaLogo } from "@/components/school/marca";
 import { useAppStore } from "@/lib/app-store";
 import {
   horaNaEscola,
@@ -27,6 +29,7 @@ import {
   nomeExibido,
   useAgora,
   type GrupoLab,
+  type SessaoLab,
 } from "@/lib/laboratorio";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { cn } from "@/lib/utils";
@@ -101,13 +104,19 @@ function useDigitando(frases: string[], porFrase = 6500) {
 export function TelaCheiaAula({
   g,
   logado,
+  historico = [],
   aoFechar,
 }: {
   g: GrupoLab;
   logado: boolean;
+  /** Idas, faltas e recusas dos últimos dias, para a ficha de cada aluno. */
+  historico?: SessaoLab[];
   aoFechar: () => void;
 }) {
-  const { turmas } = useAppStore();
+  const { turmas, config } = useAppStore();
+  const [ficha, setFicha] = useState<GrupoLab["alunos"][number] | null>(null);
+  const fichaAberta = useRef(false);
+  fichaAberta.current = ficha !== null;
   const agora = useAgora(1000);
   const { w, h } = useJanela();
   const [nativa, setNativa] = useState(false);
@@ -186,7 +195,10 @@ export function TelaCheiaAula({
   // Esc fecha; F liga e desliga a tela cheia do navegador.
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !document.fullscreenElement) aoFechar();
+      if (e.key === "Escape" && !document.fullscreenElement) {
+        if (fichaAberta.current) setFicha(null);
+        else aoFechar();
+      }
       if (e.key === "f" || e.key === "F") alternarNativa();
     };
     window.addEventListener("keydown", tecla);
@@ -298,9 +310,10 @@ export function TelaCheiaAula({
         )}
       >
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 backdrop-blur-xl sm:size-11">
-            <MonitorSmartphone className="size-5 text-emerald-300 sm:size-6" aria-hidden />
-          </span>
+          <MarcaLogo
+            tamanho={w >= 640 ? 46 : 38}
+            className="rounded-xl shadow-lg ring-1 ring-white/20"
+          />
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-300 sm:text-xs">
               <span className="relative flex size-2">
@@ -323,7 +336,10 @@ export function TelaCheiaAula({
               </span>
               {acabou ? "Encerrada" : pausada ? "Pausada" : "Ao vivo"}
             </p>
-            <p className="truncate text-sm font-semibold text-white/85 sm:text-base">
+            <p className="line-clamp-2 text-xs font-bold leading-tight text-white sm:text-base">
+              {config.nomeEscola || "Laboratório de Informática"}
+            </p>
+            <p className="hidden truncate text-xs text-white/60 sm:block">
               Laboratório de Informática
             </p>
           </div>
@@ -440,12 +456,32 @@ export function TelaCheiaAula({
                 {g.turmaRotulo}
               </h2>
             )}
-            {professor ? (
-              <p className="mt-1 flex items-center gap-2 text-sm text-white/80 sm:text-lg">
-                <GraduationCap className="size-5 text-amber-300" aria-hidden />
-                Professor(a) {professor}
-              </p>
-            ) : null}
+            <div
+              className={cn(
+                "mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/85 sm:text-lg",
+                deitado ? "justify-start" : "justify-center",
+              )}
+            >
+              {config.professorInformatica ? (
+                <p className="flex items-center gap-2">
+                  <MonitorSmartphone className="size-5 text-emerald-300" aria-hidden />
+                  <span>
+                    <span className="text-white/60">Informática:</span>{" "}
+                    <strong className="font-bold text-white">
+                      Prof. {config.professorInformatica}
+                    </strong>
+                  </span>
+                </p>
+              ) : null}
+              {professor ? (
+                <p className="flex items-center gap-2">
+                  <GraduationCap className="size-5 text-amber-300" aria-hidden />
+                  <span>
+                    <span className="text-white/60">Regente:</span> {professor}
+                  </span>
+                </p>
+              ) : null}
+            </div>
             {mista ? (
               <ul
                 className={cn(
@@ -483,8 +519,8 @@ export function TelaCheiaAula({
             className={cn(
               "grid min-h-0 w-full content-start overflow-y-auto [scrollbar-width:none]",
               deitado
-                ? "gap-2 grid-cols-[repeat(auto-fill,minmax(7rem,1fr))]"
-                : "gap-1.5 grid-cols-[repeat(auto-fill,minmax(6.25rem,1fr))]",
+                ? "gap-2 grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))]"
+                : "gap-1.5 grid-cols-[repeat(auto-fill,minmax(6.75rem,1fr))]",
             )}
           >
             {presentes.map((a, i) => {
@@ -497,7 +533,11 @@ export function TelaCheiaAula({
                 >
                   <button
                     type="button"
-                    onClick={() => setToque(a.sessaoId)}
+                    onClick={() => {
+                      setToque(a.sessaoId);
+                      setFicha(a);
+                    }}
+                    aria-label={`Ver a ficha de ${primeiroNome(nomeExibido(a.nome, logado))}`}
                     onAnimationEnd={() => setToque(null)}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-2 text-left backdrop-blur-xl transition hover:bg-white/[0.14]",
@@ -508,7 +548,7 @@ export function TelaCheiaAula({
                     <span
                       className={cn(
                         "relative flex shrink-0 items-center justify-center rounded-md border border-white/20 bg-slate-900",
-                        deitado && !baixo ? "h-7 w-9" : "h-5 w-7",
+                        deitado && !baixo ? "h-8 w-10" : "h-6 w-8",
                       )}
                     >
                       <span
@@ -528,8 +568,8 @@ export function TelaCheiaAula({
                     <span className="min-w-0">
                       <span
                         className={cn(
-                          "block truncate font-semibold sm:text-sm",
-                          deitado ? "text-xs" : "text-[11px]",
+                          "block truncate font-bold sm:text-lg",
+                          deitado ? "text-base" : "text-sm",
                         )}
                       >
                         {primeiroNome(nomeExibido(a.nome, logado))}
@@ -586,6 +626,15 @@ export function TelaCheiaAula({
         </div>
       </footer>
 
+      {ficha ? (
+        <FichaTelaCheia
+          aluno={ficha}
+          historico={historico}
+          logado={logado}
+          aoFechar={() => setFicha(null)}
+        />
+      ) : null}
+
       {/* ── Fim da aula ── */}
       {acabou ? (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-[#050b1a]/85 p-6 text-center backdrop-blur-md">
@@ -617,13 +666,18 @@ export function TelaCheiaAula({
  * (pausas, alunos que entraram) e, quando a aula acaba e some da lista de
  * "ao vivo", continua com a última cópia para mostrar "Aula concluída".
  */
-export function useTelaCheiaAula(grupos: GrupoLab[], logado: boolean) {
+export function useTelaCheiaAula(grupos: GrupoLab[], logado: boolean, historico?: SessaoLab[]) {
   const [aberto, setAberto] = useState<GrupoLab | null>(null);
   const atual = aberto ? (grupos.find((x) => x.grupoId === aberto.grupoId) ?? aberto) : null;
   return {
     abrir: (g: GrupoLab) => setAberto(g),
     tela: atual ? (
-      <TelaCheiaAula g={atual} logado={logado} aoFechar={() => setAberto(null)} />
+      <TelaCheiaAula
+        g={atual}
+        logado={logado}
+        historico={historico ?? []}
+        aoFechar={() => setAberto(null)}
+      />
     ) : null,
   };
 }

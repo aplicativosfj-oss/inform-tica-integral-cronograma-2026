@@ -213,7 +213,11 @@ function Index() {
             </div>
 
             {/* Cartão de vidro: o laboratório agora. Com aula, vira o destaque com o relógio. */}
-            <CartaoAoVivoHome sessoes={lab.sessoes} logado={isAuthenticated} />
+            <CartaoAoVivoHome
+              sessoes={lab.sessoes}
+              ausencias={lab.ausencias}
+              logado={isAuthenticated}
+            />
           </div>
           <AvisoDireitosImagem className="mx-auto max-w-6xl px-4 pb-3 text-white/60 sm:px-6 [@media(max-height:800px)]:hidden" />
         </section>

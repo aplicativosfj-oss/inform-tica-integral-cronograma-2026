@@ -979,6 +979,19 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
 .tc-pulo {
   animation: tc-pulo 0.6s ease-out;
 }
+@keyframes tc-ficha {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.tc-ficha {
+  animation: tc-ficha 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .lab-aluno,
@@ -1001,7 +1014,8 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   .tc-tela,
   .tc-titulo,
   .tc-orbita,
-  .tc-pulo {
+  .tc-pulo,
+  .tc-ficha {
     animation: none;
   }
 }
