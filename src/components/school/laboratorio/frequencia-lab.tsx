@@ -3,6 +3,7 @@ import {
   CalendarCheck2,
   CheckCircle2,
   Clock3,
+  Hand,
   IdCard,
   Search,
   UserX,
@@ -20,7 +21,7 @@ import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { cn } from "@/lib/utils";
 
 type Periodo = "semana" | "mes" | "mesAnterior";
-type Situacao = "foi" | "faltou" | "impedido" | "pendente";
+type Situacao = "foi" | "faltou" | "impedido" | "recusou" | "pendente";
 type Filtro = "todos" | Situacao;
 
 const MESES = [
@@ -64,6 +65,13 @@ const COR: Record<
     barra: "bg-amber-500",
     quadro: "bg-amber-500",
     texto: "text-amber-700 dark:text-amber-300",
+  },
+  recusou: {
+    rotulo: "Recusou-se",
+    chip: "border-violet-500/50 bg-violet-500/12 text-violet-700 dark:text-violet-300",
+    barra: "bg-violet-500",
+    quadro: "bg-violet-500",
+    texto: "text-violet-700 dark:text-violet-300",
   },
   pendente: {
     rotulo: "Ainda não foi",
@@ -126,6 +134,7 @@ interface LinhaAluno {
   idas: number;
   faltas: number;
   impedimentos: number;
+  recusas: number;
   idasSemana: number;
   idasMes: number;
   ultimaIda: string | null;
@@ -164,6 +173,7 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
     const idas = new Map<string, Set<string>>();
     const faltas = new Map<string, Set<string>>();
     const impedidos = new Map<string, Set<string>>();
+    const recusas = new Map<string, Set<string>>();
     const ultima = new Map<string, string>();
     const anotar = (m: Map<string, Set<string>>, k: string, d: string) => {
       const s = m.get(k) ?? new Set<string>();
@@ -177,7 +187,11 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
     }
     for (const s of dados.ausencias ?? []) {
       const k = `${s.turmaId}|${s.alunoId}`;
-      anotar(s.ausencia === "faltou" ? faltas : impedidos, k, s.data);
+      anotar(
+        s.ausencia === "faltou" ? faltas : s.ausencia === "recusou" ? recusas : impedidos,
+        k,
+        s.data,
+      );
     }
 
     const s0 = inicioDaSemana(hoje);
@@ -191,11 +205,21 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
         const di = [...(idas.get(k) ?? [])];
         const df = [...(faltas.get(k) ?? [])];
         const dm = [...(impedidos.get(k) ?? [])];
+        const dr = [...(recusas.get(k) ?? [])];
+        const nRecusas = dr.filter(dentro).length;
         const nIdas = di.filter(dentro).length;
         const nFaltas = df.filter(dentro).length;
         const nImped = dm.filter(dentro).length;
         const situacao: Situacao =
-          nIdas > 0 ? "foi" : nImped > 0 ? "impedido" : nFaltas > 0 ? "faltou" : "pendente";
+          nIdas > 0
+            ? "foi"
+            : nRecusas > 0
+              ? "recusou"
+              : nImped > 0
+                ? "impedido"
+                : nFaltas > 0
+                  ? "faltou"
+                  : "pendente";
         return {
           chave: k,
           turmaId: t.id,
@@ -204,12 +228,21 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
           idas: nIdas,
           faltas: nFaltas,
           impedimentos: nImped,
+          recusas: nRecusas,
           idasSemana: di.filter((d) => d >= s0 && d <= s1).length,
           idasMes: di.filter((d) => d.slice(0, 7) === mesAtual).length,
           ultimaIda: ultima.get(k) ?? null,
           situacao,
           dias: dias.map((d) =>
-            di.includes(d) ? "foi" : dm.includes(d) ? "impedido" : df.includes(d) ? "faltou" : null,
+            di.includes(d)
+              ? "foi"
+              : dr.includes(d)
+                ? "recusou"
+                : dm.includes(d)
+                  ? "impedido"
+                  : df.includes(d)
+                    ? "faltou"
+                    : null,
           ),
         };
       });
@@ -223,6 +256,7 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
         foi: conta("foi"),
         faltou: conta("faltou"),
         impedido: conta("impedido"),
+        recusou: conta("recusou"),
         pendente: conta("pendente"),
         idas: alunos.reduce((n, a) => n + a.idas, 0),
       };
@@ -230,12 +264,13 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
   }, [turmas, dados.sessoes, dados.ausencias, hoje, intervalo, dias]);
 
   const total = useMemo(() => {
-    const t = { alunos: 0, foi: 0, faltou: 0, impedido: 0, pendente: 0, idas: 0 };
+    const t = { alunos: 0, foi: 0, faltou: 0, impedido: 0, recusou: 0, pendente: 0, idas: 0 };
     for (const x of porTurma) {
       t.alunos += x.alunos.length;
       t.foi += x.foi;
       t.faltou += x.faltou;
       t.impedido += x.impedido;
+      t.recusou += x.recusou;
       t.pendente += x.pendente;
       t.idas += x.idas;
     }
@@ -293,7 +328,7 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
       </div>
 
       {/* números da escola */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <Indicador
           Icone={Users2}
           rotulo="Alunos que foram"
@@ -312,7 +347,7 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
           Icone={Clock3}
           rotulo="Ainda não foram"
           valor={`${total.pendente}`}
-          detalhe="sem ida, falta ou impedimento"
+          detalhe="sem nenhum registro"
           tom="slate"
         />
         <Indicador
@@ -328,6 +363,13 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
           valor={`${total.impedido}`}
           detalhe="e não foram no período"
           tom="amber"
+        />
+        <Indicador
+          Icone={Hand}
+          rotulo="Recusaram-se"
+          valor={`${total.recusou}`}
+          detalhe="não quiseram ir"
+          tom="violet"
         />
       </div>
 
@@ -390,7 +432,7 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
                   </span>
                 </span>
                 <span className="flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                  {(["foi", "impedido", "faltou"] as const).map((s) =>
+                  {(["foi", "impedido", "recusou", "faltou"] as const).map((s) =>
                     t[s] ? (
                       <span
                         key={s}
@@ -405,6 +447,7 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
                   {t.impedido ? (
                     <span className={COR.impedido.texto}>{t.impedido} imp.</span>
                   ) : null}
+                  {t.recusou ? <span className={COR.recusou.texto}>{t.recusou} rec.</span> : null}
                   {t.faltou ? <span className={COR.faltou.texto}>{t.faltou} falt.</span> : null}
                   <span>{t.pendente} faltam ir</span>
                 </span>
@@ -418,7 +461,7 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
       <section className="overflow-hidden rounded-2xl border bg-card shadow-sm" aria-label="Alunos">
         <div className="flex flex-wrap items-center gap-2 border-b bg-muted/40 p-3">
           <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por situação">
-            {(["todos", "foi", "pendente", "faltou", "impedido"] as const).map((f) => (
+            {(["todos", "foi", "pendente", "faltou", "impedido", "recusou"] as const).map((f) => (
               <button
                 key={f}
                 type="button"
@@ -492,7 +535,9 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
                                 ? "ring-rose-500"
                                 : a.situacao === "impedido"
                                   ? "ring-amber-500"
-                                  : "ring-transparent",
+                                  : a.situacao === "recusou"
+                                    ? "ring-violet-500"
+                                    : "ring-transparent",
                           )}
                         >
                           {iniciais(a.nome)}
@@ -552,6 +597,11 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
                           +{a.impedimentos}i
                         </span>
                       ) : null}
+                      {a.recusas ? (
+                        <span className="ml-1 text-violet-600 dark:text-violet-400">
+                          +{a.recusas}r
+                        </span>
+                      ) : null}
                     </td>
                     <td className="whitespace-nowrap px-2 py-2 text-muted-foreground">
                       {a.ultimaIda ? dataCurta(a.ultimaIda) : "—"}
@@ -580,7 +630,13 @@ export function FrequenciaLab({ dados }: { dados: DadosLab }) {
   );
 }
 
-const ORDEM: Record<Situacao, number> = { pendente: 0, faltou: 1, impedido: 2, foi: 3 };
+const ORDEM: Record<Situacao, number> = {
+  pendente: 0,
+  recusou: 1,
+  faltou: 2,
+  impedido: 3,
+  foi: 4,
+};
 
 const TONS = {
   emerald: "from-emerald-500/20 text-emerald-600 dark:text-emerald-300",
@@ -588,6 +644,7 @@ const TONS = {
   slate: "from-slate-500/20 text-slate-600 dark:text-slate-300",
   rose: "from-rose-500/20 text-rose-600 dark:text-rose-300",
   amber: "from-amber-500/25 text-amber-600 dark:text-amber-300",
+  violet: "from-violet-500/20 text-violet-600 dark:text-violet-300",
 } as const;
 
 function Indicador({
@@ -625,7 +682,7 @@ function Indicador({
 function Legenda() {
   return (
     <span className="hidden flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground sm:flex">
-      {(["foi", "impedido", "faltou", "pendente"] as const).map((s) => (
+      {(["foi", "impedido", "recusou", "faltou", "pendente"] as const).map((s) => (
         <span key={s} className="flex items-center gap-1">
           <span className={cn("size-2.5 rounded-[3px]", COR[s].quadro)} aria-hidden />
           {s === "pendente" ? "Sem registro" : COR[s].rotulo}

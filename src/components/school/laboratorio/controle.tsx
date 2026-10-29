@@ -95,7 +95,7 @@ const dataCurta = (c: string) => c.slice(5).split("-").reverse().join("/");
 const jaFoiNaSemana = (sit: { naSemana: boolean; hoje: boolean }) => sit.naSemana || sit.hoje;
 
 /** Como o aluno ficou hoje: cada situação tem a sua cor no cartão e na legenda. */
-type PresencaHoje = "participou" | "faltou" | "impedido";
+type PresencaHoje = "participou" | "faltou" | "impedido" | "recusou";
 
 const PRESENCA: Record<
   PresencaHoje,
@@ -121,6 +121,13 @@ const PRESENCA: Record<
     barra: "bg-amber-500",
     texto: "text-amber-700 dark:text-amber-300",
     ponto: "bg-amber-500",
+  },
+  recusou: {
+    rotulo: "Recusou-se",
+    cartao: "border-violet-500/60 bg-violet-500/10 dark:bg-violet-500/15",
+    barra: "bg-violet-500",
+    texto: "text-violet-700 dark:text-violet-300",
+    ponto: "bg-violet-500",
   },
 };
 
@@ -739,7 +746,10 @@ export function ControleLaboratorio({
                   if (p) c[p]++;
                   return c;
                 },
-                { participou: 0, faltou: 0, impedido: 0 } as Record<PresencaHoje, number>,
+                { participou: 0, faltou: 0, impedido: 0, recusou: 0 } as Record<
+                  PresencaHoje,
+                  number
+                >,
               )}
             />
 
@@ -851,7 +861,11 @@ export function ControleLaboratorio({
                               <span>suspenso(a)</span>
                             ) : ausente ? (
                               <span className={cn("font-semibold", cor?.texto)}>
-                                {ausente.ausencia === "faltou" ? "faltou hoje" : "impedido hoje"}
+                                {ausente.ausencia === "faltou"
+                                  ? "faltou hoje"
+                                  : ausente.ausencia === "recusou"
+                                    ? "recusou-se a ir hoje"
+                                    : "impedido hoje"}
                               </span>
                             ) : ocupado ? (
                               <span className={cn("font-semibold", PRESENCA.participou.texto)}>
@@ -903,6 +917,28 @@ export function ControleLaboratorio({
                         <IdCard className="size-4" aria-hidden />
                       </button>
                       <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
+                        <BotaoAusencia
+                          modo="recusou"
+                          sessaoId={ausente?.id}
+                          semMarcacao={ausente?.semMarcacao ?? false}
+                          novo={{
+                            aluno: { id: a.id, nome: a.nome },
+                            turma: { id: t.id, rotulo: rotuloTurma(t.serie, t.letra) },
+                            criadoPor: email,
+                          }}
+                          nome={a.nome}
+                          ausencia={ausente?.ausencia ?? null}
+                          ausenciaMotivo={ausente?.ausenciaMotivo ?? null}
+                          aoMudar={() => {
+                            setEscolhidos((anterior) => {
+                              const novo = new Set(anterior);
+                              novo.delete(k);
+                              return novo;
+                            });
+                            void dados.recarregar();
+                          }}
+                          className={cn(marcado && !ausente && "text-white")}
+                        />
                         <BotaoAusencia
                           modo="impedido"
                           sessaoId={ausente?.id}
@@ -1314,6 +1350,7 @@ export function ControleLaboratorio({
 function presencaHoje(ausencia: TipoAusencia | null, foi: boolean): PresencaHoje | null {
   if (ausencia === "faltou") return "faltou";
   if (ausencia === "nao_autorizado") return "impedido";
+  if (ausencia === "recusou") return "recusou";
   return foi ? "participou" : null;
 }
 

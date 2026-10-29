@@ -12,11 +12,12 @@ import { supabase } from "@/lib/supabase-client";
  */
 
 /** Por que um aluno marcado não ficou no laboratório. */
-export type TipoAusencia = "faltou" | "nao_autorizado";
+export type TipoAusencia = "faltou" | "nao_autorizado" | "recusou";
 
 export const ROTULO_AUSENCIA: Record<TipoAusencia, string> = {
   faltou: "Faltou",
   nao_autorizado: "Impedido",
+  recusou: "Recusou-se",
 };
 
 export interface SessaoLab {

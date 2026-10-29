@@ -498,7 +498,7 @@ export function FichaAluno({
 
         <section className="space-y-3 rounded-xl border p-4">
           <h3 className="flex items-center gap-2 text-sm font-semibold">
-            <Ban className="size-4 text-red-600" aria-hidden /> Faltas e impedimentos
+            <Ban className="size-4 text-red-600" aria-hidden /> Faltas, impedimentos e recusas
             {ocorrencias && ocorrencias.length > 0 ? (
               <Badge variant="secondary">{ocorrencias.length}</Badge>
             ) : null}
@@ -507,7 +507,7 @@ export function FichaAluno({
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : ocorrencias.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nenhuma falta ou impedimento registrado.
+              Nenhuma falta, impedimento ou recusa registrada.
             </p>
           ) : (
             <ul className="divide-y rounded-lg border">
@@ -520,7 +520,9 @@ export function FichaAluno({
                     className={
                       o.ausencia === "nao_autorizado"
                         ? "rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-300"
-                        : "rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-300"
+                        : o.ausencia === "recusou"
+                          ? "rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-semibold text-violet-700 dark:text-violet-300"
+                          : "rounded-full bg-red-500/15 px-2 py-0.5 text-xs font-semibold text-red-700 dark:text-red-300"
                     }
                   >
                     {o.ausencia ? ROTULO_AUSENCIA[o.ausencia] : ""}

@@ -97,7 +97,8 @@ alter table public.laboratorio_sessoes
 -- ============================================================
 -- FALTA E NÃO AUTORIZAÇÃO (acrescentado depois)
 -- ausencia: o aluno foi marcado mas não ficou no laboratório:
---   'faltou' (não veio) ou 'nao_autorizado' (o professor não liberou).
+--   'faltou' (não veio), 'nao_autorizado' (o professor não liberou) ou
+--   'recusou' (a criança não quis ir).
 -- ausencia_motivo: por que o professor não autorizou.
 -- A marcação fica guardada, mas não conta como ida.
 -- ============================================================
@@ -109,7 +110,7 @@ alter table public.laboratorio_sessoes
   drop constraint if exists laboratorio_ausencia_valida;
 alter table public.laboratorio_sessoes
   add constraint laboratorio_ausencia_valida
-  check (ausencia is null or ausencia in ('faltou', 'nao_autorizado'));
+  check (ausencia is null or ausencia in ('faltou', 'nao_autorizado', 'recusou'));
 
 -- sem_marcacao: falta ou impedimento registrado antes de marcar o aluno
 -- (não há aula por trás). Desfazer essa falta apaga a linha.
