@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BedDouble,
   CalendarDays,
+  ChevronDown,
   Clapperboard,
   Clock,
   Dices,
@@ -18,7 +19,7 @@ import { createPortal } from "react-dom";
 
 import { CompartilharRedes } from "@/components/school/pausa/compartilhar-redes";
 import { IlustracaoEspaco } from "@/components/school/pausa/ilustracoes";
-import { AvisoDiaEncerrado, SeloIntervalo } from "@/components/school/pausa/status-intervalo";
+import { SeloIntervalo } from "@/components/school/pausa/status-intervalo";
 import {
   DIAS,
   ESCOLA,
@@ -32,6 +33,7 @@ import {
   turmasNoDia,
   type DiaUtil,
   type Espaco,
+  type MomentoIntervalo,
   type TurmaPausa,
 } from "@/lib/entre-turnos";
 import { useMomentoIntervalo } from "@/lib/use-momento-intervalo";
@@ -125,26 +127,37 @@ type Modo = "dia" | "turma";
 export function EntreTurnos() {
   const m = useMomentoIntervalo();
   const hoje = m?.hoje ?? null;
-  const [modo, setModo] = useState<Modo>("dia");
   const [dia, setDia] = useState<DiaUtil>(1);
   const [turma, setTurma] = useState<string>(TURMAS_PAUSA[0]!.turma);
   const [montado, setMontado] = useState(false);
+  const [aberto, setAberto] = useState({ espacos: false, quadro: false });
 
   useEffect(() => {
     setMontado(true);
+    // Em tela larga, tudo já vem aberto; no celular, o que é explicação fica recolhido.
+    if (window.matchMedia("(min-width: 768px)").matches) setAberto({ espacos: true, quadro: true });
   }, []);
   // Leva a consulta para hoje e, depois das 13h, para o próximo dia letivo.
   const foco = m?.diaEmFoco;
   useEffect(() => {
     if (foco) setDia(foco);
   }, [foco]);
-  const encerrado = !!m && (m.fase === "encerrado" || m.fase === "fim-de-semana");
+
+  function verLugares() {
+    setAberto((a) => ({ ...a, espacos: true }));
+    window.setTimeout(
+      () =>
+        document.getElementById("espacos")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50,
+    );
+  }
 
   function abrir(novo: { modo: Modo; dia?: DiaUtil; turma?: string }) {
-    setModo(novo.modo);
     if (novo.dia) setDia(novo.dia);
     if (novo.turma) setTurma(novo.turma);
-    document.getElementById("consulta")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(novo.modo === "dia" ? "agora" : "consulta")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -156,31 +169,35 @@ export function EntreTurnos() {
           aria-hidden
           className="absolute -right-40 -top-40 -z-10 size-[32rem] rounded-full bg-sun/20 blur-3xl"
         />
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 pb-10 pt-10 sm:px-6 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center">
+        <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-6 pt-6 sm:gap-8 sm:px-6 sm:pb-10 sm:pt-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center">
           <div className="hero-subir">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-sun">
+              <span className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-sun">
                 <Clock className="size-3.5" aria-hidden /> {HORARIO.inicio} às {HORARIO.fim} ·
                 depois do almoço
               </span>
               {m ? <SeloIntervalo m={m} /> : null}
             </div>
-            <h1 className="mt-4 text-balance text-[clamp(2.4rem,6vw,4rem)] font-extrabold leading-[1.02] tracking-tight">
+            <h1 className="mt-3 text-balance text-[clamp(2.1rem,6vw,4rem)] font-extrabold leading-[1.02] tracking-tight sm:mt-4">
               Entre <span className="text-sun">Turnos</span>
             </h1>
-            <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-white/80 sm:text-lg">
+            <p className="mt-3 hidden max-w-xl text-pretty text-base leading-relaxed text-white/80 sm:mt-4 sm:block sm:text-lg">
               Das 11h às 13h, depois do almoço, as crianças ficam em{" "}
               <strong className="text-white">quatro lugares</strong> da escola. Veja abaixo, de
               forma simples, <strong className="text-white">quais turmas</strong> vão para cada
               lugar e <strong className="text-white">quem cuida</strong> delas.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-2.5">
-              <a
-                href="#espacos"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-sun px-5 text-sm font-bold text-sun-foreground shadow-lg shadow-sun/20 transition-transform hover:-translate-y-0.5"
+            <p className="mt-2 text-base text-white/80 sm:hidden">
+              Onde cada turma fica e quem cuida dela, das 11h às 13h.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2.5 sm:mt-6">
+              <button
+                type="button"
+                onClick={verLugares}
+                className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-sun px-4 text-sm font-bold text-sun-foreground shadow-lg shadow-sun/20 transition-transform hover:-translate-y-0.5 sm:h-11 sm:px-5"
               >
-                <Search className="size-4" aria-hidden /> Ver os lugares e os responsáveis
-              </a>
+                <Search className="max-sm:hidden size-4" aria-hidden /> Entender cada lugar
+              </button>
               <button
                 type="button"
                 onClick={() => window.print()}
@@ -218,216 +235,189 @@ export function EntreTurnos() {
         </div>
       </section>
 
-      {/* --------------------------------------------------------- os espaços */}
-      <OsEspacos />
+      {/* ----------------------------------------------- agora / o que vem a seguir */}
+      <AgoraEProximo
+        m={m}
+        dia={dia}
+        hoje={hoje}
+        onDia={setDia}
+        onTurma={(t) => abrir({ modo: "turma", turma: t })}
+      />
 
       {/* ------------------------------------------------------------ consulta */}
-      <section id="consulta" className="scroll-mt-20 border-y border-border bg-muted/40">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          {encerrado && m ? (
-            <div className="mb-8">
-              <AvisoDiaEncerrado m={m} />
-            </div>
-          ) : null}
-
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
-                Consulte
-              </p>
-              <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
-                {modo === "dia" ? "Escolha um dia" : "Escolha uma turma"}
-              </h2>
-            </div>
-            <div
-              role="tablist"
-              aria-label="Forma de consulta"
-              className="grid grid-cols-2 rounded-2xl bg-muted p-1 text-sm font-bold"
-            >
-              {(
-                [
-                  ["dia", CalendarDays, "Por dia"],
-                  ["turma", Users, "Por turma"],
-                ] as const
-              ).map(([v, Icone, rotulo]) => (
-                <button
-                  key={v}
-                  type="button"
-                  role="tab"
-                  aria-selected={modo === v}
-                  onClick={() => setModo(v)}
-                  className={cn(
-                    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors",
-                    modo === v
-                      ? "bg-sun text-sun-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  <Icone className="size-4" aria-hidden /> {rotulo}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {modo === "dia" ? (
-            <ConsultaPorDia
-              dia={dia}
-              hoje={hoje}
-              rotuloProximo={
-                encerrado && m && dia === m.proximo
-                  ? m.proximoEhAmanha
-                    ? "amanhã"
-                    : "próximo dia de aula"
-                  : null
-              }
-              onDia={setDia}
-              onTurma={(t) => abrir({ modo: "turma", turma: t })}
-            />
-          ) : (
-            <ConsultaPorTurma
-              turma={turma}
-              hoje={hoje}
-              onTurma={setTurma}
-              onDia={(d) => abrir({ modo: "dia", dia: d })}
-            />
-          )}
+      <section id="consulta" className="mt-6 scroll-mt-20 border-y border-border bg-muted/40">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+            Consulte por turma
+          </p>
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            Veja a semana da sua turma
+          </h2>
+          <ConsultaPorTurma
+            turma={turma}
+            hoje={hoje}
+            onTurma={setTurma}
+            onDia={(d) => abrir({ modo: "dia", dia: d })}
+          />
         </div>
       </section>
+
+      {/* --------------------------------------------------------- os espaços */}
+      <Recolhivel
+        titulo="Entenda cada lugar"
+        legenda="Sala de aula, sala de filme, sala de jogos e sala de repouso"
+        aberto={aberto.espacos}
+        onAbrir={(v) => setAberto((a) => ({ ...a, espacos: v }))}
+      >
+        <OsEspacos />
+      </Recolhivel>
 
       {/* -------------------------------------------------- quadro da semana */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
-          Visão geral
-        </p>
-        <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
-          Quadro da semana
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Toque no nome de uma turma para ver a semana dela, ou num dia para ver quem está onde.
-        </p>
-
-        {CHOQUES.length ? (
-          <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-200">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
-            Atenção: {CHOQUES.map((c) => `${c.turma} na ${c.dia.toLowerCase()}`).join("; ")} aparece
-            em dois espaços ao mesmo tempo. A coordenação vai confirmar.
+      <Recolhivel
+        titulo="Quadro da semana"
+        legenda="Todas as turmas, dia por dia"
+        aberto={aberto.quadro}
+        onAbrir={(v) => setAberto((a) => ({ ...a, quadro: v }))}
+      >
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600 dark:text-sun">
+            Visão geral
           </p>
-        ) : null}
+          <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            Quadro da semana
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Toque no nome de uma turma para ver a semana dela, ou num dia para ver quem está onde.
+          </p>
 
-        {/* computador: tabela */}
-        <div className="mt-5 hidden overflow-hidden rounded-3xl border border-border md:block">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/70 text-left text-xs uppercase tracking-wider text-muted-foreground">
-              <tr>
-                <th className="px-4 py-3 font-bold">Turma</th>
-                {DIAS.map((d) => (
-                  <th
-                    key={d.dia}
-                    className={cn("px-1 py-2 text-center", hoje === d.dia && "bg-sun/15")}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => abrir({ modo: "dia", dia: d.dia })}
-                      className={cn(
-                        "cursor-pointer rounded-lg px-2 py-1 font-bold uppercase hover:bg-muted",
-                        hoje === d.dia ? "text-amber-600 dark:text-sun" : "hover:text-foreground",
-                      )}
-                    >
-                      {d.curto}
-                      {hoje === d.dia ? " · hoje" : ""}
-                    </button>
-                  </th>
-                ))}
-                <th className="px-4 py-3 font-bold">Monitores</th>
-              </tr>
-            </thead>
-            <tbody>
-              {TURMAS_PAUSA.map((t, i) => (
-                <tr key={t.turma} className={cn("border-t border-border", i % 2 && "bg-muted/30")}>
-                  <th scope="row" className="px-2 py-1.5 text-left">
-                    <button
-                      type="button"
-                      onClick={() => abrir({ modo: "turma", turma: t.turma })}
-                      className="cursor-pointer rounded-lg px-2 py-1 text-base font-extrabold hover:bg-muted hover:text-amber-600 dark:hover:text-sun"
-                    >
-                      {t.turma}
-                    </button>
-                  </th>
+          {CHOQUES.length ? (
+            <p className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-200">
+              <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+              Atenção: {CHOQUES.map((c) => `${c.turma} na ${c.dia.toLowerCase()}`).join("; ")}{" "}
+              aparece em dois espaços ao mesmo tempo. A coordenação vai confirmar.
+            </p>
+          ) : null}
+
+          {/* computador: tabela */}
+          <div className="mt-5 hidden overflow-hidden rounded-3xl border border-border md:block">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/70 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3 font-bold">Turma</th>
                   {DIAS.map((d) => (
-                    <td
+                    <th
                       key={d.dia}
-                      className={cn("px-2 py-2.5 text-center", hoje === d.dia && "bg-sun/[0.07]")}
+                      className={cn("px-1 py-2 text-center", hoje === d.dia && "bg-sun/15")}
                     >
-                      <span className="inline-flex flex-col items-center gap-1">
-                        {espacosDoDia(t, d.dia).map((e) => (
-                          <Etiqueta key={e} espaco={e} curta />
-                        ))}
-                      </span>
-                    </td>
+                      <button
+                        type="button"
+                        onClick={() => abrir({ modo: "dia", dia: d.dia })}
+                        className={cn(
+                          "cursor-pointer rounded-lg px-2 py-1 font-bold uppercase hover:bg-muted",
+                          hoje === d.dia ? "text-amber-600 dark:text-sun" : "hover:text-foreground",
+                        )}
+                      >
+                        {d.curto}
+                        {hoje === d.dia ? " · hoje" : ""}
+                      </button>
+                    </th>
                   ))}
-                  <td className="px-4 py-2.5 font-medium text-foreground/85">
-                    {juntarNomes(t.monitores)}
-                  </td>
+                  <th className="px-4 py-3 font-bold">Monitores</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {TURMAS_PAUSA.map((t, i) => (
+                  <tr
+                    key={t.turma}
+                    className={cn("border-t border-border", i % 2 && "bg-muted/30")}
+                  >
+                    <th scope="row" className="px-2 py-1.5 text-left">
+                      <button
+                        type="button"
+                        onClick={() => abrir({ modo: "turma", turma: t.turma })}
+                        className="cursor-pointer rounded-lg px-2 py-1 text-base font-extrabold hover:bg-muted hover:text-amber-600 dark:hover:text-sun"
+                      >
+                        {t.turma}
+                      </button>
+                    </th>
+                    {DIAS.map((d) => (
+                      <td
+                        key={d.dia}
+                        className={cn("px-2 py-2.5 text-center", hoje === d.dia && "bg-sun/[0.07]")}
+                      >
+                        <span className="inline-flex flex-col items-center gap-1">
+                          {espacosDoDia(t, d.dia).map((e) => (
+                            <Etiqueta key={e} espaco={e} curta />
+                          ))}
+                        </span>
+                      </td>
+                    ))}
+                    <td className="px-4 py-2.5 font-medium text-foreground/85">
+                      {juntarNomes(t.monitores)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        {/* celular: um cartão por turma */}
-        <ul className="mt-5 grid gap-3 sm:grid-cols-2 md:hidden">
-          {TURMAS_PAUSA.map((t) => (
-            <li key={t.turma}>
-              <button
-                type="button"
-                onClick={() => abrir({ modo: "turma", turma: t.turma })}
-                className="w-full cursor-pointer rounded-2xl border border-border bg-card p-3.5 text-left transition-colors hover:border-sun/50"
-              >
-                <span className="flex items-baseline justify-between gap-2">
-                  <span className="text-lg font-extrabold">{t.turma}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {juntarNomes(t.monitores)}
-                  </span>
-                </span>
-                <span className="mt-2.5 grid grid-cols-5 gap-1">
-                  {DIAS.map((d) => (
-                    <span
-                      key={d.dia}
-                      className={cn(
-                        "flex flex-col items-center gap-1 rounded-lg py-1.5",
-                        hoje === d.dia ? "bg-sun/15 ring-1 ring-sun/50" : "bg-muted/60",
-                      )}
-                    >
-                      <span className="text-[10px] font-bold text-muted-foreground">{d.curto}</span>
-                      {espacosDoDia(t, d.dia).map((e) => {
-                        const I = VISUAL[e].Icone;
-                        return (
-                          <span
-                            key={e}
-                            title={ESPACOS[e].nome}
-                            className={cn(
-                              "grid size-7 place-items-center rounded-full",
-                              VISUAL[e].etiqueta,
-                            )}
-                          >
-                            <I className="size-3.5" aria-label={ESPACOS[e].nome} />
-                          </span>
-                        );
-                      })}
+          {/* celular: um cartão por turma */}
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2 md:hidden">
+            {TURMAS_PAUSA.map((t) => (
+              <li key={t.turma}>
+                <button
+                  type="button"
+                  onClick={() => abrir({ modo: "turma", turma: t.turma })}
+                  className="w-full cursor-pointer rounded-2xl border border-border bg-card p-3.5 text-left transition-colors hover:border-sun/50"
+                >
+                  <span className="flex items-baseline justify-between gap-2">
+                    <span className="text-lg font-extrabold">{t.turma}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {juntarNomes(t.monitores)}
                     </span>
-                  ))}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+                  </span>
+                  <span className="mt-2.5 grid grid-cols-5 gap-1">
+                    {DIAS.map((d) => (
+                      <span
+                        key={d.dia}
+                        className={cn(
+                          "flex flex-col items-center gap-1 rounded-lg py-1.5",
+                          hoje === d.dia ? "bg-sun/15 ring-1 ring-sun/50" : "bg-muted/60",
+                        )}
+                      >
+                        <span className="text-[10px] font-bold text-muted-foreground">
+                          {d.curto}
+                        </span>
+                        {espacosDoDia(t, d.dia).map((e) => {
+                          const I = VISUAL[e].Icone;
+                          return (
+                            <span
+                              key={e}
+                              title={ESPACOS[e].nome}
+                              className={cn(
+                                "grid size-7 place-items-center rounded-full",
+                                VISUAL[e].etiqueta,
+                              )}
+                            >
+                              <I className="size-3.5" aria-label={ESPACOS[e].nome} />
+                            </span>
+                          );
+                        })}
+                      </span>
+                    ))}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {ORDEM.map((e) => (
-            <Etiqueta key={e} espaco={e} />
-          ))}
-        </div>
-      </section>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {ORDEM.map((e) => (
+              <Etiqueta key={e} espaco={e} />
+            ))}
+          </div>
+        </section>
+      </Recolhivel>
 
       <p className="mx-auto max-w-6xl px-4 pb-10 text-xs text-muted-foreground sm:px-6">
         Fonte: Cronograma de Atendimento às turmas no período de repouso após o almoço e escala da
@@ -436,6 +426,184 @@ export function EntreTurnos() {
 
       {montado ? createPortal(<VersaoImpressa />, document.body) : null}
     </div>
+  );
+}
+
+/**
+ * Primeira coisa que o público vê: o que está acontecendo no intervalo agora
+ * ou, fora do horário, o que já está programado para o próximo dia, lugar por
+ * lugar, com o desenho de cada espaço e as turmas que vão para ele.
+ */
+function AgoraEProximo({
+  m,
+  dia,
+  hoje,
+  onDia,
+  onTurma,
+}: {
+  m: MomentoIntervalo | null;
+  dia: DiaUtil;
+  hoje: DiaUtil | null;
+  onDia: (d: DiaUtil) => void;
+  onTurma: (t: string) => void;
+}) {
+  if (!m) return <div aria-busy className="mx-auto h-72 max-w-6xl animate-pulse px-4 sm:px-6" />;
+  const doDia = turmasNoDia(dia);
+  const emFoco = dia === m.diaEmFoco;
+  const agora = emFoco && m.fase === "agora";
+  const programado = !agora && (!emFoco || m.fase === "encerrado" || m.fase === "fim-de-semana");
+  const quando =
+    dia === m.proximo && m.fase !== "antes" && m.fase !== "agora"
+      ? m.proximoEhAmanha
+        ? "amanhã"
+        : "o próximo dia de aula"
+      : nomeDoDia(dia).toLowerCase();
+  const titulo = agora
+    ? "Acontecendo agora"
+    : emFoco && m.fase === "antes"
+      ? "Hoje, a partir das 11h"
+      : `Programado para ${quando}`;
+  return (
+    <section
+      id="agora"
+      aria-label={titulo}
+      className="mx-auto max-w-6xl scroll-mt-20 px-4 pt-5 sm:px-6 sm:pt-8"
+    >
+      <div
+        className={cn(
+          "overflow-hidden rounded-3xl border shadow-xl",
+          agora
+            ? "border-emerald-400/50"
+            : programado
+              ? "border-indigo-400/50"
+              : "border-amber-400/50",
+        )}
+      >
+        <div
+          className={cn(
+            "flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 text-white sm:px-5",
+            agora
+              ? "bg-gradient-to-r from-emerald-600 to-emerald-500"
+              : programado
+                ? "bg-gradient-to-r from-indigo-700 to-indigo-500"
+                : "bg-gradient-to-r from-amber-600 to-amber-500",
+          )}
+        >
+          <div>
+            <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-white/85">
+              {agora ? (
+                <span className="relative flex size-2.5">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-white opacity-70" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-white" />
+                </span>
+              ) : (
+                <CalendarDays className="size-3.5" aria-hidden />
+              )}
+              {titulo}
+            </p>
+            <h2 className="font-heading text-2xl font-extrabold leading-tight">{nomeDoDia(dia)}</h2>
+          </div>
+          <p className="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-sm font-bold">
+            <Clock className="size-4" aria-hidden /> {HORARIO.inicio} às {HORARIO.fim}
+          </p>
+        </div>
+
+        <div className="border-b bg-card px-3 pb-3 pt-5 sm:px-4">
+          <SeletorDia dia={dia} hoje={hoje} onDia={onDia} />
+        </div>
+
+        <ul className="divide-y divide-border bg-card">
+          {ORDEM.map((e) => {
+            const v = VISUAL[e];
+            const lista = doDia[e];
+            const proprio = ESPACOS[e].responsavel;
+            return (
+              <li key={e} className="flex gap-3 p-3 sm:gap-4 sm:p-4">
+                <div className="relative h-24 w-28 shrink-0 overflow-hidden rounded-2xl sm:h-28 sm:w-40">
+                  <IlustracaoEspaco espaco={e} className="size-full" />
+                  <span
+                    className={cn(
+                      "absolute left-1.5 top-1.5 grid size-7 place-items-center rounded-full shadow",
+                      v.etiqueta,
+                    )}
+                  >
+                    <v.Icone className="size-4" aria-hidden />
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-heading text-base font-extrabold leading-tight sm:text-lg">
+                    {ESPACOS[e].nome}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {proprio ? `Responsável: ${proprio}` : "Com os monitores da própria turma"}
+                  </p>
+                  {lista.length === 0 ? (
+                    <p className="mt-2 text-sm text-muted-foreground">Nenhuma turma neste dia.</p>
+                  ) : (
+                    <ul className="mt-2 flex flex-wrap gap-1.5">
+                      {lista.map((t) => (
+                        <li key={t.turma}>
+                          <button
+                            type="button"
+                            onClick={() => onTurma(t.turma)}
+                            className={cn(
+                              "rounded-lg px-2.5 py-1 text-sm font-extrabold transition hover:scale-105",
+                              v.etiqueta,
+                            )}
+                          >
+                            {t.turma}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="flex items-center gap-2 border-t bg-sky-500/10 px-4 py-2.5 text-xs text-sky-800 dark:text-sky-200">
+          <Moon className="size-3.5 shrink-0" aria-hidden />
+          Sala de repouso aberta todos os dias, para quem quiser dormir (meninas: sala de
+          informática · meninos: biblioteca).
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/** Seção que no celular fica recolhida: um cartão com título que abre e fecha. */
+function Recolhivel({
+  titulo,
+  legenda,
+  aberto,
+  onAbrir,
+  children,
+}: {
+  titulo: string;
+  legenda: string;
+  aberto: boolean;
+  onAbrir: (v: boolean) => void;
+  children: ReactNode;
+}) {
+  return (
+    <details
+      open={aberto}
+      onToggle={(e) => onAbrir((e.currentTarget as HTMLDetailsElement).open)}
+      className="group mx-auto mt-2 max-w-6xl px-4 sm:px-6"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border bg-card px-4 py-3.5 shadow-sm">
+        <span>
+          <span className="block font-heading text-base font-extrabold">{titulo}</span>
+          <span className="block text-xs text-muted-foreground">{legenda}</span>
+        </span>
+        <ChevronDown
+          className="size-5 shrink-0 transition-transform group-open:rotate-180"
+          aria-hidden
+        />
+      </summary>
+      <div className="-mx-4 sm:-mx-6">{children}</div>
+    </details>
   );
 }
 
@@ -639,143 +807,6 @@ function SeletorDia({
           ) : null}
         </button>
       ))}
-    </div>
-  );
-}
-
-/** Um dia: quem vai para cada espaço e quem é responsável. */
-function ConsultaPorDia({
-  dia,
-  hoje,
-  rotuloProximo,
-  onDia,
-  onTurma,
-}: {
-  dia: DiaUtil;
-  hoje: DiaUtil | null;
-  rotuloProximo: string | null;
-  onDia: (d: DiaUtil) => void;
-  onTurma: (t: string) => void;
-}) {
-  const doDia = turmasNoDia(dia);
-  const jogosAno = Object.entries(JOGOS_POR_ANO).find(([, d]) => d === dia)?.[0];
-  return (
-    <div className="mt-6">
-      <SeletorDia dia={dia} hoje={hoje} onDia={onDia} />
-      <p className="mt-5 text-sm text-muted-foreground">
-        <strong className="text-foreground">
-          {nomeDoDia(dia)}
-          {hoje === dia ? " (hoje)" : rotuloProximo ? ` (${rotuloProximo})` : ""}
-        </strong>
-        , das {HORARIO.inicio} às {HORARIO.fim}
-        {jogosAno ? ` · dia do ${jogosAno}º ano na sala de jogos` : ""}. Toque numa turma para ver a
-        semana dela.
-      </p>
-
-      <div className="mt-4 grid gap-4 md:grid-cols-3">
-        {ORDEM.map((e) => {
-          const v = VISUAL[e];
-          const lista = doDia[e];
-          const proprio = ESPACOS[e].responsavel;
-          return (
-            <div
-              key={e}
-              className={cn(
-                "flex flex-col rounded-3xl border bg-gradient-to-b to-transparent p-4",
-                v.borda,
-                v.fundo,
-              )}
-            >
-              <div className="flex items-center gap-3">
-                <IlustracaoEspaco espaco={e} className="h-14 w-20 shrink-0 rounded-xl" />
-                <div className="min-w-0">
-                  <h3 className="font-extrabold">{ESPACOS[e].nome}</h3>
-                  <p className="text-xs text-muted-foreground">
-                    {lista.length} {lista.length === 1 ? "turma" : "turmas"}
-                  </p>
-                </div>
-              </div>
-              {proprio && lista.length ? (
-                <p className="mt-4 flex items-center gap-2 rounded-2xl bg-muted px-3 py-2.5 text-sm">
-                  <HandHeart className={cn("size-4 shrink-0", v.texto)} aria-hidden />
-                  <span>
-                    Responsável: <strong>{proprio}</strong>
-                  </span>
-                </p>
-              ) : null}
-              <ul className={cn("space-y-2", proprio ? "mt-2" : "mt-4")}>
-                {lista.map((t) => (
-                  <li key={t.turma}>
-                    <button
-                      type="button"
-                      onClick={() => onTurma(t.turma)}
-                      className="group flex w-full cursor-pointer items-center gap-3 rounded-2xl bg-card px-3 py-2.5 text-left ring-1 ring-border transition hover:ring-primary/40"
-                    >
-                      <span
-                        className={cn(
-                          "grid size-10 shrink-0 place-items-center rounded-xl text-sm font-extrabold",
-                          v.etiqueta,
-                        )}
-                      >
-                        {t.turma}
-                      </span>
-                      <span className="min-w-0 flex-1 text-sm">
-                        <span className="block text-[11px] uppercase tracking-wider text-muted-foreground">
-                          {proprio ? `${t.ano}º ano` : "Monitores"}
-                        </span>
-                        <span className="block truncate font-semibold">
-                          {proprio ? `Turma ${t.turma.slice(-1)}` : juntarNomes(t.monitores)}
-                        </span>
-                      </span>
-                      <ArrowRight
-                        className="size-4 shrink-0 text-muted-foreground/60 transition group-hover:translate-x-0.5 group-hover:text-foreground"
-                        aria-hidden
-                      />
-                    </button>
-                  </li>
-                ))}
-                {lista.length === 0 ? (
-                  <li className="rounded-2xl border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">
-                    Nenhuma turma neste dia
-                  </li>
-                ) : null}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
-
-      <FaixaRepouso />
-    </div>
-  );
-}
-
-/** Sala de repouso: aberta todos os dias, fora da escala. */
-function FaixaRepouso() {
-  return (
-    <div className="mt-4 flex flex-col gap-3 rounded-3xl border border-sky-400/30 bg-sky-500/10 p-4 sm:flex-row sm:items-center">
-      <IlustracaoEspaco espaco="repouso" className="h-14 w-20 shrink-0 rounded-xl" />
-      <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 font-extrabold">
-          <Moon className="size-4 text-sky-700 dark:text-sky-300" aria-hidden /> {SALA_REPOUSO.nome}
-          <span className="rounded-full bg-sky-400/20 px-2 py-0.5 text-[11px] font-bold text-sky-700 dark:text-sky-200">
-            opcional · todo dia
-          </span>
-        </p>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Para o aluno de qualquer turma que realmente queira dormir.
-        </p>
-      </div>
-      <ul className="grid gap-2 sm:grid-cols-2">
-        {SALA_REPOUSO.grupos.map((g) => (
-          <li key={g.publico} className="rounded-2xl bg-card px-3 py-2 text-sm ring-1 ring-border">
-            <span className="block text-[11px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
-              {g.publico} · {g.local}
-            </span>
-            <span className="font-semibold">{g.responsavel}</span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
