@@ -536,19 +536,19 @@ export function ControleLaboratorio({
       <ol className="flex items-center gap-2 text-sm font-semibold" aria-label="Passos">
         {(
           [
-            [1, "Escolher os alunos"],
-            [2, "Confirmar e definir o tempo"],
+            [1, "Escolher os alunos", "Alunos"],
+            [2, "Confirmar e definir o tempo", "Tempo e confirmação"],
           ] as const
-        ).map(([n, rotulo], i) => (
-          <li key={n} className="flex items-center gap-2">
-            {i > 0 ? <span aria-hidden className="h-px w-8 bg-border" /> : null}
+        ).map(([n, rotulo, curto], i) => (
+          <li key={n} className="flex min-w-0 items-center gap-2">
+            {i > 0 ? <span aria-hidden className="h-px w-4 shrink-0 bg-border sm:w-8" /> : null}
             <button
               type="button"
               aria-current={passo === n ? "step" : undefined}
               disabled={n === 2 && escolhidos.size === 0}
               onClick={() => setPasso(n)}
               className={cn(
-                "flex items-center gap-2 rounded-full border px-3 py-1.5 transition disabled:opacity-40",
+                "flex min-w-0 items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 transition disabled:opacity-40",
                 passo === n
                   ? "border-indigo-600 bg-indigo-600 text-white shadow"
                   : "bg-card hover:bg-muted",
@@ -562,7 +562,8 @@ export function ControleLaboratorio({
               >
                 {n}
               </span>
-              {rotulo}
+              <span className="sm:hidden">{curto}</span>
+              <span className="hidden sm:inline">{rotulo}</span>
             </button>
           </li>
         ))}
@@ -571,97 +572,115 @@ export function ControleLaboratorio({
       {passo === 1 ? (
         <>
           {/* ─────────── Página 1: turmas e alunos ─────────── */}
-          <section aria-label="Turmas e alunos" className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Turmas">
-              {turmas.map((t) => {
-                const cor = serieClasses(serieIndexPorNumero(t.serie));
-                const ativa = t.id === idAtual;
-                const nEsc = t.alunos.filter((a) => escolhidos.has(chave(t.id, a.id))).length;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={ativa}
-                    onClick={() => escolherTurma(t.id)}
-                    className={cn(
-                      "relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-bold transition",
-                      cor.bg,
-                      cor.text,
-                      ativa
-                        ? "scale-105 shadow-lg ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                        : "opacity-55 hover:opacity-100",
-                      nEsc > 0 && !ativa && "opacity-100 ring-2 ring-emerald-500",
-                    )}
-                  >
-                    {rotuloTurma(t.serie, t.letra)}
-                    <span className="rounded-md bg-black/20 px-1.5 text-[11px] font-semibold tabular-nums">
-                      {t.alunos.length}
-                    </span>
-                    {nEsc > 0 ? (
-                      <span className="absolute -right-1.5 -top-1.5 flex items-center gap-0.5 rounded-full bg-emerald-600 px-1.5 text-[10px] font-extrabold text-white shadow">
-                        <CheckCircle2 className="size-3" aria-hidden /> {nEsc}
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                aria-pressed={mista}
-                onClick={pedirMista}
-                className={cn(
-                  "group relative ml-1 flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-bold text-white shadow-md transition hover:scale-[1.03] active:scale-95",
-                  "bg-gradient-to-r from-violet-600 via-indigo-500 to-emerald-500",
-                  mista && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
-                )}
-              >
-                <span
-                  aria-hidden
-                  className="lab-varredura pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                />
-                <Shuffle
+          <section aria-label="Turmas e alunos" className="space-y-3 sm:space-y-4">
+            {/* Turma: no celular, uma fileira que desliza para o lado. */}
+            <div className="space-y-3 rounded-2xl border bg-card/60 p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {mista ? "Aula mista: alunos de várias turmas" : "Escolha a turma"}
+                </p>
+                <button
+                  type="button"
+                  aria-pressed={mista}
+                  onClick={pedirMista}
                   className={cn(
-                    "relative size-4 transition-transform duration-500",
-                    mista && "rotate-180",
+                    "group relative flex shrink-0 items-center gap-1.5 overflow-hidden rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-md transition hover:scale-[1.03] active:scale-95 sm:px-4 sm:py-2 sm:text-sm",
+                    "bg-gradient-to-r from-violet-600 via-indigo-500 to-emerald-500",
+                    mista && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
                   )}
-                  aria-hidden
-                />
-                <span className="relative">{mista ? "Aula mista · sair" : "Aula mista"}</span>
-              </button>
-            </div>
+                >
+                  <span
+                    aria-hidden
+                    className="lab-varredura pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  />
+                  <Shuffle
+                    className={cn(
+                      "relative size-4 transition-transform duration-500",
+                      mista && "rotate-180",
+                    )}
+                    aria-hidden
+                  />
+                  <span className="relative">{mista ? "Sair da aula mista" : "Aula mista"}</span>
+                </button>
+              </div>
 
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-xl border bg-card/60 px-4 py-3 text-sm">
+              <div
+                className="-mx-3 flex snap-x gap-2 overflow-x-auto px-3 pb-1 pt-1.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+                role="tablist"
+                aria-label="Turmas"
+              >
+                {turmas.map((t) => {
+                  const cor = serieClasses(serieIndexPorNumero(t.serie));
+                  const ativa = t.id === idAtual;
+                  const nEsc = t.alunos.filter((a) => escolhidos.has(chave(t.id, a.id))).length;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={ativa}
+                      onClick={() => escolherTurma(t.id)}
+                      className={cn(
+                        "relative flex shrink-0 snap-start items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-bold transition",
+                        cor.bg,
+                        cor.text,
+                        ativa
+                          ? "shadow-lg ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                          : "opacity-60 hover:opacity-100",
+                        nEsc > 0 && !ativa && "opacity-100 ring-2 ring-emerald-500",
+                      )}
+                    >
+                      {rotuloTurma(t.serie, t.letra)}
+                      <span className="rounded-md bg-black/20 px-1.5 text-[11px] font-semibold tabular-nums">
+                        {t.alunos.length}
+                      </span>
+                      {nEsc > 0 ? (
+                        <span className="absolute -right-1.5 -top-1.5 flex items-center gap-0.5 rounded-full bg-emerald-600 px-1.5 text-[10px] font-extrabold text-white shadow">
+                          <CheckCircle2 className="size-3" aria-hidden /> {nEsc}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+
               {busca.trim() ? (
-                <strong>{lista.length} resultado(s) na escola toda</strong>
+                <p className="text-sm font-semibold">{lista.length} resultado(s) na escola toda</p>
               ) : turma ? (
-                <>
-                  <strong className="font-heading text-lg">
-                    {rotuloTurma(turma.serie, turma.letra)}
-                  </strong>
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Users2 className="size-4" aria-hidden />
-                    <strong className="text-foreground">{turma.alunos.length}</strong> alunos
-                  </span>
-                  <span className="text-muted-foreground">
-                    <strong className="text-amber-600 dark:text-amber-400">{doTurmaSemana}</strong>{" "}
-                    já foram na semana
-                  </span>
-                  <span className="text-muted-foreground">
-                    <strong className="text-indigo-700 dark:text-indigo-300">{doTurmaFila}</strong>{" "}
-                    na fila de prioridade
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Professor(a) {turma.professorRegente}
-                  </span>
-                </>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    {(
+                      [
+                        [turma.alunos.length, "alunos", "text-foreground"],
+                        [doTurmaSemana, "já foram na semana", "text-amber-600 dark:text-amber-400"],
+                        [
+                          doTurmaFila,
+                          "na fila de prioridade",
+                          "text-indigo-700 dark:text-indigo-300",
+                        ],
+                      ] as const
+                    ).map(([n, rotulo, cls]) => (
+                      <div key={rotulo} className="rounded-xl border bg-background/70 px-2 py-1.5">
+                        <p className={cn("font-heading text-lg font-extrabold tabular-nums", cls)}>
+                          {n}
+                        </p>
+                        <p className="text-[11px] leading-tight text-muted-foreground">{rotulo}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Users2 className="size-3.5" aria-hidden />
+                    {rotuloTurma(turma.serie, turma.letra)} · Professor(a) {turma.professorRegente}
+                  </p>
+                </div>
               ) : (
-                <span className="text-muted-foreground">Nenhuma turma cadastrada.</span>
+                <p className="text-sm text-muted-foreground">Nenhuma turma cadastrada.</p>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative min-w-52 flex-1 sm:max-w-sm">
+            {/* Busca e ações: empilhadas no celular, em linha no computador. */}
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+              <div className="relative col-span-2 sm:min-w-52 sm:max-w-sm sm:flex-1">
                 <Search
                   className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden
@@ -674,16 +693,10 @@ export function ControleLaboratorio({
                   className="h-10 pl-9"
                 />
               </div>
-              <div className="flex items-center gap-2.5 rounded-lg border bg-card/60 px-3 py-2">
-                <Switch id="lab-liberar" checked={liberar} onCheckedChange={setLiberar} />
-                <Label htmlFor="lab-liberar" className="text-xs">
-                  Liberar quem já foi na semana
-                </Label>
-              </div>
-              <div className="flex gap-1 rounded-lg border bg-card/60 p-1 text-xs font-semibold">
+              <div className="grid grid-cols-2 gap-1 rounded-lg border bg-card/60 p-1 text-xs font-semibold sm:flex">
                 {(
                   [
-                    ["prioridade", "Fila de prioridade"],
+                    ["prioridade", "Prioridade"],
                     ["az", "A–Z"],
                   ] as const
                 ).map(([id, rotulo]) => (
@@ -693,7 +706,7 @@ export function ControleLaboratorio({
                     aria-pressed={ordem === id}
                     onClick={() => setOrdem(id)}
                     className={cn(
-                      "rounded-md px-3 py-1.5 transition",
+                      "rounded-md px-2 py-1.5 transition sm:px-3",
                       ordem === id ? "bg-indigo-600 text-white" : "hover:bg-muted",
                     )}
                   >
@@ -704,14 +717,26 @@ export function ControleLaboratorio({
               <Button
                 type="button"
                 variant="outline"
+                className="h-auto"
                 onClick={marcarFiltrados}
                 disabled={mista && filtro === "todos" && !busca.trim()}
               >
-                {filtro === "todos" ? "Marcar todos" : "Marcar os filtrados"}
+                <CheckCircle2 aria-hidden />
+                {filtro === "todos" ? "Marcar todos" : "Marcar filtrados"}
               </Button>
+              <div className="col-span-2 flex items-center gap-2.5 rounded-lg border bg-card/60 px-3 py-2 sm:col-span-1">
+                <Switch id="lab-liberar" checked={liberar} onCheckedChange={setLiberar} />
+                <Label htmlFor="lab-liberar" className="text-xs">
+                  Liberar quem já foi na semana
+                </Label>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Filtros rápidos">
+            <div
+              className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden"
+              role="group"
+              aria-label="Filtros rápidos"
+            >
               {FILTROS.map(({ id, rotulo }) => (
                 <button
                   key={id}
@@ -719,7 +744,7 @@ export function ControleLaboratorio({
                   aria-pressed={filtro === id}
                   onClick={() => setFiltro(id)}
                   className={cn(
-                    "flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
+                    "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
                     filtro === id
                       ? "border-indigo-600 bg-indigo-600 text-white shadow"
                       : "bg-card/60 hover:bg-muted",
@@ -760,7 +785,7 @@ export function ControleLaboratorio({
                   : "Ninguém se encaixa neste filtro."}
               </p>
             ) : (
-              <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <ul className="grid grid-cols-[minmax(0,1fr)] gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
                 {visiveis.map(({ a, t }) => {
                   const k = chave(t.id, a.id);
                   const sit = situacoes.get(k)!;
@@ -782,7 +807,7 @@ export function ControleLaboratorio({
                         ? "ring-indigo-500"
                         : "ring-emerald-500/60";
                   return (
-                    <li key={k} className="relative">
+                    <li key={k} className="relative min-w-0">
                       {cor && !marcado ? (
                         <span
                           aria-hidden
@@ -807,7 +832,7 @@ export function ControleLaboratorio({
                                 : undefined
                         }
                         className={cn(
-                          "flex w-full items-center gap-3.5 rounded-xl border p-3.5 pb-10 pr-10 text-left transition",
+                          "flex w-full items-center gap-3 rounded-xl border p-3 pb-9 pr-10 text-left transition sm:gap-3.5 sm:p-3.5 sm:pb-10",
                           marcado
                             ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
                             : "bg-card hover:-translate-y-0.5 hover:shadow-md",
@@ -823,7 +848,7 @@ export function ControleLaboratorio({
                       >
                         <span
                           className={cn(
-                            "relative flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-extrabold text-foreground ring-2",
+                            "relative flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-extrabold text-foreground ring-2 sm:size-11",
                             marcado ? "bg-white/25 text-white ring-white/60" : ring,
                           )}
                         >
@@ -851,7 +876,9 @@ export function ControleLaboratorio({
                           <span
                             className={cn(
                               "mt-1 flex flex-wrap items-center gap-x-1.5 text-xs",
-                              marcado ? "text-white/85" : "text-muted-foreground",
+                              marcado
+                                ? "text-white/85 [&_*]:text-white/90!"
+                                : "text-muted-foreground",
                             )}
                           >
                             {mista || busca.trim() ? (
@@ -912,7 +939,10 @@ export function ControleLaboratorio({
                         aria-label={`Abrir a ficha de ${a.nome}`}
                         title="Abrir a ficha do aluno"
                         onClick={() => setFicha({ turmaId: t.id, alunoId: a.id })}
-                        className="absolute right-2 top-2 rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-indigo-600 dark:hover:text-indigo-300"
+                        className={cn(
+                          "absolute right-2 top-2 rounded-md p-1.5 transition hover:bg-muted hover:text-indigo-600 dark:hover:text-indigo-300",
+                          marcado ? "text-white/80" : "text-muted-foreground",
+                        )}
                       >
                         <IdCard className="size-4" aria-hidden />
                       </button>
@@ -991,8 +1021,8 @@ export function ControleLaboratorio({
           </section>
 
           {/* barra fixa embaixo: vagas e botão para a página 2 */}
-          <div className="sticky bottom-3 z-20 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border bg-card/95 px-4 py-3 shadow-xl backdrop-blur">
-            <div className="min-w-40">
+          <div className="sticky bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-2xl border bg-card/95 px-3 py-2.5 shadow-xl backdrop-blur sm:gap-5 sm:px-4 sm:py-3">
+            <div className="min-w-0 flex-1 sm:min-w-40 sm:flex-none">
               <p className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Vagas
                 <span className="tabular-nums text-foreground">
@@ -1019,7 +1049,7 @@ export function ControleLaboratorio({
             </div>
             <p
               className={cn(
-                "min-w-0 flex-1 truncate text-xs",
+                "hidden min-w-0 flex-1 truncate text-xs sm:block",
                 noLimite
                   ? "font-medium text-amber-600 dark:text-amber-400"
                   : "text-muted-foreground",
@@ -1038,18 +1068,27 @@ export function ControleLaboratorio({
             <Button
               type="button"
               size="lg"
-              className="bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+              className="shrink-0 bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
               disabled={escolhidos.size === 0}
               onClick={() => setPasso(2)}
             >
-              Continuar <ArrowRight />
+              Continuar
+              {escolhidos.size > 0 ? (
+                <span className="rounded-full bg-white/25 px-1.5 text-xs tabular-nums sm:hidden">
+                  {escolhidos.size}
+                </span>
+              ) : null}
+              <ArrowRight />
             </Button>
           </div>
         </>
       ) : (
         /* ─────────── Página 2: confirmar e definir o tempo ─────────── */
         <div className="grid gap-5 lg:grid-cols-2">
-          <section aria-label="Escolhidos" className="space-y-4 rounded-2xl border bg-card p-5">
+          <section
+            aria-label="Escolhidos"
+            className="space-y-4 rounded-2xl border bg-card p-4 sm:p-5"
+          >
             <div className="flex items-center justify-between">
               <h3 className="font-heading text-lg font-bold">
                 {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} escolhido
@@ -1139,7 +1178,7 @@ export function ControleLaboratorio({
             })}
           </section>
 
-          <section aria-label="Tempo" className="space-y-5 rounded-2xl border bg-card p-5">
+          <section aria-label="Tempo" className="space-y-5 rounded-2xl border bg-card p-4 sm:p-5">
             <h3 className="font-heading text-lg font-bold">
               {grupoEmAndamento ? "Aula em andamento" : "Quando e por quanto tempo?"}
             </h3>
@@ -1358,7 +1397,7 @@ function presencaHoje(ausencia: TipoAusencia | null, foi: boolean): PresencaHoje
 function LegendaPresenca({ contagem }: { contagem: Record<PresencaHoje, number> }) {
   return (
     <div
-      className="flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border bg-card/60 px-3.5 py-2 text-xs"
+      className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border bg-card/60 px-3 py-2 text-xs sm:gap-x-4 sm:px-3.5"
       aria-label="Legenda das cores de hoje"
     >
       <span className="font-semibold text-muted-foreground">Hoje:</span>

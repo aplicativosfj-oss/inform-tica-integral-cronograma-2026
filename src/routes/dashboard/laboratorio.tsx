@@ -1,5 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, ClipboardCheck, IdCard, MonitorSmartphone, Radio } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  CalendarDays,
+  ChevronRight,
+  ClipboardCheck,
+  Clock3,
+  IdCard,
+  MonitorSmartphone,
+  Radio,
+  Search,
+  Users2,
+} from "lucide-react";
 
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { AniversariantesHoje } from "@/components/school/laboratorio/aniversariantes";
@@ -20,6 +30,20 @@ export const Route = createFileRoute("/dashboard/laboratorio")({
     ],
   }),
 });
+
+const ABAS = [
+  { valor: "marcar", icone: MonitorSmartphone, curto: "Marcar", rotulo: "Marcar alunos" },
+  { valor: "uso", icone: ClipboardCheck, curto: "Frequência", rotulo: "Frequência" },
+  { valor: "aovivo", icone: Radio, curto: "Ao vivo", rotulo: "Ao vivo" },
+  { valor: "calendario", icone: CalendarDays, curto: "Agenda", rotulo: "Calendário e relatório" },
+  { valor: "alunos", icone: IdCard, curto: "Fichas", rotulo: "Fichas dos alunos" },
+] as const;
+
+const CADASTROS = [
+  { para: "/dashboard/turmas", icone: Users2, rotulo: "Turmas e alunos" },
+  { para: "/dashboard/alunos", icone: Search, rotulo: "Buscar aluno" },
+  { para: "/dashboard/aulas", icone: Clock3, rotulo: "Aulas e horários" },
+] as const;
 
 function LaboratorioPage() {
   const dados = useSessoesLab();
@@ -58,23 +82,42 @@ function LaboratorioPage() {
         <AniversariantesHoje />
 
         <Tabs defaultValue="marcar" className="space-y-3">
-          <TabsList className="h-auto flex-wrap justify-start">
-            <TabsTrigger value="marcar" className="gap-1.5">
-              <MonitorSmartphone className="size-4" aria-hidden /> Marcar alunos
-            </TabsTrigger>
-            <TabsTrigger value="uso" className="gap-1.5">
-              <ClipboardCheck className="size-4" aria-hidden /> Frequência
-            </TabsTrigger>
-            <TabsTrigger value="aovivo" className="gap-1.5">
-              <Radio className="size-4" aria-hidden /> Ao vivo
-            </TabsTrigger>
-            <TabsTrigger value="calendario" className="gap-1.5">
-              <CalendarDays className="size-4" aria-hidden /> Calendário e relatório
-            </TabsTrigger>
-            <TabsTrigger value="alunos" className="gap-1.5">
-              <IdCard className="size-4" aria-hidden /> Fichas dos alunos
-            </TabsTrigger>
-          </TabsList>
+          {/* Área do professor: as tarefas do laboratório em botões grandes,
+              fáceis de tocar no celular, e os cadastros logo abaixo. */}
+          <nav
+            aria-label="Área do professor"
+            className="space-y-2.5 rounded-2xl border bg-card/60 p-2.5 sm:p-3"
+          >
+            <TabsList className="grid h-auto w-full grid-cols-5 gap-1 bg-transparent p-0 sm:flex sm:w-auto sm:justify-start sm:bg-muted sm:p-1">
+              {ABAS.map(({ valor, icone: Icone, curto, rotulo }) => (
+                <TabsTrigger
+                  key={valor}
+                  value={valor}
+                  className="h-auto flex-col gap-1 rounded-xl px-1 py-2 text-[11px] font-semibold data-[state=active]:bg-indigo-600 data-[state=active]:text-white sm:flex-row sm:gap-1.5 sm:rounded-md sm:px-3 sm:py-1 sm:text-sm sm:font-medium"
+                >
+                  <Icone className="size-5 sm:size-4" aria-hidden />
+                  <span className="sm:hidden">{curto}</span>
+                  <span className="hidden sm:inline">{rotulo}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <div className="-mx-2.5 flex gap-2 overflow-x-auto px-2.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
+              <span className="flex shrink-0 items-center text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                Cadastros
+              </span>
+              {CADASTROS.map(({ para, icone: Icone, rotulo }) => (
+                <Link
+                  key={para}
+                  to={para}
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-xs font-semibold transition hover:border-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300"
+                >
+                  <Icone className="size-3.5" aria-hidden />
+                  {rotulo}
+                  <ChevronRight className="size-3.5 opacity-50" aria-hidden />
+                </Link>
+              ))}
+            </div>
+          </nav>
           <TabsContent value="marcar">
             <ControleLaboratorio dados={dados} />
           </TabsContent>
