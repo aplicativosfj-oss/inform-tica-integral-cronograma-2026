@@ -1,9 +1,9 @@
-import { Clock3, History, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
+import { Clock3, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
 import fotoLabLivre from "@/assets/laboratorio-moderno.jpg";
-import fotoLaboratorio from "@/assets/laboratorio-informatica-turma.jpg";
 import { PalcoGrupo } from "@/components/school/laboratorio/palco-grupo";
+import { SemanaNoLaboratorio } from "@/components/school/laboratorio/semana-laboratorio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,6 @@ import {
   agruparSessoes,
   encerrarGrupo,
   estadoDaSessao,
-  historico24h,
   hojeNaEscola,
   horaNaEscola,
   nomeExibido,
@@ -22,6 +21,7 @@ import {
   type GrupoLab,
   type SessaoLab,
 } from "@/lib/laboratorio";
+import { useAppStore } from "@/lib/app-store";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 
 export interface DadosLab {
@@ -159,6 +159,7 @@ function LaboratorioLivre({
           </span>
           Laboratório livre
         </span>
+        <BancadaEmDescanso />
         <div className="rounded-2xl border border-white/20 bg-white/[0.12] p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_32px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl backdrop-saturate-150">
           <p className="font-heading text-xl font-extrabold leading-tight sm:text-2xl">
             Computadores prontos para a próxima turma
@@ -186,6 +187,44 @@ function LaboratorioLivre({
 }
 
 /**
+ * Os computadores do laboratório em descanso: as telas acendem em onda, uma
+ * de cada vez, e um feixe de luz varre a bancada, como um protetor de tela.
+ */
+function BancadaEmDescanso() {
+  const { config } = useAppStore();
+  const n = Math.min(12, Math.max(1, config.numeroComputadores || 7));
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] px-3 pb-2.5 pt-3 backdrop-blur-md"
+      aria-label={`${n} computadores em espera`}
+      role="img"
+    >
+      <span
+        aria-hidden
+        className="tela-feixe absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-emerald-300/15 to-transparent"
+      />
+      <div className="relative flex items-end justify-between gap-1.5">
+        {Array.from({ length: n }, (_, i) => (
+          <span key={i} className="flex flex-1 flex-col items-center">
+            <span
+              className="tela-descanso relative block aspect-[4/3] w-full max-w-11 rounded-[5px] border border-white/30 bg-gradient-to-br from-emerald-400/50 via-sky-500/30 to-indigo-600/40"
+              style={{ animationDelay: `${i * 0.28}s` }}
+            >
+              <span className="absolute bottom-0.5 right-0.5 size-1 rounded-full bg-emerald-300" />
+            </span>
+            <span className="h-1.5 w-0.5 bg-white/30" />
+            <span className="h-0.5 w-3 rounded-full bg-white/30" />
+          </span>
+        ))}
+      </div>
+      <p className="relative mt-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white/65">
+        {n} computadores em espera
+      </p>
+    </div>
+  );
+}
+
+/**
  * Painel ao vivo: quem está no laboratório agora, quem vem em seguida e quem
  * já passou hoje. Público; só quem está logado vê os botões de encerrar.
  */
@@ -206,7 +245,6 @@ export function PainelLaboratorioAgora({
   const estado = (g: GrupoLab) => estadoDaSessao(g, agora);
   const aoVivo = grupos.filter((g) => estado(g) === "ao-vivo");
   const proximos = grupos.filter((g) => estado(g) === "agendada");
-  const historico = historico24h(dados.sessoes, agora);
   const alunosAgora = new Set(aoVivo.flatMap((g) => g.alunos.map((a) => a.id))).size;
 
   return (
@@ -289,78 +327,7 @@ export function PainelLaboratorioAgora({
               </div>
             ) : null}
 
-            {historico.length > 0 ? (
-              // Sempre escuro: foto do laboratório ao fundo e os dias em painéis de vidro.
-              <section
-                className="dark relative isolate flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/15 p-3 text-white sm:p-4"
-                aria-label="Aulas das últimas 24 horas"
-              >
-                <img
-                  src={fotoLaboratorio}
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  className="absolute inset-0 -z-20 size-full object-cover"
-                />
-                <div
-                  aria-hidden
-                  className="absolute inset-0 -z-10 bg-gradient-to-b from-indigo-950/70 via-ink/75 to-ink/90"
-                />
-                <h3 className="flex items-center gap-2 text-base font-bold">
-                  <span className="flex size-8 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-xl">
-                    <History className="size-4 text-sun" aria-hidden />
-                  </span>
-                  Aulas das últimas 24 horas
-                </h3>
-                {historico.map(({ data, grupos: gs }) => {
-                  const turmasDoDia = new Map<string, string>();
-                  for (const g of gs)
-                    for (const a of g.alunos) turmasDoDia.set(a.turmaId, a.turmaRotulo);
-                  return (
-                    <div
-                      key={data}
-                      className="rounded-xl border border-white/15 bg-white/10 p-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] backdrop-blur-xl backdrop-saturate-150"
-                    >
-                      <p className="flex flex-wrap items-center gap-2 text-sm">
-                        <strong>{data === hoje ? "Hoje" : "Ontem"}</strong>
-                        <span className="text-white/70">{data.split("-").reverse().join("/")}</span>
-                        <span className="text-white/70">· turmas que participaram:</span>
-                        {[...turmasDoDia.values()].map((r) => (
-                          <Etiqueta key={r} rotulo={r} />
-                        ))}
-                      </p>
-                      <ul className="mt-2 space-y-1.5">
-                        {gs.map((g) => (
-                          <li
-                            key={g.grupoId}
-                            className="rounded-lg border border-white/10 bg-white/[0.08] px-2.5 py-2 text-sm backdrop-blur-md transition-colors hover:bg-white/[0.14]"
-                          >
-                            <details>
-                              <summary className="cursor-pointer">
-                                <strong>
-                                  {g.turmaId === "mista" ? "Aula mista" : g.turmaRotulo}
-                                </strong>{" "}
-                                · {horaNaEscola(g.inicio)}–{horaNaEscola(g.fim)} · {g.alunos.length}{" "}
-                                aluno
-                                {g.alunos.length === 1 ? "" : "s"}
-                                {g.motivoParada ? (
-                                  <span className="ml-1 text-xs italic text-amber-700 dark:text-amber-300">
-                                    · parada: {g.motivoParada}
-                                  </span>
-                                ) : null}
-                              </summary>
-                              <p className="mt-1.5 text-xs text-white/75">
-                                {g.alunos.map((a) => nomeExibido(a.nome, logado)).join(", ")}
-                              </p>
-                            </details>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </section>
-            ) : null}
+            <SemanaNoLaboratorio sessoes={dados.sessoes} agora={agora} logado={logado} />
           </>
         )}
       </CardContent>

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
 import { BotaoAusencia } from "@/components/school/laboratorio/ausencia";
 import { ControleAula } from "@/components/school/laboratorio/controle-aula";
-import { RelogioAula } from "@/components/school/laboratorio/relogio-aula";
+import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/app-store";
 import {
@@ -131,6 +131,7 @@ export function PalcoGrupo({
             pausada={pausada}
             tamanho={196}
           />
+          {pausada ? null : <AvisoMinutosFinais restanteMs={fim - efetivo} />}
           <dl className="grid w-full grid-cols-2 gap-2 text-left text-xs">
             <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
               <dt className="text-white/55">Horário</dt>

@@ -1,6 +1,6 @@
 import { ArrowRight, GraduationCap, Pause, Users2 } from "lucide-react";
 
-import { RelogioAula } from "@/components/school/laboratorio/relogio-aula";
+import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { useAppStore } from "@/lib/app-store";
 import {
   agruparSessoes,
@@ -104,6 +104,13 @@ export function CartaoAoVivoHome({ sessoes, logado }: { sessoes: SessaoLab[]; lo
           </div>
         </div>
       </div>
+
+      {pausada ? null : (
+        <AvisoMinutosFinais
+          restanteMs={new Date(principal.fim).getTime() - instanteEfetivo(principal, agora)}
+          className="relative mt-4"
+        />
+      )}
 
       {/* quem está nos computadores */}
       <ul className="relative mt-5 flex flex-wrap gap-1.5">

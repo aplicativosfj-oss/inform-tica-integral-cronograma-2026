@@ -772,13 +772,94 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
 .relogio-digito {
   animation: relogio-digito 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+/* Minutos finais da aula: ondas que saem do relógio, anel girando,
+   ampulheta virando e um brilho que corre pelo aviso. */
+@keyframes relogio-onda {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+@keyframes relogio-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ampulheta-gira {
+  0%,
+  70% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(180deg);
+  }
+}
+@keyframes aviso-final-brilho {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+.relogio-onda {
+  animation: relogio-onda 1.8s ease-out infinite;
+}
+.relogio-gira {
+  animation: relogio-gira 12s linear infinite;
+}
+.ampulheta-gira {
+  animation: ampulheta-gira 2s ease-in-out infinite;
+}
+.aviso-final-brilho {
+  animation: aviso-final-brilho 2.6s ease-in-out infinite;
+}
+
+/* Laboratório livre: telas em descanso que acendem em onda e um feixe que
+   varre a bancada. */
+@keyframes tela-descanso {
+  0%,
+  100% {
+    opacity: 0.35;
+    box-shadow: 0 0 0 0 rgb(52 211 153 / 0);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 18px 2px rgb(52 211 153 / 0.45);
+  }
+}
+@keyframes tela-feixe {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+.tela-descanso {
+  animation: tela-descanso 3.2s ease-in-out infinite;
+}
+.tela-feixe {
+  animation: tela-feixe 4.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lab-aluno,
   .lab-brilho,
   .lab-varredura,
   .relogio-respira,
   .relogio-alerta,
-  .relogio-digito {
+  .relogio-digito,
+  .relogio-onda,
+  .relogio-gira,
+  .ampulheta-gira,
+  .aviso-final-brilho,
+  .tela-descanso,
+  .tela-feixe {
     animation: none;
   }
 }

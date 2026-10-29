@@ -1,10 +1,13 @@
-import { Pause } from "lucide-react";
+import { Hourglass, Pause } from "lucide-react";
 import { useId, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
 const RAIO = 84;
 const CIRCUNFERENCIA = 2 * Math.PI * RAIO;
+
+/** A partir de quanto tempo restante a aula entra nos "minutos finais". */
+export const MINUTOS_FINAIS_MS = 5 * 60_000;
 
 function formatar(ms: number) {
   const total = Math.max(0, Math.ceil(ms / 1000));
@@ -44,6 +47,7 @@ export function RelogioAula({
   const passado = Math.min(total, Math.max(0, agoraMs - inicioMs));
   const fracaoRestante = restante / total;
   const ultimoMinuto = restante > 0 && restante <= 60_000;
+  const minutosFinais = !pausada && restante > 0 && restante <= MINUTOS_FINAIS_MS;
   const [corA, corB] = pausada
     ? ["var(--color-sun)", "#f59e0b"]
     : ultimoMinuto || fracaoRestante < 0.2
@@ -70,10 +74,38 @@ export function RelogioAula({
         aria-hidden
         className={cn(
           "absolute inset-[6%] rounded-full blur-2xl",
-          !pausada && (ultimoMinuto ? "relogio-alerta" : "relogio-respira"),
+          !pausada && (minutosFinais ? "relogio-alerta" : "relogio-respira"),
         )}
         style={{ background: corA, opacity: pausada ? 0.18 : undefined }}
       />
+      {/* Minutos finais: ondas que saem do relógio e um anel tracejado girando. */}
+      {minutosFinais ? (
+        <>
+          <span
+            aria-hidden
+            className="relogio-onda absolute inset-0 rounded-full border-2"
+            style={{ borderColor: corA }}
+          />
+          <span
+            aria-hidden
+            className="relogio-onda absolute inset-0 rounded-full border-2 [animation-delay:0.9s]"
+            style={{ borderColor: corA }}
+          />
+          <svg viewBox="0 0 200 200" className="relogio-gira absolute -inset-[5%]" aria-hidden>
+            <circle
+              cx="100"
+              cy="100"
+              r="97"
+              fill="none"
+              stroke={corA}
+              strokeWidth="1.5"
+              strokeDasharray="3 9"
+              strokeLinecap="round"
+              opacity="0.8"
+            />
+          </svg>
+        </>
+      ) : null}
       <svg viewBox="0 0 200 200" className="relative size-full" aria-hidden>
         <defs>
           <linearGradient id={`${id}-arco`} x1="0" y1="0" x2="1" y2="1">
@@ -169,7 +201,7 @@ export function RelogioAula({
           className={cn(
             "flex font-heading font-extrabold tabular-nums leading-none text-white",
             pausada && "animate-pulse",
-            ultimoMinuto && "text-red-300",
+            minutosFinais && "text-red-200",
           )}
           style={{ fontSize: tamanho * (mostrado.length > 5 ? 0.15 : 0.21) }}
         >
@@ -188,5 +220,62 @@ export function RelogioAula({
         </span>
       </span>
     </button>
+  );
+}
+
+/**
+ * Aviso dos minutos finais da aula: aparece quando faltam 5 minutos ou menos,
+ * com a ampulheta girando, a contagem em minutos e uma barra que esvazia até
+ * o fim, para a turma salvar o trabalho e desligar com calma.
+ */
+export function AvisoMinutosFinais({
+  restanteMs,
+  className,
+}: {
+  restanteMs: number;
+  className?: string;
+}) {
+  if (restanteMs <= 0 || restanteMs > MINUTOS_FINAIS_MS) return null;
+  const minutos = Math.ceil(restanteMs / 60_000);
+  const ultimo = restanteMs <= 60_000;
+  return (
+    <div
+      role="status"
+      className={cn(
+        "aviso-final relative isolate flex w-full items-center gap-3 overflow-hidden rounded-2xl border px-3.5 py-2.5 text-left text-white shadow-lg",
+        ultimo ? "border-red-400/70 bg-red-600/30" : "border-amber-300/60 bg-amber-500/20",
+        className,
+      )}
+    >
+      <span
+        aria-hidden
+        className="aviso-final-brilho absolute inset-y-0 -left-1/3 -z-10 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+      />
+      <span
+        className={cn(
+          "flex size-9 shrink-0 items-center justify-center rounded-xl",
+          ultimo ? "bg-red-500" : "bg-amber-400 text-amber-950",
+        )}
+      >
+        <Hourglass className="ampulheta-gira size-5" aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-extrabold leading-tight">
+          {ultimo ? "Último minuto!" : `Últimos ${minutos} minutos`}
+        </span>
+        <span className="block text-xs text-white/80">
+          Hora de salvar o trabalho e desligar com calma.
+        </span>
+      </span>
+      <span aria-hidden className="absolute inset-x-0 bottom-0 h-1 origin-left bg-white/25">
+        <span
+          className={cn("block h-full", ultimo ? "bg-red-300" : "bg-amber-300")}
+          style={{
+            width: `${(restanteMs / MINUTOS_FINAIS_MS) * 100}%`,
+            transition: "width 1s linear",
+          }}
+        />
+      </span>
+    </div>
   );
 }
