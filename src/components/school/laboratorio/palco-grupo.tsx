@@ -6,6 +6,7 @@ import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
 import { BotaoAusencia } from "@/components/school/laboratorio/ausencia";
 import { ControleAula } from "@/components/school/laboratorio/controle-aula";
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
+import { BotaoTelaCheia } from "@/components/school/laboratorio/tela-cheia-aula";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/app-store";
 import {
@@ -38,11 +39,14 @@ export function PalcoGrupo({
   agora,
   logado,
   aoMudar,
+  aoTelaCheia,
 }: {
   g: GrupoLab;
   agora: number;
   logado: boolean;
   aoMudar: () => void;
+  /** Abre a aula em tela cheia (o painel guarda qual está aberta). */
+  aoTelaCheia: () => void;
 }) {
   const { turmas } = useAppStore();
   const ini = new Date(g.inicio).getTime();
@@ -147,6 +151,7 @@ export function PalcoGrupo({
             </div>
           </dl>
           <ControleAula g={g} aoMudar={aoMudar} compacto className="justify-center" />
+          <BotaoTelaCheia onClick={aoTelaCheia} className="w-full" />
         </aside>
 
         {/* Coluna da turma e dos alunos. */}

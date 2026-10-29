@@ -1,8 +1,9 @@
 import { Clock3, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
-import fotoLabLivre from "@/assets/laboratorio-moderno.jpg";
+import fundoLabLivre from "@/assets/laboratorio-fundo-digital.svg";
 import { PalcoGrupo } from "@/components/school/laboratorio/palco-grupo";
+import { useTelaCheiaAula } from "@/components/school/laboratorio/tela-cheia-aula";
 import { SemanaNoLaboratorio } from "@/components/school/laboratorio/semana-laboratorio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -141,15 +142,14 @@ function LaboratorioLivre({
   return (
     <div className="dark relative isolate overflow-hidden rounded-2xl border border-white/15 text-white shadow-lg">
       <img
-        src={fotoLabLivre}
+        src={fundoLabLivre}
         alt=""
         aria-hidden
-        loading="lazy"
-        className="hero-zoom absolute inset-0 -z-20 size-full object-cover"
+        className="absolute inset-0 -z-20 size-full object-cover object-bottom"
       />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink via-ink/70 to-indigo-950/40"
+        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent"
       />
       <div className="flex min-h-56 flex-col justify-end gap-3 p-4 sm:p-5">
         <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200 backdrop-blur-xl">
@@ -246,9 +246,11 @@ export function PainelLaboratorioAgora({
   const aoVivo = grupos.filter((g) => estado(g) === "ao-vivo");
   const proximos = grupos.filter((g) => estado(g) === "agendada");
   const alunosAgora = new Set(aoVivo.flatMap((g) => g.alunos.map((a) => a.id))).size;
+  const telaCheia = useTelaCheiaAula(grupos, logado);
 
   return (
     <Card id="laboratorio-agora" className="scroll-mt-28">
+      {telaCheia.tela}
       <CardHeader className="pb-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-xl">
@@ -307,6 +309,7 @@ export function PainelLaboratorioAgora({
                     agora={agora}
                     logado={logado}
                     aoMudar={() => void dados.recarregar()}
+                    aoTelaCheia={() => telaCheia.abrir(g)}
                   />
                 ))}
               </div>

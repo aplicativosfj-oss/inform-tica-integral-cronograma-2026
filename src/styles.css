@@ -847,6 +847,139 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   animation: tela-feixe 4.5s ease-in-out infinite;
 }
 
+/* Tela cheia da aula: código binário caindo, grade de circuito andando,
+   peças de computador subindo, feixe de varredura e telas que piscam. */
+@keyframes tc-binario {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100vh);
+  }
+}
+@keyframes tc-grade {
+  from {
+    background-position:
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      48px 48px,
+      48px 48px;
+  }
+}
+@keyframes tc-peca {
+  from {
+    transform: translateY(10vh) rotate(0deg);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-110vh) rotate(200deg);
+    opacity: 0;
+  }
+}
+@keyframes tc-scan {
+  from {
+    top: -6rem;
+  }
+  to {
+    top: 100%;
+  }
+}
+@keyframes tc-brilho {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6%, 4%) scale(1.12);
+  }
+}
+@keyframes tc-tela {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  45% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  55% {
+    opacity: 1;
+  }
+}
+@keyframes tc-cursor {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes tc-titulo {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes tc-pulo {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12) rotate(-2deg);
+  }
+  70% {
+    transform: scale(0.97);
+  }
+}
+.tc-binario {
+  animation: tc-binario linear infinite;
+}
+.tc-grade {
+  background-image:
+    linear-gradient(rgb(56 189 248 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(56 189 248 / 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: tc-grade 6s linear infinite;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+.tc-peca {
+  animation: tc-peca linear infinite;
+}
+.tc-scan {
+  animation: tc-scan 7s linear infinite;
+}
+.tc-brilho {
+  animation: tc-brilho 14s ease-in-out infinite;
+}
+.tc-tela {
+  animation: tc-tela 3s ease-in-out infinite;
+}
+.tc-cursor {
+  animation: tc-cursor 1s steps(1) infinite;
+}
+.tc-titulo {
+  animation: tc-titulo 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.tc-orbita {
+  animation: relogio-gira 40s linear infinite;
+}
+.tc-pulo {
+  animation: tc-pulo 0.6s ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lab-aluno,
   .lab-brilho,
@@ -859,7 +992,16 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   .ampulheta-gira,
   .aviso-final-brilho,
   .tela-descanso,
-  .tela-feixe {
+  .tela-feixe,
+  .tc-binario,
+  .tc-grade,
+  .tc-peca,
+  .tc-scan,
+  .tc-brilho,
+  .tc-tela,
+  .tc-titulo,
+  .tc-orbita,
+  .tc-pulo {
     animation: none;
   }
 }

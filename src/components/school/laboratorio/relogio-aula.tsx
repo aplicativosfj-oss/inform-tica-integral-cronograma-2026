@@ -215,7 +215,10 @@ export function RelogioAula({
             </span>
           ))}
         </span>
-        <span className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/60">
+        <span
+          className="mt-1.5 font-semibold uppercase tracking-[0.2em] text-white/60"
+          style={{ fontSize: Math.max(10, tamanho * 0.05) }}
+        >
           {modo === "restam" ? "restam" : "passaram"}
         </span>
       </span>

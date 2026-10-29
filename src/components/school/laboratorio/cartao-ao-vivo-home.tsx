@@ -1,6 +1,7 @@
 import { ArrowRight, GraduationCap, Pause, Users2 } from "lucide-react";
 
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
+import { BotaoTelaCheia, useTelaCheiaAula } from "@/components/school/laboratorio/tela-cheia-aula";
 import { useAppStore } from "@/lib/app-store";
 import {
   agruparSessoes,
@@ -26,6 +27,7 @@ export function CartaoAoVivoHome({ sessoes, logado }: { sessoes: SessaoLab[]; lo
   const { turmas } = useAppStore();
   const agora = useAgora(1000);
   const grupos = agruparSessoes(sessoes.filter((s) => s.data === hojeNaEscola()));
+  const telaCheia = useTelaCheiaAula(grupos, logado);
   const aoVivo = grupos.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
   const proximo = grupos
     .filter((g) => estadoDaSessao(g, agora) === "agendada")
@@ -37,6 +39,7 @@ export function CartaoAoVivoHome({ sessoes, logado }: { sessoes: SessaoLab[]; lo
   if (!principal) {
     return (
       <div className="hidden rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md lg:block">
+        {telaCheia.tela}
         <Cabeca agora={agora} vivo={false} />
         <div className="mt-4 rounded-2xl bg-white/10 p-4">
           <p className="font-heading text-xl font-bold">Laboratório livre por enquanto</p>
@@ -146,7 +149,14 @@ export function CartaoAoVivoHome({ sessoes, logado }: { sessoes: SessaoLab[]; lo
         </ul>
       ) : null}
 
-      <VerTodos />
+      <div className="relative mt-4 flex flex-wrap items-center justify-between gap-2">
+        <BotaoTelaCheia
+          onClick={() => telaCheia.abrir(principal)}
+          className="flex-1 sm:flex-none"
+        />
+        <VerTodos className="" />
+      </div>
+      {telaCheia.tela}
     </div>
   );
 }
@@ -195,11 +205,14 @@ function Cabeca({
   );
 }
 
-function VerTodos() {
+function VerTodos({ className = "mt-4" }: { className?: string }) {
   return (
     <a
       href="#laboratorio-agora"
-      className="relative mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-sun underline-offset-4 hover:underline"
+      className={cn(
+        "relative inline-flex items-center gap-1.5 text-sm font-semibold text-sun underline-offset-4 hover:underline",
+        className,
+      )}
     >
       Ver todo mundo <ArrowRight className="size-4" aria-hidden />
     </a>
