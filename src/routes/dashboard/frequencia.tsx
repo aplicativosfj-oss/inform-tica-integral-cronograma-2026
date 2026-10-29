@@ -199,7 +199,7 @@ function FrequenciaPage() {
       ) : null}
 
       {registros ? (
-        <div className="mb-4 grid gap-4 sm:grid-cols-2">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center gap-2 pb-2">
               <UserCheck className="size-4 text-emerald-700 dark:text-emerald-400" />

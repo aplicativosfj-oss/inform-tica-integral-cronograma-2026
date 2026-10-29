@@ -1112,3 +1112,47 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
 .painel-conteudo h1 + p {
   margin-top: 0.25rem;
 }
+
+/* Painel no celular, no jeito de aplicativo: títulos, cartões e espaços
+   mais enxutos para a informação caber na tela sem parecer site. */
+@media (max-width: 1023px) {
+  .painel-conteudo h1 {
+    font-size: 1.3rem;
+  }
+  .painel-conteudo h1 + p {
+    font-size: 0.8125rem;
+  }
+  .painel-conteudo .text-3xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  .painel-conteudo .text-2xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  .painel-conteudo .p-6:not(.pt-0) {
+    padding: 1rem;
+  }
+  .painel-conteudo .p-6.pt-0 {
+    padding: 0 1rem 1rem;
+  }
+  .painel-conteudo .p-5 {
+    padding: 0.875rem;
+  }
+  .painel-conteudo .px-6 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .painel-conteudo .mb-6 {
+    margin-bottom: 1rem;
+  }
+  .painel-conteudo .mt-6 {
+    margin-top: 1rem;
+  }
+  .painel-conteudo .gap-6 {
+    gap: 1rem;
+  }
+  .painel-conteudo .space-y-6 > :not(:last-child) {
+    margin-bottom: 1rem;
+  }
+}

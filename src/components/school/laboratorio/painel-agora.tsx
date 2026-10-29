@@ -251,7 +251,7 @@ export function PainelLaboratorioAgora({
   return (
     <Card id="laboratorio-agora" className="scroll-mt-28">
       {telaCheia.tela}
-      <CardHeader className="pb-3">
+      <CardHeader className="px-3 pb-3 sm:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-xl">
             <MonitorSmartphone className="size-5 text-primary" aria-hidden /> No laboratório agora
@@ -268,7 +268,7 @@ export function PainelLaboratorioAgora({
         </div>
       </CardHeader>
       <CardContent
-        className={`space-y-4 ${rolar ? "lg:max-h-[calc(100svh-16rem)] lg:min-h-32 lg:overflow-y-auto" : ""}`}
+        className={`space-y-4 px-3 sm:px-6 ${rolar ? "lg:max-h-[calc(100svh-16rem)] lg:min-h-32 lg:overflow-y-auto" : ""}`}
       >
         {dados.erro === TABELA_AUSENTE ? (
           logado ? (

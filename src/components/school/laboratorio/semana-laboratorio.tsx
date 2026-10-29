@@ -205,12 +205,13 @@ export function SemanaNoLaboratorio({
                     className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-white/[0.12]"
                   >
                     <Turma rotulo={g.turmaRotulo} />
-                    <span className="tabular-nums text-white/80">
+                    <span className="whitespace-nowrap tabular-nums text-white/80">
                       {horaNaEscola(g.inicio)}–{horaNaEscola(g.fim)}
                     </span>
                     {aoVivo ? (
-                      <span className="flex items-center gap-1 text-xs font-semibold text-emerald-300">
-                        <Radio className="size-3.5" aria-hidden /> ao vivo
+                      <span className="flex items-center gap-1 whitespace-nowrap text-xs font-semibold text-emerald-300">
+                        <Radio className="size-3.5" aria-hidden />
+                        <span className="max-sm:sr-only">ao vivo</span>
                       </span>
                     ) : null}
                     <span className="ml-auto whitespace-nowrap text-xs text-white/70">

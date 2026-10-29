@@ -1,5 +1,5 @@
 import { GraduationCap, MonitorSmartphone, Shuffle, Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
@@ -28,6 +28,19 @@ function iniciais(nome: string) {
   return ((p[0]?.[0] ?? "") + (p.length > 1 ? (p[p.length - 1]?.[0] ?? "") : "")).toUpperCase();
 }
 
+/** Tela estreita (celular): o palco fica compacto, como num aplicativo. */
+function useCelular() {
+  const [celular, setCelular] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const mudou = () => setCelular(mq.matches);
+    mudou();
+    mq.addEventListener("change", mudou);
+    return () => mq.removeEventListener("change", mudou);
+  }, []);
+  return celular;
+}
+
 /**
  * Palco de um grupo que está no laboratório agora: anel com a contagem
  * regressiva, turma(s) e professor(a), e um cartão por aluno. Se os alunos vêm
@@ -49,6 +62,7 @@ export function PalcoGrupo({
   aoTelaCheia: () => void;
 }) {
   const { turmas } = useAppStore();
+  const celular = useCelular();
   const ini = new Date(g.inicio).getTime();
   const fim = new Date(g.fim).getTime();
   const efetivo = instanteEfetivo(g, agora);
@@ -110,55 +124,65 @@ export function PalcoGrupo({
 
       <div className="grid md:grid-cols-[17rem_minmax(0,1fr)]">
         {/* Coluna do relógio: tempo, horário e controles da aula. */}
-        <aside className="flex flex-col items-center gap-4 border-b border-white/10 p-5 text-center md:border-b-0 md:border-r">
-          <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-mint">
-            <span className="relative flex size-2.5">
-              <span
-                className={cn(
-                  "absolute inline-flex size-full rounded-full opacity-70",
-                  pausada ? "bg-sun" : "animate-ping bg-emerald-400",
-                )}
-              />
-              <span
-                className={cn(
-                  "relative inline-flex size-2.5 rounded-full",
-                  pausada ? "bg-sun" : "bg-emerald-400",
-                )}
-              />
-            </span>
-            {pausada ? "Pausada" : "Ao vivo"}
-          </p>
-          <RelogioAula
-            inicioMs={ini}
-            fimMs={fim}
-            agoraMs={efetivo}
-            pausada={pausada}
-            tamanho={196}
-          />
+        <aside className="flex flex-col gap-3 border-b border-white/10 p-4 md:items-center md:gap-4 md:border-b-0 md:border-r md:p-5 md:text-center">
+          {/* No celular, relógio e dados lado a lado, como num aplicativo. */}
+          <div className="flex items-center gap-4 md:flex-col">
+            <RelogioAula
+              inicioMs={ini}
+              fimMs={fim}
+              agoraMs={efetivo}
+              pausada={pausada}
+              tamanho={celular ? 128 : 196}
+            />
+            <div className="min-w-0 flex-1 space-y-2 md:w-full md:flex-none">
+              <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-mint md:justify-center">
+                <span className="relative flex size-2.5">
+                  <span
+                    className={cn(
+                      "absolute inline-flex size-full rounded-full opacity-70",
+                      pausada ? "bg-sun" : "animate-ping bg-emerald-400",
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "relative inline-flex size-2.5 rounded-full",
+                      pausada ? "bg-sun" : "bg-emerald-400",
+                    )}
+                  />
+                </span>
+                {pausada ? "Pausada" : "Ao vivo"}
+              </p>
+              <dl className="grid gap-1.5 text-left text-xs md:grid-cols-2 md:gap-2">
+                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 md:py-2">
+                  <dt className="text-white/55">Horário</dt>
+                  <dd className="mt-0.5 font-semibold tabular-nums">
+                    {horaNaEscola(g.inicio)}–{horaNaEscola(g.fim)}
+                  </dd>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 md:py-2">
+                  <dt className="text-white/55">Andamento</dt>
+                  <dd className="mt-0.5 font-semibold tabular-nums">
+                    {minutosPassados} de {minutosTotal} min
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
           {pausada ? null : <AvisoMinutosFinais restanteMs={fim - efetivo} />}
-          <dl className="grid w-full grid-cols-2 gap-2 text-left text-xs">
-            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-              <dt className="text-white/55">Horário</dt>
-              <dd className="mt-0.5 font-semibold tabular-nums">
-                {horaNaEscola(g.inicio)}–{horaNaEscola(g.fim)}
-              </dd>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-              <dt className="text-white/55">Andamento</dt>
-              <dd className="mt-0.5 font-semibold tabular-nums">
-                {minutosPassados} de {minutosTotal} min
-              </dd>
-            </div>
-          </dl>
-          <ControleAula g={g} aoMudar={aoMudar} compacto className="justify-center" />
-          <BotaoTelaCheia onClick={aoTelaCheia} className="w-full" />
+          <div className="flex flex-wrap items-center gap-2 md:w-full md:flex-col">
+            <ControleAula g={g} aoMudar={aoMudar} compacto className="justify-center" />
+            <BotaoTelaCheia
+              onClick={aoTelaCheia}
+              className="flex-1 px-3 py-1.5 md:w-full md:flex-none md:py-2"
+            />
+          </div>
         </aside>
 
         {/* Coluna da turma e dos alunos. */}
-        <section className="min-w-0 p-5">
+        <section className="min-w-0 p-4 md:p-5">
           <header className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="flex flex-wrap items-center gap-2 font-heading text-2xl font-extrabold">
+              <h3 className="flex flex-wrap items-center gap-2 font-heading text-xl font-extrabold md:text-2xl">
                 {mista ? <Shuffle className="size-5 text-sun" aria-hidden /> : null}
                 {mista ? "Aula mista" : g.turmaRotulo}
                 <span className="rounded-full bg-white/12 px-2.5 py-0.5 text-xs font-semibold text-white/85">
@@ -209,7 +233,7 @@ export function PalcoGrupo({
             </ul>
           ) : null}
 
-          <ul className="mt-4 grid gap-1.5 sm:grid-cols-2" aria-label="Alunos no laboratório">
+          <ul className="mt-3 grid grid-cols-2 gap-1.5 md:mt-4" aria-label="Alunos no laboratório">
             {g.alunos.map((a, i) => {
               const cor = serieClasses(serieIndexPorNumero(a.turmaRotulo));
               const foto = fotoDe(a.id, a.turmaId);
@@ -217,10 +241,10 @@ export function PalcoGrupo({
                 <li
                   key={a.sessaoId}
                   style={{ animationDelay: `${Math.min(i, 14) * 60}ms` }}
-                  className="lab-aluno flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 transition-colors hover:bg-white/[0.11]"
+                  className="lab-aluno flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-2 py-1.5 transition-colors hover:bg-white/[0.11] md:gap-3 md:px-3 md:py-2"
                 >
                   <span
-                    className={`relative flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ring-1 ring-white/25 ${cor.bg} ${cor.text}`}
+                    className={`relative flex size-8 shrink-0 md:size-9 items-center justify-center rounded-full text-xs font-extrabold ring-1 ring-white/25 ${cor.bg} ${cor.text}`}
                   >
                     {foto ? (
                       <img src={foto} alt="" className="size-full rounded-full object-cover" />
@@ -234,7 +258,7 @@ export function PalcoGrupo({
                   </span>
                   <span className="min-w-0 flex-1">
                     {/* Nome inteiro, quebrando linha se precisar: nada de reticências. */}
-                    <span className="block text-sm font-semibold leading-snug [overflow-wrap:anywhere]">
+                    <span className="block text-xs font-semibold md:text-sm leading-snug [overflow-wrap:anywhere]">
                       {nomeExibido(a.nome, logado)}
                     </span>
                     {mista ? (

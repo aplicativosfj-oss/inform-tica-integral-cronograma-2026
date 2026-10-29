@@ -188,20 +188,21 @@ function TurmasPage() {
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {turmas.map((turma) => (
-          <Card key={turma.id} className="overflow-hidden">
-            <div className="flex h-28 items-center justify-center bg-muted">
+          // No celular, cada turma é uma linha compacta (foto à esquerda).
+          <Card key={turma.id} className="flex overflow-hidden sm:block">
+            <div className="flex w-20 shrink-0 items-center justify-center bg-muted sm:h-28 sm:w-auto">
               {turma.imagem ? (
                 <img src={turma.imagem} alt="" className="size-full object-cover" />
               ) : (
-                <span className="text-3xl font-bold text-muted-foreground/60">
+                <span className="text-xl font-bold text-muted-foreground/60 sm:text-3xl">
                   {turma.serie.charAt(0)}
                   {turma.letra}
                 </span>
               )}
             </div>
-            <CardContent className="flex flex-col gap-3 pt-4">
+            <CardContent className="flex min-w-0 flex-1 flex-col gap-2 p-3 sm:gap-3 sm:p-6 sm:pt-4">
               <div>
                 <p className="font-semibold text-foreground">
                   {turma.serie} "{turma.letra}"
