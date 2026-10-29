@@ -12,7 +12,7 @@
  * que rodar o script e a arte mudar.
  */
 
-export const VERSAO_ARTE = 4;
+export const VERSAO_ARTE = 5;
 
 type Meta = Record<string, string>;
 

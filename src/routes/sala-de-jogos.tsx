@@ -17,9 +17,9 @@ export const Route = createFileRoute("/sala-de-jogos")({
   component: SalaDeJogosApp,
   head: () => ({
     meta: metaCompartilhar({
-      titulo: "Sala de Jogos · Informática Dr. Eiraldo",
+      titulo: "🎮 Sala de Jogos · Informática Dr. Eiraldo",
       descricao:
-        "Damas, dominó, jogo da velha, memória, quebra-cabeça, digitação e mais. Instale no celular ou no computador e jogue sem internet.",
+        "♟️ Damas, dominó, memória e quebra-cabeça. 📱 Instale no celular e jogue sem internet.",
       imagem: "/og/secao-sala-de-jogos.jpg",
       alt: "Sala de Jogos: instale no celular e jogue sem internet",
     }),

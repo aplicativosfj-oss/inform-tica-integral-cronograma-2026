@@ -11,9 +11,8 @@ export const Route = createFileRoute("/agenda")({
   component: AgendaPage,
   head: () => ({
     meta: metaCompartilhar({
-      titulo: "O laboratório ao vivo · Informática Dr. Eiraldo",
-      descricao:
-        "Veja quem está no laboratório de informática agora, quem já foi nos outros dias da semana e o placar das turmas.",
+      titulo: "💻 Laboratório de informática · agenda da semana",
+      descricao: "🟢 Quem está no laboratório agora e ⏭️ o que vem a seguir, dia por dia.",
       imagem: "/og/secao-agenda.jpg",
       alt: "Laboratório de Informática ao vivo",
     }),

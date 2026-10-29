@@ -22,8 +22,8 @@ import { dirname, resolve } from "node:path";
 const raiz = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const W = 1200;
 const H = 630;
-const TITULO = "Inter Display, Inter, DejaVu Sans, sans-serif";
-const TEXTO = "Inter, DejaVu Sans, sans-serif";
+const TITULO = "Inter Display, Inter, Arial, Helvetica, DejaVu Sans, sans-serif";
+const TEXTO = "Inter, Arial, Helvetica, DejaVu Sans, sans-serif";
 const esc = (t) =>
   t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
@@ -66,7 +66,7 @@ const SECOES = [
     id: "agenda",
     selo: "LABORATÓRIO AO VIVO",
     titulo: "Laboratório de Informática",
-    resumo: "Quem está no laboratório agora, até que horas e quem já foi nesta semana.",
+    resumo: "Quem está no laboratório agora e o que vem a seguir, na semana toda.",
     destaques: [
       ["radio", "Ao vivo"],
       ["calendar-days", "Semana inteira"],
@@ -79,7 +79,7 @@ const SECOES = [
     id: "resultados",
     selo: "RESULTADOS 2026",
     titulo: "Resultados do|3º bimestre",
-    resumo: "Como as turmas estão lendo e escrevendo, comparado com os bimestres anteriores.",
+    resumo: "Como as turmas estão lendo, escrevendo e aprendendo no bimestre.",
     destaques: [
       ["book-open-check", "Leitura e escrita"],
       ["trending-up", "1º ao 3º bimestre"],
@@ -92,7 +92,7 @@ const SECOES = [
     id: "avaliacao",
     selo: "AVALIAÇÕES DIAGNÓSTICAS",
     titulo: "Avaliações Diagnósticas",
-    resumo: "I e II Avaliação de 2026: quanto cada turma avançou e o que precisa ser retomado.",
+    resumo: "I e II Avaliação 2026: quanto cada turma avançou e o que retomar.",
     destaques: [
       ["clipboard-check", "I e II Avaliação"],
       ["trending-up", "Evolução"],
@@ -105,7 +105,7 @@ const SECOES = [
     id: "infoteca",
     selo: "INFOTECA",
     titulo: "Infoteca",
-    resumo: "Jogos, ferramentas e plataformas educativas escolhidos a dedo, separados por assunto.",
+    resumo: "Jogos e ferramentas educativas, separados por assunto.",
     destaques: [
       ["gamepad-2", "Jogos educativos"],
       ["wrench", "Ferramentas"],
@@ -118,7 +118,7 @@ const SECOES = [
     id: "ferramentas",
     selo: "INFOTECA · ACESSO LIVRE",
     titulo: "Ferramentas abertas",
-    resumo: "Ferramentas educativas para usar direto no navegador, sem login e sem instalar nada.",
+    resumo: "Ferramentas educativas no navegador, sem login e sem instalar.",
     destaques: [
       ["calculator", "Matemática"],
       ["book-open", "Leitura e escrita"],
@@ -131,7 +131,7 @@ const SECOES = [
     id: "entre-turnos",
     selo: "DAS 11H ÀS 13H",
     titulo: "Entre Turnos",
-    resumo: "Onde cada turma descansa, assiste a um filme ou brinca no intervalo do almoço.",
+    resumo: "Onde cada turma fica das 11h às 13h e quem cuida dela.",
     destaques: [
       ["armchair", "Sala de aula"],
       ["popcorn", "Sala de filme"],
@@ -144,7 +144,7 @@ const SECOES = [
     id: "sala-de-jogos",
     selo: "SALA DE JOGOS",
     titulo: "Sala de Jogos",
-    resumo: "Damas, dominó, jogo da velha, memória, quebra-cabeça, digitação e mais.",
+    resumo: "Damas, dominó, memória, quebra-cabeça e mais. Joga sem internet.",
     destaques: [
       ["smartphone", "Instale no celular"],
       ["wifi-off", "Joga sem internet"],
@@ -157,7 +157,7 @@ const SECOES = [
     id: "coordenacao",
     selo: "COORDENAÇÃO",
     titulo: "Uso do laboratório",
-    resumo: "Quem foi, por quanto tempo e quantas vezes no mês, turma por turma.",
+    resumo: "Quem foi ao laboratório, por quanto tempo e quantas vezes.",
     destaques: [
       ["calendar-days", "Mês a mês"],
       ["timer", "Tempo de uso"],
@@ -170,7 +170,7 @@ const SECOES = [
     id: "sobre",
     selo: "SOBRE O PROJETO",
     titulo: "A gente e o laboratório",
-    resumo: "Como funciona o laboratório de informática da escola e quem faz isso acontecer.",
+    resumo: "Como funciona o laboratório de informática e quem faz acontecer.",
     destaques: [
       ["monitor-smartphone", "O laboratório"],
       ["graduation-cap", "A equipe"],
@@ -183,7 +183,7 @@ const SECOES = [
     id: "tv",
     selo: "MODO TV",
     titulo: "Painel da TV",
-    resumo: "Cronômetro em tela cheia com a turma da vez, o grupo e o conteúdo do dia.",
+    resumo: "Cronômetro em tela cheia com a turma da vez.",
     destaques: [
       ["timer", "Cronômetro"],
       ["users-round", "Turma e grupo"],
@@ -195,10 +195,6 @@ const SECOES = [
 ];
 
 // ------------------------------------------------------------------ cartão
-
-const logo = await sharp(resolve(raiz, "src/assets/logo-full-transparent.png"))
-  .resize({ width: 196 })
-  .toBuffer();
 
 function cartao(s) {
   const [cor, corEscura] = s.cor;
@@ -228,10 +224,17 @@ function cartao(s) {
     })
     .join("");
 
-  // Medalhão do ícone, à direita.
-  const cx = 930;
-  const cy = 300;
-  const lado = 264;
+  // Ilustração à direita: caderno pautado com lápis, sem peso — o ícone da seção vai no topo do caderno.
+  const cx = 955;
+  const cy = 318;
+  const linhas = Array.from(
+    { length: 9 },
+    (_, i) => `<line x1="-96" y1="${-52 + i * 27}" x2="106" y2="${-52 + i * 27}" stroke="${cor}" stroke-opacity="0.38" stroke-width="2"/>`,
+  ).join("");
+  const espiral = Array.from(
+    { length: 9 },
+    (_, i) => `<rect x="-146" y="${-138 + i * 33}" width="34" height="11" rx="5.5" fill="#ffffff" fill-opacity="0.42"/>`,
+  ).join("");
 
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -259,25 +262,53 @@ function cartao(s) {
   <rect width="${W}" height="${H}" fill="url(#pontos)"/>
   <rect width="${W}" height="${H}" fill="url(#brilho)"/>
 
-  <!-- anéis em volta do medalhão -->
-  <circle cx="${cx}" cy="${cy}" r="196" fill="none" stroke="${cor}" stroke-opacity="0.35" stroke-width="2"/>
-  <circle cx="${cx}" cy="${cy}" r="246" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="2" stroke-dasharray="4 10"/>
-  <circle cx="${cx + 139}" cy="${cy - 139}" r="9" fill="${cor}"/>
-  <circle cx="${cx - 174}" cy="${cy + 91}" r="6" fill="#ffffff" fill-opacity="0.5"/>
-
-  <!-- medalhão -->
-  <g filter="url(#sombra)">
-    <rect x="${cx - lado / 2}" y="${cy - lado / 2}" width="${lado}" height="${lado}" rx="64" fill="url(#medalha)"/>
+  <!-- caderno pautado -->
+  <g transform="translate(${cx} ${cy}) rotate(-5)">
+    <rect x="-130" y="-172" width="262" height="344" rx="22" fill="#ffffff" fill-opacity="0.07" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2"/>
+    ${espiral}
+    <line x1="-80" y1="-158" x2="-80" y2="158" stroke="${cor}" stroke-opacity="0.55" stroke-width="2"/>
+    ${linhas}
+    <circle cx="14" cy="-108" r="50" fill="url(#medalha)"/>
+    <circle cx="14" cy="-108" r="50" fill="url(#vidro)"/>
+    <g transform="translate(-14 -136) scale(2.33)">${icone(s.icone, "#ffffff", 1.7)}</g>
   </g>
-  <rect x="${cx - lado / 2}" y="${cy - lado / 2}" width="${lado}" height="${lado}" rx="64" fill="url(#vidro)"/>
-  <rect x="${cx - lado / 2 + 1.5}" y="${cy - lado / 2 + 1.5}" width="${lado - 3}" height="${lado - 3}" rx="62.5" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
-  <g transform="translate(${cx - 72} ${cy - 72}) scale(6)">${icone(s.icone, "#ffffff", 1.5)}</g>
+  <!-- lápis -->
+  <g transform="translate(${cx + 118} ${cy + 118}) rotate(38)">
+    <rect x="-13" y="-110" width="26" height="170" rx="4" fill="url(#medalha)"/>
+    <rect x="-13" y="-110" width="9" height="170" rx="4" fill="#ffffff" fill-opacity="0.22"/>
+    <rect x="-13" y="-128" width="26" height="22" rx="5" fill="#ffffff" fill-opacity="0.55"/>
+    <polygon points="-13,60 13,60 0,100" fill="#fde7c4" fill-opacity="0.9"/>
+    <polygon points="-5,82 5,82 0,100" fill="#1f2937"/>
+  </g>
+  <!-- fichinhas pedagógicas -->
+  <g font-family="${TITULO}" font-weight="800" font-size="26" fill="#ffffff">
+    <g transform="translate(${cx - 240} ${cy - 150}) rotate(-8)">
+      <rect width="86" height="48" rx="14" fill="#ffffff" fill-opacity="0.08" stroke="${cor}" stroke-opacity="0.6" stroke-width="2"/>
+      <text x="43" y="33" text-anchor="middle" fill-opacity="0.9">ABC</text>
+    </g>
+    <g transform="translate(${cx - 232} ${cy + 118}) rotate(6)">
+      <rect width="86" height="48" rx="14" fill="#ffffff" fill-opacity="0.08" stroke="${cor}" stroke-opacity="0.6" stroke-width="2"/>
+      <text x="43" y="33" text-anchor="middle" fill-opacity="0.9">123</text>
+    </g>
+  </g>
 
   <!-- faixa de cor da seção -->
   <rect x="0" y="0" width="${W}" height="8" fill="${cor}"/>
 
   <!-- marca da escola -->
-  <rect x="52" y="44" width="228" height="92" rx="18" fill="#ffffff"/>
+  <g transform="translate(60 40)">
+    <g transform="scale(0.78)">
+      <rect width="64" height="64" rx="17" fill="#9b8cff"/>
+      <g fill="#0d0b26">
+        <rect x="17" y="6" width="8" height="8" rx="2" fill="#fbbf24"/>
+        <rect x="17" y="28" width="8" height="8" rx="2"/><rect x="28" y="28" width="8" height="8" rx="2"/>
+        <rect x="28" y="39" width="8" height="8" rx="2"/>
+        <rect x="17" y="50" width="8" height="8" rx="2"/><rect x="28" y="50" width="8" height="8" rx="2"/><rect x="39" y="50" width="8" height="8" rx="2"/>
+      </g>
+    </g>
+    <text x="64" y="26" font-family="${TITULO}" font-size="27" font-weight="800" fill="#ffffff" letter-spacing="-0.5">informática<tspan fill="#fbbf24">.</tspan></text>
+    <text x="64" y="44" font-family="${TEXTO}" font-size="12.5" font-weight="600" fill="#ffffff" fill-opacity="0.6" letter-spacing="2.2">E.M. DR. EIRALDO · FEIJÓ-AC</text>
+  </g>
 
   <g font-family="${TEXTO}">
     <circle cx="68" cy="${yTit - 86}" r="6" fill="${cor}"/>
@@ -302,7 +333,6 @@ let n = 0;
 for (const s of SECOES) {
   if (pedido.length && !pedido.includes(s.id)) continue;
   await sharp(Buffer.from(cartao(s)))
-    .composite([{ input: logo, left: 68, top: 52 }])
     .flatten({ background: "#0d0b26" })
     .jpeg({ quality: 90, chromaSubsampling: "4:4:4", mozjpeg: true })
     .toFile(resolve(raiz, `public/og/secao-${s.id}.jpg`));

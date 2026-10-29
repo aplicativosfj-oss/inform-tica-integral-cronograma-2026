@@ -80,7 +80,7 @@ const VISUAL: Record<
 const ORDEM: Espaco[] = ["aula", "filme", "jogos"];
 const CAMINHO = "/entre-turnos";
 const TEXTO_COMPARTILHAR =
-  "Entre Turnos: onde cada turma da Escola Dr. Eiraldo fica no intervalo das 11h às 13h e quem cuida dela.";
+  "🍽️ Entre Turnos · 11h às 13h\n🛏️ Sala de aula · 🎬 Filme · 🎲 Jogos\n👩‍🏫 Veja onde cada turma fica e quem cuida dela:";
 
 /** Etiqueta curta de um espaço: ícone + nome. */
 function Etiqueta({ espaco, curta = false }: { espaco: Espaco; curta?: boolean }) {

@@ -8,9 +8,9 @@ export const Route = createFileRoute("/resultados")({
   component: ResultadosPublicos,
   head: () => ({
     meta: metaCompartilhar({
-      titulo: "Resultados do 3º bimestre · Escola Dr. Eiraldo",
+      titulo: "📊 Resultados do 3º bimestre · Escola Dr. Eiraldo",
       descricao:
-        "Como as turmas da Escola Dr. Eiraldo estão lendo, escrevendo e aprendendo no 3º bimestre de 2026, comparado com o 1º e o 2º bimestre e com as duas avaliações diagnósticas.",
+        "📖 Leitura e escrita, ✏️ notas e 🎯 o que cada turma precisa. Por turma, sem identificar alunos.",
       imagem: "/og/secao-resultados.jpg",
       alt: "Resultados do 3º bimestre de 2026",
     }),

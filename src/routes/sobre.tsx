@@ -35,13 +35,13 @@ export const Route = createFileRoute("/sobre")({
   head: () => ({
     meta: [
       ...imagemCompartilhar("/og/secao-sobre.jpg", "Sobre o laboratório de informática"),
-      { title: "A gente e o laboratório · Informática Dr. Eiraldo" },
+      { title: "🏫 A gente e o laboratório · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
           "Conheça o laboratório de informática da Escola Dr. Eiraldo Carneiro de França: como funciona, quem está por trás e por que tudo isso existe.",
       },
-      { property: "og:title", content: "A gente e o laboratório · Informática Dr. Eiraldo" },
+      { property: "og:title", content: "🏫 A gente e o laboratório · Informática Dr. Eiraldo" },
       {
         property: "og:description",
         content:

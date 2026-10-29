@@ -46,9 +46,8 @@ export const Route = createFileRoute("/avaliacao")({
   component: AvaliacaoPublica,
   head: () => ({
     meta: metaCompartilhar({
-      titulo: "Avaliações Diagnósticas · Escola Dr. Eiraldo",
-      descricao:
-        "I e II Avaliação Diagnóstica 2026 da Escola Dr. Eiraldo Carneiro de França: quanto cada turma avançou, o que já foi aprendido e o que precisa ser retomado.",
+      titulo: "📝 Avaliações Diagnósticas · Escola Dr. Eiraldo",
+      descricao: "📈 I e II Avaliação 2026: quanto cada turma avançou e o que retomar.",
       imagem: "/og/secao-avaliacao.jpg",
       alt: "Avaliações Diagnósticas 2026",
     }),

@@ -37,16 +37,16 @@ export const Route = createFileRoute("/infoteca")({
   head: () => ({
     meta: [
       ...imagemCompartilhar("/og/secao-infoteca.jpg", "Infoteca: jogos e ferramentas educativas"),
-      { title: "Infoteca · Informática Dr. Eiraldo" },
+      { title: "📚 Infoteca · Informática Dr. Eiraldo" },
       {
         name: "description",
         content:
           "A Infoteca reúne jogos, ferramentas e plataformas educativas escolhidos a dedo para alunos, professores e famílias, com opções para crianças com necessidades especiais.",
       },
-      { property: "og:title", content: "Infoteca · Informática Dr. Eiraldo" },
+      { property: "og:title", content: "📚 Infoteca · Informática Dr. Eiraldo" },
       {
         property: "og:description",
-        content: "Jogos e ferramentas educativas escolhidos a dedo, separados por assunto.",
+        content: "🎮 Jogos e 🧰 ferramentas educativas, separados por assunto.",
       },
       { property: "og:type", content: "website" },
     ],
