@@ -21,6 +21,7 @@ import { ConviteInstalar } from "../components/mobile/convite-instalar";
 import { Toaster } from "../components/ui/sonner";
 import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
+import { DestravarTela } from "../components/mobile/destravar-tela";
 import { PROGRAMACAO_ATIVA } from "../lib/recursos";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 import { FONTES_CSS, precarregarOffline } from "../lib/offline-precache";
@@ -238,6 +239,7 @@ function RootComponent() {
                 {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
                 <Outlet />
                 <BarraInferior />
+                <DestravarTela />
                 <ConviteInstalar />
                 {/* No celular, os avisos sobem acima da barra inferior. */}
                 <Toaster mobileOffset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }} />
