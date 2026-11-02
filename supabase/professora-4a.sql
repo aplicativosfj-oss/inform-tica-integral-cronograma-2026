@@ -1,10 +1,10 @@
--- 4º Ano "A": a professora regente é Edivânia.
+-- 4º Ano "A": a professora regente é Edivânia Macedo.
 -- Atualiza a turma t-4a dentro de app_state.turmas (linha 'default').
 update public.app_state
 set turmas = (
   select jsonb_agg(
     case when t->>'id' = 't-4a'
-      then jsonb_set(t, '{professorRegente}', '"Edivânia"')
+      then jsonb_set(t, '{professorRegente}', '"Edivânia Macedo"')
       else t
     end
     order by ord

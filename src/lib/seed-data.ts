@@ -258,7 +258,7 @@ export const SEED_TURMAS: Turma[] = [
     id: "t-4a",
     serie: "4º Ano",
     letra: "A",
-    professorRegente: "Edivânia",
+    professorRegente: "Edivânia Macedo",
     alunos: alunos([
       "Aslyanne Souza Ribeiro",
       "Claudianny Tavares Lima",
