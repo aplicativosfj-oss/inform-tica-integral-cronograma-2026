@@ -5,7 +5,7 @@ import { useEffect } from "react";
 function temJanelaAberta() {
   return Boolean(
     document.querySelector(
-      '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]',
+      '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"], [data-tela-cheia]',
     ),
   );
 }
@@ -18,6 +18,12 @@ function destravar() {
   // A trava de rolagem das janelas usa este atributo; sem janela aberta ele
   // não deveria existir, e com ele a página fica parada e sem toque.
   if (body.hasAttribute("data-scroll-locked")) body.removeAttribute("data-scroll-locked");
+  // Tela cheia da aula ou dos jogos que saiu sem devolver a rolagem.
+  if (body.style.overflow === "hidden") body.style.overflow = "";
+  const html = document.documentElement;
+  if (html.style.overflow === "hidden") html.style.overflow = "";
+  // Tela cheia nativa do navegador que ficou ligada sem nenhuma tela cheia aberta.
+  if (document.fullscreenElement) void document.exitFullscreen?.().catch(() => undefined);
 }
 
 /**
@@ -45,7 +51,10 @@ export function DestravarTela() {
     observador.observe(document.body, {
       attributes: true,
       attributeFilter: ["style", "data-scroll-locked"],
+      // Janelas que somem do <body> (portal removido) também contam.
+      childList: true,
     });
+    observador.observe(document.documentElement, { attributes: true, attributeFilter: ["style"] });
     return () => {
       observador.disconnect();
       window.clearTimeout(espera);

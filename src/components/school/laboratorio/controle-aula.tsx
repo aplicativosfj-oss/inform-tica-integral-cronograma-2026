@@ -70,7 +70,10 @@ export function ControleAula({
       toast.success("Aula encerrada. A justificativa ficou registrada.");
       setParando(false);
       setMotivo("");
-      aoMudar();
+      // Encerrada a aula, este cartão sai da tela. Espera a janela terminar
+      // de fechar antes de atualizar, para ela não sumir pela metade e deixar
+      // a página travada (sem rolar nem clicar) até sair e entrar de novo.
+      window.setTimeout(aoMudar, 350);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Não foi possível concluir.");
     } finally {

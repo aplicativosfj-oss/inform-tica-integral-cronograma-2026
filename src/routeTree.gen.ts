@@ -41,6 +41,7 @@ import { Route as DashboardIndicadoresRouteImport } from './routes/dashboard/ind
 import { Route as DashboardLaboratorioRouteImport } from './routes/dashboard/laboratorio'
 import { Route as DashboardMapaClasseRouteImport } from './routes/dashboard/mapa-classe'
 import { Route as DashboardProgramacaoRouteImport } from './routes/dashboard/programacao'
+import { Route as DashboardRelatoriosRouteImport } from './routes/dashboard/relatorios'
 import { Route as DashboardRendimentoRouteImport } from './routes/dashboard/rendimento'
 import { Route as DashboardSimuladosRouteImport } from './routes/dashboard/simulados'
 import { Route as DashboardTrilhasRouteImport } from './routes/dashboard/trilhas'
@@ -227,6 +228,11 @@ const DashboardProgramacaoRoute = DashboardProgramacaoRouteImport.update({
   path: '/dashboard/programacao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRelatoriosRoute = DashboardRelatoriosRouteImport.update({
+  id: '/dashboard/relatorios',
+  path: '/dashboard/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRendimentoRoute = DashboardRendimentoRouteImport.update({
   id: '/dashboard/rendimento',
   path: '/dashboard/rendimento',
@@ -396,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/laboratorio': typeof DashboardLaboratorioRoute
   '/dashboard/mapa-classe': typeof DashboardMapaClasseRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/relatorios': typeof DashboardRelatoriosRoute
   '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
@@ -455,6 +462,7 @@ export interface FileRoutesByTo {
   '/dashboard/laboratorio': typeof DashboardLaboratorioRoute
   '/dashboard/mapa-classe': typeof DashboardMapaClasseRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/relatorios': typeof DashboardRelatoriosRoute
   '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
@@ -515,6 +523,7 @@ export interface FileRoutesById {
   '/dashboard/laboratorio': typeof DashboardLaboratorioRoute
   '/dashboard/mapa-classe': typeof DashboardMapaClasseRoute
   '/dashboard/programacao': typeof DashboardProgramacaoRoute
+  '/dashboard/relatorios': typeof DashboardRelatoriosRoute
   '/dashboard/rendimento': typeof DashboardRendimentoRoute
   '/dashboard/simulados': typeof DashboardSimuladosRoute
   '/dashboard/trilhas': typeof DashboardTrilhasRoute
@@ -576,6 +585,7 @@ export interface FileRouteTypes {
     | '/dashboard/laboratorio'
     | '/dashboard/mapa-classe'
     | '/dashboard/programacao'
+    | '/dashboard/relatorios'
     | '/dashboard/rendimento'
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
@@ -635,6 +645,7 @@ export interface FileRouteTypes {
     | '/dashboard/laboratorio'
     | '/dashboard/mapa-classe'
     | '/dashboard/programacao'
+    | '/dashboard/relatorios'
     | '/dashboard/rendimento'
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
@@ -694,6 +705,7 @@ export interface FileRouteTypes {
     | '/dashboard/laboratorio'
     | '/dashboard/mapa-classe'
     | '/dashboard/programacao'
+    | '/dashboard/relatorios'
     | '/dashboard/rendimento'
     | '/dashboard/simulados'
     | '/dashboard/trilhas'
@@ -754,6 +766,7 @@ export interface RootRouteChildren {
   DashboardLaboratorioRoute: typeof DashboardLaboratorioRoute
   DashboardMapaClasseRoute: typeof DashboardMapaClasseRoute
   DashboardProgramacaoRoute: typeof DashboardProgramacaoRoute
+  DashboardRelatoriosRoute: typeof DashboardRelatoriosRoute
   DashboardRendimentoRoute: typeof DashboardRendimentoRoute
   DashboardSimuladosRoute: typeof DashboardSimuladosRoute
   DashboardTrilhasRoute: typeof DashboardTrilhasRoute
@@ -1009,6 +1022,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProgramacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/relatorios': {
+      id: '/dashboard/relatorios'
+      path: '/dashboard/relatorios'
+      fullPath: '/dashboard/relatorios'
+      preLoaderRoute: typeof DashboardRelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/rendimento': {
       id: '/dashboard/rendimento'
       path: '/dashboard/rendimento'
@@ -1218,6 +1238,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardLaboratorioRoute: DashboardLaboratorioRoute,
   DashboardMapaClasseRoute: DashboardMapaClasseRoute,
   DashboardProgramacaoRoute: DashboardProgramacaoRoute,
+  DashboardRelatoriosRoute: DashboardRelatoriosRoute,
   DashboardRendimentoRoute: DashboardRendimentoRoute,
   DashboardSimuladosRoute: DashboardSimuladosRoute,
   DashboardTrilhasRoute: DashboardTrilhasRoute,

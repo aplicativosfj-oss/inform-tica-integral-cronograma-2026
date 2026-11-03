@@ -171,7 +171,9 @@ export function TelaCheiaAula({
   // tela acesa. O que o aparelho não suportar é ignorado: a camada já cobre
   // a janela inteira.
   useEffect(() => {
-    const anterior = document.body.style.overflow;
+    // Se outra janela já tinha travado a rolagem, não guardamos esse "hidden"
+    // para devolver depois: a página ficaria presa sem rolar ao fechar.
+    const anterior = document.body.style.overflow === "hidden" ? "" : document.body.style.overflow;
     document.body.style.overflow = "hidden";
     void document.documentElement.requestFullscreen?.().catch(() => {});
     let trava: { release: () => Promise<void> } | null = null;
@@ -256,6 +258,7 @@ export function TelaCheiaAula({
     <div
       role="dialog"
       aria-modal="true"
+      data-tela-cheia=""
       aria-label={`Aula de informática em tela cheia: ${mista ? "aula mista" : g.turmaRotulo}`}
       className={cn(
         "fixed inset-0 z-[9999] isolate flex flex-col overflow-hidden bg-[#050b1a] text-white",

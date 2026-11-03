@@ -56,9 +56,11 @@ export function CaixaJogo({
     if (cheia) {
       hospedeiro.className =
         "fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-slate-950 text-white";
+      hospedeiro.setAttribute("data-tela-cheia", "");
       document.body.appendChild(hospedeiro);
     } else if (lugar.current) {
       hospedeiro.className = "";
+      hospedeiro.removeAttribute("data-tela-cheia");
       lugar.current.appendChild(hospedeiro);
     }
   }, [cheia, hospedeiro]);
