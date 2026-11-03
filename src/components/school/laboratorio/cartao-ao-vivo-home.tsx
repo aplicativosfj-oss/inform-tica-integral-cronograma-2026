@@ -3,6 +3,8 @@ import { ArrowRight, GraduationCap, Pause, Users2 } from "lucide-react";
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { BotaoTelaCheia, useTelaCheiaAula } from "@/components/school/laboratorio/tela-cheia-aula";
 import { useAppStore } from "@/lib/app-store";
+import { AvisoFeriado } from "@/components/school/aviso-feriado";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
 import {
   agruparSessoes,
   estadoDaSessao,
@@ -44,6 +46,10 @@ export function CartaoAoVivoHome({
 
   const principal = aoVivo[0];
   const outros = aoVivo.slice(1);
+
+  if (feriadoNacionalEm(hojeNaEscola())) {
+    return <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="min-h-[15rem]" />;
+  }
 
   if (!principal) {
     return (
