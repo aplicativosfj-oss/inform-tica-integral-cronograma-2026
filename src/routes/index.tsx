@@ -29,6 +29,7 @@ import { CartaoAoVivoHome } from "@/components/school/laboratorio/cartao-ao-vivo
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { ClimaCompacto } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
+import { AvisoFeriado } from "@/components/school/aviso-feriado";
 import { BannerEntreTurnos } from "@/components/school/pausa/banner-home";
 import { PageBackground } from "@/components/school/page-background";
 import { AvisoDireitosImagem } from "@/components/school/site-image";
@@ -36,6 +37,8 @@ import { SiteFooter } from "@/components/school/site-footer";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useAppStore } from "@/lib/app-store";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
+import { hojeNaEscola } from "@/lib/laboratorio";
 import { useAuth } from "@/lib/auth-store";
 import { useSessoesLab } from "@/lib/laboratorio";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
@@ -84,6 +87,7 @@ export const Route = createFileRoute("/")({
 const ACESSOS = [
   {
     to: "/agenda",
+    imagem: "/images/hero-lab-photo-768w.webp",
     numero: "01",
     rotulo: "Organização",
     titulo: "Agenda do laboratório",
@@ -95,6 +99,7 @@ const ACESSOS = [
   },
   {
     to: "/aluno",
+    imagem: "/images/alunos-hero-768w.webp",
     numero: "02",
     rotulo: "Para os estudantes",
     titulo: "Meu espaço de aprender",
@@ -106,6 +111,7 @@ const ACESSOS = [
   },
   {
     to: "/infoteca",
+    imagem: "/images/feature-tools-768w.webp",
     numero: "03",
     rotulo: "Conhecimento",
     titulo: "Infoteca digital",
@@ -117,6 +123,7 @@ const ACESSOS = [
   },
   {
     to: "/sala-de-jogos",
+    imagem: "/images/feature-kids-learning-768w.webp",
     numero: "04",
     rotulo: "Aprender brincando",
     titulo: "Jogos educativos",
@@ -128,6 +135,7 @@ const ACESSOS = [
   },
   {
     to: "/resultados",
+    imagem: "/images/feature-classroom-tech-768w.webp",
     numero: "05",
     rotulo: "Transparência",
     titulo: "Resultados da escola",
@@ -139,6 +147,7 @@ const ACESSOS = [
   },
   {
     to: "/avaliacao",
+    imagem: "/images/alunos-2-480w.webp",
     numero: "06",
     rotulo: "Acompanhamento",
     titulo: "Avaliações",
@@ -194,6 +203,7 @@ function Index() {
   const sessoes = lab.sessoes.filter((s) => idsDoFundamental.has(s.turmaId));
   const ausencias = lab.ausencias?.filter((s) => idsDoFundamental.has(s.turmaId));
   const dadosLab = { ...lab, sessoes, ausencias };
+  const feriadoHoje = feriadoNacionalEm(hojeNaEscola());
 
   return (
     <div className="home-premium relative min-h-screen overflow-x-clip bg-background text-foreground">
@@ -230,6 +240,8 @@ function Index() {
                   Feijó, Acre · Ano letivo 2026
                 </span>
               </div>
+
+              {feriadoHoje ? <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="mb-8" /> : null}
 
               <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)] xl:gap-16">
                 <div className="max-w-3xl">
@@ -334,19 +346,30 @@ function Index() {
               />
             </RevealSection>
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-              {ACESSOS.map(({ to, numero, rotulo, titulo, descricao, chamada, Icone, estilo, destaque }) => (
+              {ACESSOS.map(({ to, numero, rotulo, titulo, descricao, chamada, Icone, estilo, destaque, imagem }) => (
                 <Link
                   key={to}
                   to={to}
                   className={"home-access-card group relative flex min-h-[15rem] flex-col overflow-hidden rounded-[1.75rem] border p-6 sm:p-7 " + estilo + (destaque ? " lg:min-h-[15rem]" : "")}
                 >
-                  <div className="relative flex items-start justify-between gap-3">
+                  <img
+                    src={imagem}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
+                    width={768}
+                    height={512}
+                    className="home-access-photo pointer-events-none absolute inset-0 size-full object-cover"
+                  />
+                  <span aria-hidden="true" className="home-access-overlay pointer-events-none absolute inset-0" />
+                  <div className="relative z-10 flex items-start justify-between gap-3">
                     <span className="home-access-icon grid size-12 place-items-center rounded-2xl border border-current/15 bg-current/[0.08]">
                       <Icone className="size-6" aria-hidden="true" />
                     </span>
                     <span className="font-heading text-sm font-bold opacity-40">{numero} / 06</span>
                   </div>
-                  <div className="relative mt-auto pt-10">
+                  <div className="relative z-10 mt-auto pt-12">
                     <span className="text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">{rotulo}</span>
                     <h3 className="mt-2 max-w-[18ch] font-heading text-[clamp(1.45rem,2vw,2.15rem)] font-extrabold leading-[1.13] tracking-tight">
                       {titulo}
@@ -378,7 +401,7 @@ function Index() {
                 />
                 <div className="flex shrink-0 flex-wrap items-center gap-3">
                   <ClimaCompacto />
-                  {isAuthenticated ? <MarcarAlunosCartao dados={dadosLab} compacto /> : null}
+                  {isAuthenticated && !feriadoHoje ? <MarcarAlunosCartao dados={dadosLab} compacto /> : null}
                   <Button asChild variant="outline" className="rounded-full border-border bg-background">
                     <Link to="/agenda">
                       Agenda completa <ArrowRight className="size-4" aria-hidden="true" />
@@ -387,7 +410,13 @@ function Index() {
                 </div>
               </div>
               <div className="home-live-panel min-h-[26rem] overflow-hidden rounded-[1.75rem] border border-border bg-background p-2 shadow-xl shadow-ink/5 sm:p-4">
-                <PainelLaboratorioAgora dados={dadosLab} logado={isAuthenticated} />
+                {feriadoHoje ? (
+                  <div className="grid min-h-[24rem] place-items-center rounded-2xl bg-muted/40 px-5 py-10">
+                    <AvisoFeriado dataISO={hojeNaEscola()} variante="painel" />
+                  </div>
+                ) : (
+                  <PainelLaboratorioAgora dados={dadosLab} logado={isAuthenticated} />
+                )}
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="size-2 rounded-full bg-emerald-500" aria-hidden="true" />
