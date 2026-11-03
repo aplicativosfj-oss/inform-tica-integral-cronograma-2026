@@ -9,6 +9,8 @@ import {
   KeyRound,
   ShieldCheck,
   Trash2,
+  Undo2,
+  UserX,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -237,9 +239,14 @@ function AlunoFormDialog({
 
 function TurmaAlunosPage() {
   const { turmaId } = Route.useParams();
-  const { turmas, config, addAluno, updateAluno, removeAluno } = useAppStore();
+  const { turmas, todasTurmas, config, addAluno, updateAluno, removeAluno } = useAppStore();
   const navigate = useNavigate();
   const turma = turmas.find((t) => t.id === turmaId);
+  // Transferidos e desistentes saem do rodízio, mas continuam visíveis (apagados) na turma.
+  const foraDaTurma =
+    todasTurmas
+      .find((t) => t.id === turmaId)
+      ?.alunos.filter((a) => a.situacao === "transferido" || a.situacao === "desistente") ?? [];
 
   if (!turma) {
     return (
@@ -272,7 +279,8 @@ function TurmaAlunosPage() {
             {turma.serie} "{turma.letra}"
           </h1>
           <p className="text-sm text-muted-foreground">
-            Prof(a). regente: {turma.professorRegente} · {turma.alunos.length} alunos em{" "}
+            Prof(a). regente: {turma.professorRegente} · {turma.alunos.length} alunos
+            {foraDaTurma.length > 0 ? ` (+${foraDaTurma.length} fora da turma)` : ""} em{" "}
             {grupos.length} {grupos.length === 1 ? "grupo" : "grupos"} de até{" "}
             {config.numeroComputadores} alunos
           </p>
@@ -441,6 +449,68 @@ function TurmaAlunosPage() {
             </CardContent>
           </Card>
         ))}
+
+        {foraDaTurma.length > 0 ? (
+          <Card className="border-dashed bg-muted/30">
+            <CardContent className="py-4">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="text-muted-foreground">
+                  <UserX className="size-3" /> Não estudam mais na turma
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  Ficam fora do rodízio e das contas, mas o histórico continua guardado.
+                </span>
+              </div>
+              <div className="flex flex-col divide-y divide-border/60">
+                {foraDaTurma.map((aluno) => (
+                  <div
+                    key={aluno.id}
+                    className="flex items-center justify-between gap-3 py-2"
+                    aria-label={`${aluno.nome}, ${aluno.situacao === "transferido" ? "transferido(a)" : "desistente"}`}
+                  >
+                    <div className="flex items-center gap-3 opacity-60 grayscale">
+                      <span className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+                        {aluno.foto ? (
+                          <img src={aluno.foto} alt="" className="size-full object-cover" />
+                        ) : (
+                          aluno.nome.charAt(0)
+                        )}
+                      </span>
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground line-through decoration-muted-foreground/60">
+                          {aluno.nome}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          {aluno.situacao === "transferido" ? "Transferido(a)" : "Desistente"}
+                          {aluno.situacaoEm
+                            ? ` em ${aluno.situacaoEm.split("-").reverse().join("/")}`
+                            : ""}
+                          {aluno.situacaoObs ? ` — ${aluno.situacaoObs}` : ""}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="shrink-0 text-muted-foreground"
+                      aria-label={`Reativar ${aluno.nome} na turma`}
+                      onClick={() => {
+                        updateAluno(turma.id, aluno.id, {
+                          situacao: undefined,
+                          situacaoEm: undefined,
+                          situacaoObs: undefined,
+                        });
+                        toast.success(`${aluno.nome} voltou para a turma.`);
+                      }}
+                    >
+                      <Undo2 className="size-3.5" /> Reativar
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </DashboardShell>
   );

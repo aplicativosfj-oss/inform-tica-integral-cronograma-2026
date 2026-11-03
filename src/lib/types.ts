@@ -125,6 +125,8 @@ export interface Reprogramacao {
 export interface ScheduleConfig {
   /** Migração pontual de cadastro: evita reaplicar correções após edição administrativa futura. */
   revisaoCadastroNov2026?: boolean | undefined;
+  /** Marcação pontual dos alunos transferidos informados em novembro/2026. */
+  revisaoTransferidosNov2026?: boolean | undefined;
   nomeEscola: string;
   inep: string;
   endereco: string;

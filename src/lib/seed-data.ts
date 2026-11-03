@@ -1,4 +1,5 @@
 import type { ScheduleConfig, Turma } from "@/lib/types";
+import { marcarTransferidosNov2026 } from "@/lib/transferidos-nov2026";
 
 type AlunoEntry = string | [nome: string, especial: true];
 
@@ -18,6 +19,7 @@ export const SEED_CONFIG: ScheduleConfig = {
   nomeEscola: "Escola Municipal em Tempo Integral Dr. Eiraldo Carneiro de França",
   // Cadastro oficial revisto em novembro de 2026; antigas instalações serão reconciliadas ao entrar.
   revisaoCadastroNov2026: true,
+  revisaoTransferidosNov2026: true,
   inep: "12004227",
   endereco: "Rua Ernane Moreira Braga, 108, Cohab",
   professorInformatica: "Franc D'nis",
@@ -57,7 +59,7 @@ export const SEED_CONFIG: ScheduleConfig = {
   },
 };
 
-export const SEED_TURMAS: Turma[] = [
+const TURMAS_BASE: Turma[] = [
   {
     id: "t-1a",
     serie: "1º Ano",
@@ -403,3 +405,9 @@ export const SEED_TURMAS: Turma[] = [
     apoioEspecial: [{ nome: "Kalebe Meireles Ribeiro", funcao: "Cuidador(a)" }],
   },
 ];
+
+// Transferidos continuam no cadastro, mas apagados e fora do rodízio.
+export const SEED_TURMAS: Turma[] = marcarTransferidosNov2026(TURMAS_BASE, {
+  ...SEED_CONFIG,
+  revisaoTransferidosNov2026: false,
+}).turmas;
