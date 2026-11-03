@@ -273,12 +273,12 @@ export function PainelLaboratorioAgora({
   return (
     <Card
       id="laboratorio-agora"
-      className={cn("scroll-mt-28", rolar && "lg:flex lg:flex-col lg:overflow-hidden", className)}
+      className={cn("scroll-mt-28 border-0 shadow-none", rolar && "lg:flex lg:flex-col", className)}
     >
       {telaCheia.tela}
-      <CardHeader className={cn("px-3 pb-3 sm:px-6", rolar && "lg:shrink-0 lg:pb-4")}>
+      <CardHeader className={cn("px-3 pb-2 pt-3 sm:px-4", rolar && "lg:shrink-0")}>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-xl">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <MonitorSmartphone className="size-5 text-primary" aria-hidden /> No laboratório agora
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -294,9 +294,9 @@ export function PainelLaboratorioAgora({
       </CardHeader>
       <CardContent
         className={cn(
-          "space-y-4 px-3 sm:px-6",
+          "space-y-3 px-3 pb-3 sm:px-4",
           rolar &&
-            "lg:grid lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-5 lg:space-y-0",
+            "lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,1fr)] lg:items-start lg:gap-4 lg:space-y-0",
         )}
       >
         {dados.erro === TABELA_AUSENTE ? (
@@ -322,7 +322,7 @@ export function PainelLaboratorioAgora({
             <div
               className={cn(
                 "space-y-3",
-                rolar && "lg:min-h-0 lg:[scrollbar-width:thin] lg:overflow-y-auto lg:pr-1",
+                rolar && "lg:min-w-0",
               )}
             >
               {aoVivo.length === 0 ? (
@@ -357,7 +357,7 @@ export function PainelLaboratorioAgora({
               className={cn(
                 "space-y-4",
                 rolar &&
-                  "lg:flex lg:min-h-0 lg:flex-col lg:gap-4 lg:space-y-0 lg:overflow-y-auto lg:pr-1 lg:[scrollbar-width:thin]",
+                  "lg:flex lg:min-w-0 lg:flex-col lg:gap-3 lg:space-y-0",
               )}
             >
               {proximos.length > 0 ? (
