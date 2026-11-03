@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FichaAlunoAoVivo } from "@/components/school/laboratorio/ficha-aluno-ao-vivo";
-import { ArrowRight, GraduationCap, Pause, Users2 } from "lucide-react";
+import { ArrowRight, GraduationCap, Pause, Users2, UserRoundSearch } from "lucide-react";
 
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { BotaoTelaCheia, useTelaCheiaAula } from "@/components/school/laboratorio/tela-cheia-aula";
@@ -82,7 +82,7 @@ export function CartaoAoVivoHome({
   const presentes = principal.alunos.filter((a) => a.ausencia === null && !a.semMarcacao);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-emerald-300/30 bg-ink/60 p-5 shadow-[0_24px_80px_-24px_rgb(16_185_129/0.45)] backdrop-blur-xl sm:p-6">
+    <div className="relative overflow-hidden rounded-[1.5rem] border border-emerald-300/25 bg-ink/75 p-4 shadow-[0_20px_65px_-26px_rgb(16_185_129/0.45)] backdrop-blur-xl sm:p-5">
       {/* brilho que respira atrás do relógio */}
       <div
         aria-hidden
@@ -93,21 +93,21 @@ export function CartaoAoVivoHome({
       />
       <Cabeca agora={agora} vivo={!pausada} pausada={pausada} />
 
-      <div className="relative mt-4 flex flex-col items-center gap-5 sm:flex-row sm:items-center">
+      <div className="relative mt-3 flex flex-col items-center gap-3 sm:flex-row sm:items-center">
         <div className="shrink-0">
           <RelogioAula
             inicioMs={new Date(principal.inicio).getTime()}
             fimMs={new Date(principal.fim).getTime()}
             agoraMs={instanteEfetivo(principal, agora)}
             pausada={pausada}
-            tamanho={168}
+            tamanho={138}
           />
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-left">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/60">
             Turma no laboratório
           </p>
-          <p className="font-heading text-[clamp(2.2rem,5vw,3rem)] font-extrabold leading-none tracking-tight">
+          <p className="font-heading text-[clamp(1.8rem,4vw,2.5rem)] font-extrabold leading-none tracking-tight">
             {rotulo(principal)}
           </p>
           {professor ? (
@@ -136,31 +136,33 @@ export function CartaoAoVivoHome({
       )}
 
       {/* quem está nos computadores */}
-      <ul className="relative mt-5 flex flex-wrap gap-1.5">
-        {presentes.slice(0, 8).map((a, i) => (
+      <ul className="relative mt-3 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto pr-1">
+        {presentes.slice(0, 12).map((a, i) => (
           <li
             key={a.sessaoId}
             style={{ animationDelay: `${i * 60}ms` }}
-            className="lab-aluno flex items-center gap-1.5 rounded-full border border-white/10 bg-white/10 py-0.5 pl-0.5 pr-2.5 text-xs"
+            className="lab-aluno flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.08] py-0.5 pl-0.5 pr-2.5 text-xs transition-colors hover:border-emerald-300/50 hover:bg-emerald-400/10"
           >
             <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-[10px] font-bold text-white">
               {a.nome.trim().charAt(0).toUpperCase()}
             </span>
             {logado ? (
               <button type="button" onClick={() => setAlunoSelecionado(a)} aria-label={`Abrir informações de ${a.nome}`} className="relative rounded px-1 py-0.5 font-semibold underline-offset-2 hover:text-emerald-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300" title={`Abrir ficha de ${a.nome}`}>
-                {a.nome.split(" ")[0]}
+                <span className="inline-flex items-center gap-1">{a.nome.split(" ")[0]}<UserRoundSearch className="size-3 text-emerald-300" aria-hidden /></span>
               </button>
             ) : (
               <span>{nomeExibido(a.nome, false).split(" ")[0]}</span>
             )}
           </li>
         ))}
-        {presentes.length > 8 ? (
+        {presentes.length > 12 ? (
           <li className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold">
-            +{presentes.length - 8}
+            +{presentes.length - 12}
           </li>
         ) : null}
       </ul>
+
+      {logado ? <p className="relative mt-2 text-[11px] font-medium text-emerald-200/75">Selecione um aluno para consultar a ficha e registrar observações.</p> : null}
 
       {outros.length > 0 ? (
         <ul className="relative mt-4 space-y-2 border-t border-white/10 pt-4">
