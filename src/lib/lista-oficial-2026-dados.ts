@@ -469,6 +469,7 @@ export const LISTA_OFICIAL_2026: EntradaListaOficial[] = [
     nascimento: "2015-09-27",
     especial: true,
     obs: "Pós-censo. Matriculou, mas nunca compareceu à escola.",
+    situacao: "desistente",
   },
   {
     turmaId: "t-4a",

@@ -37,7 +37,7 @@ function textoSituacao(e: EntradaListaOficial): string | undefined {
   const quando = e.situacaoEm ? ` em ${e.situacaoEm.split("-").reverse().join("/")}` : "";
   return e.situacao === "transferido"
     ? `Transferido(a)${quando}, conforme a lista oficial.`
-    : "Deixou de frequentar, conforme a lista oficial.";
+    : "Deixou de frequentar (ou nunca compareceu), conforme a lista oficial.";
 }
 
 function completar(aluno: Aluno, e: EntradaListaOficial): Aluno {
@@ -75,7 +75,7 @@ export function aplicarListaOficial2026(
   config: ScheduleConfig,
   lista: EntradaListaOficial[] = LISTA_OFICIAL_2026,
 ): { turmas: Turma[]; config: ScheduleConfig; alterado: boolean } {
-  if (config.revisaoListaOficial2026) return { turmas, config, alterado: false };
+  if (config.revisaoListaOficial2026v2) return { turmas, config, alterado: false };
 
   const atualizadas = turmas.map((turma) => {
     const daTurma = lista.filter((e) => e.turmaId === turma.id);
@@ -101,7 +101,7 @@ export function aplicarListaOficial2026(
 
   return {
     turmas: atualizadas,
-    config: { ...config, revisaoListaOficial2026: true },
+    config: { ...config, revisaoListaOficial2026v2: true },
     alterado: true,
   };
 }

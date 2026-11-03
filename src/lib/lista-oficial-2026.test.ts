@@ -5,7 +5,7 @@ import { LISTA_OFICIAL_2026 } from "@/lib/lista-oficial-2026-dados";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
 import type { Turma } from "@/lib/types";
 
-const cfg = { ...SEED_CONFIG, revisaoListaOficial2026: undefined };
+const cfg = { ...SEED_CONFIG, revisaoListaOficial2026v2: undefined };
 const ativos = (t: Turma) => t.alunos.filter((a) => !a.situacao || a.situacao === "ativo");
 
 describe("lista oficial 2026", () => {
