@@ -1,0 +1,91 @@
+/* Destaque de nomes: um aluno de cada vez flutuando na abertura da home e na
+   tela cheia da aula (por isso fica num arquivo próprio, fora de .home-premium). */
+.constelacao-nome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  white-space: nowrap;
+  padding: 0.2rem 0.1rem 0.7rem;
+  will-change: transform;
+  transition: opacity 800ms ease, filter 800ms ease;
+}
+.constelacao-nome::after {
+  /* Traço de luz na cor da série, que se desenha sob o nome. */
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--cor), transparent);
+  box-shadow: 0 0 12px var(--cor);
+  transform-origin: left;
+  animation: destaque-traco 1.4s cubic-bezier(.21,.74,.16,1) 250ms both;
+}
+.constelacao-nome.is-saindo { opacity: 0; filter: blur(8px); }
+.constelacao-legenda {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--cor) 70%, white);
+  animation: destaque-legenda 700ms ease both;
+}
+.constelacao-ponto {
+  position: relative;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--cor);
+  box-shadow: 0 0 10px var(--cor);
+}
+.constelacao-ponto.is-vivo::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1px solid var(--cor);
+  animation: constelacao-pulso 2.2s ease-out infinite;
+}
+.constelacao-texto {
+  font-family: var(--font-heading, inherit);
+  font-size: clamp(1.35rem, 2vw, 1.9rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: white;
+  text-shadow: 0 0 28px color-mix(in oklab, var(--cor) 55%, transparent);
+}
+.constelacao-lab.is-grande .constelacao-texto { font-size: clamp(1.8rem, 3vw, 3rem); }
+.constelacao-lab.is-grande .constelacao-legenda { font-size: 0.78rem; }
+.constelacao-texto > span {
+  display: inline-block;
+  animation: destaque-letra 700ms cubic-bezier(.21,.74,.16,1) both;
+}
+@keyframes destaque-letra {
+  from { opacity: 0; transform: translateY(0.45em); filter: blur(6px); }
+}
+@keyframes destaque-legenda {
+  from { opacity: 0; transform: translateY(4px); }
+}
+@keyframes destaque-traco {
+  from { transform: scaleX(0); opacity: 0; }
+}
+@keyframes constelacao-pulso {
+  from { opacity: 0.9; transform: scale(0.6); }
+  to { opacity: 0; transform: scale(2.2); }
+}
+/* No celular a abertura não tem espaço livre: o painel já mostra os nomes. */
+@media (max-width: 639px) {
+  .constelacao-lab { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .constelacao-nome::after,
+  .constelacao-legenda,
+  .constelacao-texto > span,
+  .constelacao-ponto.is-vivo::after { animation: none; }
+  .constelacao-nome { transition: none; }
+}

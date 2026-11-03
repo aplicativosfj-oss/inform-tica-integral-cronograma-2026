@@ -19,6 +19,7 @@ import {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
 import { FichaTelaCheia } from "@/components/school/laboratorio/ficha-tela-cheia";
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { MarcaLogo } from "@/components/school/marca";
@@ -305,8 +306,22 @@ export function TelaCheiaAula({
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgb(0_0_0/0.55))]" />
       </div>
 
+      {/* ── Destaque: um aluno da aula por vez, flutuando nos espaços livres ── */}
+      <ConstelacaoNomes
+        sessoes={[]}
+        logado={logado}
+        fixos={presentes.map((a) => ({
+          chave: `${a.turmaId}|${a.id}`,
+          nome: a.nome,
+          turma: a.turmaRotulo,
+        }))}
+        evitar="[data-constelacao-evitar], [data-constelacao-filhos] > *"
+        grande
+      />
+
       {/* ── Barra de cima ── */}
       <header
+        data-constelacao-evitar
         className={cn(
           "flex items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-8",
           baixo ? "sm:pt-3" : "sm:pt-6",
@@ -389,7 +404,7 @@ export function TelaCheiaAula({
           deitado ? "flex-row justify-center" : "flex-col pt-3",
         )}
       >
-        <div className="relative flex shrink-0 flex-col items-center gap-3">
+        <div data-constelacao-evitar className="relative flex shrink-0 flex-col items-center gap-3">
           {/* anel de dados girando em volta do relógio */}
           <svg
             viewBox="0 0 200 200"
@@ -429,6 +444,7 @@ export function TelaCheiaAula({
         </div>
 
         <section
+          data-constelacao-filhos
           className={cn(
             "flex min-h-0 min-w-0 flex-col gap-3 sm:gap-4",
             deitado
@@ -591,7 +607,10 @@ export function TelaCheiaAula({
       </main>
 
       {/* ── Rodapé: aviso final, linha do tempo e terminal de dicas ── */}
-      <footer className="space-y-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-8 sm:pb-6">
+      <footer
+        data-constelacao-evitar
+        className="space-y-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-8 sm:pb-6"
+      >
         {!pausada ? (
           <AvisoMinutosFinais restanteMs={restante} className="mx-auto max-w-2xl" />
         ) : null}

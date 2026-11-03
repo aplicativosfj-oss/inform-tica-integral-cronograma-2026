@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import "@/styles/destaque-nomes.css";
+
 import { rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import { useAppStore } from "@/lib/app-store";
 import {
@@ -69,10 +71,22 @@ function embaralhar<T>(lista: T[]): T[] {
 export function ConstelacaoNomes({
   sessoes,
   logado,
+  fixos,
+  evitar = OBSTACULOS,
+  grande = false,
   className,
 }: {
   sessoes: SessaoLab[];
   logado: boolean;
+  /**
+   * Lista pronta (ex.: os alunos da aula na tela cheia). Quando vem, só esses
+   * nomes passam, com a legenda "No laboratório agora".
+   */
+  fixos?: { chave: string; nome: string; turma: string }[];
+  /** Seletor dos blocos que o nome contorna (padrão: os da página inicial). */
+  evitar?: string;
+  /** Letras maiores, para a TV na tela cheia. */
+  grande?: boolean;
   className?: string;
 }) {
   const { turmas } = useAppStore();
@@ -130,8 +144,15 @@ export function ConstelacaoNomes({
     [turmas, logado],
   );
 
-  const modo = aula?.modo ?? "todos";
-  const fonte = aula?.nomes.length ? aula.nomes : todos;
+  const fixosComCor = useMemo<Destaque[] | null>(
+    () =>
+      fixos
+        ? fixos.map((d) => ({ ...d, nome: nomeExibido(d.nome, logado), cor: corDaTurma(d.turma) }))
+        : null,
+    [fixos, logado],
+  );
+  const modo = fixosComCor ? "vivo" : (aula?.modo ?? "todos");
+  const fonte = fixosComCor ?? (aula?.nomes.length ? aula.nomes : todos);
   /** Assinatura da lista, para recomeçar o rodízio só quando ela muda de verdade. */
   const assinatura = fonte.map((d) => d.chave).join(",");
   const fonteRef = useRef(fonte);
@@ -152,7 +173,7 @@ export function ConstelacaoNomes({
     const el = caixa.current;
     if (!el) return;
     const base = el.getBoundingClientRect();
-    obstaculos.current = [...(el.parentElement?.querySelectorAll(OBSTACULOS) ?? [])]
+    obstaculos.current = [...(el.parentElement?.querySelectorAll(evitar) ?? [])]
       .filter((o) => !el.contains(o))
       .map((o) => o.getBoundingClientRect())
       .filter((r) => r.width > 0 && r.height > 0)
@@ -177,7 +198,7 @@ export function ConstelacaoNomes({
     medirObstaculos();
     const { width: w, height: h } = el.getBoundingClientRect();
     // Largura aproximada do nome (a letra grande tem ~15px), com folga.
-    const lw = Math.max(220, nome.length * 16 + 24);
+    const lw = Math.max(220, nome.length * (grande ? 26 : 16) + 24);
     const lh = 70;
     let x = 0;
     let y = 0;
@@ -225,6 +246,13 @@ export function ConstelacaoNomes({
   useEffect(() => {
     const el = caixa.current;
     if (!el || !atual) return;
+    // O primeiro nome é escolhido antes de a camada existir na tela: sem
+    // medidas, ele nasceria no canto. Aqui ela já existe, então posiciona.
+    if (corpo.current.vx === 0 && corpo.current.vy === 0) {
+      reposicionar(atual.nome);
+      const r = rotulo.current;
+      if (r) r.style.transform = `translate3d(${corpo.current.x}px, ${corpo.current.y}px, 0)`;
+    }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let quadro = 0;
     let anterior = performance.now();
@@ -307,7 +335,9 @@ export function ConstelacaoNomes({
       ref={caixa}
       aria-hidden
       className={
-        "constelacao-lab pointer-events-none absolute inset-0 overflow-hidden " + (className ?? "")
+        "constelacao-lab pointer-events-none absolute inset-0 overflow-hidden " +
+        (grande ? "is-grande " : "") +
+        (className ?? "")
       }
     >
       <div
