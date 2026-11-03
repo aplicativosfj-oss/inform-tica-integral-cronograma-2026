@@ -119,7 +119,7 @@ function AvaliacaoPublica() {
           onValueChange={(v) => setAba(v as AbaAvaliacao)}
           className="mx-auto max-w-7xl px-4 pb-10 sm:px-6"
         >
-          <TabsList className="relative z-10 -mt-6 mb-8 grid h-auto w-full grid-cols-2 gap-1.5 rounded-2xl border border-border/70 bg-card/95 p-1.5 shadow-xl backdrop-blur-xl lg:grid-cols-4">
+          <TabsList className="relative z-10 -mt-6 mb-8 grid h-auto w-full grid-cols-2 gap-2 rounded-[1.5rem] border border-border/70 bg-card/95 p-2 shadow-[0_16px_50px_-34px_rgba(25,24,75,0.43)] backdrop-blur-2xl lg:grid-cols-4">
             {ABAS_VISIVEIS.map(({ id, nome, legenda, Icone }) => (
               <TabsTrigger
                 key={id}
@@ -150,7 +150,7 @@ function AvaliacaoPublica() {
           <TabsContent value="detalhes">
             <ObservatorioFrame
               dados={provas}
-              className="h-[calc(100dvh-12rem)] min-h-[520px] w-full rounded-xl border border-border bg-background"
+              className="h-[calc(100dvh-12rem)] min-h-[520px] w-full overflow-hidden rounded-[1.5rem] border border-border bg-background shadow-lg shadow-ink/5"
             />
           </TabsContent>
           <TabsContent value="mapa">

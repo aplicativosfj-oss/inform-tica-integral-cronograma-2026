@@ -305,10 +305,10 @@ function CabecalhoSecao({
   acao?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
+    <div className="flex flex-wrap items-end justify-between gap-5 border-b border-border/75 pb-6">
       <div className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{numero}</p>
-        <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        <h2 className="mt-2 font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
           {titulo}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -340,7 +340,7 @@ function Grupo({
 }) {
   const c = CORES_CATEGORIA[cor];
   return (
-    <div id={id} className="grid scroll-mt-32 gap-5 py-8 lg:grid-cols-[17rem_1fr] lg:gap-10">
+    <div id={id} className="grid scroll-mt-32 gap-5 rounded-[1.75rem] border border-border/60 bg-card/60 p-5 shadow-sm sm:p-7 lg:grid-cols-[17rem_1fr] lg:gap-9">
       <div className="lg:sticky lg:top-32 lg:self-start">
         <span className={`flex size-10 items-center justify-center rounded-xl border ${c.chip}`}>
           <Icon className="size-5" />
@@ -384,7 +384,7 @@ function InfotecaPage() {
                 <span className="h-px w-8 bg-primary" aria-hidden />
                 Um acervo para aprender e brincar
               </p>
-              <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              <h1 className="mt-4 font-heading text-4xl font-extrabold tracking-[-0.045em] text-foreground sm:text-5xl lg:text-6xl">
                 Infoteca
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -427,7 +427,7 @@ function InfotecaPage() {
             </div>
 
             <div className="relative">
-              <div className="overflow-hidden rounded-3xl border border-border shadow-xl">
+              <div className="overflow-hidden rounded-[2rem] border border-border/70 shadow-[0_30px_80px_-46px_rgba(17,16,51,0.48)]">
                 <SiteImage
                   src={infotecaHeroImg}
                   alt="Criança sorrindo em frente a um computador com ícones coloridos de aprendizagem — teclado, mouse, alfabeto, números e jogos educativos"

@@ -171,7 +171,7 @@ function CoordenacaoAntiga() {
           />
           <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-10">
             <div className="flex flex-col gap-4">
-              <h1 className="text-2xl font-semibold text-foreground">Coordenação</h1>
+              <h1 className="font-heading text-3xl font-extrabold tracking-tight text-foreground">Coordenação</h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
                 Diário das aulas (dadas, suspensas e reprogramadas), participação por turma e grupo
                 e histórico de faltas. Acesso aberto, somente leitura.

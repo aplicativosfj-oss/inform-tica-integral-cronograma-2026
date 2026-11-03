@@ -218,7 +218,7 @@ export function PainelPublico() {
                   onClick={() => irPara(DESTINO[d.id] ?? "mapa")}
                   style={{ animationDelay: `${i * 60}ms` }}
                   className={cn(
-                    "lab-aluno group flex flex-col gap-3 rounded-2xl border border-border bg-gradient-to-br to-card p-5 text-left transition duration-300 hover:-translate-y-1 hover:border-primary/40",
+                    "lab-aluno group flex min-h-52 flex-col gap-3 rounded-[1.55rem] border border-border bg-gradient-to-br to-card p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary",
                     tom.cartao,
                   )}
                 >

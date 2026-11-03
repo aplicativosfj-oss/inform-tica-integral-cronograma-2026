@@ -371,7 +371,7 @@ export function JanelaFerramenta({
             : {}),
         }}
         className={cn(
-          "fixed z-50 flex flex-col overflow-hidden rounded-2xl border-2 bg-card shadow-2xl",
+          "fixed z-50 flex flex-col overflow-hidden rounded-[1.65rem] border-2 bg-card shadow-[0_35px_100px_-45px_rgba(12,16,47,0.65)]",
           abertaInicial ? `jf-grande ${larguraPagina}` : `border-border ${larguraBalao}`,
         )}
       >
@@ -392,7 +392,7 @@ export function JanelaFerramenta({
               : undefined
           }
           className={cn(
-            "flex shrink-0 touch-none select-none items-center gap-1.5 rounded-t-2xl border-b",
+            "flex shrink-0 touch-none select-none items-center gap-2 rounded-t-[1.5rem] border-b",
             abertaInicial
               ? "gap-3 border-black/10 px-5 py-3.5 text-white"
               : cn(
