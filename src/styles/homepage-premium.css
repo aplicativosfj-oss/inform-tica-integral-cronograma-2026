@@ -270,66 +270,91 @@
   .home-premium #laboratorio-agora.home-live-section .lab-aluno { padding-top: .4rem; padding-bottom: .4rem; }
 }
 
-/* Constelação do laboratório: nomes de quem está no laboratório flutuando na abertura. */
-.home-premium .constelacao-lab {
-  /* Mais discreta atrás do título, mais visível à direita. */
-  mask-image: linear-gradient(to right, rgb(0 0 0 / 0.35) 0%, rgb(0 0 0 / 0.55) 40%, black 70%);
-}
+/* Destaque de nomes: um aluno de cada vez flutuando na abertura da home. */
 .home-premium .constelacao-nome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  white-space: nowrap;
+  padding: 0.2rem 0.1rem 0.7rem;
+  will-change: transform;
+  transition: opacity 800ms ease, filter 800ms ease;
+}
+.home-premium .constelacao-nome::after {
+  /* Traço de luz na cor da série, que se desenha sob o nome. */
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--cor), transparent);
+  box-shadow: 0 0 12px var(--cor);
+  transform-origin: left;
+  animation: destaque-traco 1.4s cubic-bezier(.21,.74,.16,1) 250ms both;
+}
+.home-premium .constelacao-nome.is-saindo { opacity: 0; filter: blur(8px); }
+.home-premium .constelacao-legenda {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  white-space: nowrap;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--cor) 45%, transparent);
-  background: color-mix(in oklab, var(--cor) 12%, oklch(0.2 0.05 276 / 0.55));
-  padding: 0.3rem 0.5rem 0.3rem 0.6rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: white;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 24px -6px color-mix(in oklab, var(--cor) 60%, transparent);
-  will-change: transform;
-  animation: constelacao-surgir 900ms cubic-bezier(.21,.74,.16,1) both;
+  gap: 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--cor) 70%, white);
+  animation: destaque-legenda 700ms ease both;
 }
-.home-premium .constelacao-nome.is-hoje { opacity: 0.5; box-shadow: none; }
 .home-premium .constelacao-ponto {
   position: relative;
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 0.4rem;
+  height: 0.4rem;
   border-radius: 999px;
   background: var(--cor);
   box-shadow: 0 0 10px var(--cor);
 }
-.home-premium .constelacao-nome.is-vivo .constelacao-ponto::after {
+.home-premium .constelacao-ponto.is-vivo::after {
   content: "";
   position: absolute;
   inset: -4px;
   border-radius: inherit;
   border: 1px solid var(--cor);
-  animation: constelacao-pulso 2.4s ease-out infinite;
+  animation: constelacao-pulso 2.2s ease-out infinite;
 }
-.home-premium .constelacao-turma {
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
-  padding: 0.05rem 0.4rem;
-  font-size: 0.62rem;
+.home-premium .constelacao-texto {
+  font-family: var(--font-heading, inherit);
+  font-size: clamp(1.35rem, 2vw, 1.9rem);
   font-weight: 800;
-  color: rgb(255 255 255 / 0.75);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: white;
+  text-shadow: 0 0 28px color-mix(in oklab, var(--cor) 55%, transparent);
 }
-@keyframes constelacao-surgir {
-  from { opacity: 0; filter: blur(6px); }
+.home-premium .constelacao-texto > span {
+  display: inline-block;
+  animation: destaque-letra 700ms cubic-bezier(.21,.74,.16,1) both;
+}
+@keyframes destaque-letra {
+  from { opacity: 0; transform: translateY(0.45em); filter: blur(6px); }
+}
+@keyframes destaque-legenda {
+  from { opacity: 0; transform: translateY(4px); }
+}
+@keyframes destaque-traco {
+  from { transform: scaleX(0); opacity: 0; }
 }
 @keyframes constelacao-pulso {
   from { opacity: 0.9; transform: scale(0.6); }
   to { opacity: 0; transform: scale(2.2); }
 }
-/* No celular a abertura não tem espaço livre: os nomes já aparecem no painel. */
+/* No celular a abertura não tem espaço livre: o painel já mostra os nomes. */
 @media (max-width: 639px) {
   .home-premium .constelacao-lab { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .home-premium .constelacao-nome,
-  .home-premium .constelacao-nome.is-vivo .constelacao-ponto::after { animation: none; }
+  .home-premium .constelacao-nome::after,
+  .home-premium .constelacao-legenda,
+  .home-premium .constelacao-texto > span,
+  .home-premium .constelacao-ponto.is-vivo::after { animation: none; }
+  .home-premium .constelacao-nome { transition: none; }
 }
