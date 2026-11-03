@@ -1024,7 +1024,7 @@ export function ControleLaboratorio({
           </section>
 
           {/* barra fixa embaixo: vagas e botão para a página 2 */}
-          <div className="sticky bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-2xl border bg-card/95 px-3 py-2.5 shadow-xl backdrop-blur sm:gap-5 sm:px-4 sm:py-3">
+          <div className="sticky bottom-[calc(var(--rodape-app,env(safe-area-inset-bottom))+0.75rem)] z-20 flex items-center gap-3 rounded-2xl border bg-card/95 px-3 py-2.5 shadow-xl backdrop-blur sm:gap-5 sm:px-4 sm:py-3">
             {/* contador em tempo real de quantos alunos já foram escolhidos */}
             <div
               className={cn(
@@ -1341,7 +1341,7 @@ export function ControleLaboratorio({
               <Button
                 type="button"
                 size="lg"
-                className="flex-1 bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+                className="h-auto min-h-11 flex-1 whitespace-normal py-2.5 text-center bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
                 disabled={
                   salvando || escolhidos.size === 0 || typeof janela === "string" || passouDoLimite
                 }

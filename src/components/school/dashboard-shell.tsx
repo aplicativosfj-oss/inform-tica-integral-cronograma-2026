@@ -139,7 +139,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       <div className="relative z-10">
         <NavBar />
         <Protected>
-          <div className="mx-auto max-w-[90rem] px-3 py-3 sm:px-6 sm:py-5 lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:gap-8 lg:py-8">
+          <div className="mx-auto max-w-[90rem] px-3 py-3 [--rodape-app:calc(4.25rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-5 lg:grid lg:[--rodape-app:0px] lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:gap-8 lg:py-8">
             {/* Lateral fixa no computador. */}
             <aside className="hidden lg:block">
               <div className="platform-dashboard-sidebar sticky top-20 flex max-h-[calc(100vh-6rem)] flex-col gap-5 overflow-y-auto rounded-[1.8rem] border border-border/75 bg-card/85 p-4 shadow-xl shadow-ink/5 backdrop-blur-2xl">
@@ -209,7 +209,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               </ul>
             </nav>
 
-            <main className="painel-conteudo min-w-0">
+            {/* No celular, folga embaixo para a barra de abas não cobrir o fim da página. */}
+            <main className="painel-conteudo min-w-0 pb-[var(--rodape-app)] lg:pb-0">
               {/* Trilha de navegação: deixa claro em que parte do painel se está. */}
               <p className="mb-5 hidden w-fit items-center gap-2 rounded-full border border-border/75 bg-card/85 px-4 py-2 text-xs font-semibold text-muted-foreground shadow-sm lg:flex">
                 <span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
