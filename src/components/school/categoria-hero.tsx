@@ -124,7 +124,8 @@ export function CategoriaHero({
   return (
     <div
       id={id}
-      className={`relative flex scroll-mt-32 items-center gap-3.5 overflow-hidden rounded-2xl border bg-gradient-to-r p-4 pl-5 shadow-sm ${c.faixa} ${c.borda} ${className ?? ""}`}
+      data-ui="category-hero"
+      className={`relative flex scroll-mt-32 items-center gap-4 overflow-hidden rounded-[1.65rem] border bg-gradient-to-r p-5 pl-6 shadow-md sm:p-6 sm:pl-7 ${c.faixa} ${c.borda} ${className ?? ""}`}
     >
       {/* Barra sólida na lateral: é o que faz a categoria aparecer de
         relance, já que o degradê sozinho some no fundo claro. */}

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
+      data-ui="card"
       ref={ref}
       // O efeito de vidro (branco translúcido com borda branca) só funciona
       // sobre um fundo colorido — no tema claro ele desaparecia dentro da

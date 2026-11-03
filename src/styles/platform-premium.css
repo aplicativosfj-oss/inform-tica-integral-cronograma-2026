@@ -1,0 +1,97 @@
+/* Sistema visual 2026: o mesmo acabamento acompanha alunos, equipe e ferramentas.
+   Atributos data-ui restringem os ajustes aos componentes compartilhados. */
+body.platform-2026 { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+body.platform-2026 main { min-width: 0; }
+body.platform-2026 :is(a,button,input,textarea,select,[role="tab"]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+body.platform-2026 [data-ui="card"] {
+  border-radius: 1.4rem;
+  border-color: color-mix(in oklch, var(--border) 88%, var(--primary) 12%);
+  background-image: linear-gradient(155deg, oklch(1 0 0 / .048), transparent 50%);
+  box-shadow: 0 1px 0 oklch(1 0 0 / .15), 0 18px 46px -37px oklch(.19 .05 277 / .42);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.dark body.platform-2026 [data-ui="card"] {
+  background-image: linear-gradient(155deg, oklch(1 0 0 / .05), transparent 55%);
+  border-color: oklch(1 0 0 / .15);
+  box-shadow: 0 18px 44px -31px oklch(.04 .04 280 / .65);
+}
+body.platform-2026 [data-ui="card"]:focus-within { border-color: color-mix(in oklch, var(--ring) 42%, var(--border)); }
+body.platform-2026 [data-ui="button"] {
+  letter-spacing: .005em;
+  transition-property: background-color,border-color,box-shadow,color,transform;
+  transition-duration: .2s;
+  transition-timing-function: cubic-bezier(.16,.84,.3,1);
+}
+body.platform-2026 [data-ui="input"],
+body.platform-2026 [data-ui="textarea"] {
+  border-radius: .85rem;
+  border-color: color-mix(in oklch, var(--border) 88%, var(--primary) 12%);
+  background-color: color-mix(in oklch, var(--card) 93%, transparent);
+  box-shadow: inset 0 1px 2px oklch(.15 .02 260 / .025);
+}
+body.platform-2026 [data-ui="input"]:focus-visible,
+body.platform-2026 [data-ui="textarea"]:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 18%, transparent);
+  background-color: var(--card);
+}
+body.platform-2026 [data-ui="tabs-list"] {
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: color-mix(in oklch, var(--muted) 82%, var(--card));
+  box-shadow: inset 0 1px 2px oklch(.14 .03 265 / .035);
+}
+body.platform-2026 [data-ui="tabs-trigger"] {
+  border-radius: .72rem;
+  font-weight: 700;
+}
+body.platform-2026 [data-ui="tabs-trigger"][data-state="active"] {
+  box-shadow: 0 4px 12px -8px oklch(.17 .04 270 / .4);
+}
+body.platform-2026 [data-ui="table"] th {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .015em;
+  background: color-mix(in oklch, var(--muted) 45%, var(--card));
+}
+body.platform-2026 [data-ui="table"] tbody tr:hover td {
+  background: color-mix(in oklch, var(--primary) 4%, transparent);
+}
+body.platform-2026 [data-ui="category-hero"] {
+  isolation: isolate;
+  box-shadow: 0 12px 36px -28px oklch(.2 .04 277 / .33);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+body.platform-2026 [data-ui="category-hero"]::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto auto;
+  width: 35%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(circle at 100% 0%, oklch(1 0 0 / .18), transparent 65%);
+}
+.platform-dashboard-sidebar { box-shadow: 0 23px 60px -43px oklch(.17 .06 279 / .42); }
+.platform-sidebar-link { transition: background-color .2s ease, color .2s ease, transform .2s ease; }
+.platform-sidebar-link:hover { transform: translateX(2px); }
+.platform-dashboard .painel-conteudo { min-width: 0; }
+.platform-dashboard .painel-conteudo h1,
+.platform-dashboard .painel-conteudo h2 { text-wrap: balance; }
+.platform-dashboard .painel-conteudo > :first-child { animation: platform-enter .42s ease-out both; }
+@keyframes platform-enter {
+  from { opacity: .6; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width:640px) {
+  body.platform-2026 [data-ui="card"] { border-radius: 1.15rem; }
+  body.platform-2026 [data-ui="category-hero"] { border-radius: 1.25rem; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .platform-dashboard .painel-conteudo > :first-child { animation: none; }
+  .platform-sidebar-link:hover { transform: none; }
+  body.platform-2026 :is([data-ui="card"],[data-ui="button"],[data-ui="category-hero"]) { transition: none; }
+}
