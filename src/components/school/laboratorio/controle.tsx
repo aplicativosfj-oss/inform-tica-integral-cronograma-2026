@@ -1025,6 +1025,30 @@ export function ControleLaboratorio({
 
           {/* barra fixa embaixo: vagas e botão para a página 2 */}
           <div className="sticky bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-3 rounded-2xl border bg-card/95 px-3 py-2.5 shadow-xl backdrop-blur sm:gap-5 sm:px-4 sm:py-3">
+            {/* contador em tempo real de quantos alunos já foram escolhidos */}
+            <div
+              className={cn(
+                "flex shrink-0 flex-col items-center justify-center rounded-xl px-3 py-1 text-center transition-colors duration-300",
+                escolhidos.size === 0
+                  ? "bg-muted text-muted-foreground"
+                  : passouDoLimite
+                    ? "bg-red-600 text-white"
+                    : "bg-indigo-600 text-white",
+              )}
+              role="status"
+              aria-live="polite"
+              aria-label={`${escolhidos.size} aluno${escolhidos.size === 1 ? "" : "s"} escolhido${escolhidos.size === 1 ? "" : "s"}`}
+            >
+              <span
+                key={escolhidos.size}
+                className="font-heading text-2xl font-extrabold leading-none tabular-nums animate-in zoom-in-50 duration-200 sm:text-3xl"
+              >
+                {escolhidos.size}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-wider">
+                escolhido{escolhidos.size === 1 ? "" : "s"}
+              </span>
+            </div>
             <div className="min-w-0 flex-1 sm:min-w-40 sm:flex-none">
               <p className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Vagas
