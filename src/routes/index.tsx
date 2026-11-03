@@ -198,6 +198,9 @@ function Index() {
   return (
     <div className="home-premium relative min-h-screen overflow-x-clip bg-background text-foreground">
       <PageBackground />
+      <a href="#conteudo-principal" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-background focus:px-5 focus:py-3 focus:font-bold focus:text-foreground focus:shadow-xl">
+        Pular para o conteúdo
+      </a>
       <div className="relative z-10">
         <NavBar />
         <main id="conteudo-principal">
@@ -303,9 +306,9 @@ function Index() {
               </div>
 
               <div className="home-hero-stats mt-11 grid grid-cols-2 overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/[0.09] backdrop-blur-xl sm:grid-cols-4 lg:mt-14">
-                <HeroStat rotulo="Turmas atendidas" valor={turmas.length} isReady={isReady} Icone={GraduationCap} />
-                <HeroStat rotulo="Alunos ativos" valor={totalAlunos} isReady={isReady} Icone={Users2} />
-                <HeroStat rotulo="Computadores" valor={config.numeroComputadores} isReady={isReady} Icone={MonitorSmartphone} />
+                <HeroStat rotulo="Turmas atendidas" detalhe="1º ao 5º ano" valor={turmas.length} isReady={isReady} Icone={GraduationCap} />
+                <HeroStat rotulo="Alunos ativos" detalhe="Matrículas vigentes" valor={totalAlunos} isReady={isReady} Icone={Users2} />
+                <HeroStat rotulo="Computadores" detalhe="Estações de uso" valor={config.numeroComputadores} isReady={isReady} Icone={MonitorSmartphone} />
                 <div className="home-stat-cell px-4 py-5 sm:px-6">
                   <div className="flex items-center gap-2 text-white/60">
                     <Clock3 className="size-4 text-sun" aria-hidden="true" />
@@ -335,7 +338,7 @@ function Index() {
                 <Link
                   key={to}
                   to={to}
-                  className={"home-access-card group relative flex min-h-[15rem] flex-col overflow-hidden rounded-[1.75rem] border p-6 sm:p-7 " + estilo + (destaque ? " lg:row-span-2 lg:min-h-[31rem]" : "")}
+                  className={"home-access-card group relative flex min-h-[15rem] flex-col overflow-hidden rounded-[1.75rem] border p-6 sm:p-7 " + estilo + (destaque ? " lg:min-h-[15rem]" : "")}
                 >
                   <div className="relative flex items-start justify-between gap-3">
                     <span className="home-access-icon grid size-12 place-items-center rounded-2xl border border-current/15 bg-current/[0.08]">
@@ -509,11 +512,13 @@ function Index() {
 
 function HeroStat({
   rotulo,
+  detalhe,
   valor,
   isReady,
   Icone,
 }: {
   rotulo: string;
+  detalhe: string;
   valor: number;
   isReady: boolean;
   Icone: LucideIcon;
@@ -529,7 +534,7 @@ function HeroStat({
       ) : (
         <div className="mt-3 h-8 w-16 animate-pulse rounded-lg bg-white/20" aria-label="Carregando" />
       )}
-      <span className="mt-0.5 block text-xs text-white/60">Ensino fundamental</span>
+      <span className="mt-0.5 block text-xs text-white/60">{detalhe}</span>
     </div>
   );
 }
