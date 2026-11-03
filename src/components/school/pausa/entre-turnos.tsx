@@ -18,6 +18,9 @@ import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { CompartilharRedes } from "@/components/school/pausa/compartilhar-redes";
+import { AvisoFeriado } from "@/components/school/aviso-feriado";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
+import { hojeNaEscola } from "@/lib/laboratorio";
 import { IlustracaoEspaco } from "@/components/school/pausa/ilustracoes";
 import { SeloIntervalo } from "@/components/school/pausa/status-intervalo";
 import {
@@ -127,6 +130,7 @@ type Modo = "dia" | "turma";
 export function EntreTurnos() {
   const m = useMomentoIntervalo();
   const hoje = m?.hoje ?? null;
+  const feriadoHoje = feriadoNacionalEm(hojeNaEscola());
   const [dia, setDia] = useState<DiaUtil>(1);
   const [turma, setTurma] = useState<string>(TURMAS_PAUSA[0]!.turma);
   const [montado, setMontado] = useState(false);
@@ -236,13 +240,22 @@ export function EntreTurnos() {
       </section>
 
       {/* ----------------------------------------------- agora / o que vem a seguir */}
-      <AgoraEProximo
-        m={m}
-        dia={dia}
-        hoje={hoje}
-        onDia={setDia}
-        onTurma={(t) => abrir({ modo: "turma", turma: t })}
-      />
+      {feriadoHoje ? (
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <AvisoFeriado dataISO={hojeNaEscola()} className="max-w-none" />
+          <p className="mt-3 text-sm text-muted-foreground">
+            As informações abaixo mostram a escala padrão para consulta. Em 02/11 não há atividades regulares do Entre Turnos.
+          </p>
+        </div>
+      ) : (
+        <AgoraEProximo
+          m={m}
+          dia={dia}
+          hoje={hoje}
+          onDia={setDia}
+          onTurma={(t) => abrir({ modo: "turma", turma: t })}
+        />
+      )}
 
       {/* ------------------------------------------------------------ consulta */}
       <section id="consulta" className="mt-6 scroll-mt-20 border-y border-border bg-muted/40">

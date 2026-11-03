@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppStore } from "@/lib/app-store";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
 import {
   aplicarExcecoesDeData,
   buildWeeklySchedule,
@@ -102,6 +103,7 @@ interface Registro {
 interface Dia {
   dataKey: string;
   data: Date;
+  feriado?: string;
   registros: Registro[];
 }
 
@@ -148,6 +150,11 @@ function montarDiario(
     if (config.dataInicioOperacao && dataKey < config.dataInicioOperacao) continue;
     const dia = currentWeekdayLabel(data);
     if (!config.diasSemana.includes(dia)) continue;
+    const feriado = feriadoNacionalEm(dataKey);
+    if (feriado) {
+      dias.push({ dataKey, data, feriado: feriado.nome, registros: [] });
+      continue;
+    }
 
     const reposicoes = reprogramacoesParaData(turmas, config, data);
     const semana = aplicarExcecoesDeData(
@@ -379,6 +386,11 @@ export function DiarioAulas({ registros, mes }: { registros: Presenca[] | null; 
                       month: "long",
                     })}
                   </p>
+                  {d.feriado ? (
+                    <p className="mx-4 my-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-800 dark:text-amber-200">
+                      Feriado nacional · {d.feriado}. Sem aulas regulares nesta data.
+                    </p>
+                  ) : null}
                   <ul className="divide-y divide-border/40">
                     {d.registros.map((r) => {
                       const s = SITUACOES[r.situacao];
