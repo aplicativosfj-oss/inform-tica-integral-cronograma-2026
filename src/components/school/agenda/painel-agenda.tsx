@@ -21,6 +21,8 @@ import {
 import { useMemo, useState } from "react";
 
 import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
+import { AvisoFeriado } from "@/components/school/aviso-feriado";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
 import { rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { WeatherWidget } from "@/components/school/weather-widget";
@@ -71,6 +73,7 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
   };
   const agora = useAgora(1000);
   const hoje = hojeNaEscola();
+  const feriadoHoje = feriadoNacionalEm(hoje);
   const s0 = inicioDaSemana(hoje);
   const s1 = fimDaSemana(hoje);
 
@@ -84,7 +87,7 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
     return (g: GrupoLab) => m.get(g.grupoId) ?? "";
   }, [daSemana]);
   const gruposHoje = gruposSemana.filter((g) => dataDoGrupo(g) === hoje);
-  const aoVivo = gruposHoje.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
+  const aoVivo = feriadoHoje ? [] : gruposHoje.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
   const proximo = gruposHoje
     .filter((g) => estadoDaSessao(g, agora) === "agendada")
     .sort((a, b) => a.inicio.localeCompare(b.inicio))[0];
@@ -120,6 +123,7 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
       <Cabecalho agora={agora} aoVivo={aoVivo.length} proximo={proximo} />
 
       <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 sm:px-6 lg:px-8">
+        {feriadoHoje ? <AvisoFeriado dataISO={hoje} className="relative z-10 -mt-10 max-w-none" /> : null}
         <div className="relative z-10 -mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Numero
             Icone={MonitorSmartphone}
@@ -150,7 +154,11 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
 
         <div className="grid gap-6 xl:grid-cols-12">
           <div className="xl:col-span-8">
-            <PainelLaboratorioAgora dados={dados} logado={logado} />
+            {feriadoHoje ? (
+              <div className="grid min-h-72 place-items-center rounded-3xl border border-border bg-card p-5">
+                <AvisoFeriado dataISO={hoje} className="w-full max-w-lg" />
+              </div>
+            ) : <PainelLaboratorioAgora dados={dados} logado={logado} />}
           </div>
           <div className="grid gap-6 sm:grid-cols-2 xl:col-span-4 xl:grid-cols-1 xl:content-start">
             <Placar linhas={placar} />
@@ -204,7 +212,9 @@ function Cabecalho({
     timeZone: FUSO,
   }).format(data);
 
+  const feriadoHoje = feriadoNacionalEm(hojeNaEscola());
   const status =
+    feriadoHoje ? { texto: "Feriado nacional · Dia de Finados", cor: "bg-amber-400", pulsa: false } :
     aoVivo > 0
       ? {
           texto: aoVivo === 1 ? "Aula acontecendo agora" : `${aoVivo} aulas acontecendo agora`,
@@ -583,6 +593,7 @@ function QuadroDaSemana({
             .filter((g) => dataDoGrupo(g) === chave)
             .sort((a, b) => a.inicio.localeCompare(b.inicio));
           const ehHoje = chave === hoje;
+          const feriado = feriadoNacionalEm(chave);
           const futuro = chave > hoje;
           const [, mes, dia] = chave.split("-");
           return (
@@ -610,7 +621,11 @@ function QuadroDaSemana({
                   </span>
                 ) : null}
               </header>
-              {doDia.length === 0 ? (
+              {feriado ? (
+                <p className="m-auto rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-3 text-center text-sm font-bold text-amber-800 dark:text-amber-200">
+                  Dia de Finados · Sem aulas regulares
+                </p>
+              ) : doDia.length === 0 ? (
                 <p className="m-auto text-center text-sm text-muted-foreground">
                   {futuro
                     ? "Ainda sem aula marcada"
