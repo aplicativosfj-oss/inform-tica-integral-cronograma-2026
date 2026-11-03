@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PreviaAlunosDialog } from "@/components/school/previa-alunos-dialog";
 import { useAppStore } from "@/lib/app-store";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
 import { useAuth } from "@/lib/auth-store";
 import { useConfirmar } from "@/lib/confirm-store";
 import { fetchPresencasRange } from "@/lib/presencas";
@@ -140,6 +141,7 @@ export function WeeklySchedule() {
       const data = datasDosDias.get(dia);
       if (!data) continue;
       const dataKey = toDateKey(data);
+      if (feriadoNacionalEm(dataKey)) continue; // sem grade regular no feriado
       const doDia = aplicarExcecoesDeData(
         assignments.filter((a) => a.dia === dia),
         config,
@@ -282,6 +284,9 @@ export function WeeklySchedule() {
         <div className="divide-y divide-border/60 sm:hidden">
           {colunas.map((dia) => {
             const hoje = dia === todayLabel;
+            const feriado = datasDosDias.get(dia)
+              ? feriadoNacionalEm(toDateKey(datasDosDias.get(dia)!))
+              : null;
             const doDia = linhas
               .map((slot) => ({ slot, celula: lookup.get(`${dia}|${slot.inicio}`) }))
               .filter((item) => item.celula);
@@ -300,7 +305,11 @@ export function WeeklySchedule() {
                     </span>
                   ) : null}
                 </h3>
-                {doDia.length === 0 ? (
+                {feriado ? (
+                  <p className="mx-3 mb-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-800 dark:text-amber-200">
+                    Feriado nacional · {feriado.nome} — sem aulas regulares.
+                  </p>
+                ) : doDia.length === 0 ? (
                   <p className="px-4 pb-3 text-xs text-muted-foreground">Sem aulas neste dia.</p>
                 ) : (
                   <ul className="space-y-1.5 px-3 pb-3">
@@ -349,6 +358,8 @@ export function WeeklySchedule() {
                 <th className="sticky left-0 z-20 w-[68px] shrink-0 border-r border-b border-border/60 bg-slate-100/90 p-2 backdrop-blur sm:w-24 sm:p-3 dark:bg-muted/60" />
                 {colunas.map((dia) => {
                   const hoje = dia === todayLabel;
+                  const data = datasDosDias.get(dia);
+                  const feriado = data ? feriadoNacionalEm(toDateKey(data)) : null;
                   return (
                     <th
                       key={dia}
@@ -366,6 +377,7 @@ export function WeeklySchedule() {
                       <span className="block text-[11px] font-normal text-muted-foreground">
                         {datasDosDias.get(dia) ? dataCurta(datasDosDias.get(dia)!) : ""}
                         {hoje ? " · hoje" : ""}
+                        {feriado ? " · Dia de Finados" : ""}
                       </span>
                     </th>
                   );
@@ -388,6 +400,8 @@ export function WeeklySchedule() {
                       </td>
                       {colunas.map((dia) => {
                         const celula = lookup.get(`${dia}|${slot.inicio}`);
+                        const data = datasDosDias.get(dia);
+                        const feriado = data ? feriadoNacionalEm(toDateKey(data)) : null;
                         const assignment = celula?.assignment;
                         const hoje = dia === todayLabel;
                         const overridden = Boolean(config.slotOverrides?.[`${dia}|${slot.inicio}`]);
@@ -396,7 +410,11 @@ export function WeeklySchedule() {
                             key={dia}
                             className={`border-b border-border/40 p-1.5 align-top ${hoje ? "bg-primary/[0.03]" : ""}`}
                           >
-                            {celula && assignment ? (
+                            {feriado ? (
+                              <div className="grid h-14 place-items-center rounded-xl border border-amber-500/20 bg-amber-500/10 px-1 text-center text-[11px] font-bold text-amber-800 dark:text-amber-200">
+                                {rowIndex === 0 ? "Finados · Sem aulas" : "—"}
+                              </div>
+                            ) : celula && assignment ? (
                               <CelulaAula
                                 celula={celula}
                                 config={config}
