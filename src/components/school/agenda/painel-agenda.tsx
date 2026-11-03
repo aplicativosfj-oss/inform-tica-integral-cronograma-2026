@@ -60,8 +60,15 @@ const corDaTurma = (rotulo: string) => serieClasses(serieIndexPorNumero(rotulo))
  * turmas, a dica do dia e o quadro da semana, de segunda a sexta.
  */
 export function PainelAgenda({ logado }: { logado: boolean }) {
-  const dados = useSessoesLab();
+  const dadosOriginais = useSessoesLab();
   const { turmas } = useAppStore();
+  // Registros históricos da EJA não entram no painel público nem nas estatísticas.
+  const idsPermitidos = new Set(turmas.map((t) => t.id));
+  const dados = {
+    ...dadosOriginais,
+    sessoes: dadosOriginais.sessoes.filter((s) => idsPermitidos.has(s.turmaId)),
+    ausencias: dadosOriginais.ausencias?.filter((s) => idsPermitidos.has(s.turmaId)),
+  };
   const agora = useAgora(1000);
   const hoje = hojeNaEscola();
   const s0 = inicioDaSemana(hoje);

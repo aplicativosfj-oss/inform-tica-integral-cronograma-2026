@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth-store";
 import { enfileirar, gravarCache, lerCache, registrarExecutor } from "@/lib/offline-queue";
 import { sincronizarPresencasPendentes } from "@/lib/presencas";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
+import { turmaParticipaInformatica } from "@/lib/turmas-informatica";
 import { slotKey, suspensaoKey } from "@/lib/schedule-engine";
 import { supabase } from "@/lib/supabase-client";
 import type { Aluno, AulaManual, Grupo, Reprogramacao, ScheduleConfig, Turma } from "@/lib/types";
@@ -198,11 +199,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AppState>(
     () => ({
-      turmas: turmas.map((t) => ({
+      turmas: turmas.filter(turmaParticipaInformatica).map((t) => ({
         ...t,
         alunos: t.alunos.filter((a) => !a.situacao || a.situacao === "ativo"),
       })),
-      todasTurmas: turmas,
+      // A EJA permanece preservada no banco, mas não participa do módulo de informática.
+      todasTurmas: turmas.filter(turmaParticipaInformatica),
       config,
       isReady,
       addTurma: (turma) => {

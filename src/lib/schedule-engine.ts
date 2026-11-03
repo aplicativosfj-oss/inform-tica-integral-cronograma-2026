@@ -1,3 +1,4 @@
+import { turmaParticipaInformatica } from "@/lib/turmas-informatica";
 import type {
   Aluno,
   Assignment,
@@ -140,10 +141,12 @@ export function buildWeeklySchedule(
   config: ScheduleConfig,
   weekIndex = 0,
 ): Assignment[] {
-  if (turmas.length === 0) return [];
+  // EJA não frequenta informática, mesmo que apareça no banco ou em trocas manuais.
+  const turmasInformatica = turmas.filter(turmaParticipaInformatica);
+  if (turmasInformatica.length === 0) return [];
   const slots = buildDailySlots(config);
-  const turmasById = new Map(turmas.map((t) => [t.id, t]));
-  const turmasPorTamanho = [...turmas].sort((a, b) => b.alunos.length - a.alunos.length);
+  const turmasById = new Map(turmasInformatica.map((t) => [t.id, t]));
+  const turmasPorTamanho = [...turmasInformatica].sort((a, b) => b.alunos.length - a.alunos.length);
   const n = turmasPorTamanho.length;
 
   const posicoes: { dia: string; diaIndex: number; slot: Slot }[] = [];
