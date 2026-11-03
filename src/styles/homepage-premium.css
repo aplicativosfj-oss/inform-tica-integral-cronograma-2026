@@ -269,3 +269,67 @@
   .home-premium #laboratorio-agora.home-live-section .home-live-panel { padding: .5rem; }
   .home-premium #laboratorio-agora.home-live-section .lab-aluno { padding-top: .4rem; padding-bottom: .4rem; }
 }
+
+/* Constelação do laboratório: nomes de quem está no laboratório flutuando na abertura. */
+.home-premium .constelacao-lab {
+  /* Mais discreta atrás do título, mais visível à direita. */
+  mask-image: linear-gradient(to right, rgb(0 0 0 / 0.35) 0%, rgb(0 0 0 / 0.55) 40%, black 70%);
+}
+.home-premium .constelacao-nome {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--cor) 45%, transparent);
+  background: color-mix(in oklab, var(--cor) 12%, oklch(0.2 0.05 276 / 0.55));
+  padding: 0.3rem 0.5rem 0.3rem 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: white;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 24px -6px color-mix(in oklab, var(--cor) 60%, transparent);
+  will-change: transform;
+  animation: constelacao-surgir 900ms cubic-bezier(.21,.74,.16,1) both;
+}
+.home-premium .constelacao-nome.is-hoje { opacity: 0.5; box-shadow: none; }
+.home-premium .constelacao-ponto {
+  position: relative;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--cor);
+  box-shadow: 0 0 10px var(--cor);
+}
+.home-premium .constelacao-nome.is-vivo .constelacao-ponto::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1px solid var(--cor);
+  animation: constelacao-pulso 2.4s ease-out infinite;
+}
+.home-premium .constelacao-turma {
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  padding: 0.05rem 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: rgb(255 255 255 / 0.75);
+}
+@keyframes constelacao-surgir {
+  from { opacity: 0; filter: blur(6px); }
+}
+@keyframes constelacao-pulso {
+  from { opacity: 0.9; transform: scale(0.6); }
+  to { opacity: 0; transform: scale(2.2); }
+}
+/* No celular a abertura não tem espaço livre: os nomes já aparecem no painel. */
+@media (max-width: 639px) {
+  .home-premium .constelacao-lab { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-premium .constelacao-nome,
+  .home-premium .constelacao-nome.is-vivo .constelacao-ponto::after { animation: none; }
+}

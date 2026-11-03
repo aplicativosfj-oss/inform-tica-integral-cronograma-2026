@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { MarcaLogo } from "@/components/school/marca";
 import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialog";
 import { CartaoAoVivoHome } from "@/components/school/laboratorio/cartao-ao-vivo-home";
+import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { ClimaCompacto } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
@@ -226,9 +227,10 @@ function Index() {
             <div aria-hidden="true" className="home-hero-shade absolute inset-0 -z-20" />
             <div aria-hidden="true" className="home-hero-grid absolute inset-0 -z-10" />
             <div aria-hidden="true" className="home-hero-orb absolute -right-20 top-20 -z-10 size-80 rounded-full bg-sun/15 blur-3xl" />
+            {feriadoHoje ? null : <ConstelacaoNomes sessoes={sessoes} logado={isAuthenticated} className="-z-10" />}
 
             <div className="mx-auto max-w-[86rem] px-4 pb-7 pt-9 sm:px-8 sm:pb-10 sm:pt-12 lg:px-10 lg:pt-16">
-              <div className="mb-9 flex flex-wrap items-center justify-between gap-3 border-b border-white/15 pb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-white/70 sm:text-xs">
+              <div data-constelacao-evitar className="mb-9 flex flex-wrap items-center justify-between gap-3 border-b border-white/15 pb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-white/70 sm:text-xs">
                 <span className="flex items-center gap-2">
                   <span className="grid size-8 place-items-center rounded-xl border border-white/20 bg-white/10">
                     <MarcaLogo tamanho={22} />
@@ -287,7 +289,7 @@ function Index() {
                       </a>
                     </Button>
                   </div>
-                  <p className="mt-6 flex items-center gap-2 text-xs font-medium text-white/60 sm:text-sm">
+                  <p data-constelacao-evitar className="mt-6 flex items-center gap-2 text-xs font-medium text-white/60 sm:text-sm">
                     <ShieldCheck className="size-4 text-emerald-300" aria-hidden="true" />
                     Uma plataforma de aprendizagem e acompanhamento escolar
                   </p>
