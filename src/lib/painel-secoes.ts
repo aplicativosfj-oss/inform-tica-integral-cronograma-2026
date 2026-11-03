@@ -76,6 +76,12 @@ const NAV_GROUPS = [
         programacao: true,
       },
       {
+        to: "/dashboard/relatorios",
+        label: "Relatórios de atendimento",
+        desc: "Resumo semanal, mensal e anual com gráficos",
+        icon: BarChart3,
+      },
+      {
         to: "/dashboard/frequencia",
         label: "Frequência",
         desc: "Quem participou ou faltou, por período",
