@@ -134,6 +134,8 @@ export interface ScheduleConfig {
   revisaoTransferidosNov2026?: boolean | undefined;
   /** Segundo lote de transferidos (João Pedro Sabóia Roque, 2º B). */
   revisaoTransferidosNov2026b?: boolean | undefined;
+  /** Terceiro lote (Yhasmin Nascimento de Souza, 2º B, desistente). */
+  revisaoTransferidosNov2026c?: boolean | undefined;
   /** Conferência única do cadastro com a lista oficial de 2026 (v2: João Miguel do 4º B como desistente). Reaplicar é seguro. */
   revisaoListaOficial2026v2?: boolean | undefined;
   nomeEscola: string;

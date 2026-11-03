@@ -5,7 +5,14 @@ import type { ScheduleConfig, Turma } from "@/lib/types";
  * cadastro (ficha, histórico, presenças), mas saem do rodízio e das contas e
  * aparecem apagados na lista da turma.
  */
-type Transferido = { turmaId: string; nome: string; obs: string; em: string };
+type Transferido = {
+  turmaId: string;
+  nome: string;
+  obs: string;
+  em: string;
+  /** Padrão: transferido. */
+  situacao?: "transferido" | "desistente";
+};
 
 /**
  * Cada lote é aplicado uma única vez, guardado por uma marca própria na
@@ -13,7 +20,8 @@ type Transferido = { turmaId: string; nome: string; obs: string; em: string };
  * desfazer uma reativação já feita no painel nos lotes anteriores.
  */
 const LOTES: {
-  marca: "revisaoTransferidosNov2026" | "revisaoTransferidosNov2026b";
+  marca:
+    "revisaoTransferidosNov2026" | "revisaoTransferidosNov2026b" | "revisaoTransferidosNov2026c";
   alunos: Transferido[];
 }[] = [
   {
@@ -35,6 +43,18 @@ const LOTES: {
         nome: "João Pedro Sabóia Roque",
         obs: "Transferido (informado pelo professor em 03/11/2026).",
         em: "2026-11-03",
+      },
+    ],
+  },
+  {
+    marca: "revisaoTransferidosNov2026c",
+    alunos: [
+      {
+        turmaId: "t-2b",
+        nome: "Yhasmin Nascimento de Souza",
+        obs: "Desistente (informado pelo professor em 03/11/2026).",
+        em: "2026-11-03",
+        situacao: "desistente",
       },
     ],
   },
@@ -70,7 +90,7 @@ export function marcarTransferidosNov2026(
         if (!marca || (aluno.situacao && aluno.situacao !== "ativo")) return aluno;
         return {
           ...aluno,
-          situacao: "transferido" as const,
+          situacao: marca.situacao ?? ("transferido" as const),
           situacaoEm: aluno.situacaoEm ?? marca.em,
           situacaoObs: aluno.situacaoObs ?? marca.obs,
         };

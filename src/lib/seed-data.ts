@@ -22,6 +22,7 @@ export const SEED_CONFIG: ScheduleConfig = {
   revisaoCadastroNov2026: true,
   revisaoTransferidosNov2026: true,
   revisaoTransferidosNov2026b: true,
+  revisaoTransferidosNov2026c: true,
   revisaoListaOficial2026v2: true,
   inep: "12004227",
   endereco: "Rua Ernane Moreira Braga, 108, Cohab",
@@ -415,6 +416,7 @@ export const SEED_TURMAS: Turma[] = aplicarListaOficial2026(
     ...SEED_CONFIG,
     revisaoTransferidosNov2026: false,
     revisaoTransferidosNov2026b: false,
+    revisaoTransferidosNov2026c: false,
   }).turmas,
   { ...SEED_CONFIG, revisaoListaOficial2026v2: false },
 ).turmas;
