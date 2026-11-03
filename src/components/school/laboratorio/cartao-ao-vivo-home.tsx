@@ -47,7 +47,7 @@ export function CartaoAoVivoHome({
 
   if (!principal) {
     return (
-      <div className="hidden rounded-3xl border border-white/20 bg-white/10 p-5 shadow-2xl backdrop-blur-md lg:block">
+      <div className="relative block w-full rounded-3xl border border-white/20 bg-white/[0.11] p-5 text-white shadow-2xl backdrop-blur-xl sm:p-6">
         {telaCheia.tela}
         <Cabeca agora={agora} vivo={false} />
         <div className="mt-4 rounded-2xl bg-white/10 p-4">

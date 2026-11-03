@@ -1,0 +1,186 @@
+/* Homepage 2026 — visual editorial com superfícies consistentes nos dois temas.
+   Todos os seletores são escopados: não alteram páginas internas, turmas e dashboard. */
+.home-premium {
+  --home-shadow: 0 18px 55px -38px oklch(0.24 0.04 275 / 0.4);
+  isolation: isolate;
+}
+.home-premium .home-hero {
+  background: oklch(0.19 0.05 278);
+}
+.home-premium .home-hero-photo {
+  object-position: 65% 44%;
+  filter: saturate(0.85) contrast(1.03);
+  transform: scale(1.015);
+}
+.home-premium .home-hero-shade {
+  background: linear-gradient(112deg,
+    oklch(0.18 0.05 276 / 0.98) 0%,
+    oklch(0.19 0.06 280 / 0.93) 37%,
+    oklch(0.18 0.06 275 / 0.74) 65%,
+    oklch(0.16 0.04 275 / 0.79) 100%);
+}
+.home-premium .home-hero-grid {
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to right, transparent, black 42%, transparent 95%);
+  opacity: 0.45;
+}
+.home-premium .home-headline-accent {
+  text-shadow: 0 5px 40px oklch(0.7 0.14 85 / 0.12);
+}
+.home-premium .home-hero-entrance {
+  animation: home-enter 650ms cubic-bezier(.21,.74,.16,1) both;
+}
+.home-premium .home-hero-entrance:nth-of-type(2) { animation-delay: 80ms; }
+.home-premium .home-hero-entrance:nth-of-type(3) { animation-delay: 150ms; }
+.home-premium .home-live-frame {
+  min-width: 0;
+}
+.home-premium .home-live-frame > div:nth-child(2) {
+  box-shadow: 0 28px 65px -22px oklch(0.08 0.02 270 / .64);
+  backdrop-filter: blur(30px) saturate(130%);
+}
+.home-premium .home-stat-cell + .home-stat-cell {
+  border-left: 1px solid oklch(1 0 0 / .16);
+}
+.home-premium .home-hero-stats {
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / .08), 0 20px 60px -35px oklch(.1 .03 270 / .5);
+}
+.home-premium .home-access-card {
+  box-shadow: var(--home-shadow);
+  transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+.home-premium .home-access-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 98% 3%, currentColor, transparent 40%);
+  opacity: .028;
+  pointer-events: none;
+}
+.home-premium .home-access-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 29px 65px -35px oklch(.2 .08 275 / .35);
+}
+.home-premium .home-access-card:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 4px;
+}
+.home-premium .home-access-arrow {
+  transition: transform .2s ease, background-color .2s ease;
+}
+.home-premium .home-access-card:hover .home-access-arrow,
+.home-premium .home-access-card:focus-visible .home-access-arrow {
+  transform: translateX(5px);
+}
+.home-premium .home-access-ink {
+  color: oklch(.97 .01 86);
+  background: linear-gradient(135deg, oklch(.25 .07 277), oklch(.34 .11 281));
+  border-color: oklch(.5 .09 278 / .4);
+}
+.home-premium .home-access-lilac {
+  color: oklch(.27 .1 285);
+  background: linear-gradient(130deg, oklch(.96 .018 286), oklch(.91 .045 282));
+  border-color: oklch(.78 .05 283);
+}
+.home-premium .home-access-mint {
+  color: oklch(.23 .07 183);
+  background: linear-gradient(130deg, oklch(.95 .03 177), oklch(.86 .07 172));
+  border-color: oklch(.74 .065 175);
+}
+.home-premium .home-access-sun {
+  color: oklch(.29 .075 71);
+  background: linear-gradient(130deg, oklch(.975 .05 90), oklch(.91 .1 84));
+  border-color: oklch(.82 .085 85);
+}
+.home-premium .home-access-ice {
+  color: oklch(.25 .08 251);
+  background: linear-gradient(130deg, oklch(.96 .025 251), oklch(.89 .052 247));
+  border-color: oklch(.81 .055 255);
+}
+.home-premium .home-access-paper {
+  color: var(--foreground);
+  background: var(--card);
+  border-color: var(--border);
+}
+.dark .home-premium .home-access-lilac {
+  color: oklch(.9 .025 284);
+  background: linear-gradient(145deg, oklch(.32 .08 287), oklch(.25 .055 287));
+  border-color: oklch(.48 .06 287);
+}
+.dark .home-premium .home-access-mint {
+  color: oklch(.88 .07 178);
+  background: linear-gradient(145deg, oklch(.28 .066 183), oklch(.22 .04 181));
+  border-color: oklch(.48 .06 180);
+}
+.dark .home-premium .home-access-sun {
+  color: oklch(.94 .07 86);
+  background: linear-gradient(145deg, oklch(.37 .065 80), oklch(.27 .045 75));
+  border-color: oklch(.55 .07 82);
+}
+.dark .home-premium .home-access-ice {
+  color: oklch(.89 .05 254);
+  background: linear-gradient(145deg, oklch(.32 .068 250), oklch(.23 .043 256));
+  border-color: oklch(.48 .068 253);
+}
+.home-premium .home-live-panel {
+  box-shadow: var(--home-shadow);
+}
+.home-premium .home-step-card {
+  transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+}
+.home-premium .home-step-card:hover {
+  transform: translateY(-3px);
+  border-color: oklch(.62 .09 279 / .35);
+  box-shadow: var(--home-shadow);
+}
+.home-premium .home-method-image {
+  object-position: center 45%;
+  transition: transform .6s cubic-bezier(.2,.7,.2,1);
+}
+.home-premium .home-method-image:hover {
+  transform: scale(1.015);
+}
+.home-premium .home-videos-card {
+  box-shadow: var(--home-shadow);
+}
+.home-premium .home-video-thumb {
+  box-shadow: 0 15px 30px -18px oklch(.18 .03 280 / .45);
+}
+.home-premium #laboratorio-agora {
+  scroll-margin-top: 5.5rem;
+}
+@keyframes home-enter {
+  from { opacity: 0; transform: translateY(17px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 639px) {
+  .home-premium .home-hero-photo { object-position: 68% center; }
+  .home-premium .home-hero-shade {
+    background: linear-gradient(to bottom,
+      oklch(.17 .05 276 / .98) 0%,
+      oklch(.17 .05 276 / .93) 57%,
+      oklch(.17 .05 276 / .78) 100%);
+  }
+  .home-premium .home-stat-cell:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid oklch(1 0 0 / .15);
+  }
+  .home-premium .home-stat-cell:nth-child(4) {
+    border-top: 1px solid oklch(1 0 0 / .15);
+  }
+  .home-premium .home-access-card { min-height: 13.75rem; }
+  .home-premium .home-video-thumb { border-radius: 0.8rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-premium .home-hero-entrance { animation: none; }
+  .home-premium .home-access-card,
+  .home-premium .home-access-arrow,
+  .home-premium .home-step-card,
+  .home-premium .home-method-image { transition: none; }
+  .home-premium .home-access-card:hover,
+  .home-premium .home-step-card:hover,
+  .home-premium .home-method-image:hover { transform: none; }
+}
