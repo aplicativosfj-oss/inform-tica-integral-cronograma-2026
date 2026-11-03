@@ -94,6 +94,9 @@ function tituloDaPagina(pathname: string): string {
     "/entre-turnos": "Entre Turnos",
     "/login": "Entrar no painel",
     "/tv": "Modo TV",
+    "/resultados": "Resultados da aprendizagem",
+    "/sala-de-jogos": "Sala de jogos educativos",
+    "/mapa-da-pausa": "Mapa do Entre Turnos",
   };
   if (mapa[pathname]) return mapa[pathname];
   if (pathname.startsWith("/aluno")) return "Área do Aluno";
@@ -212,7 +215,7 @@ export function NavBar() {
     }
 
     return (
-      <header className="relative sticky top-0 z-40 border-b border-blue-300/45 pt-[env(safe-area-inset-top)] bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 text-slate-900 shadow-lg shadow-slate-900/10 backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white dark:shadow-black/40">
+      <header className="relative sticky top-0 z-40 border-b border-border/70 bg-background/90 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_35px_-25px_rgb(12_17_45/0.45)] backdrop-blur-2xl supports-[backdrop-filter]:bg-background/80">
         {/* Filete da marca rente à base: é o que separa a barra do
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
         <span
@@ -282,7 +285,7 @@ export function NavBar() {
   // sem competir com a atividade.
   if (location.pathname !== "/") {
     return (
-      <header className="sticky top-0 z-40 flex h-[calc(3.5rem_+_env(safe-area-inset-top))] shrink-0 pt-[env(safe-area-inset-top)] items-center gap-1.5 border-b border-blue-300/45 bg-gradient-to-b from-blue-50/95 via-sky-50/92 to-blue-200/85 px-2 text-slate-900 shadow-sm backdrop-blur-xl dark:border-white/10 dark:from-slate-900/85 dark:via-slate-900/80 dark:to-slate-950/85 dark:text-white sm:px-3">
+      <header className="sticky top-0 z-40 flex h-[calc(3.5rem_+_env(safe-area-inset-top))] shrink-0 items-center gap-1.5 border-b border-border/70 bg-background/90 px-2 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_30px_-26px_rgb(12_17_45/0.38)] backdrop-blur-2xl sm:px-3">
         <Button
           variant="ghost"
           size="icon"
@@ -335,7 +338,7 @@ export function NavBar() {
   }
 
   return (
-    <header className="relative sticky top-0 z-40 border-b border-border/60 pt-[env(safe-area-inset-top)] bg-background/80 text-foreground shadow-sm backdrop-blur-xl">
+    <header className="relative sticky top-0 z-40 border-b border-border/70 bg-background/90 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_30px_-26px_rgb(12_17_45/0.38)] backdrop-blur-2xl">
       {/* Filete da marca rente à base: é o que separa a barra do
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
       <span

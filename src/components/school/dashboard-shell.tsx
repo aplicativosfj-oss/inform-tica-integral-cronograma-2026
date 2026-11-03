@@ -35,7 +35,7 @@ function iniciais(email: string) {
 /** Cartão da conta conectada, com o botão de sair à mão. */
 function Conta({ email, onSair }: { email: string; onSair: () => void }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.07] p-2.5">
+    <div className="flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/[0.055] p-3 shadow-sm">
       <span className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 text-xs font-bold text-white">
         {iniciais(email)}
         <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-card bg-emerald-400" />
@@ -83,10 +83,10 @@ function NavPainel({ pathname, aoEscolher }: { pathname: string; aoEscolher?: ()
                 onClick={aoEscolher}
                 aria-current={ativo ? "page" : undefined}
                 className={cn(
-                  "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+                  "platform-sidebar-link group relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors",
                   ativo
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                    ? "bg-primary/10 text-primary ring-1 ring-primary/15 shadow-sm"
+                    : "text-muted-foreground hover:bg-muted/80 hover:text-foreground",
                 )}
               >
                 <span
@@ -123,7 +123,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const grupoAtual = GRUPOS_VISIVEIS.find((g) => g.items.includes(atual))?.label ?? null;
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="platform-dashboard relative min-h-screen bg-background">
       {/* Mesma ambientação de tecnologia do login: dá identidade visual ao
           painel inteiro, discreta o bastante pra nunca competir com os
           dados e formulários por cima. */}
@@ -142,7 +142,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <div className="mx-auto max-w-[90rem] px-3 py-3 sm:px-6 sm:py-5 lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:gap-8 lg:py-8">
             {/* Lateral fixa no computador. */}
             <aside className="hidden lg:block">
-              <div className="sticky top-20 flex max-h-[calc(100vh-6rem)] flex-col gap-4 overflow-y-auto rounded-2xl border border-border/70 bg-card/75 p-3 shadow-sm backdrop-blur-xl">
+              <div className="platform-dashboard-sidebar sticky top-20 flex max-h-[calc(100vh-6rem)] flex-col gap-5 overflow-y-auto rounded-[1.8rem] border border-border/75 bg-card/85 p-4 shadow-xl shadow-ink/5 backdrop-blur-2xl">
                 {email ? <Conta email={email} onSair={logout} /> : null}
                 <NavPainel pathname={pathname} />
               </div>
@@ -211,7 +211,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
             <main className="painel-conteudo min-w-0">
               {/* Trilha de navegação: deixa claro em que parte do painel se está. */}
-              <p className="mb-3 hidden items-center gap-2 text-xs text-muted-foreground lg:flex">
+              <p className="mb-5 hidden w-fit items-center gap-2 rounded-full border border-border/75 bg-card/85 px-4 py-2 text-xs font-semibold text-muted-foreground shadow-sm lg:flex">
                 <span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-primary">
                   <IconeAtual className="size-3.5" aria-hidden />
                 </span>
