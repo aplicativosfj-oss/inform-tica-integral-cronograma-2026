@@ -229,3 +229,33 @@
   .home-premium .home-access-photo { transition: none; }
   .home-premium .home-access-card:hover .home-access-photo { transform: none; }
 }
+
+/* 2026 — Homepage compacta, organizada em janelas responsivas. */
+.home-premium { --home-panel-radius: 1.4rem; }
+.home-premium .home-window-hero { min-height: auto; }
+.home-premium .home-window-hero > div:not([aria-hidden]) { padding-top: clamp(2.5rem,5vw,4rem); padding-bottom: clamp(1.5rem,3vw,2.5rem); }
+.home-premium .home-window-section { scroll-margin-top: 5rem; }
+.home-premium .home-window-section .home-access-card { min-height: 12rem; border-radius: var(--home-panel-radius); }
+.home-premium .home-window-section .home-access-card h3 { line-height: 1.14; }
+.home-premium .home-window-section .home-access-card:hover { transform: translateY(-2px); }
+.home-premium .home-window-section .home-access-card .home-access-icon { width: 2.6rem; height: 2.6rem; border-radius: .85rem; }
+.home-premium .home-window-section .home-live-panel { border-radius: var(--home-panel-radius); }
+.home-premium .home-window-section .home-step-card,
+.home-premium .home-window-section .home-videos-card { border-radius: var(--home-panel-radius); }
+.home-premium .home-hero-stats { border-radius: 1.1rem; }
+.home-premium .home-stat-cell { padding-top: .8rem; padding-bottom: .8rem; }
+.home-premium .home-live-frame > div:nth-child(2) { border-radius: var(--home-panel-radius); }
+.home-premium .home-live-section .home-live-panel { box-shadow: 0 16px 44px -30px oklch(.18 .06 270 / .3); }
+@media (min-width: 1024px) {
+  .home-premium .home-window-section .home-access-card { min-height: 12.5rem; }
+  .home-premium .home-window-section .home-live-panel { max-height: min(76vh, 740px); overflow-y: auto; scrollbar-width: thin; }
+}
+@media (max-width: 639px) {
+  .home-premium .home-window-hero > div:not([aria-hidden]) { padding-top: 2rem; padding-bottom: 1.5rem; }
+  .home-premium .home-window-section .home-access-card { min-height: 11.5rem; }
+  .home-premium .home-window-section .home-live-panel { max-height: 75vh; overflow-y: auto; }
+  .home-premium .home-hero-stats { margin-top: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-premium .home-window-section .home-access-card:hover { transform: none; }
+}
