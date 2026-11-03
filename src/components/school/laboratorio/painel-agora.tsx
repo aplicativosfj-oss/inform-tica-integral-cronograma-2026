@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { FichaAlunoAoVivo } from "@/components/school/laboratorio/ficha-aluno-ao-vivo";
 import { Clock3, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -57,6 +59,7 @@ function CartaoGrupo({
   logado: boolean;
   aoMudar: () => void;
 }) {
+  const [selecionado,setSelecionado] = useState<(typeof g.alunos)[number] | null>(null);
   const ini = new Date(g.inicio).getTime();
   const fim = new Date(g.fim).getTime();
   const aoVivo = ini <= agora;
@@ -118,10 +121,11 @@ function CartaoGrupo({
       <ul className="mt-3 flex flex-wrap gap-1.5">
         {g.alunos.map((a) => (
           <li key={a.id} className="rounded-full border bg-background px-2.5 py-1 text-sm">
-            {nomeExibido(a.nome, logado)}
+            {logado ? <button type="button" onClick={()=>setSelecionado(a)} className="font-semibold underline-offset-2 hover:text-primary hover:underline" aria-label={`Abrir ficha de ${a.nome}`}>{a.nome}</button> : nomeExibido(a.nome, false)}
           </li>
         ))}
       </ul>
+      {logado && selecionado ? <FichaAlunoAoVivo aluno={selecionado} onClose={()=>setSelecionado(null)} onUpdate={aoMudar}/> : null}
     </div>
   );
 }
