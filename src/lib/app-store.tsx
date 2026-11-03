@@ -11,6 +11,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-store";
 import { revisarCadastroNov2026 } from "@/lib/cadastro-nov2026";
+import { aplicarListaOficial2026 } from "@/lib/lista-oficial-2026";
 import { marcarTransferidosNov2026 } from "@/lib/transferidos-nov2026";
 import { enfileirar, gravarCache, lerCache, registrarExecutor } from "@/lib/offline-queue";
 import { sincronizarPresencasPendentes } from "@/lib/presencas";
@@ -111,7 +112,8 @@ function comRegrasPadrao(config: ScheduleConfig): ScheduleConfig {
 function revisarCadastro(turmas: Turma[], config: ScheduleConfig) {
   const a = revisarCadastroNov2026(turmas, config);
   const b = marcarTransferidosNov2026(a.turmas, a.config);
-  return { turmas: b.turmas, config: b.config, alterado: a.alterado || b.alterado };
+  const c = aplicarListaOficial2026(b.turmas, b.config);
+  return { turmas: c.turmas, config: c.config, alterado: a.alterado || b.alterado || c.alterado };
 }
 
 function generateId(prefix: string) {

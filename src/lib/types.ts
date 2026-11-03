@@ -127,6 +127,8 @@ export interface ScheduleConfig {
   revisaoCadastroNov2026?: boolean | undefined;
   /** Marcação pontual dos alunos transferidos informados em novembro/2026. */
   revisaoTransferidosNov2026?: boolean | undefined;
+  /** Conferência única do cadastro com a lista oficial de 2026 (INEP, nascimento, transferidos). */
+  revisaoListaOficial2026?: boolean | undefined;
   nomeEscola: string;
   inep: string;
   endereco: string;
