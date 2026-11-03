@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-store";
+import { revisarCadastroNov2026 } from "@/lib/cadastro-nov2026";
 import { enfileirar, gravarCache, lerCache, registrarExecutor } from "@/lib/offline-queue";
 import { sincronizarPresencasPendentes } from "@/lib/presencas";
 import { SEED_CONFIG, SEED_TURMAS } from "@/lib/seed-data";
@@ -139,8 +140,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Enquanto a rede não responde, a tela abre com a última cópia local.
     const emCache = lerCache<{ turmas: Turma[]; config: ScheduleConfig }>("app_state");
     if (emCache) {
-      setTurmas(emCache.turmas);
-      setConfig(comRegrasPadrao(emCache.config));
+      const recuperado = revisarCadastroNov2026(
+        emCache.turmas,
+        comRegrasPadrao(emCache.config),
+      );
+      setTurmas(recuperado.turmas);
+      setConfig(recuperado.config);
     }
     supabase
       .from("app_state")
@@ -152,13 +157,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (error) {
           if (!emCache) toast.error(`Não foi possível carregar os dados: ${error.message}`);
         } else if (data) {
-          const proximasTurmas = (data.turmas as Turma[] | null) ?? SEED_TURMAS;
-          const proximaConfig = comRegrasPadrao(
-            (data.config as ScheduleConfig | null) ?? SEED_CONFIG,
+          const revisao = revisarCadastroNov2026(
+            (data.turmas as Turma[] | null) ?? SEED_TURMAS,
+            comRegrasPadrao((data.config as ScheduleConfig | null) ?? SEED_CONFIG),
           );
+          const proximasTurmas = revisao.turmas;
+          const proximaConfig = revisao.config;
           setTurmas(proximasTurmas);
           setConfig(proximaConfig);
           gravarCache("app_state", { turmas: proximasTurmas, config: proximaConfig });
+          // A leitura pública mostra o cadastro revisado, mas SOMENTE a sessão
+          // autenticada tenta gravar os dados. A migração é idempotente e não
+          // altera frequências, datas de aula ou outras turmas.
+          if (revisao.alterado && isAuthenticated) {
+            try {
+              await enviarAppState({ turmas: proximasTurmas, config: proximaConfig });
+              toast.success("Cadastro escolar atualizado: professora do 4º A e alunos do 5º A.");
+            } catch (e) {
+              toast.error(
+                "O cadastro foi corrigido na tela, mas não pôde ser salvo no banco: " +
+                  (e instanceof Error ? e.message : "verifique o acesso do administrador"),
+              );
+            }
+          }
         } else if (isAuthenticated) {
           // First run: seed the row (requires an authenticated admin session,
           // per the write RLS policy) so future reads — including the public

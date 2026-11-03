@@ -16,6 +16,8 @@ function alunos(entradas: AlunoEntry[]) {
 
 export const SEED_CONFIG: ScheduleConfig = {
   nomeEscola: "Escola Municipal em Tempo Integral Dr. Eiraldo Carneiro de França",
+  // Cadastro oficial revisto em novembro de 2026; antigas instalações serão reconciliadas ao entrar.
+  revisaoCadastroNov2026: true,
   inep: "12004227",
   endereco: "Rua Ernane Moreira Braga, 108, Cohab",
   professorInformatica: "Franc D'nis",
@@ -258,7 +260,7 @@ export const SEED_TURMAS: Turma[] = [
     id: "t-4a",
     serie: "4º Ano",
     letra: "A",
-    professorRegente: "Edivânia Macedo",
+    professorRegente: "Edivania Macedo",
     alunos: alunos([
       "Aslyanne Souza Ribeiro",
       "Claudianny Tavares Lima",
@@ -358,6 +360,9 @@ export const SEED_TURMAS: Turma[] = [
       "Mary Jane Gomes do Carmo",
       ["Davi Luiz de Oliveira de Lima", true],
       "Rosilene Pereira de Aguiar Kaxinawá",
+      // Alunos pós-censo identificados na lista oficial do 5º A (2026).
+      "Joaquim Oliveira Lima",
+      "Benjamin Oliveira Lima",
     ]),
     apoioEspecial: [{ nome: "Christian do Nascimento Sousa", funcao: "Cuidador(a)" }],
   },
