@@ -21,6 +21,7 @@ export const SEED_CONFIG: ScheduleConfig = {
   // Cadastro oficial revisto em novembro de 2026; antigas instalações serão reconciliadas ao entrar.
   revisaoCadastroNov2026: true,
   revisaoTransferidosNov2026: true,
+  revisaoTransferidosNov2026b: true,
   revisaoListaOficial2026v2: true,
   inep: "12004227",
   endereco: "Rua Ernane Moreira Braga, 108, Cohab",
@@ -410,7 +411,10 @@ const TURMAS_BASE: Turma[] = [
 
 // Transferidos continuam no cadastro, mas apagados e fora do rodízio.
 export const SEED_TURMAS: Turma[] = aplicarListaOficial2026(
-  marcarTransferidosNov2026(TURMAS_BASE, { ...SEED_CONFIG, revisaoTransferidosNov2026: false })
-    .turmas,
+  marcarTransferidosNov2026(TURMAS_BASE, {
+    ...SEED_CONFIG,
+    revisaoTransferidosNov2026: false,
+    revisaoTransferidosNov2026b: false,
+  }).turmas,
   { ...SEED_CONFIG, revisaoListaOficial2026v2: false },
 ).turmas;
