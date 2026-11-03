@@ -1,4 +1,5 @@
 import { turmaParticipaInformatica } from "@/lib/turmas-informatica";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
 import type {
   Aluno,
   Assignment,
@@ -768,6 +769,7 @@ export function reprogramacoesParaData(
   data: Date,
 ): Assignment[] {
   const dataKey = toDateKey(data);
+  if (feriadoNacionalEm(dataKey)) return [];
   const dia = currentWeekdayLabel(data);
   const turmasById = new Map(turmas.map((t) => [t.id, t]));
   const resultado: Assignment[] = [];
@@ -795,6 +797,8 @@ export function findSessaoAtual(
   now: Date,
   extras: Assignment[] = [],
 ): SessaoAtual | null {
+  // Em Finados não existe sessão regular ao vivo, mesmo que a grade semanal tenha slots.
+  if (feriadoNacionalEm(toDateKey(now))) return null;
   const dia = currentWeekdayLabel(now);
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const nowSeconds = nowMinutes * 60 + now.getSeconds();
@@ -859,7 +863,7 @@ export function proximoDiaLetivo(config: ScheduleConfig, from: Date): ProximoDia
     const data = new Date(from);
     data.setDate(data.getDate() + i);
     const dia = currentWeekdayLabel(data);
-    if (config.diasSemana.includes(dia)) return { data, dia };
+    if (config.diasSemana.includes(dia) && !feriadoNacionalEm(toDateKey(data))) return { data, dia };
   }
   return null;
 }
@@ -929,6 +933,7 @@ export function encontrarHorariosParaReprogramar(
     const data = new Date(desde.getFullYear(), desde.getMonth(), desde.getDate() + i);
     const dia = currentWeekdayLabel(data);
     if (!config.diasSemana.includes(dia)) continue;
+    if (feriadoNacionalEm(toDateKey(data))) continue;
     if (turmaIndisponivelNoDia(config, turmaId, dia, getWeekIndex(data))) continue;
     const dataKey = toDateKey(data);
     const semana = aplicarExcecoesDeData(
