@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { FichaAlunoAoVivo } from "@/components/school/laboratorio/ficha-aluno-ao-vivo";
 import { ArrowRight, GraduationCap, Pause, Users2 } from "lucide-react";
 
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
@@ -36,6 +38,7 @@ export function CartaoAoVivoHome({
   logado: boolean;
 }) {
   const { turmas } = useAppStore();
+  const [alunoSelecionado, setAlunoSelecionado] = useState<GrupoLab["alunos"][number] | null>(null);
   const agora = useAgora(1000);
   const grupos = agruparSessoes(sessoes.filter((s) => s.data === hojeNaEscola()));
   const telaCheia = useTelaCheiaAula(grupos, logado, [...sessoes, ...ausencias]);
@@ -143,7 +146,13 @@ export function CartaoAoVivoHome({
             <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-[10px] font-bold text-white">
               {a.nome.trim().charAt(0).toUpperCase()}
             </span>
-            {nomeExibido(a.nome, logado).split(" ")[0]}
+            {logado ? (
+              <button type="button" onClick={() => setAlunoSelecionado(a)} aria-label={`Abrir informações de ${a.nome}`} className="relative rounded px-1 py-0.5 font-semibold underline-offset-2 hover:text-emerald-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300" title={`Abrir ficha de ${a.nome}`}>
+                {a.nome.split(" ")[0]}
+              </button>
+            ) : (
+              <span>{nomeExibido(a.nome, false).split(" ")[0]}</span>
+            )}
           </li>
         ))}
         {presentes.length > 8 ? (
@@ -174,6 +183,9 @@ export function CartaoAoVivoHome({
         <VerTodos className="" />
       </div>
       {telaCheia.tela}
+      {logado && alunoSelecionado ? (
+        <FichaAlunoAoVivo aluno={alunoSelecionado} onClose={() => setAlunoSelecionado(null)} onUpdate={() => window.dispatchEvent(new Event("focus"))} />
+      ) : null}
     </div>
   );
 }
