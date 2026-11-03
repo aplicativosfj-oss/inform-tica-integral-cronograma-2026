@@ -214,7 +214,7 @@ function Index() {
       <div className="relative z-10">
         <NavBar />
         <main id="conteudo-principal">
-          <section aria-labelledby="home-titulo" className="home-hero relative isolate overflow-hidden text-white">
+          <section aria-labelledby="home-titulo" className="home-hero home-window-hero relative isolate overflow-hidden text-white">
             <img
               src={labFotoImg}
               alt=""
@@ -317,7 +317,7 @@ function Index() {
                 </div>
               </div>
 
-              <div className="home-hero-stats mt-11 grid grid-cols-2 overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/[0.09] backdrop-blur-xl sm:grid-cols-4 lg:mt-14">
+              <div className="home-hero-stats mt-5 grid grid-cols-2 overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/[0.09] backdrop-blur-xl sm:grid-cols-4 lg:mt-14">
                 <HeroStat rotulo="Turmas atendidas" detalhe="1º ao 5º ano" valor={turmas.length} isReady={isReady} Icone={GraduationCap} />
                 <HeroStat rotulo="Alunos ativos" detalhe="Matrículas vigentes" valor={totalAlunos} isReady={isReady} Icone={Users2} />
                 <HeroStat rotulo="Computadores" detalhe="Estações de uso" valor={config.numeroComputadores} isReady={isReady} Icone={MonitorSmartphone} />
@@ -336,7 +336,7 @@ function Index() {
             <AvisoDireitosImagem className="mx-auto max-w-[86rem] px-4 pb-4 text-white/45 sm:px-8" />
           </section>
 
-          <section aria-labelledby="home-acessos-titulo" className="home-section mx-auto max-w-[86rem] px-4 py-16 sm:px-8 sm:py-20 lg:px-10">
+          <section aria-labelledby="home-acessos-titulo" className="home-section home-window-section mx-auto max-w-[86rem] px-4 py-8 sm:px-8 sm:py-10 lg:px-10">
             <RevealSection>
               <SectionIntro
                 etiqueta="Explore a plataforma"
@@ -350,7 +350,7 @@ function Index() {
                 <Link
                   key={to}
                   to={to}
-                  className={"home-access-card group relative flex min-h-[15rem] flex-col overflow-hidden rounded-[1.75rem] border p-6 sm:p-7 " + estilo + (destaque ? " lg:min-h-[15rem]" : "")}
+                  className={"home-access-card group relative flex min-h-[12rem] flex-col overflow-hidden rounded-[1.5rem] border p-4 sm:p-5 " + estilo + (destaque ? " lg:min-h-[12rem]" : "")}
                 >
                   <img
                     src={imagem}
@@ -390,7 +390,7 @@ function Index() {
             </div>
           </section>
 
-          <section id="laboratorio-agora" aria-labelledby="home-lab-titulo" className="home-live-section scroll-mt-24 border-y border-border/60 bg-card/70 py-14 sm:py-20">
+          <section id="laboratorio-agora" aria-labelledby="home-lab-titulo" className="home-live-section home-window-section scroll-mt-24 border-y border-border/60 bg-card/70 py-8 sm:py-10">
             <div className="mx-auto max-w-[86rem] px-4 sm:px-8 lg:px-10">
               <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                 <SectionIntro
@@ -409,7 +409,7 @@ function Index() {
                   </Button>
                 </div>
               </div>
-              <div className="home-live-panel min-h-[26rem] overflow-hidden rounded-[1.75rem] border border-border bg-background p-2 shadow-xl shadow-ink/5 sm:p-4">
+              <div className="home-live-panel min-h-[20rem] overflow-hidden rounded-[1.5rem] border border-border bg-background p-2 shadow-xl shadow-ink/5 sm:p-3">
                 {feriadoHoje ? (
                   <div className="grid min-h-[24rem] place-items-center rounded-2xl bg-muted/40 px-5 py-10">
                     <AvisoFeriado dataISO={hojeNaEscola()} variante="painel" />
@@ -469,7 +469,7 @@ function Index() {
             </div>
           </section>
 
-          <section aria-labelledby="home-comunidade-titulo" className="home-section border-t border-border/60 bg-card/65 py-16 sm:py-20">
+          <section aria-labelledby="home-comunidade-titulo" className="home-section home-window-section border-t border-border/60 bg-card/65 py-8 sm:py-10">
             <div className="mx-auto max-w-[86rem] px-4 sm:px-8 lg:px-10">
               <SectionIntro
                 etiqueta="Nossa comunidade escolar"
@@ -510,7 +510,7 @@ function Index() {
             </div>
           </section>
 
-          <section aria-label="Acesso da equipe" className="home-last-cta px-4 py-12 sm:px-8 sm:py-14 lg:px-10">
+          <section aria-label="Acesso da equipe" className="home-last-cta px-4 py-7 sm:px-8 sm:py-9 lg:px-10">
             <div className="mx-auto flex max-w-[86rem] flex-col gap-5 rounded-[1.8rem] border border-border bg-card px-6 py-7 shadow-sm sm:px-9 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4">
                 <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
