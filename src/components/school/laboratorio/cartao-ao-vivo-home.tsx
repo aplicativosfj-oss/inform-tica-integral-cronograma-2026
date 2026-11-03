@@ -48,7 +48,9 @@ export function CartaoAoVivoHome({
   const outros = aoVivo.slice(1);
 
   if (feriadoNacionalEm(hojeNaEscola())) {
-    return <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="min-h-[15rem]" />;
+    return (
+      <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="min-h-[15rem]" />
+    );
   }
 
   if (!principal) {

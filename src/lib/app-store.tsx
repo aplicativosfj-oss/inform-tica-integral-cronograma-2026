@@ -10,6 +10,15 @@ import {
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-store";
+import {
+  TABELA_PRIVADA,
+  assinatura,
+  cadastroPublico,
+  chavePrivada,
+  juntarDadosPrivados,
+  linhasAlteradas,
+  type LinhaPrivada,
+} from "@/lib/dados-privados";
 import { revisarCadastroNov2026 } from "@/lib/cadastro-nov2026";
 import { aplicarListaOficial2026 } from "@/lib/lista-oficial-2026";
 import { marcarTransferidosNov2026 } from "@/lib/transferidos-nov2026";
@@ -78,15 +87,45 @@ interface AppState {
 const AppContext = createContext<AppState | null>(null);
 
 interface AppStatePayload {
+  /** Cadastro já sem os dados privados (é o que o site público lê). */
   turmas: Turma[];
   config: ScheduleConfig;
+  /** Dados privados que mudaram (vão para a tabela só de administradores). */
+  privados?: LinhaPrivada[];
+  /**
+   * Cadastro com os dados privados, usado só se a tabela privada ainda não
+   * existir no banco: assim nada se perde antes de o SQL ser rodado.
+   */
+  turmasCompletas?: Turma[];
 }
 
-/** Envia o cadastro completo (turmas, grupos, alunos, aulas) ao banco. */
+const CACHE_PRIVADO = "alunos_privado";
+
+/** A tabela privada ainda não foi criada (SQL supabase/alunos-privado.sql). */
+const tabelaPrivadaAusente = (msg: string) =>
+  /alunos_privado|does not exist|schema cache|42P01|PGRST205/i.test(msg);
+
+/** Envia o cadastro (turmas, grupos, alunos, aulas) e os dados privados ao banco. */
 async function enviarAppState(payload: AppStatePayload): Promise<void> {
+  let turmas = payload.turmas;
+  if (payload.privados?.length) {
+    const { error } = await supabase.from(TABELA_PRIVADA).upsert(
+      payload.privados.map((l) => ({ ...l, updated_at: new Date().toISOString() })),
+      { onConflict: "turma_id,aluno_id" },
+    );
+    if (error) {
+      if (!tabelaPrivadaAusente(error.message) || !payload.turmasCompletas) {
+        throw new Error(error.message);
+      }
+      turmas = payload.turmasCompletas;
+      toast.warning(
+        "Os dados pessoais dos alunos ainda ficam no cadastro público: rode o SQL alunos-privado.sql no Supabase.",
+      );
+    }
+  }
   const { error } = await supabase.from("app_state").upsert({
     id: ROW_ID,
-    turmas: payload.turmas,
+    turmas,
     config: payload.config,
     updated_at: new Date().toISOString(),
   });
@@ -121,7 +160,7 @@ function generateId(prefix: string) {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isReady: authPronto } = useAuth();
   const [turmas, setTurmas] = useState<Turma[]>(SEED_TURMAS);
   const [config, setConfig] = useState<ScheduleConfig>(SEED_CONFIG);
   const [isReady, setIsReady] = useState(false);
@@ -129,6 +168,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Kept in refs so every mutation can persist the *latest* full row to
   // Supabase without depending on stale closures over `turmas`/`config`.
   const turmasRef = useRef(turmas);
+  // Dados privados já gravados no banco (chave → assinatura), para enviar só
+  // o que mudou. `null` = ainda não carregados (ou sem login): nada é enviado.
+  const privadosSalvosRef = useRef<Map<string, string> | null>(null);
   const configRef = useRef(config);
   turmasRef.current = turmas;
   configRef.current = config;
@@ -145,40 +187,75 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("online", sincronizar);
   }, []);
 
+  // Sem login (ou depois de sair), nenhum dado pessoal fica neste aparelho.
+  useEffect(() => {
+    if (authPronto && !isAuthenticated) gravarCache(CACHE_PRIVADO, null);
+  }, [authPronto, isAuthenticated]);
+
   useEffect(() => {
     let cancelled = false;
+    privadosSalvosRef.current = null;
+    const privadosEmCache = isAuthenticated ? lerCache<LinhaPrivada[]>(CACHE_PRIVADO) : null;
     // Enquanto a rede não responde, a tela abre com a última cópia local.
     const emCache = lerCache<{ turmas: Turma[]; config: ScheduleConfig }>("app_state");
     if (emCache) {
-      const recuperado = revisarCadastro(emCache.turmas, comRegrasPadrao(emCache.config));
+      const recuperado = revisarCadastro(
+        juntarDadosPrivados(emCache.turmas, privadosEmCache ?? []),
+        comRegrasPadrao(emCache.config),
+      );
       setTurmas(recuperado.turmas);
       setConfig(recuperado.config);
     }
-    supabase
-      .from("app_state")
-      .select("turmas, config")
-      .eq("id", ROW_ID)
-      .maybeSingle()
-      .then(async ({ data, error }) => {
+    const privadosPromise: Promise<LinhaPrivada[] | null> = isAuthenticated
+      ? Promise.resolve(
+          supabase
+            .from(TABELA_PRIVADA)
+            .select("turma_id, aluno_id, inep, nascimento, endereco, anotacoes")
+            .limit(5000),
+        ).then(({ data, error }) => (error ? null : ((data ?? []) as LinhaPrivada[])))
+      : Promise.resolve(null);
+    Promise.all([
+      supabase.from("app_state").select("turmas, config").eq("id", ROW_ID).maybeSingle(),
+      privadosPromise,
+    ])
+      .then(([{ data, error }, privados]) => ({ data, error, privados }))
+      .then(async ({ data, error, privados }) => {
         if (cancelled) return;
+        if (privados) {
+          privadosSalvosRef.current = new Map(
+            privados.map((l) => [
+              chavePrivada(l.turma_id, l.aluno_id),
+              assinatura({ ...l, anotacoes: l.anotacoes ?? [] }),
+            ]),
+          );
+          gravarCache(CACHE_PRIVADO, privados);
+        }
         if (error) {
           if (!emCache) toast.error(`Não foi possível carregar os dados: ${error.message}`);
         } else if (data) {
           const revisao = revisarCadastro(
-            (data.turmas as Turma[] | null) ?? SEED_TURMAS,
+            juntarDadosPrivados((data.turmas as Turma[] | null) ?? SEED_TURMAS, privados ?? []),
             comRegrasPadrao((data.config as ScheduleConfig | null) ?? SEED_CONFIG),
           );
           const proximasTurmas = revisao.turmas;
           const proximaConfig = revisao.config;
           setTurmas(proximasTurmas);
           setConfig(proximaConfig);
-          gravarCache("app_state", { turmas: proximasTurmas, config: proximaConfig });
+          gravarCache("app_state", {
+            turmas: cadastroPublico(proximasTurmas, privados !== null),
+            config: proximaConfig,
+          });
+          // Cadastro antigo ainda com dados pessoais dentro: o administrador
+          // logado os move para a tabela privada na primeira leitura.
+          const temDadoPrivadoPublico = ((data.turmas as Turma[] | null) ?? []).some((t) =>
+            t.alunos?.some((a) => a.inep || a.nascimento || a.endereco || a.anotacoes?.length),
+          );
           // A leitura pública mostra o cadastro revisado, mas SOMENTE a sessão
           // autenticada tenta gravar os dados. A migração é idempotente e não
           // altera frequências, datas de aula ou outras turmas.
-          if (revisao.alterado && isAuthenticated) {
+          if ((revisao.alterado || (temDadoPrivadoPublico && privados)) && isAuthenticated) {
             try {
-              await enviarAppState({ turmas: proximasTurmas, config: proximaConfig });
+              await enviarAppState(montarEnvio(proximasTurmas, proximaConfig));
               toast.success("Cadastro escolar atualizado.");
             } catch (e) {
               toast.error(
@@ -203,12 +280,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, [isAuthenticated]);
 
+  /**
+   * Separa o que vai para o cadastro público e o que vai para a tabela só de
+   * administradores. Marca as linhas privadas como salvas já aqui: se o envio
+   * falhar, ele fica na fila offline com essas mesmas linhas.
+   */
+  function montarEnvio(nextTurmas: Turma[], nextConfig: ScheduleConfig): AppStatePayload {
+    const salvas = privadosSalvosRef.current;
+    const privados = salvas ? linhasAlteradas(nextTurmas, salvas) : [];
+    if (salvas) {
+      for (const l of privados) salvas.set(chavePrivada(l.turma_id, l.aluno_id), assinatura(l));
+      gravarCache(
+        CACHE_PRIVADO,
+        linhasAlteradas(nextTurmas, new Map()), // todas as linhas com algum dado
+      );
+    }
+    return {
+      // Sem os dados privados carregados (ex.: o SQL da tabela ainda não foi
+      // rodado), o cadastro vai como está, para não perder nada.
+      turmas: salvas ? cadastroPublico(nextTurmas, true) : nextTurmas,
+      config: nextConfig,
+      privados,
+      turmasCompletas: nextTurmas,
+    };
+  }
+
   function persist(nextTurmas: Turma[], nextConfig: ScheduleConfig) {
+    const envio = montarEnvio(nextTurmas, nextConfig);
     // A cópia local é gravada primeiro: mesmo sem internet a tela continua
     // funcionando e os dados sobrevivem a um recarregamento.
-    gravarCache("app_state", { turmas: nextTurmas, config: nextConfig });
-    enviarAppState({ turmas: nextTurmas, config: nextConfig }).catch(() => {
-      enfileirar("app_state", { turmas: nextTurmas, config: nextConfig });
+    gravarCache("app_state", { turmas: envio.turmas, config: nextConfig });
+    enviarAppState(envio).catch(() => {
+      enfileirar("app_state", envio);
       toast.warning("Sem internet: as alterações foram guardadas e serão enviadas ao reconectar.");
     });
   }

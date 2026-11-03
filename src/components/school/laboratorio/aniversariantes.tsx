@@ -7,8 +7,16 @@ import { hojeNaEscola } from "@/lib/laboratorio";
 const rotuloTurma = (serie: string, letra: string) => `${serie.replace(/\D+/g, "")}º ${letra}`;
 
 /** Selo "aniversariante" para pôr ao lado do nome do aluno que faz aniversário hoje. */
-export function SeloAniversario({ nascimento }: { nascimento: string | undefined }) {
-  if (!infoAniversario(nascimento, hojeNaEscola())?.hoje) return null;
+export function SeloAniversario({
+  nascimento,
+  aniversario,
+}: {
+  nascimento: string | undefined;
+  /** "MM-DD": o que o site público conhece (a data completa só aparece com login). */
+  aniversario?: string | undefined;
+}) {
+  const data = nascimento ?? (aniversario ? `2000-${aniversario}` : undefined);
+  if (!infoAniversario(data, hojeNaEscola())?.hoje) return null;
   return (
     <span
       className="inline-flex shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-fuchsia-600 to-amber-400 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white shadow-sm"

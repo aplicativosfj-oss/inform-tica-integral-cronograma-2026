@@ -863,7 +863,10 @@ export function ControleLaboratorio({
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1.5">
                             <span className="truncate text-sm font-semibold">{a.nome}</span>
-                            <SeloAniversario nascimento={a.nascimento} />
+                            <SeloAniversario
+                              nascimento={a.nascimento}
+                              aniversario={a.aniversario}
+                            />
                             {fila && fila <= 10 && !marcado ? (
                               <span
                                 className="shrink-0 rounded-md bg-indigo-600 px-1.5 text-[10px] font-extrabold text-white"

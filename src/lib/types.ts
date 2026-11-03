@@ -20,8 +20,13 @@ export interface Aluno {
   impedido?: boolean | undefined;
   /** Motivo do impedimento, registrado por quem marcou. */
   motivoImpedimento?: string | undefined;
-  /** Data de nascimento (YYYY-MM-DD) — usada para mostrar a idade no espaço do apoio. */
+  /**
+   * Data de nascimento (YYYY-MM-DD). Dado privado: só existe na memória de
+   * quem está logado (tabela alunos_privado), nunca no cadastro público.
+   */
   nascimento?: string | undefined;
+  /** Dia e mês do aniversário ("MM-DD"), público, para o selo de aniversariante. */
+  aniversario?: string | undefined;
   /** Especialidade/laudo do atendimento especializado (ex.: TEA, deficiência auditiva). */
   especialidade?: string | undefined;
   /** Transferido ou desistente deixa de contar na turma (rodízio, laboratório, totais). */

@@ -923,7 +923,7 @@ export function BuscaAlunos() {
                     <span className="min-w-0">
                       <span className="flex items-center gap-1.5 truncate text-sm font-medium">
                         {a.nome}
-                        <SeloAniversario nascimento={a.nascimento} />
+                        <SeloAniversario nascimento={a.nascimento} aniversario={a.aniversario} />
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {turma ? "" : `${rotuloTurma(t.serie, t.letra)} · `}
