@@ -36,18 +36,19 @@ const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('informati
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+      <div className="w-full max-w-md rounded-[2rem] border border-border bg-card p-8 text-center shadow-xl shadow-ink/5 sm:p-10">
+        <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-primary">Página não encontrada</p>
+        <h1 className="mt-3 font-heading text-7xl font-extrabold tracking-tighter text-primary">404</h1>
+        <h2 className="mt-4 font-heading text-2xl font-extrabold tracking-tight text-foreground">Não encontramos esta página.</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          O endereço pode ter mudado. Você pode voltar à página inicial e continuar navegando pela plataforma.
         </p>
         <div className="mt-6">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Go home
+            Voltar ao início
           </Link>
         </div>
       </div>
@@ -64,12 +65,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+      <div className="w-full max-w-md rounded-[2rem] border border-border bg-card p-8 text-center shadow-xl shadow-ink/5 sm:p-10">
+        <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-primary">Agenda Educativa</p>
+        <h1 className="mt-3 font-heading text-2xl font-extrabold tracking-tight text-foreground">
+          Esta página não carregou
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          Não foi possível carregar este conteúdo agora. Tente novamente ou volte ao início para continuar.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -79,13 +81,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            Try again
+            Tentar novamente
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            Voltar ao início
           </a>
         </div>
       </div>
