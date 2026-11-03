@@ -248,14 +248,24 @@
 .home-premium .home-live-section .home-live-panel { box-shadow: 0 16px 44px -30px oklch(.18 .06 270 / .3); }
 @media (min-width: 1024px) {
   .home-premium .home-window-section .home-access-card { min-height: 12.5rem; }
-  .home-premium .home-window-section .home-live-panel { max-height: min(76vh, 740px); overflow-y: auto; scrollbar-width: thin; }
+  .home-premium .home-window-section .home-live-panel { max-height: none; overflow: visible; }
 }
 @media (max-width: 639px) {
   .home-premium .home-window-hero > div:not([aria-hidden]) { padding-top: 2rem; padding-bottom: 1.5rem; }
   .home-premium .home-window-section .home-access-card { min-height: 11.5rem; }
-  .home-premium .home-window-section .home-live-panel { max-height: 75vh; overflow-y: auto; }
+  .home-premium .home-window-section .home-live-panel { max-height: none; overflow: visible; }
   .home-premium .home-hero-stats { margin-top: 1.25rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .home-premium .home-window-section .home-access-card:hover { transform: none; }
+}
+
+/* Laboratório em tempo real: um painel fluido, sem rolagem aninhada. */
+.home-premium #laboratorio-agora.home-live-section { padding-top: 1.75rem; padding-bottom: 1.75rem; }
+.home-premium #laboratorio-agora.home-live-section .home-live-panel { min-height: 0; overflow: visible; padding: .35rem; border-radius: 1.25rem; }
+.home-premium #laboratorio-agora.home-live-section .home-live-panel > * { min-width: 0; }
+.home-premium #laboratorio-agora.home-live-section .lab-aluno { min-width: 0; }
+@media (min-width: 1024px) {
+  .home-premium #laboratorio-agora.home-live-section .home-live-panel { padding: .5rem; }
+  .home-premium #laboratorio-agora.home-live-section .lab-aluno { padding-top: .4rem; padding-bottom: .4rem; }
 }
