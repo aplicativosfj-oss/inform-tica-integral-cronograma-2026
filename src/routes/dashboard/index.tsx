@@ -11,6 +11,7 @@ import {
 import { useMemo } from "react";
 
 import { DashboardShell } from "@/components/school/dashboard-shell";
+import { OcorrenciasAdministrativas } from "@/components/school/ocorrencias-administrativas";
 import { rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { Button } from "@/components/ui/button";
@@ -169,6 +170,8 @@ function DashboardHome() {
           </CardContent>
         </Card>
       </div>
+
+      <OcorrenciasAdministrativas />
 
       <section aria-label="Áreas do painel" className="mt-8">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-muted-foreground">
