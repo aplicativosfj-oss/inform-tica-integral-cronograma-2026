@@ -184,3 +184,48 @@
   .home-premium .home-step-card:hover,
   .home-premium .home-method-image:hover { transform: none; }
 }
+
+
+/* Cards fotográficos: seis imagens próprias do acervo do projeto, sem links externos. */
+.home-premium .home-access-card {
+  min-height: 17rem;
+  color: oklch(0.99 0 0);
+  background: oklch(0.22 0.04 275);
+  border-color: oklch(1 0 0 / .21);
+  box-shadow: 0 18px 45px -23px oklch(0.16 0.03 270 / .53);
+  isolation: isolate;
+}
+.home-premium .home-access-photo {
+  z-index: -2;
+  object-position: center 38%;
+  transform: scale(1.015);
+  filter: saturate(.92) contrast(1.04);
+  transition: transform .7s cubic-bezier(.2,.7,.2,1), filter .5s ease;
+}
+.home-premium .home-access-overlay {
+  z-index: -1;
+  background: linear-gradient(180deg,
+    oklch(0.11 0.025 272 / .26) 0%,
+    oklch(0.12 0.03 275 / .35) 27%,
+    oklch(0.12 0.04 280 / .88) 75%,
+    oklch(0.1 0.035 274 / .96) 100%);
+}
+.home-premium .home-access-card:hover .home-access-photo,
+.home-premium .home-access-card:focus-visible .home-access-photo {
+  transform: scale(1.075);
+  filter: saturate(1.05) contrast(1.05);
+}
+.home-premium .home-access-card h3 {
+  text-shadow: 0 2px 12px oklch(0.07 0.02 260 / .37);
+}
+.home-premium .home-access-icon,
+.home-premium .home-access-arrow {
+  background: oklch(1 0 0 / .12);
+  border-color: oklch(1 0 0 / .25);
+  backdrop-filter: blur(14px);
+}
+.home-premium .home-access-card .home-access-decor { opacity: .25; }
+@media (prefers-reduced-motion: reduce) {
+  .home-premium .home-access-photo { transition: none; }
+  .home-premium .home-access-card:hover .home-access-photo { transform: none; }
+}
