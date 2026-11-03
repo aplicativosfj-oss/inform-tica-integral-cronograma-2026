@@ -1,4 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { AvisoFeriado } from "@/components/school/aviso-feriado";
+import { feriadoNacionalEm } from "@/lib/calendario-escolar";
+import { hojeNaEscola } from "@/lib/laboratorio";
 import {
   ArrowRight,
   BedDouble,
@@ -38,6 +41,14 @@ export function BannerEntreTurnos() {
   const doDia = m ? turmasNoDia(m.diaEmFoco) : null;
   const encerrado = !!m && (m.fase === "encerrado" || m.fase === "fim-de-semana");
   const quando = m ? quandoEhProximo(m) : "";
+
+  if (feriadoNacionalEm(hojeNaEscola())) {
+    return (
+      <div className="mx-auto w-full max-w-6xl px-4 pt-7 sm:px-6">
+        <AvisoFeriado dataISO={hojeNaEscola()} variante="painel" className="max-w-none" />
+      </div>
+    );
+  }
 
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
