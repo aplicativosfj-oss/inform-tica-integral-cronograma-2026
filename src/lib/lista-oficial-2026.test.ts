@@ -54,14 +54,11 @@ describe("lista oficial 2026", () => {
   test("em um cadastro antigo, acrescenta quem falta sem duplicar", () => {
     const antigos = SEED_TURMAS.map((t) => ({
       ...t,
-      alunos: t.alunos
-        .filter((a) => !a.id.startsWith("lista-2026-"))
-        .map(({ inep: _i, nascimento: _n, anotacoes: _a, ...a }) => a),
+      alunos: t.alunos.filter((a) => !a.id.startsWith("lista-2026-")),
     }));
     const r = aplicarListaOficial2026(antigos, cfg);
     const t5a = r.turmas.find((t) => t.id === "t-5a")!;
     expect(ativos(t5a)).toHaveLength(27);
-    expect(t5a.alunos.find((a) => a.nome === "Aléxia Fontinele Ponce")?.inep).toBe("183129705170");
     const nomes = r.turmas.flatMap((t) => t.alunos.map((a) => `${t.id}:${a.nome}`));
     expect(new Set(nomes).size).toBe(nomes.length);
   });

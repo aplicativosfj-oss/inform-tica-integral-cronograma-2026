@@ -4,19 +4,11 @@ import type { Aluno, ScheduleConfig, SituacaoMatricula, Turma } from "@/lib/type
 export interface EntradaListaOficial {
   turmaId: string;
   nome: string;
-  inep?: string;
-  /** YYYY-MM-DD */
-  nascimento?: string;
   especial?: boolean;
-  /** Observação da secretaria (saúde, laudo, pós-censo...). */
-  obs?: string;
   situacao?: Exclude<SituacaoMatricula, "ativo">;
   /** YYYY-MM-DD */
   situacaoEm?: string;
 }
-
-const AUTOR = "Lista oficial 2026 (secretaria)";
-const EM = "2026-11-03T12:00:00.000Z";
 
 function normalizar(nome: string): string {
   return nome
@@ -42,8 +34,6 @@ function textoSituacao(e: EntradaListaOficial): string | undefined {
 
 function completar(aluno: Aluno, e: EntradaListaOficial): Aluno {
   const novo: Aluno = { ...aluno };
-  if (e.inep && !novo.inep) novo.inep = e.inep;
-  if (e.nascimento && !novo.nascimento) novo.nascimento = e.nascimento;
   if (e.especial && !novo.necessidadeEspecial) novo.necessidadeEspecial = true;
   if (e.situacao && (!novo.situacao || novo.situacao === "ativo")) {
     novo.situacao = e.situacao;
@@ -52,23 +42,15 @@ function completar(aluno: Aluno, e: EntradaListaOficial): Aluno {
   } else if (e.situacao && novo.situacao === e.situacao && !novo.situacaoEm) {
     novo.situacaoEm = e.situacaoEm;
   }
-  if (e.obs) {
-    const anotacoes = novo.anotacoes ?? [];
-    if (!anotacoes.some((a) => a.texto === e.obs)) {
-      novo.anotacoes = [
-        ...anotacoes,
-        { id: `${idNovo(e)}-obs`, texto: e.obs, em: EM, autor: AUTOR },
-      ];
-    }
-  }
   return novo;
 }
 
 /**
- * Confere o cadastro com a lista oficial uma única vez: completa INEP, data
- * de nascimento e observações que estiverem faltando (nunca apaga nem troca o
- * que já foi digitado), marca transferidos/desistentes e inclui quem está na
- * lista mas não no sistema. Quem saiu da escola entra já apagado.
+ * Confere o cadastro com a lista oficial uma única vez: marca
+ * transferidos/desistentes e inclui quem está na lista mas não no sistema
+ * (quem já saiu entra apagado). Nunca apaga nem troca o que já foi digitado.
+ * INEP, nascimento e observações de saúde não passam por aqui: vão direto ao
+ * banco, porque o repositório é público.
  */
 export function aplicarListaOficial2026(
   turmas: Turma[],
