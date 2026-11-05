@@ -644,13 +644,34 @@ export function PainelMapaClasse({
                 <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Observações do professor</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.observacoes || "Nenhuma observação registrada."}</p></div>
                 <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Evidências</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.evidencia || "Nenhuma evidência registrada."}</p></div>
                 <section><h3 className="mb-2 text-sm font-bold">Histórico bimestral de leitura e escrita</h3>{carregandoHistorico ? <p className="text-sm text-muted-foreground">Carregando histórico...</p> : historicoAluno.length ? <div className="space-y-2">{historicoAluno.map((r) => <div key={r.id} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div><p className="text-sm font-semibold">{r.bimestre}º bimestre · {r.area === "leitura" ? "Leitura" : "Escrita"}</p><p className="text-xs text-muted-foreground">{r.data_avaliacao ? new Date(r.data_avaliacao + "T12:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p></div><span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold">Nível {r.nivel}</span></div>)}</div> : <p className="text-sm text-muted-foreground">Sem histórico adicional.</p>}</section>
-                <button type="button" onClick={() => setAlunoSelecionado(null)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ArrowLeft className="size-4" /> Voltar à lista</button>
+                <div className="flex flex-wrap gap-2 print:hidden">
+                  <button type="button" onClick={() => { const limpar = () => { document.body.classList.remove("print-aluno-mapa"); window.removeEventListener("afterprint", limpar); }; document.body.classList.add("print-aluno-mapa"); window.addEventListener("afterprint", limpar); window.print(); }} className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground"><Printer className="size-4" /> Exportar ficha individual PDF</button>
+                  <button type="button" onClick={() => setAlunoSelecionado(null)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ArrowLeft className="size-4" /> Voltar à lista</button>
+                </div>
               </div>}
             </DialogContent>
           </Dialog>
+          {alunoSelecionado && <section className="mapa-aluno-print hidden">
+            <header className="border-b-2 border-slate-800 pb-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-600">Acompanhamento pedagógico · documento individual</p>
+              <h1 className="mt-2 text-2xl font-bold text-slate-950">{alunoSelecionado.aluno_nome}</h1>
+              <p className="mt-1 text-sm text-slate-600">{alunoSelecionado.ano}º ano · Turma {alunoSelecionado.turma} · Ano letivo 2026</p>
+            </header>
+            <div className="mt-5 grid grid-cols-2 gap-3 text-slate-900">
+              <div className="rounded-lg border p-3"><p className="text-xs text-slate-500">Área avaliada</p><p className="mt-1 font-bold">{alunoSelecionado.area === "leitura" ? "Leitura" : "Escrita"}</p></div>
+              <div className="rounded-lg border p-3"><p className="text-xs text-slate-500">Nível do registro selecionado</p><p className="mt-1 font-bold">{alunoSelecionado.nivel}</p></div>
+              <div className="rounded-lg border p-3"><p className="text-xs text-slate-500">Bimestre do registro</p><p className="mt-1 font-bold">{alunoSelecionado.bimestre}º bimestre</p></div>
+              <div className="rounded-lg border p-3"><p className="text-xs text-slate-500">Data da avaliação</p><p className="mt-1 font-bold">{alunoSelecionado.data_avaliacao ? new Date(alunoSelecionado.data_avaliacao + "T12:00:00").toLocaleDateString("pt-BR") : "Não informada"}</p></div>
+            </div>
+            <section className="mt-6"><h2 className="mb-2 text-base font-bold text-slate-900">Histórico bimestral</h2>
+              {historicoAluno.length ? <table className="w-full border-collapse text-sm text-slate-900"><thead><tr className="border-b-2 text-left"><th className="p-2">Bimestre</th><th className="p-2">Área</th><th className="p-2">Nível</th><th className="p-2">Data</th></tr></thead><tbody>{historicoAluno.map((r) => <tr key={r.id} className="border-b"><td className="p-2">{r.bimestre}º</td><td className="p-2">{r.area === "leitura" ? "Leitura" : "Escrita"}</td><td className="p-2 font-semibold">{r.nivel}</td><td className="p-2">{r.data_avaliacao ? new Date(r.data_avaliacao + "T12:00:00").toLocaleDateString("pt-BR") : "—"}</td></tr>)}</tbody></table> : <p className="text-sm text-slate-600">Não há outros registros históricos disponíveis.</p>}
+            </section>
+            <section className="mt-6"><h2 className="text-base font-bold text-slate-900">Observações do professor</h2><p className="mt-2 whitespace-pre-wrap rounded-lg border p-3 text-sm text-slate-700">{alunoSelecionado.observacoes || "Nenhuma observação registrada."}</p></section>
+            <section className="mt-4"><h2 className="text-base font-bold text-slate-900">Evidências registradas</h2><p className="mt-2 whitespace-pre-wrap rounded-lg border p-3 text-sm text-slate-700">{alunoSelecionado.evidencia || "Nenhuma evidência registrada."}</p></section>
+            <p className="mt-8 border-t pt-3 text-xs text-slate-500">Documento confidencial para acompanhamento pedagógico. Elaborado exclusivamente com os registros existentes no sistema; campos sem informação não foram presumidos.</p>
+          </section>}
         </>
-      )}
-<style>{'@media print { @page { size: A4 portrait; margin: 16mm; } body * { visibility: hidden !important; } .mapa-print-root, .mapa-print-root * { visibility: visible !important; } .mapa-print-root { display: block !important; position: absolute; inset: 0 auto auto 0; width: 100%; background: white !important; color: #0f172a !important; } .mapa-print-root tr { page-break-inside: avoid; } }'}</style>
+<style>{'@media print { @page { size: A4 portrait; margin: 16mm; } body * { visibility: hidden !important; } .mapa-print-root, .mapa-print-root *, .mapa-aluno-print, .mapa-aluno-print * { visibility: visible !important; } .mapa-print-root { display: block !important; position: absolute; inset: 0 auto auto 0; width: 100%; background: white !important; color: #0f172a !important; } .mapa-aluno-print { display: none !important; } body.print-aluno-mapa .mapa-print-root { display: none !important; } body.print-aluno-mapa .mapa-aluno-print { display: block !important; position: absolute; inset: 0 auto auto 0; width: 100%; background: white !important; color: #0f172a !important; } .mapa-print-root tr, .mapa-aluno-print tr { page-break-inside: avoid; } }'}</style>
 
     </div>
   );
