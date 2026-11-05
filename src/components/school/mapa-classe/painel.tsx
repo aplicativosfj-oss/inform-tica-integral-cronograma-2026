@@ -164,8 +164,15 @@ export function PainelMapaClasse({
   /** Libera consulta de dados identificáveis somente no painel autenticado. */
   permitirDetalhesIndividuais?: boolean;
 } = {}) {
-  const { turmas, evolucaoLeitura, bimestre } = MAPA_CLASSE_3_BIM;
+  const { turmas, evolucaoLeitura } = MAPA_CLASSE_3_BIM;
+  const [bimestreSelecionado, setBimestreSelecionado] = useState<1 | 2 | 3>(3);
   const [foco, setFoco] = useState<"leitura" | "escrita">("leitura");
+  const escritaDisponivel = bimestreSelecionado === 3;
+  const turmasDoBimestre = useMemo(() => turmas.map((t) => {
+    const historico = evolucaoLeitura[`${t.ano}${t.turma}`]?.find((e) => e.bim === bimestreSelecionado);
+    if (!historico) return t;
+    return { ...t, leitura: { A: historico.A, B: historico.B, C: historico.C, D: historico.D, E: historico.E }, avaliadosLeitura: historico.avaliados, avaliadosAbaLeitura: historico.avaliados };
+  }), [turmas, evolucaoLeitura, bimestreSelecionado]);
   const [faixaSelecionada, setFaixaSelecionada] = useState<{
     ano: number; turma: string; area: AreaMapa; nivel: string; nomeNivel: string; acao: string; total: number;
   } | null>(null);
@@ -183,7 +190,7 @@ export function PainelMapaClasse({
     setAlunosDaFaixa([]);
     supabase.from("mapa_classe_avaliacoes_individuais").select("*")
       .eq("ano", faixaSelecionada.ano).eq("turma", faixaSelecionada.turma)
-      .eq("bimestre", bimestre).eq("area", faixaSelecionada.area)
+      .eq("bimestre", bimestreSelecionado).eq("area", faixaSelecionada.area)
       .eq("nivel", faixaSelecionada.nivel).order("aluno_nome", { ascending: true })
       .then(({ data, error }) => {
         if (!ativo) return;
@@ -195,7 +202,7 @@ export function PainelMapaClasse({
         setCarregandoAlunos(false);
       });
     return () => { ativo = false; };
-  }, [faixaSelecionada, bimestre, permitirDetalhesIndividuais]);
+  }, [faixaSelecionada, bimestreSelecionado, permitirDetalhesIndividuais]);
 
   useEffect(() => {
     if (!alunoSelecionado) return;
@@ -214,48 +221,18 @@ export function PainelMapaClasse({
 
   const geral = useMemo(() => {
     const leitura = { A: 0, B: 0, C: 0, D: 0, E: 0 };
-    for (const t of turmas)
+    for (const t of turmasDoBimestre)
       for (const k of Object.keys(leitura) as (keyof typeof leitura)[]) leitura[k] += t.leitura[k];
     const avaliadosLeitura = Object.values(leitura).reduce((a, b) => a + b, 0);
-    const escritaPrioridade = turmas.reduce(
-      (s, t) => s + somaZona(escritaDoAno(t.ano), t.escrita, "prioridade"),
-      0,
-    );
-    const avaliadosEscrita = turmas.reduce((s, t) => s + t.avaliadosEscrita, 0);
-    const primeiro = Object.values(evolucaoLeitura).map((l) => l.find((e) => e.bim === 1)!);
-    const ultimo = Object.values(evolucaoLeitura).map((l) => l.find((e) => e.bim === 3)!);
-    const soma = (lista: EvolucaoLeitura[]) =>
-      lista.reduce(
-        (a, e) => ({
-          A: a.A + e.A,
-          B: a.B + e.B,
-          C: a.C + e.C,
-          D: a.D + e.D,
-          E: a.E + e.E,
-          avaliados: 0,
-          bim: 0,
-        }),
-        { A: 0, B: 0, C: 0, D: 0, E: 0, avaliados: 0, bim: 0 } as EvolucaoLeitura,
-      );
-    return {
-      leitura,
-      avaliadosLeitura,
-      escritaPrioridade,
-      avaliadosEscrita,
-      ab1: leitoresAB(soma(primeiro)),
-      ab3: leitoresAB(soma(ultimo)),
-      de1: semLeituraDE(soma(primeiro)),
-      de3: semLeituraDE(soma(ultimo)),
-    };
-  }, [turmas, evolucaoLeitura]);
+    const escritaPrioridade = escritaDisponivel ? turmas.reduce((s, t) => s + somaZona(escritaDoAno(t.ano), t.escrita, "prioridade"), 0) : 0;
+    const avaliadosEscrita = escritaDisponivel ? turmas.reduce((s, t) => s + t.avaliadosEscrita, 0) : 0;
+    const soma = (lista: EvolucaoLeitura[]) => lista.reduce((a, e) => ({ A: a.A + e.A, B: a.B + e.B, C: a.C + e.C, D: a.D + e.D, E: a.E + e.E, avaliados: a.avaliados + e.avaliados, bim: bimestreSelecionado }), { A: 0, B: 0, C: 0, D: 0, E: 0, avaliados: 0, bim: bimestreSelecionado } as EvolucaoLeitura);
+    const selecionados = Object.values(evolucaoLeitura).map((lista) => lista.find((e) => e.bim === bimestreSelecionado)).filter((e): e is EvolucaoLeitura => Boolean(e));
+    const agregado = soma(selecionados);
+    return { leitura, avaliadosLeitura, escritaPrioridade, avaliadosEscrita, ab: leitoresAB(agregado), de: semLeituraDE(agregado) };
+  }, [turmas, turmasDoBimestre, evolucaoLeitura, bimestreSelecionado, escritaDisponivel]);
 
-  const prioridades = turmas
-    .map((t) => ({
-      t,
-      leitura: t.leitura.D + t.leitura.E,
-      escrita: somaZona(escritaDoAno(t.ano), t.escrita, "prioridade"),
-    }))
-    .sort((a, b) => b.leitura + b.escrita - (a.leitura + a.escrita));
+  const prioridades = turmasDoBimestre.map((t) => ({ t, leitura: t.leitura.D + t.leitura.E, escrita: escritaDisponivel ? somaZona(escritaDoAno(t.ano), t.escrita, "prioridade") : 0 })).sort((a, b) => b.leitura + b.escrita - (a.leitura + a.escrita));
 
   const divergencias = turmas.filter(
     (t) =>
@@ -273,28 +250,35 @@ export function PainelMapaClasse({
         {semCabecalho ? null : (
           <h1 className="text-2xl font-bold">Mapa de classe · Escrita e leitura</h1>
         )}
-        <p className="text-sm text-muted-foreground">
-          {bimestre}º bimestre de 2026 · {instrumento("mapa").nome} (aplicação:{" "}
-          {textoAplicacao(instrumento("mapa"))}) · modelo da Secretaria de Educação. Mostra quantos
-          alunos estão em cada nível, por turma. Nenhum nome de aluno aparece nesta tela.
-        </p>
+        <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Mapa de classe de 2026 · dados agregados por turma. Nenhum nome de aluno aparece nesta tela.
+            {escritaDisponivel ? " Escrita e leitura disponíveis para o 3º bimestre." : " Para este bimestre, há histórico de leitura; os dados de escrita ainda não foram disponibilizados."}
+          </p>
+          <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            <span>BIMESTRE</span>
+            <select value={bimestreSelecionado} onChange={(e) => setBimestreSelecionado(Number(e.target.value) as 1 | 2 | 3)} className="rounded-xl border border-input bg-background px-3 py-2 text-sm font-semibold text-foreground">
+              <option value={1}>1º bimestre</option><option value={2}>2º bimestre</option><option value={3}>3º bimestre</option>
+            </select>
+          </label>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Indicador
           rotulo="Leem com fluência ou pausadamente"
-          valor={`${geral.ab3}%`}
-          detalhe={`eram ${geral.ab1}% no 1º bimestre · ${geral.avaliadosLeitura} alunos avaliados`}
+          valor={`${geral.ab}%`}
+          detalhe={`${bimestreSelecionado}º bimestre · ${geral.avaliadosLeitura} alunos avaliados`}
         />
         <Indicador
           rotulo="Só leem sílabas ou não leem"
           valor={`${pct(geral.leitura.D + geral.leitura.E, geral.avaliadosLeitura)}%`}
-          detalhe={`eram ${geral.de1}% no 1º bimestre · ${geral.leitura.D + geral.leitura.E} alunos`}
+          detalhe={`${geral.leitura.D + geral.leitura.E} alunos · ${bimestreSelecionado}º bimestre`}
         />
         <Indicador
           rotulo="Escrita em nível de prioridade"
-          valor={`${pct(geral.escritaPrioridade, geral.avaliadosEscrita)}%`}
-          detalhe={`${geral.escritaPrioridade} de ${geral.avaliadosEscrita} alunos avaliados`}
+          valor={escritaDisponivel ? `${pct(geral.escritaPrioridade, geral.avaliadosEscrita)}%` : "—"}
+          detalhe={escritaDisponivel ? `${geral.escritaPrioridade} de ${geral.avaliadosEscrita} alunos avaliados` : "Sem dados históricos de escrita para este bimestre"}
         />
         <Indicador
           rotulo="Turmas mapeadas"
@@ -335,7 +319,7 @@ export function PainelMapaClasse({
             <Legenda niveis={LEITURA} />
           </CardHeader>
           <CardContent className="space-y-3">
-            {turmas.map((t) => (
+            {turmasDoBimestre.map((t) => (
               <div
                 key={`${t.ano}${t.turma}`}
                 className="grid items-center gap-2 sm:grid-cols-[5rem_1fr_8rem]"
@@ -358,10 +342,20 @@ export function PainelMapaClasse({
             ))}
           </CardContent>
         </Card>
+      ) : !escritaDisponivel ? (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-2 p-8 text-center">
+            <Info className="size-7 text-muted-foreground" />
+            <h3 className="font-semibold">Dados de escrita ainda não disponíveis</h3>
+            <p className="max-w-xl text-sm text-muted-foreground">
+              O histórico disponível contém a distribuição de leitura dos 1º e 2º bimestres, mas a planilha de escrita corresponde somente ao 3º bimestre. Selecione o 3º bimestre para consultar essa métrica. Não exibimos dados de outro período como se fossem atuais.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Mapa de escrita por turma</CardTitle>
+            <CardTitle className="text-base">Mapa de escrita por turma · 3º bimestre</CardTitle>
             <p className="text-xs text-muted-foreground">
               No 1º e 2º ano a escala mostra a hipótese de escrita; do 3º ao 5º, a quantidade de
               erros ortográficos.
@@ -537,11 +531,7 @@ export function PainelMapaClasse({
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
-            Estes são os números do {bimestre}º bimestre. A evolução usa os quadros do 1º e do 2º
-            bimestres da própria planilha, sempre rotulados. As folhas de cada turma não trazem o
-            bimestre escrito; o que confirma que são do 3º é a conferência da leitura de cada turma
-            com o quadro do 3º bimestre, que bate em 9 das 10 turmas (no 1º A há 1 aluno de
-            diferença).
+            A leitura exibida corresponde ao {bimestreSelecionado}º bimestre, selecionado acima. A série histórica permite consultar separadamente os três períodos. Os dados de escrita e as contagens detalhadas de escrita são do 3º bimestre.
           </p>
           <p>
             As quantidades foram recontadas a partir das marcações de cada aluno na planilha do mapa
