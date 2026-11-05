@@ -352,7 +352,7 @@ function AcompanharAluno() {
                         <div className="flex gap-1">
                           {atividade.url ? (
                             <Button asChild size="sm" variant="ghost" className="h-7 gap-1 px-2">
-                              <a href={atividade.url} target="_blank" rel="noopener noreferrer">
+                              <a href={atividade.url} target="_blank" rel="noopener noreferrer" onClick={(event) => event.stopPropagation()}>
                                 Abrir <ExternalLink className="size-3" />
                               </a>
                             </Button>
