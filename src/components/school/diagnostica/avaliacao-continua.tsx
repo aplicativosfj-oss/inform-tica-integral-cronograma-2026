@@ -400,10 +400,29 @@ export function AvaliacaoContinuaLeituraEscrita() {
       atualizado_em: new Date().toISOString(),
     }));
     for (const payload of payloads) {
-      const { error } = await supabase.from("planos_intervencao_leitura_escrita")
-        .upsert(payload, { onConflict: "avaliacao_id,area,habilidade_key" });
-      if (error) {
-        toast.error("Não foi possível salvar o plano: " + error.message);
+      const { data: existente, error: buscaErro } = await supabase
+        .from("planos_intervencao_leitura_escrita")
+        .select("id")
+        .eq("avaliacao_id", payload.avaliacao_id)
+        .eq("area", payload.area)
+        .eq("habilidade_key", payload.habilidade_key)
+        .maybeSingle();
+      if (buscaErro) {
+        toast.error("Não foi possível verificar o plano existente: " + buscaErro.message);
+        setSalvandoPlano(null);
+        return;
+      }
+      const gravacao = existente
+        ? await supabase.from("planos_intervencao_leitura_escrita")
+            .update({
+              ...payload,
+              status: undefined,
+              data_inicio: undefined,
+              data_revisao: undefined,
+            }).eq("id", existente.id)
+        : await supabase.from("planos_intervencao_leitura_escrita").insert(payload);
+      if (gravacao.error) {
+        toast.error("Não foi possível salvar o plano: " + gravacao.error.message);
         setSalvandoPlano(null);
         return;
       }
@@ -635,6 +654,19 @@ export function AvaliacaoContinuaLeituraEscrita() {
                   <div>
                     <h3 className="font-bold">{plano.aluno_nome}</h3>
                     <p className="text-xs text-muted-foreground">{plano.area === "leitura" ? "Leitura" : "Escrita"} · {plano.habilidade} · Nível inicial {plano.nivel_base}/4</p>
+                  {(() => {
+                    const chaveArea = plano.area === "leitura" ? "leitura" : "escrita";
+                    const atual = [...registros].filter((r) => r.aluno_id === plano.aluno_id && r.criterios?.[chaveArea]?.[plano.habilidade_key] != null)
+                      .sort((a, b) => b.data_avaliacao.localeCompare(a.data_avaliacao))[0];
+                    const notaAtual = atual?.criterios?.[chaveArea]?.[plano.habilidade_key];
+                    const diferenca = notaAtual == null ? null : notaAtual - plano.nivel_base;
+                    return <p className="mt-1 text-xs font-medium">
+                      {notaAtual == null ? "Aguardando nova avaliação desta habilidade" :
+                        "Última avaliação: nível " + notaAtual + "/4 · " +
+                        (diferenca! > 0 ? "evoluiu +" + diferenca : diferenca! < 0 ? "recuou " + diferenca : "sem alteração") +
+                        " em relação à linha de base"}
+                    </p>;
+                  })()}
                     <p className="mt-1 text-xs text-muted-foreground">Revisão prevista: {plano.data_revisao ? new Date(plano.data_revisao + "T12:00:00").toLocaleDateString("pt-BR") : "não definida"}</p>
                   </div>
                   <select value={plano.status} onChange={(e) => void atualizarStatusPlano(plano, e.target.value as PlanoSalvo["status"])} className="rounded-lg border border-input bg-background px-3 py-2 text-xs">
