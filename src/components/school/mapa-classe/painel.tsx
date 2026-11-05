@@ -18,7 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase-client";
 import { MAPA_CLASSE_3_BIM } from "@/lib/mapa-classe/dados-3bim";
-import { instrumento, textoAplicacao } from "@/lib/resultados/referencia";
 import { LEITURA, ZONAS, escritaDoAno, type NivelInfo, type Zona } from "@/lib/mapa-classe/niveis";
 import type { EvolucaoLeitura, TurmaMapa } from "@/lib/mapa-classe/tipos";
 
@@ -229,10 +228,14 @@ export function PainelMapaClasse({
     const soma = (lista: EvolucaoLeitura[]) => lista.reduce((a, e) => ({ A: a.A + e.A, B: a.B + e.B, C: a.C + e.C, D: a.D + e.D, E: a.E + e.E, avaliados: a.avaliados + e.avaliados, bim: bimestreSelecionado }), { A: 0, B: 0, C: 0, D: 0, E: 0, avaliados: 0, bim: bimestreSelecionado } as EvolucaoLeitura);
     const selecionados = Object.values(evolucaoLeitura).map((lista) => lista.find((e) => e.bim === bimestreSelecionado)).filter((e): e is EvolucaoLeitura => Boolean(e));
     const agregado = soma(selecionados);
-    return { leitura, avaliadosLeitura, escritaPrioridade, avaliadosEscrita, ab: leitoresAB(agregado), de: semLeituraDE(agregado) };
+    return { leitura, avaliadosLeitura, escritaPrioridade, avaliadosEscrita, ab: leitoresAB(agregado) };
   }, [turmas, turmasDoBimestre, evolucaoLeitura, bimestreSelecionado, escritaDisponivel]);
 
-  const prioridades = turmasDoBimestre.map((t) => ({ t, leitura: t.leitura.D + t.leitura.E, escrita: escritaDisponivel ? somaZona(escritaDoAno(t.ano), t.escrita, "prioridade") : 0 })).sort((a, b) => b.leitura + b.escrita - (a.leitura + a.escrita));
+  const prioridades = turmasDoBimestre.map((t) => ({
+    t,
+    leitura: t.leitura.D + t.leitura.E,
+    escrita: escritaDisponivel ? somaZona(escritaDoAno(t.ano), t.escrita, "prioridade") : null,
+  })).sort((a, b) => b.leitura + (b.escrita ?? 0) - (a.leitura + (a.escrita ?? 0)));
 
   const divergencias = turmas.filter(
     (t) =>
@@ -460,8 +463,8 @@ export function PainelMapaClasse({
             <Users2 className="size-4" aria-hidden /> Por onde começar
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Turmas ordenadas pelo total de alunos em nível de prioridade: na leitura, os que só leem
-            sílabas ou não leem; na escrita, os que estão nos níveis de prioridade de cada ano.
+            Turmas ordenadas pela quantidade de alunos em prioridade na leitura do bimestre selecionado.
+            {escritaDisponivel ? " A escrita considera os dados disponíveis do 3º bimestre." : " A escrita não entra na ordenação porque não há dados históricos para este bimestre."}
           </p>
         </CardHeader>
         <CardContent>
