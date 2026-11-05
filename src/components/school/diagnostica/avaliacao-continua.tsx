@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BookOpenText, CalendarDays, CheckCircle2, ClipboardPenLine, FileText, Save, Search, Users2 } from "lucide-react";
+import { BookOpenText, CalendarDays, ClipboardPenLine, FileText, Save, Search, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -259,7 +259,7 @@ export function AvaliacaoContinuaLeituraEscrita() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Indicador titulo="Registros no recorte" valor={filtrados.length} detalhe="avaliações salvas" />
-        <Indicador titulo="Alunos acompanhados" valor={alunosUnicos} detalhe="identificados por matrícula interna" />
+        <Indicador titulo="Alunos acompanhados" valor={alunosUnicos} detalhe="identificados por código interno do cadastro" />
         <Indicador titulo="Média de leitura" valor={percentual(resumo.leitura)} detalhe="dos critérios avaliados" />
         <Indicador titulo="Média de escrita" valor={percentual(resumo.escrita)} detalhe="dos critérios avaliados" />
       </div>
