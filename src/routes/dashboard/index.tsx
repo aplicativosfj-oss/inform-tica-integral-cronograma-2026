@@ -89,7 +89,7 @@ function DashboardHome() {
 
   return (
     <DashboardShell>
-      <div className="flex flex-col gap-3.5 lg:h-[calc(100dvh-12.5rem)] lg:min-h-[34rem]">
+      <div className="flex flex-col gap-3.5 2xl:h-[calc(100dvh-12.5rem)] 2xl:min-h-[34rem] 2xl:overflow-hidden">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary first-letter:uppercase">
@@ -124,15 +124,21 @@ function DashboardHome() {
           />
         </div>
 
-        <div className="grid min-h-0 flex-1 gap-3.5 lg:grid-cols-2 xl:grid-cols-12">
-          {/* A aula ao vivo é o que mais se olha: fica na coluna maior e
-              rola por dentro, para nunca empurrar o resto da tela. */}
-          <section className="flex min-h-0 flex-col lg:col-span-1 xl:col-span-5">
-            <PainelLaboratorioAgora dados={lab} logado rolar className="min-h-0 flex-1" />
+        {/* Duas faixas: em cima a aula ao vivo, que precisa de largura para
+            mostrar o cronômetro e os nomes lado a lado; embaixo a semana, as
+            ocorrências e os atalhos. Cada caixa rola por dentro, então a
+            página inteira continua do tamanho da janela. */}
+        <div className="grid min-h-0 flex-1 gap-3.5 2xl:grid-rows-[minmax(0,0.95fr)_minmax(0,1fr)]">
+          <section className="flex min-h-0 flex-col">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card/80">
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <PainelLaboratorioAgora dados={lab} logado />
+              </div>
+            </div>
           </section>
 
-          <div className="flex min-h-0 flex-col gap-3.5 lg:col-span-1 xl:col-span-3">
-            <Card className="flex min-h-0 flex-1 flex-col bg-card/80">
+          <div className="grid min-h-0 gap-3.5 md:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)]">
+            <Card className="flex min-h-0 flex-col bg-card/80">
               <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
                 <p className="flex items-center gap-2 text-sm font-bold">
                   <CalendarCheck2 className="size-4 text-primary" aria-hidden /> Semana no
@@ -175,13 +181,9 @@ function DashboardHome() {
               </CardContent>
             </Card>
 
-            <OcorrenciasAdministrativas className="max-h-[14rem] shrink-0 overflow-y-auto" />
-          </div>
+            <OcorrenciasAdministrativas className="min-h-0 overflow-y-auto" />
 
-          {/* Atalhos: todo o painel numa grade pequena, em vez da lista
-              comprida que antes ficava abaixo da dobra. */}
-          <section className="flex min-h-0 flex-col lg:col-span-2 xl:col-span-4">
-            <Card className="flex min-h-0 flex-1 flex-col bg-card/80">
+            <Card className="flex min-h-0 flex-col bg-card/80 md:col-span-2 2xl:col-span-1">
               <div className="border-b border-border/60 px-4 py-3">
                 <p className="text-sm font-bold">Áreas do painel</p>
                 <p className="text-xs text-muted-foreground">Tudo o que o sistema faz, à mão</p>
@@ -192,20 +194,17 @@ function DashboardHome() {
                     <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
                       {grupo.label}
                     </p>
-                    <div className="grid gap-1">
+                    <div className="grid gap-1 sm:grid-cols-2 2xl:grid-cols-1">
                       {grupo.items.map(({ to, label, desc, icon: Icone }) => (
                         <Link
                           key={to}
                           to={to}
                           title={desc ?? label}
-                          className={cn(
-                            "group flex items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-2 transition-colors",
-                            "hover:border-primary/25 hover:bg-primary/[0.06]",
-                          )}
+                          className="group flex items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-2 transition-colors hover:border-primary/25 hover:bg-primary/[0.06]"
                         >
                           <span
                             className={cn(
-                              "flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+                              "flex size-8 shrink-0 items-center justify-center rounded-lg",
                               COR_DO_GRUPO[grupo.label ?? ""] ?? "bg-primary/10 text-primary",
                             )}
                           >
@@ -232,7 +231,7 @@ function DashboardHome() {
                 ))}
               </CardContent>
             </Card>
-          </section>
+          </div>
         </div>
       </div>
     </DashboardShell>
