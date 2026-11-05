@@ -305,6 +305,16 @@ export function AvaliacaoContinuaLeituraEscrita() {
           {registrosDoRecorte.length ? [...new Set(registrosDoRecorte.map(r => r.aluno_id))].sort().map(id => {
             const hist = registrosDoRecorte.filter(r => r.aluno_id === id).sort((a,b) => a.bimestre-b.bimestre || a.data_avaliacao.localeCompare(b.data_avaliacao));
             const nome = hist[0]?.aluno_nome ?? "Aluno";
+            const detalhar = (area: "leitura" | "escrita", itens: readonly (readonly [string, string])[]) =>
+              itens.map(([chave, rotulo]) => ({
+                rotulo,
+                nota: media(hist.flatMap(r => {
+                  const valor = r.criterios?.[area]?.[chave];
+                  return valor == null ? [] : [valor];
+                })),
+              })).filter(item => item.nota != null);
+            const detalhesLeitura = detalhar("leitura", LEITURA);
+            const detalhesEscrita = detalhar("escrita", ESCRITA);
             return <div key={id} className="rounded-xl border border-border p-3">
               <div className="mb-2 flex items-center gap-2 text-sm font-bold"><Users2 className="size-4 text-primary" />{nome}</div>
               <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -317,6 +327,19 @@ export function AvaliacaoContinuaLeituraEscrita() {
                     {doBimestre.length ? <><p className="mt-1 text-xs">Leitura: <b>{percentual(leitura)}</b></p><p className="text-xs">Escrita: <b>{percentual(escrita)}</b></p><p className="text-[10px] text-muted-foreground">{doBimestre.length} registro(s)</p></> : <p className="mt-1 text-xs text-muted-foreground">Sem avaliação</p>}
                   </div>;
                 })}
+              </div>
+              <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                {[["Leitura", detalhesLeitura], ["Escrita", detalhesEscrita]].map(([area, itens]) => (
+                  <section key={String(area)} className="rounded-lg border border-border/70 p-3">
+                    <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">{area}</h4>
+                    {(itens as { rotulo: string; nota: number | null }[]).length ? (itens as { rotulo: string; nota: number | null }[]).map(item => (
+                      <div key={item.rotulo} className="flex items-center justify-between gap-2 border-b border-border/50 py-1.5 last:border-0">
+                        <span className="text-xs">{item.rotulo}</span>
+                        <span className={item.nota != null && item.nota <= 2 ? "text-xs font-bold text-rose-600" : "text-xs font-semibold"}>{item.nota == null ? "—" : `${item.nota.toFixed(1)}/4 · ${NIVEL[Math.round(item.nota)]}`}</span>
+                      </div>
+                    )) : <p className="text-xs text-muted-foreground">Sem critérios avaliados.</p>}
+                  </section>
+                ))}
               </div>
             </div>;
           }) : <p className="text-sm text-muted-foreground">O histórico será preenchido conforme os professores registrarem as avaliações.</p>}
