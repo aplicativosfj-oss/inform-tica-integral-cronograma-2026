@@ -116,16 +116,9 @@ function Legenda<T extends string>({ niveis }: { niveis: NivelInfo<T>[] }) {
   );
 }
 
-function Indicador({ rotulo, valor, detalhe }: { rotulo: string; valor: string; detalhe: string }) {
-  return (
-    <Card>
-      <CardContent className="space-y-1 p-4">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">{rotulo}</p>
-        <p className="text-2xl font-bold">{valor}</p>
-        <p className="text-xs text-muted-foreground">{detalhe}</p>
-      </CardContent>
-    </Card>
-  );
+function Indicador({ rotulo, valor, detalhe, onClick, clicavel = false }: { rotulo: string; valor: string; detalhe: string; onClick?: () => void; clicavel?: boolean }) {
+  const conteudo = <><p className="text-xs uppercase tracking-wide text-muted-foreground">{rotulo}</p><p className="text-2xl font-bold">{valor}</p><p className="text-xs text-muted-foreground">{detalhe}</p>{clicavel && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">Ver alunos e detalhes <ChevronRight className="size-3" /></span>}</>;
+  return <Card className={clicavel ? "transition hover:border-primary/50 hover:shadow-sm" : ""}><CardContent className="p-0">{clicavel ? <button type="button" onClick={onClick} className="w-full rounded-xl p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">{conteudo}</button> : <div className="space-y-1 p-4">{conteudo}</div>}</CardContent></Card>;
 }
 
 function leitoresAB(e: EvolucaoLeitura) {
@@ -183,6 +176,9 @@ export function PainelMapaClasse({
   const [alunoSelecionado, setAlunoSelecionado] = useState<RegistroMapaAluno | null>(null);
   const [historicoAluno, setHistoricoAluno] = useState<RegistroMapaAluno[]>([]);
   const [carregandoHistorico, setCarregandoHistorico] = useState(false);
+  const [metricaSelecionada, setMetricaSelecionada] = useState<{ titulo: string; area: AreaMapa; niveis: string[]; descricao: string; escritaPrioritaria?: boolean } | null>(null);
+  const [alunosDaMetrica, setAlunosDaMetrica] = useState<RegistroMapaAluno[]>([]);
+  const [carregandoMetrica, setCarregandoMetrica] = useState(false);
 
   useEffect(() => {
     if (!faixaSelecionada || !permitirDetalhesIndividuais) return;
@@ -206,6 +202,17 @@ export function PainelMapaClasse({
     return () => { ativo = false; };
   }, [faixaSelecionada, bimestreSelecionado, permitirDetalhesIndividuais]);
 
+  useEffect(() => {
+    if (!metricaSelecionada || !permitirDetalhesIndividuais) return;
+    let ativo = true; setCarregandoMetrica(true); setAlunosDaMetrica([]);
+    supabase.from("mapa_classe_avaliacoes_individuais").select("*").eq("bimestre", bimestreSelecionado).eq("area", metricaSelecionada.area).in("nivel", metricaSelecionada.niveis).order("ano").order("turma").order("aluno_nome").then(({ data, error }) => {
+      if (!ativo) return;
+      if (error) toast.error("Não foi possível localizar os alunos: " + error.message);
+      else { const rows = (data ?? []) as RegistroMapaAluno[]; setAlunosDaMetrica(metricaSelecionada.escritaPrioritaria ? rows.filter(r => escritaDoAno(r.ano).some(n => n.id === r.nivel && n.zona === "prioridade")) : rows); }
+      setCarregandoMetrica(false);
+    });
+    return () => { ativo = false; };
+  }, [metricaSelecionada, bimestreSelecionado, permitirDetalhesIndividuais]);
   useEffect(() => {
     if (!alunoSelecionado) return;
     let ativo = true;
@@ -271,26 +278,10 @@ export function PainelMapaClasse({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Indicador
-          rotulo="Leem com fluência ou pausadamente"
-          valor={`${geral.ab}%`}
-          detalhe={`${bimestreSelecionado}º bimestre · ${geral.avaliadosLeitura} alunos avaliados`}
-        />
-        <Indicador
-          rotulo="Só leem sílabas ou não leem"
-          valor={`${pct(geral.leitura.D + geral.leitura.E, geral.avaliadosLeitura)}%`}
-          detalhe={`${geral.leitura.D + geral.leitura.E} alunos · ${bimestreSelecionado}º bimestre`}
-        />
-        <Indicador
-          rotulo="Escrita em nível de prioridade"
-          valor={escritaDisponivel ? `${pct(geral.escritaPrioridade, geral.avaliadosEscrita)}%` : "—"}
-          detalhe={escritaDisponivel ? `${geral.escritaPrioridade} de ${geral.avaliadosEscrita} alunos avaliados` : "Sem dados históricos de escrita para este bimestre"}
-        />
-        <Indicador
-          rotulo="Turmas mapeadas"
-          valor={`${turmas.length}`}
-          detalhe="1º ao 5º ano, turmas A e B"
-        />
+        <Indicador rotulo="Leem com fluência ou pausadamente" valor={geral.ab + "%"} detalhe={bimestreSelecionado + "º bimestre · " + geral.avaliadosLeitura + " alunos avaliados"} clicavel={permitirDetalhesIndividuais} onClick={() => setMetricaSelecionada({ titulo: "Leem com fluência ou pausadamente", area: "leitura", niveis: ["A", "B"], descricao: "Estudantes classificados nos níveis A e B de leitura." })} />
+        <Indicador rotulo="Só leem sílabas ou não leem" valor={pct(geral.leitura.D + geral.leitura.E, geral.avaliadosLeitura) + "%"} detalhe={(geral.leitura.D + geral.leitura.E) + " alunos · " + bimestreSelecionado + "º bimestre"} clicavel={permitirDetalhesIndividuais} onClick={() => setMetricaSelecionada({ titulo: "Só leem sílabas ou não leem", area: "leitura", niveis: ["D", "E"], descricao: "Estudantes que precisam de intervenção prioritária em leitura." })} />
+        <Indicador rotulo="Escrita em nível de prioridade" valor={escritaDisponivel ? pct(geral.escritaPrioridade, geral.avaliadosEscrita) + "%" : "—"} detalhe={escritaDisponivel ? geral.escritaPrioridade + " de " + geral.avaliadosEscrita + " alunos avaliados" : "Sem dados históricos de escrita para este bimestre"} clicavel={permitirDetalhesIndividuais && escritaDisponivel} onClick={() => setMetricaSelecionada({ titulo: "Escrita em nível de prioridade", area: "escrita", niveis: ["E", "D", "C3"], escritaPrioritaria: true, descricao: "Estudantes classificados na zona de prioridade, conforme a escala do ano escolar." })} />
+        <Indicador rotulo="Turmas mapeadas" valor={String(turmas.length)} detalhe="1º ao 5º ano, turmas A e B" />
       </div>
 
       <div className="flex gap-2" role="tablist" aria-label="Escolher o mapa">
@@ -649,6 +640,12 @@ export function PainelMapaClasse({
                   <button type="button" onClick={() => setAlunoSelecionado(null)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ArrowLeft className="size-4" /> Voltar à lista</button>
                 </div>
               </div>}
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!metricaSelecionada} onOpenChange={(v) => { if (!v) { setMetricaSelecionada(null); setAlunosDaMetrica([]); } }}>
+            <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto">
+              <DialogHeader><DialogTitle>{metricaSelecionada?.titulo}</DialogTitle><DialogDescription>{bimestreSelecionado}º bimestre · {metricaSelecionada?.descricao} Lista restrita à área autenticada.</DialogDescription></DialogHeader>
+              {carregandoMetrica ? <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Localizando estudantes...</div> : alunosDaMetrica.length ? <div className="space-y-2"><div className="rounded-xl bg-muted p-3 text-sm"><b>{alunosDaMetrica.length} registros individuais</b><span className="ml-2 text-muted-foreground">· {new Set(alunosDaMetrica.map(a => a.aluno_id)).size} alunos</span></div>{alunosDaMetrica.map(a => <button key={a.id} type="button" onClick={() => { setMetricaSelecionada(null); setAlunosDaMetrica([]); setAlunoSelecionado(a); }} className="flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left hover:border-primary/50 hover:bg-muted/40"><span className="min-w-0"><b className="block truncate">{a.aluno_nome}</b><span className="text-xs text-muted-foreground">{a.ano}º {a.turma} · {a.area} · {a.bimestre}º bim.</span></span><b className="shrink-0">Nível {a.nivel}</b></button>)}</div> : <div className="rounded-xl border border-dashed p-5 text-center"><p className="font-semibold">Nenhum aluno individual localizado</p><p className="mt-1 text-sm text-muted-foreground">Os totais agregados não contêm nomes. Para identificar os estudantes, os registros individuais correspondentes precisam estar cadastrados no Supabase no mesmo bimestre e escala.</p></div>}
             </DialogContent>
           </Dialog>
           {alunoSelecionado && <section className="mapa-aluno-print hidden">
