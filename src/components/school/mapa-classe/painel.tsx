@@ -668,8 +668,6 @@ export function PainelMapaClasse({
             <p className="mt-8 border-t pt-3 text-xs text-slate-500">Documento confidencial para acompanhamento pedagógico. Elaborado exclusivamente com os registros existentes no sistema; campos sem informação não foram presumidos.</p>
           </section>}
 <style>{'@media print { @page { size: A4 portrait; margin: 16mm; } body * { visibility: hidden !important; } .mapa-print-root, .mapa-print-root *, .mapa-aluno-print, .mapa-aluno-print * { visibility: visible !important; } .mapa-print-root { display: block !important; position: absolute; inset: 0 auto auto 0; width: 100%; background: white !important; color: #0f172a !important; } .mapa-aluno-print { display: none !important; } body.print-aluno-mapa .mapa-print-root { display: none !important; } body.print-aluno-mapa .mapa-aluno-print { display: block !important; position: absolute; inset: 0 auto auto 0; width: 100%; background: white !important; color: #0f172a !important; } .mapa-print-root tr, .mapa-aluno-print tr { page-break-inside: avoid; } }'}</style>
-        </>
-
     </div>
   );
 }
