@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Activity, ArrowRight, BookOpenText, ClipboardList, Target, TrendingUp, Users } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Activity, ArrowRight, BookOpenText, ClipboardCheck, ClipboardList, Target, TrendingUp, Users } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -80,6 +81,14 @@ export function PainelGestaoPedagogica() {
       <div><p className="text-xs font-bold uppercase tracking-[.16em] text-primary">Gestão pedagógica · {MAPA_CLASSE_3_BIM.bimestre}º bimestre</p><h2 className="mt-1 text-2xl font-extrabold tracking-tight">Intervenção e evolução por turma</h2><p className="mt-1 max-w-3xl text-sm text-muted-foreground">Acompanhe os níveis que exigem apoio, a variação da leitura ao longo do ano e as habilidades prioritárias. Selecione qualquer indicador ou turma para abrir os detalhes.</p></div>
       <span className="rounded-full border bg-muted/50 px-3 py-1.5 text-xs font-semibold text-muted-foreground">{totais.turmas} turmas · 1º ao 5º ano</span>
     </header>
+
+    <Link to="/dashboard/intervencoes" className="group flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-primary/25 bg-gradient-to-r from-primary/10 via-card to-card p-4 transition hover:border-primary/50 hover:shadow-md">
+      <span className="flex min-w-0 items-center gap-3">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><ClipboardCheck className="size-5" /></span>
+        <span className="min-w-0"><b className="block text-sm">Acompanhar intervenções individuais</b><span className="mt-0.5 block text-xs text-muted-foreground">Registrar avaliações, criar planos, documentar atividades e comparar a evolução de cada aluno</span></span>
+      </span>
+      <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary">Abrir acompanhamento <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span>
+    </Link>
 
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <Indicador titulo="Intervenção em leitura" valor={String(totais.leitura)} detalhe="alunos nos níveis prioritários D ou E" icon={Target} onClick={() => setSelecionada(dados.slice().sort((a,b)=>b.intervencaoLeitura-a.intervencaoLeitura)[0] ?? null)}/>
