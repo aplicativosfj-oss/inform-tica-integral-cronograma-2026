@@ -102,11 +102,13 @@ export function AvaliacaoContinuaLeituraEscrita() {
 
   useEffect(() => { void carregar(); }, []);
 
-  const filtrados = useMemo(() => registros.filter((r) =>
-    (filtroBimestre === "todos" || String(r.bimestre) === filtroBimestre) &&
+  const registrosDoRecorte = useMemo(() => registros.filter((r) =>
     (filtroTurma === "todas" || r.turma_id === filtroTurma) &&
     (!busca || r.aluno_nome.toLocaleLowerCase("pt-BR").includes(busca.toLocaleLowerCase("pt-BR"))),
-  ), [registros, filtroBimestre, filtroTurma, busca]);
+  ), [registros, filtroTurma, busca]);
+  const filtrados = registrosDoRecorte.filter((r) =>
+    filtroBimestre === "todos" || String(r.bimestre) === filtroBimestre,
+  );
 
   const resumo = useMemo(() => {
     const notasLeitura = filtrados.flatMap((r) => Object.values(r.criterios?.leitura ?? {}));
@@ -296,8 +298,8 @@ export function AvaliacaoContinuaLeituraEscrita() {
         <CardHeader><CardTitle className="flex items-center gap-2 text-base"><CalendarDays className="size-4 text-primary" /> Evolução bimestral do estudante</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           <p className="text-xs text-muted-foreground">A linha do tempo mostra somente os bimestres com avaliações reais. Bimestres sem registro aparecem como “Sem avaliação”, sem estimativas.</p>
-          {filtrados.length ? [...new Set(filtrados.map(r => r.aluno_id))].sort().map(id => {
-            const hist = filtrados.filter(r => r.aluno_id === id).sort((a,b) => a.bimestre-b.bimestre || a.data_avaliacao.localeCompare(b.data_avaliacao));
+          {registrosDoRecorte.length ? [...new Set(registrosDoRecorte.map(r => r.aluno_id))].sort().map(id => {
+            const hist = registrosDoRecorte.filter(r => r.aluno_id === id).sort((a,b) => a.bimestre-b.bimestre || a.data_avaliacao.localeCompare(b.data_avaliacao));
             const nome = hist[0]?.aluno_nome ?? "Aluno";
             return <div key={id} className="rounded-xl border border-border p-3">
               <div className="mb-2 flex items-center gap-2 text-sm font-bold"><Users2 className="size-4 text-primary" />{nome}</div>
