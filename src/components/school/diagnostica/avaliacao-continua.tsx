@@ -51,8 +51,30 @@ const NIVEL: Record<number, string> = {
 };
 const CRITERIOS_VAZIOS: Criterios = { leitura: {}, escrita: {} };
 const PONTOS_FRAGEIS = 2;
+type PlanoSalvo = {
+  id: string;
+  avaliacao_id: string;
+  turma_id: string;
+  aluno_id: string;
+  aluno_nome: string;
+  area: "leitura" | "escrita";
+  habilidade_key: string;
+  habilidade: string;
+  nivel_base: number;
+  objetivo: string;
+  atividade_sugerida: string;
+  rotina_sugerida: string;
+  evidencia_esperada: string;
+  status: "planejado" | "em_andamento" | "concluido" | "reavaliar";
+  data_inicio: string | null;
+  data_revisao: string | null;
+  atividades: { data: string; descricao: string; evidencia: string; resultado: string; registrado_em: string }[];
+  criado_em: string;
+};
 type Intervencao = {
   area: "Leitura" | "Escrita";
+  chave: string;
+  avaliacaoId: string;
   habilidade: string;
   nivel: number;
   objetivo: string;
@@ -167,6 +189,11 @@ export function AvaliacaoContinuaLeituraEscrita() {
   const [filtroBimestre, setFiltroBimestre] = useState("todos");
   const [filtroTurma, setFiltroTurma] = useState("todas");
   const [busca, setBusca] = useState("");
+  const [planosSalvos, setPlanosSalvos] = useState<PlanoSalvo[]>([]);
+  const [carregandoPlanos, setCarregandoPlanos] = useState(false);
+  const [salvandoPlano, setSalvandoPlano] = useState<string | null>(null);
+  const [rascunhosAtividade, setRascunhosAtividade] = useState<Record<string, { descricao: string; evidencia: string; resultado: string }>>({});
+  const [salvandoAtividade, setSalvandoAtividade] = useState<string | null>(null);
 
   const turmasAtivas = turmas.filter((t) => t.alunos.length > 0);
   const turmaAtual = turmas.find((t) => t.id === turmaId);
@@ -192,6 +219,23 @@ export function AvaliacaoContinuaLeituraEscrita() {
   }
 
   useEffect(() => { void carregar(); }, []);
+  useEffect(() => {
+    let ativo = true;
+    setCarregandoPlanos(true);
+    supabase.from("planos_intervencao_leitura_escrita").select("*").order("criado_em", { ascending: false })
+      .then(({ data, error }) => {
+        if (!ativo) return;
+        if (error) {
+          if (/planos_intervencao_leitura_escrita|does not exist|schema cache|42P01|PGRST205/i.test(error.message)) {
+            toast.info("Para salvar e acompanhar intervenções, execute o SQL planos-intervencao-leitura-escrita.sql.");
+          } else {
+            toast.error("Não foi possível carregar os planos: " + error.message);
+          }
+        } else setPlanosSalvos((data ?? []) as PlanoSalvo[]);
+        setCarregandoPlanos(false);
+      });
+    return () => { ativo = false; };
+  }, []);
 
   const registrosDoRecorte = useMemo(() => registros.filter((r) =>
     (filtroTurma === "todas" || r.turma_id === filtroTurma) &&
@@ -311,7 +355,9 @@ export function AvaliacaoContinuaLeituraEscrita() {
           const nota = valores?.[chave];
           if (nota == null || nota > PONTOS_FRAGEIS) continue;
           const estrategia = ESTRATEGIAS[chave];
-          if (estrategia) habilidades.push({ area, habilidade: nome, nivel: nota, ...estrategia });
+          if (estrategia) habilidades.push({
+            area, chave, avaliacaoId: avaliacao!.id, habilidade: nome, nivel: nota, ...estrategia,
+          });
         }
       }
       habilidades.sort((a, b) => a.nivel - b.nivel);
@@ -319,6 +365,7 @@ export function AvaliacaoContinuaLeituraEscrita() {
       return {
         alunoId,
         nome: maisRecente.aluno_nome,
+        turmaId: maisRecente.turma_id,
         turmaNome: turma ? turma.serie + " " + turma.letra : "Turma não identificada",
         dataBase: maisRecente.data_avaliacao,
         bimestreBase: maisRecente.bimestre,
@@ -328,6 +375,95 @@ export function AvaliacaoContinuaLeituraEscrita() {
     }).filter((plano) => plano.habilidades.length > 0)
       .sort((a, b) => (a.prioridade === b.prioridade ? a.nome.localeCompare(b.nome, "pt-BR") : a.prioridade === "Prioritária" ? -1 : 1));
   }, [registrosDoRecorte, turmas]);
+
+
+  async function salvarPlanoIndividual(plano: (typeof planosIntervencao)[number]) {
+    setSalvandoPlano(plano.alunoId);
+    const dataInicio = new Date().toISOString().slice(0, 10);
+    const dataRevisao = new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10);
+    const payloads = plano.habilidades.map((h) => ({
+      avaliacao_id: h.avaliacaoId,
+      turma_id: plano.turmaId,
+      aluno_id: plano.alunoId,
+      aluno_nome: plano.nome,
+      area: h.area === "Leitura" ? "leitura" : "escrita",
+      habilidade_key: h.chave,
+      habilidade: h.habilidade,
+      nivel_base: h.nivel,
+      objetivo: h.objetivo,
+      atividade_sugerida: h.atividade,
+      rotina_sugerida: h.rotina,
+      evidencia_esperada: h.evidencia,
+      status: "planejado",
+      data_inicio: dataInicio,
+      data_revisao: dataRevisao,
+      atualizado_em: new Date().toISOString(),
+    }));
+    for (const payload of payloads) {
+      const { error } = await supabase.from("planos_intervencao_leitura_escrita")
+        .upsert(payload, { onConflict: "avaliacao_id,area,habilidade_key" });
+      if (error) {
+        toast.error("Não foi possível salvar o plano: " + error.message);
+        setSalvandoPlano(null);
+        return;
+      }
+    }
+    const { data, error } = await supabase.from("planos_intervencao_leitura_escrita")
+      .select("*").eq("aluno_id", plano.alunoId).order("criado_em", { ascending: false });
+    if (error) toast.error("Plano salvo, mas não foi possível atualizar a lista: " + error.message);
+    else {
+      setPlanosSalvos((atual) => {
+        const outros = atual.filter((item) => item.aluno_id !== plano.alunoId);
+        return [...outros, ...((data ?? []) as PlanoSalvo[])];
+      });
+      toast.success("Plano individual salvo. Agora registre as atividades realizadas.");
+    }
+    setSalvandoPlano(null);
+  }
+
+  async function atualizarStatusPlano(plano: PlanoSalvo, status: PlanoSalvo["status"]) {
+    const { error } = await supabase.from("planos_intervencao_leitura_escrita")
+      .update({ status, atualizado_em: new Date().toISOString() }).eq("id", plano.id);
+    if (error) toast.error("Não foi possível atualizar o status: " + error.message);
+    else {
+      setPlanosSalvos((atual) => atual.map((item) => item.id === plano.id ? { ...item, status } : item));
+      toast.success("Status do plano atualizado.");
+    }
+  }
+
+  async function registrarAtividade(plano: PlanoSalvo) {
+    const rascunho = rascunhosAtividade[plano.id];
+    if (!rascunho?.descricao.trim()) {
+      toast.error("Descreva a atividade realizada.");
+      return;
+    }
+    setSalvandoAtividade(plano.id);
+    const atividades = [
+      ...(plano.atividades ?? []),
+      {
+        data: new Date().toISOString().slice(0, 10),
+        descricao: rascunho.descricao.trim(),
+        evidencia: rascunho.evidencia.trim(),
+        resultado: rascunho.resultado,
+        registrado_em: new Date().toISOString(),
+      },
+    ];
+    const { error } = await supabase.from("planos_intervencao_leitura_escrita")
+      .update({
+        atividades,
+        status: plano.status === "planejado" ? "em_andamento" : plano.status,
+        atualizado_em: new Date().toISOString(),
+      }).eq("id", plano.id);
+    if (error) toast.error("Não foi possível registrar a atividade: " + error.message);
+    else {
+      setPlanosSalvos((atual) => atual.map((item) => item.id === plano.id
+        ? { ...item, atividades, status: item.status === "planejado" ? "em_andamento" : item.status }
+        : item));
+      setRascunhosAtividade((atual) => ({ ...atual, [plano.id]: { descricao: "", evidencia: "", resultado: "em_progresso" } }));
+      toast.success("Atividade registrada no histórico do aluno.");
+    }
+    setSalvandoAtividade(null);
+  }
 
   const alunosUnicos = new Set(filtrados.map((r) => r.aluno_id)).size;
 
@@ -456,6 +592,9 @@ export function AvaliacaoContinuaLeituraEscrita() {
                   <p className="mt-0.5 text-xs text-muted-foreground">{plano.turmaNome} · Base: {plano.bimestreBase}º bimestre · {new Date(plano.dataBase + "T12:00:00").toLocaleDateString("pt-BR")}</p>
                 </div>
                 <span className={plano.prioridade === "Prioritária" ? "rounded-full bg-rose-500/10 px-2.5 py-1 text-xs font-bold text-rose-700 dark:text-rose-300" : "rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-300"}>{plano.prioridade}</span>
+                <Button size="sm" onClick={() => void salvarPlanoIndividual(plano)} disabled={salvandoPlano === plano.alunoId}>
+                  <Save className="mr-2 size-4" />{salvandoPlano === plano.alunoId ? "Salvando..." : "Criar / atualizar plano"}
+                </Button>
               </div>
               <div className="mt-3 space-y-3">
                 {plano.habilidades.map((h) => (
@@ -479,6 +618,62 @@ export function AvaliacaoContinuaLeituraEscrita() {
             <p className="mt-1 text-xs text-muted-foreground">Registros insuficientes ou habilidades avaliadas mais recentemente acima do nível 2.</p>
           </div>}
           <p className="text-xs text-muted-foreground">Este é um apoio à decisão pedagógica, não um diagnóstico clínico ou rótulo do estudante. O professor deve validar as estratégias, considerar o contexto e registrar novas evidências na próxima avaliação.</p>
+        </CardContent>
+      </Card>
+
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base"><ClipboardCheck className="size-4 text-primary" /> Acompanhamento das intervenções registradas</CardTitle>
+          <p className="text-xs text-muted-foreground">Atualize a situação do plano e registre cada atividade com evidências e resultado observado.</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {carregandoPlanos ? <p className="text-sm text-muted-foreground">Carregando planos salvos...</p>
+            : planosSalvos.length ? planosSalvos.map((plano) => (
+              <section key={plano.id} className="rounded-xl border border-border p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-bold">{plano.aluno_nome}</h3>
+                    <p className="text-xs text-muted-foreground">{plano.area === "leitura" ? "Leitura" : "Escrita"} · {plano.habilidade} · Nível inicial {plano.nivel_base}/4</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Revisão prevista: {plano.data_revisao ? new Date(plano.data_revisao + "T12:00:00").toLocaleDateString("pt-BR") : "não definida"}</p>
+                  </div>
+                  <select value={plano.status} onChange={(e) => void atualizarStatusPlano(plano, e.target.value as PlanoSalvo["status"])} className="rounded-lg border border-input bg-background px-3 py-2 text-xs">
+                    <option value="planejado">Planejado</option>
+                    <option value="em_andamento">Em andamento</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="reavaliar">Aguardando reavaliação</option>
+                  </select>
+                </div>
+                <div className="mt-3 rounded-lg bg-muted/40 p-3 text-sm">
+                  <p><b>Objetivo:</b> {plano.objetivo}</p>
+                  <p className="mt-1"><b>Atividade:</b> {plano.atividade_sugerida}</p>
+                  <p className="mt-1"><b>Rotina:</b> {plano.rotina_sugerida}</p>
+                </div>
+                <div className="mt-3 grid gap-2 md:grid-cols-2">
+                  <input value={rascunhosAtividade[plano.id]?.descricao ?? ""} onChange={(e) => setRascunhosAtividade((atual) => ({ ...atual, [plano.id]: { descricao: e.target.value, evidencia: atual[plano.id]?.evidencia ?? "", resultado: atual[plano.id]?.resultado ?? "em_progresso" } }))} placeholder="Atividade realizada (obrigatório)" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                  <input value={rascunhosAtividade[plano.id]?.evidencia ?? ""} onChange={(e) => setRascunhosAtividade((atual) => ({ ...atual, [plano.id]: { descricao: atual[plano.id]?.descricao ?? "", evidencia: e.target.value, resultado: atual[plano.id]?.resultado ?? "em_progresso" } }))} placeholder="Evidência observada (opcional)" className="rounded-lg border border-input bg-background px-3 py-2 text-sm" />
+                  <select value={rascunhosAtividade[plano.id]?.resultado ?? "em_progresso"} onChange={(e) => setRascunhosAtividade((atual) => ({ ...atual, [plano.id]: { descricao: atual[plano.id]?.descricao ?? "", evidencia: atual[plano.id]?.evidencia ?? "", resultado: e.target.value } }))} className="rounded-lg border border-input bg-background px-3 py-2 text-sm">
+                    <option value="em_progresso">Em desenvolvimento</option>
+                    <option value="avanco_observado">Avanço observado</option>
+                    <option value="sem_avanco">Sem avanço observado</option>
+                    <option value="dificuldade_persistente">Dificuldade persistente</option>
+                  </select>
+                  <Button size="sm" onClick={() => void registrarAtividade(plano)} disabled={salvandoAtividade === plano.id}>
+                    <Save className="mr-2 size-4" />{salvandoAtividade === plano.id ? "Registrando..." : "Registrar atividade"}
+                  </Button>
+                </div>
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Histórico de atividades ({plano.atividades?.length ?? 0})</p>
+                  {(plano.atividades ?? []).length ? [...plano.atividades].reverse().map((atividade, index) => (
+                    <div key={atividade.registrado_em + index} className="rounded-lg border border-border/70 p-2 text-xs">
+                      <div className="flex flex-wrap justify-between gap-2"><b>{new Date(atividade.data + "T12:00:00").toLocaleDateString("pt-BR")}</b><span>{atividade.resultado.replaceAll("_", " ")}</span></div>
+                      <p className="mt-1">{atividade.descricao}</p>
+                      {atividade.evidencia && <p className="mt-1 text-muted-foreground">Evidência: {atividade.evidencia}</p>}
+                    </div>
+                  )) : <p className="text-xs text-muted-foreground">Nenhuma atividade registrada ainda.</p>}
+                </div>
+              </section>
+            )) : <p className="rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">Nenhum plano salvo. Gere um plano na seção acima para iniciar o acompanhamento.</p>}
         </CardContent>
       </Card>
 
