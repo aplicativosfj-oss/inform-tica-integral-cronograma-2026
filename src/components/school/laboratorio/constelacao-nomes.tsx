@@ -191,6 +191,17 @@ export function ConstelacaoNomes({
     );
   }
 
+  /** Quanto de um retângulo cai por cima dos blocos de conteúdo. */
+  function invasao(x: number, y: number, w: number, h: number) {
+    let total = 0;
+    for (const o of obstaculos.current) {
+      const dx = Math.min(x + w, o.x + o.w) - Math.max(x, o.x);
+      const dy = Math.min(y + h, o.y + o.h) - Math.max(y, o.y);
+      if (dx > 0 && dy > 0) total += dx * dy;
+    }
+    return total;
+  }
+
   /** Escolhe um lugar livre e um rumo novo para o próximo nome. */
   function reposicionar(nome: string) {
     const el = caixa.current;
@@ -200,12 +211,22 @@ export function ConstelacaoNomes({
     // Largura aproximada do nome (a letra grande tem ~15px), com folga.
     const lw = Math.max(220, nome.length * (grande ? 26 : 16) + 24);
     const lh = 70;
-    let x = 0;
-    let y = 0;
+    // Numa abertura cheia pode não existir lugar totalmente livre. Antes o
+    // sorteio parava no último palpite — e o nome caía em cima do selo ou do
+    // título. Agora fica com o palpite que invade menos.
+    let x = 12;
+    let y = 12;
+    let menor = Number.POSITIVE_INFINITY;
     for (let i = 0; i < 80; i++) {
-      x = 12 + Math.random() * Math.max(0, w - lw - 24);
-      y = 12 + Math.random() * Math.max(0, h - lh - 24);
-      if (!bate(x, y, lw, lh)) break;
+      const cx = 12 + Math.random() * Math.max(0, w - lw - 24);
+      const cy = 12 + Math.random() * Math.max(0, h - lh - 24);
+      const area = invasao(cx, cy, lw, lh);
+      if (area < menor) {
+        menor = area;
+        x = cx;
+        y = cy;
+      }
+      if (area === 0) break;
     }
     const ang = Math.random() * Math.PI * 2;
     const vel = 5 + Math.random() * 5;
