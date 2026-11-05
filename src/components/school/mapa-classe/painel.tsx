@@ -97,6 +97,9 @@ function BarraNiveis<T extends string>({
             </div>
           );
       })}
+    </div>
+  );
+}
 
 function Legenda<T extends string>({ niveis }: { niveis: NivelInfo<T>[] }) {
   return (
