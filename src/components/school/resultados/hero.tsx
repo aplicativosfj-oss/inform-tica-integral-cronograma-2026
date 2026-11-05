@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+import { ArrowRight, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ export interface IndicadorHero {
   /** Linha pequena de comparação, ex.: "era 32% no 1º bimestre". */
   detalhe?: string | undefined;
   tom?: "sobe" | "desce" | "neutro" | undefined;
+  aoClicar?: (() => void) | undefined;
 }
 
 /**
@@ -129,12 +130,13 @@ export function HeroResultados({
 
       <div className="mx-auto max-w-6xl px-4 pb-10 sm:px-6">
         <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-          {indicadores.map(({ Icone, rotulo, valor, detalhe, tom }, i) => (
-            <li
-              key={rotulo}
-              style={{ animationDelay: `${150 + i * 90}ms` }}
-              className="hero-subir flex flex-col gap-2 rounded-2xl border border-white/15 bg-white/[0.07] p-3.5 backdrop-blur-md sm:p-4"
-            >
+          {indicadores.map(({ Icone, rotulo, valor, detalhe, tom, aoClicar }, i) => (
+            <li key={rotulo} style={{ animationDelay: `${150 + i * 90}ms` }}>
+              <button type="button" onClick={aoClicar} disabled={!aoClicar}
+                aria-label={aoClicar ? `Ver detalhes: ${rotulo}` : undefined}
+                className={cn("hero-subir flex h-full w-full flex-col gap-2 rounded-2xl border border-white/15 bg-white/[0.07] p-3.5 text-left backdrop-blur-md sm:p-4",
+                  aoClicar && "cursor-pointer transition hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun",
+                  !aoClicar && "cursor-default")}>
               <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-white/65">
                 <Icone className={cn("size-4 shrink-0", corAcento)} aria-hidden />
                 {rotulo}
@@ -156,6 +158,8 @@ export function HeroResultados({
                   {detalhe}
                 </span>
               ) : null}
+              {aoClicar ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-white/55">Ver detalhes <ArrowRight className="size-3" /></span> : null}
+              </button>
             </li>
           ))}
         </ul>
