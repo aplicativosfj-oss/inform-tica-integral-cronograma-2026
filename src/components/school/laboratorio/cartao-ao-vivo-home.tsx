@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FichaAlunoAoVivo } from "@/components/school/laboratorio/ficha-aluno-ao-vivo";
+import { useEffect, useRef, useState } from "react";
+import { PainelAlunoAula } from "@/components/school/laboratorio/painel-aluno-aula";
 import {
   ArrowRight,
   GraduationCap,
@@ -56,6 +56,32 @@ export function CartaoAoVivoHome({
 
   const principal = aoVivo[0];
   const outros = aoVivo.slice(1);
+
+  /**
+   * Atalho "Tela cheia" da faixa que aparece em todas as páginas: ela manda
+   * para a inicial com `#tela-cheia` e quem abre a aula é este cartão, que já
+   * tem as sessões em mãos — assim a faixa não precisa consultar o banco por
+   * conta própria em cada página do site.
+   */
+  const aulaRef = useRef(principal);
+  aulaRef.current = principal;
+  const abrirRef = useRef(telaCheia.abrir);
+  abrirRef.current = telaCheia.abrir;
+  const grupoAtual = principal?.grupoId;
+  useEffect(() => {
+    if (!grupoAtual) return;
+    const abrirPeloEndereco = () => {
+      if (window.location.hash !== "#tela-cheia") return;
+      const aula = aulaRef.current;
+      if (!aula) return;
+      // Tira a marca do endereço para um F5 não reabrir sozinho depois.
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      abrirRef.current(aula);
+    };
+    abrirPeloEndereco();
+    window.addEventListener("hashchange", abrirPeloEndereco);
+    return () => window.removeEventListener("hashchange", abrirPeloEndereco);
+  }, [grupoAtual]);
 
   if (feriadoNacionalEm(hojeNaEscola())) {
     return (
@@ -165,22 +191,18 @@ export function CartaoAoVivoHome({
             <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-[10px] font-bold text-white">
               {a.nome.trim().charAt(0).toUpperCase()}
             </span>
-            {logado ? (
-              <button
-                type="button"
-                onClick={() => setAlunoSelecionado(a)}
-                aria-label={`Abrir informações de ${a.nome}`}
-                className="relative rounded px-1 py-0.5 font-semibold underline-offset-2 hover:text-emerald-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300"
-                title={`Abrir ficha de ${a.nome}`}
-              >
-                <span className="inline-flex items-center gap-1">
-                  {a.nome.split(" ")[0]}
-                  <UserRoundSearch className="size-3 text-emerald-300" aria-hidden />
-                </span>
-              </button>
-            ) : (
-              <span>{nomeExibido(a.nome, false).split(" ")[0]}</span>
-            )}
+            <button
+              type="button"
+              onClick={() => setAlunoSelecionado(a)}
+              aria-label={`Abrir a ficha de ${nomeExibido(a.nome, logado)}`}
+              className="relative rounded px-1 py-0.5 font-semibold underline-offset-2 hover:text-emerald-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300"
+              title={`Abrir a ficha de ${nomeExibido(a.nome, logado)}`}
+            >
+              <span className="inline-flex items-center gap-1">
+                {a.nome.split(" ")[0]}
+                <UserRoundSearch className="size-3 text-emerald-300" aria-hidden />
+              </span>
+            </button>
           </li>
         ))}
         {presentes.length > 12 ? (
@@ -190,11 +212,11 @@ export function CartaoAoVivoHome({
         ) : null}
       </ul>
 
-      {logado ? (
-        <p className="relative mt-2 text-[11px] font-medium text-emerald-200/75">
-          Selecione um aluno para consultar a ficha e registrar observações.
-        </p>
-      ) : null}
+      <p className="relative mt-2 text-[11px] font-medium text-emerald-200/75">
+        {logado
+          ? "Toque num aluno para abrir a ficha, anotar ou impedir a aula dele."
+          : "Toque num aluno para ver a ficha de participação."}
+      </p>
 
       {outros.length > 0 ? (
         <ul className="relative mt-4 space-y-2 border-t border-white/10 pt-4">
@@ -217,11 +239,13 @@ export function CartaoAoVivoHome({
         <VerTodos className="" />
       </div>
       {telaCheia.tela}
-      {logado && alunoSelecionado ? (
-        <FichaAlunoAoVivo
+      {alunoSelecionado ? (
+        <PainelAlunoAula
           aluno={alunoSelecionado}
-          onClose={() => setAlunoSelecionado(null)}
-          onUpdate={() => window.dispatchEvent(new Event("focus"))}
+          historico={[...sessoes, ...ausencias]}
+          logado={logado}
+          aoFechar={() => setAlunoSelecionado(null)}
+          aoMudar={() => window.dispatchEvent(new Event("focus"))}
         />
       ) : null}
     </div>

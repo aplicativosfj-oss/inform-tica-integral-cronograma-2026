@@ -20,7 +20,7 @@ import {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { FichaTelaCheia } from "@/components/school/laboratorio/ficha-tela-cheia";
+import { PainelAlunoAula } from "@/components/school/laboratorio/painel-aluno-aula";
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { MarcaLogo } from "@/components/school/marca";
 import { useAppStore } from "@/lib/app-store";
@@ -178,12 +178,15 @@ export function TelaCheiaAula({
   logado,
   historico = [],
   aoFechar,
+  aoMudar,
 }: {
   g: GrupoLab;
   logado: boolean;
   /** Idas, faltas e recusas dos últimos dias, para a ficha de cada aluno. */
   historico?: SessaoLab[];
   aoFechar: () => void;
+  /** Avisa a página de origem quando o professor mexe no registro do aluno. */
+  aoMudar?: () => void;
 }) {
   const { turmas, config } = useAppStore();
   const [ficha, setFicha] = useState<GrupoLab["alunos"][number] | null>(null);
@@ -249,7 +252,12 @@ export function TelaCheiaAula({
     // Se outra janela já tinha travado a rolagem, não guardamos esse "hidden"
     // para devolver depois: a página ficaria presa sem rolar ao fechar.
     const anterior = document.body.style.overflow === "hidden" ? "" : document.body.style.overflow;
+    const anteriorRaiz =
+      document.documentElement.style.overflow === "hidden"
+        ? ""
+        : document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     void document.documentElement.requestFullscreen?.().catch(() => {});
     let trava: { release: () => Promise<void> } | null = null;
     const nav = navigator as Navigator & {
@@ -263,6 +271,7 @@ export function TelaCheiaAula({
     document.addEventListener("fullscreenchange", mudou);
     return () => {
       document.body.style.overflow = anterior;
+      document.documentElement.style.overflow = anteriorRaiz;
       document.removeEventListener("fullscreenchange", mudou);
       void trava?.release().catch(() => {});
       if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
@@ -330,8 +339,11 @@ export function TelaCheiaAula({
   );
 
   /** Caixa de vidro das faixas laterais — a mesma em toda a tela cheia. */
+  // Translúcido, mas sem `backdrop-filter`: o fundo da tela cheia é animado
+  // (chuva binária, halos, varredura) e o Chrome chegava a não desenhar as
+  // faixas de vidro durante a rolagem — a tela aparecia vazia.
   const vidro =
-    "relative min-h-0 rounded-[1.75rem] border border-white/12 bg-white/[0.045] shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_24px_70px_-40px_rgb(0_0_0/0.9)] backdrop-blur-xl";
+    "relative min-h-0 rounded-[1.75rem] border border-white/12 bg-[#0b1226]/70 shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_24px_70px_-40px_rgb(0_0_0/0.9)]";
 
   const painelTurma = (
     <section
@@ -513,7 +525,7 @@ export function TelaCheiaAula({
       data-tela-cheia=""
       aria-label={`Aula de informática em tela cheia: ${mista ? "aula mista" : g.turmaRotulo}`}
       className={cn(
-        "fixed inset-0 z-[9999] isolate grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-[#050b1a] text-white",
+        "fixed inset-0 z-[9999] isolate grid grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-[#050b1a] text-white",
         parado && "cursor-none",
       )}
     >
@@ -735,11 +747,13 @@ export function TelaCheiaAula({
       </footer>
 
       {ficha ? (
-        <FichaTelaCheia
+        <PainelAlunoAula
           aluno={ficha}
           historico={historico}
           logado={logado}
+          estacao={presentes.findIndex((a) => a.sessaoId === ficha.sessaoId) + 1}
           aoFechar={() => setFicha(null)}
+          aoMudar={aoMudar}
         />
       ) : null}
 
@@ -774,7 +788,12 @@ export function TelaCheiaAula({
  * (pausas, alunos que entraram) e, quando a aula acaba e some da lista de
  * "ao vivo", continua com a última cópia para mostrar "Aula concluída".
  */
-export function useTelaCheiaAula(grupos: GrupoLab[], logado: boolean, historico?: SessaoLab[]) {
+export function useTelaCheiaAula(
+  grupos: GrupoLab[],
+  logado: boolean,
+  historico?: SessaoLab[],
+  aoMudar?: () => void,
+) {
   const [aberto, setAberto] = useState<GrupoLab | null>(null);
   const atual = aberto ? (grupos.find((x) => x.grupoId === aberto.grupoId) ?? aberto) : null;
   return {
@@ -785,6 +804,7 @@ export function useTelaCheiaAula(grupos: GrupoLab[], logado: boolean, historico?
         logado={logado}
         historico={historico ?? []}
         aoFechar={() => setAberto(null)}
+        {...(aoMudar ? { aoMudar } : {})}
       />
     ) : null,
   };

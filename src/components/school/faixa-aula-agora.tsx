@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CalendarX2, ChevronRight, Clock3, MonitorPlay, X } from "lucide-react";
+import { CalendarX2, ChevronRight, Clock3, Expand, MonitorPlay, X } from "lucide-react";
 
 import { useAulaAgora, type EstadoLaboratorio } from "@/lib/use-aula-agora";
 import { usePersistentState } from "@/lib/use-persistent-state";
@@ -102,10 +102,26 @@ export function FaixaAulaAgora() {
           <span className="hidden shrink-0 items-center gap-0.5 text-xs font-semibold opacity-90 group-hover:opacity-100 sm:inline-flex">
             {aoVivo ? "Acompanhar ao vivo" : "Ver agenda"} <ChevronRight className="size-3.5" />
           </span>
-          {/* Espaço reservado para o "x", que fica fora do link. */}
-          <span className="w-5 shrink-0" aria-hidden />
+          {/* Espaço reservado para os botões que ficam fora do link. */}
+          <span className={cn("shrink-0", aoVivo ? "w-12 sm:w-32" : "w-5")} aria-hidden />
         </div>
       </Link>
+
+      {/* Tela cheia a um toque, de qualquer página e sem precisar entrar: é o
+          que o professor usa para jogar a aula na TV do corredor. Abre a
+          página inicial já com a aula em tela cheia. */}
+      {aoVivo ? (
+        <Link
+          to="/"
+          hash="tela-cheia"
+          aria-label="Abrir a aula em tela cheia"
+          title="Abrir a aula em tela cheia"
+          className="absolute right-8 top-1/2 inline-flex -translate-y-1/2 items-center gap-1.5 rounded-full bg-black/25 px-2.5 py-1 text-[11px] font-bold text-white transition hover:bg-black/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:right-10"
+        >
+          <Expand className="size-3.5" aria-hidden />
+          <span className="hidden sm:inline">Tela cheia</span>
+        </Link>
+      ) : null}
 
       <button
         type="button"

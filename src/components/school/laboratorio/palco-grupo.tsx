@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
 import { BotaoAusencia } from "@/components/school/laboratorio/ausencia";
-import { FichaAlunoAoVivo } from "@/components/school/laboratorio/ficha-aluno-ao-vivo";
+import { PainelAlunoAula } from "@/components/school/laboratorio/painel-aluno-aula";
 import { ControleAula } from "@/components/school/laboratorio/controle-aula";
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { BotaoTelaCheia } from "@/components/school/laboratorio/tela-cheia-aula";
@@ -327,20 +327,14 @@ export function PalcoGrupo({
                   </span>
                   <span className="min-w-0 flex-1">
                     {/* Nome inteiro, quebrando linha se precisar: nada de reticências. */}
-                    {logado ? (
-                      <button
-                        type="button"
-                        onClick={() => setAlunoSelecionado(a)}
-                        className="block w-full text-left text-xs font-semibold leading-snug underline-offset-2 hover:text-mint hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint md:text-sm [overflow-wrap:anywhere]"
-                        aria-label={`Abrir ficha individual de ${a.nome}`}
-                      >
-                        {a.nome}
-                      </button>
-                    ) : (
-                      <span className="block text-xs font-semibold leading-snug md:text-sm [overflow-wrap:anywhere]">
-                        {nomeExibido(a.nome, false)}
-                      </span>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setAlunoSelecionado(a)}
+                      className="block w-full text-left text-xs font-semibold leading-snug underline-offset-2 hover:text-mint hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint md:text-sm [overflow-wrap:anywhere]"
+                      aria-label={`Abrir a ficha de ${nomeExibido(a.nome, logado)}`}
+                    >
+                      {nomeExibido(a.nome, logado)}
+                    </button>
                     <span className="block text-[11px] leading-tight text-white/45">
                       {mista ? `${a.turmaRotulo} · ` : ""}estação {i + 1}
                     </span>
@@ -362,11 +356,13 @@ export function PalcoGrupo({
           </ul>
         </section>
       </div>
-      {logado && alunoSelecionado ? (
-        <FichaAlunoAoVivo
+      {alunoSelecionado ? (
+        <PainelAlunoAula
           aluno={alunoSelecionado}
-          onClose={() => setAlunoSelecionado(null)}
-          onUpdate={aoMudar}
+          logado={logado}
+          estacao={g.alunos.findIndex((a) => a.sessaoId === alunoSelecionado.sessaoId) + 1}
+          aoFechar={() => setAlunoSelecionado(null)}
+          aoMudar={aoMudar}
         />
       ) : null}
     </article>

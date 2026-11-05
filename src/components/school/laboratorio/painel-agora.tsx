@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FichaAlunoAoVivo } from "@/components/school/laboratorio/ficha-aluno-ao-vivo";
+import { PainelAlunoAula } from "@/components/school/laboratorio/painel-aluno-aula";
 import { Clock3, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -59,7 +59,7 @@ function CartaoGrupo({
   logado: boolean;
   aoMudar: () => void;
 }) {
-  const [selecionado,setSelecionado] = useState<(typeof g.alunos)[number] | null>(null);
+  const [selecionado, setSelecionado] = useState<(typeof g.alunos)[number] | null>(null);
   const ini = new Date(g.inicio).getTime();
   const fim = new Date(g.fim).getTime();
   const aoVivo = ini <= agora;
@@ -121,11 +121,25 @@ function CartaoGrupo({
       <ul className="mt-3 flex flex-wrap gap-1.5">
         {g.alunos.map((a) => (
           <li key={a.id} className="rounded-full border bg-background px-2.5 py-1 text-sm">
-            {logado ? <button type="button" onClick={()=>setSelecionado(a)} className="font-semibold underline-offset-2 hover:text-primary hover:underline" aria-label={`Abrir ficha de ${a.nome}`}>{a.nome}</button> : nomeExibido(a.nome, false)}
+            <button
+              type="button"
+              onClick={() => setSelecionado(a)}
+              className="font-semibold underline-offset-2 hover:text-primary hover:underline"
+              aria-label={`Abrir a ficha de ${nomeExibido(a.nome, logado)}`}
+            >
+              {nomeExibido(a.nome, logado)}
+            </button>
           </li>
         ))}
       </ul>
-      {logado && selecionado ? <FichaAlunoAoVivo aluno={selecionado} onClose={()=>setSelecionado(null)} onUpdate={aoMudar}/> : null}
+      {selecionado ? (
+        <PainelAlunoAula
+          aluno={selecionado}
+          logado={logado}
+          aoFechar={() => setSelecionado(null)}
+          aoMudar={aoMudar}
+        />
+      ) : null}
     </div>
   );
 }
@@ -319,12 +333,7 @@ export function PainelLaboratorioAgora({
           <div className="h-16 animate-pulse rounded-xl bg-muted" />
         ) : (
           <>
-            <div
-              className={cn(
-                "space-y-3",
-                rolar && "lg:min-w-0",
-              )}
-            >
+            <div className={cn("space-y-3", rolar && "lg:min-w-0")}>
               {aoVivo.length === 0 ? (
                 <LaboratorioLivre
                   cheio={rolar}
@@ -356,8 +365,7 @@ export function PainelLaboratorioAgora({
             <div
               className={cn(
                 "space-y-4",
-                rolar &&
-                  "lg:flex lg:min-w-0 lg:flex-col lg:gap-3 lg:space-y-0",
+                rolar && "lg:flex lg:min-w-0 lg:flex-col lg:gap-3 lg:space-y-0",
               )}
             >
               {proximos.length > 0 ? (
