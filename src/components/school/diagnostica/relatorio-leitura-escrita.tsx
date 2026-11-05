@@ -3,7 +3,6 @@ import { BookOpenText, FileText, Search, Users2 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ProvaII } from "@/lib/diagnostica/tipos";
-import { NOME_DISC } from "@/lib/diagnostica/tipos";
 
 type RespostaHabilidade = {
   turma: string;
@@ -36,7 +35,7 @@ function linhasDosAlunos(provas: ProvaII[]): AlunoLeituraEscrita[] {
     const questoes = Object.keys(prova.hab).map(Number).sort((a, b) => a - b);
     for (const aluno of prova.alunos) {
       const chave = `${prova.ano}|${prova.turma}|${aluno.nome.trim().toLocaleLowerCase("pt-BR")}`;
-      const item = alunos.get(chave) ?? {
+      const item: AlunoLeituraEscrita = alunos.get(chave) ?? {
         chave,
         nome: aluno.nome,
         turma: prova.turma,
