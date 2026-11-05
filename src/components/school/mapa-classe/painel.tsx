@@ -165,6 +165,8 @@ export function PainelMapaClasse({
 } = {}) {
   const { turmas, evolucaoLeitura } = MAPA_CLASSE_3_BIM;
   const [bimestreSelecionado, setBimestreSelecionado] = useState<1 | 2 | 3>(3);
+  const [compararDe, setCompararDe] = useState<1 | 2 | 3>(1);
+  const [compararPara, setCompararPara] = useState<1 | 2 | 3>(3);
   const [foco, setFoco] = useState<"leitura" | "escrita">("leitura");
   const escritaDisponivel = bimestreSelecionado === 3;
   const turmasDoBimestre = useMemo(() => turmas.map((t) => {
@@ -457,6 +459,57 @@ export function PainelMapaClasse({
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Comparação entre bimestres</CardTitle>
+          <p className="text-xs text-muted-foreground">Compare a evolução da leitura entre dois períodos. A variação considera a proporção de alunos nos níveis A e B; aumento indica avanço nessa dimensão.</p>
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground"><span>DE</span>
+              <select value={compararDe} onChange={(e) => setCompararDe(Number(e.target.value) as 1 | 2 | 3)} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"><option value={1}>1º bimestre</option><option value={2}>2º bimestre</option><option value={3}>3º bimestre</option></select>
+            </label><span className="text-xs text-muted-foreground">→</span>
+            <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground"><span>PARA</span>
+              <select value={compararPara} onChange={(e) => setCompararPara(Number(e.target.value) as 1 | 2 | 3)} className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"><option value={1}>1º bimestre</option><option value={2}>2º bimestre</option><option value={3}>3º bimestre</option></select>
+            </label>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(() => {
+            const somar = (bim: number) => Object.values(evolucaoLeitura).reduce((acc, lista) => {
+              const e = lista.find((item) => item.bim === bim);
+              if (!e) return acc;
+              return { A: acc.A + e.A, B: acc.B + e.B, C: acc.C + e.C, D: acc.D + e.D, E: acc.E + e.E, avaliados: acc.avaliados + e.avaliados };
+            }, { A: 0, B: 0, C: 0, D: 0, E: 0, avaliados: 0 });
+            const inicio = somar(compararDe);
+            const fim = somar(compararPara);
+            const percentualInicio = pct(inicio.A + inicio.B, inicio.avaliados);
+            const percentualFim = pct(fim.A + fim.B, fim.avaliados);
+            const variacao = percentualFim - percentualInicio;
+            return (
+              <>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border bg-muted/30 p-3"><p className="text-xs text-muted-foreground">{compararDe}º bimestre · níveis A e B</p><p className="mt-1 text-2xl font-bold">{percentualInicio}%</p><p className="text-xs text-muted-foreground">{inicio.avaliados} avaliados</p></div>
+                  <div className="rounded-xl border bg-muted/30 p-3"><p className="text-xs text-muted-foreground">{compararPara}º bimestre · níveis A e B</p><p className="mt-1 text-2xl font-bold">{percentualFim}%</p><p className="text-xs text-muted-foreground">{fim.avaliados} avaliados</p></div>
+                  <div className="rounded-xl border bg-muted/30 p-3"><p className="text-xs text-muted-foreground">Variação no período</p><p className={`mt-1 text-2xl font-bold ${variacao > 0 ? "text-emerald-600" : variacao < 0 ? "text-red-600" : "text-foreground"}`}>{variacao > 0 ? "+" : ""}{variacao} p.p.</p><p className="text-xs text-muted-foreground">{variacao > 0 ? "Avanço na proporção de leitores A/B" : variacao < 0 ? "Queda na proporção de leitores A/B" : "Sem alteração percentual"}</p></div>
+                </div>
+                <div className="overflow-x-auto"><table className="w-full min-w-[34rem] text-sm">
+                  <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2 pr-3">Turma</th><th className="pr-3">{compararDe}º bim.</th><th className="pr-3">{compararPara}º bim.</th><th className="pr-3">Variação</th><th>Situação</th></tr></thead>
+                  <tbody>
+                    {turmas.map((t) => {
+                      const lista = evolucaoLeitura[String(t.ano) + t.turma] ?? [];
+                      const a = lista.find((e) => e.bim === compararDe);
+                      const b = lista.find((e) => e.bim === compararPara);
+                      if (!a || !b) return null;
+                      const pa = leitoresAB(a); const pb = leitoresAB(b); const delta = pb - pa;
+                      return <tr key={String(t.ano) + t.turma} className="border-b last:border-0"><td className="py-2 pr-3 font-semibold">{nomeTurma(t)}</td><td className="pr-3">{pa}% <span className="text-xs text-muted-foreground">({a.avaliados})</span></td><td className="pr-3 font-semibold">{pb}% <span className="text-xs font-normal text-muted-foreground">({b.avaliados})</span></td><td className="pr-3"><Seta de={pa} para={pb} bomQuandoSobe /></td><td><span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${delta > 0 ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : delta < 0 ? "bg-red-500/10 text-red-700 dark:text-red-300" : "bg-muted text-muted-foreground"}`}>{delta > 0 ? "Avanço" : delta < 0 ? "Regressão" : "Estável"}</span></td></tr>;
+                    })}
+                  </tbody>
+                </table></div>
+                <p className="text-xs text-muted-foreground">Os números entre parênteses indicam a quantidade de alunos avaliados em cada período. Como esse total pode mudar, a comparação usa percentuais e não apenas quantidades absolutas.</p>
+              </>
+            );
+          })()}
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
