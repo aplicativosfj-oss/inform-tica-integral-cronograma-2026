@@ -186,3 +186,123 @@ grant execute on function public.registrar_passo_aluno(
 
 revoke all on function public.ler_trilha_aluno(text, text, integer) from public;
 grant execute on function public.ler_trilha_aluno(text, text, integer) to anon, authenticated;
+
+
+-- ============================================================
+-- AVALIAÇÃO CONTÍNUA E PLANOS DE INTERVENÇÃO PEDAGÓGICA
+-- Também mantidos em arquivos SQL individuais para instalação seletiva.
+-- ============================================================
+
+-- Avaliação contínua individual de leitura e escrita.
+-- Não altera nem reclassifica os dados históricos da avaliação diagnóstica.
+-- Execute no SQL Editor do projeto Supabase usado pelo site.
+
+create table if not exists public.avaliacoes_leitura_escrita (
+  id uuid primary key default gen_random_uuid(),
+  turma_id text not null,
+  aluno_id text not null,
+  aluno_nome text not null,
+  ano smallint not null check (ano between 1 and 9),
+  bimestre smallint not null check (bimestre between 1 and 4),
+  data_avaliacao date not null,
+  titulo text not null check (char_length(trim(titulo)) between 1 and 180),
+  criterios jsonb not null default '{"leitura":{},"escrita":{}}'::jsonb,
+  observacoes text,
+  evidencia text,
+  avaliador_id uuid not null default auth.uid() references auth.users(id) on delete restrict,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint avaliacao_leitura_escrita_criterios_objeto
+    check (jsonb_typeof(criterios) = 'object'),
+  constraint avaliacao_leitura_escrita_leitura_objeto
+    check (jsonb_typeof(coalesce(criterios->'leitura', '{}'::jsonb)) = 'object'),
+  constraint avaliacao_leitura_escrita_escrita_objeto
+    check (jsonb_typeof(coalesce(criterios->'escrita', '{}'::jsonb)) = 'object')
+);
+
+create index if not exists avaliacoes_leitura_escrita_turma_bimestre_idx
+  on public.avaliacoes_leitura_escrita (turma_id, bimestre, data_avaliacao desc);
+create index if not exists avaliacoes_leitura_escrita_aluno_idx
+  on public.avaliacoes_leitura_escrita (aluno_id, data_avaliacao desc);
+
+alter table public.avaliacoes_leitura_escrita enable row level security;
+revoke all on public.avaliacoes_leitura_escrita from anon;
+grant select, insert, update on public.avaliacoes_leitura_escrita to authenticated;
+
+drop policy if exists "avaliacoes_leitura_escrita_admin_select" on public.avaliacoes_leitura_escrita;
+create policy "avaliacoes_leitura_escrita_admin_select"
+  on public.avaliacoes_leitura_escrita for select to authenticated
+  using (true);
+
+drop policy if exists "avaliacoes_leitura_escrita_admin_insert" on public.avaliacoes_leitura_escrita;
+create policy "avaliacoes_leitura_escrita_admin_insert"
+  on public.avaliacoes_leitura_escrita for insert to authenticated
+  with check (avaliador_id = (select auth.uid()));
+
+drop policy if exists "avaliacoes_leitura_escrita_admin_update" on public.avaliacoes_leitura_escrita;
+create policy "avaliacoes_leitura_escrita_admin_update"
+  on public.avaliacoes_leitura_escrita for update to authenticated
+  using (avaliador_id = (select auth.uid()))
+  with check (avaliador_id = (select auth.uid()));
+
+comment on table public.avaliacoes_leitura_escrita is
+  'Rubricas individuais de leitura e produção escrita, com bimestre e data explicitamente informados pelo professor.';
+
+
+-- Acompanhamento persistente dos planos de intervenção de leitura e escrita.
+-- Execute uma única vez no SQL Editor do mesmo projeto Supabase da aplicação.
+
+create table if not exists public.planos_intervencao_leitura_escrita (
+  id uuid primary key default gen_random_uuid(),
+  avaliacao_id uuid not null references public.avaliacoes_leitura_escrita(id) on delete cascade,
+  turma_id text not null,
+  aluno_id text not null,
+  aluno_nome text not null,
+  area text not null check (area in ('leitura','escrita')),
+  habilidade_key text not null,
+  habilidade text not null,
+  nivel_base smallint not null check (nivel_base between 1 and 2),
+  objetivo text not null,
+  atividade_sugerida text not null,
+  rotina_sugerida text not null,
+  evidencia_esperada text not null,
+  status text not null default 'planejado'
+    check (status in ('planejado','em_andamento','concluido','reavaliar')),
+  data_inicio date,
+  data_revisao date,
+  atividades jsonb not null default '[]'::jsonb
+    check (jsonb_typeof(atividades) = 'array'),
+  criado_por uuid not null default auth.uid() references auth.users(id) on delete restrict,
+  atualizado_em timestamptz not null default now(),
+  criado_em timestamptz not null default now(),
+  constraint planos_intervencao_unicos unique (avaliacao_id, area, habilidade_key)
+);
+
+create index if not exists planos_intervencao_aluno_idx
+  on public.planos_intervencao_leitura_escrita (aluno_id, criado_em desc);
+create index if not exists planos_intervencao_turma_status_idx
+  on public.planos_intervencao_leitura_escrita (turma_id, status, data_revisao);
+
+alter table public.planos_intervencao_leitura_escrita enable row level security;
+revoke all on public.planos_intervencao_leitura_escrita from anon;
+grant select, insert, update on public.planos_intervencao_leitura_escrita to authenticated;
+
+drop policy if exists "planos_intervencao_select_autenticado" on public.planos_intervencao_leitura_escrita;
+create policy "planos_intervencao_select_autenticado"
+  on public.planos_intervencao_leitura_escrita for select to authenticated
+  using (true);
+
+drop policy if exists "planos_intervencao_insert_autor" on public.planos_intervencao_leitura_escrita;
+create policy "planos_intervencao_insert_autor"
+  on public.planos_intervencao_leitura_escrita for insert to authenticated
+  with check (criado_por = (select auth.uid()));
+
+drop policy if exists "planos_intervencao_update_autor" on public.planos_intervencao_leitura_escrita;
+create policy "planos_intervencao_update_autor"
+  on public.planos_intervencao_leitura_escrita for update to authenticated
+  using (criado_por = (select auth.uid()))
+  with check (criado_por = (select auth.uid()));
+
+comment on table public.planos_intervencao_leitura_escrita is
+  'Planos individuais de intervenção pedagógica, vinculados à avaliação que originou cada habilidade prioritária.';
+
