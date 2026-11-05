@@ -179,10 +179,14 @@ export function AvaliacaoContinuaLeituraEscrita() {
       criterios, observacoes: observacoes.trim() || null, evidencia: evidencia.trim() || null,
       updated_at: new Date().toISOString(),
     };
-    const query = edicaoId
-      ? supabase.from("avaliacoes_leitura_escrita").update(payload).eq("id", edicaoId)
-      : supabase.from("avaliacoes_leitura_escrita").insert(payload);
-    const { error } = await query;
+    let error: { message: string } | null = null;
+    if (edicaoId) {
+      const result = await supabase.from("avaliacoes_leitura_escrita").update(payload).eq("id", edicaoId);
+      error = result.error;
+    } else {
+      const result = await supabase.from("avaliacoes_leitura_escrita").insert(payload);
+      error = result.error;
+    }
     if (error) toast.error("Não foi possível salvar: " + error.message);
     else {
       toast.success(edicaoId ? "Avaliação atualizada." : "Avaliação registrada.");
