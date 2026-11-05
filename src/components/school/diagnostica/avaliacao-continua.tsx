@@ -207,7 +207,7 @@ export function AvaliacaoContinuaLeituraEscrita() {
             <label className="text-xs font-semibold text-muted-foreground">TURMA
               <select value={turmaId} onChange={(e) => { setTurmaId(e.target.value); setAlunoId(""); }} className="mt-1 block w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm text-foreground">
                 <option value="">Selecione</option>
-                {turmasAtivas.map((t) => <option key={t.id} value={t.id}>{t.serie}º ano {t.letra}</option>)}
+                {turmasAtivas.map((t) => <option key={t.id} value={t.id}>{t.serie} {t.letra}</option>)}
               </select>
             </label>
             <label className="text-xs font-semibold text-muted-foreground">ALUNO
@@ -263,7 +263,7 @@ export function AvaliacaoContinuaLeituraEscrita() {
         <CardContent className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <select value={filtroBimestre} onChange={(e) => setFiltroBimestre(e.target.value)} className="rounded-xl border border-input bg-background px-3 py-2.5 text-sm"><option value="todos">Todos os bimestres</option>{[1,2,3,4].map(n => <option key={n} value={n}>{n}º bimestre</option>)}</select>
-            <select value={filtroTurma} onChange={(e) => setFiltroTurma(e.target.value)} className="rounded-xl border border-input bg-background px-3 py-2.5 text-sm"><option value="todas">Todas as turmas</option>{turmas.map(t => <option key={t.id} value={t.id}>{t.serie}º ano {t.letra}</option>)}</select>
+            <select value={filtroTurma} onChange={(e) => setFiltroTurma(e.target.value)} className="rounded-xl border border-input bg-background px-3 py-2.5 text-sm"><option value="todas">Todas as turmas</option>{turmas.map(t => <option key={t.id} value={t.id}>{t.serie} {t.letra}</option>)}</select>
             <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar aluno..." className="rounded-xl border border-input bg-background px-3 py-2.5 text-sm" />
           </div>
 
