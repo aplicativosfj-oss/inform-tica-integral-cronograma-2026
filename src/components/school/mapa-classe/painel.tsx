@@ -68,7 +68,7 @@ function BarraNiveis<T extends string>({
   return (
     <div
       className="flex h-6 w-full overflow-hidden rounded-md bg-muted"
-      role="img"
+      role={interativa ? "group" : "img"}
       aria-label={`${rotulo}: ${niveis.map((n) => `${n.nome} ${valores[n.id] ?? 0}`).join(", ")}`}
     >
       {niveis.map((n) => {
