@@ -53,6 +53,15 @@ function formatarData(data: string) {
   return new Date(`${data}T12:00:00`).toLocaleDateString("pt-BR");
 }
 
+/** Faixas padrão do calendário letivo: jan–abr, mai–jul, ago–set e out–dez. */
+function bimestreDaData(data: string): number {
+  const mes = new Date(data.length === 10 ? `${data}T12:00:00` : data).getMonth() + 1;
+  if (mes <= 4) return 1;
+  if (mes <= 7) return 2;
+  if (mes <= 9) return 3;
+  return 4;
+}
+
 function AcompanharAluno() {
   const { turmaId, alunoId } = Route.useParams();
   const { turmas, updateAluno } = useAppStore();
@@ -71,6 +80,7 @@ function AcompanharAluno() {
   const [semAcessoAoAndamento, setSemAcessoAoAndamento] = useState(false);
   const [avaliacoes, setAvaliacoes] = useState<Avaliacao[]>([]);
   const [entregas, setEntregas] = useState<Entrega[]>([]);
+  const [bimestreSelecionado, setBimestreSelecionado] = useState<number | "todos">("todos");
   const [avaliando, setAvaliando] = useState<{
     titulo: string;
     tipo: "atividade" | "entrega";
@@ -192,6 +202,15 @@ function AcompanharAluno() {
   const faltas = presencas.filter((p) => p.status === "faltou").length;
   const comparecimentos = presencas.length - faltas;
   const idade = idadeEmAnos(aluno.nascimento);
+  const atividadesDoBimestre = atividades.filter(
+    (item) => bimestreSelecionado === "todos" || bimestreDaData(item.data) === bimestreSelecionado,
+  );
+  const entregasDoBimestre = entregas.filter(
+    (item) => bimestreSelecionado === "todos" || bimestreDaData(item.criadoEm) === bimestreSelecionado,
+  );
+  const totalPorBimestre = (numero: number) =>
+    atividades.filter((item) => bimestreDaData(item.data) === numero).length +
+    entregas.filter((item) => bimestreDaData(item.criadoEm) === numero).length;
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -269,7 +288,27 @@ function AcompanharAluno() {
             </span>
           </div>
 
-          <h2 className="mb-3 mt-8 text-lg font-semibold text-foreground">Atividades</h2>
+          <section className="mt-8 rounded-2xl border border-border bg-card/80 p-4 shadow-sm">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Avaliações por bimestre</h2>
+                <p className="text-xs text-muted-foreground">Selecione um período para consultar atividades, entregas e notas.</p>
+              </div>
+              <Badge variant="secondary">{avaliacoes.length} avaliações registradas</Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+              <Button size="sm" variant={bimestreSelecionado === "todos" ? "default" : "outline"} onClick={() => setBimestreSelecionado("todos")}>
+                Ano todo
+              </Button>
+              {[1, 2, 3, 4].map((numero) => (
+                <Button key={numero} size="sm" variant={bimestreSelecionado === numero ? "default" : "outline"} onClick={() => setBimestreSelecionado(numero)} className="justify-between">
+                  {numero}º bim. <span className="ml-1 text-xs opacity-75">{totalPorBimestre(numero)}</span>
+                </Button>
+              ))}
+            </div>
+          </section>
+
+          <h2 className="mb-3 mt-6 text-lg font-semibold text-foreground">Atividades</h2>
           {semAcessoAoAndamento ? (
             <p className="mb-3 text-xs text-muted-foreground">
               O andamento marcado pelo aluno só aparece para quem está logado no painel
@@ -278,7 +317,7 @@ function AcompanharAluno() {
           ) : null}
           {carregando ? (
             <p className="text-sm text-muted-foreground">Carregando...</p>
-          ) : atividades.length === 0 ? (
+          ) : atividadesDoBimestre.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="py-6 text-center text-sm text-muted-foreground">
                 Nenhuma atividade cadastrada para esta turma ainda.
@@ -286,7 +325,7 @@ function AcompanharAluno() {
             </Card>
           ) : (
             <div className="flex flex-col gap-2">
-              {atividades.map((atividade) => {
+              {atividadesDoBimestre.map((atividade) => {
                 const feita = concluidas.has(atividade.id);
                 return (
                   <Card key={atividade.id}>
@@ -345,7 +384,7 @@ function AcompanharAluno() {
           <p className="mb-3 text-sm text-muted-foreground">
             O que o aluno escreveu no editor e escolheu entregar para você ler.
           </p>
-          {entregas.length === 0 ? (
+          {entregasDoBimestre.length === 0 ? (
             <Card className="border-dashed">
               <CardContent className="py-6 text-center text-sm text-muted-foreground">
                 Nenhum texto entregue ainda. No editor, o aluno usa o botão &quot;Entregar ao
@@ -354,8 +393,21 @@ function AcompanharAluno() {
             </Card>
           ) : (
             <div className="flex flex-col gap-2">
-              {entregas.map((entrega) => (
-                <Card key={entrega.id}>
+              {entregasDoBimestre.map((entrega) => (
+                <Card
+                  key={entrega.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Abrir texto entregue: ${entrega.titulo}`}
+                  onClick={() => setTextoAberto(textoAberto?.id === entrega.id ? null : entrega)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setTextoAberto(textoAberto?.id === entrega.id ? null : entrega);
+                    }
+                  }}
+                  className="cursor-pointer transition hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
                   <CardContent className="flex flex-wrap items-start justify-between gap-3 p-4">
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
