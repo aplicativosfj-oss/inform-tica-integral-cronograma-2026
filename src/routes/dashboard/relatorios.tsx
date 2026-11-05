@@ -13,7 +13,7 @@ function hojeLocal(){return new Intl.DateTimeFormat("en-CA",{timeZone:tz,year:"n
 function horaLocal(){return Number(new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"2-digit",hourCycle:"h23"}).format(new Date()))}
 function dataUTC(s:string){return new Date(s+"T12:00:00Z")}
 function iso(d:Date){return d.toISOString().slice(0,10)}
-function limites(p:Periodo,base:string){const d=dataUTC(base),ano=d.getUTCFullYear(),mes=d.getUTCMonth();if(p==="ano")return [`${ano}-01-01`,`${ano}-12-31`];if(p==="mes")return [iso(new Date(Date.UTC(ano,mes,1))),iso(new Date(Date.UTC(ano,mes+1,0)))];const dia=(d.getUTCDay()+6)%7;const ini=new Date(d);ini.setUTCDate(d.getUTCDate()-dia);const fim=new Date(ini);fim.setUTCDate(ini.getUTCDate()+6);return [iso(ini),iso(fim)]}
+function limites(p:Periodo,base:string):[string,string]{const d=dataUTC(base),ano=d.getUTCFullYear(),mes=d.getUTCMonth();if(p==="ano")return [`${ano}-01-01`,`${ano}-12-31`];if(p==="mes")return [iso(new Date(Date.UTC(ano,mes,1))),iso(new Date(Date.UTC(ano,mes+1,0)))];const dia=(d.getUTCDay()+6)%7;const ini=new Date(d);ini.setUTCDate(d.getUTCDate()-dia);const fim=new Date(ini);fim.setUTCDate(ini.getUTCDate()+6);return [iso(ini),iso(fim)]}
 function fechado(p:Periodo,fim:string){const hoje=hojeLocal();if(p==="semana"){const sexta=iso(new Date(dataUTC(fim).getTime()-2*86400000));return hoje>sexta||(hoje===sexta&&horaLocal()>=15)}return p==="mes"?hoje>fim:hoje>fim}
 function csvEscape(v:unknown){return '"'+String(v??"").replace(/"/g,'""')+'"'}
 function Relatorios(){

@@ -723,7 +723,7 @@ function StatCounter({ valor }: { valor: number }) {
   const { ref, exibido } = useCountUp(valor);
   return (
     <div
-      ref={ref}
+      ref={ref as React.RefObject<HTMLDivElement | null>}
       className="mt-1 font-heading text-[1.85rem] font-extrabold leading-none tracking-tight tabular-nums text-white sm:text-[2.1rem]"
     >
       {exibido}
