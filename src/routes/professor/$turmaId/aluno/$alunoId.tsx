@@ -328,7 +328,20 @@ function AcompanharAluno() {
               {atividadesDoBimestre.map((atividade) => {
                 const feita = concluidas.has(atividade.id);
                 return (
-                  <Card key={atividade.id}>
+                  <Card
+                    key={atividade.id}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Abrir avaliação de ${atividade.titulo}`}
+                    onClick={() => setAvaliando({ titulo: atividade.titulo, tipo: "atividade", referenciaId: atividade.id })}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setAvaliando({ titulo: atividade.titulo, tipo: "atividade", referenciaId: atividade.id });
+                      }
+                    }}
+                    className="cursor-pointer transition hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
                     <CardContent className="flex items-start gap-3 p-4">
                       {feita ? (
                         <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-700 dark:text-emerald-400" />
