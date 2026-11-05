@@ -90,9 +90,10 @@ export function RelatorioLeituraEscrita({ provas }: { provas: ProvaII[] }) {
   const acertos = respostas.filter((r) => r.correta).length;
   const erros = respostas.length - acertos;
   const comEscrita = filtrados.filter((a) => !!a.escrita);
-  const alfabéticos = comEscrita.filter((a) =>
-    a.ano <= 2 ? a.escrita === "A" || a.escrita === "B" : a.escrita === "A" || a.escrita === "B",
-  ).length;
+  const anoDoFiltro = turmaSelecionada === "todas" ? null : Number(turmaSelecionada.split("|")[0]);
+  const percentualAB = anoDoFiltro == null || comEscrita.length === 0
+    ? null
+    : Math.round(comEscrita.filter((a) => a.escrita === "A" || a.escrita === "B").length / comEscrita.length * 100);
 
   const habilidades = useMemo(() => {
     const mapa = new Map<string, { texto: string; total: number; erros: number; alunos: Set<string> }>();
@@ -107,7 +108,7 @@ export function RelatorioLeituraEscrita({ provas }: { provas: ProvaII[] }) {
       item.total += 1;
       if (!resposta.correta) {
         item.erros += 1;
-        item.alunos.add(resposta.nome);
+        item.alunos.add(`${resposta.ano}º ano ${resposta.turma} · ${resposta.nome}`);
       }
       mapa.set(chave, item);
     }
@@ -234,8 +235,8 @@ export function RelatorioLeituraEscrita({ provas }: { provas: ProvaII[] }) {
                 <p className="text-2xl font-bold">{comEscrita.length}</p>
               </div>
               <div className="rounded-xl bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground">A/B na escala</p>
-                <p className="text-2xl font-bold">{comEscrita.length ? Math.round(alfabéticos / comEscrita.length * 100) : 0}%</p>
+                <p className="text-xs text-muted-foreground">Faixa A/B nesta turma</p>
+                <p className="text-2xl font-bold">{percentualAB == null ? "—" : `${percentualAB}%`}</p>
               </div>
             </div>
             <div className="space-y-2">
@@ -251,9 +252,11 @@ export function RelatorioLeituraEscrita({ provas }: { provas: ProvaII[] }) {
               ))}
             </div>
             <p className="rounded-xl border border-border bg-muted/30 p-3 text-xs leading-relaxed text-muted-foreground">
-              {filtrados.some((a) => a.ano <= 2)
-                ? "No 1º e 2º ano, A/B representam escrita alfabética na escala de alfabetização."
-                : "Do 3º ao 5º ano, A/B representam até quatro erros ortográficos. Consulte a rubrica da avaliação para interpretar as demais faixas."}
+              {anoDoFiltro == null
+                ? "A escala muda conforme a série: no 1º e 2º ano, A/B representam escrita alfabética; do 3º ao 5º ano, A/B representam até quatro erros ortográficos. Selecione uma turma para interpretar a faixa corretamente."
+                : anoDoFiltro <= 2
+                  ? "Nesta série, A/B representam escrita alfabética. As demais faixas devem ser interpretadas conforme a rubrica da avaliação."
+                  : "Nesta série, A/B representam até quatro erros ortográficos. As demais faixas devem ser interpretadas conforme a rubrica da avaliação."}
               {" "}A classificação disponível não substitui a análise da produção textual original.
             </p>
           </CardContent>
@@ -310,7 +313,7 @@ export function RelatorioLeituraEscrita({ provas }: { provas: ProvaII[] }) {
         </CardContent>
       </Card>
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Fonte: respostas individuais da II Avaliação Diagnóstica 2026 (Português). A I Avaliação possui resultados agregados por turma, não respostas individuais. O relatório não inventa diagnósticos para questões não respondidas; para evolução bimestral real, cada nova aplicação deverá ser registrada com seu bimestre e data.
+        Fonte: respostas individuais da II Avaliação Diagnóstica 2026 (Português). A I Avaliação possui resultados agregados por turma, não respostas individuais. O relatório não inventa diagnósticos para questões não respondidas; o arquivo atual identifica alunos pelo nome, sem matrícula/ID individual; homônimos na mesma turma precisam de identificação no cadastro para não serem confundidos. Para evolução bimestral real, cada nova aplicação deverá ser registrada com seu bimestre e data.
       </p>
     </div>
   );
