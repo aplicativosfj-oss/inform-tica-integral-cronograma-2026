@@ -431,6 +431,57 @@ export function AvaliacaoContinuaLeituraEscrita() {
         </CardContent>
       </Card>
 
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base"><Target className="size-4 text-primary" /> Plano de intervenção pedagógica</CardTitle>
+              <p className="mt-1 text-xs text-muted-foreground">Sugestões geradas a partir do resultado mais recente de cada habilidade, sem transformar ausência de avaliação em dificuldade.</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => window.print()}><Printer className="mr-2 size-4" /> Imprimir planos</Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+            <Indicador titulo="Alunos com plano sugerido" valor={planosIntervencao.length} detalhe="com pelo menos uma habilidade em nível 1 ou 2" />
+            <Indicador titulo="Prioridade pedagógica" valor={planosIntervencao.filter(p => p.prioridade === "Prioritária").length} detalhe="nível 1 ou três ou mais habilidades frágeis" />
+            <Indicador titulo="Habilidades a trabalhar" valor={planosIntervencao.reduce((s,p) => s + p.habilidades.length, 0)} detalhe="com base na avaliação mais recente" />
+          </div>
+          {planosIntervencao.length ? planosIntervencao.map((plano) => (
+            <section key={plano.alunoId} className="break-inside-avoid rounded-2xl border border-border p-4">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h3 className="flex items-center gap-2 font-bold"><ClipboardCheck className="size-4 text-primary" />{plano.nome}</h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{plano.turmaNome} · Base: {plano.bimestreBase}º bimestre · {new Date(plano.dataBase + "T12:00:00").toLocaleDateString("pt-BR")}</p>
+                </div>
+                <span className={plano.prioridade === "Prioritária" ? "rounded-full bg-rose-500/10 px-2.5 py-1 text-xs font-bold text-rose-700 dark:text-rose-300" : "rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-300"}>{plano.prioridade}</span>
+              </div>
+              <div className="mt-3 space-y-3">
+                {plano.habilidades.map((h) => (
+                  <div key={h.habilidade} className="rounded-xl bg-muted/35 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wide text-primary">{h.area} · {h.habilidade}</span>
+                      <span className="text-xs font-semibold">Nível {h.nivel} · {NIVEL[h.nivel]}</span>
+                    </div>
+                    <p className="mt-2 text-sm"><b>Objetivo:</b> {h.objetivo}</p>
+                    <p className="mt-1 text-sm"><b>Atividade sugerida:</b> {h.atividade}</p>
+                    <p className="mt-1 text-sm"><b>Rotina:</b> {h.rotina}</p>
+                    <p className="mt-1 text-sm"><b>Como acompanhar:</b> {h.evidencia}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 rounded-lg border border-dashed border-border p-2 text-xs text-muted-foreground">Revisão sugerida: após 4 semanas de atividades. Reavalie os mesmos critérios e compare com esta linha de base. O professor valida e adapta as propostas à realidade da turma.</p>
+            </section>
+          )) : <div className="rounded-xl border border-dashed border-border p-6 text-center">
+            <CheckCircle2 className="mx-auto size-7 text-emerald-600" />
+            <p className="mt-2 text-sm font-semibold">Nenhum plano sugerido neste recorte.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Registros insuficientes ou habilidades avaliadas mais recentemente acima do nível 2.</p>
+          </div>}
+          <p className="text-xs text-muted-foreground">Este é um apoio à decisão pedagógica, não um diagnóstico clínico ou rótulo do estudante. O professor deve validar as estratégias, considerar o contexto e registrar novas evidências na próxima avaliação.</p>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2 text-base"><CalendarDays className="size-4 text-primary" /> Evolução bimestral do estudante</CardTitle></CardHeader>
         <CardContent className="space-y-3">
