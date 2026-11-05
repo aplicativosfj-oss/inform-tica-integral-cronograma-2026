@@ -99,70 +99,6 @@ function BarraNiveis<T extends string>({
           )}
         );
       })}
-      {permitirDetalhesIndividuais && (
-        <>
-          <Dialog open={!!faixaSelecionada} onOpenChange={(aberto) => { if (!aberto) { setFaixaSelecionada(null); setAlunoSelecionado(null); } }}>
-            <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{faixaSelecionada ? `${nomeTurma(faixaSelecionada)} · ${faixaSelecionada.area === "leitura" ? "Leitura" : "Escrita"}` : "Alunos"}</DialogTitle>
-                <DialogDescription>
-                  {faixaSelecionada ? `Nível ${faixaSelecionada.nivel} · ${faixaSelecionada.nomeNivel} · ${faixaSelecionada.total} aluno(s) na planilha agregada` : ""}
-                </DialogDescription>
-              </DialogHeader>
-              {faixaSelecionada && (
-                <div className="rounded-xl bg-muted/50 p-3">
-                  <p className="text-sm font-semibold">O que este nível significa</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{faixaSelecionada.acao}</p>
-                </div>
-              )}
-              {carregandoAlunos ? <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Buscando alunos...</div>
-                : alunosDaFaixa.length ? (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selecione um aluno para abrir o relatório individual</p>
-                    {alunosDaFaixa.map((aluno) => (
-                      <button key={aluno.id} type="button" onClick={() => setAlunoSelecionado(aluno)}
-                        className="flex w-full items-center justify-between rounded-xl border border-border p-3 text-left transition hover:border-primary/50 hover:bg-muted/40">
-                        <span><b className="block text-sm">{aluno.aluno_nome}</b><span className="text-xs text-muted-foreground">{aluno.ano}º {aluno.turma} · Nível {aluno.nivel} · {aluno.area === "leitura" ? "Leitura" : "Escrita"}</span></span>
-                        <ChevronRight className="size-4 text-muted-foreground" />
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border p-5 text-center">
-                    <Users2 className="mx-auto size-7 text-muted-foreground" />
-                    <p className="mt-2 text-sm font-semibold">Os dados atuais mostram apenas totais por turma.</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Ainda não há registros individuais importados para esta faixa. Para preservar a privacidade das crianças, os nomes não são inferidos nem publicados. Importe ou cadastre os níveis individuais no banco privado.</p>
-                  </div>
-                )}
-            </DialogContent>
-          </Dialog>
-          <Dialog open={!!alunoSelecionado} onOpenChange={(aberto) => { if (!aberto) setAlunoSelecionado(null); }}>
-            <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2"><FileText className="size-5 text-primary" /> Relatório individual</DialogTitle>
-                <DialogDescription>{alunoSelecionado?.aluno_nome} · {alunoSelecionado?.ano}º {alunoSelecionado?.turma}</DialogDescription>
-              </DialogHeader>
-              {alunoSelecionado && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Área</p><p className="mt-1 font-bold">{alunoSelecionado.area === "leitura" ? "Leitura" : "Escrita"}</p></div>
-                    <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Nível atual</p><p className="mt-1 font-bold">{alunoSelecionado.nivel}</p></div>
-                  </div>
-                  <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Observações do professor</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.observacoes || "Nenhuma observação registrada."}</p></div>
-                  <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Evidências</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.evidencia || "Nenhuma evidência registrada."}</p></div>
-                  <section><h3 className="mb-2 text-sm font-bold">Histórico bimestral de leitura e escrita</h3>
-                    {carregandoHistorico ? <p className="text-sm text-muted-foreground">Carregando histórico...</p> : historicoAluno.length ? <div className="space-y-2">{historicoAluno.map((r) => <div key={r.id} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div><p className="text-sm font-semibold">{r.bimestre}º bimestre · {r.area === "leitura" ? "Leitura" : "Escrita"}</p><p className="text-xs text-muted-foreground">{r.data_avaliacao ? new Date(r.data_avaliacao + "T12:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p></div><span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold">Nível {r.nivel}</span></div>)}</div> : <p className="text-sm text-muted-foreground">Sem histórico adicional.</p>}
-                  </section>
-                  <div className="flex justify-between"><button type="button" onClick={() => setAlunoSelecionado(null)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ArrowLeft className="size-4" /> Voltar à lista</button></div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
-        </>
-      )}
-    </div>
-  );
-}
 
 function Legenda<T extends string>({ niveis }: { niveis: NivelInfo<T>[] }) {
   return (
@@ -623,6 +559,34 @@ export function PainelMapaClasse({
           </p>
         </CardContent>
       </Card>
+      {permitirDetalhesIndividuais && (
+        <>
+          <Dialog open={!!faixaSelecionada} onOpenChange={(v) => { if (!v) { setFaixaSelecionada(null); setAlunoSelecionado(null); } }}>
+            <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto">
+              <DialogHeader><DialogTitle>{faixaSelecionada ? `${nomeTurma(faixaSelecionada)} · ${faixaSelecionada.area === "leitura" ? "Leitura" : "Escrita"}` : "Alunos"}</DialogTitle>
+                <DialogDescription>{faixaSelecionada ? `Nível ${faixaSelecionada.nivel} · ${faixaSelecionada.nomeNivel} · ${faixaSelecionada.total} aluno(s)` : ""}</DialogDescription></DialogHeader>
+              {faixaSelecionada && <div className="rounded-xl bg-muted/50 p-3"><p className="text-sm font-semibold">O que este nível significa</p><p className="mt-1 text-sm text-muted-foreground">{faixaSelecionada.acao}</p></div>}
+              {carregandoAlunos ? <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Buscando alunos...</div>
+                : alunosDaFaixa.length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selecione um aluno para abrir o relatório individual</p>
+                  {alunosDaFaixa.map((aluno) => <button key={aluno.id} type="button" onClick={() => setAlunoSelecionado(aluno)} className="flex w-full items-center justify-between rounded-xl border border-border p-3 text-left transition hover:border-primary/50 hover:bg-muted/40"><span><b className="block text-sm">{aluno.aluno_nome}</b><span className="text-xs text-muted-foreground">{aluno.ano}º {aluno.turma} · Nível {aluno.nivel} · {aluno.area === "leitura" ? "Leitura" : "Escrita"}</span></span><ChevronRight className="size-4 text-muted-foreground" /></button>)}
+                </div> : <div className="rounded-xl border border-dashed border-border p-5 text-center"><Users2 className="mx-auto size-7 text-muted-foreground" /><p className="mt-2 text-sm font-semibold">Os dados atuais mostram apenas totais por turma.</p><p className="mt-1 text-xs text-muted-foreground">Ainda não há registros individuais importados para esta faixa. Importe ou cadastre os níveis individuais no banco privado; os nomes não serão inferidos.</p></div>}
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!alunoSelecionado} onOpenChange={(v) => { if (!v) setAlunoSelecionado(null); }}>
+            <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto">
+              <DialogHeader><DialogTitle className="flex items-center gap-2"><FileText className="size-5 text-primary" /> Relatório individual</DialogTitle><DialogDescription>{alunoSelecionado?.aluno_nome} · {alunoSelecionado?.ano}º {alunoSelecionado?.turma}</DialogDescription></DialogHeader>
+              {alunoSelecionado && <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3"><div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Área</p><p className="mt-1 font-bold">{alunoSelecionado.area === "leitura" ? "Leitura" : "Escrita"}</p></div><div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Nível atual</p><p className="mt-1 font-bold">{alunoSelecionado.nivel}</p></div></div>
+                <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Observações do professor</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.observacoes || "Nenhuma observação registrada."}</p></div>
+                <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Evidências</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.evidencia || "Nenhuma evidência registrada."}</p></div>
+                <section><h3 className="mb-2 text-sm font-bold">Histórico bimestral de leitura e escrita</h3>{carregandoHistorico ? <p className="text-sm text-muted-foreground">Carregando histórico...</p> : historicoAluno.length ? <div className="space-y-2">{historicoAluno.map((r) => <div key={r.id} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div><p className="text-sm font-semibold">{r.bimestre}º bimestre · {r.area === "leitura" ? "Leitura" : "Escrita"}</p><p className="text-xs text-muted-foreground">{r.data_avaliacao ? new Date(r.data_avaliacao + "T12:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p></div><span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold">Nível {r.nivel}</span></div>)}</div> : <p className="text-sm text-muted-foreground">Sem histórico adicional.</p>}</section>
+                <button type="button" onClick={() => setAlunoSelecionado(null)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ArrowLeft className="size-4" /> Voltar à lista</button>
+              </div>}
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+
     </div>
   );
 }
