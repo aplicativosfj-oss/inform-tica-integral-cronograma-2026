@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { BotaoAusencia } from "@/components/school/laboratorio/ausencia";
+import { BotaoSaida } from "@/components/school/laboratorio/saida";
 import { FichaAluno, rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import type { DadosLab } from "@/components/school/laboratorio/painel-agora";
 import {
@@ -132,6 +133,41 @@ const PRESENCA: Record<
 };
 
 /**
+ * Cores por situação do aluno na escolha — uma para cada coisa, porque
+ * antes "já foi na semana" e "suspenso" dividiam o mesmo âmbar e só dava
+ * para distinguir lendo o texto miúdo.
+ *
+ * Azul: já foi nesta semana (cumpriu a vez). Âmbar: suspenso das aulas por
+ * decisão do professor. Rosa: faltou hoje. Cinza: saiu da turma.
+ */
+const SITUACAO = {
+  naSemana: {
+    rotulo: "Já foi na semana",
+    cartao: "border-sky-500/60 bg-sky-500/10 dark:bg-sky-500/15",
+    barra: "bg-sky-500",
+    texto: "text-sky-700 dark:text-sky-300",
+    ponto: "bg-sky-500",
+    anel: "ring-sky-500",
+  },
+  suspenso: {
+    rotulo: "Suspenso das aulas",
+    cartao: "border-amber-500/70 bg-amber-400/15 dark:bg-amber-500/15",
+    barra: "bg-amber-500",
+    texto: "text-amber-700 dark:text-amber-300",
+    ponto: "bg-amber-500",
+    anel: "ring-amber-500",
+  },
+  saiu: {
+    rotulo: "Transferido ou desistente",
+    cartao: "border-slate-400/60 bg-slate-500/10 dark:bg-slate-400/10",
+    barra: "bg-slate-500",
+    texto: "text-slate-600 dark:text-slate-300",
+    ponto: "bg-slate-500",
+    anel: "ring-slate-400",
+  },
+} as const;
+
+/**
  * Chave de um aluno no painel. O id sozinho não basta: no cadastro, alunos de
  * turmas diferentes podem ter o mesmo id, e escolher um marcava o outro junto.
  */
@@ -152,7 +188,7 @@ export function ControleLaboratorio({
   aoMarcar?: () => void;
   className?: string;
 }) {
-  const { turmas } = useAppStore();
+  const { turmas, todasTurmas } = useAppStore();
   const { email } = useAuth();
   const [turmaSel, setTurmaSel] = useState<string | null>(null);
   const [escolhidos, setEscolhidos] = useState<Set<string>>(new Set());
@@ -261,6 +297,15 @@ export function ControleLaboratorio({
     if (x.acima) p -= 50;
     return p;
   };
+
+  /** Transferidos e desistentes: saem do rodízio, mas o professor precisa
+   *  ver que a criança saiu, em vez de achar que sumiu da lista. */
+  const saidos = useMemo(() => {
+    const doSaiu = (a: { situacao?: string | undefined }) =>
+      a.situacao === "transferido" || a.situacao === "desistente";
+    const fonte = mista ? todasTurmas : todasTurmas.filter((t) => t.id === idAtual);
+    return fonte.flatMap((t) => t.alunos.filter(doSaiu).map((a) => ({ a, t })));
+  }, [todasTurmas, idAtual, mista]);
 
   const visiveis = useMemo(() => {
     const ok = lista.filter(({ a, t }) => {
@@ -776,6 +821,11 @@ export function ControleLaboratorio({
                   number
                 >,
               )}
+              naSemana={
+                lista.filter(({ a, t }) => jaFoiNaSemana(situacoes.get(chave(t.id, a.id))!)).length
+              }
+              suspensos={lista.filter(({ a }) => Boolean(a.impedido)).length}
+              saidos={saidos.length}
             />
 
             {visiveis.length === 0 ? (
@@ -799,15 +849,26 @@ export function ControleLaboratorio({
                   const fila = posicaoFila.get(k);
                   const presenca = presencaHoje(ausente?.ausencia ?? null, ocupado || sit.hoje);
                   const cor = presenca ? PRESENCA[presenca] : null;
-                  const ring = sit.repetiuSemana
-                    ? "ring-red-500"
-                    : jaFoiNaSemana(sit)
-                      ? "ring-amber-500"
-                      : sit.prioridade
-                        ? "ring-indigo-500"
-                        : "ring-emerald-500/60";
+                  const ring = a.impedido
+                    ? SITUACAO.suspenso.anel
+                    : sit.repetiuSemana
+                      ? "ring-red-500"
+                      : jaFoiNaSemana(sit)
+                        ? SITUACAO.naSemana.anel
+                        : sit.prioridade
+                          ? "ring-indigo-500"
+                          : "ring-emerald-500/60";
                   return (
                     <li key={k} className="relative min-w-0">
+                      {!cor && !marcado && (a.impedido || travadoSemana) ? (
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "absolute inset-y-2 left-0 z-10 w-1.5 rounded-r-full",
+                            a.impedido ? SITUACAO.suspenso.barra : SITUACAO.naSemana.barra,
+                          )}
+                        />
+                      ) : null}
                       {cor && !marcado ? (
                         <span
                           aria-hidden
@@ -840,9 +901,13 @@ export function ControleLaboratorio({
                             sit.prioridade &&
                             "border-indigo-500/50 bg-gradient-to-r from-indigo-500/10 to-transparent",
                           cor && !marcado && cn("cursor-not-allowed", cor.cartao),
+                          !cor && !marcado && a.impedido && SITUACAO.suspenso.cartao,
                           !cor &&
                             travadoSemana &&
-                            "cursor-not-allowed border-dashed opacity-50 grayscale [background-image:repeating-linear-gradient(135deg,transparent_0_7px,rgb(120_120_120/0.12)_7px_14px)]",
+                            cn(
+                              "cursor-not-allowed border-dashed opacity-70",
+                              !a.impedido && SITUACAO.naSemana.cartao,
+                            ),
                           !cor && bloqueado && !travadoSemana && "cursor-not-allowed opacity-45",
                         )}
                       >
@@ -888,7 +953,9 @@ export function ControleLaboratorio({
                               <strong>{rotuloTurma(t.serie, t.letra)}</strong>
                             ) : null}
                             {a.impedido ? (
-                              <span>suspenso(a)</span>
+                              <span className={cn("font-semibold", SITUACAO.suspenso.texto)}>
+                                suspenso(a) das aulas
+                              </span>
                             ) : ausente ? (
                               <span className={cn("font-semibold", cor?.texto)}>
                                 {ausente.ausencia === "faltou"
@@ -910,7 +977,7 @@ export function ControleLaboratorio({
                                 foi {sit.idasSemana}× na semana
                               </span>
                             ) : sit.naSemana ? (
-                              <span className="font-semibold text-amber-600 dark:text-amber-400">
+                              <span className={cn("font-semibold", SITUACAO.naSemana.texto)}>
                                 foi na semana
                                 {sit.ultimaIda ? ` (${dataCurta(sit.ultimaIda)})` : ""}
                               </span>
@@ -1015,12 +1082,61 @@ export function ControleLaboratorio({
                           }}
                           className={cn(marcado && !ausente && "text-white")}
                         />
+                        <BotaoSaida
+                          turmaId={t.id}
+                          aluno={{ id: a.id, nome: a.nome }}
+                          aoMudar={() => {
+                            setEscolhidos((anterior) => {
+                              const novo = new Set(anterior);
+                              novo.delete(k);
+                              return novo;
+                            });
+                          }}
+                          className={cn(marcado && "text-white/80")}
+                        />
                       </div>
                     </li>
                   );
                 })}
               </ul>
             )}
+
+            {saidos.length > 0 ? (
+              <div className="mt-4 rounded-xl border border-dashed border-slate-400/50 bg-slate-500/5 p-3">
+                <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  <span className={cn("size-2.5 rounded-full", SITUACAO.saiu.ponto)} aria-hidden />
+                  Fora da turma ({saidos.length})
+                </p>
+                <ul className="flex flex-wrap gap-2">
+                  {saidos.map(({ a, t }) => (
+                    <li
+                      key={chave(t.id, a.id)}
+                      className={cn(
+                        "flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs",
+                        SITUACAO.saiu.cartao,
+                      )}
+                      title={
+                        a.situacaoObs
+                          ? `${a.situacao === "transferido" ? "Transferido(a)" : "Desistente"} — ${a.situacaoObs}`
+                          : undefined
+                      }
+                    >
+                      <span className="font-semibold line-through decoration-slate-400/70">
+                        {a.nome}
+                      </span>
+                      <span className={SITUACAO.saiu.texto}>
+                        {a.situacao === "transferido" ? "transferido(a)" : "desistente"}
+                        {a.situacaoEm ? ` · ${a.situacaoEm.split("-").reverse().join("/")}` : ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Eles não entram no rodízio nem nos totais. Para trazer alguém de volta, abra a
+                  ficha em Turmas e alunos.
+                </p>
+              </div>
+            ) : null}
           </section>
 
           {/* barra fixa embaixo: vagas e botão para a página 2 */}
@@ -1420,8 +1536,23 @@ function presencaHoje(ausencia: TipoAusencia | null, foi: boolean): PresencaHoje
   return foi ? "participou" : null;
 }
 
-/** Legenda das cores do dia, com quantos alunos há em cada situação. */
-function LegendaPresenca({ contagem }: { contagem: Record<PresencaHoje, number> }) {
+/**
+ * Legenda das cores, com quantos alunos há em cada situação. Mostra o que
+ * aconteceu hoje (participou, faltou, impedido, recusou) e também as
+ * situações que atravessam o dia: já foi na semana, suspenso das aulas e
+ * quem saiu da turma.
+ */
+function LegendaPresenca({
+  contagem,
+  naSemana,
+  suspensos,
+  saidos,
+}: {
+  contagem: Record<PresencaHoje, number>;
+  naSemana: number;
+  suspensos: number;
+  saidos: number;
+}) {
   return (
     <div
       className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border bg-card/60 px-3 py-2 text-xs sm:gap-x-4 sm:px-3.5"
@@ -1435,6 +1566,21 @@ function LegendaPresenca({ contagem }: { contagem: Record<PresencaHoje, number> 
           <span className="tabular-nums text-muted-foreground">{contagem[p]}</span>
         </span>
       ))}
+      {(
+        [
+          { chave: "naSemana", n: naSemana },
+          { chave: "suspenso", n: suspensos },
+          { chave: "saiu", n: saidos },
+        ] as const
+      )
+        .filter((x) => x.n > 0)
+        .map(({ chave: c, n }) => (
+          <span key={c} className="flex items-center gap-1.5">
+            <span className={cn("size-2.5 rounded-full", SITUACAO[c].ponto)} aria-hidden />
+            <span className={cn("font-semibold", SITUACAO[c].texto)}>{SITUACAO[c].rotulo}</span>
+            <span className="tabular-nums text-muted-foreground">{n}</span>
+          </span>
+        ))}
       <span className="flex items-center gap-1.5">
         <span className="size-2.5 rounded-full border border-muted-foreground/50" aria-hidden />
         <span className="text-muted-foreground">Sem registro</span>
