@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BookOpenText, CalendarDays, ClipboardPenLine, FileText, Save, Search, Users2 } from "lucide-react";
+import { CalendarDays, ClipboardCheck, ClipboardPenLine, FileText, Printer, Save, Search, Target, Users2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,97 @@ const NIVEL: Record<number, string> = {
 };
 const CRITERIOS_VAZIOS: Criterios = { leitura: {}, escrita: {} };
 const PONTOS_FRAGEIS = 2;
+type Intervencao = {
+  area: "Leitura" | "Escrita";
+  habilidade: string;
+  nivel: number;
+  objetivo: string;
+  atividade: string;
+  rotina: string;
+  evidencia: string;
+};
+
+const ESTRATEGIAS: Record<string, Omit<Intervencao, "area" | "habilidade" | "nivel">> = {
+  precisao: {
+    objetivo: "Reconhecer palavras com maior precisão, reduzindo trocas, omissões e hesitações.",
+    atividade: "Leitura guiada de listas graduadas, jogos de correspondência palavra-imagem e leitura repetida de pequenos trechos.",
+    rotina: "2 a 3 sessões semanais de 10 a 15 minutos, com palavras e textos adequados ao nível de leitura.",
+    evidencia: "Registrar palavras lidas corretamente, tipos de troca e necessidade de ajuda.",
+  },
+  fluencia: {
+    objetivo: "Ganhar continuidade, ritmo e segurança sem sacrificar a compreensão.",
+    atividade: "Leitura eco, leitura em duplas e releitura de um mesmo texto curto com acompanhamento do professor.",
+    rotina: "3 sessões semanais de 10 minutos; comparar uma leitura inicial e outra após a prática.",
+    evidencia: "Anotar interrupções, autocorreções, continuidade e compreensão do trecho.",
+  },
+  prosodia: {
+    objetivo: "Usar pausas, entonação e sinais de pontuação para construir sentido.",
+    atividade: "Leitura dramatizada de diálogos, marcação de pausas no texto e leitura-modelo seguida de imitação.",
+    rotina: "2 sessões semanais de 15 minutos, com textos curtos e variados.",
+    evidencia: "Observar pausas adequadas, entonação e respeito à pontuação.",
+  },
+  compreensao_literal: {
+    objetivo: "Localizar informações explícitas e recuperar fatos essenciais do texto.",
+    atividade: "Leitura compartilhada com perguntas quem, onde, quando e o que aconteceu; localizar no texto a pista da resposta.",
+    rotina: "2 a 3 textos curtos por semana, aumentando gradualmente a extensão.",
+    evidencia: "Guardar respostas e indicar se o aluno localiza a informação no texto.",
+  },
+  compreensao_inferencial: {
+    objetivo: "Construir inferências simples usando pistas do texto e conhecimentos prévios.",
+    atividade: "Paradas durante a leitura para perguntar o que pode acontecer, por que o personagem agiu assim e quais pistas sustentam a resposta.",
+    rotina: "2 sessões semanais de 15 minutos com conversa orientada.",
+    evidencia: "Registrar a inferência e a pista textual usada para justificá-la.",
+  },
+  ideia_principal: {
+    objetivo: "Identificar o assunto e distinguir a ideia principal de detalhes secundários.",
+    atividade: "Dar título a parágrafos, selecionar a frase que melhor resume o texto e produzir resumo oral em uma ou duas frases.",
+    rotina: "2 textos por semana, com retirada gradual de pistas do professor.",
+    evidencia: "Comparar título, resumo e seleção da informação central.",
+  },
+  vocabulario: {
+    objetivo: "Ampliar o repertório lexical e compreender palavras pelo contexto.",
+    atividade: "Diário de palavras, exploração de sinônimos e antônimos, famílias de palavras e dedução de significado pelo contexto.",
+    rotina: "Selecionar 3 a 5 palavras por semana e reutilizá-las em falas e pequenos textos.",
+    evidencia: "Verificar se explica o significado e utiliza a palavra em novo contexto.",
+  },
+  ortografia: {
+    objetivo: "Perceber regularidades ortográficas e revisar a escrita de palavras frequentes.",
+    atividade: "Ditado reflexivo, classificação de palavras por regularidade, consulta a repertório visual e revisão orientada.",
+    rotina: "2 a 3 sessões semanais de 10 a 15 minutos focadas nos padrões observados nos textos do aluno.",
+    evidencia: "Manter amostras de escrita e contabilizar os padrões de erro que diminuem ou persistem.",
+  },
+  pontuacao: {
+    objetivo: "Empregar sinais de pontuação para organizar frases e favorecer a leitura.",
+    atividade: "Reescrever pequenos textos sem pontuação, comparar sentidos e revisar frases com ponto final, interrogação e exclamação.",
+    rotina: "2 sessões semanais de 15 minutos, sempre a partir de textos produzidos pelo estudante.",
+    evidencia: "Comparar uso adequado dos sinais em duas produções sucessivas.",
+  },
+  coerencia: {
+    objetivo: "Produzir textos com ideias relacionadas ao tema e sequência compreensível.",
+    atividade: "Planejar começo, desenvolvimento e fechamento com imagens, sequência de cenas e reconto antes da escrita.",
+    rotina: "Uma produção curta por semana, com planejamento oral e revisão do sentido global.",
+    evidencia: "Verificar manutenção do tema, sequência lógica e ausência de contradições.",
+  },
+  coesao: {
+    objetivo: "Conectar frases e partes do texto usando recursos de articulação adequados.",
+    atividade: "Ordenar frases, completar textos com conectivos e substituir repetições por pronomes ou expressões equivalentes.",
+    rotina: "2 atividades semanais de reconstrução e ampliação de pequenos parágrafos.",
+    evidencia: "Observar variedade e adequação dos conectivos e continuidade entre frases.",
+  },
+  estrutura: {
+    objetivo: "Organizar o texto de acordo com sua finalidade e gênero.",
+    atividade: "Analisar modelos curtos, planejar as partes do gênero trabalhado e produzir texto com roteiro visual.",
+    rotina: "Uma sequência de produção por semana, alternando gêneros já trabalhados em sala.",
+    evidencia: "Usar lista de verificação das partes esperadas para o gênero.",
+  },
+  frases: {
+    objetivo: "Construir frases completas, compreensíveis e progressivamente mais elaboradas.",
+    atividade: "Ampliar frases simples com quem, fez o quê, onde e quando; combinar frases e revisar concordância e ordem das palavras.",
+    rotina: "2 a 3 sessões semanais de 10 minutos integradas à produção textual.",
+    evidencia: "Guardar exemplos de frases iniciais e revisadas para comparar a evolução.",
+  },
+};
+
 
 function media(valores: number[]) {
   return valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null;
@@ -195,6 +286,48 @@ export function AvaliacaoContinuaLeituraEscrita() {
     }
     setSalvando(false);
   }
+
+
+  const planosIntervencao = useMemo(() => {
+    const porAluno = new Map<string, Registro[]>();
+    for (const registro of registrosDoRecorte) {
+      const lista = porAluno.get(registro.aluno_id) ?? [];
+      lista.push(registro);
+      porAluno.set(registro.aluno_id, lista);
+    }
+    return [...porAluno.entries()].map(([alunoId, historico]) => {
+      const ordenado = [...historico].sort((a, b) =>
+        b.data_avaliacao.localeCompare(a.data_avaliacao) || b.updated_at.localeCompare(a.updated_at),
+      );
+      const maisRecente = ordenado[0]!;
+      const habilidades: Intervencao[] = [];
+      for (const [area, lista] of [["Leitura", LEITURA], ["Escrita", ESCRITA]] as const) {
+        for (const [chave, nome] of lista) {
+          const avaliacao = ordenado.find((r) => {
+            const valores = area === "Leitura" ? r.criterios?.leitura : r.criterios?.escrita;
+            return valores?.[chave] != null;
+          });
+          const valores = area === "Leitura" ? avaliacao?.criterios?.leitura : avaliacao?.criterios?.escrita;
+          const nota = valores?.[chave];
+          if (nota == null || nota > PONTOS_FRAGEIS) continue;
+          const estrategia = ESTRATEGIAS[chave];
+          if (estrategia) habilidades.push({ area, habilidade: nome, nivel: nota, ...estrategia });
+        }
+      }
+      habilidades.sort((a, b) => a.nivel - b.nivel);
+      const turma = turmas.find((t) => t.id === maisRecente.turma_id);
+      return {
+        alunoId,
+        nome: maisRecente.aluno_nome,
+        turmaNome: turma ? turma.serie + " " + turma.letra : "Turma não identificada",
+        dataBase: maisRecente.data_avaliacao,
+        bimestreBase: maisRecente.bimestre,
+        habilidades,
+        prioridade: habilidades.some((h) => h.nivel === 1) || habilidades.length >= 3 ? "Prioritária" : "Acompanhar",
+      };
+    }).filter((plano) => plano.habilidades.length > 0)
+      .sort((a, b) => (a.prioridade === b.prioridade ? a.nome.localeCompare(b.nome, "pt-BR") : a.prioridade === "Prioritária" ? -1 : 1));
+  }, [registrosDoRecorte, turmas]);
 
   const alunosUnicos = new Set(filtrados.map((r) => r.aluno_id)).size;
 
