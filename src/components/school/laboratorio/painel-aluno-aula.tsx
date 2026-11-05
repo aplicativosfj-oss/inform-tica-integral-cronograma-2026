@@ -2,11 +2,14 @@ import {
   Ban,
   CalendarDays,
   CheckCircle2,
+  CalendarOff,
   ClipboardList,
+  Flag,
   GraduationCap,
   Hand,
   Loader2,
   Lock,
+  LogOut,
   MonitorSmartphone,
   NotebookPen,
   ShieldAlert,
@@ -36,6 +39,7 @@ import {
   type SessaoLab,
   type TipoAusencia,
 } from "@/lib/laboratorio";
+import { ROTULO_MARCA, TIPOS_MARCA } from "@/lib/marcas-aluno";
 import { idadeEmAnos } from "@/lib/profissional-acesso";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { supabase } from "@/lib/supabase-client";
@@ -141,6 +145,13 @@ export function PainelAlunoAula({
   const [registros, setRegistros] = useState<SessaoLab[] | null>(null);
   const [notas, setNotas] = useState<Nota[] | null>(null);
   const [erroNotas, setErroNotas] = useState<string | null>(null);
+
+  /** Lembrete mais recente deste aluno (saiu antes, comportamento, impedimento). */
+  const lembrete = useMemo(() => {
+    const doTipo = (notas ?? []).filter((n) => (TIPOS_MARCA as readonly string[]).includes(n.tipo));
+    const ultima = doTipo[0];
+    return ultima ? { n: doTipo.length, tipo: ultima.tipo, descricao: ultima.descricao } : null;
+  }, [notas]);
 
   const turma = turmas.find((t) => t.id === aluno.turmaId);
   const cadastro = turma?.alunos.find((a) => a.id === aluno.id);
@@ -317,6 +328,19 @@ export function PainelAlunoAula({
               {aluno.ausencia ? (
                 <span className="rounded-md bg-amber-500/25 px-2 py-0.5 font-bold text-amber-200">
                   {ROTULO_AUSENCIA[aluno.ausencia]}
+                </span>
+              ) : null}
+              {/* O lembrete acompanha o aluno em todas as abas: é o que o
+                  professor precisa ter em mente antes de decidir qualquer
+                  coisa sobre a aula de hoje. */}
+              {lembrete ? (
+                <span
+                  className="flex items-center gap-1 rounded-md bg-amber-500/20 px-2 py-0.5 font-bold text-amber-200"
+                  title={lembrete.descricao}
+                >
+                  <Flag className="size-3" aria-hidden />
+                  {ROTULO_MARCA[lembrete.tipo] ?? lembrete.tipo}
+                  {lembrete.n > 1 ? ` ${lembrete.n}×` : ""}
                 </span>
               ) : null}
             </p>
@@ -762,6 +786,8 @@ function Anotacoes({
  * Impedir e cancelar mexem no registro do dia, então pedem justificativa e
  * uma confirmação separada — a mesma regra da saída da turma.
  */
+type AcaoAula = TipoAusencia | "cancelar" | "saiu_antes" | "suspender" | "liberar";
+
 function Acoes({
   aluno,
   aoMudar,
@@ -771,12 +797,21 @@ function Acoes({
   aoMudar: () => void;
   aoFechar: () => void;
 }) {
+  const { turmas, updateAluno } = useAppStore();
+  const cadastro = turmas
+    .find((t) => t.id === aluno.turmaId)
+    ?.alunos.find((a) => a.id === aluno.id);
+  const suspenso = Boolean(cadastro?.impedido);
   const [motivo, setMotivo] = useState("");
-  const [confirmando, setConfirmando] = useState<TipoAusencia | "cancelar" | null>(null);
+  const [confirmando, setConfirmando] = useState<AcaoAula | null>(null);
   const [ocupado, setOcupado] = useState(false);
 
-  async function aplicar(acao: TipoAusencia | "cancelar") {
-    const precisaMotivo = acao === "nao_autorizado" || acao === "cancelar";
+  async function aplicar(acao: AcaoAula) {
+    const precisaMotivo =
+      acao === "nao_autorizado" ||
+      acao === "cancelar" ||
+      acao === "saiu_antes" ||
+      acao === "suspender";
     if (precisaMotivo && motivo.trim().length < 10) {
       toast.error("Escreva a justificativa com pelo menos 10 caracteres.");
       return;
@@ -795,6 +830,40 @@ function Acoes({
         aoFechar();
         return;
       }
+      // Saiu antes do fim: a aula dele aconteceu, então nada muda no registro
+      // de hoje. O que fica é o lembrete, que reaparece na tela de escolher.
+      if (acao === "saiu_antes") {
+        await registrarNota(aluno, "saiu_antes", motivo.trim());
+        toast.success("Lembrete guardado. O aluno aparece marcado na hora de escolher.");
+        setMotivo("");
+        setConfirmando(null);
+        aoMudar();
+        return;
+      }
+      // Suspender vale para as **próximas** aulas: enquanto estiver marcado, a
+      // seleção do dia pula o aluno e chama o próximo da vez.
+      if (acao === "suspender" || acao === "liberar") {
+        const ligar = acao === "suspender";
+        updateAluno(aluno.turmaId, aluno.id, {
+          impedido: ligar,
+          motivoImpedimento: ligar ? motivo.trim() : undefined,
+        });
+        if (ligar)
+          await registrarNota(
+            aluno,
+            "impedimento",
+            `Suspenso das próximas aulas: ${motivo.trim()}`,
+          ).catch(() => {});
+        toast.success(
+          ligar
+            ? "Suspenso das próximas aulas. O rodízio vai pular este aluno."
+            : "Suspensão retirada. O aluno volta ao rodízio.",
+        );
+        setMotivo("");
+        setConfirmando(null);
+        aoMudar();
+        return;
+      }
       if (acao === "nao_autorizado")
         await registrarNota(aluno, "impedimento", motivo.trim()).catch(() => {});
       await marcarAusencia(aluno.sessaoId, acao, precisaMotivo ? motivo.trim() : null);
@@ -803,7 +872,7 @@ function Acoes({
       setConfirmando(null);
       aoMudar();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível concluir.");
+      toast.error(mensagemDeErro(e));
     } finally {
       setOcupado(false);
     }
@@ -823,12 +892,26 @@ function Acoes({
   }
 
   const acoes: {
-    id: TipoAusencia | "cancelar";
+    id: AcaoAula;
     rotulo: string;
     ajuda: string;
     Icone: LucideIcon;
     perigo?: boolean;
   }[] = [
+    {
+      id: "saiu_antes",
+      rotulo: "Saiu antes do fim",
+      ajuda: "Pediu para sair e deixou o colega de fora. Vira lembrete na hora de escolher.",
+      Icone: LogOut,
+    },
+    {
+      id: suspenso ? "liberar" : "suspender",
+      rotulo: suspenso ? "Liberar para as próximas aulas" : "Suspender das próximas aulas",
+      ajuda: suspenso
+        ? "Tira a suspensão: o aluno volta ao rodízio."
+        : "O rodízio pula este aluno até você liberar. Vale para as próximas, não para hoje.",
+      Icone: CalendarOff,
+    },
     {
       id: "faltou",
       rotulo: "Marcar falta",
@@ -843,8 +926,8 @@ function Acoes({
     },
     {
       id: "nao_autorizado",
-      rotulo: "Impedir o aluno",
-      ajuda: "Não autorizado a participar hoje. Exige justificativa.",
+      rotulo: "Impedir o aluno hoje",
+      ajuda: "Não autorizado a participar nesta aula. Exige justificativa.",
       Icone: Ban,
     },
     {
@@ -858,6 +941,19 @@ function Acoes({
 
   return (
     <div className="space-y-4">
+      {suspenso ? (
+        <Caixa className="border-amber-400/40 bg-amber-500/10">
+          <p className="flex items-start gap-2 text-sm">
+            <CalendarOff className="mt-0.5 size-4 shrink-0 text-amber-300" aria-hidden />
+            <span>
+              Está <b>suspenso(a) das próximas aulas</b>
+              {cadastro?.motivoImpedimento ? `: ${cadastro.motivoImpedimento}` : "."} O rodízio pula
+              este aluno até alguém liberar.
+            </span>
+          </p>
+        </Caixa>
+      ) : null}
+
       {aluno.ausencia ? (
         <Caixa className="border-amber-400/40 bg-amber-500/10">
           <p className="text-sm">
@@ -909,7 +1005,13 @@ function Acoes({
                   <p className="text-xs font-semibold text-white/85">
                     {id === "cancelar"
                       ? `${aluno.nome} sai da aula em andamento e a marcação de hoje é apagada. Confirma?`
-                      : `Confirma registrar “${ROTULO_AUSENCIA[id]}” para ${aluno.nome}?`}
+                      : id === "saiu_antes"
+                        ? `Guardar que ${aluno.nome} saiu antes do fim? Vai aparecer marcada nas próximas escolhas.`
+                        : id === "suspender"
+                          ? `${aluno.nome} fica fora do rodízio até você liberar. Confirma?`
+                          : id === "liberar"
+                            ? `${aluno.nome} volta ao rodízio. Confirma?`
+                            : `Confirma registrar “${ROTULO_AUSENCIA[id as TipoAusencia]}” para ${aluno.nome}?`}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -956,6 +1058,18 @@ function Acoes({
       </Caixa>
     </div>
   );
+}
+
+/**
+ * O banco recusa um tipo de anotação que ainda não conhece. Em vez do texto
+ * cru do Postgres, diz qual arquivo falta rodar — o mesmo caminho que o
+ * sistema já usa para o "Recusou-se".
+ */
+function mensagemDeErro(e: unknown): string {
+  const texto = e instanceof Error ? e.message : "";
+  if (/anotacoes_aluno_laboratorio_tipo_check|violates check constraint/i.test(texto))
+    return "O banco ainda não aceita este tipo de lembrete. Rode supabase/marcas-aluno.sql no Supabase e tente de novo.";
+  return texto || "Não foi possível concluir.";
 }
 
 /** Guarda a justificativa junto das anotações do aluno, quando a tabela existe. */

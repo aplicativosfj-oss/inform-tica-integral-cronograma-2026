@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock3,
+  Flag,
   Flame,
   IdCard,
   Lock,
@@ -55,6 +56,7 @@ import {
   type SessaoLab,
   type TipoAusencia,
 } from "@/lib/laboratorio";
+import { ROTULO_MARCA, diaCurto, marcaDe, useMarcas } from "@/lib/marcas-aluno";
 import { LIMITE_ALUNOS_LAB, LIMITE_IDAS_MES, LIMITE_IDAS_SEMANA } from "@/lib/recursos";
 import { serieClasses, serieIndexPorNumero } from "@/lib/serie-colors";
 import { cn } from "@/lib/utils";
@@ -300,6 +302,20 @@ export function ControleLaboratorio({
 
   /** Transferidos e desistentes: saem do rodízio, mas o professor precisa
    *  ver que a criança saiu, em vez de achar que sumiu da lista. */
+  /**
+   * Lembretes do laboratório das turmas visíveis: quem saiu antes do fim,
+   * quem teve ocorrência de comportamento, quem já foi impedido. Aparecem
+   * como uma marca âmbar no cartão, para a escolha de hoje não repetir o
+   * problema da semana passada. `marcasVersao` força a releitura depois de
+   * registrar algo pela ficha.
+   */
+  const turmasNaTela = useMemo(
+    () => (mista ? turmas.map((t) => t.id) : idAtual ? [idAtual] : []),
+    [mista, turmas, idAtual],
+  );
+  const [marcasVersao, setMarcasVersao] = useState(0);
+  const marcas = useMarcas(turmasNaTela, marcasVersao);
+
   const saidos = useMemo(() => {
     const doSaiu = (a: { situacao?: string | undefined }) =>
       a.situacao === "transferido" || a.situacao === "desistente";
@@ -847,6 +863,7 @@ export function ControleLaboratorio({
                   const bloqueado =
                     Boolean(a.impedido) || ocupado || Boolean(ausente) || travadoSemana || noTeto;
                   const fila = posicaoFila.get(k);
+                  const marca = marcaDe(marcas, t.id, a.id);
                   const presenca = presencaHoje(ausente?.ausencia ?? null, ocupado || sit.hoje);
                   const cor = presenca ? PRESENCA[presenca] : null;
                   const ring = a.impedido
@@ -1002,6 +1019,21 @@ export function ControleLaboratorio({
                               <span className="font-semibold text-red-500">· acima da média</span>
                             ) : null}
                           </span>
+                          {marca ? (
+                            <span
+                              title={marca.descricao}
+                              className={cn(
+                                "mt-1.5 flex w-fit items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold",
+                                marcado
+                                  ? "bg-white/20 text-white"
+                                  : "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+                              )}
+                            >
+                              <Flag className="size-3 shrink-0" aria-hidden />
+                              {ROTULO_MARCA[marca.tipo] ?? marca.tipo}
+                              {marca.n > 1 ? ` ${marca.n}×` : ""} · {diaCurto(marca.ultima)}
+                            </span>
+                          ) : null}
                         </span>
                       </button>
                       <button
@@ -1473,7 +1505,18 @@ export function ControleLaboratorio({
         </div>
       )}
 
-      {ficha ? <FichaAluno {...ficha} aberto aoFechar={() => setFicha(null)} /> : null}
+      {ficha ? (
+        <FichaAluno
+          {...ficha}
+          aberto
+          aoFechar={() => {
+            setFicha(null);
+            // A ficha pode ter mudado a suspensão ou gerado anotação: relê os
+            // lembretes para a marca do cartão não ficar desatualizada.
+            setMarcasVersao((v) => v + 1);
+          }}
+        />
+      ) : null}
 
       <AlertDialog open={confirmarMista} onOpenChange={setConfirmarMista}>
         <AlertDialogContent>
