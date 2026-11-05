@@ -948,7 +948,7 @@ export class Corrida {
 
   private montarRivais() {
     const nivel = this.op.nivel;
-    const padrao = CARROS.map((c, i) => ({ nome: `Piloto ${i + 1}`, cor: c.cor })).filter(
+    const padrao = CARROS.map((c, i) => ({ nome: `Piloto ${i + 1}`, cor: c.cor, piloto: undefined as string | undefined })).filter(
       (c) => c.cor !== this.op.corJogador,
     );
     const grade = (this.op.rivais?.length ? this.op.rivais : padrao).slice(0, 5);
