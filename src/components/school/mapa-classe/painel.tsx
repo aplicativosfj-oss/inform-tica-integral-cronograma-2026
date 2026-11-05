@@ -10,6 +10,7 @@ import {
   Loader2,
   FileText,
   ArrowLeft,
+  Printer,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -461,7 +462,10 @@ export function PainelMapaClasse({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Comparação entre bimestres</CardTitle>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <CardTitle className="text-base">Comparação entre bimestres</CardTitle>
+            <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm font-semibold transition hover:bg-muted print:hidden"><Printer className="size-4" /> Exportar relatório PDF</button>
+          </div>
           <p className="text-xs text-muted-foreground">Compare a evolução da leitura entre dois períodos. A variação considera a proporção de alunos nos níveis A e B; aumento indica avanço nessa dimensão.</p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground"><span>DE</span>
@@ -510,6 +514,19 @@ export function PainelMapaClasse({
           })()}
         </CardContent>
       </Card>
+      <section className="mapa-print-root hidden print:block">
+        <div className="border-b-2 border-slate-800 pb-4"><p className="text-xs font-bold uppercase tracking-widest text-slate-600">Relatório pedagógico · leitura</p><h1 className="mt-2 text-2xl font-bold text-slate-950">Comparativo de desempenho por bimestre</h1><p className="mt-1 text-sm text-slate-600">Período: {compararDe}º para {compararPara}º bimestre · Ano letivo 2026</p><p className="mt-1 text-xs text-slate-500">Indicador: proporção de estudantes nos níveis A e B. Os totais avaliados podem variar entre aplicações.</p></div>
+        {(() => {
+          const somar = (bim: number) => Object.values(evolucaoLeitura).reduce((acc, lista) => { const e = lista.find((item) => item.bim === bim); if (!e) return acc; return { A: acc.A + e.A, B: acc.B + e.B, C: acc.C + e.C, D: acc.D + e.D, E: acc.E + e.E, avaliados: acc.avaliados + e.avaliados }; }, { A: 0, B: 0, C: 0, D: 0, E: 0, avaliados: 0 });
+          const inicio = somar(compararDe); const fim = somar(compararPara); const pa = pct(inicio.A + inicio.B, inicio.avaliados); const pb = pct(fim.A + fim.B, fim.avaliados);
+          return <div className="mt-5 grid grid-cols-3 gap-3 text-slate-900"><div className="rounded-lg border p-3"><p className="text-xs text-slate-500">{compararDe}º bimestre</p><p className="text-2xl font-bold">{pa}%</p><p className="text-xs text-slate-500">{inicio.avaliados} avaliados</p></div><div className="rounded-lg border p-3"><p className="text-xs text-slate-500">{compararPara}º bimestre</p><p className="text-2xl font-bold">{pb}%</p><p className="text-xs text-slate-500">{fim.avaliados} avaliados</p></div><div className="rounded-lg border p-3"><p className="text-xs text-slate-500">Variação</p><p className="text-2xl font-bold">{pb > pa ? "+" : ""}{pb - pa} p.p.</p><p className="text-xs text-slate-500">{pb > pa ? "Avanço" : pb < pa ? "Regressão" : "Estável"}</p></div></div>;
+        })()}
+        <h2 className="mb-2 mt-6 text-base font-bold text-slate-900">Resultado por turma</h2>
+        <table className="w-full border-collapse text-sm text-slate-900"><thead><tr className="border-b-2 border-slate-700 text-left"><th className="p-2">Turma</th><th className="p-2">{compararDe}º bim.</th><th className="p-2">{compararPara}º bim.</th><th className="p-2">Variação</th><th className="p-2">Situação</th></tr></thead>
+          <tbody>{turmas.map((t) => { const lista = evolucaoLeitura[String(t.ano) + t.turma] ?? []; const a = lista.find((e) => e.bim === compararDe); const b = lista.find((e) => e.bim === compararPara); if (!a || !b) return null; const pa = leitoresAB(a); const pb = leitoresAB(b); const d = pb - pa; return <tr key={String(t.ano) + t.turma} className="border-b"><td className="p-2 font-semibold">{nomeTurma(t)}</td><td className="p-2">{pa}% · {a.avaliados}</td><td className="p-2">{pb}% · {b.avaliados}</td><td className="p-2">{d > 0 ? "+" : ""}{d} p.p.</td><td className="p-2">{d > 0 ? "Avanço" : d < 0 ? "Regressão" : "Estável"}</td></tr>; })}</tbody></table>
+        <div className="mt-5 rounded-lg border p-3 text-xs leading-relaxed text-slate-600"><strong className="text-slate-800">Como interpretar:</strong> variação positiva indica aumento da proporção de alunos nos níveis A e B; variação negativa indica redução. Os números após o percentual representam estudantes avaliados em cada bimestre. Este relatório usa dados agregados por turma e não identifica estudantes.</div>
+        <p className="mt-6 text-[10px] text-slate-400">Relatório gerado a partir dos dados disponíveis no Mapa de Classe · 2026</p>
+      </section>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
@@ -633,6 +650,7 @@ export function PainelMapaClasse({
           </Dialog>
         </>
       )}
+<style>{'@media print { @page { size: A4 portrait; margin: 16mm; } body * { visibility: hidden !important; } .mapa-print-root, .mapa-print-root * { visibility: visible !important; } .mapa-print-root { display: block !important; position: absolute; inset: 0 auto auto 0; width: 100%; background: white !important; color: #0f172a !important; } .mapa-print-root tr { page-break-inside: avoid; } }'}</style>
 
     </div>
   );
