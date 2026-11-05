@@ -259,14 +259,14 @@ export function TelaArena({
 
   // O modelo 3D dos personagens já começa a baixar durante a preparação da missão.
   useEffect(() => {
-    if (missao.id === "moto" || missao.id === "maratona") return;
+    if (missao.id === "moto" || missao.id === "maratona" || missao.id === "perseguicao") return;
     void import("@/components/plantao/personagem3d").then((m) => m.carregarModeloBase());
   }, [missao.id]);
 
   // Motor
   useEffect(() => {
     if (fase !== "jogando" || !canvas.current || motor.current) return;
-    if (missao.id === "moto" || missao.id === "maratona") return;
+    if (missao.id === "moto" || missao.id === "maratona" || missao.id === "perseguicao") return;
     const a = new Arena({
       canvas: canvas.current,
       minimapa: minimapa.current,
