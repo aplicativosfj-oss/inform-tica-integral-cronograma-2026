@@ -101,7 +101,12 @@ function BarraNiveis<T extends string>({
   );
 }
 
-function Legenda<T extends string>({ niveis }: { niveis: NivelInfo<T>[] }) {
+interface LegendaProps<T extends string> {
+  niveis: NivelInfo<T>[];
+}
+
+function Legenda<T extends string>(props: LegendaProps<T>) {
+  const { niveis } = props;
   return (
     <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
       {niveis.map((n) => (
