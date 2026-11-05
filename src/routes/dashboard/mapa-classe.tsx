@@ -19,7 +19,7 @@ function MapaClassePage() {
     <DashboardShell>
       <div className="space-y-6">
         <QuadroReferencia ids={["mapa"]} />
-        <PainelMapaClasse />
+        <PainelMapaClasse permitirDetalhesIndividuais />
       </div>
     </DashboardShell>
   );
