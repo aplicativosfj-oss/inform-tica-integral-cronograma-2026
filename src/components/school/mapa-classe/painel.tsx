@@ -6,14 +6,36 @@ import {
   Info,
   PenLine,
   Users2,
+  ChevronRight,
+  Loader2,
+  FileText,
+  ArrowLeft,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { supabase } from "@/lib/supabase-client";
 import { MAPA_CLASSE_3_BIM } from "@/lib/mapa-classe/dados-3bim";
 import { instrumento, textoAplicacao } from "@/lib/resultados/referencia";
 import { LEITURA, ZONAS, escritaDoAno, type NivelInfo, type Zona } from "@/lib/mapa-classe/niveis";
 import type { EvolucaoLeitura, TurmaMapa } from "@/lib/mapa-classe/tipos";
+
+type AreaMapa = "leitura" | "escrita";
+type RegistroMapaAluno = {
+  id: string;
+  aluno_id: string;
+  aluno_nome: string;
+  ano: number;
+  turma: string;
+  bimestre: number;
+  area: AreaMapa;
+  nivel: string;
+  data_avaliacao: string | null;
+  observacoes: string | null;
+  evidencia: string | null;
+};
 
 const pct = (parte: number, total: number) => (total ? Math.round((parte / total) * 100) : 0);
 
@@ -32,10 +54,14 @@ function BarraNiveis<T extends string>({
   niveis,
   valores,
   rotulo,
+  interativa = false,
+  aoSelecionar,
 }: {
   niveis: NivelInfo<T>[];
   valores: Partial<Record<string, number>>;
   rotulo: string;
+  interativa?: boolean;
+  aoSelecionar?: (nivel: NivelInfo<T>) => void;
 }) {
   const total = niveis.reduce((s, n) => s + (valores[n.id] ?? 0), 0);
   if (!total) return <p className="text-xs text-muted-foreground">Sem alunos avaliados.</p>;
@@ -49,16 +75,91 @@ function BarraNiveis<T extends string>({
         const q = valores[n.id] ?? 0;
         if (!q) return null;
         return (
-          <div
-            key={n.id}
-            className={`${n.cor} flex items-center justify-center text-[11px] font-semibold text-black/80`}
-            style={{ width: `${(q / total) * 100}%` }}
-            title={`${n.nome}: ${q} (${pct(q, total)}%)`}
-          >
-            {q}
-          </div>
+          {interativa ? (
+            <button
+              key={n.id}
+              type="button"
+              onClick={() => aoSelecionar?.(n)}
+              className={`${n.cor} flex min-w-0 items-center justify-center text-[11px] font-semibold text-black/80 transition hover:brightness-90 focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-foreground`}
+              style={{ width: `${(q / total) * 100}%` }}
+              title={`Abrir ${n.nome}: ${q} alunos (${pct(q, total)}%)`}
+              aria-label={`Abrir ${q} alunos no nível ${n.id} — ${n.nome}`}
+            >
+              {q}
+            </button>
+          ) : (
+            <div
+              key={n.id}
+              className={`${n.cor} flex items-center justify-center text-[11px] font-semibold text-black/80`}
+              style={{ width: `${(q / total) * 100}%` }}
+              title={`${n.nome}: ${q} (${pct(q, total)}%)`}
+            >
+              {q}
+            </div>
+          )}
         );
       })}
+      {permitirDetalhesIndividuais && (
+        <>
+          <Dialog open={!!faixaSelecionada} onOpenChange={(aberto) => { if (!aberto) { setFaixaSelecionada(null); setAlunoSelecionado(null); } }}>
+            <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{faixaSelecionada ? `${nomeTurma(faixaSelecionada)} · ${faixaSelecionada.area === "leitura" ? "Leitura" : "Escrita"}` : "Alunos"}</DialogTitle>
+                <DialogDescription>
+                  {faixaSelecionada ? `Nível ${faixaSelecionada.nivel} · ${faixaSelecionada.nomeNivel} · ${faixaSelecionada.total} aluno(s) na planilha agregada` : ""}
+                </DialogDescription>
+              </DialogHeader>
+              {faixaSelecionada && (
+                <div className="rounded-xl bg-muted/50 p-3">
+                  <p className="text-sm font-semibold">O que este nível significa</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{faixaSelecionada.acao}</p>
+                </div>
+              )}
+              {carregandoAlunos ? <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Buscando alunos...</div>
+                : alunosDaFaixa.length ? (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selecione um aluno para abrir o relatório individual</p>
+                    {alunosDaFaixa.map((aluno) => (
+                      <button key={aluno.id} type="button" onClick={() => setAlunoSelecionado(aluno)}
+                        className="flex w-full items-center justify-between rounded-xl border border-border p-3 text-left transition hover:border-primary/50 hover:bg-muted/40">
+                        <span><b className="block text-sm">{aluno.aluno_nome}</b><span className="text-xs text-muted-foreground">{aluno.ano}º {aluno.turma} · Nível {aluno.nivel} · {aluno.area === "leitura" ? "Leitura" : "Escrita"}</span></span>
+                        <ChevronRight className="size-4 text-muted-foreground" />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border p-5 text-center">
+                    <Users2 className="mx-auto size-7 text-muted-foreground" />
+                    <p className="mt-2 text-sm font-semibold">Os dados atuais mostram apenas totais por turma.</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Ainda não há registros individuais importados para esta faixa. Para preservar a privacidade das crianças, os nomes não são inferidos nem publicados. Importe ou cadastre os níveis individuais no banco privado.</p>
+                  </div>
+                )}
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!alunoSelecionado} onOpenChange={(aberto) => { if (!aberto) setAlunoSelecionado(null); }}>
+            <DialogContent className="max-h-[88dvh] max-w-2xl overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><FileText className="size-5 text-primary" /> Relatório individual</DialogTitle>
+                <DialogDescription>{alunoSelecionado?.aluno_nome} · {alunoSelecionado?.ano}º {alunoSelecionado?.turma}</DialogDescription>
+              </DialogHeader>
+              {alunoSelecionado && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Área</p><p className="mt-1 font-bold">{alunoSelecionado.area === "leitura" ? "Leitura" : "Escrita"}</p></div>
+                    <div className="rounded-xl bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Nível atual</p><p className="mt-1 font-bold">{alunoSelecionado.nivel}</p></div>
+                  </div>
+                  <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Observações do professor</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.observacoes || "Nenhuma observação registrada."}</p></div>
+                  <div className="rounded-xl border p-3"><p className="text-sm font-semibold">Evidências</p><p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{alunoSelecionado.evidencia || "Nenhuma evidência registrada."}</p></div>
+                  <section><h3 className="mb-2 text-sm font-bold">Histórico bimestral de leitura e escrita</h3>
+                    {carregandoHistorico ? <p className="text-sm text-muted-foreground">Carregando histórico...</p> : historicoAluno.length ? <div className="space-y-2">{historicoAluno.map((r) => <div key={r.id} className="flex items-center justify-between gap-3 rounded-lg border p-3"><div><p className="text-sm font-semibold">{r.bimestre}º bimestre · {r.area === "leitura" ? "Leitura" : "Escrita"}</p><p className="text-xs text-muted-foreground">{r.data_avaliacao ? new Date(r.data_avaliacao + "T12:00:00").toLocaleDateString("pt-BR") : "Data não informada"}</p></div><span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-bold">Nível {r.nivel}</span></div>)}</div> : <p className="text-sm text-muted-foreground">Sem histórico adicional.</p>}
+                  </section>
+                  <div className="flex justify-between"><button type="button" onClick={() => setAlunoSelecionado(null)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm"><ArrowLeft className="size-4" /> Voltar à lista</button></div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }
@@ -117,14 +218,62 @@ function Seta({ de, para, bomQuandoSobe }: { de: number; para: number; bomQuando
 export function PainelMapaClasse({
   mostrarProfessor = true,
   semCabecalho = false,
+  permitirDetalhesIndividuais = false,
 }: {
   /** Na página pública o nome do professor não aparece ao lado dos resultados da turma. */
   mostrarProfessor?: boolean;
   /** A página que hospeda o painel já tem o título dela. */
   semCabecalho?: boolean;
+  /** Libera consulta de dados identificáveis somente no painel autenticado. */
+  permitirDetalhesIndividuais?: boolean;
 } = {}) {
   const { turmas, evolucaoLeitura, bimestre } = MAPA_CLASSE_3_BIM;
   const [foco, setFoco] = useState<"leitura" | "escrita">("leitura");
+  const [faixaSelecionada, setFaixaSelecionada] = useState<{
+    ano: number; turma: string; area: AreaMapa; nivel: string; nomeNivel: string; acao: string; total: number;
+  } | null>(null);
+  const [alunosDaFaixa, setAlunosDaFaixa] = useState<RegistroMapaAluno[]>([]);
+  const [carregandoAlunos, setCarregandoAlunos] = useState(false);
+  const [alunoSelecionado, setAlunoSelecionado] = useState<RegistroMapaAluno | null>(null);
+  const [historicoAluno, setHistoricoAluno] = useState<RegistroMapaAluno[]>([]);
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false);
+
+  useEffect(() => {
+    if (!faixaSelecionada || !permitirDetalhesIndividuais) return;
+    let ativo = true;
+    setCarregandoAlunos(true);
+    setAlunoSelecionado(null);
+    setAlunosDaFaixa([]);
+    supabase.from("mapa_classe_avaliacoes_individuais").select("*")
+      .eq("ano", faixaSelecionada.ano).eq("turma", faixaSelecionada.turma)
+      .eq("bimestre", bimestre).eq("area", faixaSelecionada.area)
+      .eq("nivel", faixaSelecionada.nivel).order("aluno_nome", { ascending: true })
+      .then(({ data, error }) => {
+        if (!ativo) return;
+        if (error) {
+          toast.error(/mapa_classe_avaliacoes_individuais|does not exist|schema cache|42P01|PGRST205/i.test(error.message)
+            ? "Execute o SQL de registros individuais do Mapa de Classe no Supabase."
+            : "Não foi possível carregar os alunos: " + error.message);
+        } else setAlunosDaFaixa((data ?? []) as RegistroMapaAluno[]);
+        setCarregandoAlunos(false);
+      });
+    return () => { ativo = false; };
+  }, [faixaSelecionada, bimestre, permitirDetalhesIndividuais]);
+
+  useEffect(() => {
+    if (!alunoSelecionado) return;
+    let ativo = true;
+    setCarregandoHistorico(true);
+    supabase.from("mapa_classe_avaliacoes_individuais").select("*")
+      .eq("aluno_id", alunoSelecionado.aluno_id).order("bimestre", { ascending: true })
+      .then(({ data, error }) => {
+        if (!ativo) return;
+        if (error) toast.error("Não foi possível carregar o histórico individual: " + error.message);
+        else setHistoricoAluno((data ?? []) as RegistroMapaAluno[]);
+        setCarregandoHistorico(false);
+      });
+    return () => { ativo = false; };
+  }, [alunoSelecionado]);
 
   const geral = useMemo(() => {
     const leitura = { A: 0, B: 0, C: 0, D: 0, E: 0 };
@@ -259,6 +408,11 @@ export function PainelMapaClasse({
                   niveis={LEITURA}
                   valores={t.leitura}
                   rotulo={`Leitura ${nomeTurma(t)}`}
+                  interativa={permitirDetalhesIndividuais}
+                  aoSelecionar={(nivel) => setFaixaSelecionada({
+                    ano: t.ano, turma: t.turma, area: "leitura", nivel: nivel.id,
+                    nomeNivel: nivel.nome, acao: nivel.acao, total: t.leitura[nivel.id] ?? 0,
+                  })}
                 />
                 <span className="text-xs text-muted-foreground">
                   {t.avaliadosLeitura} avaliados
@@ -302,6 +456,11 @@ export function PainelMapaClasse({
                         niveis={niveis}
                         valores={t.escrita}
                         rotulo={`Escrita ${nomeTurma(t)}`}
+                        interativa={permitirDetalhesIndividuais}
+                        aoSelecionar={(nivel) => setFaixaSelecionada({
+                          ano: t.ano, turma: t.turma, area: "escrita", nivel: nivel.id,
+                          nomeNivel: nivel.nome, acao: nivel.acao, total: t.escrita[nivel.id] ?? 0,
+                        })}
                       />
                       <span className="text-xs text-muted-foreground">
                         {t.avaliadosEscrita} avaliados
