@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { QuadroReferencia } from "@/components/school/resultados/quadro-referencia";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { PainelMapaClasse } from "@/components/school/mapa-classe/painel";
+import { PainelGestaoPedagogica } from "@/components/school/mapa-classe/gestao-pedagogica";
 
 export const Route = createFileRoute("/dashboard/mapa-classe")({
   component: MapaClassePage,
@@ -19,6 +20,7 @@ function MapaClassePage() {
     <DashboardShell>
       <div className="space-y-6">
         <QuadroReferencia ids={["mapa"]} />
+        <PainelGestaoPedagogica />
         <PainelMapaClasse permitirDetalhesIndividuais />
       </div>
     </DashboardShell>
