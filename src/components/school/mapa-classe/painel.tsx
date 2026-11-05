@@ -480,7 +480,7 @@ export function PainelMapaClasse({
                   leitura: <strong>{leitura}</strong> aluno{leitura === 1 ? "" : "s"}
                 </span>
                 <span>
-                  escrita: <strong>{escrita}</strong> aluno{escrita === 1 ? "" : "s"}
+                  escrita: <strong>{escrita == null ? "sem dados" : escrita}</strong>{escrita == null ? "" : ` aluno${escrita === 1 ? "" : "s"}`}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {mostrarProfessor ? `Prof(a). ${t.professor}` : ""}
