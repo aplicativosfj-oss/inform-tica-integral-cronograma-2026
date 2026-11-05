@@ -194,6 +194,7 @@ export function AvaliacaoContinuaLeituraEscrita() {
   const [salvandoPlano, setSalvandoPlano] = useState<string | null>(null);
   const [rascunhosAtividade, setRascunhosAtividade] = useState<Record<string, { descricao: string; evidencia: string; resultado: string }>>({});
   const [salvandoAtividade, setSalvandoAtividade] = useState<string | null>(null);
+  const [celulaMapaAberta, setCelulaMapaAberta] = useState<string | null>(null);
 
   const turmasAtivas = turmas.filter((t) => t.alunos.length > 0);
   const turmaAtual = turmas.find((t) => t.id === turmaId);
@@ -270,6 +271,26 @@ export function AvaliacaoContinuaLeituraEscrita() {
         .sort((a, b) => a.media - b.media),
     };
   }, [filtrados]);
+
+  const mapaHabilidadesTurma = useMemo(() => turmas.map((t) => {
+    const registrosTurma = filtrados.filter((r) => r.turma_id === t.id);
+    const itens = [...LEITURA.map(([chave, nome]) => ({ chave, nome, area: "Leitura" })),
+      ...ESCRITA.map(([chave, nome]) => ({ chave, nome, area: "Escrita" }))].map((h) => {
+        const porAluno = new Map<string, { nome: string; nivel: number }>();
+        for (const r of registrosTurma) {
+          const notas = h.area === "Leitura" ? r.criterios?.leitura : r.criterios?.escrita;
+          const nivel = notas?.[h.chave];
+          if (nivel == null) continue;
+          const anterior = porAluno.get(r.aluno_id);
+          if (!anterior || nivel < anterior.nivel) porAluno.set(r.aluno_id, { nome: r.aluno_nome, nivel });
+        }
+        const alunos = [...porAluno.entries()].map(([id, a]) => ({ id, ...a }));
+        const fragil = alunos.filter((a) => a.nivel <= PONTOS_FRAGEIS).length;
+        return { ...h, avaliados: alunos.length, fragil, percentual: alunos.length ? Math.round(fragil / alunos.length * 100) : 0,
+          alunos: alunos.filter((a) => a.nivel <= PONTOS_FRAGEIS).sort((a,b) => a.nome.localeCompare(b.nome, "pt-BR")) };
+      }).filter((h) => h.avaliados > 0);
+    return { turmaId: t.id, turmaNome: t.serie + " " + t.letra, itens };
+  }).filter((t) => t.itens.length > 0), [filtrados, turmas]);
 
   function limparFormulario() {
     setAlunoId(""); setBimestre(""); setData(""); setTitulo("");
@@ -560,6 +581,36 @@ export function AvaliacaoContinuaLeituraEscrita() {
             <select value={filtroTurma} onChange={(e) => setFiltroTurma(e.target.value)} className="rounded-xl border border-input bg-background px-3 py-2.5 text-sm"><option value="todas">Todas as turmas</option>{turmas.map(t => <option key={t.id} value={t.id}>{t.serie} {t.letra}</option>)}</select>
             <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar aluno..." className="rounded-xl border border-input bg-background px-3 py-2.5 text-sm" />
           </div>
+
+          <section className="space-y-3 rounded-2xl border border-border p-3 sm:p-4">
+            <div><h3 className="flex items-center gap-2 text-sm font-bold"><Target className="size-4 text-primary" /> Mapa de calor por turma e habilidade</h3>
+              <p className="mt-1 text-xs text-muted-foreground">Percentual de alunos avaliados com nível 1 ou 2. Selecione uma célula para localizar os estudantes.</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">Verde: abaixo de 25% · Amarelo: 25–49% · Vermelho: 50% ou mais.</p></div>
+            {mapaHabilidadesTurma.length ? mapaHabilidadesTurma.map((turma) => (
+              <div key={turma.turmaId} className="overflow-hidden rounded-xl border border-border">
+                <div className="bg-muted/40 px-3 py-2"><b className="text-sm">{turma.turmaNome}</b></div>
+                <div className="grid gap-2 p-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {turma.itens.map((item) => {
+                    const id = turma.turmaId + ":" + item.area + ":" + item.chave;
+                    const aberto = celulaMapaAberta === id;
+                    const intensidade = item.percentual >= 50 ? "border-rose-500/40 bg-rose-500/10" : item.percentual >= 25 ? "border-amber-500/40 bg-amber-500/10" : "border-emerald-500/30 bg-emerald-500/5";
+                    return <div key={id} className="min-w-0">
+                      <button type="button" aria-expanded={aberto} onClick={() => setCelulaMapaAberta(aberto ? null : id)} className={"w-full rounded-lg border p-3 text-left transition hover:ring-2 hover:ring-primary/30 " + intensidade}>
+                        <span className="block text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{item.area}</span>
+                        <span className="mt-1 block text-xs font-semibold">{item.nome}</span>
+                        <span className="mt-2 flex items-end justify-between gap-2"><b className="text-xl tabular-nums">{item.percentual}%</b><span className="text-right text-[11px] text-muted-foreground">{item.fragil}/{item.avaliados} alunos<br/>com dificuldade</span></span>
+                      </button>
+                      {aberto && <div className="mt-1 rounded-lg border bg-background p-3">
+                        <p className="mb-2 text-xs font-bold">Estudantes que precisam de atenção</p>
+                        {item.alunos.length ? <ul className="space-y-1">{item.alunos.map((aluno) => <li key={aluno.id} className="flex items-center justify-between gap-2 text-xs"><span>{aluno.nome}</span><b>Nível {aluno.nivel}/4</b></li>)}</ul> : <p className="text-xs text-muted-foreground">Nenhum aluno com nível 1 ou 2 nesta habilidade.</p>}
+                        <p className="mt-2 text-[10px] text-muted-foreground">Base: {item.avaliados} alunos avaliados neste critério.</p>
+                      </div>}
+                    </div>;
+                  })}
+                </div>
+              </div>
+            )) : <p className="rounded-xl border border-dashed p-5 text-center text-sm text-muted-foreground">Não há avaliações para montar o mapa neste recorte.</p>}
+          </section>
 
           <div className="grid gap-4 xl:grid-cols-2">
             <div className="space-y-2">
