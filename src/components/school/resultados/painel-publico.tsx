@@ -140,6 +140,7 @@ export function PainelPublico() {
             valor: porcento(b3?.leem),
             detalhe: `${dLeem >= 0 ? "+" : ""}${dLeem} pts desde o 1º bim. (${porcento(b1?.leem)})`,
             tom: dLeem >= 0 ? "sobe" : "desce",
+            aoClicar: () => irPara("mapa"),
           },
           {
             Icone: Target,
@@ -147,6 +148,7 @@ export function PainelPublico() {
             valor: porcento(b3?.prioridade),
             detalhe: `${dPrior > 0 ? "+" : ""}${dPrior} pts desde o 1º bim. (${porcento(b1?.prioridade)})`,
             tom: dPrior <= 0 ? "sobe" : "desce",
+            aoClicar: () => irPara("mapa"),
           },
           {
             Icone: ListChecks,
@@ -157,6 +159,7 @@ export function PainelPublico() {
                 ? `1ª avaliação: ${porcento(diag.i)}`
                 : `${dDiag >= 0 ? "+" : ""}${dDiag} pts sobre a 1ª (${porcento(diag.i)})`,
             tom: dDiag == null ? "neutro" : dDiag >= 0 ? "sobe" : "desce",
+            aoClicar: () => irPara("turmas"),
           },
           {
             Icone: GraduationCap,
@@ -164,6 +167,7 @@ export function PainelPublico() {
             valor: porcento(notas.parte),
             detalhe: `${notas.cem} de ${notas.turmas} turmas com todos acima de 7,0`,
             tom: "neutro",
+            aoClicar: () => irPara("notas"),
           },
         ]}
         acoes={
