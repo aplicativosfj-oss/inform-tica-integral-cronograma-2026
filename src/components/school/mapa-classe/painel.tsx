@@ -169,7 +169,7 @@ export function PainelMapaClasse({
   const escritaDisponivel = bimestreSelecionado === 3;
   const turmasDoBimestre = useMemo(() => turmas.map((t) => {
     const historico = evolucaoLeitura[`${t.ano}${t.turma}`]?.find((e) => e.bim === bimestreSelecionado);
-    if (!historico) return t;
+    if (!historico) return { ...t, leitura: { A: 0, B: 0, C: 0, D: 0, E: 0 }, avaliadosLeitura: 0, avaliadosAbaLeitura: 0 };
     return { ...t, leitura: { A: historico.A, B: historico.B, C: historico.C, D: historico.D, E: historico.E }, avaliadosLeitura: historico.avaliados, avaliadosAbaLeitura: historico.avaliados };
   }), [turmas, evolucaoLeitura, bimestreSelecionado]);
   const [faixaSelecionada, setFaixaSelecionada] = useState<{
