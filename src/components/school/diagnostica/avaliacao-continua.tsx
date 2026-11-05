@@ -647,6 +647,12 @@ export function AvaliacaoContinuaLeituraEscrita() {
           <p className="text-xs text-muted-foreground">Atualize a situação do plano e registre cada atividade com evidências e resultado observado.</p>
         </CardHeader>
         <CardContent className="space-y-3">
+          {!carregandoPlanos && planosSalvos.length > 0 && <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <Indicador titulo="Planos ativos" valor={planosSalvos.filter(p => p.status === "planejado" || p.status === "em_andamento").length} detalhe="planejados ou em execução" />
+            <Indicador titulo="Em andamento" valor={planosSalvos.filter(p => p.status === "em_andamento").length} detalhe="com atividades em execução" />
+            <Indicador titulo="Aguardando reavaliação" valor={planosSalvos.filter(p => p.status === "reavaliar").length} detalhe="precisam de nova avaliação" />
+            <Indicador titulo="Concluídos" valor={planosSalvos.filter(p => p.status === "concluido").length} detalhe="marcados como concluídos" />
+          </div>}
           {carregandoPlanos ? <p className="text-sm text-muted-foreground">Carregando planos salvos...</p>
             : planosSalvos.length ? planosSalvos.map((plano) => (
               <section key={plano.id} className="rounded-xl border border-border p-4">
@@ -656,16 +662,27 @@ export function AvaliacaoContinuaLeituraEscrita() {
                     <p className="text-xs text-muted-foreground">{plano.area === "leitura" ? "Leitura" : "Escrita"} · {plano.habilidade} · Nível inicial {plano.nivel_base}/4</p>
                   {(() => {
                     const chaveArea = plano.area === "leitura" ? "leitura" : "escrita";
-                    const atual = [...registros].filter((r) => r.aluno_id === plano.aluno_id && r.criterios?.[chaveArea]?.[plano.habilidade_key] != null)
-                      .sort((a, b) => b.data_avaliacao.localeCompare(a.data_avaliacao))[0];
+                    const avaliacaoBase = registros.find((r) => r.id === plano.avaliacao_id);
+                    const posteriores = registros
+                      .filter((r) =>
+                        r.aluno_id === plano.aluno_id &&
+                        r.id !== plano.avaliacao_id &&
+                        r.criterios?.[chaveArea]?.[plano.habilidade_key] != null &&
+                        (!avaliacaoBase || r.data_avaliacao > avaliacaoBase.data_avaliacao ||
+                          (r.data_avaliacao === avaliacaoBase.data_avaliacao && r.created_at > avaliacaoBase.created_at)),
+                      )
+                      .sort((a, b) => b.data_avaliacao.localeCompare(a.data_avaliacao) || b.created_at.localeCompare(a.created_at));
+                    const atual = posteriores[0];
                     const notaAtual = atual?.criterios?.[chaveArea]?.[plano.habilidade_key];
                     const diferenca = notaAtual == null ? null : notaAtual - plano.nivel_base;
-                    return <p className="mt-1 text-xs font-medium">
-                      {notaAtual == null ? "Aguardando nova avaliação desta habilidade" :
-                        "Última avaliação: nível " + notaAtual + "/4 · " +
-                        (diferenca! > 0 ? "evoluiu +" + diferenca : diferenca! < 0 ? "recuou " + diferenca : "sem alteração") +
-                        " em relação à linha de base"}
-                    </p>;
+                    return <div className="mt-2 rounded-lg bg-background/70 p-2 text-xs">
+                      <p className="font-semibold">Verificação de evolução</p>
+                      {notaAtual == null
+                        ? <p className="mt-1 text-muted-foreground">Aguardando uma nova avaliação posterior à linha de base para esta habilidade. A avaliação que originou o plano não conta como reavaliação.</p>
+                        : <><p className="mt-1">Reavaliado em {atual!.bimestre}º bimestre · {new Date(atual!.data_avaliacao + "T12:00:00").toLocaleDateString("pt-BR")} · nível {notaAtual}/4</p>
+                          <p className={`mt-1 font-bold ${diferenca! > 0 ? "text-emerald-600" : diferenca! < 0 ? "text-rose-600" : "text-muted-foreground"}`}>{diferenca! > 0 ? "Evolução +" + diferenca : diferenca! < 0 ? "Regressão " + diferenca : "Sem alteração"} em relação ao nível inicial {plano.nivel_base}/4</p>
+                        </>}
+                    </div>;
                   })()}
                     <p className="mt-1 text-xs text-muted-foreground">Revisão prevista: {plano.data_revisao ? new Date(plano.data_revisao + "T12:00:00").toLocaleDateString("pt-BR") : "não definida"}</p>
                   </div>
