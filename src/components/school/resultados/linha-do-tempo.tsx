@@ -1,4 +1,5 @@
-import { Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { Minus, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 import { LEITURA } from "@/lib/mapa-classe/niveis";
 import type { FotoLeitura, TurmaNoAno } from "@/lib/resultados/linha-do-tempo";
@@ -121,7 +122,7 @@ export function LinhaDoAno({
         </div>
       </article>
 
-      <article className="flex flex-col rounded-3xl border border-border bg-gradient-to-br from-sky-500/15 via-card to-violet-500/15 p-5 backdrop-blur-md sm:p-6">
+      <Link to="/avaliacao" className="group flex flex-col rounded-3xl border border-border bg-gradient-to-br from-sky-500/15 via-card to-violet-500/15 p-5 text-left backdrop-blur-md transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:p-6" aria-label="Abrir detalhes das avaliações diagnósticas">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">
           Avaliações diagnósticas
         </p>
@@ -156,7 +157,8 @@ export function LinhaDoAno({
         <p className="mt-4 text-xs text-muted-foreground">
           Acerto médio em Português e Matemática: de cada 100 questões, quantas foram acertadas.
         </p>
-      </article>
+        <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">Ver resultados por turma <ArrowRight className="size-3.5 transition group-hover:translate-x-1" /></span>
+      </Link>
     </div>
   );
 }
