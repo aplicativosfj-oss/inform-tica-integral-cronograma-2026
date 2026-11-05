@@ -20,6 +20,7 @@ import {
 } from "@/components/school/diagnostica/graficos";
 import { PainelAvaliacoes } from "@/components/school/diagnostica/painel-avaliacoes";
 import { RelatorioLeituraEscrita } from "@/components/school/diagnostica/relatorio-leitura-escrita";
+import { AvaliacaoContinuaLeituraEscrita } from "@/components/school/diagnostica/avaliacao-continua";
 import { RaioXAlunoDialog } from "@/components/school/diagnostica/raio-x";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,6 +116,7 @@ export function PainelEvolucao({ publico = false }: { publico?: boolean }) {
           <TabsTrigger value="turmas">Turmas em detalhe</TabsTrigger>
           <TabsTrigger value="habilidades">Habilidades</TabsTrigger>
           {!publico && <TabsTrigger value="leitura-escrita">Leitura e escrita</TabsTrigger>}
+          {!publico && <TabsTrigger value="avaliacao-continua">Avaliação contínua</TabsTrigger>}
           {!publico && <TabsTrigger value="alunos">Alunos</TabsTrigger>}
           {!publico && <TabsTrigger value="intervencao">Intervenção</TabsTrigger>}
         </TabsList>
@@ -131,6 +133,11 @@ export function PainelEvolucao({ publico = false }: { publico?: boolean }) {
         {!publico && provas && (
           <TabsContent value="leitura-escrita" className="space-y-4">
             <RelatorioLeituraEscrita provas={provas} />
+          </TabsContent>
+        )}
+        {!publico && (
+          <TabsContent value="avaliacao-continua" className="space-y-4">
+            <AvaliacaoContinuaLeituraEscrita />
           </TabsContent>
         )}
         {!publico && (
