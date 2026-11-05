@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { FichaAlunoAoVivo } from "@/components/school/laboratorio/ficha-aluno-ao-vivo";
-import { ArrowRight, GraduationCap, Pause, Users2, UserRoundSearch } from "lucide-react";
+import {
+  ArrowRight,
+  GraduationCap,
+  MonitorSmartphone,
+  Pause,
+  Users2,
+  UserRoundSearch,
+} from "lucide-react";
 
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { BotaoTelaCheia, useTelaCheiaAula } from "@/components/school/laboratorio/tela-cheia-aula";
@@ -58,17 +65,29 @@ export function CartaoAoVivoHome({
 
   if (!principal) {
     return (
-      <div className="relative block w-full rounded-3xl border border-white/20 bg-white/[0.11] p-5 text-white shadow-2xl backdrop-blur-xl sm:p-6">
+      <div className="relative w-full overflow-hidden rounded-[1.5rem] border border-white/18 bg-ink/70 p-4 text-white shadow-[0_24px_70px_-30px_rgb(2,6,23,0.9)] backdrop-blur-xl sm:p-5">
         {telaCheia.tela}
+        <div
+          aria-hidden
+          className="relogio-respira absolute -right-16 -top-16 size-56 rounded-full bg-sky-400/25 blur-3xl"
+        />
         <Cabeca agora={agora} vivo={false} />
-        <div className="mt-4 rounded-2xl bg-white/10 p-4">
-          <p className="font-heading text-xl font-bold">Laboratório livre por enquanto</p>
-          <p className="mt-1 text-sm text-white/70">
-            {proximo
-              ? `Daqui a pouco: ${rotulo(proximo)}, às ${horaNaEscola(proximo.inicio)}`
-              : "Ninguém marcado para agora."}
-          </p>
+        <div className="relative mt-3.5 flex items-center gap-3">
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/15 bg-white/10">
+            <MonitorSmartphone className="size-6 text-mint" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <p className="font-heading text-lg font-extrabold leading-tight sm:text-xl">
+              Laboratório livre por enquanto
+            </p>
+            <p className="mt-0.5 text-sm text-white/70">
+              {proximo
+                ? `Daqui a pouco: ${rotulo(proximo)}, às ${horaNaEscola(proximo.inicio)}`
+                : "Ninguém marcado para agora."}
+            </p>
+          </div>
         </div>
+        <BancadaEmEspera />
         <VerTodos />
       </div>
     );
@@ -100,7 +119,7 @@ export function CartaoAoVivoHome({
             fimMs={new Date(principal.fim).getTime()}
             agoraMs={instanteEfetivo(principal, agora)}
             pausada={pausada}
-            tamanho={138}
+            tamanho={150}
           />
         </div>
         <div className="min-w-0 flex-1 text-center sm:text-left">
@@ -136,7 +155,7 @@ export function CartaoAoVivoHome({
       )}
 
       {/* quem está nos computadores */}
-      <ul className="relative mt-3 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto pr-1">
+      <ul className="relative mt-3 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {presentes.slice(0, 12).map((a, i) => (
           <li
             key={a.sessaoId}
@@ -147,8 +166,17 @@ export function CartaoAoVivoHome({
               {a.nome.trim().charAt(0).toUpperCase()}
             </span>
             {logado ? (
-              <button type="button" onClick={() => setAlunoSelecionado(a)} aria-label={`Abrir informações de ${a.nome}`} className="relative rounded px-1 py-0.5 font-semibold underline-offset-2 hover:text-emerald-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300" title={`Abrir ficha de ${a.nome}`}>
-                <span className="inline-flex items-center gap-1">{a.nome.split(" ")[0]}<UserRoundSearch className="size-3 text-emerald-300" aria-hidden /></span>
+              <button
+                type="button"
+                onClick={() => setAlunoSelecionado(a)}
+                aria-label={`Abrir informações de ${a.nome}`}
+                className="relative rounded px-1 py-0.5 font-semibold underline-offset-2 hover:text-emerald-200 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-300"
+                title={`Abrir ficha de ${a.nome}`}
+              >
+                <span className="inline-flex items-center gap-1">
+                  {a.nome.split(" ")[0]}
+                  <UserRoundSearch className="size-3 text-emerald-300" aria-hidden />
+                </span>
               </button>
             ) : (
               <span>{nomeExibido(a.nome, false).split(" ")[0]}</span>
@@ -162,7 +190,11 @@ export function CartaoAoVivoHome({
         ) : null}
       </ul>
 
-      {logado ? <p className="relative mt-2 text-[11px] font-medium text-emerald-200/75">Selecione um aluno para consultar a ficha e registrar observações.</p> : null}
+      {logado ? (
+        <p className="relative mt-2 text-[11px] font-medium text-emerald-200/75">
+          Selecione um aluno para consultar a ficha e registrar observações.
+        </p>
+      ) : null}
 
       {outros.length > 0 ? (
         <ul className="relative mt-4 space-y-2 border-t border-white/10 pt-4">
@@ -186,13 +218,45 @@ export function CartaoAoVivoHome({
       </div>
       {telaCheia.tela}
       {logado && alunoSelecionado ? (
-        <FichaAlunoAoVivo aluno={alunoSelecionado} onClose={() => setAlunoSelecionado(null)} onUpdate={() => window.dispatchEvent(new Event("focus"))} />
+        <FichaAlunoAoVivo
+          aluno={alunoSelecionado}
+          onClose={() => setAlunoSelecionado(null)}
+          onUpdate={() => window.dispatchEvent(new Event("focus"))}
+        />
       ) : null}
     </div>
   );
 }
 
 const rotulo = (g: GrupoLab) => (g.turmaId === "mista" ? "Aula mista" : g.turmaRotulo);
+
+/**
+ * A bancada esperando a próxima turma: as telas acendem em onda, uma de cada
+ * vez. É o que diz "o laboratório está pronto" sem precisar de texto — e dá
+ * ao cartão da abertura algum movimento nas horas em que não há aula.
+ */
+function BancadaEmEspera() {
+  const { config } = useAppStore();
+  const n = Math.min(10, Math.max(1, config.numeroComputadores || 7));
+  return (
+    <div
+      role="img"
+      aria-label={`${n} computadores em espera`}
+      className="relative mt-3.5 flex items-end justify-between gap-1.5 rounded-2xl border border-white/12 bg-white/[0.05] px-3 py-2.5"
+    >
+      {Array.from({ length: n }, (_, i) => (
+        <span key={i} className="flex flex-1 flex-col items-center">
+          <span
+            className="tela-descanso relative block aspect-[4/3] w-full max-w-9 rounded-[4px] border border-white/25 bg-gradient-to-br from-emerald-400/45 via-sky-500/30 to-indigo-600/35"
+            style={{ animationDelay: `${i * 0.28}s` }}
+          />
+          <span className="h-1.5 w-0.5 bg-white/25" />
+          <span className="h-0.5 w-2.5 rounded-full bg-white/25" />
+        </span>
+      ))}
+    </div>
+  );
+}
 
 function Cabeca({
   agora,

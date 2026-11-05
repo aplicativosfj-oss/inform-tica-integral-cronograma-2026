@@ -3,8 +3,10 @@ import { useId, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-const RAIO = 84;
+/** Geometria do mostrador, em unidades do viewBox 200×200. */
+const RAIO = 78;
 const CIRCUNFERENCIA = 2 * Math.PI * RAIO;
+const MARCAS = 60;
 
 /** A partir de quanto tempo restante a aula entra nos "minutos finais". */
 export const MINUTOS_FINAIS_MS = 5 * 60_000;
@@ -19,12 +21,18 @@ function formatar(ms: number) {
 }
 
 /**
- * Relógio da aula: um anel de progresso que vai se esvaziando de forma
- * contínua, um cometa que dá a volta a cada minuto (o ponteiro dos segundos)
- * e um halo que "respira" enquanto a aula está ao vivo. Cada dígito desliza
- * quando muda. A cor vai de verde para âmbar e vermelho, e no último minuto o
- * halo pulsa mais rápido. Um toque alterna entre "restam" e "passaram".
- * Pausada, tudo congela em âmbar.
+ * Relógio da aula.
+ *
+ * O mostrador inteiro é um medidor: as 60 marcas da borda acendem no tempo
+ * que ainda resta e apagam conforme a aula anda, então dá para ler quanto
+ * falta de longe, sem enxergar os números — é o que vale na TV do corredor.
+ * Por dentro, o anel de progresso se esvazia de forma contínua, um cometa dá
+ * a volta a cada minuto (o ponteiro dos segundos) e um halo "respira"
+ * enquanto a aula está ao vivo. Cada dígito desliza quando muda.
+ *
+ * A cor atravessa verde, âmbar e vermelho conforme o tempo aperta, e no
+ * último minuto o halo pulsa mais rápido. Um toque alterna entre "restam" e
+ * "passaram". Pausada, tudo congela em âmbar.
  */
 export function RelogioAula({
   inicioMs,
@@ -32,6 +40,8 @@ export function RelogioAula({
   agoraMs,
   pausada = false,
   tamanho = 176,
+  ateHora,
+  className,
 }: {
   inicioMs: number;
   fimMs: number;
@@ -39,6 +49,9 @@ export function RelogioAula({
   agoraMs: number;
   pausada?: boolean;
   tamanho?: number;
+  /** Hora do fim da aula, mostrada por dentro do mostrador (ex.: "13:39"). */
+  ateHora?: string | undefined;
+  className?: string;
 }) {
   const id = useId().replace(/:/g, "");
   const [modo, setModo] = useState<"restam" | "passaram">("restam");
@@ -59,6 +72,13 @@ export function RelogioAula({
   // O ângulo só cresce (sem voltar a zero a cada minuto), para não girar de ré.
   const angulo = -Math.floor(restante / 1000) * 6;
   const mostrado = formatar(modo === "restam" ? restante : passado);
+  const longo = mostrado.length > 5;
+
+  // Tipografia proporcional ao mostrador: o mesmo componente serve ao cartão
+  // da home (138 px) e à TV em tela cheia (600 px e mais).
+  const corpo = tamanho * (longo ? 0.168 : 0.232);
+  const legenda = Math.max(9, tamanho * 0.044);
+  const rodape = Math.max(9, tamanho * 0.047);
 
   return (
     <button
@@ -66,7 +86,10 @@ export function RelogioAula({
       onClick={() => setModo((m) => (m === "restam" ? "passaram" : "restam"))}
       aria-label={`${mostrado} ${modo === "restam" ? "restantes" : "decorridos"}. Toque para alternar.`}
       title="Toque para alternar entre o que falta e o que passou"
-      className="group relative shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+      className={cn(
+        "group relative shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+        className,
+      )}
       style={{ width: tamanho, height: tamanho, color: corA }}
     >
       {/* Halo que respira ao vivo (e pulsa rápido no último minuto). */}
@@ -112,30 +135,41 @@ export function RelogioAula({
             <stop offset="0%" stopColor={corA} />
             <stop offset="100%" stopColor={corB} />
           </linearGradient>
-          <radialGradient id={`${id}-fundo`} cx="50%" cy="35%" r="70%">
-            <stop offset="0%" stopColor="rgb(255 255 255 / 0.16)" />
-            <stop offset="100%" stopColor="rgb(10 10 30 / 0.55)" />
+          <radialGradient id={`${id}-vidro`} cx="50%" cy="22%" r="86%">
+            <stop offset="0%" stopColor="rgb(255 255 255 / 0.2)" />
+            <stop offset="55%" stopColor="rgb(255 255 255 / 0.05)" />
+            <stop offset="100%" stopColor="rgb(6 10 28 / 0.62)" />
+          </radialGradient>
+          <radialGradient id={`${id}-miolo`} cx="50%" cy="28%" r="78%">
+            <stop offset="0%" stopColor="rgb(255 255 255 / 0.13)" />
+            <stop offset="100%" stopColor="rgb(4 8 24 / 0.5)" />
           </radialGradient>
         </defs>
 
-        <circle cx="100" cy="100" r="98" fill={`url(#${id}-fundo)`} />
-        <circle cx="100" cy="100" r="98" fill="none" stroke="rgb(255 255 255 / 0.12)" />
+        {/* Vidro do mostrador, com reflexo em cima e sombra em baixo. */}
+        <circle cx="100" cy="100" r="99" fill={`url(#${id}-vidro)`} />
+        <circle cx="100" cy="100" r="99" fill="none" stroke="rgb(255 255 255 / 0.14)" />
+        <circle cx="100" cy="100" r="92.5" fill="none" stroke="rgb(255 255 255 / 0.06)" />
 
-        {/* Marcas dos minutos, discretas, por dentro do anel. */}
-        {Array.from({ length: 60 }, (_, i) => {
-          const a = (i * 6 * Math.PI) / 180;
+        {/* Coroa de marcas: acesa no tempo que resta, apagada no que já passou.
+            De longe, é ela que diz quanto falta. */}
+        {Array.from({ length: MARCAS }, (_, i) => {
+          const a = (i * (360 / MARCAS) * Math.PI) / 180;
           const grande = i % 5 === 0;
-          const r1 = grande ? 64 : 67;
+          const gasta = i / MARCAS >= fracaoRestante;
+          const r1 = grande ? 84 : 87;
           return (
             <line
               key={i}
               x1={100 + Math.sin(a) * r1}
               y1={100 - Math.cos(a) * r1}
-              x2={100 + Math.sin(a) * 71}
-              y2={100 - Math.cos(a) * 71}
-              strokeWidth={grande ? 2 : 1}
+              x2={100 + Math.sin(a) * 94}
+              y2={100 - Math.cos(a) * 94}
+              strokeWidth={grande ? 2.6 : 1.3}
               strokeLinecap="round"
-              stroke={grande ? "rgb(255 255 255 / 0.45)" : "rgb(255 255 255 / 0.18)"}
+              stroke={gasta ? "rgb(255 255 255 / 0.13)" : corA}
+              opacity={gasta ? 1 : grande ? 0.95 : 0.6}
+              style={{ transition: "stroke 0.6s linear, opacity 0.6s linear" }}
             />
           );
         })}
@@ -146,8 +180,8 @@ export function RelogioAula({
           cy="100"
           r={RAIO}
           fill="none"
-          stroke="rgb(255 255 255 / 0.1)"
-          strokeWidth="9"
+          stroke="rgb(255 255 255 / 0.09)"
+          strokeWidth="10"
         />
         <circle
           cx="100"
@@ -155,16 +189,20 @@ export function RelogioAula({
           r={RAIO}
           fill="none"
           stroke={`url(#${id}-arco)`}
-          strokeWidth="9"
+          strokeWidth="10"
           strokeLinecap="round"
           strokeDasharray={CIRCUNFERENCIA}
           strokeDashoffset={CIRCUNFERENCIA * (1 - fracaoRestante)}
           transform="rotate(-90 100 100)"
           style={{
             transition: pausada ? "none" : "stroke-dashoffset 1s linear, stroke 0.6s",
-            filter: "drop-shadow(0 0 6px currentColor)",
+            filter: "drop-shadow(0 0 7px currentColor)",
           }}
         />
+
+        {/* Disco central: separa os números do anel e dá profundidade. */}
+        <circle cx="100" cy="100" r="68" fill={`url(#${id}-miolo)`} />
+        <circle cx="100" cy="100" r="68" fill="none" stroke="rgb(255 255 255 / 0.1)" />
 
         {/* Cometa dos segundos: cabeça brilhante e rastro que some. */}
         <g
@@ -180,30 +218,38 @@ export function RelogioAula({
             r={RAIO}
             fill="none"
             stroke="currentColor"
-            strokeWidth="3"
+            strokeWidth="3.4"
             strokeLinecap="round"
-            strokeDasharray={`28 ${CIRCUNFERENCIA}`}
+            strokeDasharray={`30 ${CIRCUNFERENCIA}`}
             transform="rotate(-90 100 100)"
             opacity="0.45"
           />
-          <circle cx="100" cy={100 - RAIO} r="6.5" fill="white" />
-          <circle cx="100" cy={100 - RAIO} r="3.5" fill="currentColor" />
+          <circle cx="100" cy={100 - RAIO} r="8" fill="currentColor" opacity="0.35" />
+          <circle cx="100" cy={100 - RAIO} r="5.6" fill="white" />
+          <circle cx="100" cy={100 - RAIO} r="3" fill="currentColor" />
         </g>
       </svg>
 
       <span className="absolute inset-0 flex flex-col items-center justify-center">
         {pausada ? (
-          <span className="mb-1 flex items-center gap-1 rounded-full bg-sun px-2 py-px text-[9px] font-extrabold uppercase tracking-wider text-sun-foreground">
-            <Pause className="size-2.5" aria-hidden /> pausada
+          <span
+            className="mb-1 flex items-center gap-1 rounded-full bg-sun px-2 py-px font-extrabold uppercase tracking-wider text-sun-foreground"
+            style={{ fontSize: legenda }}
+          >
+            <Pause style={{ width: legenda, height: legenda }} aria-hidden /> pausada
           </span>
         ) : null}
         <span
           className={cn(
             "flex font-heading font-extrabold tabular-nums leading-none text-white",
             pausada && "animate-pulse",
-            minutosFinais && "text-red-200",
+            minutosFinais && "text-red-100",
           )}
-          style={{ fontSize: tamanho * (mostrado.length > 5 ? 0.15 : 0.21) }}
+          style={{
+            fontSize: corpo,
+            textShadow: "0 2px 18px rgb(0 0 0 / 0.45)",
+            letterSpacing: "-0.02em",
+          }}
         >
           {[...mostrado].map((c, i) => (
             <span
@@ -216,11 +262,19 @@ export function RelogioAula({
           ))}
         </span>
         <span
-          className="mt-1.5 font-semibold uppercase tracking-[0.2em] text-white/60"
-          style={{ fontSize: Math.max(10, tamanho * 0.05) }}
+          className="mt-[0.35em] font-semibold uppercase tracking-[0.26em] text-white/55"
+          style={{ fontSize: legenda }}
         >
           {modo === "restam" ? "restam" : "passaram"}
         </span>
+        {ateHora ? (
+          <span
+            className="mt-[0.5em] rounded-full border border-white/15 bg-white/[0.07] px-[0.7em] py-[0.18em] font-bold tabular-nums text-white/70"
+            style={{ fontSize: rodape }}
+          >
+            até {ateHora}
+          </span>
+        ) : null}
       </span>
     </button>
   );

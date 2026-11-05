@@ -182,7 +182,8 @@ const ETAPAS: { numero: string; titulo: string; descricao: string; Icone: Lucide
   {
     numero: "04",
     titulo: "Aprender vai além do laboratório",
-    descricao: "Atividades, jogos e materiais digitais estendem as descobertas para outros momentos.",
+    descricao:
+      "Atividades, jogos e materiais digitais estendem as descobertas para outros momentos.",
     Icone: Sparkles,
   },
 ];
@@ -209,13 +210,19 @@ function Index() {
   return (
     <div className="home-premium relative min-h-screen overflow-x-clip bg-background text-foreground">
       <PageBackground />
-      <a href="#conteudo-principal" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-background focus:px-5 focus:py-3 focus:font-bold focus:text-foreground focus:shadow-xl">
+      <a
+        href="#conteudo-principal"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-background focus:px-5 focus:py-3 focus:font-bold focus:text-foreground focus:shadow-xl"
+      >
         Pular para o conteúdo
       </a>
       <div className="relative z-10">
         <NavBar />
         <main id="conteudo-principal">
-          <section aria-labelledby="home-titulo" className="home-hero home-window-hero relative isolate overflow-hidden text-white">
+          <section
+            aria-labelledby="home-titulo"
+            className="home-hero home-window-hero relative isolate overflow-hidden text-white"
+          >
             <img
               src={labFotoImg}
               alt=""
@@ -226,71 +233,104 @@ function Index() {
             />
             <div aria-hidden="true" className="home-hero-shade absolute inset-0 -z-20" />
             <div aria-hidden="true" className="home-hero-grid absolute inset-0 -z-10" />
-            <div aria-hidden="true" className="home-hero-orb absolute -right-20 top-20 -z-10 size-80 rounded-full bg-sun/15 blur-3xl" />
-            {feriadoHoje ? null : <ConstelacaoNomes sessoes={sessoes} logado={isAuthenticated} className="-z-10" />}
+            <div
+              aria-hidden="true"
+              className="home-hero-orb absolute -right-20 top-20 -z-10 size-80 rounded-full bg-sun/15 blur-3xl"
+            />
+            {feriadoHoje ? null : (
+              <ConstelacaoNomes sessoes={sessoes} logado={isAuthenticated} className="-z-10" />
+            )}
 
             <div className="mx-auto max-w-[86rem] px-4 pb-7 pt-9 sm:px-8 sm:pb-10 sm:pt-12 lg:px-10 lg:pt-16">
-              <div data-constelacao-evitar className="mb-9 flex flex-wrap items-center justify-between gap-3 border-b border-white/15 pb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-white/70 sm:text-xs">
-                <span className="flex items-center gap-2">
-                  <span className="grid size-8 place-items-center rounded-xl border border-white/20 bg-white/10">
-                    <MarcaLogo tamanho={22} />
+              {/* Assinatura da escola: no celular cabe numa linha só, com o
+                  nome cortado antes de virar um parágrafo em caixa alta. */}
+              <div
+                data-constelacao-evitar
+                className="mb-6 flex items-center justify-between gap-3 border-b border-white/15 pb-3.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/70 sm:mb-9 sm:pb-4 sm:text-xs sm:tracking-[0.18em]"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg border border-white/20 bg-white/10 sm:size-8 sm:rounded-xl">
+                    <MarcaLogo tamanho={20} />
                   </span>
-                  Escola Municipal Dr. Eiraldo Carneiro de França
+                  <span className="truncate">
+                    <span className="sm:hidden">E. M. Dr. Eiraldo C. de França</span>
+                    <span className="hidden sm:inline">
+                      Escola Municipal Dr. Eiraldo Carneiro de França
+                    </span>
+                  </span>
                 </span>
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex shrink-0 items-center gap-1.5">
                   <MapPin className="size-3.5 text-sun" aria-hidden="true" />
-                  Feijó, Acre · Ano letivo 2026
+                  <span className="sm:hidden">Feijó · AC</span>
+                  <span className="hidden sm:inline">Feijó, Acre · Ano letivo 2026</span>
                 </span>
               </div>
 
-              {feriadoHoje ? <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="mb-8" /> : null}
+              {feriadoHoje ? (
+                <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="mb-8" />
+              ) : null}
 
               <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)] xl:gap-16">
-                <div className="max-w-3xl">
+                {/* O bloco inteiro é obstáculo para os nomes que flutuam ao
+                    fundo: antes um nome podia cair em cima do selo ou do
+                    título se a medição acontecesse antes do layout assentar. */}
+                <div data-constelacao-evitar className="max-w-3xl">
                   <div className="home-hero-entrance inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-xl sm:text-xs">
                     <span className="size-2 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.8)]" />
                     Educação integral & tecnologia
                   </div>
                   <h1
                     id="home-titulo"
-                    className="home-hero-entrance mt-6 max-w-[12.7ch] font-heading text-[clamp(2.75rem,5.8vw,5.7rem)] font-extrabold leading-[1.02] tracking-[-0.055em] text-white"
+                    className="home-hero-entrance mt-5 max-w-[12.7ch] font-heading text-[clamp(2.3rem,5.8vw,5.7rem)] font-extrabold leading-[1.03] tracking-[-0.05em] text-white sm:mt-6"
                   >
                     Um universo de
                     <span className="home-headline-accent mt-1 block text-sun">descobertas.</span>
                     Todos os dias.
                   </h1>
-                  <p className="home-hero-entrance mt-6 max-w-[34rem] text-base leading-relaxed text-white/80 sm:text-lg">
+                  <p className="home-hero-entrance mt-5 max-w-[34rem] text-[15px] leading-relaxed text-white/80 sm:mt-6 sm:text-lg">
                     O laboratório de informática aproxima nossos estudantes da tecnologia, da
-                    criatividade e de novas formas de aprender. Acompanhe o que acontece na escola
-                    e explore cada espaço.
+                    criatividade e de novas formas de aprender. Acompanhe o que acontece na escola e
+                    explore cada espaço.
                   </p>
-                  <div className="home-hero-entrance mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  {/* No celular os dois botões dividem a linha: a abertura
+                      inteira cabe numa tela, sem empurrar o painel ao vivo
+                      para baixo da dobra. */}
+                  <div className="home-hero-entrance mt-6 flex flex-wrap gap-2.5 sm:mt-8 sm:gap-3">
                     <Button
                       asChild
                       size="lg"
-                      className="home-cta-primary h-12 rounded-full bg-sun px-6 font-bold text-sun-foreground shadow-xl shadow-black/20 hover:bg-sun/90 sm:h-13"
+                      className="home-cta-primary h-12 min-w-0 flex-1 rounded-full bg-sun px-4 font-bold text-sun-foreground shadow-xl shadow-black/20 hover:bg-sun/90 sm:h-13 sm:flex-none sm:px-6"
                     >
                       <Link to="/agenda">
-                        <CalendarDays className="size-5" aria-hidden="true" />
-                        Explorar agenda
-                        <ArrowRight className="size-4" aria-hidden="true" />
+                        <CalendarDays className="size-5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">Explorar agenda</span>
+                        <ArrowRight
+                          className="hidden size-4 shrink-0 sm:block"
+                          aria-hidden="true"
+                        />
                       </Link>
                     </Button>
                     <Button
                       asChild
                       size="lg"
                       variant="outline"
-                      className="h-12 rounded-full border-white/30 bg-white/10 px-6 font-bold text-white backdrop-blur-xl hover:border-white/50 hover:bg-white/20 hover:text-white sm:h-13"
+                      className="h-12 min-w-0 flex-1 rounded-full border-white/30 bg-white/10 px-4 font-bold text-white backdrop-blur-xl hover:border-white/50 hover:bg-white/20 hover:text-white sm:h-13 sm:flex-none sm:px-6"
                     >
                       <a href="#laboratorio-agora">
-                        <MonitorSmartphone className="size-5" aria-hidden="true" />
-                        Laboratório ao vivo
-                        <ArrowDown className="size-4" aria-hidden="true" />
+                        <MonitorSmartphone className="size-5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">
+                          <span className="sm:hidden">Ao vivo</span>
+                          <span className="hidden sm:inline">Laboratório ao vivo</span>
+                        </span>
+                        <ArrowDown className="hidden size-4 shrink-0 sm:block" aria-hidden="true" />
                       </a>
                     </Button>
                   </div>
-                  <p data-constelacao-evitar className="mt-6 flex items-center gap-2 text-xs font-medium text-white/60 sm:text-sm">
-                    <ShieldCheck className="size-4 text-emerald-300" aria-hidden="true" />
+                  <p
+                    data-constelacao-evitar
+                    className="mt-5 flex items-center gap-2 text-xs font-medium text-white/60 sm:mt-6 sm:text-sm"
+                  >
+                    <ShieldCheck className="size-4 shrink-0 text-emerald-300" aria-hidden="true" />
                     Uma plataforma de aprendizagem e acompanhamento escolar
                   </p>
                 </div>
@@ -312,7 +352,10 @@ function Index() {
                   />
                   <div className="mt-3 flex items-center justify-between gap-3 px-1 text-xs text-white/70">
                     <span>O que está acontecendo, em um só olhar.</span>
-                    <Link to="/agenda" className="inline-flex shrink-0 items-center gap-1 font-bold text-sun hover:underline">
+                    <Link
+                      to="/agenda"
+                      className="inline-flex shrink-0 items-center gap-1 font-bold text-sun hover:underline"
+                    >
                       Ver detalhes <ChevronRight className="size-4" aria-hidden="true" />
                     </Link>
                   </div>
@@ -320,13 +363,36 @@ function Index() {
               </div>
 
               <div className="home-hero-stats mt-5 grid grid-cols-2 overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/[0.09] backdrop-blur-xl sm:grid-cols-4 lg:mt-14">
-                <HeroStat rotulo="Turmas atendidas" detalhe="1º ao 5º ano" valor={turmas.length} isReady={isReady} Icone={GraduationCap} />
-                <HeroStat rotulo="Alunos ativos" detalhe="Matrículas vigentes" valor={totalAlunos} isReady={isReady} Icone={Users2} />
-                <HeroStat rotulo="Computadores" detalhe="Estações de uso" valor={config.numeroComputadores} isReady={isReady} Icone={MonitorSmartphone} />
+                <HeroStat
+                  rotulo="Turmas atendidas"
+                  curto="Turmas"
+                  detalhe="1º ao 5º ano"
+                  valor={turmas.length}
+                  isReady={isReady}
+                  Icone={GraduationCap}
+                />
+                <HeroStat
+                  rotulo="Alunos ativos"
+                  curto="Alunos"
+                  detalhe="Matrículas vigentes"
+                  valor={totalAlunos}
+                  isReady={isReady}
+                  Icone={Users2}
+                />
+                <HeroStat
+                  rotulo="Computadores"
+                  curto="Computadores"
+                  detalhe="Estações de uso"
+                  valor={config.numeroComputadores}
+                  isReady={isReady}
+                  Icone={MonitorSmartphone}
+                />
                 <div className="home-stat-cell px-4 py-5 sm:px-6">
                   <div className="flex items-center gap-2 text-white/60">
                     <Clock3 className="size-4 text-sun" aria-hidden="true" />
-                    <span className="text-[11px] font-bold uppercase tracking-[0.12em]">Funcionamento</span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
+                      Funcionamento
+                    </span>
                   </div>
                   <span className="mt-2 block font-heading text-xl font-extrabold tracking-tight text-white sm:text-2xl">
                     {config.horaInicio}–{config.horaFim}
@@ -338,7 +404,10 @@ function Index() {
             <AvisoDireitosImagem className="mx-auto max-w-[86rem] px-4 pb-4 text-white/45 sm:px-8" />
           </section>
 
-          <section aria-labelledby="home-acessos-titulo" className="home-section home-window-section mx-auto max-w-[86rem] px-4 py-8 sm:px-8 sm:py-10 lg:px-10">
+          <section
+            aria-labelledby="home-acessos-titulo"
+            className="home-section home-window-section mx-auto max-w-[86rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-10"
+          >
             <RevealSection>
               <SectionIntro
                 etiqueta="Explore a plataforma"
@@ -348,51 +417,84 @@ function Index() {
               />
             </RevealSection>
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-              {ACESSOS.map(({ to, numero, rotulo, titulo, descricao, chamada, Icone, estilo, destaque, imagem }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className={"home-access-card group relative flex min-h-[12rem] flex-col overflow-hidden rounded-[1.5rem] border p-4 sm:p-5 " + estilo + (destaque ? " lg:min-h-[12rem]" : "")}
-                >
-                  <img
-                    src={imagem}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                    decoding="async"
-                    width={768}
-                    height={512}
-                    className="home-access-photo pointer-events-none absolute inset-0 size-full object-cover"
-                  />
-                  <span aria-hidden="true" className="home-access-overlay pointer-events-none absolute inset-0" />
-                  <div className="relative z-10 flex items-start justify-between gap-3">
-                    <span className="home-access-icon grid size-12 place-items-center rounded-2xl border border-current/15 bg-current/[0.08]">
-                      <Icone className="size-6" aria-hidden="true" />
-                    </span>
-                    <span className="font-heading text-sm font-bold opacity-40">{numero} / 06</span>
-                  </div>
-                  <div className="relative z-10 mt-auto pt-12">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">{rotulo}</span>
-                    <h3 className="mt-2 max-w-[18ch] font-heading text-[clamp(1.45rem,2vw,2.15rem)] font-extrabold leading-[1.13] tracking-tight">
-                      {titulo}
-                    </h3>
-                    <p className="mt-3 max-w-sm text-sm leading-relaxed opacity-80">{descricao}</p>
-                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
-                      {chamada}
-                      <span className="home-access-arrow grid size-8 place-items-center rounded-full border border-current/20">
-                        <ArrowRight className="size-4" aria-hidden="true" />
+              {ACESSOS.map(
+                ({
+                  to,
+                  numero,
+                  rotulo,
+                  titulo,
+                  descricao,
+                  chamada,
+                  Icone,
+                  estilo,
+                  destaque,
+                  imagem,
+                }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={
+                      "home-access-card group relative flex min-h-[12rem] flex-col overflow-hidden rounded-[1.5rem] border p-4 sm:p-5 " +
+                      estilo +
+                      (destaque ? " lg:min-h-[12rem]" : "")
+                    }
+                  >
+                    <img
+                      src={imagem}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      decoding="async"
+                      width={768}
+                      height={512}
+                      className="home-access-photo pointer-events-none absolute inset-0 size-full object-cover"
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="home-access-overlay pointer-events-none absolute inset-0"
+                    />
+                    <div className="relative z-10 flex items-start justify-between gap-3">
+                      <span className="home-access-icon grid size-12 place-items-center rounded-2xl border border-current/15 bg-current/[0.08]">
+                        <Icone className="size-6" aria-hidden="true" />
                       </span>
-                    </span>
-                  </div>
-                  {destaque ? (
-                    <span aria-hidden="true" className="home-access-decor absolute -right-12 top-20 hidden size-52 rounded-full border-[26px] border-white/10 lg:block" />
-                  ) : null}
-                </Link>
-              ))}
+                      <span className="font-heading text-sm font-bold opacity-40">
+                        {numero} / 06
+                      </span>
+                    </div>
+                    <div className="relative z-10 mt-auto pt-12">
+                      <span className="text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">
+                        {rotulo}
+                      </span>
+                      <h3 className="mt-2 max-w-[18ch] font-heading text-[clamp(1.45rem,2vw,2.15rem)] font-extrabold leading-[1.13] tracking-tight">
+                        {titulo}
+                      </h3>
+                      <p className="mt-3 max-w-sm text-sm leading-relaxed opacity-80">
+                        {descricao}
+                      </p>
+                      <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
+                        {chamada}
+                        <span className="home-access-arrow grid size-8 place-items-center rounded-full border border-current/20">
+                          <ArrowRight className="size-4" aria-hidden="true" />
+                        </span>
+                      </span>
+                    </div>
+                    {destaque ? (
+                      <span
+                        aria-hidden="true"
+                        className="home-access-decor absolute -right-12 top-20 hidden size-52 rounded-full border-[26px] border-white/10 lg:block"
+                      />
+                    ) : null}
+                  </Link>
+                ),
+              )}
             </div>
           </section>
 
-          <section id="laboratorio-agora" aria-labelledby="home-lab-titulo" className="home-live-section home-window-section scroll-mt-24 border-y border-border/60 bg-card/70 py-8 sm:py-10">
+          <section
+            id="laboratorio-agora"
+            aria-labelledby="home-lab-titulo"
+            className="home-live-section home-window-section scroll-mt-24 border-y border-border/60 bg-card/70 py-10 sm:py-14"
+          >
             <div className="mx-auto max-w-[86rem] px-4 sm:px-8 lg:px-10">
               <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
                 <SectionIntro
@@ -403,8 +505,14 @@ function Index() {
                 />
                 <div className="flex shrink-0 flex-wrap items-center gap-3">
                   <ClimaCompacto />
-                  {isAuthenticated && !feriadoHoje ? <MarcarAlunosCartao dados={dadosLab} compacto /> : null}
-                  <Button asChild variant="outline" className="rounded-full border-border bg-background">
+                  {isAuthenticated && !feriadoHoje ? (
+                    <MarcarAlunosCartao dados={dadosLab} compacto />
+                  ) : null}
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="rounded-full border-border bg-background"
+                  >
                     <Link to="/agenda">
                       Agenda completa <ArrowRight className="size-4" aria-hidden="true" />
                     </Link>
@@ -431,7 +539,10 @@ function Index() {
             <BannerEntreTurnos />
           </div>
 
-          <section aria-labelledby="home-metodo-titulo" className="home-section mx-auto max-w-[86rem] px-4 py-16 sm:px-8 sm:py-20 lg:px-10">
+          <section
+            aria-labelledby="home-metodo-titulo"
+            className="home-section mx-auto max-w-[86rem] px-4 py-12 sm:px-8 sm:py-16 lg:px-10"
+          >
             <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-14">
               <RevealSection>
                 <SectionIntro
@@ -456,22 +567,34 @@ function Index() {
               </RevealSection>
               <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
                 {ETAPAS.map(({ numero, titulo, descricao, Icone }) => (
-                  <div key={numero} className="home-step-card rounded-[1.5rem] border border-border bg-card p-6 shadow-sm sm:p-7">
+                  <div
+                    key={numero}
+                    className="home-step-card rounded-[1.5rem] border border-border bg-card p-6 shadow-sm sm:p-7"
+                  >
                     <div className="flex items-center justify-between gap-3">
                       <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary">
                         <Icone className="size-5" aria-hidden="true" />
                       </span>
-                      <span className="font-heading text-sm font-extrabold text-muted-foreground/50">{numero}</span>
+                      <span className="font-heading text-sm font-extrabold text-muted-foreground/50">
+                        {numero}
+                      </span>
                     </div>
-                    <h3 className="mt-8 font-heading text-xl font-extrabold leading-tight tracking-tight">{titulo}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{descricao}</p>
+                    <h3 className="mt-8 font-heading text-xl font-extrabold leading-tight tracking-tight">
+                      {titulo}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                      {descricao}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
           </section>
 
-          <section aria-labelledby="home-comunidade-titulo" className="home-section home-window-section border-t border-border/60 bg-card/65 py-8 sm:py-10">
+          <section
+            aria-labelledby="home-comunidade-titulo"
+            className="home-section home-window-section border-t border-border/60 bg-card/65 py-10 sm:py-14"
+          >
             <div className="mx-auto max-w-[86rem] px-4 sm:px-8 lg:px-10">
               <SectionIntro
                 etiqueta="Nossa comunidade escolar"
@@ -488,7 +611,10 @@ function Index() {
                     loading="lazy"
                     className="absolute inset-0 -z-30 size-full object-cover opacity-30"
                   />
-                  <span aria-hidden="true" className="absolute inset-0 -z-20 bg-gradient-to-br from-ink/95 via-ink/85 to-primary/50" />
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 -z-20 bg-gradient-to-br from-ink/95 via-ink/85 to-primary/50"
+                  />
                   <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-sun">
                     <CheckCircle2 className="size-4" aria-hidden="true" /> Acompanhamento
                   </span>
@@ -500,7 +626,11 @@ function Index() {
                       Indicadores por turma ajudam a compreender o desenvolvimento dos estudantes,
                       sem identificar crianças publicamente.
                     </p>
-                    <Button asChild size="lg" className="mt-7 rounded-full bg-sun px-6 font-bold text-sun-foreground hover:bg-sun/90">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="mt-7 rounded-full bg-sun px-6 font-bold text-sun-foreground hover:bg-sun/90"
+                    >
                       <Link to="/resultados">
                         Ver resultados <ArrowRight className="size-4" aria-hidden="true" />
                       </Link>
@@ -512,24 +642,34 @@ function Index() {
             </div>
           </section>
 
-          <section aria-label="Acesso da equipe" className="home-last-cta px-4 py-7 sm:px-8 sm:py-9 lg:px-10">
+          <section
+            aria-label="Acesso da equipe"
+            className="home-last-cta px-4 py-7 sm:px-8 sm:py-9 lg:px-10"
+          >
             <div className="mx-auto flex max-w-[86rem] flex-col gap-5 rounded-[1.8rem] border border-border bg-card px-6 py-7 shadow-sm sm:px-9 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4">
                 <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
                   <ShieldCheck className="size-6" aria-hidden="true" />
                 </span>
                 <div>
-                  <h2 className="font-heading text-xl font-extrabold tracking-tight">Um espaço também para a equipe.</h2>
+                  <h2 className="font-heading text-xl font-extrabold tracking-tight">
+                    Um espaço também para a equipe.
+                  </h2>
                   <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                    Professores e responsáveis autorizados podem acessar os recursos de gestão e acompanhamento.
+                    Professores e responsáveis autorizados podem acessar os recursos de gestão e
+                    acompanhamento.
                   </p>
                 </div>
               </div>
               <Button asChild size="lg" className="shrink-0 rounded-full px-6 font-bold">
                 {isAuthenticated ? (
-                  <Link to="/dashboard">Abrir painel <ArrowRight className="size-4" aria-hidden="true" /></Link>
+                  <Link to="/dashboard">
+                    Abrir painel <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
                 ) : (
-                  <Link to="/login">Acesso da equipe <ArrowRight className="size-4" aria-hidden="true" /></Link>
+                  <Link to="/login">
+                    Acesso da equipe <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
                 )}
               </Button>
             </div>
@@ -543,12 +683,15 @@ function Index() {
 
 function HeroStat({
   rotulo,
+  curto,
   detalhe,
   valor,
   isReady,
   Icone,
 }: {
   rotulo: string;
+  /** Versão curta para o celular, onde o rótulo inteiro quebraria em duas linhas. */
+  curto: string;
   detalhe: string;
   valor: number;
   isReady: boolean;
@@ -557,13 +700,19 @@ function HeroStat({
   return (
     <div className="home-stat-cell px-4 py-5 sm:px-6">
       <div className="flex items-center gap-2 text-white/60">
-        <Icone className="size-4 text-sun" aria-hidden="true" />
-        <span className="text-[11px] font-bold uppercase tracking-[0.12em]">{rotulo}</span>
+        <Icone className="size-4 shrink-0 text-sun" aria-hidden="true" />
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
+          <span className="sm:hidden">{curto}</span>
+          <span className="hidden sm:inline">{rotulo}</span>
+        </span>
       </div>
       {isReady ? (
         <StatCounter valor={valor} />
       ) : (
-        <div className="mt-3 h-8 w-16 animate-pulse rounded-lg bg-white/20" aria-label="Carregando" />
+        <div
+          className="mt-3 h-8 w-16 animate-pulse rounded-lg bg-white/20"
+          aria-label="Carregando"
+        />
       )}
       <span className="mt-0.5 block text-xs text-white/60">{detalhe}</span>
     </div>
@@ -573,7 +722,10 @@ function HeroStat({
 function StatCounter({ valor }: { valor: number }) {
   const { ref, exibido } = useCountUp(valor);
   return (
-    <div ref={ref} className="mt-1 font-heading text-[1.85rem] font-extrabold leading-none tracking-tight tabular-nums text-white sm:text-[2.1rem]">
+    <div
+      ref={ref}
+      className="mt-1 font-heading text-[1.85rem] font-extrabold leading-none tracking-tight tabular-nums text-white sm:text-[2.1rem]"
+    >
       {exibido}
     </div>
   );
@@ -605,7 +757,10 @@ function SectionIntro({
         <span className="h-px w-7 bg-primary" aria-hidden="true" />
         {etiqueta}
       </p>
-      <h2 id={id} className="mt-3 max-w-[19ch] font-heading text-[clamp(2rem,3.5vw,3.5rem)] font-extrabold leading-[1.06] tracking-[-0.045em] text-foreground">
+      <h2
+        id={id}
+        className="mt-3 max-w-[19ch] font-heading text-[clamp(2rem,3.5vw,3.5rem)] font-extrabold leading-[1.06] tracking-[-0.045em] text-foreground"
+      >
         {titulo}
       </h2>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -675,7 +830,10 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
           <Youtube className="size-9 text-red-400" aria-hidden="true" />
         </span>
       )}
-      <span aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20" />
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20"
+      />
       <span className="absolute left-1/2 top-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-red-600 shadow-lg transition-transform duration-300 group-hover:scale-110 sm:size-12">
         <Play className="ml-0.5 size-5 fill-current" aria-hidden="true" />
       </span>

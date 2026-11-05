@@ -13,13 +13,13 @@ import {
   PartyPopper,
   Save,
   Shuffle,
+  Users2,
   Wifi,
   X,
 } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
 import { FichaTelaCheia } from "@/components/school/laboratorio/ficha-tela-cheia";
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { MarcaLogo } from "@/components/school/marca";
@@ -51,6 +51,9 @@ const DICAS_FINAIS = [
 ];
 
 const ICONES = [Monitor, Keyboard, Mouse, Cpu, Wifi, Code2, Laptop, Save];
+
+/** Quanto tempo cada aluno fica no holofote, e quanto dura a troca. */
+const TEMPO_DESTAQUE = 5200;
 
 function primeiroNome(nome: string) {
   return nome.trim().split(/\s+/)[0] ?? nome;
@@ -95,11 +98,79 @@ function useDigitando(frases: string[], porFrase = 6500) {
 }
 
 /**
- * Modo tela cheia da aula de informática: o relógio da contagem ocupa o
- * centro da tela, com a turma (ou a aula mista e as turmas que vieram), os
- * alunos em "estações" de computador e um fundo animado com código binário,
- * trilhas de circuito e peças de computador flutuando. Funciona no
- * computador, na TV e no celular (em pé ou deitado). Mantém a tela acesa
+ * Holofote da aula: um aluno de cada vez, em letras grandes, trocando sozinho.
+ *
+ * Na tela cheia antiga o nome flutuava procurando um buraco entre os blocos.
+ * Agora que a janela inteira é aproveitada não sobra buraco nenhum, então o
+ * holofote virou um lugar fixo do layout — mesma ideia, sem risco de o nome
+ * cair por cima do relógio ou sair da tela.
+ */
+function Holofote({
+  alunos,
+  logado,
+  className,
+}: {
+  alunos: { sessaoId: string; nome: string; turmaRotulo: string }[];
+  logado: boolean;
+  className?: string;
+}) {
+  const [i, setI] = useState(0);
+  const [visivel, setVisivel] = useState(true);
+  const total = alunos.length;
+
+  useEffect(() => {
+    if (total <= 1) return;
+    const some = window.setTimeout(() => setVisivel(false), TEMPO_DESTAQUE - 600);
+    const troca = window.setTimeout(() => {
+      setI((x) => (x + 1) % total);
+      setVisivel(true);
+    }, TEMPO_DESTAQUE);
+    return () => {
+      window.clearTimeout(some);
+      window.clearTimeout(troca);
+    };
+  }, [i, total]);
+
+  const atual = alunos[i % Math.max(1, total)];
+  if (!atual) return null;
+  const cor = serieClasses(serieIndexPorNumero(atual.turmaRotulo));
+  return (
+    <div className={cn("min-w-0", className)} aria-hidden>
+      <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-white/45">
+        <span className="size-1.5 rounded-full bg-emerald-400" />
+        No computador agora
+      </p>
+      <p
+        className={cn(
+          "mt-1.5 font-heading text-[clamp(1.15rem,2.1vw,2rem)] font-extrabold leading-[1.08] transition-all duration-500 [overflow-wrap:anywhere]",
+          visivel ? "translate-y-0 opacity-100 blur-0" : "translate-y-2 opacity-0 blur-[3px]",
+        )}
+      >
+        {nomeExibido(atual.nome, logado)}
+      </p>
+      <span
+        className={cn(
+          "mt-2 w-fit self-start rounded-full px-2.5 py-0.5 text-xs font-extrabold transition-opacity duration-500",
+          cor.bg,
+          cor.text,
+          visivel ? "opacity-100" : "opacity-0",
+        )}
+      >
+        {atual.turmaRotulo}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Modo tela cheia da aula de informática.
+ *
+ * A janela é dividida em três faixas que ocupam toda a tela: à esquerda a
+ * identidade da aula (turma, professores, holofote dos alunos), ao centro o
+ * relógio da contagem no maior tamanho que couber, e à direita as estações de
+ * computador, uma por aluno. Em cima, a barra da escola com o relógio do dia;
+ * embaixo, a linha do tempo da aula e o terminal de dicas, de ponta a ponta.
+ * No celular em pé tudo se empilha na mesma ordem. Mantém a tela acesa
  * enquanto estiver aberto, quando o aparelho permite.
  */
 export function TelaCheiaAula({
@@ -146,26 +217,29 @@ export function TelaCheiaAula({
   const mista = g.turmaId === "mista";
   const professor = mista ? null : turmas.find((t) => t.id === g.turmaId)?.professorRegente;
   const cor = serieClasses(serieIndexPorNumero(g.turmaRotulo));
+  const minutosTotal = Math.max(1, Math.round((fim - ini) / 60_000));
 
   const deitado = w > h;
   /** Celular deitado ou janela baixa: menos enfeites em volta, mais relógio. */
   const baixo = h < 560;
-  // Tudo tem de caber numa janela só: se a lista de alunos não couber, o
-  // relógio encolhe um pouco de cada vez (e, deitado, a lista ganha largura).
+  // Tudo tem de caber numa janela só. O relógio vem da altura da janela; se a
+  // grade de estações ainda transbordar, são as estações que encolhem — o
+  // relógio é o que precisa ser visto do fundo da sala.
   const [fator, setFator] = useState(1);
   const lista = useRef<HTMLUListElement>(null);
   useEffect(() => setFator(1), [w, h, presentes.length, mista]);
   useLayoutEffect(() => {
     const ul = lista.current;
-    if (ul && ul.scrollHeight > ul.clientHeight + 2 && fator > 0.72)
-      setFator((f) => Math.round((f - 0.06) * 100) / 100);
+    if (ul && ul.scrollHeight > ul.clientHeight + 2 && fator > 0.62)
+      setFator((f) => Math.round((f - 0.07) * 100) / 100);
   });
   const tamanho = Math.round(
-    fator *
-      (deitado
-        ? Math.min(h * (baixo ? 0.62 : 0.6), w * 0.4, 560)
-        : Math.min(w * 0.72, h * (mista ? 0.3 : 0.34), 520)),
+    deitado
+      ? Math.min(h * (baixo ? 0.66 : 0.58), w * 0.33, 640)
+      : Math.min(w * 0.74, h * (mista ? 0.27 : 0.3), 440),
   );
+  /** Largura mínima de cada estação: encolhe até tudo caber sem rolar. */
+  const estacao = (deitado ? 10.5 : 7.25) * fator;
   const dica = useDigitando(finais ? DICAS_FINAIS : DICAS);
 
   // Trava a rolagem da página, tenta a tela cheia do navegador e mantém a
@@ -255,6 +329,183 @@ export function TelaCheiaAula({
     [],
   );
 
+  /** Caixa de vidro das faixas laterais — a mesma em toda a tela cheia. */
+  const vidro =
+    "relative min-h-0 rounded-[1.75rem] border border-white/12 bg-white/[0.045] shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_24px_70px_-40px_rgb(0_0_0/0.9)] backdrop-blur-xl";
+
+  const painelTurma = (
+    <section
+      className={cn(
+        vidro,
+        "flex flex-col gap-3 overflow-hidden p-4",
+        deitado ? "xl:p-5" : "shrink-0 gap-2 p-3",
+      )}
+      aria-label="Turma no laboratório"
+    >
+      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/45 sm:text-[11px]">
+        {mista ? "Turmas juntas" : "Turma no laboratório"}
+      </p>
+      {mista ? (
+        <h2 className="tc-titulo flex items-center gap-2 bg-gradient-to-r from-violet-300 via-sky-300 to-emerald-300 bg-clip-text font-heading text-[clamp(1.8rem,4.4vw,3.6rem)] font-extrabold leading-none tracking-tight text-transparent">
+          <Shuffle className="size-[0.62em] shrink-0 text-violet-300" aria-hidden />
+          Aula mista
+        </h2>
+      ) : (
+        <h2
+          className={cn(
+            "tc-titulo w-fit rounded-2xl px-[0.3em] py-[0.06em] font-heading text-[clamp(2.4rem,6vw,5.5rem)] font-extrabold leading-none tracking-tight shadow-2xl",
+            cor.bg,
+            cor.text,
+          )}
+        >
+          {g.turmaRotulo}
+        </h2>
+      )}
+
+      <dl className="grid grid-cols-2 gap-2 text-left">
+        <div className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2">
+          <dt className="text-[10px] uppercase tracking-wider text-white/45">Alunos</dt>
+          <dd className="font-heading text-xl font-extrabold tabular-nums leading-none">
+            {presentes.length}
+          </dd>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2">
+          <dt className="text-[10px] uppercase tracking-wider text-white/45">Duração</dt>
+          <dd className="font-heading text-xl font-extrabold tabular-nums leading-none">
+            {minutosTotal}
+            <span className="ml-0.5 text-xs font-bold text-white/60">min</span>
+          </dd>
+        </div>
+      </dl>
+
+      {(config.professorInformatica || professor) && !baixo ? (
+        <div className="space-y-1.5 text-sm">
+          {config.professorInformatica ? (
+            <p className="flex items-center gap-2">
+              <MonitorSmartphone className="size-4 shrink-0 text-emerald-300" aria-hidden />
+              <span className="min-w-0 truncate">
+                <span className="text-white/55">Informática:</span>{" "}
+                <strong className="font-bold">Prof. {config.professorInformatica}</strong>
+              </span>
+            </p>
+          ) : null}
+          {professor ? (
+            <p className="flex items-center gap-2">
+              <GraduationCap className="size-4 shrink-0 text-amber-300" aria-hidden />
+              <span className="min-w-0 truncate">
+                <span className="text-white/55">Regente:</span> {professor}
+              </span>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {mista ? (
+        <ul className="flex flex-wrap gap-1.5">
+          {participantes.map((p) => {
+            const c = serieClasses(serieIndexPorNumero(p.rotulo));
+            return (
+              <li
+                key={p.id}
+                className="flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.07] py-0.5 pl-0.5 pr-2.5 text-xs"
+              >
+                <span className={cn("rounded-full px-2 py-0.5 font-extrabold", c.bg, c.text)}>
+                  {p.rotulo}
+                </span>
+                <span className="text-white/75">{p.qtd}</span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      {deitado && !baixo ? (
+        <Holofote
+          alunos={presentes}
+          logado={logado}
+          className="mt-2 flex min-h-0 flex-1 flex-col justify-center border-t border-white/10 pt-3"
+        />
+      ) : null}
+    </section>
+  );
+
+  const painelEstacoes = (
+    <section
+      className={cn(vidro, "flex min-w-0 flex-col overflow-hidden p-3 sm:p-4")}
+      aria-label="Alunos nos computadores"
+    >
+      <p className="mb-2 flex shrink-0 items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-white/45 sm:text-[11px]">
+        <span className="flex items-center gap-2">
+          <Users2 className="size-3.5" aria-hidden /> Nos computadores
+        </span>
+        <span className="rounded-full bg-white/10 px-2 py-0.5 tabular-nums text-white/70">
+          {presentes.length}
+        </span>
+      </p>
+      {/* Mapa das estações: cada linha divide igualmente a altura que sobra,
+          então a bancada preenche o painel em vez de ficar amontoada em cima.
+          A linha nunca fica menor que 3,2 rem — abaixo disso a grade volta a
+          rolar e o `fator` diminui as colunas. */}
+      <ul
+        ref={lista}
+        className="grid min-h-0 flex-1 gap-2 overflow-y-auto [scrollbar-width:none]"
+        style={{
+          gridTemplateColumns: `repeat(auto-fill,minmax(${estacao}rem,1fr))`,
+          gridAutoRows: "minmax(3.2rem,1fr)",
+        }}
+      >
+        {presentes.map((a, i) => {
+          const c = serieClasses(serieIndexPorNumero(a.turmaRotulo));
+          return (
+            <li
+              key={a.sessaoId}
+              style={{ animationDelay: `${Math.min(i, 14) * 70}ms` }}
+              className="lab-aluno min-h-0"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  setToque(a.sessaoId);
+                  setFicha(a);
+                }}
+                aria-label={`Ver a ficha de ${primeiroNome(nomeExibido(a.nome, logado))}`}
+                onAnimationEnd={() => setToque(null)}
+                className={cn(
+                  "flex size-full flex-col items-center justify-center gap-[5%] rounded-2xl border border-white/10 bg-white/[0.06] p-2 text-center transition hover:border-white/25 hover:bg-white/[0.13]",
+                  toque === a.sessaoId && "tc-pulo",
+                )}
+              >
+                <span className="relative flex aspect-[4/3] h-[clamp(1.5rem,42%,5rem)] items-center justify-center rounded-lg border border-white/20 bg-slate-900/80">
+                  <span
+                    className="tc-tela absolute inset-[6%] rounded-[4px] bg-gradient-to-br from-emerald-400/55 to-sky-500/40"
+                    style={{ animationDelay: `${(i * 0.37) % 3}s` }}
+                  />
+                  <span
+                    className={cn(
+                      "relative rounded px-1 text-[clamp(0.6rem,0.9vw,1.1rem)] font-extrabold leading-none",
+                      c.bg,
+                      c.text,
+                    )}
+                  >
+                    {a.nome.trim().charAt(0).toUpperCase()}
+                  </span>
+                </span>
+                <span className="w-full min-w-0">
+                  <span className="block truncate font-bold leading-tight text-[clamp(0.8rem,1.05vw,1.45rem)]">
+                    {primeiroNome(nomeExibido(a.nome, logado))}
+                  </span>
+                  <span className="block truncate text-[clamp(0.6rem,0.72vw,0.85rem)] leading-tight text-white/50">
+                    {a.turmaRotulo} · estação {i + 1}
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+
   const conteudo = (
     <div
       role="dialog"
@@ -262,7 +513,7 @@ export function TelaCheiaAula({
       data-tela-cheia=""
       aria-label={`Aula de informática em tela cheia: ${mista ? "aula mista" : g.turmaRotulo}`}
       className={cn(
-        "fixed inset-0 z-[9999] isolate flex flex-col overflow-hidden bg-[#050b1a] text-white",
+        "fixed inset-0 z-[9999] isolate grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-[#050b1a] text-white",
         parado && "cursor-none",
       )}
     >
@@ -306,25 +557,11 @@ export function TelaCheiaAula({
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgb(0_0_0/0.55))]" />
       </div>
 
-      {/* ── Destaque: um aluno da aula por vez, flutuando nos espaços livres ── */}
-      <ConstelacaoNomes
-        sessoes={[]}
-        logado={logado}
-        fixos={presentes.map((a) => ({
-          chave: `${a.turmaId}|${a.id}`,
-          nome: a.nome,
-          turma: a.turmaRotulo,
-        }))}
-        evitar="[data-constelacao-evitar], [data-constelacao-filhos] > *"
-        grande
-      />
-
       {/* ── Barra de cima ── */}
       <header
-        data-constelacao-evitar
         className={cn(
-          "flex items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-8",
-          baixo ? "sm:pt-3" : "sm:pt-6",
+          "flex items-center justify-between gap-3 px-4 pb-2.5 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6",
+          baixo ? "sm:pt-3" : "sm:pt-5",
         )}
       >
         <div className="flex min-w-0 items-center gap-2.5">
@@ -397,24 +634,24 @@ export function TelaCheiaAula({
         </div>
       </header>
 
-      {/* ── Centro: relógio e turma ── */}
+      {/* ── Corpo: identidade da aula · relógio · estações ── */}
       <main
         className={cn(
-          "flex min-h-0 flex-1 items-center gap-4 px-4 sm:gap-10 sm:px-8",
-          deitado ? "flex-row justify-center" : "flex-col pt-3",
+          "min-h-0 px-3 sm:px-6",
+          deitado
+            ? "grid items-stretch gap-3 xl:gap-4 grid-cols-[minmax(11rem,0.78fr)_auto_minmax(0,1.3fr)]"
+            : "flex flex-col gap-2.5",
         )}
       >
-        <div data-constelacao-evitar className="relative flex shrink-0 flex-col items-center gap-3">
+        {painelTurma}
+
+        <div className="relative flex min-w-0 flex-col items-center justify-center gap-2">
           {/* anel de dados girando em volta do relógio */}
           <svg
             viewBox="0 0 200 200"
             aria-hidden
-            className="tc-orbita pointer-events-none absolute left-1/2 top-0 -translate-x-1/2"
-            style={{
-              width: tamanho * 1.16,
-              height: tamanho * 1.16,
-              marginTop: -tamanho * 0.08,
-            }}
+            className="tc-orbita pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{ width: tamanho * 1.18, height: tamanho * 1.18 }}
           >
             <circle
               cx="100"
@@ -434,187 +671,35 @@ export function TelaCheiaAula({
             agoraMs={efetivo}
             pausada={pausada}
             tamanho={tamanho}
+            ateHora={horaNaEscola(g.fim)}
           />
           {pausada ? (
-            <p className="flex items-center gap-2 rounded-full bg-amber-400 px-4 py-1.5 text-sm font-bold text-amber-950">
-              <Pause className="size-4" aria-hidden />
-              Aula pausada{g.motivoParada ? `: ${g.motivoParada}` : ""}
+            <p className="relative flex max-w-full items-center gap-2 rounded-full bg-amber-400 px-4 py-1.5 text-center text-sm font-bold text-amber-950">
+              <Pause className="size-4 shrink-0" aria-hidden />
+              <span className="truncate">
+                Aula pausada{g.motivoParada ? `: ${g.motivoParada}` : ""}
+              </span>
             </p>
           ) : null}
         </div>
 
-        <section
-          data-constelacao-filhos
-          className={cn(
-            "flex min-h-0 min-w-0 flex-col gap-3 sm:gap-4",
-            deitado
-              ? cn(
-                  "max-h-full flex-1 items-start justify-center text-left",
-                  fator < 1 ? "max-w-3xl" : "max-w-xl",
-                )
-              : "w-full flex-1 items-center text-center",
-          )}
-        >
-          <div className={cn("flex flex-col gap-1", deitado ? "items-start" : "items-center")}>
-            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/55 sm:text-sm">
-              {mista ? "Turmas juntas no laboratório" : "Turma no laboratório"}
-            </p>
-            {mista ? (
-              <h2 className="tc-titulo flex items-center gap-3 bg-gradient-to-r from-violet-300 via-sky-300 to-emerald-300 bg-clip-text font-heading text-[clamp(2.4rem,8vmin,6rem)] font-extrabold leading-none tracking-tight text-transparent">
-                <Shuffle className="size-[0.7em] shrink-0 text-violet-300" aria-hidden />
-                Aula mista
-              </h2>
-            ) : (
-              <h2
-                className={cn(
-                  "tc-titulo rounded-3xl px-[0.35em] py-[0.08em] font-heading text-[clamp(3rem,12vmin,8.5rem)] font-extrabold leading-none tracking-tight shadow-2xl",
-                  cor.bg,
-                  cor.text,
-                )}
-              >
-                {g.turmaRotulo}
-              </h2>
-            )}
-            <div
-              className={cn(
-                "mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-white/85 sm:text-lg",
-                deitado ? "justify-start" : "justify-center",
-              )}
-            >
-              {config.professorInformatica ? (
-                <p className="flex items-center gap-2">
-                  <MonitorSmartphone className="size-5 text-emerald-300" aria-hidden />
-                  <span>
-                    <span className="text-white/60">Informática:</span>{" "}
-                    <strong className="font-bold text-white">
-                      Prof. {config.professorInformatica}
-                    </strong>
-                  </span>
-                </p>
-              ) : null}
-              {professor ? (
-                <p className="flex items-center gap-2">
-                  <GraduationCap className="size-5 text-amber-300" aria-hidden />
-                  <span>
-                    <span className="text-white/60">Regente:</span> {professor}
-                  </span>
-                </p>
-              ) : null}
-            </div>
-            {mista ? (
-              <ul
-                className={cn(
-                  "mt-2 flex flex-wrap gap-2",
-                  deitado ? "justify-start" : "justify-center",
-                )}
-              >
-                {participantes.map((p) => {
-                  const c = serieClasses(serieIndexPorNumero(p.rotulo));
-                  return (
-                    <li
-                      key={p.id}
-                      className={cn(
-                        "flex items-center gap-2 rounded-full border border-white/15 bg-white/10 pl-1 backdrop-blur-xl",
-                        deitado ? "py-1 pr-3 text-sm" : "py-0.5 pr-2.5 text-xs",
-                      )}
-                    >
-                      <span
-                        className={cn("rounded-full px-2.5 py-0.5 font-extrabold", c.bg, c.text)}
-                      >
-                        {p.rotulo}
-                      </span>
-                      {p.qtd} aluno{p.qtd === 1 ? "" : "s"}
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-          </div>
-
-          {/* Estações: um computador por aluno, com a tela piscando. */}
-          <ul
-            ref={lista}
-            aria-label="Alunos nos computadores"
-            className={cn(
-              "grid min-h-0 w-full content-start overflow-y-auto [scrollbar-width:none]",
-              deitado
-                ? "gap-2 grid-cols-[repeat(auto-fill,minmax(8.5rem,1fr))]"
-                : "gap-1.5 grid-cols-[repeat(auto-fill,minmax(6.75rem,1fr))]",
-            )}
-          >
-            {presentes.map((a, i) => {
-              const c = serieClasses(serieIndexPorNumero(a.turmaRotulo));
-              return (
-                <li
-                  key={a.sessaoId}
-                  style={{ animationDelay: `${Math.min(i, 14) * 70}ms` }}
-                  className="lab-aluno"
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setToque(a.sessaoId);
-                      setFicha(a);
-                    }}
-                    aria-label={`Ver a ficha de ${primeiroNome(nomeExibido(a.nome, logado))}`}
-                    onAnimationEnd={() => setToque(null)}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-2 text-left backdrop-blur-xl transition hover:bg-white/[0.14]",
-                      deitado && !baixo ? "py-1.5" : "py-1",
-                      toque === a.sessaoId && "tc-pulo",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "relative flex shrink-0 items-center justify-center rounded-md border border-white/20 bg-slate-900",
-                        deitado && !baixo ? "h-8 w-10" : "h-6 w-8",
-                      )}
-                    >
-                      <span
-                        className="tc-tela absolute inset-0.5 rounded-sm bg-gradient-to-br from-emerald-400/50 to-sky-500/40"
-                        style={{ animationDelay: `${(i * 0.37) % 3}s` }}
-                      />
-                      <span
-                        className={cn(
-                          "relative rounded px-1 text-[9px] font-extrabold",
-                          c.bg,
-                          c.text,
-                        )}
-                      >
-                        {a.nome.trim().charAt(0).toUpperCase()}
-                      </span>
-                    </span>
-                    <span className="min-w-0">
-                      <span
-                        className={cn(
-                          "block truncate font-bold sm:text-lg",
-                          deitado ? "text-base" : "text-sm",
-                        )}
-                      >
-                        {primeiroNome(nomeExibido(a.nome, logado))}
-                      </span>
-                      {/* No celular em pé, a cor da letra já mostra a turma. */}
-                      {mista && deitado && !baixo ? (
-                        <span className="block text-[10px] text-white/55">{a.turmaRotulo}</span>
-                      ) : null}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+        {painelEstacoes}
       </main>
 
       {/* ── Rodapé: aviso final, linha do tempo e terminal de dicas ── */}
       <footer
-        data-constelacao-evitar
-        className="space-y-3 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-8 sm:pb-6"
+        className={cn(
+          "px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2.5 sm:px-6 sm:pb-5",
+          deitado ? "flex items-center gap-4" : "space-y-2",
+        )}
       >
-        {!pausada ? (
-          <AvisoMinutosFinais restanteMs={restante} className="mx-auto max-w-2xl" />
+        {!pausada && finais ? (
+          <AvisoMinutosFinais
+            restanteMs={restante}
+            className={deitado ? "max-w-sm shrink-0" : "mx-auto max-w-2xl"}
+          />
         ) : null}
-        <div className="mx-auto max-w-5xl">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between text-xs font-semibold tabular-nums text-white/70 sm:text-sm">
             <span>Início {horaNaEscola(g.inicio)}</span>
             <span className="md:hidden">{horaComSegundos(agora)}</span>
@@ -634,18 +719,19 @@ export function TelaCheiaAula({
               style={{ left: `${progresso * 100}%`, transition: "left 1s linear" }}
             />
           </div>
-          <p
-            className={cn(
-              "mt-3 truncate rounded-xl border border-white/10 bg-black/30 px-3 py-2 font-mono text-xs text-emerald-300 backdrop-blur-xl sm:text-sm",
-              (baixo || finais) && "hidden",
-            )}
-          >
-            <span className="text-sky-300">lab@escola</span>
-            <span className="text-white/50">:~$ </span>
-            {dica}
-            <span className="tc-cursor ml-0.5 inline-block h-[1em] w-[0.55em] translate-y-[0.15em] bg-emerald-300" />
-          </p>
         </div>
+        <p
+          className={cn(
+            "truncate rounded-xl border border-white/10 bg-black/30 px-3 py-2 font-mono text-xs text-emerald-300 backdrop-blur-xl sm:text-sm",
+            deitado ? "w-[34%] min-w-0 shrink-0" : "",
+            (baixo || finais) && "hidden",
+          )}
+        >
+          <span className="text-sky-300">lab@escola</span>
+          <span className="text-white/50">:~$ </span>
+          {dica}
+          <span className="tc-cursor ml-0.5 inline-block h-[1em] w-[0.55em] translate-y-[0.15em] bg-emerald-300" />
+        </p>
       </footer>
 
       {ficha ? (

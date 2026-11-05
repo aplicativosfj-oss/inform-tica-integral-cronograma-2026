@@ -729,6 +729,30 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
 .lab-varredura {
   animation: lab-varredura 2.6s ease-in-out infinite;
 }
+/* Palco da aula ao vivo: dois halos que passeiam devagar por trás do cartão e
+   uma grade fina de circuito, para o fundo ter profundidade sem roubar a
+   leitura dos nomes. */
+@keyframes lab-aurora {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(8%, 6%) scale(1.14);
+    opacity: 1;
+  }
+}
+.lab-aurora {
+  animation: lab-aurora 16s ease-in-out infinite;
+}
+.lab-circuito {
+  background-image:
+    linear-gradient(rgb(125 211 252 / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(125 211 252 / 0.055) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at 20% 0%, black 10%, transparent 72%);
+}
 /* Relógio da aula: halo que respira, alerta do último minuto e dígitos que deslizam. */
 @keyframes relogio-respira {
   0%,
@@ -752,11 +776,14 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
     transform: scale(1.08);
   }
 }
+/* O dígito dos segundos troca a cada segundo e o relógio chega a 600 px na
+   TV: a entrada é curta e nunca parte do invisível, senão o número pisca
+   como se estivesse faltando. */
 @keyframes relogio-digito {
   from {
-    opacity: 0;
-    transform: translateY(-0.35em);
-    filter: blur(2px);
+    opacity: 0.45;
+    transform: translateY(-0.14em);
+    filter: blur(1px);
   }
   to {
     opacity: 1;
@@ -771,7 +798,7 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   animation: relogio-alerta 0.9s ease-in-out infinite;
 }
 .relogio-digito {
-  animation: relogio-digito 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: relogio-digito 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 /* Minutos finais da aula: ondas que saem do relógio, anel girando,
    ampulheta virando e um brilho que corre pelo aviso. */
@@ -998,6 +1025,7 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
   .lab-aluno,
   .lab-brilho,
   .lab-varredura,
+  .lab-aurora,
   .relogio-respira,
   .relogio-alerta,
   .relogio-digito,

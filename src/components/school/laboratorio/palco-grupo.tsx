@@ -123,10 +123,12 @@ export function PalcoGrupo({
   const minutosTotal = Math.round((fim - ini) / 60_000);
   const minutosPassados = Math.min(minutosTotal, Math.max(0, Math.floor((efetivo - ini) / 60_000)));
 
+  const progresso = Math.min(1, Math.max(0, (efetivo - ini) / Math.max(1, fim - ini)));
+
   return (
     <article
       className={cn(
-        "relative isolate overflow-hidden rounded-3xl border border-white/10 bg-ink text-white shadow-xl",
+        "lab-palco relative isolate overflow-hidden rounded-[1.75rem] border border-white/12 bg-ink text-white shadow-[0_30px_80px_-45px_rgb(2,6,23,0.95)]",
         cheio && "lg:flex lg:h-full lg:flex-col",
       )}
     >
@@ -135,16 +137,37 @@ export function PalcoGrupo({
         alt=""
         aria-hidden
         loading="lazy"
-        className="absolute inset-0 -z-20 size-full object-cover opacity-25"
+        className="absolute inset-0 -z-20 size-full object-cover opacity-[0.18]"
       />
       <div
         aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-br from-ink/95 via-ink/90 to-primary/55"
+        className="absolute inset-0 -z-10 bg-gradient-to-br from-ink/96 via-ink/92 to-primary/55"
+      />
+      {/* Aurora: dois halos que se movem devagar, um verde (ao vivo) e um da
+          marca, só para o cartão não ser um retângulo chapado. */}
+      <div
+        aria-hidden
+        className={cn(
+          "lab-aurora absolute -left-24 -top-28 -z-10 size-80 rounded-full blur-3xl",
+          pausada ? "bg-sun/30" : "bg-mint/30",
+        )}
       />
       <div
         aria-hidden
-        className="lab-brilho absolute -left-20 -top-20 -z-10 size-64 rounded-full bg-primary/40 blur-3xl"
+        className="lab-aurora absolute -bottom-32 -right-24 -z-10 size-96 rounded-full bg-primary/35 blur-3xl [animation-delay:-7s]"
       />
+      <div aria-hidden className="lab-circuito absolute inset-0 -z-10" />
+
+      {/* Andamento da aula de ponta a ponta, na borda de cima. */}
+      <div aria-hidden className="absolute inset-x-0 top-0 z-10 h-1 bg-white/10">
+        <div
+          className={cn(
+            "h-full bg-gradient-to-r",
+            pausada ? "from-sun to-amber-400" : "from-mint via-emerald-300 to-sky-300",
+          )}
+          style={{ width: `${progresso * 100}%`, transition: "width 1s linear" }}
+        />
+      </div>
 
       <div
         className={cn(
@@ -155,7 +178,7 @@ export function PalcoGrupo({
         {/* Coluna do relógio: tempo, horário e controles da aula. */}
         <aside
           className={cn(
-            "flex flex-col gap-3 border-b border-white/10 p-4 md:items-center md:gap-4 md:border-b-0 md:border-r md:p-5 md:text-center",
+            "flex flex-col gap-3 border-b border-white/10 bg-white/[0.025] p-4 md:items-center md:gap-4 md:border-b-0 md:border-r md:p-5 md:text-center",
             cheio && "lg:justify-center",
           )}
         >
@@ -166,7 +189,8 @@ export function PalcoGrupo({
               fimMs={fim}
               agoraMs={efetivo}
               pausada={pausada}
-              tamanho={celular ? 128 : cheio && grande ? 228 : 196}
+              tamanho={celular ? 128 : cheio && grande ? 236 : 200}
+              ateHora={celular ? undefined : horaNaEscola(g.fim)}
             />
             <div className="min-w-0 flex-1 space-y-2 md:w-full md:flex-none">
               <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-mint md:justify-center">
@@ -267,11 +291,13 @@ export function PalcoGrupo({
             </ul>
           ) : null}
 
+          {/* Bancada: uma estação por aluno. A grade se ajusta sozinha à
+              largura disponível, então o mesmo cartão serve ao celular, à
+              coluna estreita da home e à faixa larga do painel. */}
           <ul
             className={cn(
-              "mt-3 grid grid-cols-2 gap-1.5 md:mt-4",
-              cheio &&
-                "lg:mt-5 lg:gap-2.5 [&_.lab-aluno]:lg:py-3 [&_.lab-aluno_.block.text-xs]:lg:text-base",
+              "mt-3 grid grid-cols-[repeat(auto-fill,minmax(min(100%,14rem),1fr))] gap-2 md:mt-4",
+              cheio && "lg:mt-5 lg:gap-2.5",
             )}
             aria-label="Alunos no laboratório"
           >
@@ -282,8 +308,10 @@ export function PalcoGrupo({
                 <li
                   key={a.sessaoId}
                   style={{ animationDelay: `${Math.min(i, 14) * 60}ms` }}
-                  className="lab-aluno flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-2 py-1.5 transition-colors hover:bg-white/[0.11] md:gap-3 md:px-3 md:py-2"
+                  className="lab-aluno group relative flex items-center gap-2.5 overflow-hidden rounded-xl border border-white/10 bg-white/[0.055] py-1.5 pl-3 pr-1.5 transition-colors hover:border-white/25 hover:bg-white/[0.11] md:py-2"
                 >
+                  {/* Faixa da cor da série: identifica a turma sem ocupar texto. */}
+                  <span aria-hidden className={cn("absolute inset-y-0 left-0 w-1", cor.bg)} />
                   <span
                     className={`relative flex size-8 shrink-0 md:size-9 items-center justify-center rounded-full text-xs font-extrabold ring-1 ring-white/25 ${cor.bg} ${cor.text}`}
                   >
@@ -300,15 +328,22 @@ export function PalcoGrupo({
                   <span className="min-w-0 flex-1">
                     {/* Nome inteiro, quebrando linha se precisar: nada de reticências. */}
                     {logado ? (
-                      <button type="button" onClick={() => setAlunoSelecionado(a)} className="block w-full text-left text-xs font-semibold leading-snug underline-offset-2 hover:text-mint hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint md:text-sm [overflow-wrap:anywhere]" aria-label={`Abrir ficha individual de ${a.nome}`}>
+                      <button
+                        type="button"
+                        onClick={() => setAlunoSelecionado(a)}
+                        className="block w-full text-left text-xs font-semibold leading-snug underline-offset-2 hover:text-mint hover:underline focus-visible:rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-mint md:text-sm [overflow-wrap:anywhere]"
+                        aria-label={`Abrir ficha individual de ${a.nome}`}
+                      >
                         {a.nome}
                       </button>
                     ) : (
-                      <span className="block text-xs font-semibold leading-snug md:text-sm [overflow-wrap:anywhere]">{nomeExibido(a.nome, false)}</span>
+                      <span className="block text-xs font-semibold leading-snug md:text-sm [overflow-wrap:anywhere]">
+                        {nomeExibido(a.nome, false)}
+                      </span>
                     )}
-                    {mista ? (
-                      <span className="block text-[11px] text-white/55">{a.turmaRotulo}</span>
-                    ) : null}
+                    <span className="block text-[11px] leading-tight text-white/45">
+                      {mista ? `${a.turmaRotulo} · ` : ""}estação {i + 1}
+                    </span>
                   </span>
                   {logado ? (
                     <BotaoAusencia
@@ -328,7 +363,11 @@ export function PalcoGrupo({
         </section>
       </div>
       {logado && alunoSelecionado ? (
-        <FichaAlunoAoVivo aluno={alunoSelecionado} onClose={() => setAlunoSelecionado(null)} onUpdate={aoMudar} />
+        <FichaAlunoAoVivo
+          aluno={alunoSelecionado}
+          onClose={() => setAlunoSelecionado(null)}
+          onUpdate={aoMudar}
+        />
       ) : null}
     </article>
   );
