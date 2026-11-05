@@ -74,8 +74,7 @@ function BarraNiveis<T extends string>({
       {niveis.map((n) => {
         const q = valores[n.id] ?? 0;
         if (!q) return null;
-        return (
-          {interativa ? (
+        return interativa ? (
             <button
               key={n.id}
               type="button"
@@ -96,8 +95,7 @@ function BarraNiveis<T extends string>({
             >
               {q}
             </div>
-          )}
-        );
+          );
       })}
 
 function Legenda<T extends string>({ niveis }: { niveis: NivelInfo<T>[] }) {
