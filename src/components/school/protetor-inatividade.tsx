@@ -51,6 +51,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       }
     };
     void carregar();
+    const polling = window.setInterval(() => void carregar(), 10_000);
     const canal = supabase
       .channel("protetor-tela-global")
       .on("postgres_changes", { event: "*", schema: "public", table: "app_state", filter: "id=eq.default" }, (payload) => {
@@ -60,6 +61,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       .subscribe();
     return () => {
       cancelado = true;
+      window.clearInterval(polling);
       void supabase.removeChannel(canal);
     };
   }, []);
@@ -126,13 +128,25 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     if (typeof window === "undefined") return;
     const desktop = window.matchMedia("(min-width: 900px) and (hover: hover) and (pointer: fine)");
     const bloqueada = ROTAS_EXCLUIDAS.some((rota) => pathname === rota || pathname.startsWith(rota + "/"));
-    if (!authPronto || isAuthenticated) {\n      setAtivo(false);\n      setConfirmarSaida(false);\n      return;\n    }\n    if ((!desktop.matches && !protetorForcado) || bloqueada || (aulaEmAndamento && !protetorForcado)) {
+    if (!authPronto || isAuthenticated) {
+      setAtivo(false);
+      setConfirmarSaida(false);
+      return;
+    }
+    if ((!desktop.matches && !protetorForcado) || bloqueada || (aulaEmAndamento && !protetorForcado)) {
       setAtivo(false);
       setConfirmarSaida(false);
       return;
     }
 
-    if (protetorForcado) {\n      window.clearTimeout(temporizadorRef.current);\n      setConfirmarSaida(false);\n      setAtivo(true);\n      return () => window.clearTimeout(temporizadorRef.current);\n    }\n\n    const reiniciar = () => {
+    if (protetorForcado) {
+      window.clearTimeout(temporizadorRef.current);
+      setConfirmarSaida(false);
+      setAtivo(true);
+      return () => window.clearTimeout(temporizadorRef.current);
+    }
+
+    const reiniciar = () => {
       // Se o protetor está montado, nenhuma movimentação do mouse/teclado
       // pode fechá-lo. A única saída é a confirmação explícita no diálogo.
       if (document.getElementById("screensaver-informatica")) return;
@@ -187,7 +201,12 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   };
 
   const pedirConfirmacao = (evento: PointerEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
-    if (protetorForcado) {\n      evento.preventDefault();\n      evento.stopPropagation();\n      return;\n    }\n    if (confirmarSaida) return;
+    if (protetorForcado) {
+      evento.preventDefault();
+      evento.stopPropagation();
+      return;
+    }
+    if (confirmarSaida) return;
     evento.preventDefault();
     evento.stopPropagation();
     setConfirmarSaida(true);
@@ -538,7 +557,8 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         .screensaver-neon-corner { animation:screensaverNeonPulse 5.5s ease-in-out infinite; }
         .screensaver-neon-tr { animation-delay:1.2s; } .screensaver-neon-bl { animation-delay:2.4s; } .screensaver-neon-br { animation-delay:3.6s; }
         @media (prefers-reduced-motion: reduce) { .screensaver-neon-corner { animation:none; } }
-\n                @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
+
+                @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
         @keyframes cameraLine { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(170px); opacity: .9; } }
         @keyframes cctvRoomPan { 0% { transform: scale(1.04) translate3d(-.5%,0,0); } 100% { transform: scale(1.14) translate3d(.7%,-.6%,0); } }
         @keyframes cctvScan { 0% { transform: translateY(0); opacity: .18; } 50% { opacity: .8; } 100% { transform: translateY(350px); opacity: .18; } }
@@ -603,7 +623,11 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         @keyframes cameraPivot { 0% { transform: rotate(-1.2deg) translateX(-2px); } 50% { transform: rotate(.8deg) translateX(3px); } 100% { transform: rotate(-.4deg) translateX(0); } }
         @keyframes lensPulse { 0%, 100% { opacity: .18; transform: scale(.97); } 50% { opacity: .7; transform: scale(1.035); } }
         @keyframes cameraProgress { 0% { transform: translateX(-55%); } 100% { transform: translateX(110%); } }
-        #screensaver-informatica .constelacao-lab { z-index: 30; }\n        #screensaver-informatica .constelacao-texto { font-size: clamp(1.2rem, 2.2vw, 2.4rem); }\n        #screensaver-informatica .constelacao-legenda { font-size: clamp(.55rem, .8vw, .72rem); }\n        @media (max-height: 760px) { #screensaver-informatica main { gap: 2px; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] { min-height: 0; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] > div:first-child { min-height: 0; } #screensaver-informatica main > div.mt-1.grid.w-full.shrink-0.grid-cols-3 { display: none; } #screensaver-informatica main > section[aria-label="Alunos do laboratório"] { display: none; } #screensaver-informatica main > footer { display: none; } }\n        @media (prefers-reduced-motion: reduce) {
+        #screensaver-informatica .constelacao-lab { z-index: 30; }
+        #screensaver-informatica .constelacao-texto { font-size: clamp(1.2rem, 2.2vw, 2.4rem); }
+        #screensaver-informatica .constelacao-legenda { font-size: clamp(.55rem, .8vw, .72rem); }
+        @media (max-height: 760px) { #screensaver-informatica main { gap: 2px; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] { min-height: 0; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] > div:first-child { min-height: 0; } #screensaver-informatica main > div.mt-1.grid.w-full.shrink-0.grid-cols-3 { display: none; } #screensaver-informatica main > section[aria-label="Alunos do laboratório"] { display: none; } #screensaver-informatica main > footer { display: none; } }
+        @media (prefers-reduced-motion: reduce) {
           [class*="animate-"] { animation: none !important; }
         }
       `}</style>
