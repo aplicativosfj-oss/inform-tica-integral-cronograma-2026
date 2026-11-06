@@ -428,6 +428,7 @@ function Index() {
                   Icone,
                   estilo,
                   imagem,
+                  destaque,
                 }) => (
                   <Link
                     key={to}
