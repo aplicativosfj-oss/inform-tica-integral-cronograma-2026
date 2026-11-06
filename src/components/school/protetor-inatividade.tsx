@@ -218,7 +218,74 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
               </div>
             </div>
 
-            <div className="screensaver-avoid pointer-events-none absolute right-3 top-1/2 z-[2] flex h-[88%] max-h-[300px] w-[48%] -translate-y-1/2 items-center justify-end">
+
+
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent shadow-[0_0_20px_3px_rgba(34,211,238,.45)] motion-safe:animate-[cctvScan_5s_linear_infinite]" />
+            <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap items-end justify-between gap-2 sm:bottom-6 sm:left-7 sm:right-7">
+              <span className="rounded-lg border border-white/10 bg-black/35 px-3 py-2 text-[8px] font-bold uppercase tracking-[.15em] text-white/65 backdrop-blur-md">Escola Municipal · Dr. Eiraldo Carneiro de França</span>
+              <span className="rounded-lg border border-cyan-200/20 bg-cyan-300/10 px-3 py-2 font-mono text-[8px] font-bold tracking-[.14em] text-cyan-100/80 backdrop-blur-md">SISTEMA ATIVO</span>
+            </div>
+            <div aria-hidden className="pointer-events-none absolute inset-3 border border-white/[.07]">
+              <span className="absolute left-0 top-0 h-5 w-5 border-l-2 border-t-2 border-cyan-100/70"/>
+              <span className="absolute right-0 top-0 h-5 w-5 border-r-2 border-t-2 border-cyan-100/70"/>
+              <span className="absolute bottom-0 left-0 h-5 w-5 border-b-2 border-l-2 border-cyan-100/70"/>
+              <span className="absolute bottom-0 right-0 h-5 w-5 border-b-2 border-r-2 border-cyan-100/70"/>
+            </div>
+          </div>
+
+          <div className="mt-2 grid shrink-0 grid-cols-[auto_1fr] items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-xl border border-cyan-100/20 bg-cyan-300/10 text-cyan-100">
+              <ShieldCheck className="size-7" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-cyan-200">
+                <ShieldCheck className="size-4" /> Cuidado e responsabilidade
+              </div>
+              <h2 className="mt-0.5 font-heading text-xs font-extrabold leading-snug text-white sm:text-sm">
+                Nosso laboratório é um espaço de respeito, aprendizagem e cuidado.
+              </h2>
+              <p className="mt-0.5 text-[9px] leading-snug text-blue-100/75 sm:text-[10px]">
+                Cuide dos equipamentos, respeite os colegas e siga as orientações dos educadores.
+                A tecnologia é uma ferramenta para aprender, criar e compartilhar.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-1 grid w-full shrink-0 grid-cols-3 gap-2">
+          {[
+            { Icon: BookOpen, label: "Aprendizagem", cor: "text-violet-200" },
+            { Icon: Cpu, label: "Tecnologia", cor: "text-cyan-200" },
+            { Icon: Code2, label: "Criatividade", cor: "text-amber-200" },
+          ].map(({ Icon, label, cor }) => (
+            <div key={label} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.055] px-2 py-3 backdrop-blur-md">
+              <Icon className={`size-4 shrink-0 ${cor}`} />
+              <span className="text-[9px] font-extrabold uppercase tracking-[.1em] text-white/70 sm:text-[10px]">{label}</span>
+            </div>
+          ))}
+        </div>
+
+        <ConstelacaoNomes
+          sessoes={[]}
+          logado={false}
+          grande
+          evitar=".screensaver-avoid"
+          className="z-30"
+        />
+
+        <footer className="screensaver-avoid mt-1 flex shrink-0 flex-col items-center gap-0.5 text-center">
+          <div className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[.17em] text-white/60">
+            <Wifi className="size-3.5 text-cyan-200/75" /> Escola Municipal Dr. Eiraldo Carneiro de França
+          </div>
+          <p className="text-[8px] font-semibold uppercase tracking-[.2em] text-white/35">Informática Educativa · Um espaço para aprender e descobrir</p>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-white/10 bg-white/[.045] px-3 py-1.5 text-[9px] text-white/55">
+            <span className="font-semibold uppercase tracking-[.12em]">Desenvolvimento e professor de informática</span>
+            <span className="text-amber-200/90">Franc D’nis</span>
+          </div>
+        </footer>
+      </main>
+
+      <div className="screensaver-avoid pointer-events-none absolute right-[2%] top-[38%] z-20 flex h-[min(36vh,320px)] w-[min(44vw,460px)] items-center justify-end">
               <svg viewBox="0 0 760 520" role="img" aria-label="Câmera de segurança tridimensional" className="h-full w-auto max-w-full overflow-visible drop-shadow-[0_28px_28px_rgba(0,0,0,.55)] motion-safe:animate-[cameraFloat_6s_ease-in-out_infinite]">
                 <defs>
                   <linearGradient id="camBody" x1="0" y1="0" x2="1" y2="1">
@@ -274,71 +341,6 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
                 <circle cx="249" cy="225" r="112" fill="none" stroke="#56cfff" strokeWidth="2" opacity=".45" filter="url(#camGlow)" className="motion-safe:animate-[lensPulse_3.2s_ease-in-out_infinite]"/>
               </svg>
             </div>
-
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent shadow-[0_0_20px_3px_rgba(34,211,238,.45)] motion-safe:animate-[cctvScan_5s_linear_infinite]" />
-            <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap items-end justify-between gap-2 sm:bottom-6 sm:left-7 sm:right-7">
-              <span className="rounded-lg border border-white/10 bg-black/35 px-3 py-2 text-[8px] font-bold uppercase tracking-[.15em] text-white/65 backdrop-blur-md">Escola Municipal · Dr. Eiraldo Carneiro de França</span>
-              <span className="rounded-lg border border-cyan-200/20 bg-cyan-300/10 px-3 py-2 font-mono text-[8px] font-bold tracking-[.14em] text-cyan-100/80 backdrop-blur-md">SISTEMA ATIVO</span>
-            </div>
-            <div aria-hidden className="pointer-events-none absolute inset-3 border border-white/[.07]">
-              <span className="absolute left-0 top-0 h-5 w-5 border-l-2 border-t-2 border-cyan-100/70"/>
-              <span className="absolute right-0 top-0 h-5 w-5 border-r-2 border-t-2 border-cyan-100/70"/>
-              <span className="absolute bottom-0 left-0 h-5 w-5 border-b-2 border-l-2 border-cyan-100/70"/>
-              <span className="absolute bottom-0 right-0 h-5 w-5 border-b-2 border-r-2 border-cyan-100/70"/>
-            </div>
-          </div>
-
-          <div className="mt-2 grid shrink-0 grid-cols-[auto_1fr] items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-xl border border-cyan-100/20 bg-cyan-300/10 text-cyan-100">
-              <ShieldCheck className="size-7" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-cyan-200">
-                <ShieldCheck className="size-4" /> Cuidado e responsabilidade
-              </div>
-              <h2 className="mt-0.5 font-heading text-xs font-extrabold leading-snug text-white sm:text-sm">
-                Nosso laboratório é um espaço de respeito, aprendizagem e cuidado.
-              </h2>
-              <p className="mt-0.5 text-[9px] leading-snug text-blue-100/75 sm:text-[10px]">
-                Cuide dos equipamentos, respeite os colegas e siga as orientações dos educadores.
-                A tecnologia é uma ferramenta para aprender, criar e compartilhar.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <div className="mt-1 grid w-full shrink-0 grid-cols-3 gap-2">
-          {[
-            { Icon: BookOpen, label: "Aprendizagem", cor: "text-violet-200" },
-            { Icon: Cpu, label: "Tecnologia", cor: "text-cyan-200" },
-            { Icon: Code2, label: "Criatividade", cor: "text-amber-200" },
-          ].map(({ Icon, label, cor }) => (
-            <div key={label} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[.055] px-2 py-3 backdrop-blur-md">
-              <Icon className={`size-4 shrink-0 ${cor}`} />
-              <span className="text-[9px] font-extrabold uppercase tracking-[.1em] text-white/70 sm:text-[10px]">{label}</span>
-            </div>
-          ))}
-        </div>
-
-        <ConstelacaoNomes
-          sessoes={[]}
-          logado={false}
-          grande
-          evitar=".screensaver-avoid"
-          className="z-30"
-        />
-
-        <footer className="mt-1 flex shrink-0 flex-col items-center gap-0.5 text-center">
-          <div className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[.17em] text-white/60">
-            <Wifi className="size-3.5 text-cyan-200/75" /> Escola Municipal Dr. Eiraldo Carneiro de França
-          </div>
-          <p className="text-[8px] font-semibold uppercase tracking-[.2em] text-white/35">Informática Educativa · Um espaço para aprender e descobrir</p>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-white/10 bg-white/[.045] px-3 py-1.5 text-[9px] text-white/55">
-            <span className="font-semibold uppercase tracking-[.12em]">Desenvolvimento e professor de informática</span>
-            <span className="text-amber-200/90">Franc D’nis</span>
-          </div>
-        </footer>
-      </main>
 
       {confirmarSaida && (
         <div
