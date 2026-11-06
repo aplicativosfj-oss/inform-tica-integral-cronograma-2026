@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LogOut, Monitor, MonitorOff, RotateCcw, Save, ShieldCheck } from "lucide-react";
+import { LogOut, Monitor, MonitorOff, RotateCcw, Save, ShieldCheck, Ban } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -80,6 +80,35 @@ function ConfiguracoesPage() {
               toast.success(ativar ? "Proteção global ativada." : "Proteção global desativada.");
             }}>
             {config.protetorForcado ? <><MonitorOff className="mr-2 size-4" /> Desativar proteção</> : <><Monitor className="mr-2 size-4" /> Ativar proteção</>}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6 max-w-2xl border-amber-500/25 bg-amber-500/[0.035] shadow-sm">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600"><Ban className="size-5" /></span>
+            <div>
+              <CardTitle className="text-base">Desativar descanso de tela</CardTitle>
+              <CardDescription>Interruptor geral para impedir que qualquer tela de descanso seja exibida.</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">{config.descansoTelaDesativado ? "Descanso de tela desativado em toda a plataforma" : "Descanso de tela funcionando normalmente"}</p>
+            <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-foreground">
+              Ao ativar esta opção, o descanso automático e a proteção global forçada deixam de funcionar
+              para todos os visitantes e navegadores. O administrador pode reativar quando quiser.
+            </p>
+          </div>
+          <Button type="button" variant={config.descansoTelaDesativado ? "default" : "outline"} className="shrink-0"
+            onClick={() => {
+              const desativar = !config.descansoTelaDesativado;
+              updateConfig({ descansoTelaDesativado: desativar });
+              toast.success(desativar ? "Descanso de tela desativado para todos." : "Descanso de tela reativado.");
+            }}>
+            {config.descansoTelaDesativado ? <><Monitor className="mr-2 size-4" /> Reativar descanso</> : <><Ban className="mr-2 size-4" /> Desativar descanso</>}
           </Button>
         </CardContent>
       </Card>
