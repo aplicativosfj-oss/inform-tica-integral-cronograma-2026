@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
-import { useAppStore } from "@/lib/app-store";
+import { useEffect, useState, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
 import {
   ArrowRight, BookOpen, Check, Clock3, Code2, Cpu, GraduationCap,
   Maximize2, Monitor, ShieldCheck, Sparkles, Wifi, X,
@@ -28,22 +28,6 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
   const temporizadorRef = useRef<number | undefined>(undefined);
-  const { turmas } = useAppStore();
-  const alunosAtivos = useMemo(
-    () => turmas.flatMap((turma) =>
-      turma.alunos
-        .filter((aluno) => !aluno.situacao || aluno.situacao === "ativo")
-        .map((aluno) => {
-          const partes = aluno.nome.trim().split(/\s+/).filter(Boolean);
-          const nomeExibicao = partes.length > 1
-            ? `${partes[0]} ${partes[1].charAt(0).toLocaleUpperCase("pt-BR")}.`
-            : (partes[0] ?? "Aluno");
-          return { id: aluno.id, nome: nomeExibicao, turma: `${turma.serie}º ${turma.letra}` };
-        }),
-    ),
-    [turmas],
-  );
-  const [alunosEmDestaque, setAlunosEmDestaque] = useState<typeof alunosAtivos>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -92,31 +76,6 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     atualizar();
     return () => document.removeEventListener("fullscreenchange", atualizar);
   }, []);
-
-  useEffect(() => {
-    if (!alunosAtivos.length) {
-      setAlunosEmDestaque([]);
-      return;
-    }
-    // Embaralhamento local: não altera a ordem nem os dados do cadastro.
-    const embaralhados = [...alunosAtivos];
-    for (let i = embaralhados.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [embaralhados[i], embaralhados[j]] = [embaralhados[j], embaralhados[i]];
-    }
-    setAlunosEmDestaque(embaralhados);
-  }, [alunosAtivos]);
-
-  useEffect(() => {
-    if (!ativo || alunosEmDestaque.length <= 3) return;
-    const id = window.setInterval(() => {
-      setAlunosEmDestaque((atuais) => {
-        if (atuais.length <= 3) return atuais;
-        return [...atuais.slice(1), atuais[0]];
-      });
-    }, 6500);
-    return () => window.clearInterval(id);
-  }, [ativo, alunosEmDestaque.length]);
 
   useEffect(() => {
     if (!ativo) return;
@@ -186,7 +145,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       </div>
 
       <main className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col items-center justify-between overflow-hidden py-1 text-center">
-        <header className="mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2">
+        <header className="screensaver-avoid mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2">
           <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-slate-950/35 px-4 py-2.5 shadow-xl backdrop-blur-xl">
             <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-blue-700 shadow-lg shadow-blue-950/40">
               <Monitor className="size-5 text-white" />
@@ -206,7 +165,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         </div>
 
         {/* Relógio único: horas e minutos em destaque, segundos discretos ao lado. */}
-        <section aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`} className="flex shrink-0 items-end justify-center gap-2">
+        <section aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`} className="screensaver-avoid flex shrink-0 items-end justify-center gap-2">
           <time className="font-heading text-[clamp(3.2rem,8.5vw,6.5rem)] font-black leading-[.92] tracking-[-.075em] tabular-nums text-white drop-shadow-[0_8px_36px_rgba(75,125,255,.34)]">
             {horario.hora}
           </time>
@@ -215,9 +174,9 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             <span className="block text-[8px] font-extrabold tracking-[.18em] text-cyan-100/55">SEG</span>
           </span>
         </section>
-        <p className="mb-1 shrink-0 text-xs font-medium capitalize text-blue-100/75 sm:text-sm">{formatarData(agora)}</p>
+        <p className="screensaver-avoid mb-1 shrink-0 text-xs font-medium capitalize text-blue-100/75 sm:text-sm">{formatarData(agora)}</p>
 
-        <div className="mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-full border border-white/15 bg-slate-950/30 px-4 py-1.5 text-[10px] font-semibold text-white/85 shadow-xl backdrop-blur-xl sm:text-xs">
+        <div className="screensaver-avoid mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-full border border-white/15 bg-slate-950/30 px-4 py-1.5 text-[10px] font-semibold text-white/85 shadow-xl backdrop-blur-xl sm:text-xs">
           <Clock3 className="size-4 text-cyan-200" />
           Tela de descanso ativada após 60 segundos sem interação
         </div>
@@ -227,13 +186,13 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           onPointerDown={(evento) => evento.stopPropagation()}
           onKeyDown={(evento) => evento.stopPropagation()}
           onClick={ativarTelaCheia}
-          className="mb-1 inline-flex min-h-8 shrink-0 items-center justify-center gap-2 rounded-full border border-cyan-100/35 bg-cyan-300/10 px-4 py-1.5 text-[9px] font-extrabold uppercase tracking-[.15em] text-cyan-50 shadow-lg backdrop-blur transition hover:bg-cyan-300/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-100"
+          className="screensaver-avoid mb-1 inline-flex min-h-8 shrink-0 items-center justify-center gap-2 rounded-full border border-cyan-100/35 bg-cyan-300/10 px-4 py-1.5 text-[9px] font-extrabold uppercase tracking-[.15em] text-cyan-50 shadow-lg backdrop-blur transition hover:bg-cyan-300/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-100"
         >
           <Maximize2 className="size-4" /> {telaCheia ? "Modo tela cheia ativado" : "Ativar modo tela cheia"}
         </button>
 
         <section aria-label="Monitoramento do laboratório" className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[1.25rem] border border-cyan-100/20 bg-[#061329]/80 p-2 text-left shadow-[0_28px_90px_rgba(0,0,0,.42)] backdrop-blur-2xl sm:p-3">
-          <div className="relative isolate min-h-0 flex-1 overflow-hidden rounded-xl border border-cyan-100/20 bg-[radial-gradient(ellipse_at_72%_42%,rgba(26,105,173,.35),transparent_48%),linear-gradient(120deg,#06101f_0%,#0a1d38_52%,#071226_100%)]">
+          <div className="relative isolate min-h-[clamp(220px,34vh,340px)] flex-1 overflow-hidden rounded-xl border border-cyan-100/20 bg-[radial-gradient(ellipse_at_72%_42%,rgba(26,105,173,.35),transparent_48%),linear-gradient(120deg,#06101f_0%,#0a1d38_52%,#071226_100%)]">
             <div aria-hidden className="absolute inset-0 opacity-[.16]" style={{ backgroundImage: "linear-gradient(rgba(130,220,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(130,220,255,.28) 1px,transparent 1px)", backgroundSize: "32px 32px" }} />
             <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_50%,transparent_0%,rgba(2,8,23,.12)_48%,rgba(2,8,23,.75)_100%)]" />
             <div aria-hidden className="absolute -right-16 top-1/2 size-[330px] -translate-y-1/2 rounded-full border border-cyan-300/10 shadow-[0_0_70px_rgba(34,211,238,.08)] sm:size-[470px]" />
@@ -247,7 +206,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
               </span>
               <span className="text-[10px] font-black uppercase tracking-[.22em] text-white/90 sm:text-xs">Monitorando …</span>
             </div>
-            <div className="absolute left-4 top-[4.2rem] z-10 max-w-[42%] sm:left-7 sm:top-[5.2rem]">
+            <div className="screensaver-avoid absolute left-4 top-[4.2rem] z-10 max-w-[42%] sm:left-7 sm:top-[5.2rem]">
               <p className="text-[9px] font-bold uppercase tracking-[.2em] text-cyan-200/65">Informática educativa</p>
               <h2 className="mt-2 font-heading text-xl font-black leading-tight text-white drop-shadow-lg sm:text-3xl">Laboratório<br/>de informática</h2>
               <p className="mt-2 text-[10px] font-medium leading-relaxed text-blue-100/65 sm:text-xs">Escola Municipal Dr. Eiraldo Carneiro de França</p>
@@ -259,8 +218,8 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
               </div>
             </div>
 
-            <div className="pointer-events-none absolute -right-2 top-[13%] z-[2] w-[65%] max-w-[590px] sm:right-4 sm:top-[8%] sm:w-[62%]">
-              <svg viewBox="0 0 760 520" role="img" aria-label="Câmera de segurança tridimensional" className="h-auto w-full overflow-visible drop-shadow-[0_28px_28px_rgba(0,0,0,.55)] motion-safe:animate-[cameraFloat_6s_ease-in-out_infinite]">
+            <div className="screensaver-avoid pointer-events-none absolute right-3 top-1/2 z-[2] flex h-[88%] max-h-[300px] w-[48%] -translate-y-1/2 items-center justify-end">
+              <svg viewBox="0 0 760 520" role="img" aria-label="Câmera de segurança tridimensional" className="h-full w-auto max-w-full overflow-visible drop-shadow-[0_28px_28px_rgba(0,0,0,.55)] motion-safe:animate-[cameraFloat_6s_ease-in-out_infinite]">
                 <defs>
                   <linearGradient id="camBody" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0" stopColor="#ffffff"/><stop offset=".28" stopColor="#e8edf1"/><stop offset=".58" stopColor="#aeb9c4"/><stop offset=".82" stopColor="#f8fafc"/><stop offset="1" stopColor="#778594"/>
@@ -361,34 +320,13 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           ))}
         </div>
 
-        <section aria-label="Alunos do laboratório" className="mt-1 w-full max-w-4xl shrink-0">
-          <div className="mb-2 flex items-center justify-center gap-2 text-[9px] font-extrabold uppercase tracking-[.2em] text-blue-100/55">
-            <GraduationCap className="size-3.5 text-cyan-200/80" />
-            Nossa comunidade de aprendizagem
-          </div>
-          {alunosEmDestaque.length > 0 ? (
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {alunosEmDestaque.slice(0, 3).map((aluno, indice) => (
-                <div
-                  key={aluno.id}
-                  className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-slate-950/35 px-3 py-2 text-left shadow-lg backdrop-blur-md transition-all duration-700"
-                  style={{ animationDelay: `${indice * 140}ms` }}
-                >
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-cyan-100/20 bg-cyan-200/10 text-[10px] font-black text-cyan-100">
-                    {aluno.nome.split(" ").map((parte) => parte[0]).join("").replace(".", "").slice(0, 2)}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-xs font-bold text-white/90">{aluno.nome}</span>
-                    <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[.12em] text-cyan-100/55">Turma {aluno.turma}</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-[10px] text-white/45">Alunos cadastrados aparecerão aqui.</p>
-          )}
-          <p className="mt-1.5 text-center text-[8px] font-medium text-white/35">Exibição rotativa · primeiro nome e inicial do sobrenome</p>
-        </section>
+        <ConstelacaoNomes
+          sessoes={[]}
+          logado={false}
+          grande
+          evitar=".screensaver-avoid"
+          className="z-30"
+        />
 
         <footer className="mt-1 flex shrink-0 flex-col items-center gap-0.5 text-center">
           <div className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[.17em] text-white/60">
@@ -443,7 +381,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         @keyframes cameraPivot { 0% { transform: rotate(-1.2deg) translateX(-2px); } 50% { transform: rotate(.8deg) translateX(3px); } 100% { transform: rotate(-.4deg) translateX(0); } }
         @keyframes lensPulse { 0%, 100% { opacity: .18; transform: scale(.97); } 50% { opacity: .7; transform: scale(1.035); } }
         @keyframes cameraProgress { 0% { transform: translateX(-55%); } 100% { transform: translateX(110%); } }
-        @media (max-height: 760px) { #screensaver-informatica main { gap: 2px; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] { min-height: 0; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] > div:first-child { min-height: 0; } #screensaver-informatica main > div.mt-1.grid.w-full.shrink-0.grid-cols-3 { display: none; } #screensaver-informatica main > section[aria-label="Alunos do laboratório"] { display: none; } #screensaver-informatica main > footer { display: none; } }\n        @media (prefers-reduced-motion: reduce) {
+        #screensaver-informatica .constelacao-lab { z-index: 30; }\n        #screensaver-informatica .constelacao-texto { font-size: clamp(1.2rem, 2.2vw, 2.4rem); }\n        #screensaver-informatica .constelacao-legenda { font-size: clamp(.55rem, .8vw, .72rem); }\n        @media (max-height: 760px) { #screensaver-informatica main { gap: 2px; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] { min-height: 0; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] > div:first-child { min-height: 0; } #screensaver-informatica main > div.mt-1.grid.w-full.shrink-0.grid-cols-3 { display: none; } #screensaver-informatica main > section[aria-label="Alunos do laboratório"] { display: none; } #screensaver-informatica main > footer { display: none; } }\n        @media (prefers-reduced-motion: reduce) {
           [class*="animate-"] { animation: none !important; }
         }
       `}</style>
