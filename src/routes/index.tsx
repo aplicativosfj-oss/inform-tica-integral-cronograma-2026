@@ -501,9 +501,6 @@ function Index() {
                 />
                 <div className="flex shrink-0 flex-wrap items-center gap-3">
                   <ClimaCompacto />
-                  {isAuthenticated && !feriadoHoje ? (
-                    <MarcarAlunosCartao dados={dadosLab} compacto rotulo="Programar alunos" />
-                  ) : null}
                   <Button
                     asChild
                     variant="outline"
