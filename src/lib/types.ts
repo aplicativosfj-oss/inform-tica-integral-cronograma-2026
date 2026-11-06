@@ -130,6 +130,8 @@ export interface Reprogramacao {
 export interface ScheduleConfig {
   /** Proteção global de tela ativada pelo administrador para visitantes não autenticados. */
   protetorForcado?: boolean | undefined;
+  /** Desativa todo o descanso de tela, inclusive o acionamento forçado, em todos os navegadores. */
+  descansoTelaDesativado?: boolean | undefined;
   /** Migração pontual de cadastro: evita reaplicar correções após edição administrativa futura. */
   revisaoCadastroNov2026?: boolean | undefined;
   /** Marcação pontual dos alunos transferidos informados em novembro/2026. */
