@@ -266,7 +266,7 @@ export function TelaArena({
   // Motor
   useEffect(() => {
     if (fase !== "jogando" || !canvas.current || motor.current) return;
-    if (missao.id === "moto" || missao.id === "maratona") return;
+    if (missao.id === "moto" || missao.id === "maratona" || missao.id === "perseguicao") return;
     const a = new Arena({
       canvas: canvas.current,
       minimapa: minimapa.current,

@@ -452,8 +452,8 @@ const desafiosPorAno: Record<number, Desafio[]> = Object.fromEntries(
       opcoes,
       resposta,
       explicacao,
-      fala,
-      figura,
+      ...(fala !== undefined ? { fala } : {}),
+      ...(figura !== undefined ? { figura } : {}),
     })),
   ]),
 );

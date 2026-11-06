@@ -83,7 +83,7 @@ type Intervencao = {
   evidencia: string;
 };
 
-const ESTRATEGIAS: Record<string, Omit<Intervencao, "area" | "habilidade" | "nivel">> = {
+const ESTRATEGIAS: Record<string, Omit<Intervencao, "area" | "habilidade" | "nivel" | "chave" | "avaliacaoId">> = {
   precisao: {
     objetivo: "Reconhecer palavras com maior precisão, reduzindo trocas, omissões e hesitações.",
     atividade: "Leitura guiada de listas graduadas, jogos de correspondência palavra-imagem e leitura repetida de pequenos trechos.",
@@ -810,7 +810,7 @@ export function AvaliacaoContinuaLeituraEscrita() {
               <div className="mt-3 grid gap-3 lg:grid-cols-2">
                 {[["Leitura", detalhesLeitura], ["Escrita", detalhesEscrita]].map(([area, itens]) => (
                   <section key={String(area)} className="rounded-lg border border-border/70 p-3">
-                    <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">{area}</h4>
+                    <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">{String(area)}</h4>
                     {(itens as { rotulo: string; nota: number | null }[]).length ? (itens as { rotulo: string; nota: number | null }[]).map(item => (
                       <div key={item.rotulo} className="flex items-center justify-between gap-2 border-b border-border/50 py-1.5 last:border-0">
                         <span className="text-xs">{item.rotulo}</span>
