@@ -1,4 +1,4 @@
-import { MonitorSmartphone } from "lucide-react";
+import { CalendarPlus2, MonitorSmartphone } from "lucide-react";
 import { useState } from "react";
 
 import { ControleLaboratorio } from "@/components/school/laboratorio/controle";
@@ -20,17 +20,19 @@ import {
 export function MarcarAlunosCartao({
   dados,
   compacto = false,
+  rotulo = "Marcar alunos",
 }: {
   dados: DadosLab;
   /** Só o botão, para caber no cabeçalho de uma seção. */
   compacto?: boolean;
+  rotulo?: string;
 }) {
   const [aberto, setAberto] = useState(false);
   return (
     <>
       {compacto ? (
         <Button size="sm" className="h-9 rounded-full px-4" onClick={() => setAberto(true)}>
-          <MonitorSmartphone /> Marcar alunos
+          <CalendarPlus2 className="size-4" /> {rotulo}
         </Button>
       ) : (
         <Card className="border-primary/40 bg-primary/5">
@@ -47,11 +49,11 @@ export function MarcarAlunosCartao({
         </Card>
       )}
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent className="max-h-[94svh] max-w-6xl overflow-y-auto">
+        <DialogContent className="max-h-[90dvh] w-[calc(100vw-1rem)] max-w-6xl overflow-y-auto rounded-2xl p-3 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Quem vai ao laboratório?</DialogTitle>
+            <DialogTitle>Programar turma e alunos</DialogTitle>
             <DialogDescription>
-              Se alguém já foi nesta semana ou neste mês, a gente avisa.
+              Selecione a turma, escolha os alunos e defina a duração ou o horário. O sistema avisa sobre participações anteriores.
             </DialogDescription>
           </DialogHeader>
           <ControleLaboratorio dados={dados} aoMarcar={() => setAberto(false)} />
