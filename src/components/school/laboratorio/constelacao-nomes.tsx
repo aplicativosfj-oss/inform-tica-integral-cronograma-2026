@@ -263,90 +263,47 @@ export function ConstelacaoNomes({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [montado, assinatura]);
 
-  // Flutuação lenta, desviando dos blocos de conteúdo.
+  // Movimento cinematográfico suave: trajetória senoidal contínua, sem colisões
+  // ou inversões bruscas de velocidade que causavam tremor nos nomes.
   useEffect(() => {
     const el = caixa.current;
     if (!el || !atual) return;
-    // O primeiro nome é escolhido antes de a camada existir na tela: sem
-    // medidas, ele nasceria no canto. Aqui ela já existe, então posiciona.
-    if (corpo.current.vx === 0 && corpo.current.vy === 0) {
-      reposicionar(atual.nome);
-      const r = rotulo.current;
-      if (r) r.style.transform = `translate3d(${corpo.current.x}px, ${corpo.current.y}px, 0)`;
-    }
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let quadro = 0;
-    let anterior = performance.now();
+    const r = rotulo.current;
+    if (!r) return;
+    const { width, height } = el.getBoundingClientRect();
+    const nameWidth = r.offsetWidth || Math.min(360, atual.nome.length * 13 + 40);
+    const nameHeight = r.offsetHeight || 56;
+    const startX = Math.max(18, Math.min(width - nameWidth - 18, width * (0.18 + Math.random() * 0.42)));
+    const startY = Math.max(18, Math.min(height - nameHeight - 18, height * (0.24 + Math.random() * 0.36)));
+    const travelX = Math.max(24, Math.min(width - nameWidth - 36, width * 0.22));
+    const travelY = Math.min(12, height * 0.025);
+    const inicio = performance.now();
+    let frame = 0;
     let visivel = true;
-    const passo = (t: number) => {
-      const r = rotulo.current;
-      const c = corpo.current;
-      if (r) {
-        const dt = Math.min(0.05, (t - anterior) / 1000);
-        const { width: w, height: h } = el.getBoundingClientRect();
-        const lw = r.offsetWidth;
-        const lh = r.offsetHeight;
-        c.x += c.vx * dt;
-        c.y += c.vy * dt;
-        if (c.x < 8) c.vx = Math.abs(c.vx);
-        if (c.x > w - lw - 8) {
-          c.vx = -Math.abs(c.vx);
-          c.x = Math.max(8, Math.min(c.x, w - lw - 8 + 30 * dt));
-        }
-        if (c.y < 8) c.vy = Math.abs(c.vy);
-        if (c.y > h - lh - 8) c.vy = -Math.abs(c.vy);
-        const o = bate(c.x, c.y, lw, lh);
-        if (o) {
-          const esq = c.x + lw - o.x;
-          const dir = o.x + o.w - c.x;
-          const cima = c.y + lh - o.y;
-          const baixo = o.y + o.h - c.y;
-          const m = Math.min(esq, dir, cima, baixo);
-          const d = Math.min(m, 30 * dt + 0.4);
-          if (m === esq) {
-            c.x -= d;
-            c.vx = -Math.abs(c.vx);
-          } else if (m === dir) {
-            c.x += d;
-            c.vx = Math.abs(c.vx);
-          } else if (m === cima) {
-            c.y -= d;
-            c.vy = -Math.abs(c.vy);
-          } else {
-            c.y += d;
-            c.vy = Math.abs(c.vy);
-          }
-        }
-        const onda = Math.sin(t / 1800) * 3;
-        r.style.transform = `translate3d(${c.x.toFixed(1)}px, ${(c.y + onda).toFixed(1)}px, 0)`;
-      }
-      anterior = t;
-      if (visivel) quadro = requestAnimationFrame(passo);
+    const passo = (now: number) => {
+      const t = (now - inicio) / 1000;
+      const x = Math.max(18, Math.min(width - nameWidth - 18, startX + Math.sin(t * 0.22) * travelX));
+      const y = Math.max(18, Math.min(height - nameHeight - 18, startY + Math.sin(t * 0.31) * travelY));
+      r.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)`;
+      if (visivel) frame = requestAnimationFrame(passo);
     };
-    const ligar = () => {
-      cancelAnimationFrame(quadro);
-      anterior = performance.now();
-      quadro = requestAnimationFrame(passo);
-    };
-    ligar();
-    const io = new IntersectionObserver(([x]) => {
-      visivel = Boolean(x?.isIntersecting) && document.visibilityState === "visible";
-      if (visivel) ligar();
-    });
-    io.observe(el);
-    const aba = () => {
+    frame = requestAnimationFrame(passo);
+    const visibility = () => {
       visivel = document.visibilityState === "visible";
-      if (visivel) ligar();
+      if (visivel) frame = requestAnimationFrame(passo);
+      else cancelAnimationFrame(frame);
     };
-    document.addEventListener("visibilitychange", aba);
-    window.addEventListener("resize", medirObstaculos);
+    document.addEventListener("visibilitychange", visibility);
+    const resize = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(passo);
+    };
+    window.addEventListener("resize", resize);
     return () => {
-      cancelAnimationFrame(quadro);
-      io.disconnect();
-      document.removeEventListener("visibilitychange", aba);
-      window.removeEventListener("resize", medirObstaculos);
+      cancelAnimationFrame(frame);
+      document.removeEventListener("visibilitychange", visibility);
+      window.removeEventListener("resize", resize);
     };
-    // Um laço por nome; as funções auxiliares só leem refs.
   }, [atual]);
 
   if (!montado || !atual) return null;
