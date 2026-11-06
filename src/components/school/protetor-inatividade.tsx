@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Clock3, Monitor, Sparkles, GraduationCap, Cpu, BookOpen, Code2, Wifi, Maximize2 } from "lucide-react";
 
 const TEMPO_INATIVIDADE = 120_000;
@@ -72,7 +72,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     return () => document.removeEventListener("fullscreenchange", atualizarTelaCheia);
   }, []);
 
-  const ativarTelaCheia = async (evento: React.MouseEvent<HTMLButtonElement>) => {
+  const ativarTelaCheia = async (evento: MouseEvent<HTMLButtonElement>) => {
     evento.preventDefault();
     evento.stopPropagation();
     try {
