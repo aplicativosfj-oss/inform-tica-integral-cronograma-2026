@@ -427,17 +427,12 @@ function Index() {
                   chamada,
                   Icone,
                   estilo,
-                  destaque,
                   imagem,
                 }) => (
                   <Link
                     key={to}
                     to={to}
-                    className={
-                      "home-access-card group relative flex min-h-0 flex-col overflow-hidden rounded-[1.1rem] border p-3 sm:p-4 " +
-                      estilo +
-                      (destaque ? "" : "")
-                    }
+                    className={"home-access-card group relative flex min-h-0 flex-col overflow-hidden rounded-[1.1rem] border p-3 sm:p-4 " + estilo}
                   >
                     <img
                       src={imagem}
@@ -457,12 +452,12 @@ function Index() {
                       <span className="home-access-icon grid size-9 place-items-center rounded-xl border border-current/15 bg-current/[0.08] sm:size-10">
                         <Icone className="size-5" aria-hidden="true" />
                       </span>
-                      <span className="font-heading text-sm font-bold opacity-40">
+                      <span className="home-access-index font-heading text-sm font-bold opacity-40">
                         {numero} / 06
                       </span>
                     </div>
                     <div className="relative z-10 mt-auto pt-7 sm:pt-10">
-                      <span className="text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">
+                      <span className="home-access-label text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">
                         {rotulo}
                       </span>
                       <h3 className="mt-1 max-w-[18ch] font-heading text-[clamp(.95rem,1.7vw,1.4rem)] font-extrabold leading-[1.15] tracking-tight">
@@ -471,7 +466,7 @@ function Index() {
                       <p className="mt-2 hidden max-w-sm text-xs leading-snug opacity-80 sm:line-clamp-2">
                         {descricao}
                       </p>
-                      <span className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold sm:mt-3">
+                      <span className="home-access-cta mt-2 inline-flex items-center gap-1.5 text-xs font-bold sm:mt-3">
                         {chamada}
                         <span className="home-access-arrow grid size-6 place-items-center rounded-full border border-current/20">
                           <ArrowRight className="size-4" aria-hidden="true" />
