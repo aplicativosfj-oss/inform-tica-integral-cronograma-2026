@@ -66,7 +66,7 @@
   animation: destaque-letra 700ms cubic-bezier(.21,.74,.16,1) both;
 }
 @keyframes destaque-letra {
-  from { opacity: 0; transform: translateY(0.45em); filter: blur(6px); }
+  from { opacity: 0; filter: blur(4px); }
 }
 @keyframes destaque-legenda {
   from { opacity: 0; transform: translateY(4px); }
@@ -121,7 +121,7 @@
 .constelacao-brilho-um { right: .72rem; top: .48rem; font-size: 1.05rem; }
 .constelacao-brilho-dois { right: 1.9rem; bottom: .55rem; font-size: .78rem; animation-delay: .8s; }
 @keyframes nome-escolar-entrada {
-  from { opacity: 0; filter: blur(10px); transform: translate3d(0,12px,0) scale(.94); }
+  from { opacity: 0; filter: blur(8px); }
   to { opacity: 1; filter: blur(0); }
 }
 @keyframes nome-escolar-pulso { 0%,100% { transform: scale(.985); opacity: .28; } 50% { transform: scale(1.025); opacity: .72; } }
@@ -129,3 +129,9 @@
 @media (prefers-reduced-motion: reduce) {
   .constelacao-nome-escolar, .constelacao-nome-escolar::before, .constelacao-brilho { animation: none !important; }
 }
+
+/* Posição do cartão controlada por requestAnimationFrame; não competir no transform. */
+.constelacao-nome, .constelacao-nome-escolar { backface-visibility: hidden; transform-origin: center center; }
+.constelacao-texto { display:inline-flex; align-items:baseline; white-space:nowrap; font-synthesis:none; text-rendering:geometricPrecision; }
+.constelacao-texto > span { animation:destaque-letra 520ms ease-out both; transform:none !important; filter:none; line-height:1.15; }
+.constelacao-nome.is-saindo .constelacao-texto > span { animation:none; }
