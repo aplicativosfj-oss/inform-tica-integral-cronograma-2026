@@ -57,7 +57,14 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     let temporizador: number | undefined;
     const reiniciar = (evento?: Event) => {
       const telaDescanso = document.getElementById("screensaver-informatica");
-      if (evento?.target instanceof Node && telaDescanso?.contains(evento.target)) return;
+      const interacaoNaTela = Boolean(
+        evento?.target instanceof Node && telaDescanso?.contains(evento.target),
+      );
+
+      // Enquanto o descanso está visível, movimentos não o fecham nem reiniciam
+      // o estado. A saída só acontece pelo botão de confirmação.
+      if (ativo && interacaoNaTela) return;
+
       setAtivo(false);
       setConfirmarSaida(false);
       window.clearTimeout(temporizador);
@@ -83,7 +90,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       eventos.forEach((evento) => window.removeEventListener(evento, reiniciar));
       document.removeEventListener("visibilitychange", visibilidade);
     };
-  }, [pathname]);
+  }, [pathname, ativo]);
 
   useEffect(() => {
     const atualizar = () => setTelaCheia(Boolean(document.fullscreenElement));
@@ -165,7 +172,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       onPointerDown={pedirConfirmacao}
       onKeyDown={pedirConfirmacao}
       tabIndex={-1}
-      className="fixed inset-0 z-[9999] flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#071329] px-5 py-6 text-white outline-none sm:px-8"
+      className="fixed inset-0 z-[9999] flex h-[100dvh] min-h-0 items-center justify-center overflow-hidden bg-[#071329] px-[clamp(10px,2vw,28px)] py-[clamp(8px,1.5vh,16px)] text-white outline-none"
     >
       {/* Fotografia real do laboratório com camadas de contraste para leitura. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -182,8 +189,8 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         <div className="absolute -right-40 top-[-16rem] size-[34rem] rounded-full bg-cyan-400/15 blur-[110px]" />
       </div>
 
-      <main className="relative z-10 mx-auto flex max-h-[94dvh] w-full max-w-6xl flex-col items-center overflow-y-auto py-2 text-center [scrollbar-width:none]">
-        <header className="mb-5 flex flex-wrap items-center justify-center gap-3 sm:mb-7">
+      <main className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col items-center justify-between overflow-hidden py-1 text-center">
+        <header className="mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2">
           <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-slate-950/35 px-4 py-2.5 shadow-xl backdrop-blur-xl">
             <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-blue-700 shadow-lg shadow-blue-950/40">
               <Monitor className="size-5 text-white" />
@@ -198,13 +205,13 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           </span>
         </header>
 
-        <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.28em] text-cyan-100/75 sm:text-xs">
+        <div className="flex shrink-0 items-center gap-2 text-[9px] font-bold uppercase tracking-[.24em] text-cyan-100/75 sm:text-[10px]">
           <Sparkles className="size-4" /> Tecnologia, conhecimento e criatividade
         </div>
 
         {/* Relógio único: horas e minutos em destaque, segundos discretos ao lado. */}
-        <section aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`} className="mb-2 flex items-end justify-center gap-3">
-          <time className="font-heading text-[clamp(4.6rem,13vw,9rem)] font-black leading-[.92] tracking-[-.075em] tabular-nums text-white drop-shadow-[0_8px_36px_rgba(75,125,255,.34)]">
+        <section aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`} className="flex shrink-0 items-end justify-center gap-2">
+          <time className="font-heading text-[clamp(3.2rem,8.5vw,6.5rem)] font-black leading-[.92] tracking-[-.075em] tabular-nums text-white drop-shadow-[0_8px_36px_rgba(75,125,255,.34)]">
             {horario.hora}
           </time>
           <span className="mb-1 rounded-xl border border-cyan-100/20 bg-cyan-200/10 px-3 py-2 text-left backdrop-blur-md">
@@ -212,9 +219,9 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             <span className="block text-[8px] font-extrabold tracking-[.18em] text-cyan-100/55">SEG</span>
           </span>
         </section>
-        <p className="mb-5 text-sm font-medium capitalize text-blue-100/75 sm:mb-7 sm:text-lg">{formatarData(agora)}</p>
+        <p className="mb-1 shrink-0 text-xs font-medium capitalize text-blue-100/75 sm:text-sm">{formatarData(agora)}</p>
 
-        <div className="mb-5 flex flex-wrap items-center justify-center gap-2 rounded-full border border-white/15 bg-slate-950/30 px-5 py-3 text-xs font-semibold text-white/85 shadow-xl backdrop-blur-xl sm:text-sm">
+        <div className="mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-full border border-white/15 bg-slate-950/30 px-4 py-1.5 text-[10px] font-semibold text-white/85 shadow-xl backdrop-blur-xl sm:text-xs">
           <Clock3 className="size-4 text-cyan-200" />
           Tela de descanso ativada após 60 segundos sem interação
         </div>
@@ -224,13 +231,13 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           onPointerDown={(evento) => evento.stopPropagation()}
           onKeyDown={(evento) => evento.stopPropagation()}
           onClick={ativarTelaCheia}
-          className="mb-6 inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-cyan-100/35 bg-cyan-300/10 px-5 py-2 text-[10px] font-extrabold uppercase tracking-[.15em] text-cyan-50 shadow-lg backdrop-blur transition hover:bg-cyan-300/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-100"
+          className="mb-1 inline-flex min-h-8 shrink-0 items-center justify-center gap-2 rounded-full border border-cyan-100/35 bg-cyan-300/10 px-4 py-1.5 text-[9px] font-extrabold uppercase tracking-[.15em] text-cyan-50 shadow-lg backdrop-blur transition hover:bg-cyan-300/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-100"
         >
           <Maximize2 className="size-4" /> {telaCheia ? "Modo tela cheia ativado" : "Ativar modo tela cheia"}
         </button>
 
-        <section aria-label="Monitoramento do laboratório" className="w-full overflow-hidden rounded-[1.6rem] border border-cyan-100/20 bg-[#061329]/80 p-3 text-left shadow-[0_28px_90px_rgba(0,0,0,.42)] backdrop-blur-2xl sm:p-5">
-          <div className="relative isolate min-h-[250px] overflow-hidden rounded-2xl border border-cyan-100/20 bg-[radial-gradient(ellipse_at_72%_42%,rgba(26,105,173,.35),transparent_48%),linear-gradient(120deg,#06101f_0%,#0a1d38_52%,#071226_100%)] sm:min-h-[350px]">
+        <section aria-label="Monitoramento do laboratório" className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[1.25rem] border border-cyan-100/20 bg-[#061329]/80 p-2 text-left shadow-[0_28px_90px_rgba(0,0,0,.42)] backdrop-blur-2xl sm:p-3">
+          <div className="relative isolate min-h-0 flex-1 overflow-hidden rounded-xl border border-cyan-100/20 bg-[radial-gradient(ellipse_at_72%_42%,rgba(26,105,173,.35),transparent_48%),linear-gradient(120deg,#06101f_0%,#0a1d38_52%,#071226_100%)]">
             <div aria-hidden className="absolute inset-0 opacity-[.16]" style={{ backgroundImage: "linear-gradient(rgba(130,220,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(130,220,255,.28) 1px,transparent 1px)", backgroundSize: "32px 32px" }} />
             <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_50%,transparent_0%,rgba(2,8,23,.12)_48%,rgba(2,8,23,.75)_100%)]" />
             <div aria-hidden className="absolute -right-16 top-1/2 size-[330px] -translate-y-1/2 rounded-full border border-cyan-300/10 shadow-[0_0_70px_rgba(34,211,238,.08)] sm:size-[470px]" />
@@ -326,18 +333,18 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-5">
-            <div className="flex size-14 items-center justify-center rounded-2xl border border-cyan-100/20 bg-cyan-300/10 text-cyan-100">
+          <div className="mt-2 grid shrink-0 grid-cols-[auto_1fr] items-center gap-2">
+            <div className="flex size-9 items-center justify-center rounded-xl border border-cyan-100/20 bg-cyan-300/10 text-cyan-100">
               <ShieldCheck className="size-7" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-cyan-200">
                 <ShieldCheck className="size-4" /> Cuidado e responsabilidade
               </div>
-              <h2 className="mt-1.5 font-heading text-lg font-extrabold leading-snug text-white sm:text-xl">
+              <h2 className="mt-0.5 font-heading text-xs font-extrabold leading-snug text-white sm:text-sm">
                 Nosso laboratório é um espaço de respeito, aprendizagem e cuidado.
               </h2>
-              <p className="mt-1.5 text-xs leading-relaxed text-blue-100/75 sm:text-sm">
+              <p className="mt-0.5 text-[9px] leading-snug text-blue-100/75 sm:text-[10px]">
                 Cuide dos equipamentos, respeite os colegas e siga as orientações dos educadores.
                 A tecnologia é uma ferramenta para aprender, criar e compartilhar.
               </p>
@@ -345,7 +352,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           </div>
         </section>
 
-        <div className="mt-4 grid w-full grid-cols-3 gap-2">
+        <div className="mt-1 grid w-full shrink-0 grid-cols-3 gap-2">
           {[
             { Icon: BookOpen, label: "Aprendizagem", cor: "text-violet-200" },
             { Icon: Cpu, label: "Tecnologia", cor: "text-cyan-200" },
@@ -358,7 +365,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           ))}
         </div>
 
-        <section aria-label="Alunos do laboratório" className="mt-4 w-full max-w-4xl">
+        <section aria-label="Alunos do laboratório" className="mt-1 w-full max-w-4xl shrink-0">
           <div className="mb-2 flex items-center justify-center gap-2 text-[9px] font-extrabold uppercase tracking-[.2em] text-blue-100/55">
             <GraduationCap className="size-3.5 text-cyan-200/80" />
             Nossa comunidade de aprendizagem
@@ -387,7 +394,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           <p className="mt-1.5 text-center text-[8px] font-medium text-white/35">Exibição rotativa · primeiro nome e inicial do sobrenome</p>
         </section>
 
-        <footer className="mt-5 flex flex-col items-center gap-1 text-center">
+        <footer className="mt-1 flex shrink-0 flex-col items-center gap-0.5 text-center">
           <div className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[.17em] text-white/60">
             <Wifi className="size-3.5 text-cyan-200/75" /> Escola Municipal Dr. Eiraldo Carneiro de França
           </div>
@@ -401,7 +408,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
 
       {confirmarSaida && (
         <div
-          className="absolute inset-0 z-20 flex items-center justify-center bg-[#020817]/75 p-5 backdrop-blur-md"
+          className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden bg-[#020817]/75 p-4 backdrop-blur-md"
           role="presentation"
           onPointerDown={(evento) => evento.stopPropagation()}
           onKeyDown={(evento) => evento.stopPropagation()}
@@ -411,7 +418,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             aria-modal="true"
             aria-labelledby="confirmar-saida-titulo"
             aria-describedby="confirmar-saida-descricao"
-            className="w-full max-w-md rounded-[1.7rem] border border-white/15 bg-[#101f3d] p-6 text-center shadow-[0_30px_100px_rgba(0,0,0,.55)] sm:p-8"
+            className="w-full max-w-md rounded-[1.7rem] border border-white/15 bg-[#101f3d] p-5 text-center shadow-[0_30px_100px_rgba(0,0,0,.55)]"
           >
             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-cyan-200/20 bg-cyan-300/10 text-cyan-100">
               <Monitor className="size-7" />
@@ -440,7 +447,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         @keyframes cameraPivot { 0% { transform: rotate(-1.2deg) translateX(-2px); } 50% { transform: rotate(.8deg) translateX(3px); } 100% { transform: rotate(-.4deg) translateX(0); } }
         @keyframes lensPulse { 0%, 100% { opacity: .18; transform: scale(.97); } 50% { opacity: .7; transform: scale(1.035); } }
         @keyframes cameraProgress { 0% { transform: translateX(-55%); } 100% { transform: translateX(110%); } }
-        @media (prefers-reduced-motion: reduce) {
+        @media (max-height: 760px) { #screensaver-informatica main { gap: 2px; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] { min-height: 0; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] > div:first-child { min-height: 0; } #screensaver-informatica main > div.mt-1.grid.w-full.shrink-0.grid-cols-3 { display: none; } #screensaver-informatica main > section[aria-label="Alunos do laboratório"] { display: none; } #screensaver-informatica main > footer { display: none; } }\n        @media (prefers-reduced-motion: reduce) {
           [class*="animate-"] { animation: none !important; }
         }
       `}</style>
