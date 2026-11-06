@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, type RefObject } from "react";
 import {
   ArrowDown,
   ArrowRight,
@@ -13,6 +13,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   MapPin,
+  Maximize2,
   MonitorSmartphone,
   Play,
   ShieldCheck,
@@ -88,7 +89,7 @@ export const Route = createFileRoute("/")({
 const ACESSOS = [
   {
     to: "/agenda",
-    imagem: "/images/hero-lab-photo-768w.webp",
+    imagem: "/images/image0-768w.webp",
     numero: "01",
     rotulo: "Organização",
     titulo: "Agenda do laboratório",
@@ -100,7 +101,7 @@ const ACESSOS = [
   },
   {
     to: "/aluno",
-    imagem: "/images/alunos-hero-768w.webp",
+    imagem: "/images/image1-768w.webp",
     numero: "02",
     rotulo: "Para os estudantes",
     titulo: "Meu espaço de aprender",
@@ -112,7 +113,7 @@ const ACESSOS = [
   },
   {
     to: "/infoteca",
-    imagem: "/images/feature-tools-768w.webp",
+    imagem: "/images/image2-768w.webp",
     numero: "03",
     rotulo: "Conhecimento",
     titulo: "Infoteca digital",
@@ -124,7 +125,7 @@ const ACESSOS = [
   },
   {
     to: "/sala-de-jogos",
-    imagem: "/images/feature-kids-learning-768w.webp",
+    imagem: "/images/image3-768w.webp",
     numero: "04",
     rotulo: "Aprender brincando",
     titulo: "Jogos educativos",
@@ -136,7 +137,7 @@ const ACESSOS = [
   },
   {
     to: "/resultados",
-    imagem: "/images/feature-classroom-tech-768w.webp",
+    imagem: "/images/image4-768w.webp",
     numero: "05",
     rotulo: "Transparência",
     titulo: "Resultados da escola",
@@ -148,7 +149,7 @@ const ACESSOS = [
   },
   {
     to: "/avaliacao",
-    imagem: "/images/alunos-2-480w.webp",
+    imagem: "/images/image6-768w.webp",
     numero: "06",
     rotulo: "Acompanhamento",
     titulo: "Avaliações",
@@ -206,6 +207,15 @@ function Index() {
   const ausencias = lab.ausencias?.filter((s) => idsDoFundamental.has(s.turmaId));
   const dadosLab = { ...lab, sessoes, ausencias };
   const feriadoHoje = feriadoNacionalEm(hojeNaEscola());
+  const alternarTelaGrande = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      // O navegador pode exigir gesto explícito para permitir tela cheia.
+    }
+  };
+
 
   return (
     <div className="home-premium relative min-h-screen overflow-x-clip bg-background text-foreground">
@@ -242,6 +252,13 @@ function Index() {
             )}
 
             <div className="mx-auto max-w-[86rem] px-4 pb-7 pt-9 sm:px-8 sm:pb-10 sm:pt-12 lg:px-10 lg:pt-16">
+              <div className="mb-3 flex justify-end">
+                <Button type="button" variant="outline" size="sm" onClick={alternarTelaGrande}
+                  className="rounded-full border-white/25 bg-white/10 text-white shadow-lg backdrop-blur-md hover:bg-white/20 hover:text-white"
+                  aria-label="Ativar ou sair da tela grande">
+                  <Maximize2 className="mr-2 size-4" aria-hidden="true" /> Tela grande
+                </Button>
+              </div>
               {/* Assinatura da escola: no celular cabe numa linha só, com o
                   nome cortado antes de virar um parágrafo em caixa alta. */}
               <div
@@ -270,7 +287,7 @@ function Index() {
                 <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="mb-8" />
               ) : null}
 
-              <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)] xl:gap-16">
+              <div className="grid items-center gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:gap-8">
                 {/* O bloco inteiro é obstáculo para os nomes que flutuam ao
                     fundo: antes um nome podia cair em cima do selo ou do
                     título se a medição acontecesse antes do layout assentar. */}
@@ -281,13 +298,13 @@ function Index() {
                   </div>
                   <h1
                     id="home-titulo"
-                    className="home-hero-entrance mt-5 max-w-[12.7ch] font-heading text-[clamp(2.3rem,5.8vw,5.7rem)] font-extrabold leading-[1.03] tracking-[-0.05em] text-white sm:mt-6"
+                    className="home-hero-entrance mt-3 max-w-[15ch] font-heading text-[clamp(2rem,4.2vw,4.1rem)] font-extrabold leading-[1.06] tracking-[-0.045em] text-white sm:mt-4"
                   >
                     Um universo de
                     <span className="home-headline-accent mt-1 block text-sun">descobertas.</span>
                     Todos os dias.
                   </h1>
-                  <p className="home-hero-entrance mt-5 max-w-[34rem] text-[15px] leading-relaxed text-white/80 sm:mt-6 sm:text-lg">
+                  <p className="home-hero-entrance mt-3 max-w-[32rem] text-sm leading-relaxed text-white/80 sm:mt-4 sm:text-base">
                     O laboratório de informática aproxima nossos estudantes da tecnologia, da
                     criatividade e de novas formas de aprender. Acompanhe o que acontece na escola e
                     explore cada espaço.
@@ -295,7 +312,7 @@ function Index() {
                   {/* No celular os dois botões dividem a linha: a abertura
                       inteira cabe numa tela, sem empurrar o painel ao vivo
                       para baixo da dobra. */}
-                  <div className="home-hero-entrance mt-6 flex flex-wrap gap-2.5 sm:mt-8 sm:gap-3">
+                  <div className="home-hero-entrance mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-3">
                     <Button
                       asChild
                       size="lg"
@@ -416,7 +433,7 @@ function Index() {
                 id="home-acessos-titulo"
               />
             </RevealSection>
-            <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+            <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-3">
               {ACESSOS.map(
                 ({
                   to,
@@ -427,17 +444,13 @@ function Index() {
                   chamada,
                   Icone,
                   estilo,
-                  destaque,
                   imagem,
+                  destaque,
                 }) => (
                   <Link
                     key={to}
                     to={to}
-                    className={
-                      "home-access-card group relative flex min-h-[12rem] flex-col overflow-hidden rounded-[1.5rem] border p-4 sm:p-5 " +
-                      estilo +
-                      (destaque ? " lg:min-h-[12rem]" : "")
-                    }
+                    className={"home-access-card group relative flex min-h-0 flex-col overflow-hidden rounded-[1.1rem] border p-3 sm:p-4 " + estilo}
                   >
                     <img
                       src={imagem}
@@ -454,26 +467,26 @@ function Index() {
                       className="home-access-overlay pointer-events-none absolute inset-0"
                     />
                     <div className="relative z-10 flex items-start justify-between gap-3">
-                      <span className="home-access-icon grid size-12 place-items-center rounded-2xl border border-current/15 bg-current/[0.08]">
-                        <Icone className="size-6" aria-hidden="true" />
+                      <span className="home-access-icon grid size-9 place-items-center rounded-xl border border-current/15 bg-current/[0.08] sm:size-10">
+                        <Icone className="size-5" aria-hidden="true" />
                       </span>
-                      <span className="font-heading text-sm font-bold opacity-40">
+                      <span className="home-access-index font-heading text-sm font-bold opacity-40">
                         {numero} / 06
                       </span>
                     </div>
-                    <div className="relative z-10 mt-auto pt-12">
-                      <span className="text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">
+                    <div className="relative z-10 mt-auto pt-7 sm:pt-10">
+                      <span className="home-access-label text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">
                         {rotulo}
                       </span>
-                      <h3 className="mt-2 max-w-[18ch] font-heading text-[clamp(1.45rem,2vw,2.15rem)] font-extrabold leading-[1.13] tracking-tight">
+                      <h3 className="mt-1 max-w-[18ch] font-heading text-[clamp(.95rem,1.7vw,1.4rem)] font-extrabold leading-[1.15] tracking-tight">
                         {titulo}
                       </h3>
-                      <p className="mt-3 max-w-sm text-sm leading-relaxed opacity-80">
+                      <p className="mt-2 hidden max-w-sm text-xs leading-snug opacity-80 sm:line-clamp-2">
                         {descricao}
                       </p>
-                      <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
+                      <span className="home-access-cta mt-2 inline-flex items-center gap-1.5 text-xs font-bold sm:mt-3">
                         {chamada}
-                        <span className="home-access-arrow grid size-8 place-items-center rounded-full border border-current/20">
+                        <span className="home-access-arrow grid size-6 place-items-center rounded-full border border-current/20">
                           <ArrowRight className="size-4" aria-hidden="true" />
                         </span>
                       </span>
@@ -496,7 +509,7 @@ function Index() {
             className="home-live-section home-window-section scroll-mt-24 border-y border-border/60 bg-card/70 py-10 sm:py-14"
           >
             <div className="mx-auto max-w-[86rem] px-4 sm:px-8 lg:px-10">
-              <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <SectionIntro
                   etiqueta="Acompanhe em tempo real"
                   titulo="O laboratório está vivo."
@@ -505,9 +518,6 @@ function Index() {
                 />
                 <div className="flex shrink-0 flex-wrap items-center gap-3">
                   <ClimaCompacto />
-                  {isAuthenticated && !feriadoHoje ? (
-                    <MarcarAlunosCartao dados={dadosLab} compacto />
-                  ) : null}
                   <Button
                     asChild
                     variant="outline"
@@ -519,13 +529,29 @@ function Index() {
                   </Button>
                 </div>
               </div>
-              <div className="home-live-panel min-h-[20rem] overflow-hidden rounded-[1.5rem] border border-border bg-background p-2 shadow-xl shadow-ink/5 sm:p-3">
+              {isAuthenticated ? (
+                <nav aria-label="Ações rápidas da equipe" className="mb-3 rounded-2xl border border-primary/20 bg-card/85 p-2.5 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-extrabold text-foreground">Ações rápidas</p>
+                      <p className="text-[11px] text-muted-foreground">Organize o laboratório sem sair da página</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {!feriadoHoje ? <MarcarAlunosCartao dados={dadosLab} compacto rotulo="Escolher turma e alunos" /> : null}
+                      <Button asChild size="sm" variant="outline" className="h-9 rounded-full">
+                        <Link to="/dashboard">Painel de gestão <ArrowRight className="size-4" /></Link>
+                      </Button>
+                    </div>
+                  </div>
+                </nav>
+              ) : null}
+              <div className="home-live-panel min-w-0 overflow-hidden rounded-[1.25rem] border border-border bg-background p-1.5 shadow-lg shadow-ink/5 sm:p-3">
                 {feriadoHoje ? (
                   <div className="grid min-h-[24rem] place-items-center rounded-2xl bg-muted/40 px-5 py-10">
                     <AvisoFeriado dataISO={hojeNaEscola()} variante="painel" />
                   </div>
                 ) : (
-                  <PainelLaboratorioAgora dados={dadosLab} logado={isAuthenticated} />
+                  <PainelLaboratorioAgora dados={dadosLab} logado={isAuthenticated} compacto />
                 )}
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
@@ -543,7 +569,7 @@ function Index() {
             aria-labelledby="home-metodo-titulo"
             className="home-section mx-auto max-w-[86rem] px-4 py-12 sm:px-8 sm:py-16 lg:px-10"
           >
-            <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-14">
+            <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-6">
               <RevealSection>
                 <SectionIntro
                   etiqueta="Educação com propósito"
@@ -551,13 +577,13 @@ function Index() {
                   descricao="Uma rotina planejada, acolhedora e cheia de possibilidades. O digital faz parte do aprendizado, sem perder o olhar humano."
                   id="home-metodo-titulo"
                 />
-                <div className="mt-6 overflow-hidden rounded-[1.75rem] border border-border bg-card p-2 shadow-lg shadow-ink/5">
+                <div className="mt-4 overflow-hidden rounded-[1.25rem] border border-border bg-card p-2 shadow-sm">
                   <img
                     src={heroTechBgImg}
                     alt="Ambiente de tecnologia e recursos de informática"
                     loading="lazy"
                     decoding="async"
-                    className="home-method-image aspect-[16/10] w-full rounded-[1.3rem] object-cover"
+                    className="home-method-image aspect-[16/7] w-full rounded-xl object-cover"
                   />
                   <div className="flex items-center gap-2 px-3 pb-2 pt-4 text-xs font-semibold text-muted-foreground">
                     <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
@@ -565,11 +591,11 @@ function Index() {
                   </div>
                 </div>
               </RevealSection>
-              <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 {ETAPAS.map(({ numero, titulo, descricao, Icone }) => (
                   <div
                     key={numero}
-                    className="home-step-card rounded-[1.5rem] border border-border bg-card p-6 shadow-sm sm:p-7"
+                    className="home-step-card rounded-xl border border-border bg-card p-3 shadow-sm sm:p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary">
@@ -579,10 +605,10 @@ function Index() {
                         {numero}
                       </span>
                     </div>
-                    <h3 className="mt-8 font-heading text-xl font-extrabold leading-tight tracking-tight">
+                    <h3 className="mt-3 font-heading text-sm font-extrabold leading-tight tracking-tight sm:text-base">
                       {titulo}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                       {descricao}
                     </p>
                   </div>
@@ -602,8 +628,8 @@ function Index() {
                 descricao="Resultados, experiências e momentos que fazem parte da vida escolar."
                 id="home-comunidade-titulo"
               />
-              <div className="mt-8 grid gap-5 lg:grid-cols-[0.86fr_1.14fr]">
-                <div className="home-results-card relative isolate flex min-h-[24rem] flex-col overflow-hidden rounded-[1.9rem] bg-ink p-7 text-white sm:p-9">
+              <div className="mt-5 grid gap-3 lg:grid-cols-[0.86fr_1.14fr]">
+                <div className="home-results-card relative isolate flex min-h-[15rem] flex-col overflow-hidden rounded-[1.25rem] bg-ink p-5 text-white sm:p-6">
                   <img
                     src={escolaInformaticaHeroImg}
                     alt=""
@@ -618,8 +644,8 @@ function Index() {
                   <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-sun">
                     <CheckCircle2 className="size-4" aria-hidden="true" /> Acompanhamento
                   </span>
-                  <div className="mt-auto pt-16">
-                    <h3 className="max-w-[15ch] font-heading text-[clamp(2rem,3vw,3rem)] font-extrabold leading-[1.08] tracking-tight">
+                  <div className="mt-auto pt-6">
+                    <h3 className="max-w-[22ch] font-heading text-[clamp(1.35rem,2.2vw,2rem)] font-extrabold leading-[1.08] tracking-tight">
                       Resultados que orientam o próximo passo.
                     </h3>
                     <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75 sm:text-base">
@@ -629,7 +655,7 @@ function Index() {
                     <Button
                       asChild
                       size="lg"
-                      className="mt-7 rounded-full bg-sun px-6 font-bold text-sun-foreground hover:bg-sun/90"
+                      className="mt-3 rounded-full bg-sun px-5 font-bold text-sun-foreground hover:bg-sun/90"
                     >
                       <Link to="/resultados">
                         Ver resultados <ArrowRight className="size-4" aria-hidden="true" />
@@ -723,7 +749,7 @@ function StatCounter({ valor }: { valor: number }) {
   const { ref, exibido } = useCountUp(valor);
   return (
     <div
-      ref={ref as React.RefObject<HTMLDivElement | null>}
+      ref={ref as RefObject<HTMLDivElement | null>}
       className="mt-1 font-heading text-[1.85rem] font-extrabold leading-none tracking-tight tabular-nums text-white sm:text-[2.1rem]"
     >
       {exibido}
@@ -772,7 +798,7 @@ function SectionIntro({
 
 function CanalYoutubeCard() {
   return (
-    <div className="home-videos-card flex h-full min-h-[24rem] flex-col overflow-hidden rounded-[1.9rem] border border-border bg-card p-6 shadow-sm sm:p-8">
+    <div className="home-videos-card flex h-full min-h-[15rem] flex-col overflow-hidden rounded-[1.25rem] border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-red-600 dark:text-red-400">
@@ -797,7 +823,7 @@ function CanalYoutubeCard() {
           Ver canal <ExternalLink className="size-3.5" aria-hidden="true" />
         </a>
       </div>
-      <div className="mt-7 grid flex-1 grid-cols-3 gap-2.5 sm:gap-4">
+      <div className="mt-3 grid flex-1 grid-cols-3 gap-2 sm:gap-3">
         {VIDEOS_DESTAQUE.map((video) => (
           <VideoThumb key={video.id} video={video} />
         ))}
@@ -814,7 +840,7 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={"Assistir: " + video.titulo}
-      className="home-video-thumb group relative block aspect-[9/15] overflow-hidden rounded-[1.1rem] bg-ink text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+      className="home-video-thumb group relative block aspect-[4/5] overflow-hidden rounded-lg bg-ink text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
     >
       {!falhou ? (
         <img
