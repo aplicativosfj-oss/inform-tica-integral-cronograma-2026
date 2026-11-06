@@ -164,21 +164,39 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           <Sparkles className="size-4" /> Tecnologia, conhecimento e criatividade
         </div>
 
-        {/* Relógio único: horas e minutos em destaque, segundos discretos ao lado. */}
-        <section aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`} className="screensaver-avoid flex shrink-0 items-end justify-center gap-2">
-          <time className="font-heading text-[clamp(3.2rem,8.5vw,6.5rem)] font-black leading-[.92] tracking-[-.075em] tabular-nums text-white drop-shadow-[0_8px_36px_rgba(75,125,255,.34)]">
-            {horario.hora}
-          </time>
-          <span className="mb-1 rounded-xl border border-cyan-100/20 bg-cyan-200/10 px-3 py-2 text-left backdrop-blur-md">
-            <span className="block font-mono text-2xl font-bold tabular-nums text-cyan-100 sm:text-3xl">{horario.segundos}</span>
-            <span className="block text-[8px] font-extrabold tracking-[.18em] text-cyan-100/55">SEG</span>
-          </span>
+        {/* Relógio redesenhado: painel editorial, leitura imediata e segundos discretos. */}
+        <section
+          aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`}
+          className="screensaver-avoid relative flex w-full max-w-[min(92vw,680px)] shrink-0 flex-col items-center justify-center"
+        >
+          <div className="relative w-full overflow-hidden rounded-[2rem] border border-white/[0.14] bg-slate-950/35 px-6 py-5 shadow-[0_24px_90px_rgba(0,0,0,.28)] backdrop-blur-2xl sm:px-10 sm:py-6">
+            <div aria-hidden className="pointer-events-none absolute inset-x-[12%] top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/70 to-transparent" />
+            <div className="flex items-center justify-center gap-2 text-[9px] font-extrabold uppercase tracking-[.34em] text-cyan-100/65 sm:text-[10px]">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-300 opacity-40" />
+                <span className="relative inline-flex size-2 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,.8)]" />
+              </span>
+              Horário local
+            </div>
+            <div className="mt-2 flex items-center justify-center gap-3 sm:gap-5">
+              <time className="font-heading text-[clamp(4.4rem,12vw,8.5rem)] font-semibold leading-[.95] tracking-[-.085em] tabular-nums text-white [font-variant-numeric:tabular-nums] drop-shadow-[0_8px_32px_rgba(34,211,238,.16)]">
+                {horario.hora}
+              </time>
+              <div className="mb-1 flex min-w-[3.2rem] flex-col items-center justify-center border-l border-white/15 pl-3 sm:min-w-[4rem] sm:pl-5">
+                <span className="font-heading text-2xl font-semibold leading-none tabular-nums text-cyan-100 sm:text-3xl">{horario.segundos}</span>
+                <span className="mt-1.5 text-[8px] font-bold uppercase tracking-[.25em] text-white/40">seg</span>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-2 border-t border-white/[0.09] pt-3 text-[11px] font-medium capitalize tracking-[.04em] text-blue-100/70 sm:text-xs">
+              <Clock3 className="size-3.5 text-cyan-200/70" />
+              {formatarData(agora)}
+            </div>
+          </div>
         </section>
-        <p className="screensaver-avoid mb-1 shrink-0 text-xs font-medium capitalize text-blue-100/75 sm:text-sm">{formatarData(agora)}</p>
 
-        <div className="screensaver-avoid mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-full border border-white/15 bg-slate-950/30 px-4 py-1.5 text-[10px] font-semibold text-white/85 shadow-xl backdrop-blur-xl sm:text-xs">
-          <Clock3 className="size-4 text-cyan-200" />
-          Tela de descanso ativada após 60 segundos sem interação
+        <div className="screensaver-avoid flex shrink-0 items-center justify-center gap-2 text-[9px] font-semibold tracking-[.08em] text-white/45 sm:text-[10px]">
+          <span className="size-1 rounded-full bg-cyan-200/70" />
+          Descanso automático após 60 segundos de inatividade
         </div>
 
         <button
