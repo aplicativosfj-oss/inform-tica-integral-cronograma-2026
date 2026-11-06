@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock3, Monitor, Sparkles } from "lucide-react";
+import { Clock3, Monitor, Sparkles, GraduationCap, Cpu, BookOpen, Code2, Wifi } from "lucide-react";
 
 const TEMPO_INATIVIDADE = 120_000;
 const ROTAS_EXCLUIDAS = ["/login", "/tv", "/sala-de-jogos", "/jogos"];
@@ -90,22 +90,31 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center text-center">
-        <div className="mb-8 flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.06] px-5 py-2.5 shadow-2xl backdrop-blur-xl">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-400 to-indigo-600 shadow-lg shadow-violet-950/50">
-            <Monitor className="size-5 text-white" />
-          </span>
-          <span className="text-left">
-            <span className="block text-sm font-extrabold tracking-tight sm:text-base">informática<span className="text-amber-300">.</span></span>
-            <span className="block text-[10px] font-semibold tracking-[0.22em] text-indigo-100/70">E.M. DR. EIRALDO</span>
-          </span>
+        <div className="mb-7 flex flex-wrap items-center justify-center gap-3">
+          <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-3 shadow-2xl backdrop-blur-xl">
+            <span className="relative flex size-12 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-violet-400 via-indigo-500 to-blue-700 shadow-lg shadow-violet-950/50">
+              <Monitor className="size-6 text-white" />
+              <span className="absolute -bottom-1 -right-1 size-5 rounded-full border-2 border-[#111630] bg-amber-300" />
+            </span>
+            <span className="text-left">
+              <span className="block text-base font-black tracking-tight sm:text-lg">informática<span className="text-amber-300">.</span></span>
+              <span className="block text-[10px] font-bold tracking-[0.2em] text-indigo-100/70">AMBIENTE DIGITAL ESCOLAR</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-cyan-200/20 bg-cyan-300/[0.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-cyan-100">
+            <GraduationCap className="size-4" /> Informática Educativa
+          </div>
         </div>
 
         <div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-cyan-200/80 sm:text-sm">
-          <Sparkles className="size-4" /> Um espaço para aprender e descobrir
+          <Sparkles className="size-4" /> Tecnologia, conhecimento e criatividade
         </div>
 
-        <div className="font-heading text-[clamp(5rem,17vw,12rem)] font-black leading-none tracking-[-0.075em] tabular-nums text-white drop-shadow-[0_12px_45px_rgba(99,102,241,0.25)]">
-          {formatarHora(agora)}
+        <div className="relative w-full max-w-4xl">
+          <div aria-hidden className="pointer-events-none absolute inset-x-[12%] top-1/2 h-24 -translate-y-1/2 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="relative font-heading text-[clamp(5rem,17vw,12rem)] font-black leading-none tracking-[-0.075em] tabular-nums text-white drop-shadow-[0_12px_45px_rgba(99,102,241,0.25)]">
+            {formatarHora(agora)}
+          </div>
         </div>
         <p className="mt-5 text-base font-medium capitalize text-indigo-100/75 sm:text-xl">
           {formatarData(agora)}
@@ -119,9 +128,26 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             Tela em espera · Mova o mouse ou pressione uma tecla para continuar
           </span>
         </div>
-        <p className="mt-8 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/35">
-          Escola Municipal Dr. Eiraldo Carneiro de França
-        </p>
+        <div className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 py-3 text-left backdrop-blur-md">
+            <BookOpen className="size-4 shrink-0 text-violet-200" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">Aprendizagem</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 py-3 text-left backdrop-blur-md">
+            <Cpu className="size-4 shrink-0 text-cyan-200" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">Tecnologia</span>
+          </div>
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 py-3 text-left backdrop-blur-md">
+            <Code2 className="size-4 shrink-0 text-amber-200" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">Criatividade</span>
+          </div>
+        </div>
+        <div className="mt-7 flex flex-col items-center gap-2 text-center">
+          <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/55">
+            <Wifi className="size-3.5 text-cyan-200/70" /> Escola Municipal Dr. Eiraldo Carneiro de França
+          </div>
+          <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-white/30">Informática Educativa · Um espaço para aprender e descobrir</p>
+        </div>
       </div>
     </div>
   );
