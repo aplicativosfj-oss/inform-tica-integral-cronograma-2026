@@ -928,7 +928,7 @@ export function ControleLaboratorio({
                                 : undefined
                         }
                         className={cn(
-                          "flex w-full min-w-0 items-start gap-2.5 rounded-xl border p-3 pb-12 text-left transition sm:gap-3 sm:p-3 sm:pb-11",
+                          "flex w-full min-w-0 items-start gap-2.5 rounded-xl border p-2.5 pb-12 text-left transition sm:gap-3 sm:p-3 sm:pb-11",
                           marcado
                             ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
                             : "bg-card hover:-translate-y-0.5 hover:shadow-md",
@@ -961,8 +961,8 @@ export function ControleLaboratorio({
                           )}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-1.5">
-                            <span className="min-w-0 truncate text-sm font-semibold">{a.nome}</span>
+                          <span className="flex min-w-0 flex-wrap items-center gap-1.5 pr-8">
+                            <span className="min-w-0 basis-full break-words text-sm font-semibold leading-snug sm:basis-auto">{a.nome}</span>
                             <SeloAniversario
                               nascimento={a.nascimento}
                               aniversario={a.aniversario}
@@ -971,7 +971,7 @@ export function ControleLaboratorio({
                               <span
                                 title={alertaVisual.rotulo}
                                 className={cn(
-                                  "inline-flex max-w-[9.5rem] shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-extrabold tracking-wide shadow-sm sm:max-w-none sm:text-[10px]",
+                                  "inline-flex max-w-full shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-extrabold tracking-wide shadow-sm sm:max-w-none sm:text-[10px]",
                                   alertaVisual.classe,
                                 )}
                               >
@@ -1071,7 +1071,7 @@ export function ControleLaboratorio({
                         aria-label={`Ver registros de hoje de ${a.nome}`}
                         title="Ver informações e registros do aluno"
                         onClick={() => setDetalhe({ turmaId: t.id, alunoId: a.id })}
-                        className="absolute right-12 top-2 z-20 flex items-center gap-1 rounded-lg border border-border/60 bg-background/85 px-2 py-1 text-[11px] font-semibold text-foreground shadow-sm backdrop-blur hover:border-primary/50 hover:text-primary"
+                        className="absolute right-11 top-2 z-20 flex items-center gap-1 rounded-lg border border-border/60 bg-background/85 px-2 py-1 text-[11px] font-semibold text-foreground shadow-sm backdrop-blur hover:border-primary/50 hover:text-primary"
                       >
                         <Info className="size-3.5" aria-hidden /> <span className="hidden sm:inline">Detalhes</span>
                       </button>
@@ -1087,7 +1087,7 @@ export function ControleLaboratorio({
                       >
                         <IdCard className="size-4" aria-hidden />
                       </button>
-                      <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5">
+                      <div className="absolute bottom-2 right-2 flex max-w-[calc(100%-1rem)] items-center gap-1 sm:gap-1.5">
                         <BotaoAusencia
                           modo="recusou"
                           sessaoId={ausente?.id}
@@ -1211,7 +1211,7 @@ export function ControleLaboratorio({
           </section>
 
           {/* barra fixa embaixo: vagas e botão para a página 2 */}
-          <div className="sticky bottom-0 z-20 flex min-w-0 items-center gap-2 rounded-xl border border-primary/20 bg-card px-2.5 py-2 shadow-lg sm:gap-4 sm:px-4 sm:py-3">
+          <div className="sticky bottom-0 z-20 flex min-w-0 items-center gap-2 rounded-xl border border-primary/20 bg-card px-2 py-2 shadow-lg sm:gap-4 sm:px-4 sm:py-3">
             {/* contador em tempo real de quantos alunos já foram escolhidos */}
             <div
               className={cn(
@@ -1236,7 +1236,7 @@ export function ControleLaboratorio({
                 escolhido{escolhidos.size === 1 ? "" : "s"}
               </span>
             </div>
-            <div className="min-w-0 flex-1 sm:min-w-40 sm:flex-none">
+            <div className="hidden min-w-0 flex-1 sm:block sm:min-w-40 sm:flex-none">
               <p className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Vagas
                 <span className="tabular-nums text-foreground">
