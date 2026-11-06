@@ -88,7 +88,7 @@ export const Route = createFileRoute("/")({
 const ACESSOS = [
   {
     to: "/agenda",
-    imagem: "/images/hero-lab-photo-768w.webp",
+    imagem: "/images/image0-768w.webp",
     numero: "01",
     rotulo: "Organização",
     titulo: "Agenda do laboratório",
@@ -100,7 +100,7 @@ const ACESSOS = [
   },
   {
     to: "/aluno",
-    imagem: "/images/alunos-hero-768w.webp",
+    imagem: "/images/image1-768w.webp",
     numero: "02",
     rotulo: "Para os estudantes",
     titulo: "Meu espaço de aprender",
@@ -112,7 +112,7 @@ const ACESSOS = [
   },
   {
     to: "/infoteca",
-    imagem: "/images/feature-tools-768w.webp",
+    imagem: "/images/image2-768w.webp",
     numero: "03",
     rotulo: "Conhecimento",
     titulo: "Infoteca digital",
@@ -124,7 +124,7 @@ const ACESSOS = [
   },
   {
     to: "/sala-de-jogos",
-    imagem: "/images/feature-kids-learning-768w.webp",
+    imagem: "/images/image3-768w.webp",
     numero: "04",
     rotulo: "Aprender brincando",
     titulo: "Jogos educativos",
@@ -136,7 +136,7 @@ const ACESSOS = [
   },
   {
     to: "/resultados",
-    imagem: "/images/feature-classroom-tech-768w.webp",
+    imagem: "/images/image4-768w.webp",
     numero: "05",
     rotulo: "Transparência",
     titulo: "Resultados da escola",
@@ -148,7 +148,7 @@ const ACESSOS = [
   },
   {
     to: "/avaliacao",
-    imagem: "/images/alunos-2-480w.webp",
+    imagem: "/images/image6-768w.webp",
     numero: "06",
     rotulo: "Acompanhamento",
     titulo: "Avaliações",
