@@ -502,7 +502,7 @@ function Index() {
                 <div className="flex shrink-0 flex-wrap items-center gap-3">
                   <ClimaCompacto />
                   {isAuthenticated && !feriadoHoje ? (
-                    <MarcarAlunosCartao dados={dadosLab} compacto />
+                    <MarcarAlunosCartao dados={dadosLab} compacto rotulo="Programar alunos" />
                   ) : null}
                   <Button
                     asChild
@@ -515,6 +515,22 @@ function Index() {
                   </Button>
                 </div>
               </div>
+              {isAuthenticated ? (
+                <nav aria-label="Ações rápidas da equipe" className="mb-3 rounded-2xl border border-primary/20 bg-card/85 p-2.5 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-extrabold text-foreground">Ações rápidas</p>
+                      <p className="text-[11px] text-muted-foreground">Organize o laboratório sem sair da página</p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {!feriadoHoje ? <MarcarAlunosCartao dados={dadosLab} compacto rotulo="Escolher turma e alunos" /> : null}
+                      <Button asChild size="sm" variant="outline" className="h-9 rounded-full">
+                        <Link to="/dashboard">Painel de gestão <ArrowRight className="size-4" /></Link>
+                      </Button>
+                    </div>
+                  </div>
+                </nav>
+              ) : null}
               <div className="home-live-panel min-w-0 overflow-hidden rounded-[1.25rem] border border-border bg-background p-1.5 shadow-lg shadow-ink/5 sm:p-3">
                 {feriadoHoje ? (
                   <div className="grid min-h-[24rem] place-items-center rounded-2xl bg-muted/40 px-5 py-10">
