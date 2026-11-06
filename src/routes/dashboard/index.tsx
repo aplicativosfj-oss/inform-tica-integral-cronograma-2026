@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowUpRight,
   CalendarCheck2,
+  ClipboardCheck,
+  Search,
   GraduationCap,
   MonitorSmartphone,
   UserX,
@@ -13,6 +15,7 @@ import { useMemo } from "react";
 import { DashboardShell } from "@/components/school/dashboard-shell";
 import { OcorrenciasAdministrativas } from "@/components/school/ocorrencias-administrativas";
 import { rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
+import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialog";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -89,23 +92,40 @@ function DashboardHome() {
 
   return (
     <DashboardShell>
-      <div className="flex flex-col gap-3.5 2xl:h-[calc(100dvh-12.5rem)] 2xl:min-h-[34rem] 2xl:overflow-hidden">
-        <header className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 2xl:h-[calc(100dvh-12.5rem)] 2xl:min-h-[34rem] 2xl:overflow-hidden">
+        <header className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-card/70 p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary first-letter:uppercase">
-              {dataExtenso}
-            </p>
-            <h1 className="truncate text-xl font-bold leading-tight sm:text-2xl">
-              {saudacao()}
-              {email ? `, ${email.split("@")[0]}` : ""}
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary first-letter:uppercase">{dataExtenso}</p>
+            <h1 className="mt-1 truncate text-lg font-extrabold leading-tight sm:text-2xl">
+              {saudacao()}{email ? `, ${email.split("@")[0]}` : ""}
             </h1>
+            <p className="mt-1 text-xs text-muted-foreground">Gestão do laboratório · visão geral</p>
           </div>
-          <Button asChild size="sm" className="gap-2">
-            <Link to="/dashboard/laboratorio">
-              <MonitorSmartphone className="size-4" /> Marcar alunos no laboratório
-            </Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <MarcarAlunosCartao dados={lab} compacto rotulo="Programar turma e alunos" />
+            <Button asChild size="sm" variant="outline" className="h-9 rounded-full px-3">
+              <Link to="/dashboard/laboratorio"><MonitorSmartphone className="size-4" /> Laboratório</Link>
+            </Button>
+          </div>
         </header>
+
+        <nav aria-label="Ações rápidas" className="rounded-2xl border border-border/70 bg-card/70 p-2 sm:p-3">
+          <div className="mb-2 flex items-center justify-between gap-2 px-1">
+            <p className="text-xs font-extrabold uppercase tracking-[.12em] text-muted-foreground">Ações rápidas</p>
+            <span className="text-[10px] text-muted-foreground">Escolha e execute</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <Link to="/dashboard/turmas" className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-2 py-2.5 text-center text-xs font-semibold transition hover:border-primary/40 hover:bg-primary/5">
+              <Users2 className="size-4 shrink-0 text-primary" /> Turmas
+            </Link>
+            <Link to="/dashboard/alunos" className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-2 py-2.5 text-center text-xs font-semibold transition hover:border-primary/40 hover:bg-primary/5">
+              <Search className="size-4 shrink-0 text-primary" /> Alunos
+            </Link>
+            <Link to="/dashboard/frequencia" className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-2 py-2.5 text-center text-xs font-semibold transition hover:border-primary/40 hover:bg-primary/5">
+              <ClipboardCheck className="size-4 shrink-0 text-primary" /> Frequência
+            </Link>
+          </div>
+        </nav>
 
         <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
           <Indicador Icone={Users2} rotulo="Turmas" valor={turmas.length} />
@@ -128,11 +148,11 @@ function DashboardHome() {
             mostrar o cronômetro e os nomes lado a lado; embaixo a semana, as
             ocorrências e os atalhos. Cada caixa rola por dentro, então a
             página inteira continua do tamanho da janela. */}
-        <div className="grid min-h-0 flex-1 gap-3.5 2xl:grid-rows-[minmax(0,0.95fr)_minmax(0,1fr)]">
+        <div className="grid min-h-0 flex-1 gap-3 2xl:grid-rows-[minmax(0,0.75fr)_minmax(0,1fr)]">
           <section className="flex min-h-0 flex-col">
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card/80">
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <PainelLaboratorioAgora dados={lab} logado />
+                <PainelLaboratorioAgora dados={lab} logado compacto />
               </div>
             </div>
           </section>
