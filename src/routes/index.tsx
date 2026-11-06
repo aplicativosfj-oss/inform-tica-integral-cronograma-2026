@@ -13,6 +13,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   MapPin,
+  Maximize2,
   MonitorSmartphone,
   Play,
   ShieldCheck,
@@ -206,6 +207,15 @@ function Index() {
   const ausencias = lab.ausencias?.filter((s) => idsDoFundamental.has(s.turmaId));
   const dadosLab = { ...lab, sessoes, ausencias };
   const feriadoHoje = feriadoNacionalEm(hojeNaEscola());
+  const alternarTelaGrande = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      // O navegador pode exigir gesto explícito para permitir tela cheia.
+    }
+  };
+
 
   return (
     <div className="home-premium relative min-h-screen overflow-x-clip bg-background text-foreground">
@@ -242,6 +252,13 @@ function Index() {
             )}
 
             <div className="mx-auto max-w-[86rem] px-4 pb-7 pt-9 sm:px-8 sm:pb-10 sm:pt-12 lg:px-10 lg:pt-16">
+              <div className="mb-3 flex justify-end">
+                <Button type="button" variant="outline" size="sm" onClick={alternarTelaGrande}
+                  className="rounded-full border-white/25 bg-white/10 text-white shadow-lg backdrop-blur-md hover:bg-white/20 hover:text-white"
+                  aria-label="Ativar ou sair da tela grande">
+                  <Maximize2 className="mr-2 size-4" aria-hidden="true" /> Tela grande
+                </Button>
+              </div>
               {/* Assinatura da escola: no celular cabe numa linha só, com o
                   nome cortado antes de virar um parágrafo em caixa alta. */}
               <div
