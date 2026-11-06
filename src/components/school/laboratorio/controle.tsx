@@ -595,9 +595,9 @@ export function ControleLaboratorio({
     .filter((x) => x.alunos.length > 0);
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("min-w-0 space-y-3 pb-2", className)}>
       {/* ─────────── Passos ─────────── */}
-      <ol className="flex items-center gap-2 text-sm font-semibold" aria-label="Passos">
+      <ol className="flex min-w-0 flex-wrap items-center gap-1.5 text-xs font-semibold sm:text-sm" aria-label="Passos">
         {(
           [
             [1, "Escolher os alunos", "Alunos"],
@@ -612,7 +612,7 @@ export function ControleLaboratorio({
               disabled={n === 2 && escolhidos.size === 0}
               onClick={() => setPasso(n)}
               className={cn(
-                "flex min-w-0 items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 transition disabled:opacity-40",
+                "flex min-w-0 items-center gap-2 rounded-full border px-2.5 py-1.5 transition disabled:opacity-40",
                 passo === n
                   ? "border-indigo-600 bg-indigo-600 text-white shadow"
                   : "bg-card hover:bg-muted",
@@ -636,9 +636,9 @@ export function ControleLaboratorio({
       {passo === 1 ? (
         <>
           {/* ─────────── Página 1: turmas e alunos ─────────── */}
-          <section aria-label="Turmas e alunos" className="space-y-3 sm:space-y-4">
+          <section aria-label="Turmas e alunos" className="min-w-0 space-y-2 sm:space-y-3">
             {/* Turma: no celular, uma fileira que desliza para o lado. */}
-            <div className="space-y-3 rounded-2xl border bg-card/60 p-3 sm:p-4">
+            <div className="min-w-0 space-y-2 rounded-xl border bg-card/60 p-2.5 sm:p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                   {mista ? "Aula mista: alunos de várias turmas" : "Escolha a turma"}
@@ -854,7 +854,7 @@ export function ControleLaboratorio({
                   : "Ninguém se encaixa neste filtro."}
               </p>
             ) : (
-              <ul className="grid grid-cols-[minmax(0,1fr)] gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
+              <ul className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
                 {visiveis.map(({ a, t }) => {
                   const k = chave(t.id, a.id);
                   const sit = situacoes.get(k)!;
@@ -928,7 +928,7 @@ export function ControleLaboratorio({
                                 : undefined
                         }
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-xl border p-3 pb-9 pr-10 text-left transition sm:gap-3.5 sm:p-3.5 sm:pb-10",
+                          "flex w-full min-w-0 items-start gap-2.5 rounded-xl border p-3 pb-12 text-left transition sm:gap-3 sm:p-3 sm:pb-11",
                           marcado
                             ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
                             : "bg-card hover:-translate-y-0.5 hover:shadow-md",
@@ -1071,7 +1071,7 @@ export function ControleLaboratorio({
                         aria-label={`Ver registros de hoje de ${a.nome}`}
                         title="Ver informações e registros do aluno"
                         onClick={() => setDetalhe({ turmaId: t.id, alunoId: a.id })}
-                        className="absolute right-10 top-2 z-20 flex items-center gap-1 rounded-lg border border-border/60 bg-background/85 px-2 py-1 text-[11px] font-semibold text-foreground shadow-sm backdrop-blur hover:border-primary/50 hover:text-primary"
+                        className="absolute right-12 top-2 z-20 flex items-center gap-1 rounded-lg border border-border/60 bg-background/85 px-2 py-1 text-[11px] font-semibold text-foreground shadow-sm backdrop-blur hover:border-primary/50 hover:text-primary"
                       >
                         <Info className="size-3.5" aria-hidden /> <span className="hidden sm:inline">Detalhes</span>
                       </button>
@@ -1211,7 +1211,7 @@ export function ControleLaboratorio({
           </section>
 
           {/* barra fixa embaixo: vagas e botão para a página 2 */}
-          <div className="sticky bottom-[calc(var(--rodape-app,env(safe-area-inset-bottom))+0.75rem)] z-20 flex items-center gap-3 rounded-2xl border bg-card/95 px-3 py-2.5 shadow-xl backdrop-blur sm:gap-5 sm:px-4 sm:py-3">
+          <div className="sticky bottom-0 z-20 flex min-w-0 items-center gap-2 rounded-xl border border-primary/20 bg-card px-2.5 py-2 shadow-lg sm:gap-4 sm:px-4 sm:py-3">
             {/* contador em tempo real de quantos alunos já foram escolhidos */}
             <div
               className={cn(
@@ -1282,7 +1282,7 @@ export function ControleLaboratorio({
             <Button
               type="button"
               size="lg"
-              className="shrink-0 bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+              className="min-w-0 shrink-0 bg-indigo-600 px-3 text-white hover:bg-indigo-700 disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100 sm:px-5"
               disabled={escolhidos.size === 0}
               onClick={() => setPasso(2)}
             >
