@@ -263,6 +263,10 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             <Wifi className="size-3.5 text-cyan-200/75" /> Escola Municipal Dr. Eiraldo Carneiro de França
           </div>
           <p className="text-[8px] font-semibold uppercase tracking-[.2em] text-white/35">Informática Educativa · Um espaço para aprender e descobrir</p>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-white/10 bg-white/[.045] px-3 py-1.5 text-[9px] text-white/55">
+            <span className="font-semibold uppercase tracking-[.12em]">Desenvolvimento e professor de informática</span>
+            <span className="text-amber-200/90">Franc D’nis</span>
+          </div>
         </footer>
       </main>
 
