@@ -391,3 +391,110 @@
 @media (prefers-reduced-motion:reduce) {
   .home-premium .home-access-card .home-access-photo { transition: none; }
 }
+
+
+/* Redesign final da homepage: linguagem visual editorial, mais limpa e coesa. */
+.home-premium {
+  --home-panel-radius: 1.25rem;
+  background: hsl(var(--background));
+}
+.home-premium .home-hero {
+  min-height: auto;
+  background: #0b1730;
+}
+.home-premium .home-hero-photo { filter: saturate(.78) brightness(.82); }
+.home-premium .home-hero-shade {
+  background: linear-gradient(112deg,rgba(5,12,28,.94) 0%,rgba(8,23,49,.82) 52%,rgba(8,28,54,.76) 100%);
+}
+.home-premium .home-hero-grid { opacity: .12; }
+.home-premium .home-window-hero > div:not([aria-hidden]) {
+  padding-top: clamp(1rem,2vw,2rem);
+  padding-bottom: clamp(1.1rem,2.2vw,2rem);
+}
+.home-premium .home-window-hero [data-constelacao-evitar] { border-color: rgba(255,255,255,.12); }
+.home-premium .home-hero-stats {
+  margin-top: clamp(.8rem,1.4vw,1.2rem);
+  background: rgba(255,255,255,.065);
+  border-color: rgba(255,255,255,.14);
+  backdrop-filter: blur(18px);
+}
+.home-premium .home-stat-cell { padding: .85rem 1rem; }
+.home-premium .home-window-section {
+  max-width: 90rem;
+  margin-inline: auto;
+}
+.home-premium .home-window-section .home-access-card {
+  height: clamp(10rem,14vw,12rem);
+  padding: 1rem;
+  border-radius: 1.15rem;
+  border-color: hsl(var(--border) / .8);
+  box-shadow: 0 12px 30px -24px rgba(10,20,40,.42);
+}
+.home-premium .home-access-card .home-access-overlay {
+  background: linear-gradient(180deg,rgba(7,15,32,.12),rgba(7,15,32,.34) 35%,rgba(7,15,32,.94));
+}
+.home-premium .home-access-card .home-access-icon {
+  border-radius: .85rem;
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(12px);
+}
+.home-premium .home-access-card h3 { text-wrap: balance; }
+.home-premium #laboratorio-agora.home-live-section {
+  padding-block: clamp(1.5rem,3vw,2.6rem);
+  background: hsl(var(--card) / .55);
+}
+.home-premium #laboratorio-agora .home-live-panel {
+  border-radius: 1.35rem;
+  border-color: hsl(var(--border));
+  background: hsl(var(--background));
+  box-shadow: 0 18px 55px -42px rgba(8,20,45,.45);
+}
+.home-premium .home-step-card,
+.home-premium .home-results-card,
+.home-premium .home-videos-card {
+  border-radius: 1.2rem;
+}
+.home-premium .home-step-card {
+  padding: clamp(.85rem,1.5vw,1.2rem);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.home-premium .home-step-card:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--primary) / .35);
+  box-shadow: 0 12px 28px -22px rgba(8,20,45,.5);
+}
+.home-premium .home-last-cta { padding-block: 1.5rem; }
+.home-premium :is(.home-window-section, .home-live-section) .max-w-\[86rem\] {
+  max-width: 82rem;
+}
+@media (min-width: 1024px) {
+  .home-premium .home-window-hero .grid.items-center {
+    gap: clamp(2rem,4vw,4rem);
+  }
+  .home-premium .home-window-section .home-access-card {
+    height: 11.5rem;
+  }
+}
+@media (max-width: 639px) {
+  .home-premium .home-window-hero > div:not([aria-hidden]) {
+    padding: 1rem .9rem;
+  }
+  .home-premium .home-window-hero .home-hero-stats {
+    border-radius: .95rem;
+  }
+  .home-premium .home-window-section.home-section {
+    padding-block: 1.5rem;
+  }
+  .home-premium .home-window-section .home-access-card {
+    height: 9.4rem;
+    border-radius: .95rem;
+  }
+  .home-premium #laboratorio-agora.home-live-section {
+    padding-block: 1.25rem;
+  }
+  .home-premium .home-step-card { border-radius: .95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-premium .home-step-card { transition: none; }
+  .home-premium .home-step-card:hover { transform: none; }
+}
