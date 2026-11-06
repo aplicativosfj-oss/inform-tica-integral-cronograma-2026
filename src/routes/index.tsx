@@ -1,12 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, type ReactNode, type RefObject } from "react";
+import {
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import {
   ArrowDown,
   ArrowRight,
+  ArrowUpRight,
   BookOpen,
   CalendarDays,
   CheckCircle2,
-  ChevronRight,
   Clock3,
   ExternalLink,
   Gamepad2,
@@ -40,12 +46,11 @@ import { useCountUp } from "@/hooks/use-count-up";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useAppStore } from "@/lib/app-store";
 import { feriadoNacionalEm } from "@/lib/calendario-escolar";
-import { hojeNaEscola } from "@/lib/laboratorio";
+import { hojeNaEscola, useSessoesLab } from "@/lib/laboratorio";
 import { useAuth } from "@/lib/auth-store";
-import { useSessoesLab } from "@/lib/laboratorio";
+import { cn } from "@/lib/utils";
 import escolaInformaticaHeroImg from "@/assets/escola-informatica-hero.jpg";
 import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
-import heroTechBgImg from "@/assets/feature-tools.jpg";
 import "@/styles/homepage-premium.css";
 
 export const Route = createFileRoute("/")({
@@ -86,105 +91,109 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const ACESSOS = [
+/**
+ * Mosaico de acessos: a agenda ocupa o bloco grande, a área do aluno a faixa
+ * larga ao lado, e os demais espaços se encaixam em volta, sem buracos.
+ */
+const ACESSOS: {
+  to: "/agenda" | "/aluno" | "/infoteca" | "/sala-de-jogos" | "/resultados" | "/avaliacao";
+  imagem: string;
+  rotulo: string;
+  titulo: string;
+  descricao: string;
+  chamada: string;
+  Icone: LucideIcon;
+  /** Posição no mosaico do computador. */
+  tamanho: "grande" | "largo" | "normal";
+  cor: string;
+}[] = [
   {
     to: "/agenda",
-    imagem: "/images/image0-768w.webp",
-    numero: "01",
+    imagem: "/images/image10-1024w.webp",
     rotulo: "Organização",
     titulo: "Agenda do laboratório",
-    descricao: "Aulas, horários e turmas em um só lugar. Tudo organizado para a semana.",
+    descricao: "Aulas, horários e turmas da semana, com o laboratório ao vivo.",
     chamada: "Ver programação",
     Icone: CalendarDays,
-    estilo: "home-access-ink",
-    destaque: true,
+    tamanho: "grande",
+    cor: "oklch(0.83 0.165 85)",
   },
   {
     to: "/aluno",
-    imagem: "/images/image1-768w.webp",
-    numero: "02",
+    imagem: "/images/image1-1024w.webp",
     rotulo: "Para os estudantes",
     titulo: "Meu espaço de aprender",
     descricao: "Trilhas, desafios e atividades para avançar no seu ritmo.",
     chamada: "Área do aluno",
     Icone: GraduationCap,
-    estilo: "home-access-lilac",
-    destaque: false,
+    tamanho: "largo",
+    cor: "oklch(0.75 0.15 290)",
   },
   {
     to: "/infoteca",
     imagem: "/images/image2-768w.webp",
-    numero: "03",
     rotulo: "Conhecimento",
     titulo: "Infoteca digital",
     descricao: "Materiais e descobertas para ampliar o aprendizado.",
     chamada: "Explorar acervo",
     Icone: BookOpen,
-    estilo: "home-access-mint",
-    destaque: false,
+    tamanho: "normal",
+    cor: "oklch(0.8 0.13 175)",
   },
   {
     to: "/sala-de-jogos",
     imagem: "/images/image3-768w.webp",
-    numero: "04",
     rotulo: "Aprender brincando",
     titulo: "Jogos educativos",
-    descricao: "Raciocínio, criatividade e muita prática em cada desafio.",
+    descricao: "Raciocínio, criatividade e prática em cada desafio.",
     chamada: "Abrir jogos",
     Icone: Gamepad2,
-    estilo: "home-access-sun",
-    destaque: false,
+    tamanho: "normal",
+    cor: "oklch(0.78 0.15 340)",
   },
   {
     to: "/resultados",
-    imagem: "/images/image4-768w.webp",
-    numero: "05",
+    imagem: "/images/image4-1024w.webp",
     rotulo: "Transparência",
     titulo: "Resultados da escola",
     descricao: "Um olhar sobre a aprendizagem e a evolução das turmas.",
     chamada: "Acompanhar",
     Icone: LayoutDashboard,
-    estilo: "home-access-ice",
-    destaque: false,
+    tamanho: "largo",
+    cor: "oklch(0.78 0.12 240)",
   },
   {
     to: "/avaliacao",
-    imagem: "/images/image6-768w.webp",
-    numero: "06",
+    imagem: "/images/image6-1024w.webp",
     rotulo: "Acompanhamento",
     titulo: "Avaliações",
     descricao: "Instrumentos e indicadores que ajudam a orientar o ensino.",
     chamada: "Ver avaliações",
     Icone: CheckCircle2,
-    estilo: "home-access-paper",
-    destaque: false,
+    tamanho: "largo",
+    cor: "oklch(0.8 0.14 150)",
   },
-] as const;
+];
 
-const ETAPAS: { numero: string; titulo: string; descricao: string; Icone: LucideIcon }[] = [
+const ETAPAS: { titulo: string; descricao: string; Icone: LucideIcon }[] = [
   {
-    numero: "01",
     titulo: "Cada turma tem seu momento",
-    descricao: "A programação organiza o uso dos computadores entre os grupos da escola.",
+    descricao: "A programação distribui os computadores entre os grupos da escola.",
     Icone: CalendarDays,
   },
   {
-    numero: "02",
-    titulo: "Tudo acontece em tempo real",
-    descricao: "O painel mostra quando uma aula começa, quanto tempo resta e o próximo grupo.",
+    titulo: "Tudo em tempo real",
+    descricao: "O painel mostra quando a aula começa, quanto falta e quem vem depois.",
     Icone: Clock3,
   },
   {
-    numero: "03",
-    titulo: "A participação é acompanhada",
-    descricao: "Os registros ajudam a distribuir oportunidades e planejar as próximas aulas.",
+    titulo: "Participação acompanhada",
+    descricao: "Os registros garantem que todos tenham a sua vez no laboratório.",
     Icone: Users2,
   },
   {
-    numero: "04",
-    titulo: "Aprender vai além do laboratório",
-    descricao:
-      "Atividades, jogos e materiais digitais estendem as descobertas para outros momentos.",
+    titulo: "Além do laboratório",
+    descricao: "Jogos, trilhas e materiais levam as descobertas para outros momentos.",
     Icone: Sparkles,
   },
 ];
@@ -197,6 +206,13 @@ const VIDEOS_DESTAQUE = [
   { id: "URKMI30t744", titulo: "Visita da Defensoria Pública na escola" },
 ];
 
+/** Guarda a posição do ponteiro no cartão para o brilho que segue o mouse. */
+function seguirPonteiro(e: PointerEvent<HTMLElement>) {
+  const r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+  e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+}
+
 function Index() {
   const { turmas, config, isReady } = useAppStore();
   const { isAuthenticated } = useAuth();
@@ -206,7 +222,8 @@ function Index() {
   const sessoes = lab.sessoes.filter((s) => idsDoFundamental.has(s.turmaId));
   const ausencias = lab.ausencias?.filter((s) => idsDoFundamental.has(s.turmaId));
   const dadosLab = { ...lab, sessoes, ausencias };
-  const feriadoHoje = feriadoNacionalEm(hojeNaEscola());
+  const hoje = hojeNaEscola();
+  const feriadoHoje = feriadoNacionalEm(hoje);
   const alternarTelaGrande = async () => {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
@@ -215,7 +232,6 @@ function Index() {
       // O navegador pode exigir gesto explícito para permitir tela cheia.
     }
   };
-
 
   return (
     <div className="home-premium relative min-h-screen overflow-x-clip bg-background text-foreground">
@@ -229,9 +245,10 @@ function Index() {
       <div className="relative z-10">
         <NavBar />
         <main id="conteudo-principal">
+          {/* ───────────── abertura ───────────── */}
           <section
             aria-labelledby="home-titulo"
-            className="home-hero home-window-hero relative isolate overflow-hidden text-white"
+            className="home-hero relative isolate overflow-hidden text-white"
           >
             <img
               src={labFotoImg}
@@ -242,32 +259,21 @@ function Index() {
               fetchPriority="high"
             />
             <div aria-hidden="true" className="home-hero-shade absolute inset-0 -z-20" />
+            <div aria-hidden="true" className="home-hero-aurora absolute inset-0 -z-20" />
             <div aria-hidden="true" className="home-hero-grid absolute inset-0 -z-10" />
-            <div
-              aria-hidden="true"
-              className="home-hero-orb absolute -right-20 top-20 -z-10 size-80 rounded-full bg-sun/15 blur-3xl"
-            />
             {feriadoHoje ? null : (
               <ConstelacaoNomes sessoes={sessoes} logado={isAuthenticated} className="-z-10" />
             )}
 
-            <div className="mx-auto max-w-[86rem] px-4 pb-7 pt-9 sm:px-8 sm:pb-10 sm:pt-12 lg:px-10 lg:pt-16">
-              <div className="mb-3 flex justify-end">
-                <Button type="button" variant="outline" size="sm" onClick={alternarTelaGrande}
-                  className="rounded-full border-white/25 bg-white/10 text-white shadow-lg backdrop-blur-md hover:bg-white/20 hover:text-white"
-                  aria-label="Ativar ou sair da tela grande">
-                  <Maximize2 className="mr-2 size-4" aria-hidden="true" /> Tela grande
-                </Button>
-              </div>
-              {/* Assinatura da escola: no celular cabe numa linha só, com o
-                  nome cortado antes de virar um parágrafo em caixa alta. */}
+            <div className="mx-auto max-w-[84rem] px-4 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7 lg:px-10">
+              {/* Assinatura da escola e o botão de tela grande numa linha só. */}
               <div
                 data-constelacao-evitar
-                className="mb-6 flex items-center justify-between gap-3 border-b border-white/15 pb-3.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/70 sm:mb-9 sm:pb-4 sm:text-xs sm:tracking-[0.18em]"
+                className="home-signature flex items-center justify-between gap-3 pb-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/70 sm:text-[11px] sm:tracking-[0.2em]"
               >
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className="grid size-7 shrink-0 place-items-center rounded-lg border border-white/20 bg-white/10 sm:size-8 sm:rounded-xl">
-                    <MarcaLogo tamanho={20} />
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <span className="grid size-7 shrink-0 place-items-center rounded-lg border border-white/15 bg-white/10">
+                    <MarcaLogo tamanho={18} />
                   </span>
                   <span className="truncate">
                     <span className="sm:hidden">E. M. Dr. Eiraldo C. de França</span>
@@ -276,62 +282,67 @@ function Index() {
                     </span>
                   </span>
                 </span>
-                <span className="inline-flex shrink-0 items-center gap-1.5">
-                  <MapPin className="size-3.5 text-sun" aria-hidden="true" />
-                  <span className="sm:hidden">Feijó · AC</span>
-                  <span className="hidden sm:inline">Feijó, Acre · Ano letivo 2026</span>
+                <span className="flex shrink-0 items-center gap-3">
+                  <span className="hidden items-center gap-1.5 md:inline-flex">
+                    <MapPin className="size-3.5 text-sun" aria-hidden="true" />
+                    Feijó, Acre · 2026
+                  </span>
+                  <button
+                    type="button"
+                    onClick={alternarTelaGrande}
+                    aria-label="Ativar ou sair da tela grande"
+                    title="Tela grande"
+                    className="grid size-8 place-items-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+                  >
+                    <Maximize2 className="size-3.5" aria-hidden="true" />
+                  </button>
                 </span>
               </div>
 
               {feriadoHoje ? (
-                <AvisoFeriado dataISO={hojeNaEscola()} variante="sobre-imagem" className="mb-8" />
+                <AvisoFeriado dataISO={hoje} variante="sobre-imagem" className="mt-5" />
               ) : null}
 
-              <div className="grid items-center gap-5 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] lg:gap-8">
-                {/* O bloco inteiro é obstáculo para os nomes que flutuam ao
-                    fundo: antes um nome podia cair em cima do selo ou do
-                    título se a medição acontecesse antes do layout assentar. */}
-                <div data-constelacao-evitar className="max-w-3xl">
-                  <div className="home-hero-entrance inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-xl sm:text-xs">
-                    <span className="size-2 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.8)]" />
+              <div className="mt-6 grid items-center gap-6 sm:mt-8 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.95fr)] lg:gap-12">
+                <div data-constelacao-evitar className="max-w-2xl">
+                  <p className="home-hero-entrance inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] py-1.5 pl-2 pr-3.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/90 backdrop-blur-xl">
+                    <span className="relative flex size-2">
+                      <span className="absolute inset-0 animate-ping rounded-full bg-emerald-300/70" />
+                      <span className="relative size-2 rounded-full bg-emerald-300" />
+                    </span>
                     Educação integral & tecnologia
-                  </div>
+                  </p>
                   <h1
                     id="home-titulo"
-                    className="home-hero-entrance mt-3 max-w-[15ch] font-heading text-[clamp(2rem,4.2vw,4.1rem)] font-extrabold leading-[1.06] tracking-[-0.045em] text-white sm:mt-4"
+                    className="home-hero-entrance mt-4 font-heading text-[clamp(2.1rem,4.6vw,4rem)] font-extrabold leading-[1.02] tracking-[-0.045em]"
                   >
-                    Um universo de
-                    <span className="home-headline-accent mt-1 block text-sun">descobertas.</span>
-                    Todos os dias.
+                    Um universo de <span className="home-headline-accent">descobertas</span>,
+                    <br className="hidden sm:block" /> todos os dias.
                   </h1>
-                  <p className="home-hero-entrance mt-3 max-w-[32rem] text-sm leading-relaxed text-white/80 sm:mt-4 sm:text-base">
+                  <p className="home-hero-entrance mt-4 max-w-[34rem] text-pretty text-sm leading-relaxed text-white/75 sm:text-[1.05rem]">
                     O laboratório de informática aproxima nossos estudantes da tecnologia, da
-                    criatividade e de novas formas de aprender. Acompanhe o que acontece na escola e
-                    explore cada espaço.
+                    criatividade e de novas formas de aprender. Acompanhe a escola em tempo real.
                   </p>
-                  {/* No celular os dois botões dividem a linha: a abertura
-                      inteira cabe numa tela, sem empurrar o painel ao vivo
-                      para baixo da dobra. */}
-                  <div className="home-hero-entrance mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-3">
+                  <div className="home-hero-entrance mt-6 flex flex-wrap gap-2.5">
                     <Button
                       asChild
                       size="lg"
-                      className="home-cta-primary h-12 min-w-0 flex-1 rounded-full bg-sun px-4 font-bold text-sun-foreground shadow-xl shadow-black/20 hover:bg-sun/90 sm:h-13 sm:flex-none sm:px-6"
+                      className="home-cta-primary h-12 min-w-0 flex-1 rounded-full bg-sun px-5 font-bold text-sun-foreground hover:bg-sun sm:flex-none sm:px-6"
                     >
                       <Link to="/agenda">
                         <CalendarDays className="size-5 shrink-0" aria-hidden="true" />
-                        <span className="truncate">Explorar agenda</span>
-                        <ArrowRight
-                          className="hidden size-4 shrink-0 sm:block"
-                          aria-hidden="true"
-                        />
+                        <span className="truncate">
+                          <span className="sm:hidden">Agenda</span>
+                          <span className="hidden sm:inline">Explorar agenda</span>
+                        </span>
+                        <ArrowRight className="home-cta-arrow size-4 shrink-0" aria-hidden="true" />
                       </Link>
                     </Button>
                     <Button
                       asChild
                       size="lg"
                       variant="outline"
-                      className="h-12 min-w-0 flex-1 rounded-full border-white/30 bg-white/10 px-4 font-bold text-white backdrop-blur-xl hover:border-white/50 hover:bg-white/20 hover:text-white sm:h-13 sm:flex-none sm:px-6"
+                      className="h-12 min-w-0 flex-1 rounded-full border-white/20 bg-white/[0.07] px-5 font-bold text-white backdrop-blur-xl hover:border-white/40 hover:bg-white/15 hover:text-white sm:flex-none sm:px-6"
                     >
                       <a href="#laboratorio-agora">
                         <MonitorSmartphone className="size-5 shrink-0" aria-hidden="true" />
@@ -343,362 +354,289 @@ function Index() {
                       </a>
                     </Button>
                   </div>
-                  <p
-                    data-constelacao-evitar
-                    className="mt-5 flex items-center gap-2 text-xs font-medium text-white/60 sm:mt-6 sm:text-sm"
-                  >
-                    <ShieldCheck className="size-4 shrink-0 text-emerald-300" aria-hidden="true" />
-                    Uma plataforma de aprendizagem e acompanhamento escolar
-                  </p>
                 </div>
 
                 <div className="home-live-frame min-w-0">
-                  <div className="mb-3 flex items-center justify-between gap-3 px-1">
-                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-white/80">
-                      <span className="size-2 animate-pulse rounded-full bg-emerald-300" />
-                      Painel do laboratório
-                    </span>
-                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/70 backdrop-blur">
-                      Horário de Feijó
-                    </span>
+                  <div className="home-live-glow rounded-[1.5rem] p-px">
+                    <CartaoAoVivoHome
+                      sessoes={sessoes}
+                      ausencias={ausencias}
+                      logado={isAuthenticated}
+                    />
                   </div>
-                  <CartaoAoVivoHome
-                    sessoes={sessoes}
-                    ausencias={ausencias}
-                    logado={isAuthenticated}
-                  />
-                  <div className="mt-3 flex items-center justify-between gap-3 px-1 text-xs text-white/70">
-                    <span>O que está acontecendo, em um só olhar.</span>
+                  <div className="mt-2.5 flex items-center justify-between gap-3 px-1 text-xs text-white/60">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock3 className="size-3.5" aria-hidden="true" /> Horário de Feijó
+                    </span>
                     <Link
                       to="/agenda"
-                      className="inline-flex shrink-0 items-center gap-1 font-bold text-sun hover:underline"
+                      className="group inline-flex shrink-0 items-center gap-1 font-bold text-sun"
                     >
-                      Ver detalhes <ChevronRight className="size-4" aria-hidden="true" />
+                      Ver detalhes
+                      <ArrowUpRight
+                        className="size-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        aria-hidden="true"
+                      />
                     </Link>
                   </div>
                 </div>
               </div>
 
-              <div className="home-hero-stats mt-5 grid grid-cols-2 overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/[0.09] backdrop-blur-xl sm:grid-cols-4 lg:mt-14">
+              <div className="home-hero-stats mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-4 sm:gap-3">
                 <HeroStat
+                  to="/agenda"
                   rotulo="Turmas atendidas"
-                  curto="Turmas"
                   detalhe="1º ao 5º ano"
                   valor={turmas.length}
                   isReady={isReady}
                   Icone={GraduationCap}
                 />
                 <HeroStat
+                  to="/agenda"
                   rotulo="Alunos ativos"
-                  curto="Alunos"
                   detalhe="Matrículas vigentes"
                   valor={totalAlunos}
                   isReady={isReady}
                   Icone={Users2}
                 />
                 <HeroStat
+                  href="#laboratorio-agora"
                   rotulo="Computadores"
-                  curto="Computadores"
                   detalhe="Estações de uso"
                   valor={config.numeroComputadores}
                   isReady={isReady}
                   Icone={MonitorSmartphone}
                 />
-                <div className="home-stat-cell px-4 py-5 sm:px-6">
-                  <div className="flex items-center gap-2 text-white/60">
-                    <Clock3 className="size-4 text-sun" aria-hidden="true" />
-                    <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
-                      Funcionamento
-                    </span>
-                  </div>
-                  <span className="mt-2 block font-heading text-xl font-extrabold tracking-tight text-white sm:text-2xl">
-                    {config.horaInicio}–{config.horaFim}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-white/60">Horário da escola</span>
-                </div>
+                <HeroStat
+                  href="#laboratorio-agora"
+                  rotulo="Funcionamento"
+                  detalhe="Horário da escola"
+                  texto={`${config.horaInicio}–${config.horaFim}`}
+                  isReady={isReady}
+                  Icone={Clock3}
+                />
               </div>
             </div>
-            <AvisoDireitosImagem className="mx-auto max-w-[86rem] px-4 pb-4 text-white/45 sm:px-8" />
+            <AvisoDireitosImagem className="mx-auto max-w-[84rem] px-4 pb-3 text-white/40 sm:px-8" />
           </section>
 
+          {/* ───────────── acessos ───────────── */}
           <section
             aria-labelledby="home-acessos-titulo"
-            className="home-section home-window-section mx-auto max-w-[86rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-10"
+            className="home-section mx-auto max-w-[84rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-10"
           >
-            <RevealSection>
+            <Reveal>
               <SectionIntro
                 etiqueta="Explore a plataforma"
                 titulo="Tudo o que você precisa, em um só lugar."
-                descricao="Um espaço para cada momento da jornada escolar. Escolha por onde começar."
+                descricao="Um espaço para cada momento da jornada escolar."
                 id="home-acessos-titulo"
-              />
-            </RevealSection>
-            <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-3">
-              {ACESSOS.map(
-                ({
-                  to,
-                  numero,
-                  rotulo,
-                  titulo,
-                  descricao,
-                  chamada,
-                  Icone,
-                  estilo,
-                  imagem,
-                  destaque,
-                }) => (
+                acao={
                   <Link
-                    key={to}
-                    to={to}
-                    className={"home-access-card group relative flex min-h-0 flex-col overflow-hidden rounded-[1.1rem] border p-3 sm:p-4 " + estilo}
+                    to="/sobre"
+                    className="group inline-flex items-center gap-1.5 text-sm font-bold text-primary"
                   >
-                    <img
-                      src={imagem}
-                      alt=""
+                    Conheça o projeto
+                    <ArrowRight
+                      className="size-4 transition group-hover:translate-x-1"
                       aria-hidden="true"
-                      loading="lazy"
-                      decoding="async"
-                      width={768}
-                      height={512}
-                      className="home-access-photo pointer-events-none absolute inset-0 size-full object-cover"
                     />
-                    <span
-                      aria-hidden="true"
-                      className="home-access-overlay pointer-events-none absolute inset-0"
-                    />
-                    <div className="relative z-10 flex items-start justify-between gap-3">
-                      <span className="home-access-icon grid size-9 place-items-center rounded-xl border border-current/15 bg-current/[0.08] sm:size-10">
-                        <Icone className="size-5" aria-hidden="true" />
-                      </span>
-                      <span className="home-access-index font-heading text-sm font-bold opacity-40">
-                        {numero} / 06
-                      </span>
-                    </div>
-                    <div className="relative z-10 mt-auto pt-7 sm:pt-10">
-                      <span className="home-access-label text-[11px] font-bold uppercase tracking-[0.17em] opacity-70">
-                        {rotulo}
-                      </span>
-                      <h3 className="mt-1 max-w-[18ch] font-heading text-[clamp(.95rem,1.7vw,1.4rem)] font-extrabold leading-[1.15] tracking-tight">
-                        {titulo}
-                      </h3>
-                      <p className="mt-2 hidden max-w-sm text-xs leading-snug opacity-80 sm:line-clamp-2">
-                        {descricao}
-                      </p>
-                      <span className="home-access-cta mt-2 inline-flex items-center gap-1.5 text-xs font-bold sm:mt-3">
-                        {chamada}
-                        <span className="home-access-arrow grid size-6 place-items-center rounded-full border border-current/20">
-                          <ArrowRight className="size-4" aria-hidden="true" />
-                        </span>
-                      </span>
-                    </div>
-                    {destaque ? (
-                      <span
-                        aria-hidden="true"
-                        className="home-access-decor absolute -right-12 top-20 hidden size-52 rounded-full border-[26px] border-white/10 lg:block"
-                      />
-                    ) : null}
                   </Link>
-                ),
-              )}
-            </div>
+                }
+              />
+            </Reveal>
+            <Reveal className="home-bento mt-6 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+              {ACESSOS.map((a) => (
+                <CartaoAcesso key={a.to} {...a} />
+              ))}
+            </Reveal>
           </section>
 
+          {/* ───────────── laboratório ao vivo ───────────── */}
           <section
             id="laboratorio-agora"
             aria-labelledby="home-lab-titulo"
-            className="home-live-section home-window-section scroll-mt-24 border-y border-border/60 bg-card/70 py-10 sm:py-14"
+            className="home-live-section scroll-mt-24 border-y border-border/60 py-10 sm:py-14"
           >
-            <div className="mx-auto max-w-[86rem] px-4 sm:px-8 lg:px-10">
-              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div className="mx-auto max-w-[84rem] px-4 sm:px-8 lg:px-10">
+              <Reveal>
                 <SectionIntro
                   etiqueta="Acompanhe em tempo real"
                   titulo="O laboratório está vivo."
-                  descricao="Turmas, horários e a próxima atividade, com as informações que o professor registra durante o dia."
+                  descricao="Turmas, horários e a próxima atividade, como o professor registra durante o dia."
                   id="home-lab-titulo"
-                />
-                <div className="flex shrink-0 flex-wrap items-center gap-3">
-                  <ClimaCompacto />
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="rounded-full border-border bg-background"
-                  >
-                    <Link to="/agenda">
-                      Agenda completa <ArrowRight className="size-4" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-              {isAuthenticated ? (
-                <nav aria-label="Ações rápidas da equipe" className="mb-3 rounded-2xl border border-primary/20 bg-card/85 p-2.5 shadow-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="text-xs font-extrabold text-foreground">Ações rápidas</p>
-                      <p className="text-[11px] text-muted-foreground">Organize o laboratório sem sair da página</p>
-                    </div>
+                  acao={
                     <div className="flex flex-wrap items-center gap-2">
-                      {!feriadoHoje ? <MarcarAlunosCartao dados={dadosLab} compacto rotulo="Escolher turma e alunos" /> : null}
-                      <Button asChild size="sm" variant="outline" className="h-9 rounded-full">
-                        <Link to="/dashboard">Painel de gestão <ArrowRight className="size-4" /></Link>
+                      <ClimaCompacto />
+                      {isAuthenticated && !feriadoHoje ? (
+                        <MarcarAlunosCartao dados={dadosLab} compacto rotulo="Marcar alunos" />
+                      ) : null}
+                      {isAuthenticated ? (
+                        <Button asChild size="sm" variant="outline" className="h-9 rounded-full">
+                          <Link to="/dashboard">
+                            Painel <ArrowRight className="size-4" />
+                          </Link>
+                        </Button>
+                      ) : null}
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        className="h-9 rounded-full border-border bg-background"
+                      >
+                        <Link to="/agenda">
+                          Agenda completa <ArrowRight className="size-4" aria-hidden="true" />
+                        </Link>
                       </Button>
                     </div>
-                  </div>
-                </nav>
-              ) : null}
-              <div className="home-live-panel min-w-0 overflow-hidden rounded-[1.25rem] border border-border bg-background p-1.5 shadow-lg shadow-ink/5 sm:p-3">
+                  }
+                />
+              </Reveal>
+              <div className="home-live-panel mt-5 min-w-0 overflow-hidden rounded-[1.4rem] border border-border bg-background p-1.5 sm:p-2">
                 {feriadoHoje ? (
-                  <div className="grid min-h-[24rem] place-items-center rounded-2xl bg-muted/40 px-5 py-10">
-                    <AvisoFeriado dataISO={hojeNaEscola()} variante="painel" />
+                  <div className="grid min-h-[20rem] place-items-center rounded-2xl bg-muted/40 px-5 py-10">
+                    <AvisoFeriado dataISO={hoje} variante="painel" />
                   </div>
                 ) : (
                   <PainelLaboratorioAgora dados={dadosLab} logado={isAuthenticated} compacto />
                 )}
               </div>
-              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="size-2 rounded-full bg-emerald-500" aria-hidden="true" />
-                Informações atualizadas conforme os registros do laboratório.
-              </div>
+              <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="relative flex size-2" aria-hidden="true">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-emerald-500/60" />
+                  <span className="relative size-2 rounded-full bg-emerald-500" />
+                </span>
+                Atualizado automaticamente com os registros do laboratório.
+              </p>
             </div>
           </section>
 
-          <div className="home-between py-5 sm:py-7">
+          <div className="home-between py-4 sm:py-6">
             <BannerEntreTurnos />
           </div>
 
+          {/* ───────────── como funciona ───────────── */}
           <section
             aria-labelledby="home-metodo-titulo"
-            className="home-section mx-auto max-w-[86rem] px-4 py-12 sm:px-8 sm:py-16 lg:px-10"
+            className="home-section mx-auto max-w-[84rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-10"
           >
-            <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-6">
-              <RevealSection>
-                <SectionIntro
-                  etiqueta="Educação com propósito"
-                  titulo="Tecnologia a serviço de cada descoberta."
-                  descricao="Uma rotina planejada, acolhedora e cheia de possibilidades. O digital faz parte do aprendizado, sem perder o olhar humano."
-                  id="home-metodo-titulo"
-                />
-                <div className="mt-4 overflow-hidden rounded-[1.25rem] border border-border bg-card p-2 shadow-sm">
-                  <img
-                    src={heroTechBgImg}
-                    alt="Ambiente de tecnologia e recursos de informática"
-                    loading="lazy"
-                    decoding="async"
-                    className="home-method-image aspect-[16/7] w-full rounded-xl object-cover"
-                  />
-                  <div className="flex items-center gap-2 px-3 pb-2 pt-4 text-xs font-semibold text-muted-foreground">
-                    <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
-                    Aprendizagem, criatividade e colaboração
+            <Reveal>
+              <SectionIntro
+                etiqueta="Educação com propósito"
+                titulo="Tecnologia a serviço de cada descoberta."
+                descricao="Uma rotina planejada e acolhedora, em que o digital faz parte do aprendizado sem perder o olhar humano."
+                id="home-metodo-titulo"
+              />
+            </Reveal>
+            <Reveal className="home-steps relative mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+              {ETAPAS.map(({ titulo, descricao, Icone }, i) => (
+                <article
+                  key={titulo}
+                  onPointerMove={seguirPonteiro}
+                  className="home-step-card group relative overflow-hidden rounded-2xl border border-border bg-card p-4 sm:p-5"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="home-step-node relative grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
+                      <Icone className="size-5" aria-hidden="true" />
+                    </span>
+                    <span className="font-heading text-xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
+                      Passo {i + 1}
+                    </span>
                   </div>
-                </div>
-              </RevealSection>
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                {ETAPAS.map(({ numero, titulo, descricao, Icone }) => (
-                  <div
-                    key={numero}
-                    className="home-step-card rounded-xl border border-border bg-card p-3 shadow-sm sm:p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary">
-                        <Icone className="size-5" aria-hidden="true" />
-                      </span>
-                      <span className="font-heading text-sm font-extrabold text-muted-foreground/50">
-                        {numero}
-                      </span>
-                    </div>
-                    <h3 className="mt-3 font-heading text-sm font-extrabold leading-tight tracking-tight sm:text-base">
-                      {titulo}
-                    </h3>
-                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                      {descricao}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+                  <h3 className="mt-4 font-heading text-base font-extrabold leading-tight tracking-tight sm:text-lg">
+                    {titulo}
+                  </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    {descricao}
+                  </p>
+                </article>
+              ))}
+            </Reveal>
           </section>
 
+          {/* ───────────── comunidade ───────────── */}
           <section
             aria-labelledby="home-comunidade-titulo"
-            className="home-section home-window-section border-t border-border/60 bg-card/65 py-10 sm:py-14"
+            className="home-community border-t border-border/60 py-10 sm:py-14"
           >
-            <div className="mx-auto max-w-[86rem] px-4 sm:px-8 lg:px-10">
-              <SectionIntro
-                etiqueta="Nossa comunidade escolar"
-                titulo="Aprender também é compartilhar."
-                descricao="Resultados, experiências e momentos que fazem parte da vida escolar."
-                id="home-comunidade-titulo"
-              />
-              <div className="mt-5 grid gap-3 lg:grid-cols-[0.86fr_1.14fr]">
-                <div className="home-results-card relative isolate flex min-h-[15rem] flex-col overflow-hidden rounded-[1.25rem] bg-ink p-5 text-white sm:p-6">
+            <div className="mx-auto max-w-[84rem] px-4 sm:px-8 lg:px-10">
+              <Reveal>
+                <SectionIntro
+                  etiqueta="Nossa comunidade escolar"
+                  titulo="Aprender também é compartilhar."
+                  descricao="Resultados, experiências e momentos que fazem parte da vida escolar."
+                  id="home-comunidade-titulo"
+                />
+              </Reveal>
+              <Reveal className="mt-6 grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
+                <Link
+                  to="/resultados"
+                  onPointerMove={seguirPonteiro}
+                  className="home-results-card group relative isolate flex min-h-[16rem] flex-col overflow-hidden rounded-[1.4rem] bg-ink p-5 text-white sm:p-7"
+                >
                   <img
                     src={escolaInformaticaHeroImg}
                     alt=""
                     aria-hidden="true"
                     loading="lazy"
-                    className="absolute inset-0 -z-30 size-full object-cover opacity-30"
+                    className="home-results-photo absolute inset-0 -z-30 size-full object-cover opacity-35"
                   />
                   <span
                     aria-hidden="true"
-                    className="absolute inset-0 -z-20 bg-gradient-to-br from-ink/95 via-ink/85 to-primary/50"
+                    className="absolute inset-0 -z-20 bg-gradient-to-br from-ink via-ink/85 to-primary/60"
                   />
-                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-sun">
+                  <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.16em] text-sun backdrop-blur">
                     <CheckCircle2 className="size-4" aria-hidden="true" /> Acompanhamento
                   </span>
-                  <div className="mt-auto pt-6">
-                    <h3 className="max-w-[22ch] font-heading text-[clamp(1.35rem,2.2vw,2rem)] font-extrabold leading-[1.08] tracking-tight">
+                  <div className="mt-auto pt-8">
+                    <h3 className="max-w-[20ch] font-heading text-[clamp(1.4rem,2.3vw,2.1rem)] font-extrabold leading-[1.06] tracking-tight">
                       Resultados que orientam o próximo passo.
                     </h3>
-                    <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75 sm:text-base">
-                      Indicadores por turma ajudam a compreender o desenvolvimento dos estudantes,
-                      sem identificar crianças publicamente.
+                    <p className="mt-3 max-w-md text-sm leading-relaxed text-white/70">
+                      Indicadores por turma mostram o desenvolvimento dos estudantes, sem
+                      identificar crianças publicamente.
                     </p>
-                    <Button
-                      asChild
-                      size="lg"
-                      className="mt-3 rounded-full bg-sun px-5 font-bold text-sun-foreground hover:bg-sun/90"
-                    >
-                      <Link to="/resultados">
-                        Ver resultados <ArrowRight className="size-4" aria-hidden="true" />
-                      </Link>
-                    </Button>
+                    <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-sun px-5 py-2.5 text-sm font-bold text-sun-foreground transition group-hover:gap-3">
+                      Ver resultados <ArrowRight className="size-4" aria-hidden="true" />
+                    </span>
                   </div>
-                </div>
+                </Link>
                 <CanalYoutubeCard />
-              </div>
+              </Reveal>
             </div>
           </section>
 
-          <section
-            aria-label="Acesso da equipe"
-            className="home-last-cta px-4 py-7 sm:px-8 sm:py-9 lg:px-10"
-          >
-            <div className="mx-auto flex max-w-[86rem] flex-col gap-5 rounded-[1.8rem] border border-border bg-card px-6 py-7 shadow-sm sm:px-9 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-4">
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
-                  <ShieldCheck className="size-6" aria-hidden="true" />
-                </span>
-                <div>
-                  <h2 className="font-heading text-xl font-extrabold tracking-tight">
-                    Um espaço também para a equipe.
-                  </h2>
-                  <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                    Professores e responsáveis autorizados podem acessar os recursos de gestão e
-                    acompanhamento.
-                  </p>
+          {/* ───────────── equipe ───────────── */}
+          <section aria-label="Acesso da equipe" className="px-4 pb-10 sm:px-8 lg:px-10">
+            <Reveal className="home-team-cta mx-auto flex max-w-[84rem] flex-col gap-5 rounded-[1.6rem] p-px md:flex-row">
+              <div className="flex w-full flex-col gap-5 rounded-[calc(1.6rem-1px)] bg-card px-6 py-6 sm:px-8 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-start gap-4">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+                    <ShieldCheck className="size-6" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h2 className="font-heading text-xl font-extrabold tracking-tight">
+                      Um espaço também para a equipe.
+                    </h2>
+                    <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                      Professores e responsáveis autorizados acessam os recursos de gestão e
+                      acompanhamento.
+                    </p>
+                  </div>
                 </div>
+                <Button asChild size="lg" className="shrink-0 rounded-full px-6 font-bold">
+                  {isAuthenticated ? (
+                    <Link to="/dashboard">
+                      Abrir painel <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    <Link to="/login">
+                      Acesso da equipe <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  )}
+                </Button>
               </div>
-              <Button asChild size="lg" className="shrink-0 rounded-full px-6 font-bold">
-                {isAuthenticated ? (
-                  <Link to="/dashboard">
-                    Abrir painel <ArrowRight className="size-4" aria-hidden="true" />
-                  </Link>
-                ) : (
-                  <Link to="/login">
-                    Acesso da equipe <ArrowRight className="size-4" aria-hidden="true" />
-                  </Link>
-                )}
-              </Button>
-            </div>
+            </Reveal>
           </section>
         </main>
         <SiteFooter />
@@ -707,62 +645,166 @@ function Index() {
   );
 }
 
-function HeroStat({
+function CartaoAcesso({
+  to,
+  imagem,
   rotulo,
-  curto,
-  detalhe,
-  valor,
-  isReady,
+  titulo,
+  descricao,
+  chamada,
   Icone,
-}: {
-  rotulo: string;
-  /** Versão curta para o celular, onde o rótulo inteiro quebraria em duas linhas. */
-  curto: string;
-  detalhe: string;
-  valor: number;
-  isReady: boolean;
-  Icone: LucideIcon;
-}) {
+  tamanho,
+  cor,
+}: (typeof ACESSOS)[number]) {
   return (
-    <div className="home-stat-cell px-4 py-5 sm:px-6">
-      <div className="flex items-center gap-2 text-white/60">
-        <Icone className="size-4 shrink-0 text-sun" aria-hidden="true" />
-        <span className="text-[11px] font-bold uppercase tracking-[0.12em]">
-          <span className="sm:hidden">{curto}</span>
-          <span className="hidden sm:inline">{rotulo}</span>
+    <Link
+      to={to}
+      onPointerMove={seguirPonteiro}
+      style={{ "--acento": cor } as CSSProperties}
+      className={cn(
+        "home-access-card group relative isolate flex flex-col overflow-hidden rounded-[1.25rem] p-3.5 text-white sm:p-5",
+        tamanho === "grande" && "col-span-2 lg:row-span-2",
+        tamanho === "largo" && "lg:col-span-2",
+        // O último cartão fecha a grade de duas colunas no celular.
+        to === "/avaliacao" && "col-span-2",
+      )}
+    >
+      <img
+        src={imagem}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        className="home-access-photo pointer-events-none absolute inset-0 -z-20 size-full object-cover"
+      />
+      <span
+        aria-hidden="true"
+        className="home-access-overlay pointer-events-none absolute inset-0 -z-10"
+      />
+      <span aria-hidden="true" className="home-spotlight pointer-events-none absolute inset-0" />
+      <div className="flex items-start justify-between gap-3">
+        <span className="home-access-icon grid size-9 place-items-center rounded-xl sm:size-10">
+          <Icone className="size-[1.1rem] sm:size-5" aria-hidden="true" />
+        </span>
+        <span className="home-access-go grid size-8 place-items-center rounded-full sm:size-9">
+          <ArrowUpRight className="size-4" aria-hidden="true" />
         </span>
       </div>
-      {isReady ? (
-        <StatCounter valor={valor} />
-      ) : (
-        <div
-          className="mt-3 h-8 w-16 animate-pulse rounded-lg bg-white/20"
+      <div className="mt-auto pt-10">
+        <span className="home-access-label hidden text-[10px] font-bold uppercase tracking-[0.2em] sm:block">
+          {rotulo}
+        </span>
+        <h3
+          className={cn(
+            "mt-1 font-heading font-extrabold leading-[1.08] tracking-tight",
+            tamanho === "grande"
+              ? "text-[clamp(1.25rem,2.6vw,2.4rem)]"
+              : "text-[clamp(1rem,1.6vw,1.35rem)]",
+          )}
+        >
+          {titulo}
+        </h3>
+        <p
+          className={cn(
+            "mt-1.5 hidden max-w-md text-sm leading-snug text-white/75 sm:block",
+            tamanho === "normal" && "lg:line-clamp-2",
+          )}
+        >
+          {descricao}
+        </p>
+        <span className="home-access-cta mt-3 hidden items-center gap-1.5 text-xs font-bold sm:inline-flex">
+          {chamada} <ArrowRight className="size-3.5" aria-hidden="true" />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function HeroStat({
+  rotulo,
+  detalhe,
+  valor,
+  texto,
+  isReady,
+  Icone,
+  to,
+  href,
+}: {
+  rotulo: string;
+  detalhe: string;
+  valor?: number;
+  texto?: string;
+  isReady: boolean;
+  Icone: LucideIcon;
+  to?: "/agenda";
+  href?: string;
+}) {
+  const corpo = (
+    <>
+      <span className="flex items-center justify-between">
+        <span className="grid size-8 place-items-center rounded-xl bg-white/10 text-sun ring-1 ring-white/10">
+          <Icone className="size-4" aria-hidden="true" />
+        </span>
+        <ArrowUpRight
+          className="size-4 text-white/30 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-sun"
+          aria-hidden="true"
+        />
+      </span>
+      {!isReady ? (
+        <span
+          className="mt-3 block h-7 w-16 animate-pulse rounded-lg bg-white/15"
           aria-label="Carregando"
         />
+      ) : texto ? (
+        <span className="mt-2.5 block font-heading text-xl font-extrabold leading-none tracking-tight tabular-nums sm:text-[1.6rem]">
+          {texto}
+        </span>
+      ) : (
+        <StatCounter valor={valor ?? 0} />
       )}
-      <span className="mt-0.5 block text-xs text-white/60">{detalhe}</span>
-    </div>
+      <span className="mt-1.5 block text-[11px] font-bold uppercase tracking-[0.12em] text-white/80">
+        {rotulo}
+      </span>
+      <span className="hidden text-[11px] text-white/50 sm:block">{detalhe}</span>
+    </>
+  );
+  const classe =
+    "home-stat-cell group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] p-3.5 text-white backdrop-blur-xl transition sm:p-4";
+  return to ? (
+    <Link to={to} className={classe} onPointerMove={seguirPonteiro}>
+      <span aria-hidden="true" className="home-spotlight pointer-events-none absolute inset-0" />
+      {corpo}
+    </Link>
+  ) : (
+    <a href={href} className={classe} onPointerMove={seguirPonteiro}>
+      <span aria-hidden="true" className="home-spotlight pointer-events-none absolute inset-0" />
+      {corpo}
+    </a>
   );
 }
 
 function StatCounter({ valor }: { valor: number }) {
   const { ref, exibido } = useCountUp(valor);
   return (
-    <div
-      ref={ref as RefObject<HTMLDivElement | null>}
-      className="mt-1 font-heading text-[1.85rem] font-extrabold leading-none tracking-tight tabular-nums text-white sm:text-[2.1rem]"
+    <span
+      ref={ref as RefObject<HTMLSpanElement | null>}
+      className="mt-2.5 block font-heading text-[1.75rem] font-extrabold leading-none tracking-tight tabular-nums sm:text-[2rem]"
     >
       {exibido}
-    </div>
+    </span>
   );
 }
 
-function RevealSection({ className, children }: { className?: string; children: ReactNode }) {
-  const { ref, className: revealClassName } = useScrollReveal<HTMLElement>();
+/** Revela o bloco ao rolar; os filhos entram um depois do outro. */
+function Reveal({ className, children }: { className?: string; children: ReactNode }) {
+  const { ref, className: revelado } = useScrollReveal<HTMLDivElement>();
   return (
-    <section ref={ref} className={(className || "") + " " + revealClassName}>
+    <div
+      ref={ref}
+      className={cn("home-reveal", revelado === "opacity-0" ? "" : "is-in", className)}
+    >
       {children}
-    </section>
+    </div>
   );
 }
 
@@ -771,59 +813,64 @@ function SectionIntro({
   titulo,
   descricao,
   id,
+  acao,
 }: {
   etiqueta: string;
   titulo: string;
   descricao: string;
   id: string;
+  acao?: ReactNode;
 }) {
   return (
-    <div className="max-w-3xl">
-      <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.17em] text-primary">
-        <span className="h-px w-7 bg-primary" aria-hidden="true" />
-        {etiqueta}
-      </p>
-      <h2
-        id={id}
-        className="mt-3 max-w-[19ch] font-heading text-[clamp(2rem,3.5vw,3.5rem)] font-extrabold leading-[1.06] tracking-[-0.045em] text-foreground"
-      >
-        {titulo}
-      </h2>
-      <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-        {descricao}
-      </p>
+    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="max-w-2xl">
+        <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.2em] text-primary">
+          <span
+            className="h-px w-6 bg-gradient-to-r from-primary to-transparent"
+            aria-hidden="true"
+          />
+          {etiqueta}
+        </p>
+        <h2
+          id={id}
+          className="mt-2.5 font-heading text-[clamp(1.6rem,3vw,2.6rem)] font-extrabold leading-[1.05] tracking-[-0.04em] text-foreground"
+        >
+          {titulo}
+        </h2>
+        <p className="mt-2.5 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {descricao}
+        </p>
+      </div>
+      {acao ? <div className="shrink-0">{acao}</div> : null}
     </div>
   );
 }
 
 function CanalYoutubeCard() {
   return (
-    <div className="home-videos-card flex h-full min-h-[15rem] flex-col overflow-hidden rounded-[1.25rem] border border-border bg-card p-4 shadow-sm sm:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="home-videos-card flex h-full min-h-[16rem] flex-col overflow-hidden rounded-[1.4rem] border border-border bg-card p-4 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.16em] text-red-600 dark:text-red-400">
-            <span className="grid size-8 place-items-center rounded-xl bg-red-600 text-white">
-              <Youtube className="size-5" aria-hidden="true" />
+          <p className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.18em] text-red-600 dark:text-red-400">
+            <span className="grid size-7 place-items-center rounded-lg bg-red-600 text-white">
+              <Youtube className="size-4" aria-hidden="true" />
             </span>
             A escola em vídeo
           </p>
-          <h3 className="mt-4 max-w-[18ch] font-heading text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
+          <h3 className="mt-3 font-heading text-xl font-extrabold leading-tight tracking-tight sm:text-2xl">
             Histórias que merecem ser vistas.
           </h3>
-          <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-            Registros de atividades, experiências e momentos da nossa escola.
-          </p>
         </div>
         <a
           href={CANAL_YOUTUBE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-bold transition-colors hover:border-primary/50 hover:text-primary"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-bold transition-colors hover:border-red-500/50 hover:text-red-600"
         >
           Ver canal <ExternalLink className="size-3.5" aria-hidden="true" />
         </a>
       </div>
-      <div className="mt-3 grid flex-1 grid-cols-3 gap-2 sm:gap-3">
+      <div className="mt-4 grid flex-1 grid-cols-3 gap-2 sm:gap-3">
         {VIDEOS_DESTAQUE.map((video) => (
           <VideoThumb key={video.id} video={video} />
         ))}
@@ -840,7 +887,7 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={"Assistir: " + video.titulo}
-      className="home-video-thumb group relative block aspect-[4/5] overflow-hidden rounded-lg bg-ink text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+      className="home-video-thumb group relative block aspect-[4/5] max-h-60 overflow-hidden rounded-xl bg-ink text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
     >
       {!falhou ? (
         <img
@@ -849,7 +896,7 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
           loading="lazy"
           decoding="async"
           onError={() => setFalhou(true)}
-          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="size-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
       ) : (
         <span className="grid size-full place-items-center bg-gradient-to-b from-ink to-red-950">
@@ -858,12 +905,12 @@ function VideoThumb({ video }: { video: { id: string; titulo: string } }) {
       )}
       <span
         aria-hidden="true"
-        className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/20"
+        className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent"
       />
-      <span className="absolute left-1/2 top-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-red-600 shadow-lg transition-transform duration-300 group-hover:scale-110 sm:size-12">
+      <span className="absolute left-1/2 top-1/2 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-red-600 shadow-lg backdrop-blur transition duration-300 group-hover:scale-110 group-hover:bg-white">
         <Play className="ml-0.5 size-5 fill-current" aria-hidden="true" />
       </span>
-      <span className="absolute inset-x-0 bottom-0 line-clamp-3 px-2 pb-3 text-[11px] font-bold leading-snug text-white sm:p-3 sm:text-xs">
+      <span className="absolute inset-x-0 bottom-0 line-clamp-3 px-2 pb-2.5 text-[11px] font-bold leading-snug sm:p-3 sm:text-xs">
         {video.titulo}
       </span>
     </a>
