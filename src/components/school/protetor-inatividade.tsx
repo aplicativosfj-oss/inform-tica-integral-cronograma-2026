@@ -196,7 +196,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         <div className="absolute -right-40 top-[-16rem] size-[34rem] rounded-full bg-cyan-400/15 blur-[110px]" />
       </div>
 
-      <main className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col items-center justify-between overflow-hidden py-1 text-center">
+      <main className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-none flex-col items-center justify-between overflow-hidden py-1 text-center">
         <header className="screensaver-avoid mb-1 flex shrink-0 flex-wrap items-center justify-center gap-2">
           <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-slate-950/35 px-4 py-2.5 shadow-xl backdrop-blur-xl">
             <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-blue-700 shadow-lg shadow-blue-950/40">
@@ -219,7 +219,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         {/* Relógio redesenhado: painel editorial, leitura imediata e segundos discretos. */}
         <section
           aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`}
-          className="screensaver-avoid relative flex w-full max-w-[min(92vw,680px)] shrink-0 flex-col items-center justify-center"
+          className="screensaver-avoid relative flex w-full max-w-[min(76vw,560px)] shrink-0 flex-col items-center justify-center"
         >
           <div className="relative w-full overflow-hidden rounded-[2rem] border border-white/[0.14] bg-slate-950/35 px-6 py-5 shadow-[0_24px_90px_rgba(0,0,0,.28)] backdrop-blur-2xl sm:px-10 sm:py-6">
             <div aria-hidden className="pointer-events-none absolute inset-x-[12%] top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/70 to-transparent" />
@@ -231,7 +231,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
               Horário local
             </div>
             <div className="mt-2 flex items-center justify-center gap-3 sm:gap-5">
-              <time className="font-heading text-[clamp(4.4rem,12vw,8.5rem)] font-semibold leading-[.95] tracking-[-.085em] tabular-nums text-white [font-variant-numeric:tabular-nums] drop-shadow-[0_8px_32px_rgba(34,211,238,.16)]">
+              <time className="font-heading text-[clamp(3.8rem,8vw,6.8rem)] font-semibold leading-[.95] tracking-[-.085em] tabular-nums text-white [font-variant-numeric:tabular-nums] drop-shadow-[0_8px_32px_rgba(34,211,238,.16)]">
                 {horario.hora}
               </time>
               <div className="mb-1 flex min-w-[3.2rem] flex-col items-center justify-center border-l border-white/15 pl-3 sm:min-w-[4rem] sm:pl-5">
@@ -262,7 +262,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         </button>
 
         <section aria-label="Monitoramento do laboratório" className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[1.25rem] border border-cyan-100/20 bg-[#061329]/80 p-2 text-left shadow-[0_28px_90px_rgba(0,0,0,.42)] backdrop-blur-2xl sm:p-3">
-          <div className="relative isolate min-h-[clamp(220px,34vh,340px)] flex-1 overflow-hidden rounded-xl border border-cyan-100/20 bg-[radial-gradient(ellipse_at_72%_42%,rgba(26,105,173,.35),transparent_48%),linear-gradient(120deg,#06101f_0%,#0a1d38_52%,#071226_100%)]">
+          <div className="relative isolate min-h-[clamp(180px,28vh,280px)] flex-1 overflow-hidden rounded-xl border border-cyan-100/20 bg-[radial-gradient(ellipse_at_72%_42%,rgba(26,105,173,.35),transparent_48%),linear-gradient(120deg,#06101f_0%,#0a1d38_52%,#071226_100%)]">
             <div aria-hidden className="absolute inset-0 opacity-[.16]" style={{ backgroundImage: "linear-gradient(rgba(130,220,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(130,220,255,.28) 1px,transparent 1px)", backgroundSize: "32px 32px" }} />
             <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_50%,transparent_0%,rgba(2,8,23,.12)_48%,rgba(2,8,23,.75)_100%)]" />
             <div aria-hidden className="absolute -right-16 top-1/2 size-[330px] -translate-y-1/2 rounded-full border border-cyan-300/10 shadow-[0_0_70px_rgba(34,211,238,.08)] sm:size-[470px]" />
@@ -340,7 +340,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           logado={false}
           grande
           evitar=".screensaver-avoid"
-          className="z-30 inset-x-0 top-[16%] bottom-auto h-[17%] w-full"
+          className="z-30 inset-x-0 top-[16%] bottom-[14%] h-auto w-full"
         />
 
         <footer className="screensaver-avoid mt-1 flex shrink-0 flex-col items-center gap-0.5 text-center">
@@ -356,7 +356,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       </main>
 
       {/* Câmera de segurança vista de frente: a lente encara quem está diante da tela e faz pequenas varreduras. */}
-      <div className="screensaver-avoid pointer-events-none absolute right-[3%] top-[36%] z-20 flex h-[min(36vh,310px)] w-[min(30vw,310px)] items-start justify-center">
+      <div className="screensaver-avoid pointer-events-none absolute right-[3%] top-[36%] z-20 flex h-[min(31vh,270px)] w-[min(24vw,260px)] items-start justify-center">
         <div role="img" aria-label="Câmera de segurança monitorando o laboratório" className="relative aspect-[400/440] h-full max-w-full drop-shadow-[0_24px_30px_rgba(0,0,0,.55)]">
           <svg viewBox="0 0 400 440" aria-hidden className="absolute inset-0 h-full w-full overflow-visible">
             <defs>
