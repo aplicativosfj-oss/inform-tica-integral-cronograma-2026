@@ -270,3 +270,44 @@
   .home-premium #laboratorio-agora.home-live-section .lab-aluno { padding-top: .4rem; padding-bottom: .4rem; }
 }
 
+
+/* Homepage editorial compacta: densidade consistente entre desktop e mobile. */
+.home-premium .home-window-hero > div:not([aria-hidden]) {
+  padding-top: clamp(1.1rem, 2.4vw, 2.3rem);
+  padding-bottom: clamp(.9rem, 2vw, 1.5rem);
+}
+.home-premium .home-window-section.home-section {
+  padding-top: clamp(1.5rem, 3vw, 2.6rem);
+  padding-bottom: clamp(1.5rem, 3vw, 2.6rem);
+}
+.home-premium .home-window-section .home-access-card {
+  min-height: 10.5rem;
+  border-radius: 1.05rem;
+}
+.home-premium .home-window-section .home-access-card .home-access-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+.home-premium .home-access-card .home-access-photo { object-position: center 42%; }
+.home-premium .home-access-card .home-access-overlay {
+  background: linear-gradient(180deg, rgba(8,12,30,.15),rgba(8,12,30,.3) 36%,rgba(8,12,30,.94) 100%);
+}
+.home-premium .home-step-card { min-width: 0; }
+.home-premium .home-videos-card .home-video-thumb { max-height: 13rem; }
+.home-premium .home-last-cta { padding-top: 1rem; padding-bottom: 1rem; }
+.home-premium .home-between { padding-top: .75rem; padding-bottom: .75rem; }
+.home-premium #laboratorio-agora.home-live-section { padding-block: clamp(1rem,2.5vw,1.8rem); }
+.home-premium .home-hero-stats { margin-top: 1rem; }
+@media (max-width: 639px) {
+  .home-premium .home-window-hero > div:not([aria-hidden]) { padding-top: 1rem; padding-bottom: 1rem; }
+  .home-premium .home-window-section .home-access-card { min-height: 9.25rem; }
+  .home-premium .home-window-section .home-access-card h3 { overflow-wrap: anywhere; }
+  .home-premium .home-access-card .home-access-photo { object-position: center; }
+  .home-premium .home-access-card .home-access-overlay {
+    background: linear-gradient(180deg,rgba(8,12,30,.2),rgba(8,12,30,.56) 42%,rgba(8,12,30,.97) 100%);
+  }
+  .home-premium .home-window-section .home-access-card .home-access-icon { width: 2rem; height: 2rem; }
+  .home-premium .home-access-card .home-access-arrow { display: none; }
+  .home-premium .home-videos-card .home-video-thumb { max-height: 9rem; }
+  .home-premium .home-hero-stats { margin-top: .75rem; }
+}
