@@ -948,9 +948,9 @@ export class Corrida {
 
   private montarRivais() {
     const nivel = this.op.nivel;
-    const padrao: { nome: string; cor: string; piloto?: PilotoMoto }[] = CARROS.map((c, i) => ({ nome: `Piloto ${i + 1}`, cor: c.cor })).filter(
-      (c) => c.cor !== this.op.corJogador,
-    );
+    const padrao: { nome: string; cor: string; piloto?: PilotoMoto }[] = CARROS
+      .map((c, i) => ({ nome: `Piloto ${i + 1}`, cor: c.cor }))
+      .filter((c) => c.cor !== this.op.corJogador);
     const grade = (this.op.rivais?.length ? this.op.rivais : padrao).slice(0, 5);
     // Quanto do máximo cada nível deixa o rival correr.
     const faixa = nivel === 1 ? [0.66, 0.8] : nivel === 2 ? [0.78, 0.9] : [0.88, 0.99];
