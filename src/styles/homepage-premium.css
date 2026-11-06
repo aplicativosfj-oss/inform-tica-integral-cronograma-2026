@@ -270,3 +270,231 @@
   .home-premium #laboratorio-agora.home-live-section .lab-aluno { padding-top: .4rem; padding-bottom: .4rem; }
 }
 
+
+/* Homepage editorial compacta: densidade consistente entre desktop e mobile. */
+.home-premium .home-window-hero > div:not([aria-hidden]) {
+  padding-top: clamp(1.1rem, 2.4vw, 2.3rem);
+  padding-bottom: clamp(.9rem, 2vw, 1.5rem);
+}
+.home-premium .home-window-section.home-section {
+  padding-top: clamp(1.5rem, 3vw, 2.6rem);
+  padding-bottom: clamp(1.5rem, 3vw, 2.6rem);
+}
+.home-premium .home-window-section .home-access-card {
+  min-height: 10.5rem;
+  border-radius: 1.05rem;
+}
+.home-premium .home-window-section .home-access-card .home-access-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+.home-premium .home-access-card .home-access-photo { object-position: center 42%; }
+.home-premium .home-access-card .home-access-overlay {
+  background: linear-gradient(180deg, rgba(8,12,30,.15),rgba(8,12,30,.3) 36%,rgba(8,12,30,.94) 100%);
+}
+.home-premium .home-step-card { min-width: 0; }
+.home-premium .home-videos-card .home-video-thumb { max-height: 13rem; }
+.home-premium .home-last-cta { padding-top: 1rem; padding-bottom: 1rem; }
+.home-premium .home-between { padding-top: .75rem; padding-bottom: .75rem; }
+.home-premium #laboratorio-agora.home-live-section { padding-block: clamp(1rem,2.5vw,1.8rem); }
+.home-premium .home-hero-stats { margin-top: 1rem; }
+@media (max-width: 639px) {
+  .home-premium .home-window-hero > div:not([aria-hidden]) { padding-top: 1rem; padding-bottom: 1rem; }
+  .home-premium .home-window-section .home-access-card { min-height: 9.25rem; }
+  .home-premium .home-window-section .home-access-card h3 { overflow-wrap: anywhere; }
+  .home-premium .home-access-card .home-access-photo { object-position: center; }
+  .home-premium .home-access-card .home-access-overlay {
+    background: linear-gradient(180deg,rgba(8,12,30,.2),rgba(8,12,30,.56) 42%,rgba(8,12,30,.97) 100%);
+  }
+  .home-premium .home-window-section .home-access-card .home-access-icon { width: 2rem; height: 2rem; }
+  .home-premium .home-access-card .home-access-arrow { display: none; }
+  .home-premium .home-videos-card .home-video-thumb { max-height: 9rem; }
+  .home-premium .home-hero-stats { margin-top: .75rem; }
+}
+
+/* Override final de densidade: evita cards altos herdados de estilos anteriores. */
+.home-premium .home-window-section .home-access-card {
+  min-height: 0 !important;
+  height: clamp(10rem, 16vw, 13rem);
+  padding: .85rem;
+  border-radius: 1rem;
+}
+.home-premium .home-window-section .home-access-card .home-access-photo {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.home-premium .home-window-section .home-access-card .home-access-icon {
+  width: 2rem; height: 2rem;
+}
+.home-premium .home-window-section .home-access-card h3 {
+  font-size: clamp(.95rem, 1.5vw, 1.3rem);
+  line-height: 1.12;
+  margin-top: .25rem;
+}
+.home-premium .home-window-section .home-access-card .home-access-overlay {
+  background: linear-gradient(to bottom, rgba(8,12,30,.12),rgba(8,12,30,.38) 38%,rgba(8,12,30,.96));
+}
+@media(max-width:639px) {
+  .home-premium .home-window-section .home-access-card {
+    height: 10.25rem;
+    padding: .7rem;
+  }
+  .home-premium .home-window-section .home-access-card .home-access-icon {
+    width: 1.8rem; height: 1.8rem;
+  }
+  .home-premium .home-window-section .home-access-card .home-access-icon svg {
+    width: 1rem; height: 1rem;
+  }
+  .home-premium .home-window-section .home-access-card h3 {
+    font-size: .95rem;
+  }
+  .home-premium .home-window-section .home-access-card .home-access-arrow { display: none; }
+  .home-premium .home-window-section .home-access-card p { display: none; }
+}
+
+/* Cards de acesso: hierarquia legível sem desperdiçar espaço no celular. */
+.home-premium .home-access-card { isolation: isolate; }
+.home-premium .home-access-card .home-access-photo { transition: transform .4s ease; }
+@media (hover:hover) and (prefers-reduced-motion:no-preference) {
+  .home-premium .home-access-card:hover .home-access-photo { transform: scale(1.045); }
+}
+@media (max-width:639px) {
+  .home-premium .home-window-section .home-access-card {
+    height: 9.75rem;
+    padding: .65rem;
+  }
+  .home-premium .home-access-card .home-access-index,
+  .home-premium .home-access-card .home-access-label { display: none; }
+  .home-premium .home-access-card .home-access-icon {
+    background: rgba(12,18,36,.52);
+    border-color: rgba(255,255,255,.3);
+    color: #fff;
+    backdrop-filter: blur(8px);
+  }
+  .home-premium .home-access-card h3 {
+    font-size: .96rem;
+    line-height: 1.15;
+    letter-spacing: -.015em;
+    max-width: 100%;
+    color: #fff;
+    text-wrap: balance;
+  }
+  .home-premium .home-access-card .home-access-cta {
+    margin-top: .35rem;
+    font-size: .68rem;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .home-premium .home-access-card .home-access-overlay {
+    background: linear-gradient(180deg,rgba(5,9,24,.15) 0%,rgba(5,9,24,.25) 30%,rgba(5,9,24,.95) 100%);
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .home-premium .home-access-card .home-access-photo { transition: none; }
+}
+
+
+/* Redesign final da homepage: linguagem visual editorial, mais limpa e coesa. */
+.home-premium {
+  --home-panel-radius: 1.25rem;
+  background: hsl(var(--background));
+}
+.home-premium .home-hero {
+  min-height: auto;
+  background: #0b1730;
+}
+.home-premium .home-hero-photo { filter: saturate(.78) brightness(.82); }
+.home-premium .home-hero-shade {
+  background: linear-gradient(112deg,rgba(5,12,28,.94) 0%,rgba(8,23,49,.82) 52%,rgba(8,28,54,.76) 100%);
+}
+.home-premium .home-hero-grid { opacity: .12; }
+.home-premium .home-window-hero > div:not([aria-hidden]) {
+  padding-top: clamp(1rem,2vw,2rem);
+  padding-bottom: clamp(1.1rem,2.2vw,2rem);
+}
+.home-premium .home-window-hero [data-constelacao-evitar] { border-color: rgba(255,255,255,.12); }
+.home-premium .home-hero-stats {
+  margin-top: clamp(.8rem,1.4vw,1.2rem);
+  background: rgba(255,255,255,.065);
+  border-color: rgba(255,255,255,.14);
+  backdrop-filter: blur(18px);
+}
+.home-premium .home-stat-cell { padding: .85rem 1rem; }
+.home-premium .home-window-section {
+  max-width: 90rem;
+  margin-inline: auto;
+}
+.home-premium .home-window-section .home-access-card {
+  height: clamp(10rem,14vw,12rem);
+  padding: 1rem;
+  border-radius: 1.15rem;
+  border-color: hsl(var(--border) / .8);
+  box-shadow: 0 12px 30px -24px rgba(10,20,40,.42);
+}
+.home-premium .home-access-card .home-access-overlay {
+  background: linear-gradient(180deg,rgba(7,15,32,.12),rgba(7,15,32,.34) 35%,rgba(7,15,32,.94));
+}
+.home-premium .home-access-card .home-access-icon {
+  border-radius: .85rem;
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(12px);
+}
+.home-premium .home-access-card h3 { text-wrap: balance; }
+.home-premium #laboratorio-agora.home-live-section {
+  padding-block: clamp(1.5rem,3vw,2.6rem);
+  background: hsl(var(--card) / .55);
+}
+.home-premium #laboratorio-agora .home-live-panel {
+  border-radius: 1.35rem;
+  border-color: hsl(var(--border));
+  background: hsl(var(--background));
+  box-shadow: 0 18px 55px -42px rgba(8,20,45,.45);
+}
+.home-premium .home-step-card,
+.home-premium .home-results-card,
+.home-premium .home-videos-card {
+  border-radius: 1.2rem;
+}
+.home-premium .home-step-card {
+  padding: clamp(.85rem,1.5vw,1.2rem);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.home-premium .home-step-card:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--primary) / .35);
+  box-shadow: 0 12px 28px -22px rgba(8,20,45,.5);
+}
+.home-premium .home-last-cta { padding-block: 1.5rem; }
+.home-premium :is(.home-window-section, .home-live-section) .max-w-\[86rem\] {
+  max-width: 82rem;
+}
+@media (min-width: 1024px) {
+  .home-premium .home-window-hero .grid.items-center {
+    gap: clamp(2rem,4vw,4rem);
+  }
+  .home-premium .home-window-section .home-access-card {
+    height: 11.5rem;
+  }
+}
+@media (max-width: 639px) {
+  .home-premium .home-window-hero > div:not([aria-hidden]) {
+    padding: 1rem .9rem;
+  }
+  .home-premium .home-window-hero .home-hero-stats {
+    border-radius: .95rem;
+  }
+  .home-premium .home-window-section.home-section {
+    padding-block: 1.5rem;
+  }
+  .home-premium .home-window-section .home-access-card {
+    height: 9.4rem;
+    border-radius: .95rem;
+  }
+  .home-premium #laboratorio-agora.home-live-section {
+    padding-block: 1.25rem;
+  }
+  .home-premium .home-step-card { border-radius: .95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-premium .home-step-card { transition: none; }
+  .home-premium .home-step-card:hover { transform: none; }
+}
