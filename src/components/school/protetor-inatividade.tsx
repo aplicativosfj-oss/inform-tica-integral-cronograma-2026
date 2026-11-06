@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
+import { estadoDaSessao, useSessoesLab } from "@/lib/laboratorio";
 import {
   ArrowRight, BookOpen, Check, Clock3, Code2, Cpu, GraduationCap,
   Maximize2, Monitor, ShieldCheck, Sparkles, Wifi, X,
@@ -27,7 +28,25 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [confirmarSaida, setConfirmarSaida] = useState(false);
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
+  const [agoraMs, setAgoraMs] = useState(() => Date.now());
+  const { sessoes } = useSessoesLab();
+  const aulaEmAndamento = sessoes.some((sessao) => estadoDaSessao(sessao, agoraMs) === "ao-vivo");
   const temporizadorRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    const id = window.setInterval(() => setAgoraMs(Date.now()), 15_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Uma aula ao vivo tem prioridade sobre o descanso de tela, mesmo sem
+  // interação: o protetor não deve cobrir o painel durante a atividade.
+  useEffect(() => {
+    if (!aulaEmAndamento) return;
+    window.clearTimeout(temporizadorRef.current);
+    temporizadorRef.current = undefined;
+    setAtivo(false);
+    setConfirmarSaida(false);
+  }, [aulaEmAndamento]);
+
   // Bloqueio global da página enquanto o screensaver estiver aberto.
   useEffect(() => {
     if (!ativo) return;
@@ -75,7 +94,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     if (typeof window === "undefined") return;
     const desktop = window.matchMedia("(min-width: 900px) and (hover: hover) and (pointer: fine)");
     const bloqueada = ROTAS_EXCLUIDAS.some((rota) => pathname === rota || pathname.startsWith(rota + "/"));
-    if (!desktop.matches || bloqueada) {
+    if (!desktop.matches || bloqueada || aulaEmAndamento) {
       setAtivo(false);
       setConfirmarSaida(false);
       return;
@@ -110,7 +129,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       eventos.forEach((evento) => window.removeEventListener(evento, reiniciar));
       document.removeEventListener("visibilitychange", visibilidade);
     };
-  }, [pathname]);
+  }, [pathname, aulaEmAndamento]);
 
   useEffect(() => {
     const atualizar = () => setTelaCheia(Boolean(document.fullscreenElement));
@@ -363,6 +382,9 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
               <linearGradient id="cctvShell" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0" stopColor="#ffffff"/><stop offset=".4" stopColor="#eef2f6"/><stop offset=".78" stopColor="#c2ccd6"/><stop offset="1" stopColor="#8e9aa7"/>
               </linearGradient>
+              <linearGradient id="cctvSideGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#a6b1bc"/><stop offset="1" stopColor="#5d6875"/>
+              </linearGradient>
               <linearGradient id="cctvMount" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0" stopColor="#aab5c0"/><stop offset=".5" stopColor="#f3f6f9"/><stop offset="1" stopColor="#8995a2"/>
               </linearGradient>
@@ -378,49 +400,53 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
               <filter id="cctvGlow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
             </defs>
 
-            {/* Suporte fixo no teto */}
+            {/* Suporte fixo no teto e pescoço da articulação (não se movem) */}
             <rect x="140" y="4" width="120" height="24" rx="10" fill="url(#cctvMount)" stroke="#6f7c89" strokeWidth="3"/>
             <circle cx="160" cy="16" r="4" fill="#5b6876"/><circle cx="240" cy="16" r="4" fill="#5b6876"/>
+            <rect x="184" y="26" width="32" height="58" rx="10" fill="url(#cctvMount)" stroke="#6f7c89" strokeWidth="3"/>
+            <circle cx="200" cy="84" r="20" fill="url(#cctvMount)" stroke="#6f7c89" strokeWidth="3"/>
 
-            {/* Corpo que balança levemente a partir do suporte (rotação plana, sem deformar) */}
-            <g className="cctv-corpo motion-safe:animate-[cctvSway_16s_ease-in-out_infinite]" style={{ transformOrigin: "200px 28px", transformBox: "view-box" }}>
-              <rect x="184" y="26" width="32" height="58" rx="10" fill="url(#cctvMount)" stroke="#6f7c89" strokeWidth="3"/>
-              <circle cx="200" cy="84" r="20" fill="url(#cctvMount)" stroke="#6f7c89" strokeWidth="3"/>
-
-              {/* Carcaça com viseira */}
+            {/*
+              Giro PTZ simulado por paralaxe: cada camada desloca uma distância diferente
+              (lateral da carcaça aparece, frente e lente avançam mais), então o cabeçote
+              parece virar sem esticar. Movimento linear com paradas secas.
+            */}
+            <g className="motion-safe:animate-[cctvSide_22s_linear_infinite]">
+              <rect x="70" y="112" width="260" height="300" rx="96" fill="url(#cctvSideGrad)" stroke="#5f6b78" strokeWidth="3"/>
+              <path d="M46 150 Q46 104 96 100 L304 100 Q354 104 354 150 L354 162 L46 162 Z" fill="#8995a2" stroke="#5f6b78" strokeWidth="3"/>
+            </g>
+            <g className="motion-safe:animate-[cctvShellMove_22s_linear_infinite]">
               <path d="M46 150 Q46 104 96 100 L304 100 Q354 104 354 150 L354 162 L46 162 Z" fill="url(#cctvShell)" stroke="#7b8895" strokeWidth="3"/>
               <rect x="70" y="112" width="260" height="300" rx="96" fill="url(#cctvShell)" stroke="#7b8895" strokeWidth="3"/>
               <path d="M96 128 Q200 112 304 128" fill="none" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" opacity=".85"/>
-
-              {/* Frente escura */}
-              <circle cx="200" cy="262" r="112" fill="url(#cctvFace)" stroke="#05080d" strokeWidth="6"/>
-              <circle cx="200" cy="262" r="104" fill="none" stroke="#3b4859" strokeWidth="2" opacity=".8"/>
-
-              {/* Anel de LEDs infravermelhos */}
-              {Array.from({ length: 12 }, (_, i) => {
-                const a = (i / 12) * Math.PI * 2;
-                return <g key={i}><circle cx={200 + 88 * Math.cos(a)} cy={262 + 88 * Math.sin(a)} r="6" fill="#1a0d10" stroke="#3a2026" strokeWidth="1.5"/><circle cx={200 + 88 * Math.cos(a)} cy={262 + 88 * Math.sin(a)} r="2.6" fill="#b91c1c" opacity=".7"/></g>;
-              })}
-
-              {/* Lente: o miolo se move como um olhar que acompanha a sala */}
-              <circle cx="200" cy="262" r="66" fill="url(#cctvBarrel)" stroke="#5c6a7a" strokeWidth="3"/>
-              <circle cx="200" cy="262" r="54" fill="#05080d" stroke="#2b3644" strokeWidth="3"/>
-              <g className="motion-safe:animate-[cctvLook_16s_ease-in-out_infinite]">
-                <circle cx="200" cy="262" r="42" fill="url(#cctvGlass)" stroke="#2f6d9c" strokeWidth="2"/>
-                <circle cx="200" cy="262" r="30" fill="none" stroke="#7dd3fc" strokeOpacity=".25" strokeWidth="1.5"/>
-                <circle cx="200" cy="262" r="16" fill="#02060c" className="motion-safe:animate-[cctvIris_5s_ease-in-out_infinite]" style={{ transformOrigin: "200px 262px", transformBox: "view-box" }}/>
-                <circle cx="200" cy="262" r="5" fill="#38bdf8" opacity=".55" filter="url(#cctvGlow)"/>
-              </g>
-              {/* Reflexos fixos do vidro */}
-              <ellipse cx="180" cy="240" rx="14" ry="8" fill="#ffffff" opacity=".55" transform="rotate(-35 180 240)"/>
-              <circle cx="222" cy="284" r="3.5" fill="#ffffff" opacity=".35"/>
-
-              {/* LED de gravação */}
               <g className="motion-safe:animate-[cctvRec_1.3s_steps(1,end)_infinite]">
                 <circle cx="178" cy="393" r="5.5" fill="#ef4444" filter="url(#cctvGlow)"/>
                 <circle cx="176.5" cy="391.5" r="2" fill="#fecaca"/>
               </g>
               <text x="190" y="398" fontFamily="ui-monospace, monospace" fontSize="14" fontWeight="800" letterSpacing="2" fill="#dc2626">REC</text>
+            </g>
+            <g className="motion-safe:animate-[cctvFaceMove_22s_linear_infinite]">
+              <circle cx="200" cy="262" r="112" fill="url(#cctvFace)" stroke="#05080d" strokeWidth="6"/>
+              <circle cx="200" cy="262" r="104" fill="none" stroke="#3b4859" strokeWidth="2" opacity=".8"/>
+              {Array.from({ length: 12 }, (_, i) => {
+                const a = (i / 12) * Math.PI * 2;
+                return <g key={i}><circle cx={200 + 88 * Math.cos(a)} cy={262 + 88 * Math.sin(a)} r="6" fill="#1a0d10" stroke="#3a2026" strokeWidth="1.5"/><circle cx={200 + 88 * Math.cos(a)} cy={262 + 88 * Math.sin(a)} r="2.6" fill="#b91c1c" opacity=".7"/></g>;
+              })}
+            </g>
+            <g className="motion-safe:animate-[cctvLensMove_22s_linear_infinite]">
+              <circle cx="200" cy="262" r="66" fill="url(#cctvBarrel)" stroke="#5c6a7a" strokeWidth="3"/>
+              <circle cx="200" cy="262" r="54" fill="#05080d" stroke="#2b3644" strokeWidth="3"/>
+            </g>
+            <g className="motion-safe:animate-[cctvGlassMove_22s_linear_infinite]">
+              {/* Zoom óptico: a lente aproxima quando a câmera para em cada ponto */}
+              <g className="motion-safe:animate-[cctvZoom_22s_linear_infinite]" style={{ transformOrigin: "center", transformBox: "fill-box" }}>
+                <circle cx="200" cy="262" r="42" fill="url(#cctvGlass)" stroke="#2f6d9c" strokeWidth="2"/>
+                <circle cx="200" cy="262" r="30" fill="none" stroke="#7dd3fc" strokeOpacity=".25" strokeWidth="1.5"/>
+                <circle cx="200" cy="262" r="16" fill="#02060c"/>
+                <circle cx="200" cy="262" r="5" fill="#38bdf8" opacity=".55" filter="url(#cctvGlow)"/>
+              </g>
+              <ellipse cx="180" cy="240" rx="14" ry="8" fill="#ffffff" opacity=".55" transform="rotate(-35 180 240)"/>
+              <circle cx="222" cy="284" r="3.5" fill="#ffffff" opacity=".35"/>
             </g>
           </svg>
         </div>
@@ -484,23 +510,62 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         @keyframes cameraLine { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(170px); opacity: .9; } }
         @keyframes cctvRoomPan { 0% { transform: scale(1.04) translate3d(-.5%,0,0); } 100% { transform: scale(1.14) translate3d(.7%,-.6%,0); } }
         @keyframes cctvScan { 0% { transform: translateY(0); opacity: .18; } 50% { opacity: .8; } 100% { transform: translateY(350px); opacity: .18; } }
-        @keyframes cctvSway {
-          0%, 8% { transform: rotate(0deg); }
-          22%, 34% { transform: rotate(4deg); }
-          48%, 56% { transform: rotate(0deg); }
-          70%, 82% { transform: rotate(-4deg); }
-          100% { transform: rotate(0deg); }
+        @keyframes cctvSide {
+          0% { transform: translate(0px,0px); }
+          8% { transform: translate(0px,0px); }
+          22% { transform: translate(14px,0px); }
+          38% { transform: translate(14px,0px); }
+          60% { transform: translate(-14px,2px); }
+          76% { transform: translate(-14px,2px); }
+          90% { transform: translate(0px,0px); }
+          100% { transform: translate(0px,0px); }
         }
-        @keyframes cctvLook {
-          0%, 8% { transform: translate(0,0); }
-          22%, 34% { transform: translate(-9px,3px); }
-          40% { transform: translate(-9px,-4px); }
-          48%, 56% { transform: translate(0,0); }
-          70%, 82% { transform: translate(9px,3px); }
-          88% { transform: translate(9px,-4px); }
-          100% { transform: translate(0,0); }
+        @keyframes cctvShellMove {
+          0% { transform: translate(0px,0px); }
+          8% { transform: translate(0px,0px); }
+          22% { transform: translate(-7px,0px); }
+          38% { transform: translate(-7px,0px); }
+          60% { transform: translate(7px,3px); }
+          76% { transform: translate(7px,3px); }
+          90% { transform: translate(0px,0px); }
+          100% { transform: translate(0px,0px); }
         }
-        @keyframes cctvIris { 0%, 100% { transform: scale(1); } 50% { transform: scale(.72); } }
+        @keyframes cctvFaceMove {
+          0% { transform: translate(0px,0px); }
+          8% { transform: translate(0px,0px); }
+          22% { transform: translate(-16px,0px); }
+          38% { transform: translate(-16px,0px); }
+          60% { transform: translate(16px,6px); }
+          76% { transform: translate(16px,6px); }
+          90% { transform: translate(0px,0px); }
+          100% { transform: translate(0px,0px); }
+        }
+        @keyframes cctvLensMove {
+          0% { transform: translate(0px,0px); }
+          8% { transform: translate(0px,0px); }
+          22% { transform: translate(-24px,0px); }
+          38% { transform: translate(-24px,0px); }
+          60% { transform: translate(24px,8px); }
+          76% { transform: translate(24px,8px); }
+          90% { transform: translate(0px,0px); }
+          100% { transform: translate(0px,0px); }
+        }
+        @keyframes cctvGlassMove {
+          0% { transform: translate(0px,0px); }
+          8% { transform: translate(0px,0px); }
+          22% { transform: translate(-31px,0px); }
+          38% { transform: translate(-31px,0px); }
+          60% { transform: translate(31px,10px); }
+          76% { transform: translate(31px,10px); }
+          90% { transform: translate(0px,0px); }
+          100% { transform: translate(0px,0px); }
+        }
+        @keyframes cctvZoom {
+          0%, 2% { transform: scale(1); } 4%, 7% { transform: scale(1.14); } 8% { transform: scale(1); }
+          22%, 25% { transform: scale(1); } 28%, 36% { transform: scale(1.16); } 38% { transform: scale(1); }
+          60%, 63% { transform: scale(1); } 66%, 74% { transform: scale(1.16); } 76% { transform: scale(1); }
+          90%, 93% { transform: scale(1); } 96%, 100% { transform: scale(1.1); }
+        }
         @keyframes cctvRec { 0% { opacity: 1; } 55% { opacity: .12; } }
         @keyframes cameraFloat { 0%, 100% { transform: translate3d(0,0,0) rotate(-.7deg); } 50% { transform: translate3d(0,-9px,0) rotate(.7deg); } }
         @keyframes cameraPivot { 0% { transform: rotate(-1.2deg) translateX(-2px); } 50% { transform: rotate(.8deg) translateX(3px); } 100% { transform: rotate(-.4deg) translateX(0); } }
