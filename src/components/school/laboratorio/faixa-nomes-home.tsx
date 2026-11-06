@@ -69,11 +69,11 @@ export function FaixaNomesHome({ sessoes, logado }: { sessoes: SessaoLab[]; loga
 
   if (nomes.length === 0) return null;
 
-  // Repete a lista até encher a faixa; a segunda metade é cópia da primeira
-  // para a volta da esteira não dar salto.
-  const metade: Nome[] = [];
-  while (metade.length < 14) metade.push(...nomes);
-  const duracao = Math.max(30, metade.length * 3.2);
+  // Poucos nomes (uma turma no laboratório): ficam parados, cada um uma vez,
+  // sem repetir. Muitos nomes: a esteira anda devagar (uns 28 px/s), cada
+  // aluno aparece uma vez por volta, e a segunda cópia só fecha a emenda.
+  const parado = nomes.length <= 10;
+  const duracao = Math.max(90, nomes.length * 5.5);
 
   const legenda =
     modo === "vivo"
@@ -104,11 +104,19 @@ export function FaixaNomesHome({ sessoes, logado }: { sessoes: SessaoLab[]; loga
           {modo === "vivo" ? "Agora" : modo === "proxima" ? "Próxima" : "Alunos"}
         </span>
       </span>
-      <div className="home-ticker-janela relative min-w-0 flex-1 overflow-hidden py-2">
-        <div className="home-ticker-trilho flex w-max" style={{ animationDuration: `${duracao}s` }}>
-          {[0, 1].map((copia) => (
+      <div
+        className={cn(
+          "relative min-w-0 flex-1 py-2",
+          parado ? "home-ticker-parado overflow-x-auto" : "home-ticker-janela overflow-hidden",
+        )}
+      >
+        <div
+          className={cn("flex w-max", parado ? "px-2" : "home-ticker-trilho")}
+          style={parado ? undefined : { animationDuration: `${duracao}s` }}
+        >
+          {(parado ? [0] : [0, 1]).map((copia) => (
             <ul key={copia} aria-hidden={copia === 1} className="flex shrink-0 gap-2 pr-2">
-              {metade.map((n, i) => {
+              {nomes.map((n, i) => {
                 const cor = serieClasses(serieIndexPorNumero(n.turma));
                 const exibido = nomeExibido(n.nome, logado);
                 const partes = exibido.trim().split(/\s+/);

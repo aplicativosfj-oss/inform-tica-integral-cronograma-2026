@@ -44,13 +44,15 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 /**
- * Visão geral do painel, pensada para caber numa tela só.
+ * Visão geral do painel.
  *
- * No computador a página não rola: ela ocupa a altura da janela e quem rola
- * é cada cartão por dentro. É o que transforma a home em um quadro de
- * acompanhamento — o professor bate o olho e vê a aula ao vivo, a semana e
- * os atalhos sem perder nada abaixo da dobra. No celular a mesma estrutura
- * se empilha e volta a rolar normalmente, que é o gesto natural ali.
+ * Organizada em três andares, do mais urgente ao mais consultado:
+ * 1. cabeçalho com a saudação, os atalhos e os números do dia numa faixa só;
+ * 2. o laboratório agora (aula ao vivo, próxima turma e a semana), que leva
+ *    a maior parte da largura;
+ * 3. à direita, o andamento da semana por turma e as ocorrências.
+ * Nada tem altura fixa: cada cartão mostra tudo o que tem, sem cortar.
+ * As seções do sistema ficam na lateral (e no "Mais" do celular).
  */
 function DashboardHome() {
   const { turmas } = useAppStore();
@@ -92,86 +94,73 @@ function DashboardHome() {
 
   return (
     <DashboardShell>
-      <div className="flex flex-col gap-3 2xl:h-[calc(100dvh-12.5rem)] 2xl:min-h-[34rem] 2xl:overflow-hidden">
-        <header className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-card/70 p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary first-letter:uppercase">{dataExtenso}</p>
-            <h1 className="mt-1 truncate text-lg font-extrabold leading-tight sm:text-2xl">
-              {saudacao()}{email ? `, ${email.split("@")[0]}` : ""}
-            </h1>
-            <p className="mt-1 text-xs text-muted-foreground">Gestão do laboratório · visão geral</p>
+      <div className="flex flex-col gap-4">
+        <header className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur-xl sm:p-5">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary first-letter:uppercase">
+                {dataExtenso}
+              </p>
+              <h1 className="mt-1 truncate text-xl font-extrabold leading-tight sm:text-2xl">
+                {saudacao()}
+                {email ? `, ${email.split("@")[0]}` : ""}
+              </h1>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Gestão do laboratório · visão geral do dia
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <MarcarAlunosCartao dados={lab} compacto rotulo="Programar aula" />
+              <Atalho to="/dashboard/laboratorio" Icone={MonitorSmartphone} rotulo="Laboratório" />
+              <Atalho to="/dashboard/turmas" Icone={Users2} rotulo="Turmas" />
+              <Atalho to="/dashboard/alunos" Icone={Search} rotulo="Buscar aluno" />
+              <Atalho to="/dashboard/frequencia" Icone={ClipboardCheck} rotulo="Frequência" />
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <MarcarAlunosCartao dados={lab} compacto rotulo="Programar turma e alunos" />
-            <Button asChild size="sm" variant="outline" className="h-9 rounded-full px-3">
-              <Link to="/dashboard/laboratorio"><MonitorSmartphone className="size-4" /> Laboratório</Link>
-            </Button>
+
+          <div className="mt-4 grid grid-cols-2 gap-2.5 border-t border-border/60 pt-4 sm:grid-cols-3 xl:grid-cols-5">
+            <Indicador Icone={Users2} rotulo="Turmas" valor={turmas.length} />
+            <Indicador Icone={GraduationCap} rotulo="Alunos ativos" valor={totalAlunos} />
+            <Indicador
+              Icone={MonitorSmartphone}
+              rotulo="No laboratório agora"
+              valor={noLabAgora}
+              destaque={noLabAgora > 0 ? "verde" : undefined}
+            />
+            <Indicador
+              Icone={UserX}
+              rotulo="Faltas e impedidos hoje"
+              valor={faltasHoje}
+              destaque={faltasHoje > 0 ? "vermelho" : undefined}
+            />
+            <Indicador
+              Icone={CalendarCheck2}
+              rotulo={`Foram nesta semana · ${foramNaSemana} de ${totalAlunos}`}
+              valor={`${pctSemana}%`}
+              className="col-span-2 sm:col-span-1"
+            />
           </div>
         </header>
 
-        <nav aria-label="Ações rápidas" className="rounded-2xl border border-border/70 bg-card/70 p-2 sm:p-3">
-          <div className="mb-2 flex items-center justify-between gap-2 px-1">
-            <p className="text-xs font-extrabold uppercase tracking-[.12em] text-muted-foreground">Ações rápidas</p>
-            <span className="text-[10px] text-muted-foreground">Escolha e execute</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <Link to="/dashboard/turmas" className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-2 py-2.5 text-center text-xs font-semibold transition hover:border-primary/40 hover:bg-primary/5">
-              <Users2 className="size-4 shrink-0 text-primary" /> Turmas
-            </Link>
-            <Link to="/dashboard/alunos" className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-2 py-2.5 text-center text-xs font-semibold transition hover:border-primary/40 hover:bg-primary/5">
-              <Search className="size-4 shrink-0 text-primary" /> Alunos
-            </Link>
-            <Link to="/dashboard/frequencia" className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-background px-2 py-2.5 text-center text-xs font-semibold transition hover:border-primary/40 hover:bg-primary/5">
-              <ClipboardCheck className="size-4 shrink-0 text-primary" /> Frequência
-            </Link>
-          </div>
-        </nav>
-
-        <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-          <Indicador Icone={Users2} rotulo="Turmas" valor={turmas.length} />
-          <Indicador Icone={GraduationCap} rotulo="Alunos" valor={totalAlunos} />
-          <Indicador
-            Icone={MonitorSmartphone}
-            rotulo="No laboratório agora"
-            valor={noLabAgora}
-            destaque={noLabAgora > 0 ? "verde" : undefined}
-          />
-          <Indicador
-            Icone={UserX}
-            rotulo="Faltas e impedidos hoje"
-            valor={faltasHoje}
-            destaque={faltasHoje > 0 ? "vermelho" : undefined}
-          />
-        </div>
-
-        {/* Duas faixas: em cima a aula ao vivo, que precisa de largura para
-            mostrar o cronômetro e os nomes lado a lado; embaixo a semana, as
-            ocorrências e os atalhos. Cada caixa rola por dentro, então a
-            página inteira continua do tamanho da janela. */}
-        <div className="grid min-h-0 flex-1 gap-3 2xl:grid-rows-[minmax(0,0.75fr)_minmax(0,1fr)]">
-          <section className="flex min-h-0 flex-col">
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card/80">
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                <PainelLaboratorioAgora dados={lab} logado compacto />
-              </div>
-            </div>
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem] 2xl:grid-cols-[minmax(0,1fr)_25rem]">
+          <section className="min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-sm backdrop-blur-xl">
+            <PainelLaboratorioAgora dados={lab} logado className="bg-transparent" />
           </section>
 
-          <div className="grid min-h-0 gap-3.5 md:grid-cols-2 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)]">
-            <Card className="flex min-h-0 flex-col bg-card/80">
+          <aside className="flex min-w-0 flex-col gap-4">
+            <Card className="bg-card/80 backdrop-blur-xl">
               <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
                 <p className="flex items-center gap-2 text-sm font-bold">
-                  <CalendarCheck2 className="size-4 text-primary" aria-hidden /> Semana no
-                  laboratório
+                  <CalendarCheck2 className="size-4 text-primary" aria-hidden /> Semana por turma
                 </p>
-                <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold tabular-nums text-primary">
-                  {pctSemana}%
-                </span>
+                <Link
+                  to="/dashboard/laboratorio"
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  Ver tudo
+                </Link>
               </div>
-              <CardContent className="min-h-0 flex-1 space-y-2.5 overflow-y-auto p-4">
-                <p className="text-xs text-muted-foreground">
-                  {foramNaSemana} de {totalAlunos} alunos já foram
-                </p>
+              <CardContent className="grid gap-2.5 p-4 sm:grid-cols-2 xl:grid-cols-1">
                 {semana.map(({ turma, foram, total }) => {
                   const cor = serieClasses(serieIndexPorNumero(turma.serie));
                   const pct = total ? Math.round((foram / total) * 100) : 0;
@@ -188,7 +177,10 @@ function DashboardHome() {
                       </span>
                       <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-primary transition-[width] duration-700"
+                          className={cn(
+                            "h-full rounded-full transition-[width] duration-700",
+                            pct >= 100 ? "bg-emerald-500" : "bg-primary",
+                          )}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -201,60 +193,71 @@ function DashboardHome() {
               </CardContent>
             </Card>
 
-            <OcorrenciasAdministrativas className="min-h-0 overflow-y-auto" />
-
-            <Card className="flex min-h-0 flex-col bg-card/80 md:col-span-2 2xl:col-span-1">
-              <div className="border-b border-border/60 px-4 py-3">
-                <p className="text-sm font-bold">Áreas do painel</p>
-                <p className="text-xs text-muted-foreground">Tudo o que o sistema faz, à mão</p>
-              </div>
-              <CardContent className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
-                {GRUPOS_VISIVEIS.filter((g) => g.label).map((grupo) => (
-                  <div key={grupo.label}>
-                    <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
-                      {grupo.label}
-                    </p>
-                    <div className="grid gap-1 sm:grid-cols-2 2xl:grid-cols-1">
-                      {grupo.items.map(({ to, label, desc, icon: Icone }) => (
-                        <Link
-                          key={to}
-                          to={to}
-                          title={desc ?? label}
-                          className="group flex items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-2 transition-colors hover:border-primary/25 hover:bg-primary/[0.06]"
-                        >
-                          <span
-                            className={cn(
-                              "flex size-8 shrink-0 items-center justify-center rounded-lg",
-                              COR_DO_GRUPO[grupo.label ?? ""] ?? "bg-primary/10 text-primary",
-                            )}
-                          >
-                            <Icone className="size-4" aria-hidden />
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-[13px] font-semibold leading-tight">
-                              {label}
-                            </span>
-                            {desc ? (
-                              <span className="block truncate text-[11px] leading-tight text-muted-foreground">
-                                {desc}
-                              </span>
-                            ) : null}
-                          </span>
-                          <ArrowUpRight
-                            className="size-3.5 shrink-0 text-muted-foreground/40 transition group-hover:translate-x-0.5 group-hover:text-primary"
-                            aria-hidden
-                          />
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+            <OcorrenciasAdministrativas className="bg-card/80 backdrop-blur-xl" />
+          </aside>
         </div>
+
+        {/* No celular e no tablet não há lateral: as seções aparecem aqui. */}
+        <Card className="bg-card/80 lg:hidden">
+          <div className="border-b border-border/60 px-4 py-3">
+            <p className="text-sm font-bold">Áreas do painel</p>
+            <p className="text-xs text-muted-foreground">Tudo o que o sistema faz, à mão</p>
+          </div>
+          <CardContent className="space-y-3 p-3">
+            {GRUPOS_VISIVEIS.filter((g) => g.label).map((grupo) => (
+              <div key={grupo.label}>
+                <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+                  {grupo.label}
+                </p>
+                <div className="grid gap-1 sm:grid-cols-2">
+                  {grupo.items.map(({ to, label, desc, icon: Icone }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      title={desc ?? label}
+                      className="group flex items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-2 transition-colors hover:border-primary/25 hover:bg-primary/[0.06]"
+                    >
+                      <span
+                        className={cn(
+                          "flex size-8 shrink-0 items-center justify-center rounded-lg",
+                          COR_DO_GRUPO[grupo.label ?? ""] ?? "bg-primary/10 text-primary",
+                        )}
+                      >
+                        <Icone className="size-4" aria-hidden />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13px] font-semibold leading-tight">
+                          {label}
+                        </span>
+                        {desc ? (
+                          <span className="block truncate text-[11px] leading-tight text-muted-foreground">
+                            {desc}
+                          </span>
+                        ) : null}
+                      </span>
+                      <ArrowUpRight
+                        className="size-3.5 shrink-0 text-muted-foreground/40 transition group-hover:translate-x-0.5 group-hover:text-primary"
+                        aria-hidden
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     </DashboardShell>
+  );
+}
+
+function Atalho({ to, Icone, rotulo }: { to: string; Icone: LucideIcon; rotulo: string }) {
+  return (
+    <Button asChild size="sm" variant="outline" className="h-9 rounded-full px-3">
+      <Link to={to}>
+        <Icone className="size-4" /> {rotulo}
+      </Link>
+    </Button>
   );
 }
 
@@ -280,16 +283,19 @@ function Indicador({
   rotulo,
   valor,
   destaque,
+  className,
 }: {
   Icone: LucideIcon;
   rotulo: string;
-  valor: number;
+  valor: number | string;
   destaque?: "verde" | "vermelho" | undefined;
+  className?: string | undefined;
 }) {
   return (
     <Card
       className={cn(
-        "bg-card/80",
+        "bg-background/40 shadow-none",
+        className,
         destaque === "verde" && "border-emerald-500/40",
         destaque === "vermelho" && "border-red-500/40",
       )}
@@ -309,7 +315,7 @@ function Indicador({
         </span>
         <div className="min-w-0">
           <p className="text-xl font-bold leading-none tabular-nums">{valor}</p>
-          <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground">{rotulo}</p>
+          <p className="mt-1 truncate text-[11px] leading-tight text-muted-foreground">{rotulo}</p>
         </div>
       </CardContent>
     </Card>

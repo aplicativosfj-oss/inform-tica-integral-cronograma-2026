@@ -25,7 +25,7 @@ import {
   Users2,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,40 +54,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-function NavLink({
-  to,
-  label,
-  Icone,
-  so2xl = false,
-}: {
-  to: string;
-  label: string;
-  Icone: LucideIcon;
-  /** Só aparece na barra em telas bem largas; antes disso fica no menu "Mais". */
-  so2xl?: boolean;
-}) {
-  const location = useLocation();
-  const isActive = location.pathname === to || (to === "/" && location.pathname === "");
-
-  return (
-    <Link
-      to={to}
-      aria-current={isActive ? "page" : undefined}
-      className={cn(
-        "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold transition-colors 2xl:text-sm",
-        so2xl ? "2xl:inline-flex" : "xl:inline-flex",
-        isActive
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
-      )}
-    >
-      {/* Entre 1280 e 1535 px os ícones saem para todos os atalhos caberem. */}
-      <Icone className="hidden size-4 2xl:block" aria-hidden />
-      {label}
-    </Link>
-  );
-}
 
 /**
  * "Avaliações" no topo abre as três abas da área em vez de só levar ao
@@ -119,49 +85,137 @@ function tituloDaPagina(pathname: string): string {
   return "Laboratório de informática";
 }
 
-const LINKS_MAIS: { to: string; label: string; Icone: LucideIcon; ate2xl?: boolean }[] = [
-  { to: "/avaliacao", label: "Avaliações", Icone: ListChecks, ate2xl: true },
-  { to: "/aluno", label: "Área do Aluno", Icone: GraduationCap, ate2xl: true },
+/** Atalhos principais da barra, na ordem de prioridade (os últimos saem primeiro). */
+const ITENS_BARRA: { to: string; label: string; Icone: LucideIcon }[] = [
+  { to: "/", label: "Início", Icone: Home },
+  { to: "/agenda", label: "Laboratório", Icone: MonitorSmartphone },
+  { to: "/entre-turnos", label: "Entre Turnos", Icone: Clock },
+  { to: "/resultados", label: "Resultados", Icone: BarChart3 },
+  { to: "/infoteca", label: "Infoteca", Icone: Puzzle },
+  { to: "/avaliacao", label: "Avaliações", Icone: ListChecks },
+  { to: "/aluno", label: "Área do Aluno", Icone: GraduationCap },
+];
+
+const LINKS_MAIS: { to: string; label: string; Icone: LucideIcon }[] = [
   { to: "/coordenacao", label: "Coordenação", Icone: Users2 },
   { to: "/professor", label: "Professor", Icone: Presentation },
   { to: "/mediador", label: "Mediadores", Icone: HandHeart },
   { to: "/sobre", label: "Sobre", Icone: Info },
 ];
 
-/** Atalhos de equipe e institucionais, guardados num menu para o cabeçalho caber na janela. */
-function MaisLinks() {
+const ativoEm = (pathname: string, to: string) =>
+  to === "/" ? pathname === "/" || pathname === "" : pathname.startsWith(to);
+
+const CLASSE_ITEM =
+  "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold transition-colors";
+
+/**
+ * Menu da barra que mede o próprio espaço: mostra quantos atalhos couberem
+ * (com ícones, se der) e guarda o resto em "Mais". Nada se sobrepõe ao logo
+ * nem empurra os botões da direita, em qualquer largura ou zoom.
+ */
+function MenuAdaptavel() {
   const location = useLocation();
-  const ativo = LINKS_MAIS.some((l) => location.pathname.startsWith(l.to));
+  const vaga = useRef<HTMLDivElement>(null);
+  const regua = useRef<HTMLDivElement>(null);
+  const [cabe, setCabe] = useState({ n: ITENS_BARRA.length, icones: false });
+
+  useLayoutEffect(() => {
+    const el = vaga.current;
+    const r = regua.current;
+    if (!el || !r) return;
+    const medir = () => {
+      const largura = el.clientWidth - 10; // borda e respiro da cápsula
+      const com = [...r.querySelectorAll<HTMLElement>("[data-com]")].map((x) => x.offsetWidth);
+      const sem = [...r.querySelectorAll<HTMLElement>("[data-sem]")].map((x) => x.offsetWidth);
+      const mais = r.querySelector<HTMLElement>("[data-mais]")?.offsetWidth ?? 90;
+      const soma = (l: number[], k: number) => l.slice(0, k).reduce((a, b) => a + b + 2, 0);
+      if (soma(com, com.length) + mais <= largura) return setCabe({ n: com.length, icones: true });
+      let k = sem.length;
+      while (k > 1 && soma(sem, k) + mais > largura) k--;
+      setCabe({ n: k, icones: false });
+    };
+    medir();
+    const obs = new ResizeObserver(medir);
+    obs.observe(el);
+    void document.fonts?.ready.then(medir);
+    return () => obs.disconnect();
+  }, []);
+
+  const visiveis = ITENS_BARRA.slice(0, cabe.n);
+  const noMais = [...ITENS_BARRA.slice(cabe.n), ...LINKS_MAIS];
+  const maisAtivo = noMais.some((l) => ativoEm(location.pathname, l.to));
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className={cn(
-            "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold transition-colors xl:inline-flex 2xl:text-sm",
-            ativo
-              ? "bg-primary text-primary-foreground shadow-sm"
-              : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
-          )}
-        >
-          <LayoutGrid className="size-4" aria-hidden /> Mais{" "}
-          <ChevronDown className="size-3.5 opacity-70" aria-hidden />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5">
-        {LINKS_MAIS.map(({ to, label, Icone, ate2xl }) => (
-          <DropdownMenuItem
-            key={to}
-            asChild
-            className={cn("gap-2.5 rounded-lg py-2 font-medium", ate2xl && "2xl:hidden")}
-          >
-            <Link to={to}>
-              <Icone className="size-4 text-primary" aria-hidden /> {label}
-            </Link>
-          </DropdownMenuItem>
+    <div ref={vaga} className="relative hidden min-w-0 flex-1 xl:flex">
+      {/* Régua invisível: mede cada atalho com e sem ícone. */}
+      <div
+        ref={regua}
+        aria-hidden
+        className="pointer-events-none invisible absolute left-0 top-0 flex"
+      >
+        {ITENS_BARRA.map(({ to, label, Icone }) => (
+          <span key={`c${to}`} data-com className={CLASSE_ITEM}>
+            <Icone className="size-4" /> {label}
+          </span>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        {ITENS_BARRA.map(({ to, label }) => (
+          <span key={`s${to}`} data-sem className={CLASSE_ITEM}>
+            {label}
+          </span>
+        ))}
+        <span data-mais className={CLASSE_ITEM}>
+          <LayoutGrid className="size-4" /> Mais <ChevronDown className="size-3.5" />
+        </span>
+      </div>
+
+      <div className="flex min-w-0 items-center gap-0.5 overflow-hidden rounded-full border border-border/60 bg-muted/60 p-1">
+        {visiveis.map(({ to, label, Icone }) => {
+          const ativo = ativoEm(location.pathname, to);
+          return (
+            <Link
+              key={to}
+              to={to}
+              aria-current={ativo ? "page" : undefined}
+              className={cn(
+                CLASSE_ITEM,
+                ativo
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
+              )}
+            >
+              {cabe.icones ? <Icone className="size-4" aria-hidden /> : null}
+              {label}
+            </Link>
+          );
+        })}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className={cn(
+                CLASSE_ITEM,
+                maisAtivo
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
+              )}
+            >
+              <LayoutGrid className="size-4" aria-hidden /> Mais
+              <ChevronDown className="size-3.5 opacity-70" aria-hidden />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 rounded-xl p-1.5">
+            {noMais.map(({ to, label, Icone }) => (
+              <DropdownMenuItem key={to} asChild className="gap-2.5 rounded-lg py-2 font-medium">
+                <Link to={to}>
+                  <Icone className="size-4 text-primary" aria-hidden /> {label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }
 
@@ -379,22 +433,13 @@ export function NavBar() {
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-[3px] bg-gradient-to-r from-primary via-sun to-primary"
       />
-      <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-3 px-3 sm:gap-4 sm:px-6">
+      <div className="flex h-16 w-full items-center gap-3 px-3 sm:gap-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex shrink-0 items-center" aria-label="Início">
           <Marca curto />
         </Link>
 
         <nav className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2">
-          <div className="mr-auto hidden items-center gap-0.5 rounded-full border border-border/60 bg-muted/60 p-1 xl:ml-2 xl:flex 2xl:ml-6">
-            <NavLink to="/" label="Início" Icone={Home} />
-            <NavLink to="/agenda" label="Laboratório" Icone={MonitorSmartphone} />
-            <NavLink to="/entre-turnos" label="Entre Turnos" Icone={Clock} />
-            <NavLink to="/resultados" label="Resultados" Icone={BarChart3} />
-            <NavLink to="/infoteca" label="Infoteca" Icone={Puzzle} />
-            <NavLink to="/avaliacao" label="Avaliações" Icone={ListChecks} so2xl />
-            <NavLink to="/aluno" label="Área do Aluno" Icone={GraduationCap} so2xl />
-            <MaisLinks />
-          </div>
+          <MenuAdaptavel />
           {/* O rádio aparece também no celular (em versão compacta); o contador
               de quem está online cede o lugar a ele nas telas pequenas. */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 sm:rounded-full sm:border sm:border-border/60 sm:bg-muted/40 sm:p-1">

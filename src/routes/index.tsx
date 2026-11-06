@@ -262,7 +262,7 @@ function Index() {
             <div aria-hidden="true" className="home-hero-aurora absolute inset-0 -z-20" />
             <div aria-hidden="true" className="home-hero-grid absolute inset-0 -z-10" />
 
-            <div className="mx-auto max-w-[84rem] px-4 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7 lg:px-10">
+            <div className="mx-auto max-w-[120rem] px-4 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7 lg:px-12 2xl:px-16">
               {/* Assinatura da escola e o botão de tela grande numa linha só. */}
               <div
                 data-constelacao-evitar
@@ -416,13 +416,13 @@ function Index() {
                 />
               </div>
             </div>
-            <AvisoDireitosImagem className="mx-auto max-w-[84rem] px-4 pb-3 text-white/40 sm:px-8" />
+            <AvisoDireitosImagem className="mx-auto max-w-[120rem] px-4 pb-3 text-white/40 sm:px-8" />
           </section>
 
           {/* ───────────── acessos ───────────── */}
           <section
             aria-labelledby="home-acessos-titulo"
-            className="home-section mx-auto max-w-[84rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-10"
+            className="home-section mx-auto max-w-[120rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-12 2xl:px-16"
           >
             <Reveal>
               <SectionIntro
@@ -457,7 +457,7 @@ function Index() {
             aria-labelledby="home-lab-titulo"
             className="home-live-section scroll-mt-24 border-y border-border/60 py-10 sm:py-14"
           >
-            <div className="mx-auto max-w-[84rem] px-4 sm:px-8 lg:px-10">
+            <div className="mx-auto max-w-[120rem] px-4 sm:px-8 lg:px-12 2xl:px-16">
               <Reveal>
                 <SectionIntro
                   etiqueta="Acompanhe em tempo real"
@@ -517,7 +517,7 @@ function Index() {
           {/* ───────────── como funciona ───────────── */}
           <section
             aria-labelledby="home-metodo-titulo"
-            className="home-section mx-auto max-w-[84rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-10"
+            className="home-section mx-auto max-w-[120rem] px-4 py-10 sm:px-8 sm:py-14 lg:px-12 2xl:px-16"
           >
             <Reveal>
               <SectionIntro
@@ -558,7 +558,7 @@ function Index() {
             aria-labelledby="home-comunidade-titulo"
             className="home-community border-t border-border/60 py-10 sm:py-14"
           >
-            <div className="mx-auto max-w-[84rem] px-4 sm:px-8 lg:px-10">
+            <div className="mx-auto max-w-[120rem] px-4 sm:px-8 lg:px-12 2xl:px-16">
               <Reveal>
                 <SectionIntro
                   etiqueta="Nossa comunidade escolar"
@@ -606,8 +606,8 @@ function Index() {
           </section>
 
           {/* ───────────── equipe ───────────── */}
-          <section aria-label="Acesso da equipe" className="px-4 pb-10 sm:px-8 lg:px-10">
-            <Reveal className="home-team-cta mx-auto flex max-w-[84rem] flex-col gap-5 rounded-[1.6rem] p-px md:flex-row">
+          <section aria-label="Acesso da equipe" className="px-4 pb-10 sm:px-8 lg:px-12 2xl:px-16">
+            <Reveal className="home-team-cta mx-auto flex max-w-[120rem] flex-col gap-5 rounded-[1.6rem] p-px md:flex-row">
               <div className="flex w-full flex-col gap-5 rounded-[calc(1.6rem-1px)] bg-card px-6 py-6 sm:px-8 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-start gap-4">
                   <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">

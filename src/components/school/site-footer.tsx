@@ -29,7 +29,7 @@ export function SiteFooter() {
         aria-hidden
         className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary via-sun to-mint"
       />
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-8 gap-y-3 px-4 py-4 sm:px-6">
+      <div className="mx-auto flex max-w-[120rem] flex-wrap items-center justify-between gap-x-8 gap-y-3 px-4 py-4 sm:px-8 lg:px-12 2xl:px-16">
         <Link to="/" aria-label="Início" className="shrink-0">
           <Marca curto className="[&_span]:!text-white [&_span.text-sun]:!text-sun" />
         </Link>
@@ -58,7 +58,7 @@ export function SiteFooter() {
       </div>
 
       <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 text-[11px] text-white/55 sm:px-6">
+        <div className="mx-auto flex max-w-[120rem] flex-wrap items-center justify-between gap-x-6 gap-y-1 px-4 py-2 text-[11px] text-white/55 sm:px-8 lg:px-12 2xl:px-16">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span>
               © {ANO_ATUAL} {config.nomeEscola}

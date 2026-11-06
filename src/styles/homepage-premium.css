@@ -316,6 +316,13 @@
 }
 .home-premium .home-ticker-trilho {
   animation: home-ticker linear infinite;
+  will-change: transform;
+}
+.home-premium .home-ticker-parado {
+  scrollbar-width: none;
+}
+.home-premium .home-ticker-parado::-webkit-scrollbar {
+  display: none;
 }
 .home-premium .home-ticker:hover .home-ticker-trilho {
   animation-play-state: paused;

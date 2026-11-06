@@ -44,14 +44,14 @@ export function BannerEntreTurnos() {
 
   if (feriadoNacionalEm(hojeNaEscola())) {
     return (
-      <div className="mx-auto w-full max-w-6xl px-4 pt-7 sm:px-6">
+      <div className="mx-auto w-full max-w-[120rem] px-4 pt-7 sm:px-8 lg:px-12 2xl:px-16">
         <AvisoFeriado dataISO={hojeNaEscola()} variante="painel" className="max-w-none" />
       </div>
     );
   }
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
+    <section className="mx-auto w-full max-w-[120rem] px-4 pt-2 sm:px-8 lg:px-12 2xl:px-16">
       <Link
         to="/entre-turnos"
         className="group relative isolate block overflow-hidden rounded-[2rem] bg-ink p-5 text-white shadow-xl ring-1 ring-white/10 transition-transform duration-300 hover:-translate-y-0.5 sm:p-7 dark:bg-card"
