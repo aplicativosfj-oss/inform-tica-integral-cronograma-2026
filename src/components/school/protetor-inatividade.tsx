@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
 import { estadoDaSessao, useSessoesLab } from "@/lib/laboratorio";
+import { useAuth } from "@/lib/auth-store";
+import { supabase } from "@/lib/supabase-client";
 import {
   ArrowRight, BookOpen, Check, Clock3, Code2, Cpu, GraduationCap,
   Maximize2, Monitor, ShieldCheck, Sparkles, Wifi, X,
@@ -28,10 +30,42 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [confirmarSaida, setConfirmarSaida] = useState(false);
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
+  const [protetorForcado, setProtetorForcado] = useState(false);
+  const { isAuthenticated, isReady: authPronto } = useAuth();
   const [agoraMs, setAgoraMs] = useState(() => Date.now());
   const { sessoes } = useSessoesLab();
   const aulaEmAndamento = sessoes.some((sessao) => estadoDaSessao(sessao, agoraMs) === "ao-vivo");
   const temporizadorRef = useRef<number | undefined>(undefined);
+  // Estado global vem do app_state: todos os navegadores recebem a alteração
+  // por Realtime e também fazem leitura inicial ao abrir a plataforma.
+  useEffect(() => {
+    let cancelado = false;
+    const carregar = async () => {
+      const { data, error } = await supabase
+        .from("app_state")
+        .select("config")
+        .eq("id", "default")
+        .maybeSingle();
+      if (!cancelado && !error) {
+        setProtetorForcado(Boolean((data?.config as { protetorForcado?: boolean } | null)?.protetorForcado));
+      }
+    };
+    void carregar();
+    const polling = window.setInterval(() => void carregar(), 10_000);
+    const canal = supabase
+      .channel("protetor-tela-global")
+      .on("postgres_changes", { event: "*", schema: "public", table: "app_state", filter: "id=eq.default" }, (payload) => {
+        const row = (payload.new ?? {}) as { config?: { protetorForcado?: boolean } };
+        setProtetorForcado(Boolean(row.config?.protetorForcado));
+      })
+      .subscribe();
+    return () => {
+      cancelado = true;
+      window.clearInterval(polling);
+      void supabase.removeChannel(canal);
+    };
+  }, []);
+
   useEffect(() => {
     const id = window.setInterval(() => setAgoraMs(Date.now()), 15_000);
     return () => window.clearInterval(id);
@@ -40,12 +74,12 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   // Uma aula ao vivo tem prioridade sobre o descanso de tela, mesmo sem
   // interação: o protetor não deve cobrir o painel durante a atividade.
   useEffect(() => {
-    if (!aulaEmAndamento) return;
+    if (!aulaEmAndamento || protetorForcado) return;
     window.clearTimeout(temporizadorRef.current);
     temporizadorRef.current = undefined;
     setAtivo(false);
     setConfirmarSaida(false);
-  }, [aulaEmAndamento]);
+  }, [aulaEmAndamento, protetorForcado]);
 
   // Bloqueio global da página enquanto o screensaver estiver aberto.
   useEffect(() => {
@@ -94,10 +128,22 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     if (typeof window === "undefined") return;
     const desktop = window.matchMedia("(min-width: 900px) and (hover: hover) and (pointer: fine)");
     const bloqueada = ROTAS_EXCLUIDAS.some((rota) => pathname === rota || pathname.startsWith(rota + "/"));
-    if (!desktop.matches || bloqueada || aulaEmAndamento) {
+    if (!authPronto || isAuthenticated) {
       setAtivo(false);
       setConfirmarSaida(false);
       return;
+    }
+    if ((!desktop.matches && !protetorForcado) || bloqueada || (aulaEmAndamento && !protetorForcado)) {
+      setAtivo(false);
+      setConfirmarSaida(false);
+      return;
+    }
+
+    if (protetorForcado) {
+      window.clearTimeout(temporizadorRef.current);
+      setConfirmarSaida(false);
+      setAtivo(true);
+      return () => window.clearTimeout(temporizadorRef.current);
     }
 
     const reiniciar = () => {
@@ -129,7 +175,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       eventos.forEach((evento) => window.removeEventListener(evento, reiniciar));
       document.removeEventListener("visibilitychange", visibilidade);
     };
-  }, [pathname, aulaEmAndamento]);
+  }, [pathname, aulaEmAndamento, protetorForcado, authPronto, isAuthenticated]);
 
   useEffect(() => {
     const atualizar = () => setTelaCheia(Boolean(document.fullscreenElement));
@@ -155,6 +201,11 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   };
 
   const pedirConfirmacao = (evento: PointerEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
+    if (protetorForcado) {
+      evento.preventDefault();
+      evento.stopPropagation();
+      return;
+    }
     if (confirmarSaida) return;
     evento.preventDefault();
     evento.stopPropagation();
@@ -176,7 +227,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     temporizadorRef.current = window.setTimeout(() => setAtivo(true), TEMPO_INATIVIDADE);
   };
 
-  if (!ativo) return null;
+  if (!ativo || (isAuthenticated && authPronto)) return null;
   const horario = formatarHora(agora);
 
   return (
@@ -506,7 +557,8 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         .screensaver-neon-corner { animation:screensaverNeonPulse 5.5s ease-in-out infinite; }
         .screensaver-neon-tr { animation-delay:1.2s; } .screensaver-neon-bl { animation-delay:2.4s; } .screensaver-neon-br { animation-delay:3.6s; }
         @media (prefers-reduced-motion: reduce) { .screensaver-neon-corner { animation:none; } }
-\n                @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
+
+                @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
         @keyframes cameraLine { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(170px); opacity: .9; } }
         @keyframes cctvRoomPan { 0% { transform: scale(1.04) translate3d(-.5%,0,0); } 100% { transform: scale(1.14) translate3d(.7%,-.6%,0); } }
         @keyframes cctvScan { 0% { transform: translateY(0); opacity: .18; } 50% { opacity: .8; } 100% { transform: translateY(350px); opacity: .18; } }
@@ -571,7 +623,11 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         @keyframes cameraPivot { 0% { transform: rotate(-1.2deg) translateX(-2px); } 50% { transform: rotate(.8deg) translateX(3px); } 100% { transform: rotate(-.4deg) translateX(0); } }
         @keyframes lensPulse { 0%, 100% { opacity: .18; transform: scale(.97); } 50% { opacity: .7; transform: scale(1.035); } }
         @keyframes cameraProgress { 0% { transform: translateX(-55%); } 100% { transform: translateX(110%); } }
-        #screensaver-informatica .constelacao-lab { z-index: 30; }\n        #screensaver-informatica .constelacao-texto { font-size: clamp(1.2rem, 2.2vw, 2.4rem); }\n        #screensaver-informatica .constelacao-legenda { font-size: clamp(.55rem, .8vw, .72rem); }\n        @media (max-height: 760px) { #screensaver-informatica main { gap: 2px; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] { min-height: 0; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] > div:first-child { min-height: 0; } #screensaver-informatica main > div.mt-1.grid.w-full.shrink-0.grid-cols-3 { display: none; } #screensaver-informatica main > section[aria-label="Alunos do laboratório"] { display: none; } #screensaver-informatica main > footer { display: none; } }\n        @media (prefers-reduced-motion: reduce) {
+        #screensaver-informatica .constelacao-lab { z-index: 30; }
+        #screensaver-informatica .constelacao-texto { font-size: clamp(1.2rem, 2.2vw, 2.4rem); }
+        #screensaver-informatica .constelacao-legenda { font-size: clamp(.55rem, .8vw, .72rem); }
+        @media (max-height: 760px) { #screensaver-informatica main { gap: 2px; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] { min-height: 0; } #screensaver-informatica main > section[aria-label="Monitoramento do laboratório"] > div:first-child { min-height: 0; } #screensaver-informatica main > div.mt-1.grid.w-full.shrink-0.grid-cols-3 { display: none; } #screensaver-informatica main > section[aria-label="Alunos do laboratório"] { display: none; } #screensaver-informatica main > footer { display: none; } }
+        @media (prefers-reduced-motion: reduce) {
           [class*="animate-"] { animation: none !important; }
         }
       `}</style>
