@@ -867,6 +867,21 @@ export function ControleLaboratorio({
                     Boolean(a.impedido) || ocupado || Boolean(ausente) || travadoSemana || noTeto;
                   const fila = posicaoFila.get(k);
                   const marca = marcaDe(marcas, t.id, a.id);
+                  const alertaVisual = a.impedido
+                    ? { rotulo: "SUSPENSO", classe: "border-amber-400/50 bg-gradient-to-r from-amber-600 to-orange-400 text-white", icone: "!" }
+                    : ausente?.ausencia === "faltou"
+                      ? { rotulo: "FALTOU HOJE", classe: "border-rose-400/50 bg-gradient-to-r from-rose-700 to-pink-500 text-white", icone: "!" }
+                      : ausente?.ausencia === "recusou"
+                        ? { rotulo: "RECUSOU-SE", classe: "border-fuchsia-400/50 bg-gradient-to-r from-fuchsia-700 to-violet-500 text-white", icone: "!" }
+                        : ausente?.ausencia === "nao_autorizado"
+                          ? { rotulo: "IMPEDIDO HOJE", classe: "border-orange-400/50 bg-gradient-to-r from-orange-700 to-amber-500 text-white", icone: "!" }
+                          : a.situacao === "transferido" || a.situacao === "desistente"
+                            ? { rotulo: a.situacao === "transferido" ? "TRANSFERIDO" : "DESISTENTE", classe: "border-slate-400/50 bg-gradient-to-r from-slate-700 to-slate-500 text-white", icone: "–" }
+                            : ocupado
+                              ? { rotulo: "NO LABORATÓRIO", classe: "border-emerald-400/50 bg-gradient-to-r from-emerald-700 to-teal-500 text-white", icone: "✓" }
+                              : sit.hoje
+                                ? { rotulo: "PARTICIPOU HOJE", classe: "border-emerald-400/50 bg-gradient-to-r from-emerald-700 to-teal-500 text-white", icone: "✓" }
+                                : null;
                   const presenca = presencaHoje(ausente?.ausencia ?? null, ocupado || sit.hoje);
                   const cor = presenca ? PRESENCA[presenca] : null;
                   const ring = a.impedido
@@ -947,11 +962,23 @@ export function ControleLaboratorio({
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1.5">
-                            <span className="truncate text-sm font-semibold">{a.nome}</span>
+                            <span className="min-w-0 truncate text-sm font-semibold">{a.nome}</span>
                             <SeloAniversario
                               nascimento={a.nascimento}
                               aniversario={a.aniversario}
                             />
+                            {alertaVisual ? (
+                              <span
+                                title={alertaVisual.rotulo}
+                                className={cn(
+                                  "inline-flex max-w-[9.5rem] shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-extrabold tracking-wide shadow-sm sm:max-w-none sm:text-[10px]",
+                                  alertaVisual.classe,
+                                )}
+                              >
+                                <span aria-hidden className="grid size-3.5 shrink-0 place-items-center rounded-full bg-white/20 text-[10px]">{alertaVisual.icone}</span>
+                                <span className="truncate">{alertaVisual.rotulo}</span>
+                              </span>
+                            ) : null}
                             {fila && fila <= 10 && !marcado ? (
                               <span
                                 className="shrink-0 rounded-md bg-indigo-600 px-1.5 text-[10px] font-extrabold text-white"
