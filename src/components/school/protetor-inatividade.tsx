@@ -1,11 +1,11 @@
 import { useEffect, useState, type MouseEvent } from "react";
-import { Clock3, Monitor, Sparkles, GraduationCap, Cpu, BookOpen, Code2, Wifi, Maximize2 } from "lucide-react";
+import { Clock3, Monitor, Sparkles, GraduationCap, Cpu, BookOpen, Code2, Wifi, Maximize2, Camera, ShieldCheck } from "lucide-react";
 
-const TEMPO_INATIVIDADE = 120_000;
+const TEMPO_INATIVIDADE = 60_000;
 const ROTAS_EXCLUIDAS = ["/login", "/tv", "/sala-de-jogos", "/jogos"];
 
 function formatarHora(data: Date) {
-  return data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 function formatarData(data: Date) {
@@ -132,13 +132,25 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
 
         <div className="relative w-full max-w-4xl">
           <div aria-hidden className="pointer-events-none absolute inset-x-[12%] top-1/2 h-24 -translate-y-1/2 rounded-full bg-indigo-500/20 blur-3xl" />
-          <div className="relative font-heading text-[clamp(5rem,17vw,12rem)] font-black leading-none tracking-[-0.075em] tabular-nums text-white drop-shadow-[0_12px_45px_rgba(99,102,241,0.25)]">
+          <div className="relative font-heading text-[clamp(4.5rem,14vw,10rem)] font-black leading-none tracking-[-0.075em] tabular-nums text-white drop-shadow-[0_12px_45px_rgba(99,102,241,0.25)]">
             {formatarHora(agora)}
           </div>
         </div>
         <p className="mt-5 text-base font-medium capitalize text-indigo-100/75 sm:text-xl">
           {formatarData(agora)}
         </p>
+        <div className="mt-4 flex items-center justify-center gap-2.5" aria-label={`Horas, minutos e segundos: ${formatarHora(agora)}`}>
+          {[
+            { label: "HORAS", value: formatarHora(agora).split(":")[0] },
+            { label: "MINUTOS", value: formatarHora(agora).split(":")[1] },
+            { label: "SEGUNDOS", value: formatarHora(agora).split(":")[2] },
+          ].map((parte) => (
+            <div key={parte.label} className="min-w-[4.4rem] rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2 backdrop-blur-md sm:min-w-[5.25rem]">
+              <div className="font-mono text-xl font-bold tabular-nums text-cyan-100 sm:text-2xl">{parte.value}</div>
+              <div className="mt-0.5 text-[8px] font-extrabold tracking-[0.18em] text-white/45">{parte.label}</div>
+            </div>
+          ))}
+        </div>
 
         <div className="mt-12 flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] px-6 py-4 shadow-2xl backdrop-blur-xl sm:flex-row sm:gap-4 sm:px-8">
           <span className="flex size-10 items-center justify-center rounded-full bg-white/10 text-cyan-200">
@@ -159,7 +171,28 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           <Maximize2 className="size-4" />
           {telaCheia ? "Modo tela cheia ativado" : "Ativar modo tela cheia"}
         </button>
-        <div className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-2 sm:grid-cols-3">
+        <section className="mt-7 w-full max-w-4xl rounded-2xl border border-cyan-200/15 bg-[#111a36]/85 p-3 text-left shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-4" aria-label="Mensagem de cuidado e responsabilidade">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex h-24 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-cyan-100/15 bg-gradient-to-br from-[#17264a] to-[#080f25] sm:h-24 sm:w-36">
+              <div aria-hidden className="absolute inset-0 opacity-30" style={{ backgroundImage: "linear-gradient(rgba(103,232,249,.18) 1px, transparent 1px),linear-gradient(90deg,rgba(103,232,249,.18) 1px,transparent 1px)", backgroundSize: "14px 14px" }} />
+              <div className="relative flex size-14 items-center justify-center rounded-full border border-cyan-200/35 bg-cyan-300/10 text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,.18)]">
+                <Camera className="size-7 motion-safe:animate-pulse" />
+                <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-[#111a36] bg-cyan-300" />
+              </div>
+              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-cyan-200/60 motion-safe:animate-[scan_3s_ease-in-out_infinite]" />
+              <span className="absolute bottom-1.5 left-2 text-[8px] font-bold tracking-[0.16em] text-cyan-100/60">VISUAL ILUSTRATIVO</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-cyan-200">
+                <ShieldCheck className="size-3.5" /> Cuidado e responsabilidade
+              </div>
+              <p className="mt-1.5 text-sm font-bold leading-snug text-white sm:text-base">Nosso laboratório é um espaço de respeito, aprendizagem e cuidado.</p>
+              <p className="mt-1 text-xs leading-relaxed text-indigo-100/65">Utilize os equipamentos com responsabilidade e siga as orientações dos educadores.</p>
+              <p className="mt-1.5 text-[9px] font-semibold text-white/35">Elemento gráfico de câmera ilustrativo — não representa uma transmissão ou monitoramento real.</p>
+            </div>
+          </div>
+        </section>
+        <div className="mt-7 grid w-full max-w-4xl grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 py-3 text-left backdrop-blur-md">
             <BookOpen className="size-4 shrink-0 text-violet-200" />
             <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/65">Aprendizagem</span>
