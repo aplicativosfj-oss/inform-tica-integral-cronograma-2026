@@ -350,3 +350,44 @@
   .home-premium .home-window-section .home-access-card .home-access-arrow { display: none; }
   .home-premium .home-window-section .home-access-card p { display: none; }
 }
+
+/* Cards de acesso: hierarquia legível sem desperdiçar espaço no celular. */
+.home-premium .home-access-card { isolation: isolate; }
+.home-premium .home-access-card .home-access-photo { transition: transform .4s ease; }
+@media (hover:hover) and (prefers-reduced-motion:no-preference) {
+  .home-premium .home-access-card:hover .home-access-photo { transform: scale(1.045); }
+}
+@media (max-width:639px) {
+  .home-premium .home-window-section .home-access-card {
+    height: 9.75rem;
+    padding: .65rem;
+  }
+  .home-premium .home-access-card .home-access-index,
+  .home-premium .home-access-card .home-access-label { display: none; }
+  .home-premium .home-access-card .home-access-icon {
+    background: rgba(12,18,36,.52);
+    border-color: rgba(255,255,255,.3);
+    color: #fff;
+    backdrop-filter: blur(8px);
+  }
+  .home-premium .home-access-card h3 {
+    font-size: .96rem;
+    line-height: 1.15;
+    letter-spacing: -.015em;
+    max-width: 100%;
+    color: #fff;
+    text-wrap: balance;
+  }
+  .home-premium .home-access-card .home-access-cta {
+    margin-top: .35rem;
+    font-size: .68rem;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .home-premium .home-access-card .home-access-overlay {
+    background: linear-gradient(180deg,rgba(5,9,24,.15) 0%,rgba(5,9,24,.25) 30%,rgba(5,9,24,.95) 100%);
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  .home-premium .home-access-card .home-access-photo { transition: none; }
+}
