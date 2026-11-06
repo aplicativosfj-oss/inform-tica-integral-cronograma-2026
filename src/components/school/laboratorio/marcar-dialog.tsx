@@ -49,14 +49,14 @@ export function MarcarAlunosCartao({
         </Card>
       )}
       <Dialog open={aberto} onOpenChange={setAberto}>
-        <DialogContent className="flex h-[min(88dvh,820px)] w-[calc(100vw-1rem)] max-w-5xl flex-col gap-2 overflow-hidden rounded-2xl p-3 sm:gap-3 sm:p-5">
+        <DialogContent className="flex h-[min(86dvh,820px)] w-[calc(100vw-1rem)] min-w-0 max-w-5xl flex-col gap-2 overflow-hidden rounded-2xl p-3 sm:gap-3 sm:p-5">
           <DialogHeader className="shrink-0 pr-8">
             <DialogTitle>Programar turma e alunos</DialogTitle>
             <DialogDescription>
               Selecione a turma, escolha os alunos e defina a duração ou o horário. O sistema avisa sobre participações anteriores.
             </DialogDescription>
           </DialogHeader>
-          <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
+          <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:thin]">
             <ControleLaboratorio dados={dados} aoMarcar={() => setAberto(false)} />
           </div>
         </DialogContent>
