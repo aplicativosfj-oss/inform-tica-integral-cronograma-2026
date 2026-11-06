@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
 import { estadoDaSessao, useSessoesLab } from "@/lib/laboratorio";
+import { useAuth } from "@/lib/auth-store";
+import { supabase } from "@/lib/supabase-client";
 import {
   ArrowRight, BookOpen, Check, Clock3, Code2, Cpu, GraduationCap,
   Maximize2, Monitor, ShieldCheck, Sparkles, Wifi, X,
@@ -28,10 +30,40 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [confirmarSaida, setConfirmarSaida] = useState(false);
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
+  const [protetorForcado, setProtetorForcado] = useState(false);
+  const { isAuthenticated, isReady: authPronto } = useAuth();
   const [agoraMs, setAgoraMs] = useState(() => Date.now());
   const { sessoes } = useSessoesLab();
   const aulaEmAndamento = sessoes.some((sessao) => estadoDaSessao(sessao, agoraMs) === "ao-vivo");
   const temporizadorRef = useRef<number | undefined>(undefined);
+  // Estado global vem do app_state: todos os navegadores recebem a alteração
+  // por Realtime e também fazem leitura inicial ao abrir a plataforma.
+  useEffect(() => {
+    let cancelado = false;
+    const carregar = async () => {
+      const { data, error } = await supabase
+        .from("app_state")
+        .select("config")
+        .eq("id", "default")
+        .maybeSingle();
+      if (!cancelado && !error) {
+        setProtetorForcado(Boolean((data?.config as { protetorForcado?: boolean } | null)?.protetorForcado));
+      }
+    };
+    void carregar();
+    const canal = supabase
+      .channel("protetor-tela-global")
+      .on("postgres_changes", { event: "*", schema: "public", table: "app_state", filter: "id=eq.default" }, (payload) => {
+        const row = (payload.new ?? {}) as { config?: { protetorForcado?: boolean } };
+        setProtetorForcado(Boolean(row.config?.protetorForcado));
+      })
+      .subscribe();
+    return () => {
+      cancelado = true;
+      void supabase.removeChannel(canal);
+    };
+  }, []);
+
   useEffect(() => {
     const id = window.setInterval(() => setAgoraMs(Date.now()), 15_000);
     return () => window.clearInterval(id);
@@ -94,13 +126,13 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     if (typeof window === "undefined") return;
     const desktop = window.matchMedia("(min-width: 900px) and (hover: hover) and (pointer: fine)");
     const bloqueada = ROTAS_EXCLUIDAS.some((rota) => pathname === rota || pathname.startsWith(rota + "/"));
-    if (!desktop.matches || bloqueada || aulaEmAndamento) {
+    if (!authPronto || isAuthenticated) {\n      setAtivo(false);\n      setConfirmarSaida(false);\n      return;\n    }\n    if (!desktop.matches || bloqueada || (aulaEmAndamento && !protetorForcado)) {
       setAtivo(false);
       setConfirmarSaida(false);
       return;
     }
 
-    const reiniciar = () => {
+    if (protetorForcado) {\n      window.clearTimeout(temporizadorRef.current);\n      setConfirmarSaida(false);\n      setAtivo(true);\n      return () => window.clearTimeout(temporizadorRef.current);\n    }\n\n    const reiniciar = () => {
       // Se o protetor está montado, nenhuma movimentação do mouse/teclado
       // pode fechá-lo. A única saída é a confirmação explícita no diálogo.
       if (document.getElementById("screensaver-informatica")) return;
@@ -129,7 +161,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       eventos.forEach((evento) => window.removeEventListener(evento, reiniciar));
       document.removeEventListener("visibilitychange", visibilidade);
     };
-  }, [pathname, aulaEmAndamento]);
+  }, [pathname, aulaEmAndamento, protetorForcado, authPronto, isAuthenticated]);
 
   useEffect(() => {
     const atualizar = () => setTelaCheia(Boolean(document.fullscreenElement));
@@ -155,7 +187,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   };
 
   const pedirConfirmacao = (evento: PointerEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
-    if (confirmarSaida) return;
+    if (protetorForcado) {\n      evento.preventDefault();\n      evento.stopPropagation();\n      return;\n    }\n    if (confirmarSaida) return;
     evento.preventDefault();
     evento.stopPropagation();
     setConfirmarSaida(true);
@@ -176,7 +208,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     temporizadorRef.current = window.setTimeout(() => setAtivo(true), TEMPO_INATIVIDADE);
   };
 
-  if (!ativo) return null;
+  if (!ativo || (isAuthenticated && authPronto)) return null;
   const horario = formatarHora(agora);
 
   return (
