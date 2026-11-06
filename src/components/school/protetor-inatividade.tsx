@@ -179,7 +179,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
                 <Camera className="size-7 motion-safe:animate-pulse" />
                 <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-[#111a36] bg-cyan-300" />
               </div>
-              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-cyan-200/60 motion-safe:animate-[scan_3s_ease-in-out_infinite]" />
+              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-cyan-200/60 motion-safe:animate-pulse" />
               <span className="absolute bottom-1.5 left-2 text-[8px] font-bold tracking-[0.16em] text-cyan-100/60">VISUAL ILUSTRATIVO</span>
             </div>
             <div className="min-w-0 flex-1">
