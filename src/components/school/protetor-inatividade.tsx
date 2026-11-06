@@ -55,7 +55,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       return;
     }
 
-    const reiniciar = (evento?: Event) => {
+    const reiniciar = () => {
       // Se o protetor está montado, nenhuma movimentação do mouse/teclado
       // pode fechá-lo. A única saída é a confirmação explícita no diálogo.
       if (document.getElementById("screensaver-informatica")) return;
