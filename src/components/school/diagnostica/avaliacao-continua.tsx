@@ -83,7 +83,7 @@ type Intervencao = {
   evidencia: string;
 };
 
-const ESTRATEGIAS: Record<string, Omit<Intervencao, "area" | "habilidade" | "nivel">> = {
+const ESTRATEGIAS: Record<string, Omit<Intervencao, "area" | "habilidade" | "nivel" | "chave" | "avaliacaoId">> = {
   precisao: {
     objetivo: "Reconhecer palavras com maior precisão, reduzindo trocas, omissões e hesitações.",
     atividade: "Leitura guiada de listas graduadas, jogos de correspondência palavra-imagem e leitura repetida de pequenos trechos.",
