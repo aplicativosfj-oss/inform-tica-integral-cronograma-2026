@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -24,6 +25,7 @@ import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
 import { DestravarTela } from "../components/mobile/destravar-tela";
 import { ComportamentoApp } from "../components/mobile/comportamento-app";
+import { ProtetorInatividade } from "../components/school/protetor-inatividade";
 import { PROGRAMACAO_ATIVA } from "../lib/recursos";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 import { FONTES_CSS, precarregarOffline } from "../lib/offline-precache";
