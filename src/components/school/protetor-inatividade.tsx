@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
+import { estadoDaSessao, useSessoesLab } from "@/lib/laboratorio";
 import {
   ArrowRight, BookOpen, Check, Clock3, Code2, Cpu, GraduationCap,
   Maximize2, Monitor, ShieldCheck, Sparkles, Wifi, X,
@@ -27,7 +28,25 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [confirmarSaida, setConfirmarSaida] = useState(false);
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
+  const [agoraMs, setAgoraMs] = useState(() => Date.now());
+  const { sessoes } = useSessoesLab();
+  const aulaEmAndamento = sessoes.some((sessao) => estadoDaSessao(sessao, agoraMs) === "ao-vivo");
   const temporizadorRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    const id = window.setInterval(() => setAgoraMs(Date.now()), 15_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Uma aula ao vivo tem prioridade sobre o descanso de tela, mesmo sem
+  // interação: o protetor não deve cobrir o painel durante a atividade.
+  useEffect(() => {
+    if (!aulaEmAndamento) return;
+    window.clearTimeout(temporizadorRef.current);
+    temporizadorRef.current = undefined;
+    setAtivo(false);
+    setConfirmarSaida(false);
+  }, [aulaEmAndamento]);
+
   // Bloqueio global da página enquanto o screensaver estiver aberto.
   useEffect(() => {
     if (!ativo) return;
@@ -75,7 +94,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     if (typeof window === "undefined") return;
     const desktop = window.matchMedia("(min-width: 900px) and (hover: hover) and (pointer: fine)");
     const bloqueada = ROTAS_EXCLUIDAS.some((rota) => pathname === rota || pathname.startsWith(rota + "/"));
-    if (!desktop.matches || bloqueada) {
+    if (!desktop.matches || bloqueada || aulaEmAndamento) {
       setAtivo(false);
       setConfirmarSaida(false);
       return;
@@ -110,7 +129,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       eventos.forEach((evento) => window.removeEventListener(evento, reiniciar));
       document.removeEventListener("visibilitychange", visibilidade);
     };
-  }, [pathname]);
+  }, [pathname, aulaEmAndamento]);
 
   useEffect(() => {
     const atualizar = () => setTelaCheia(Boolean(document.fullscreenElement));
