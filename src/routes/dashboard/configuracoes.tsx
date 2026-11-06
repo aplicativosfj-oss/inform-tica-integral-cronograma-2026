@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { LogOut, RotateCcw, Save } from "lucide-react";
+import { LogOut, Monitor, MonitorOff, RotateCcw, Save, ShieldCheck } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -53,6 +53,36 @@ function ConfiguracoesPage() {
           Ajuste os dados da escola e as regras usadas para gerar a agenda automaticamente.
         </p>
       </div>
+
+      <Card className="mb-6 max-w-2xl border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-card shadow-sm">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><ShieldCheck className="size-5" /></span>
+            <div>
+              <CardTitle className="text-base">Proteção global de tela</CardTitle>
+              <CardDescription>Controle centralizado do descanso de tela em todos os navegadores.</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">{config.protetorForcado ? "Proteção ativada para visitantes" : "Proteção global desativada"}</p>
+            <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted-foreground">
+              Quando ativada, visitantes sem login veem imediatamente o descanso de tela em qualquer dispositivo,
+              mesmo durante uma aula. Somente uma conta administrativa pode desativar. Administradores logados
+              continuam acessando o painel normalmente.
+            </p>
+          </div>
+          <Button type="button" variant={config.protetorForcado ? "destructive" : "default"} className="shrink-0"
+            onClick={() => {
+              const ativar = !config.protetorForcado;
+              updateConfig({ protetorForcado: ativar });
+              toast.success(ativar ? "Proteção global ativada." : "Proteção global desativada.");
+            }}>
+            {config.protetorForcado ? <><MonitorOff className="mr-2 size-4" /> Desativar proteção</> : <><Monitor className="mr-2 size-4" /> Ativar proteção</>}
+          </Button>
+        </CardContent>
+      </Card>
 
       <form
         className="flex max-w-2xl flex-col gap-6"
