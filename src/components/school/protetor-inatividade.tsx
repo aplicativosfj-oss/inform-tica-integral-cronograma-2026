@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { useAppStore } from "@/lib/app-store";
 import {
-  ArrowRight, BookOpen, Camera, Check, Clock3, Code2, Cpu, GraduationCap,
+  ArrowRight, BookOpen, Check, Clock3, Code2, Cpu, GraduationCap,
   Maximize2, Monitor, ShieldCheck, Sparkles, Wifi, X,
 } from "lucide-react";
 
@@ -229,45 +229,106 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           <Maximize2 className="size-4" /> {telaCheia ? "Modo tela cheia ativado" : "Ativar modo tela cheia"}
         </button>
 
-        <section className="w-full overflow-hidden rounded-[1.6rem] border border-white/15 bg-slate-950/55 p-3 text-left shadow-2xl shadow-black/30 backdrop-blur-2xl sm:p-5">
-          {/* Simulação visual de CFTV: usa fotografia institucional, sem captar ou transmitir vídeo real. */}
-          <div className="relative aspect-video min-h-[220px] w-full overflow-hidden rounded-2xl border border-cyan-100/25 bg-[#071329] shadow-[0_18px_55px_rgba(0,0,0,.42)] sm:min-h-[340px]">
-            <img
-              src="/images/laboratorio-informatica-turma-1280w.webp"
-              alt="Imagem ilustrativa do laboratório de informática"
-              className="absolute inset-0 h-full w-full object-cover opacity-75 motion-safe:animate-[cctvRoomPan_18s_ease-in-out_infinite_alternate]"
-            />
-            <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#061226]/65 via-transparent to-[#061226]/65" />
-            <div aria-hidden className="absolute inset-0 opacity-25" style={{ backgroundImage: "linear-gradient(rgba(130,220,255,.24) 1px,transparent 1px),linear-gradient(90deg,rgba(130,220,255,.24) 1px,transparent 1px)", backgroundSize: "34px 34px" }} />
-            <div className="absolute inset-0 border-[1px] border-white/10">
-              <span className="absolute left-3 top-3 h-7 w-7 border-l-2 border-t-2 border-cyan-100/80" />
-              <span className="absolute right-3 top-3 h-7 w-7 border-r-2 border-t-2 border-cyan-100/80" />
-              <span className="absolute bottom-3 left-3 h-7 w-7 border-b-2 border-l-2 border-cyan-100/80" />
-              <span className="absolute bottom-3 right-3 h-7 w-7 border-b-2 border-r-2 border-cyan-100/80" />
+        <section aria-label="Monitoramento do laboratório" className="w-full overflow-hidden rounded-[1.6rem] border border-cyan-100/20 bg-[#061329]/80 p-3 text-left shadow-[0_28px_90px_rgba(0,0,0,.42)] backdrop-blur-2xl sm:p-5">
+          <div className="relative isolate min-h-[250px] overflow-hidden rounded-2xl border border-cyan-100/20 bg-[radial-gradient(ellipse_at_72%_42%,rgba(26,105,173,.35),transparent_48%),linear-gradient(120deg,#06101f_0%,#0a1d38_52%,#071226_100%)] sm:min-h-[350px]">
+            <div aria-hidden className="absolute inset-0 opacity-[.16]" style={{ backgroundImage: "linear-gradient(rgba(130,220,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(130,220,255,.28) 1px,transparent 1px)", backgroundSize: "32px 32px" }} />
+            <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_50%,transparent_0%,rgba(2,8,23,.12)_48%,rgba(2,8,23,.75)_100%)]" />
+            <div aria-hidden className="absolute -right-16 top-1/2 size-[330px] -translate-y-1/2 rounded-full border border-cyan-300/10 shadow-[0_0_70px_rgba(34,211,238,.08)] sm:size-[470px]" />
+            <div aria-hidden className="absolute -right-4 top-1/2 size-[250px] -translate-y-1/2 rounded-full border border-cyan-300/15 sm:size-[360px]" />
+            <div aria-hidden className="absolute right-[13%] top-[18%] h-[65%] w-px rotate-[38deg] bg-gradient-to-b from-transparent via-cyan-200/40 to-transparent blur-[1px]" />
+
+            <div className="absolute left-4 top-4 z-10 flex items-center gap-2.5 sm:left-7 sm:top-7">
+              <span className="relative flex size-3">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-400 opacity-70" />
+                <span className="relative inline-flex size-3 rounded-full bg-red-500 shadow-[0_0_15px_4px_rgba(239,68,68,.55)]" />
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[.22em] text-white/90 sm:text-xs">Monitorando …</span>
             </div>
-            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-md border border-red-200/30 bg-black/55 px-3 py-1.5 text-[10px] font-black tracking-[.16em] text-white shadow-lg backdrop-blur-md">
-              <span className="size-2 animate-pulse rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,.9)]" /> REC · SIMULAÇÃO
+            <div className="absolute left-4 top-[4.2rem] z-10 max-w-[42%] sm:left-7 sm:top-[5.2rem]">
+              <p className="text-[9px] font-bold uppercase tracking-[.2em] text-cyan-200/65">Informática educativa</p>
+              <h2 className="mt-2 font-heading text-xl font-black leading-tight text-white drop-shadow-lg sm:text-3xl">Laboratório<br/>de informática</h2>
+              <p className="mt-2 text-[10px] font-medium leading-relaxed text-blue-100/65 sm:text-xs">Escola Municipal Dr. Eiraldo Carneiro de França</p>
+              <div className="mt-5 flex items-center gap-2">
+                <span className="h-1 w-14 overflow-hidden rounded-full bg-white/10 sm:w-20">
+                  <span className="block h-full w-1/2 rounded-full bg-cyan-300 shadow-[0_0_12px_2px_rgba(34,211,238,.7)] motion-safe:animate-[cameraProgress_3.8s_ease-in-out_infinite_alternate]" />
+                </span>
+                <span className="font-mono text-[8px] tracking-[.14em] text-cyan-100/55">CAM 01</span>
+              </div>
             </div>
-            <div className="absolute right-4 top-4 rounded-md border border-white/20 bg-black/45 px-3 py-1.5 font-mono text-[9px] font-bold tracking-wider text-white/90 backdrop-blur-md">
-              CAM 01 · LABORATÓRIO
+
+            <div className="pointer-events-none absolute -right-2 top-[13%] z-[2] w-[65%] max-w-[590px] sm:right-4 sm:top-[8%] sm:w-[62%]">
+              <svg viewBox="0 0 760 520" role="img" aria-label="Câmera de segurança tridimensional" className="h-auto w-full overflow-visible drop-shadow-[0_28px_28px_rgba(0,0,0,.55)] motion-safe:animate-[cameraFloat_6s_ease-in-out_infinite]">
+                <defs>
+                  <linearGradient id="camBody" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="#ffffff"/><stop offset=".28" stopColor="#e8edf1"/><stop offset=".58" stopColor="#aeb9c4"/><stop offset=".82" stopColor="#f8fafc"/><stop offset="1" stopColor="#778594"/>
+                  </linearGradient>
+                  <linearGradient id="camTop" x1="0" y1="0" x2=".8" y2="1">
+                    <stop offset="0" stopColor="#ffffff"/><stop offset=".55" stopColor="#e6ebef"/><stop offset="1" stopColor="#9aa7b3"/>
+                  </linearGradient>
+                  <linearGradient id="camDark" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="#3b4652"/><stop offset=".4" stopColor="#080e18"/><stop offset=".75" stopColor="#202b38"/><stop offset="1" stopColor="#050a12"/>
+                  </linearGradient>
+                  <radialGradient id="camGlass" cx=".38" cy=".32" r=".72">
+                    <stop offset="0" stopColor="#52728b"/><stop offset=".24" stopColor="#182b40"/><stop offset=".55" stopColor="#050b15"/><stop offset=".78" stopColor="#26394b"/><stop offset="1" stopColor="#03070d"/>
+                  </radialGradient>
+                  <radialGradient id="camLens" cx=".35" cy=".3" r=".7">
+                    <stop offset="0" stopColor="#7895a8"/><stop offset=".18" stopColor="#253f55"/><stop offset=".48" stopColor="#07111e"/><stop offset=".72" stopColor="#1c3548"/><stop offset="1" stopColor="#02060b"/>
+                  </radialGradient>
+                  <filter id="camGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <g className="origin-center motion-safe:animate-[cameraPivot_11s_ease-in-out_infinite_alternate]">
+                  {/* Parede, base e braço articulado */}
+                  <ellipse cx="566" cy="430" rx="145" ry="27" fill="#020814" opacity=".42"/>
+                  <path d="M526 314 L596 350 Q627 365 648 389 L671 416 L624 450 L580 406 L501 372Z" fill="url(#camBody)" stroke="#7e8c99" strokeWidth="5"/>
+                  <path d="M551 331 L615 369 L644 398" fill="none" stroke="#fff" strokeWidth="8" opacity=".65"/>
+                  <path d="M620 415 L669 438" stroke="#6c7a88" strokeWidth="12" strokeLinecap="round"/>
+                  <path d="M669 438 C692 454 716 449 727 427 L739 402 C748 381 738 356 716 346 L681 331 C659 322 635 334 629 356 L617 391 C610 411 629 430 649 432Z" fill="url(#camBody)" stroke="#8795a2" strokeWidth="5"/>
+                  <ellipse cx="682" cy="389" rx="49" ry="63" fill="#dce3e9" stroke="#7f8c98" strokeWidth="6"/>
+                  <ellipse cx="682" cy="389" rx="35" ry="48" fill="url(#camBody)" stroke="#fff" strokeWidth="4"/>
+                  {[[682,348],[716,389],[682,430],[648,389]].map(([x,y]) => <g key={x+":"+y}><circle cx={x} cy={y} r="5.5" fill="#596674"/><circle cx={x-1} cy={y-1} r="2" fill="#dce5ec"/></g>)}
+                  {/* Corpo cilíndrico */}
+                  <path d="M171 124 Q190 75 261 62 L526 35 Q592 30 617 87 L664 199 Q678 237 646 271 L566 334 Q534 359 483 348 L194 286 Q145 276 139 224Z" fill="url(#camBody)" stroke="#7f8d9a" strokeWidth="5"/>
+                  <path d="M193 117 Q219 81 272 77 L530 52 Q576 48 597 92 L632 177 L249 238 Q200 241 175 207Z" fill="url(#camTop)" stroke="#fff" strokeWidth="3"/>
+                  <path d="M250 239 L634 179" fill="none" stroke="#65727f" strokeWidth="5" opacity=".75"/>
+                  <path d="M258 248 L624 193" fill="none" stroke="#fff" strokeWidth="2" opacity=".75"/>
+                  <path d="M526 293 Q568 278 626 236 L657 267 Q620 311 564 335Z" fill="#aab5bf" opacity=".7"/>
+                  <path d="M182 133 Q145 152 125 191 L101 235 Q92 255 114 267 L173 286 L232 254 L255 148Z" fill="#202a36" stroke="#65727f" strokeWidth="6"/>
+                  {/* Cabeçote preto e lente */}
+                  <ellipse cx="249" cy="225" rx="135" ry="151" fill="url(#camDark)" stroke="#080d15" strokeWidth="13"/>
+                  <ellipse cx="249" cy="225" rx="116" ry="132" fill="#111b27" stroke="#667381" strokeWidth="7"/>
+                  <ellipse cx="249" cy="225" rx="99" ry="113" fill="#080e17" stroke="#263849" strokeWidth="8"/>
+                  <ellipse cx="249" cy="225" rx="82" ry="94" fill="url(#camGlass)" stroke="#7d8b98" strokeWidth="4"/>
+                  <ellipse cx="249" cy="225" rx="60" ry="69" fill="url(#camLens)" stroke="#34495c" strokeWidth="5"/>
+                  <ellipse cx="249" cy="225" rx="35" ry="41" fill="#07111d" stroke="#6b8396" strokeWidth="4"/>
+                  <ellipse cx="239" cy="209" rx="12" ry="16" fill="#a7d5f2" opacity=".2"/>
+                  <circle cx="254" cy="221" r="8" fill="#b7e8ff" opacity=".16"/>
+                  {/* Anel de LEDs infravermelhos */}
+                  {Array.from({length:18},(_,i)=>{const a=(i/18)*Math.PI*2;const x=249+91*Math.cos(a);const y=225+104*Math.sin(a);return <g key={i}><circle cx={x} cy={y} r="8" fill="#a9d5ed" opacity=".22" filter="url(#camGlow)"/><circle cx={x} cy={y} r="5.5" fill="#d8f0ff"/><circle cx={x-1.5} cy={y-1.5} r="2" fill="#fff"/></g>})}
+                  {/* Parafusos e reflexos */}
+                  {[[169,119],[323,103],[368,321],[126,280],[357,270]].map(([x,y])=><g key={x+":"+y}><circle cx={x} cy={y} r="7" fill="#0a111a" stroke="#6d7b89" strokeWidth="3"/><path d={`M${x-3} ${y}h6`} stroke="#dce5eb" strokeWidth="1.5"/></g>)}
+                  <path d="M286 82 Q410 51 525 58" fill="none" stroke="#fff" strokeWidth="5" opacity=".52" strokeLinecap="round"/>
+                  <path d="M155 160 Q174 104 220 91" fill="none" stroke="#fff" strokeWidth="3" opacity=".22"/>
+                </g>
+                <circle cx="249" cy="225" r="112" fill="none" stroke="#56cfff" strokeWidth="2" opacity=".45" filter="url(#camGlow)" className="motion-safe:animate-[lensPulse_3.2s_ease-in-out_infinite]"/>
+              </svg>
             </div>
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-cyan-200/90 to-transparent shadow-[0_0_18px_4px_rgba(34,211,238,.45)] motion-safe:animate-[cctvScan_5s_linear_infinite]" />
-            <div aria-hidden className="absolute left-1/2 top-1/2 size-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/40 shadow-[0_0_30px_rgba(34,211,238,.12)]">
-              <span className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-cyan-100/80" />
-              <span className="absolute bottom-0 left-1/2 h-3 w-px -translate-x-1/2 bg-cyan-100/80" />
-              <span className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-cyan-100/80" />
-              <span className="absolute right-0 top-1/2 h-px w-3 -translate-y-1/2 bg-cyan-100/80" />
-              <span className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100 shadow-[0_0_10px_3px_rgba(103,232,249,.8)]" />
+
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/80 to-transparent shadow-[0_0_20px_3px_rgba(34,211,238,.45)] motion-safe:animate-[cctvScan_5s_linear_infinite]" />
+            <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap items-end justify-between gap-2 sm:bottom-6 sm:left-7 sm:right-7">
+              <span className="rounded-lg border border-white/10 bg-black/35 px-3 py-2 text-[8px] font-bold uppercase tracking-[.15em] text-white/65 backdrop-blur-md">Escola Municipal · Dr. Eiraldo Carneiro de França</span>
+              <span className="rounded-lg border border-cyan-200/20 bg-cyan-300/10 px-3 py-2 font-mono text-[8px] font-bold tracking-[.14em] text-cyan-100/80 backdrop-blur-md">SISTEMA ATIVO</span>
             </div>
-            <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-2 text-[9px] font-bold tracking-[.12em] text-white/90">
-              <span className="rounded bg-black/45 px-2.5 py-1.5 backdrop-blur-md">VISÃO PANORÂMICA · MOVIMENTO SIMULADO</span>
-              <span className="rounded bg-black/45 px-2.5 py-1.5 font-mono backdrop-blur-md">24H · DEMONSTRAÇÃO</span>
+            <div aria-hidden className="pointer-events-none absolute inset-3 border border-white/[.07]">
+              <span className="absolute left-0 top-0 h-5 w-5 border-l-2 border-t-2 border-cyan-100/70"/>
+              <span className="absolute right-0 top-0 h-5 w-5 border-r-2 border-t-2 border-cyan-100/70"/>
+              <span className="absolute bottom-0 left-0 h-5 w-5 border-b-2 border-l-2 border-cyan-100/70"/>
+              <span className="absolute bottom-0 right-0 h-5 w-5 border-b-2 border-r-2 border-cyan-100/70"/>
             </div>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-5">
             <div className="flex size-14 items-center justify-center rounded-2xl border border-cyan-100/20 bg-cyan-300/10 text-cyan-100">
-              <Camera className="size-7" />
+              <ShieldCheck className="size-7" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-cyan-200">
@@ -279,9 +340,6 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
               <p className="mt-1.5 text-xs leading-relaxed text-blue-100/75 sm:text-sm">
                 Cuide dos equipamentos, respeite os colegas e siga as orientações dos educadores.
                 A tecnologia é uma ferramenta para aprender, criar e compartilhar.
-              </p>
-              <p className="mt-1.5 text-[9px] leading-relaxed text-white/45">
-                Câmera cenográfica: imagem institucional animada, sem acesso à webcam, gravação ou monitoramento real.
               </p>
             </div>
           </div>
@@ -377,7 +435,11 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
         @keyframes cameraLine { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(170px); opacity: .9; } }
         @keyframes cctvRoomPan { 0% { transform: scale(1.04) translate3d(-.5%,0,0); } 100% { transform: scale(1.14) translate3d(.7%,-.6%,0); } }
-        @keyframes cctvScan { 0% { transform: translateY(0); opacity: .25; } 50% { opacity: .9; } 100% { transform: translateY(340px); opacity: .25; } }
+        @keyframes cctvScan { 0% { transform: translateY(0); opacity: .18; } 50% { opacity: .8; } 100% { transform: translateY(350px); opacity: .18; } }
+        @keyframes cameraFloat { 0%, 100% { transform: translate3d(0,0,0) rotate(-.7deg); } 50% { transform: translate3d(0,-9px,0) rotate(.7deg); } }
+        @keyframes cameraPivot { 0% { transform: rotate(-1.2deg) translateX(-2px); } 50% { transform: rotate(.8deg) translateX(3px); } 100% { transform: rotate(-.4deg) translateX(0); } }
+        @keyframes lensPulse { 0%, 100% { opacity: .18; transform: scale(.97); } 50% { opacity: .7; transform: scale(1.035); } }
+        @keyframes cameraProgress { 0% { transform: translateX(-55%); } 100% { transform: translateX(110%); } }
         @media (prefers-reduced-motion: reduce) {
           [class*="animate-"] { animation: none !important; }
         }
