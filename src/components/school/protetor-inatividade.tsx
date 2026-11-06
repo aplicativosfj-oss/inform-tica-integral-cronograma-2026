@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { useEffect, useMemo, useState, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
 import { useAppStore } from "@/lib/app-store";
 import {
   ArrowRight, BookOpen, Check, Clock3, Code2, Cpu, GraduationCap,
@@ -27,6 +27,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [confirmarSaida, setConfirmarSaida] = useState(false);
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
+  const temporizadorRef = useRef<number | undefined>(undefined);
   const { turmas } = useAppStore();
   const alunosAtivos = useMemo(
     () => turmas.flatMap((turma) =>
@@ -54,22 +55,15 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       return;
     }
 
-    let temporizador: number | undefined;
     const reiniciar = (evento?: Event) => {
-      const telaDescanso = document.getElementById("screensaver-informatica");
-      const interacaoNaTela = Boolean(
-        evento?.target instanceof Node && telaDescanso?.contains(evento.target),
-      );
-
-      // Enquanto o descanso está visível, movimentos não o fecham nem reiniciam
-      // o estado. A saída só acontece pelo botão de confirmação.
-      if (ativo && interacaoNaTela) return;
-
+      // Se o protetor está montado, nenhuma movimentação do mouse/teclado
+      // pode fechá-lo. A única saída é a confirmação explícita no diálogo.
+      if (document.getElementById("screensaver-informatica")) return;
       setAtivo(false);
       setConfirmarSaida(false);
-      window.clearTimeout(temporizador);
+      window.clearTimeout(temporizadorRef.current);
       if (document.visibilityState === "visible") {
-        temporizador = window.setTimeout(() => {
+        temporizadorRef.current = window.setTimeout(() => {
           setConfirmarSaida(false);
           setAtivo(true);
         }, TEMPO_INATIVIDADE);
@@ -77,7 +71,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     };
     const visibilidade = () => {
       if (document.visibilityState === "visible") reiniciar();
-      else window.clearTimeout(temporizador);
+      else window.clearTimeout(temporizadorRef.current);
     };
     const eventos: Array<keyof WindowEventMap> = [
       "pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll",
@@ -86,11 +80,11 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     document.addEventListener("visibilitychange", visibilidade);
     reiniciar();
     return () => {
-      window.clearTimeout(temporizador);
+      window.clearTimeout(temporizadorRef.current);
       eventos.forEach((evento) => window.removeEventListener(evento, reiniciar));
       document.removeEventListener("visibilitychange", visibilidade);
     };
-  }, [pathname, ativo]);
+  }, [pathname]);
 
   useEffect(() => {
     const atualizar = () => setTelaCheia(Boolean(document.fullscreenElement));
@@ -158,6 +152,8 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     evento.stopPropagation();
     setConfirmarSaida(false);
     setAtivo(false);
+    window.clearTimeout(temporizadorRef.current);
+    temporizadorRef.current = window.setTimeout(() => setAtivo(true), TEMPO_INATIVIDADE);
   };
 
   if (!ativo) return null;
