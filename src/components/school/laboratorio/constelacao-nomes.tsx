@@ -364,12 +364,14 @@ export function ConstelacaoNomes({
       <div
         ref={rotulo}
         key={atual.chave}
-        className={"constelacao-nome absolute left-0 top-0" + (saindo ? " is-saindo" : "")}
+        className={"constelacao-nome constelacao-nome-escolar absolute left-0 top-0" + (saindo ? " is-saindo" : "")}
         style={{
           ["--cor" as string]: atual.cor,
           transform: `translate3d(${corpo.current.x}px, ${corpo.current.y}px, 0)`,
         }}
       >
+        <span aria-hidden className="constelacao-brilho constelacao-brilho-um">✦</span>
+        <span aria-hidden className="constelacao-brilho constelacao-brilho-dois">✧</span>
         <span className="constelacao-legenda">
           <span className={"constelacao-ponto" + (modo === "vivo" ? " is-vivo" : "")} />
           {modo === "vivo"
