@@ -519,13 +519,13 @@ function Index() {
                   </Button>
                 </div>
               </div>
-              <div className="home-live-panel min-h-[20rem] overflow-hidden rounded-[1.5rem] border border-border bg-background p-2 shadow-xl shadow-ink/5 sm:p-3">
+              <div className="home-live-panel min-w-0 overflow-hidden rounded-[1.25rem] border border-border bg-background p-1.5 shadow-lg shadow-ink/5 sm:p-3">
                 {feriadoHoje ? (
                   <div className="grid min-h-[24rem] place-items-center rounded-2xl bg-muted/40 px-5 py-10">
                     <AvisoFeriado dataISO={hojeNaEscola()} variante="painel" />
                   </div>
                 ) : (
-                  <PainelLaboratorioAgora dados={dadosLab} logado={isAuthenticated} />
+                  <PainelLaboratorioAgora dados={dadosLab} logado={isAuthenticated} compacto />
                 )}
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
