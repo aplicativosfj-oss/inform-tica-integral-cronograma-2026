@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clock3, Monitor, Sparkles, GraduationCap, Cpu, BookOpen, Code2, Wifi } from "lucide-react";
+import { Clock3, Monitor, Sparkles, GraduationCap, Cpu, BookOpen, Code2, Wifi, Maximize2 } from "lucide-react";
 
 const TEMPO_INATIVIDADE = 120_000;
 const ROTAS_EXCLUIDAS = ["/login", "/tv", "/sala-de-jogos", "/jogos"];
@@ -24,6 +24,7 @@ function formatarData(data: Date) {
 export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [ativo, setAtivo] = useState(false);
   const [agora, setAgora] = useState(() => new Date());
+  const [telaCheia, setTelaCheia] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -63,6 +64,25 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       document.removeEventListener("visibilitychange", aoFicarVisivel);
     };
   }, [pathname]);
+
+  useEffect(() => {
+    const atualizarTelaCheia = () => setTelaCheia(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", atualizarTelaCheia);
+    atualizarTelaCheia();
+    return () => document.removeEventListener("fullscreenchange", atualizarTelaCheia);
+  }, []);
+
+  const ativarTelaCheia = async (evento: React.MouseEvent<HTMLButtonElement>) => {
+    evento.preventDefault();
+    evento.stopPropagation();
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch {
+      // Alguns navegadores bloqueiam fullscreen fora de uma interação explícita.
+    }
+  };
 
   useEffect(() => {
     if (!ativo) return;
@@ -128,6 +148,17 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             Tela em espera · Mova o mouse ou pressione uma tecla para continuar
           </span>
         </div>
+        <button
+          type="button"
+          onPointerDown={(evento) => evento.stopPropagation()}
+          onKeyDown={(evento) => evento.stopPropagation()}
+          onClick={ativarTelaCheia}
+          className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-cyan-200/30 bg-cyan-300/10 px-5 py-2.5 text-xs font-extrabold uppercase tracking-[0.14em] text-cyan-100 shadow-lg shadow-cyan-950/20 backdrop-blur transition hover:border-cyan-100/60 hover:bg-cyan-300/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-[#090d24]"
+          aria-label={telaCheia ? "Tela cheia ativada" : "Ativar tela cheia no navegador"}
+        >
+          <Maximize2 className="size-4" />
+          {telaCheia ? "Modo tela cheia ativado" : "Ativar modo tela cheia"}
+        </button>
         <div className="mt-10 grid w-full max-w-4xl grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.045] px-3 py-3 text-left backdrop-blur-md">
             <BookOpen className="size-4 shrink-0 text-violet-200" />
