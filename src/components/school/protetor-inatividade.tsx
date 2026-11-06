@@ -38,7 +38,9 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     }
 
     let temporizador: number | undefined;
-    const reiniciar = () => {
+    const reiniciar = (evento?: Event) => {
+      const telaDescanso = document.getElementById("screensaver-informatica");
+      if (evento?.target instanceof Node && telaDescanso?.contains(evento.target)) return;
       setAtivo(false);
       setConfirmarSaida(false);
       window.clearTimeout(temporizador);
@@ -114,6 +116,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
 
   return (
     <div
+      id="screensaver-informatica"
       role="dialog"
       aria-modal="true"
       aria-label="Tela de descanso da plataforma Informática Dr. Eiraldo"
