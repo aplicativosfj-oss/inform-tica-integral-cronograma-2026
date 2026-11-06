@@ -8,6 +8,7 @@ import {
   Flag,
   Flame,
   IdCard,
+  Info,
   Lock,
   Play,
   Search,
@@ -34,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { SeloAniversario } from "@/components/school/laboratorio/aniversariantes";
@@ -206,6 +208,7 @@ export function ControleLaboratorio({
   const [ordem, setOrdem] = useState<"prioridade" | "az">("prioridade");
   const [liberar, setLiberar] = useState(false);
   const [ficha, setFicha] = useState<{ turmaId: string; alunoId: string } | null>(null);
+  const [detalhe, setDetalhe] = useState<{ turmaId: string; alunoId: string } | null>(null);
   /** Página 1: escolher os alunos. Página 2: confirmar e definir o tempo. */
   const [passo, setPasso] = useState<1 | 2>(1);
   /** Trava da aula mista: só entra nela depois de confirmar. */
@@ -1038,6 +1041,15 @@ export function ControleLaboratorio({
                       </button>
                       <button
                         type="button"
+                        aria-label={`Ver registros de hoje de ${a.nome}`}
+                        title="Ver informações e registros do aluno"
+                        onClick={() => setDetalhe({ turmaId: t.id, alunoId: a.id })}
+                        className="absolute right-10 top-2 z-20 flex items-center gap-1 rounded-lg border border-border/60 bg-background/85 px-2 py-1 text-[11px] font-semibold text-foreground shadow-sm backdrop-blur hover:border-primary/50 hover:text-primary"
+                      >
+                        <Info className="size-3.5" aria-hidden /> <span className="hidden sm:inline">Detalhes</span>
+                      </button>
+                      <button
+                        type="button"
                         aria-label={`Abrir a ficha de ${a.nome}`}
                         title="Abrir a ficha do aluno"
                         onClick={() => setFicha({ turmaId: t.id, alunoId: a.id })}
@@ -1504,6 +1516,68 @@ export function ControleLaboratorio({
           </section>
         </div>
       )}
+
+      {detalhe ? (() => {
+        const turmaDetalhe = todasTurmas.find((t) => t.id === detalhe.turmaId);
+        const alunoDetalhe = turmaDetalhe?.alunos.find((a) => a.id === detalhe.alunoId);
+        const registros = [...dados.sessoes, ...(dados.ausencias ?? [])]
+          .filter((s) => s.turmaId === detalhe.turmaId && s.alunoId === detalhe.alunoId && s.data === hoje)
+          .filter((s, i, lista) => lista.findIndex((r) => r.id === s.id) === i)
+          .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
+        return (
+          <Dialog open onOpenChange={(open) => { if (!open) setDetalhe(null); }}>
+            <DialogContent className="max-h-[88dvh] w-[calc(100vw-1rem)] max-w-lg overflow-y-auto rounded-2xl p-4 sm:p-6">
+              <DialogHeader>
+                <DialogTitle className="pr-5 text-lg">Registros do aluno</DialogTitle>
+                <DialogDescription>Consulta de hoje · {hoje.split("-").reverse().join("/")}. Não altera a seleção para o laboratório.</DialogDescription>
+              </DialogHeader>
+              {alunoDetalhe && turmaDetalhe ? (
+                <div className="space-y-3">
+                  <div className="rounded-xl border bg-muted/40 p-3">
+                    <p className="font-bold text-foreground">{alunoDetalhe.nome}</p>
+                    <p className="text-xs text-muted-foreground">{rotuloTurma(turmaDetalhe.serie, turmaDetalhe.letra)}</p>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Registros de hoje</p>
+                    {registros.length ? (
+                      <ul className="space-y-2">
+                        {registros.map((s) => (
+                          <li key={s.id} className="rounded-xl border bg-card p-3 text-sm">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="font-semibold">{s.ausencia ? ROTULO_AUSENCIA[s.ausencia] : estadoDaSessao(s, agora) === "ao-vivo" ? "No laboratório agora" : "Participação registrada"}</span>
+                              <span className="text-xs text-muted-foreground">{horaNaEscola(s.inicio)} – {horaNaEscola(s.fim)}</span>
+                            </div>
+                            {s.ausenciaMotivo ? <p className="mt-2 text-xs text-muted-foreground">Motivo: {s.ausenciaMotivo}</p> : null}
+                            {s.motivoParada ? <p className="mt-2 text-xs text-muted-foreground">Encerramento: {s.motivoParada}</p> : null}
+                            {s.semMarcacao ? <p className="mt-1 text-xs text-muted-foreground">Ocorrência registrada sem agendamento</p> : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : <p className="rounded-xl border border-dashed p-3 text-sm text-muted-foreground">Nenhuma participação ou ocorrência registrada hoje.</p>}
+                  </div>
+                  {alunoDetalhe.anotacoes?.length ? (
+                    <div>
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Anotações cadastradas</p>
+                      <div className="max-h-40 space-y-2 overflow-y-auto">
+                        {alunoDetalhe.anotacoes.slice(0, 5).map((nota) => (
+                          <div key={nota.id} className="rounded-lg border bg-muted/30 p-2.5 text-xs">
+                            <p className="whitespace-pre-wrap">{nota.texto}</p>
+                            <p className="mt-1 text-muted-foreground">{new Date(nota.em).toLocaleDateString("pt-BR")}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    setFicha(detalhe);
+                    setDetalhe(null);
+                  }}><IdCard className="size-4" /> Abrir ficha completa</Button>
+                </div>
+              ) : <p className="text-sm text-muted-foreground">Aluno não encontrado nesta turma.</p>}
+            </DialogContent>
+          </Dialog>
+        );
+      })() : null}
 
       {ficha ? (
         <FichaAluno
