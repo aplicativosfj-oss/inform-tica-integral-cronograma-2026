@@ -253,8 +253,16 @@ export function agruparSessoes(sessoes: SessaoLab[]): GrupoLab[] {
       g.alunos.push(alunoDoGrupo(s));
       // Alunos de turmas diferentes no mesmo grupo = aula mista.
       if (g.turmaId !== s.turmaId) {
+        // Nunca atribuir a turma do primeiro registro ao grupo inteiro:
+        // aulas mistas exibem explicitamente todas as turmas participantes.
+        const rotulosAtuais = g.turmaRotulo.startsWith("Aula mista · ")
+          ? g.turmaRotulo.slice("Aula mista · ".length).split(" + ")
+          : [g.turmaRotulo];
+        const rotulos = [...new Set([...rotulosAtuais, s.turmaRotulo])].sort((a, b) =>
+          a.localeCompare(b, "pt-BR", { numeric: true }),
+        );
         g.turmaId = "mista";
-        g.turmaRotulo = "Aula mista";
+        g.turmaRotulo = `Aula mista · ${rotulos.join(" + ")}`;
       }
     } else
       mapa.set(s.grupoId, {
