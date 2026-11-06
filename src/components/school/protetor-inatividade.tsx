@@ -184,44 +184,61 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           <Maximize2 className="size-4" /> {telaCheia ? "Modo tela cheia ativado" : "Ativar modo tela cheia"}
         </button>
 
-        <section className="grid w-full grid-cols-1 gap-4 rounded-[1.6rem] border border-white/15 bg-slate-950/45 p-4 text-left shadow-2xl shadow-black/30 backdrop-blur-2xl sm:grid-cols-[minmax(230px,.8fr)_1.5fr] sm:items-center sm:gap-6 sm:p-5">
-          {/* Câmera cenográfica animada: não acessa webcam nem transmite imagens. */}
-          <div className="relative flex min-h-[175px] items-center justify-center overflow-hidden rounded-2xl border border-cyan-100/20 bg-gradient-to-br from-[#122b55] via-[#0b1b39] to-[#071329]">
-            <div aria-hidden className="absolute inset-0 opacity-30" style={{ backgroundImage: "linear-gradient(rgba(103,232,249,.24) 1px,transparent 1px),linear-gradient(90deg,rgba(103,232,249,.24) 1px,transparent 1px)", backgroundSize: "18px 18px" }} />
-            <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-emerald-200/25 bg-emerald-300/10 px-2.5 py-1 text-[8px] font-black tracking-[.14em] text-emerald-100">
-              <span className="size-1.5 animate-pulse rounded-full bg-emerald-300" /> CÂMERA ILUSTRATIVA
+        <section className="w-full overflow-hidden rounded-[1.6rem] border border-white/15 bg-slate-950/55 p-3 text-left shadow-2xl shadow-black/30 backdrop-blur-2xl sm:p-5">
+          {/* Simulação visual de CFTV: usa fotografia institucional, sem captar ou transmitir vídeo real. */}
+          <div className="relative aspect-video min-h-[220px] w-full overflow-hidden rounded-2xl border border-cyan-100/25 bg-[#071329] shadow-[0_18px_55px_rgba(0,0,0,.42)] sm:min-h-[340px]">
+            <img
+              src="/images/laboratorio-informatica-turma-1280w.webp"
+              alt="Imagem ilustrativa do laboratório de informática"
+              className="absolute inset-0 h-full w-full object-cover opacity-75 motion-safe:animate-[cctvRoomPan_18s_ease-in-out_infinite_alternate]"
+            />
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-[#061226]/65 via-transparent to-[#061226]/65" />
+            <div aria-hidden className="absolute inset-0 opacity-25" style={{ backgroundImage: "linear-gradient(rgba(130,220,255,.24) 1px,transparent 1px),linear-gradient(90deg,rgba(130,220,255,.24) 1px,transparent 1px)", backgroundSize: "34px 34px" }} />
+            <div className="absolute inset-0 border-[1px] border-white/10">
+              <span className="absolute left-3 top-3 h-7 w-7 border-l-2 border-t-2 border-cyan-100/80" />
+              <span className="absolute right-3 top-3 h-7 w-7 border-r-2 border-t-2 border-cyan-100/80" />
+              <span className="absolute bottom-3 left-3 h-7 w-7 border-b-2 border-l-2 border-cyan-100/80" />
+              <span className="absolute bottom-3 right-3 h-7 w-7 border-b-2 border-r-2 border-cyan-100/80" />
             </div>
-            <div aria-hidden className="relative flex h-20 w-32 items-center justify-center rounded-[1.4rem] border border-slate-300/35 bg-gradient-to-b from-slate-200/20 to-slate-500/10 shadow-[0_20px_45px_rgba(0,0,0,.35)]">
-              <div className="absolute -top-3 left-1/2 h-3 w-12 -translate-x-1/2 rounded-t-lg border border-white/20 bg-slate-300/25" />
-              <div className="absolute -right-5 top-1/2 h-2 w-6 -translate-y-1/2 rounded-r-md bg-slate-300/30" />
-              <div className="relative flex size-14 items-center justify-center rounded-full border-[5px] border-slate-300/30 bg-slate-950 shadow-inner">
-                <div className="relative size-9 overflow-hidden rounded-full border border-cyan-200/50 bg-gradient-to-br from-cyan-300/60 to-blue-700/80 shadow-[0_0_25px_rgba(34,211,238,.4)]">
-                  <div className="absolute inset-y-0 -left-1/2 w-1/2 skew-x-[-20deg] bg-white/45 motion-safe:animate-[cameraSweep_3.2s_ease-in-out_infinite]" />
-                  <div className="absolute right-1 top-1 size-2 rounded-full bg-white/80" />
-                </div>
-              </div>
-              <div className="absolute -bottom-4 left-1/2 h-4 w-10 -translate-x-1/2 rounded-b-lg bg-slate-300/25" />
+            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-md border border-red-200/30 bg-black/55 px-3 py-1.5 text-[10px] font-black tracking-[.16em] text-white shadow-lg backdrop-blur-md">
+              <span className="size-2 animate-pulse rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,.9)]" /> REC · SIMULAÇÃO
             </div>
-            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[8px] font-bold tracking-[.13em] text-cyan-100/60">
-              <span>VISUAL DE AMBIENTE</span><span>24H · CONCEITO</span>
+            <div className="absolute right-4 top-4 rounded-md border border-white/20 bg-black/45 px-3 py-1.5 font-mono text-[9px] font-bold tracking-wider text-white/90 backdrop-blur-md">
+              CAM 01 · LABORATÓRIO
             </div>
-            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-cyan-200/80 shadow-[0_0_14px_3px_rgba(34,211,238,.35)] motion-safe:animate-[cameraLine_4s_ease-in-out_infinite]" />
+            <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-cyan-200/90 to-transparent shadow-[0_0_18px_4px_rgba(34,211,238,.45)] motion-safe:animate-[cctvScan_5s_linear_infinite]" />
+            <div aria-hidden className="absolute left-1/2 top-1/2 size-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/40 shadow-[0_0_30px_rgba(34,211,238,.12)]">
+              <span className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-cyan-100/80" />
+              <span className="absolute bottom-0 left-1/2 h-3 w-px -translate-x-1/2 bg-cyan-100/80" />
+              <span className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-cyan-100/80" />
+              <span className="absolute right-0 top-1/2 h-px w-3 -translate-y-1/2 bg-cyan-100/80" />
+              <span className="absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100 shadow-[0_0_10px_3px_rgba(103,232,249,.8)]" />
+            </div>
+            <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-end justify-between gap-2 text-[9px] font-bold tracking-[.12em] text-white/90">
+              <span className="rounded bg-black/45 px-2.5 py-1.5 backdrop-blur-md">VISÃO PANORÂMICA · MOVIMENTO SIMULADO</span>
+              <span className="rounded bg-black/45 px-2.5 py-1.5 font-mono backdrop-blur-md">24H · DEMONSTRAÇÃO</span>
+            </div>
           </div>
 
-          <div className="min-w-0 py-1">
-            <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-cyan-200">
-              <ShieldCheck className="size-4" /> Cuidado e responsabilidade
+          <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr] sm:items-center sm:gap-5">
+            <div className="flex size-14 items-center justify-center rounded-2xl border border-cyan-100/20 bg-cyan-300/10 text-cyan-100">
+              <Camera className="size-7" />
             </div>
-            <h2 className="mt-2 font-heading text-lg font-extrabold leading-snug text-white sm:text-xl">
-              Nosso laboratório é um espaço de respeito, aprendizagem e cuidado.
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-blue-100/75 sm:text-sm">
-              Cuide dos equipamentos, respeite os colegas e siga as orientações dos educadores.
-              A tecnologia é uma ferramenta para aprender, criar e compartilhar.
-            </p>
-            <p className="mt-2 text-[9px] leading-relaxed text-white/45">
-              Ilustração cenográfica: nenhuma câmera real, webcam ou transmissão é ativada por esta tela.
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[.18em] text-cyan-200">
+                <ShieldCheck className="size-4" /> Cuidado e responsabilidade
+              </div>
+              <h2 className="mt-1.5 font-heading text-lg font-extrabold leading-snug text-white sm:text-xl">
+                Nosso laboratório é um espaço de respeito, aprendizagem e cuidado.
+              </h2>
+              <p className="mt-1.5 text-xs leading-relaxed text-blue-100/75 sm:text-sm">
+                Cuide dos equipamentos, respeite os colegas e siga as orientações dos educadores.
+                A tecnologia é uma ferramenta para aprender, criar e compartilhar.
+              </p>
+              <p className="mt-1.5 text-[9px] leading-relaxed text-white/45">
+                Câmera cenográfica: imagem institucional animada, sem acesso à webcam, gravação ou monitoramento real.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -272,7 +289,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
                 <X className="size-4" /> Permanecer
               </button>
               <button type="button" onClick={sair} className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-cyan-300 px-4 py-3 text-xs font-black text-[#071329] transition hover:bg-cyan-200">
-                <Check className="size-4" /> Sim, continuar <ArrowRight className="size-4" />
+                <Check className="size-4" /> Sim, voltar à plataforma <ArrowRight className="size-4" />
               </button>
             </div>
           </section>
@@ -281,6 +298,8 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       <style>{`
         @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
         @keyframes cameraLine { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(170px); opacity: .9; } }
+        @keyframes cctvRoomPan { 0% { transform: scale(1.04) translate3d(-.5%,0,0); } 100% { transform: scale(1.14) translate3d(.7%,-.6%,0); } }
+        @keyframes cctvScan { 0% { transform: translateY(0); opacity: .25; } 50% { opacity: .9; } 100% { transform: translateY(340px); opacity: .25; } }
         @media (prefers-reduced-motion: reduce) {
           [class*="animate-"] { animation: none !important; }
         }
