@@ -52,6 +52,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [confirmarSaida, setConfirmarSaida] = useState(false);
   const [telaCheia, setTelaCheia] = useState(false);
   const [protetorForcado, setProtetorForcado] = useState(false);
+  const [descansoDesativado, setDescansoDesativado] = useState(false);
   const { isAuthenticated, isReady: authPronto } = useAuth();
   const [agoraMs, setAgoraMs] = useState(() => Date.now());
   const { sessoes } = useSessoesLab();
@@ -68,7 +69,9 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         .eq("id", "default")
         .maybeSingle();
       if (!cancelado && !error) {
-        setProtetorForcado(Boolean((data?.config as { protetorForcado?: boolean } | null)?.protetorForcado));
+        const config = data?.config as { protetorForcado?: boolean; descansoTelaDesativado?: boolean } | null;
+        setProtetorForcado(Boolean(config?.protetorForcado));
+        setDescansoDesativado(Boolean(config?.descansoTelaDesativado));
       }
     };
     void carregar();
@@ -76,8 +79,9 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     const canal = supabase
       .channel("protetor-tela-global")
       .on("postgres_changes", { event: "*", schema: "public", table: "app_state", filter: "id=eq.default" }, (payload) => {
-        const row = (payload.new ?? {}) as { config?: { protetorForcado?: boolean } };
+        const row = (payload.new ?? {}) as { config?: { protetorForcado?: boolean; descansoTelaDesativado?: boolean } };
         setProtetorForcado(Boolean(row.config?.protetorForcado));
+        setDescansoDesativado(Boolean(row.config?.descansoTelaDesativado));
       })
       .subscribe();
     return () => {
@@ -149,6 +153,12 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     if (typeof window === "undefined") return;
     const desktop = window.matchMedia("(min-width: 900px) and (hover: hover) and (pointer: fine)");
     const bloqueada = ROTAS_EXCLUIDAS.some((rota) => pathname === rota || pathname.startsWith(rota + "/"));
+    if (descansoDesativado) {
+      window.clearTimeout(temporizadorRef.current);
+      setAtivo(false);
+      setConfirmarSaida(false);
+      return;
+    }
     if (!authPronto || isAuthenticated) {
       setAtivo(false);
       setConfirmarSaida(false);
@@ -196,7 +206,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       eventos.forEach((evento) => window.removeEventListener(evento, reiniciar));
       document.removeEventListener("visibilitychange", visibilidade);
     };
-  }, [pathname, aulaEmAndamento, protetorForcado, authPronto, isAuthenticated]);
+  }, [pathname, aulaEmAndamento, protetorForcado, descansoDesativado, authPronto, isAuthenticated]);
 
   useEffect(() => {
     const atualizar = () => setTelaCheia(Boolean(document.fullscreenElement));
