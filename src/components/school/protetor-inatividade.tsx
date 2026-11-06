@@ -28,6 +28,24 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
   const temporizadorRef = useRef<number | undefined>(undefined);
+  // Trava a rolagem do documento enquanto o descanso ocupa a janela inteira.
+  useEffect(() => {
+    if (!ativo) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const htmlOverflow = html.style.overflow;
+    const bodyOverflow = body.style.overflow;
+    const bodyOverscroll = body.style.overscrollBehavior;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    return () => {
+      html.style.overflow = htmlOverflow;
+      body.style.overflow = bodyOverflow;
+      body.style.overscrollBehavior = bodyOverscroll;
+    };
+  }, [ativo]);
+
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -129,6 +147,16 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       tabIndex={-1}
       className="fixed inset-0 z-[9999] flex h-[100dvh] min-h-0 items-center justify-center overflow-hidden bg-[#071329] px-[clamp(10px,2vw,28px)] py-[clamp(8px,1.5vh,16px)] text-white outline-none"
     >
+      {/* Moldura neon discreta nos quatro cantos da janela. */}
+      <div aria-hidden className="screensaver-neon-frame pointer-events-none absolute inset-0 z-[5] overflow-hidden">
+        <span className="screensaver-neon-corner screensaver-neon-tl" />
+        <span className="screensaver-neon-corner screensaver-neon-tr" />
+        <span className="screensaver-neon-corner screensaver-neon-bl" />
+        <span className="screensaver-neon-corner screensaver-neon-br" />
+        <span className="screensaver-neon-edge screensaver-neon-top" />
+        <span className="screensaver-neon-edge screensaver-neon-bottom" />
+      </div>
+
       {/* Fotografia real do laboratório com camadas de contraste para leitura. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <img
@@ -427,7 +455,26 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         </div>
       )}
       <style>{`
-        @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
+
+        #screensaver-informatica { overflow: hidden !important; overscroll-behavior: none; scrollbar-width: none; }
+        #screensaver-informatica::-webkit-scrollbar,
+        #screensaver-informatica *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        #screensaver-informatica * { scrollbar-width: none; }
+        .screensaver-neon-corner { position:absolute; width:clamp(42px,5vw,76px); height:clamp(42px,5vh,76px); opacity:.72; filter:drop-shadow(0 0 7px rgba(103,232,249,.45)); }
+        .screensaver-neon-corner::before,.screensaver-neon-corner::after { content:"";position:absolute;border-radius:99px;background:linear-gradient(90deg,rgba(103,232,249,.08),rgba(125,211,252,.9));box-shadow:0 0 7px rgba(103,232,249,.55),0 0 18px rgba(59,130,246,.24); }
+        .screensaver-neon-corner::before { width:100%;height:2px; }
+        .screensaver-neon-corner::after { width:2px;height:100%; }
+        .screensaver-neon-tl { top:clamp(10px,1.6vh,22px);left:clamp(10px,1.2vw,22px); }
+        .screensaver-neon-tr { top:clamp(10px,1.6vh,22px);right:clamp(10px,1.2vw,22px);transform:rotate(90deg); }
+        .screensaver-neon-bl { bottom:clamp(10px,1.6vh,22px);left:clamp(10px,1.2vw,22px);transform:rotate(-90deg); }
+        .screensaver-neon-br { bottom:clamp(10px,1.6vh,22px);right:clamp(10px,1.2vw,22px);transform:rotate(180deg); }
+        .screensaver-neon-edge { position:absolute;left:12%;right:12%;height:1px;opacity:.22;background:linear-gradient(90deg,transparent,rgba(103,232,249,.65),transparent);box-shadow:0 0 8px rgba(103,232,249,.25); }
+        .screensaver-neon-top { top:0; } .screensaver-neon-bottom { bottom:0; }
+        @keyframes screensaverNeonPulse { 0%,100% { opacity:.48;filter:drop-shadow(0 0 4px rgba(103,232,249,.25)); } 50% { opacity:.9;filter:drop-shadow(0 0 10px rgba(103,232,249,.65)); } }
+        .screensaver-neon-corner { animation:screensaverNeonPulse 5.5s ease-in-out infinite; }
+        .screensaver-neon-tr { animation-delay:1.2s; } .screensaver-neon-bl { animation-delay:2.4s; } .screensaver-neon-br { animation-delay:3.6s; }
+        @media (prefers-reduced-motion: reduce) { .screensaver-neon-corner { animation:none; } }
+\n                @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
         @keyframes cameraLine { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(170px); opacity: .9; } }
         @keyframes cctvRoomPan { 0% { transform: scale(1.04) translate3d(-.5%,0,0); } 100% { transform: scale(1.14) translate3d(.7%,-.6%,0); } }
         @keyframes cctvScan { 0% { transform: translateY(0); opacity: .18; } 50% { opacity: .8; } 100% { transform: translateY(350px); opacity: .18; } }
