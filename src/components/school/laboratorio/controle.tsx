@@ -669,7 +669,7 @@ export function ControleLaboratorio({
               </div>
 
               <div
-                className="-mx-3 flex snap-x gap-2 overflow-x-auto px-3 pb-1 pt-1.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+                className="flex min-w-0 flex-wrap gap-1.5 py-1 sm:gap-2"
                 role="tablist"
                 aria-label="Turmas"
               >
@@ -685,7 +685,7 @@ export function ControleLaboratorio({
                       aria-selected={ativa}
                       onClick={() => escolherTurma(t.id)}
                       className={cn(
-                        "relative flex shrink-0 snap-start items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-bold transition",
+                        "relative flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition sm:gap-2 sm:px-3 sm:py-2 sm:text-sm",
                         cor.bg,
                         cor.text,
                         ativa
@@ -712,7 +712,7 @@ export function ControleLaboratorio({
                 <p className="text-sm font-semibold">{lista.length} resultado(s) na escola toda</p>
               ) : turma ? (
                 <div className="space-y-2">
-                  <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="grid min-w-0 grid-cols-3 gap-1.5 text-center sm:gap-2">
                     {(
                       [
                         [turma.alunos.length, "alunos", "text-foreground"],
@@ -1298,12 +1298,12 @@ export function ControleLaboratorio({
         </>
       ) : (
         /* ─────────── Página 2: confirmar e definir o tempo ─────────── */
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid min-w-0 gap-3 lg:grid-cols-2 lg:gap-5">
           <section
             aria-label="Escolhidos"
-            className="space-y-4 rounded-2xl border bg-card p-4 sm:p-5"
+            className="min-w-0 space-y-3 rounded-xl border bg-card p-3 sm:p-5"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex min-w-0 items-center justify-between gap-2">
               <h3 className="font-heading text-lg font-bold">
                 {escolhidos.size} aluno{escolhidos.size === 1 ? "" : "s"} escolhido
                 {escolhidos.size === 1 ? "" : "s"}
