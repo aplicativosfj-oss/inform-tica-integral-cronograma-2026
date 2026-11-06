@@ -187,16 +187,19 @@ export function ControleLaboratorio({
   dados,
   aoMarcar,
   className,
+  modoInicial = "duracao",
 }: {
   dados: DadosLab;
   aoMarcar?: () => void;
   className?: string;
+  /** "horario" abre já no modo de agendar com hora de início e fim. */
+  modoInicial?: "duracao" | "horario";
 }) {
   const { turmas, todasTurmas } = useAppStore();
   const { email } = useAuth();
   const [turmaSel, setTurmaSel] = useState<string | null>(null);
   const [escolhidos, setEscolhidos] = useState<Set<string>>(new Set());
-  const [modo, setModo] = useState<"duracao" | "horario">("duracao");
+  const [modo, setModo] = useState<"duracao" | "horario">(modoInicial);
   const [minutos, setMinutos] = useState(30);
   const [inicioManual, setInicioManual] = useState(horaAgoraNaEscola());
   const [fimManual, setFimManual] = useState("");

@@ -1,4 +1,7 @@
+import { Link } from "@tanstack/react-router";
 import {
+  ArrowUpRight,
+  CalendarClock,
   ChevronLeft,
   ChevronRight,
   Clock3,
@@ -15,6 +18,8 @@ import {
   Timer,
   Trophy,
   UserCheck,
+  UserPlus,
+  UserX,
   Users2,
   type LucideIcon,
 } from "lucide-react";
@@ -24,7 +29,21 @@ import labFotoImg from "@/assets/laboratorio-informatica-turma.jpg";
 import { AvisoFeriado } from "@/components/school/aviso-feriado";
 import { feriadoNacionalEm } from "@/lib/calendario-escolar";
 import { rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
+import { ControleLaboratorio } from "@/components/school/laboratorio/controle";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
+import {
+  DetalhesLaboratorio,
+  chaveAluno,
+  type AbaDetalhe,
+} from "@/components/school/agenda/detalhes-laboratorio";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { WeatherWidget } from "@/components/school/weather-widget";
 import { useAppStore } from "@/lib/app-store";
 import {
@@ -87,10 +106,43 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
     return (g: GrupoLab) => m.get(g.grupoId) ?? "";
   }, [daSemana]);
   const gruposHoje = gruposSemana.filter((g) => dataDoGrupo(g) === hoje);
-  const aoVivo = feriadoHoje ? [] : gruposHoje.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
+  const aoVivo = feriadoHoje
+    ? []
+    : gruposHoje.filter((g) => estadoDaSessao(g, agora) === "ao-vivo");
   const proximo = gruposHoje
     .filter((g) => estadoDaSessao(g, agora) === "agendada")
     .sort((a, b) => a.inicio.localeCompare(b.inicio))[0];
+
+  const ativos = useMemo(
+    () => new Set(turmas.flatMap((t) => t.alunos.map((a) => chaveAluno(t.id, a.id)))),
+    [turmas],
+  );
+  const totalAtivos = ativos.size;
+  /** Faltas da semana de quem ainda está na escola (transferidos e desistentes ficam de fora). */
+  const faltasSemana = useMemo(
+    () =>
+      (dados.ausencias ?? []).filter(
+        (s) => s.data >= s0 && s.data <= s1 && ativos.has(chaveAluno(s.turmaId, s.alunoId)),
+      ),
+    [dados.ausencias, s0, s1, ativos],
+  );
+  const faltaram = new Set(
+    faltasSemana
+      .filter((s) => s.ausencia === "faltou")
+      .map((s) => chaveAluno(s.turmaId, s.alunoId)),
+  ).size;
+  const outrasAusencias = new Set(
+    faltasSemana
+      .filter((s) => s.ausencia !== "faltou")
+      .map((s) => chaveAluno(s.turmaId, s.alunoId)),
+  ).size;
+
+  const [detalhe, setDetalhe] = useState<{
+    aba: AbaDetalhe;
+    turma?: string | null | undefined;
+  } | null>(null);
+  const [controle, setControle] = useState<null | "inserir" | "agendar">(null);
+  const abrir = (aba: AbaDetalhe, turma?: string | null) => setDetalhe({ aba, turma });
 
   const numeros = {
     agora: new Set(aoVivo.flatMap((g) => g.alunos.map((a) => `${a.turmaId}:${a.id}`))).size,
@@ -120,35 +172,76 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
 
   return (
     <div className="pb-12">
-      <Cabecalho agora={agora} aoVivo={aoVivo.length} proximo={proximo} />
+      <Cabecalho
+        agora={agora}
+        aoVivo={aoVivo.length}
+        proximo={proximo}
+        gruposHoje={feriadoHoje ? [] : gruposHoje}
+        logado={logado}
+        podeMarcar={!feriadoHoje}
+        aoInserir={() => setControle("inserir")}
+        aoAgendar={() => setControle("agendar")}
+      />
 
       <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 sm:px-6 lg:px-8">
-        {feriadoHoje ? <AvisoFeriado dataISO={hoje} className="relative z-10 -mt-10 max-w-none" /> : null}
-        <div className="relative z-10 -mt-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {feriadoHoje ? (
+          <AvisoFeriado dataISO={hoje} className="relative z-10 -mt-10 max-w-none" />
+        ) : null}
+        <div className="relative z-10 -mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 [&>*:first-child]:col-span-2 sm:[&>*:first-child]:col-span-1">
           <Numero
             Icone={MonitorSmartphone}
             rotulo="No laboratório agora"
+            detalhe={
+              aoVivo.length
+                ? "aula acontecendo"
+                : proximo
+                  ? `próxima às ${horaNaEscola(proximo.inicio)}`
+                  : "laboratório livre"
+            }
             valor={numeros.agora}
             cor="emerald"
             vivo={numeros.agora > 0}
+            onClick={() => abrir("agora")}
           />
           <Numero
             Icone={UserCheck}
             rotulo="Alunos que foram nesta semana"
+            detalhe={
+              totalAtivos
+                ? `${Math.round((numeros.semana / totalAtivos) * 100)}% de ${totalAtivos} alunos`
+                : undefined
+            }
             valor={numeros.semana}
             cor="sky"
+            onClick={() => abrir("alunos")}
+          />
+          <Numero
+            Icone={UserX}
+            rotulo="Alunos que faltaram na semana"
+            detalhe={
+              outrasAusencias
+                ? `+${outrasAusencias} impedido${outrasAusencias === 1 ? "" : "s"} ou recusa${outrasAusencias === 1 ? "" : "s"}`
+                : "sem transferidos e desistentes"
+            }
+            valor={faltaram}
+            cor="rose"
+            onClick={() => abrir("faltas")}
           />
           <Numero
             Icone={Users2}
             rotulo="Aulas no laboratório na semana"
+            detalhe={`${gruposHoje.length} hoje`}
             valor={numeros.aulas}
             cor="violet"
+            onClick={() => abrir("aulas")}
           />
           <Numero
             Icone={Timer}
             rotulo="Minutos de computador na semana"
+            detalhe={`${(numeros.minutos / 60).toFixed(1).replace(".", ",")} h de aula`}
             valor={numeros.minutos}
             cor="amber"
+            onClick={() => abrir("tempo")}
           />
         </div>
 
@@ -158,10 +251,12 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
               <div className="grid min-h-72 place-items-center rounded-3xl border border-border bg-card p-5">
                 <AvisoFeriado dataISO={hoje} className="w-full max-w-lg" />
               </div>
-            ) : <PainelLaboratorioAgora dados={dados} logado={logado} />}
+            ) : (
+              <PainelLaboratorioAgora dados={dados} logado={logado} />
+            )}
           </div>
           <div className="grid gap-6 sm:grid-cols-2 xl:col-span-4 xl:grid-cols-1 xl:content-start">
-            <Placar linhas={placar} />
+            <Placar linhas={placar} aoAbrir={(id) => abrir("alunos", id)} />
             <div className="space-y-6">
               <DicaDoDia />
               <WeatherWidget />
@@ -180,6 +275,49 @@ export function PainelAgenda({ logado }: { logado: boolean }) {
 
         <ComoFunciona />
       </div>
+
+      <DetalhesLaboratorio
+        aba={detalhe?.aba ?? null}
+        turmaInicial={detalhe?.turma ?? null}
+        aoFechar={() => setDetalhe(null)}
+        sessoes={dados.sessoes}
+        ausencias={dados.ausencias ?? []}
+        agora={agora}
+        s0={s0}
+        s1={s1}
+        hoje={hoje}
+        logado={logado}
+      />
+
+      {logado ? (
+        <Dialog open={controle !== null} onOpenChange={(v) => (v ? null : setControle(null))}>
+          <DialogContent className="flex h-[min(86dvh,820px)] w-[calc(100vw-1rem)] min-w-0 max-w-5xl flex-col gap-2 overflow-hidden rounded-2xl p-3 sm:gap-3 sm:p-5">
+            <DialogHeader className="shrink-0 pr-8">
+              <DialogTitle>
+                {controle === "agendar" ? "Agendar aula no laboratório" : "Inserir alunos na aula"}
+              </DialogTitle>
+              <DialogDescription>
+                {controle === "agendar"
+                  ? "Escolha a turma e os alunos e defina a hora de início e de fim."
+                  : "Escolha a turma e os alunos. Se já houver aula em andamento, eles entram nela."}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain [scrollbar-width:thin]">
+              {controle ? (
+                <ControleLaboratorio
+                  key={controle}
+                  dados={dados}
+                  modoInicial={controle === "agendar" ? "horario" : "duracao"}
+                  aoMarcar={() => {
+                    setControle(null);
+                    void dados.recarregar();
+                  }}
+                />
+              ) : null}
+            </div>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </div>
   );
 }
@@ -190,10 +328,20 @@ function Cabecalho({
   agora,
   aoVivo,
   proximo,
+  gruposHoje,
+  logado,
+  podeMarcar,
+  aoInserir,
+  aoAgendar,
 }: {
   agora: number;
   aoVivo: number;
   proximo: GrupoLab | undefined;
+  gruposHoje: GrupoLab[];
+  logado: boolean;
+  podeMarcar: boolean;
+  aoInserir: () => void;
+  aoAgendar: () => void;
 }) {
   const data = new Date(agora);
   const [h, m, s] = new Intl.DateTimeFormat("pt-BR", {
@@ -213,9 +361,9 @@ function Cabecalho({
   }).format(data);
 
   const feriadoHoje = feriadoNacionalEm(hojeNaEscola());
-  const status =
-    feriadoHoje ? { texto: "Feriado nacional · Dia de Finados", cor: "bg-amber-400", pulsa: false } :
-    aoVivo > 0
+  const status = feriadoHoje
+    ? { texto: "Feriado nacional · Dia de Finados", cor: "bg-amber-400", pulsa: false }
+    : aoVivo > 0
       ? {
           texto: aoVivo === 1 ? "Aula acontecendo agora" : `${aoVivo} aulas acontecendo agora`,
           cor: "bg-emerald-400",
@@ -292,6 +440,74 @@ function Cabecalho({
             </span>
             {status.texto}
           </p>
+
+          {/* ações do professor */}
+          <div className="mt-6 flex flex-wrap items-center gap-2.5">
+            {logado && podeMarcar ? (
+              <>
+                <Button
+                  size="lg"
+                  onClick={aoInserir}
+                  className="h-11 rounded-full bg-sun px-5 font-bold text-ink shadow-lg shadow-amber-500/20 hover:bg-amber-300"
+                >
+                  <UserPlus className="size-4" /> Inserir alunos na aula
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={aoAgendar}
+                  className="h-11 rounded-full border-white/25 bg-white/10 px-5 font-bold text-white backdrop-blur hover:bg-white/20 hover:text-white"
+                >
+                  <CalendarClock className="size-4" /> Agendar aula
+                </Button>
+              </>
+            ) : !logado ? (
+              <Button
+                asChild
+                variant="outline"
+                className="h-10 rounded-full border-white/25 bg-white/10 px-4 text-white backdrop-blur hover:bg-white/20 hover:text-white"
+              >
+                <Link to="/login">
+                  Professor(a)? Entre para agendar <ArrowUpRight className="size-4" />
+                </Link>
+              </Button>
+            ) : null}
+          </div>
+
+          {gruposHoje.length > 0 ? (
+            <ol aria-label="Aulas de hoje" className="mt-5 flex flex-wrap gap-2">
+              {gruposHoje.map((g) => {
+                const estado = estadoDaSessao(g, agora);
+                return (
+                  <li
+                    key={g.grupoId}
+                    className={cn(
+                      "flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold backdrop-blur",
+                      estado === "ao-vivo"
+                        ? "border-emerald-300/50 bg-emerald-400/20 text-white"
+                        : estado === "encerrada"
+                          ? "border-white/10 bg-white/5 text-white/55"
+                          : "border-white/20 bg-white/10 text-white/90",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "size-1.5 rounded-full",
+                        estado === "ao-vivo"
+                          ? "animate-pulse bg-emerald-300"
+                          : estado === "encerrada"
+                            ? "bg-white/40"
+                            : "bg-sun",
+                      )}
+                    />
+                    <span className="tabular-nums">{horaNaEscola(g.inicio)}</span>
+                    <span className="font-extrabold">{g.turmaRotulo}</span>
+                    <span className="text-white/60">· {g.alunos.length}</span>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : null}
         </div>
 
         {/* relógio grande */}
@@ -320,42 +536,86 @@ const CORES_NUMERO = {
   sky: "from-sky-500/20 text-sky-600 dark:text-sky-300",
   violet: "from-violet-500/20 text-violet-600 dark:text-violet-300",
   amber: "from-amber-500/25 text-amber-600 dark:text-amber-300",
+  rose: "from-rose-500/20 text-rose-600 dark:text-rose-300",
+} as const;
+
+const BARRA_NUMERO = {
+  emerald: "from-emerald-400 to-teal-400",
+  sky: "from-sky-400 to-cyan-400",
+  violet: "from-violet-500 to-fuchsia-400",
+  amber: "from-amber-400 to-orange-400",
+  rose: "from-rose-500 to-pink-400",
 } as const;
 
 function Numero({
   Icone,
   rotulo,
+  detalhe,
   valor,
   cor,
   vivo = false,
+  onClick,
 }: {
   Icone: LucideIcon;
   rotulo: string;
+  detalhe?: string | undefined;
   valor: number;
   cor: keyof typeof CORES_NUMERO;
   vivo?: boolean;
+  onClick: () => void;
 }) {
   return (
-    <div className="hero-subir flex flex-col items-start gap-2.5 rounded-2xl border border-border/70 bg-card/95 p-3.5 shadow-lg backdrop-blur-xl sm:flex-row sm:items-center sm:gap-3 sm:p-4">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${rotulo}: ${valor}. Ver detalhes`}
+      className="hero-subir group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl border border-border/70 bg-card/95 p-4 text-left shadow-lg backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    >
       <span
+        aria-hidden
         className={cn(
-          "relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br to-transparent sm:size-12 sm:rounded-2xl",
-          CORES_NUMERO[cor],
+          "absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-80",
+          BARRA_NUMERO[cor],
         )}
-      >
-        <Icone className="size-5 sm:size-6" aria-hidden />
-        {vivo ? (
-          <span className="absolute -right-0.5 -top-0.5 size-3 animate-pulse rounded-full bg-emerald-500 ring-2 ring-card" />
+      />
+      <span className="flex w-full items-center justify-between">
+        <span
+          className={cn(
+            "relative flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br to-transparent",
+            CORES_NUMERO[cor],
+          )}
+        >
+          <Icone className="size-5" aria-hidden />
+          {vivo ? (
+            <span className="absolute -right-0.5 -top-0.5 size-3 animate-pulse rounded-full bg-emerald-500 ring-2 ring-card" />
+          ) : null}
+        </span>
+        <span className="flex items-center gap-0.5 text-[11px] font-bold text-muted-foreground opacity-70 transition group-hover:text-primary group-hover:opacity-100">
+          Detalhes{" "}
+          <ArrowUpRight
+            className="size-3.5 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            aria-hidden
+          />
+        </span>
+      </span>
+      <span className="min-w-0">
+        {/* a chave faz o número "subir" de novo sempre que muda ao vivo */}
+        <span
+          key={valor}
+          className="hero-subir block text-3xl font-extrabold leading-none tabular-nums sm:text-[2.1rem]"
+        >
+          {valor}
+        </span>
+        <span className="mt-1.5 block text-xs font-semibold leading-tight text-foreground/80">
+          {rotulo}
+        </span>
+        {detalhe ? (
+          <span className="mt-0.5 block text-[11px] leading-tight text-muted-foreground">
+            {detalhe}
+          </span>
         ) : null}
       </span>
-      <div className="min-w-0">
-        {/* a chave faz o número "subir" de novo sempre que muda ao vivo */}
-        <p key={valor} className="hero-subir text-3xl font-extrabold leading-none tabular-nums">
-          {valor}
-        </p>
-        <p className="mt-1 text-xs leading-tight text-muted-foreground">{rotulo}</p>
-      </div>
-    </div>
+    </button>
   );
 }
 
@@ -365,7 +625,9 @@ const MEDALHAS = ["text-amber-400", "text-slate-400", "text-orange-500"];
 
 function Placar({
   linhas,
+  aoAbrir,
 }: {
+  aoAbrir: (turmaId: string) => void;
   linhas: {
     id: string;
     rotulo: string;
@@ -384,7 +646,7 @@ function Placar({
         <div>
           <h2 className="font-extrabold">Placar da semana</h2>
           <p className="text-xs text-muted-foreground">
-            Quanto de cada turma já foi ao laboratório
+            Toque numa turma para ver quem já foi e quem falta
           </p>
         </div>
       </header>
@@ -397,36 +659,39 @@ function Placar({
           linhas.map((l, i) => {
             const cor = serieClasses(serieIndexPorNumero(l.serie));
             return (
-              <li
-                key={l.id}
-                className="lab-aluno flex items-center gap-3"
-                style={{ animationDelay: `${i * 50}ms` }}
-              >
-                <span className="flex w-6 shrink-0 justify-center">
-                  {i < 3 && l.foram > 0 ? (
-                    <Medal className={cn("size-5", MEDALHAS[i])} aria-label={`${i + 1}º lugar`} />
-                  ) : (
-                    <span className="text-xs font-bold text-muted-foreground">{i + 1}º</span>
-                  )}
-                </span>
-                <span
-                  className={cn(
-                    "w-11 shrink-0 rounded-lg py-0.5 text-center text-xs font-extrabold",
-                    cor.bg,
-                    cor.text,
-                  )}
+              <li key={l.id} className="lab-aluno" style={{ animationDelay: `${i * 50}ms` }}>
+                <button
+                  type="button"
+                  onClick={() => aoAbrir(l.id)}
+                  className="-mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-xl px-2 py-1 text-left transition hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  aria-label={`${l.rotulo}: ${l.foram} de ${l.total}. Ver detalhes`}
                 >
-                  {l.rotulo}
-                </span>
-                <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-sky-500 via-violet-500 to-pink-500 transition-[width] duration-700"
-                    style={{ width: `${Math.max(l.foram ? 4 : 0, l.parte * 100)}%` }}
-                  />
-                </div>
-                <span className="w-12 shrink-0 text-right text-xs font-semibold tabular-nums text-muted-foreground">
-                  {l.foram}/{l.total}
-                </span>
+                  <span className="flex w-6 shrink-0 justify-center">
+                    {i < 3 && l.foram > 0 ? (
+                      <Medal className={cn("size-5", MEDALHAS[i])} aria-label={`${i + 1}º lugar`} />
+                    ) : (
+                      <span className="text-xs font-bold text-muted-foreground">{i + 1}º</span>
+                    )}
+                  </span>
+                  <span
+                    className={cn(
+                      "w-11 shrink-0 rounded-lg py-0.5 text-center text-xs font-extrabold",
+                      cor.bg,
+                      cor.text,
+                    )}
+                  >
+                    {l.rotulo}
+                  </span>
+                  <div className="h-3 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-sky-500 via-violet-500 to-pink-500 transition-[width] duration-700"
+                      style={{ width: `${Math.max(l.foram ? 4 : 0, l.parte * 100)}%` }}
+                    />
+                  </div>
+                  <span className="w-12 shrink-0 text-right text-xs font-semibold tabular-nums text-muted-foreground">
+                    {l.foram}/{l.total}
+                  </span>
+                </button>
               </li>
             );
           })
