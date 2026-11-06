@@ -1,4 +1,5 @@
-import { useEffect, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from "react";
+import { useAppStore } from "@/lib/app-store";
 import {
   ArrowRight, BookOpen, Camera, Check, Clock3, Code2, Cpu, GraduationCap,
   Maximize2, Monitor, ShieldCheck, Sparkles, Wifi, X,
@@ -26,6 +27,22 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [confirmarSaida, setConfirmarSaida] = useState(false);
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
+  const { turmas } = useAppStore();
+  const alunosAtivos = useMemo(
+    () => turmas.flatMap((turma) =>
+      turma.alunos
+        .filter((aluno) => !aluno.situacao || aluno.situacao === "ativo")
+        .map((aluno) => {
+          const partes = aluno.nome.trim().split(/\s+/).filter(Boolean);
+          const nomeExibicao = partes.length > 1
+            ? `${partes[0]} ${partes[1].charAt(0).toLocaleUpperCase("pt-BR")}.`
+            : (partes[0] ?? "Aluno");
+          return { id: aluno.id, nome: nomeExibicao, turma: `${turma.serie}º ${turma.letra}` };
+        }),
+    ),
+    [turmas],
+  );
+  const [alunosEmDestaque, setAlunosEmDestaque] = useState<typeof alunosAtivos>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -74,6 +91,31 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     atualizar();
     return () => document.removeEventListener("fullscreenchange", atualizar);
   }, []);
+
+  useEffect(() => {
+    if (!alunosAtivos.length) {
+      setAlunosEmDestaque([]);
+      return;
+    }
+    // Embaralhamento local: não altera a ordem nem os dados do cadastro.
+    const embaralhados = [...alunosAtivos];
+    for (let i = embaralhados.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [embaralhados[i], embaralhados[j]] = [embaralhados[j], embaralhados[i]];
+    }
+    setAlunosEmDestaque(embaralhados);
+  }, [alunosAtivos]);
+
+  useEffect(() => {
+    if (!ativo || alunosEmDestaque.length <= 3) return;
+    const id = window.setInterval(() => {
+      setAlunosEmDestaque((atuais) => {
+        if (atuais.length <= 3) return atuais;
+        return [...atuais.slice(1), atuais[0]];
+      });
+    }, 6500);
+    return () => window.clearInterval(id);
+  }, [ativo, alunosEmDestaque.length]);
 
   useEffect(() => {
     if (!ativo) return;
@@ -257,6 +299,35 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
             </div>
           ))}
         </div>
+
+        <section aria-label="Alunos do laboratório" className="mt-4 w-full max-w-4xl">
+          <div className="mb-2 flex items-center justify-center gap-2 text-[9px] font-extrabold uppercase tracking-[.2em] text-blue-100/55">
+            <GraduationCap className="size-3.5 text-cyan-200/80" />
+            Nossa comunidade de aprendizagem
+          </div>
+          {alunosEmDestaque.length > 0 ? (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {alunosEmDestaque.slice(0, 3).map((aluno, indice) => (
+                <div
+                  key={aluno.id}
+                  className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-slate-950/35 px-3 py-2 text-left shadow-lg backdrop-blur-md transition-all duration-700"
+                  style={{ animationDelay: `${indice * 140}ms` }}
+                >
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-cyan-100/20 bg-cyan-200/10 text-[10px] font-black text-cyan-100">
+                    {aluno.nome.split(" ").map((parte) => parte[0]).join("").replace(".", "").slice(0, 2)}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-bold text-white/90">{aluno.nome}</span>
+                    <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[.12em] text-cyan-100/55">Turma {aluno.turma}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-[10px] text-white/45">Alunos cadastrados aparecerão aqui.</p>
+          )}
+          <p className="mt-1.5 text-center text-[8px] font-medium text-white/35">Exibição rotativa · primeiro nome e inicial do sobrenome</p>
+        </section>
 
         <footer className="mt-5 flex flex-col items-center gap-1 text-center">
           <div className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[.17em] text-white/60">
