@@ -28,24 +28,48 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
   const temporizadorRef = useRef<number | undefined>(undefined);
-  // Trava a rolagem do documento enquanto o descanso ocupa a janela inteira.
+  // Bloqueio global da página enquanto o screensaver estiver aberto.
   useEffect(() => {
     if (!ativo) return;
     const html = document.documentElement;
     const body = document.body;
-    const htmlOverflow = html.style.overflow;
-    const bodyOverflow = body.style.overflow;
-    const bodyOverscroll = body.style.overscrollBehavior;
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    body.style.overscrollBehavior = "none";
+    const scrollY = window.scrollY;
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      htmlHeight: html.style.height,
+      bodyOverflow: body.style.overflow,
+      bodyHeight: body.style.height,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyLeft: body.style.left,
+      bodyRight: body.style.right,
+      bodyWidth: body.style.width,
+      bodyTouch: body.style.touchAction,
+    };
+    html.style.setProperty("overflow", "hidden", "important");
+    html.style.setProperty("height", "100%", "important");
+    body.style.setProperty("overflow", "hidden", "important");
+    body.style.setProperty("height", "100%", "important");
+    body.style.setProperty("position", "fixed", "important");
+    body.style.setProperty("top", `-${scrollY}px`, "important");
+    body.style.setProperty("left", "0", "important");
+    body.style.setProperty("right", "0", "important");
+    body.style.setProperty("width", "100%", "important");
+    body.style.setProperty("touch-action", "none", "important");
     return () => {
-      html.style.overflow = htmlOverflow;
-      body.style.overflow = bodyOverflow;
-      body.style.overscrollBehavior = bodyOverscroll;
+      html.style.overflow = prev.htmlOverflow;
+      html.style.height = prev.htmlHeight;
+      body.style.overflow = prev.bodyOverflow;
+      body.style.height = prev.bodyHeight;
+      body.style.position = prev.bodyPosition;
+      body.style.top = prev.bodyTop;
+      body.style.left = prev.bodyLeft;
+      body.style.right = prev.bodyRight;
+      body.style.width = prev.bodyWidth;
+      body.style.touchAction = prev.bodyTouch;
+      window.scrollTo(0, scrollY);
     };
   }, [ativo]);
-
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -145,7 +169,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       onPointerDown={pedirConfirmacao}
       onKeyDown={pedirConfirmacao}
       tabIndex={-1}
-      className="fixed inset-0 z-[9999] flex h-[100dvh] min-h-0 items-center justify-center overflow-hidden bg-[#071329] px-[clamp(10px,2vw,28px)] py-[clamp(8px,1.5vh,16px)] text-white outline-none"
+      className="fixed inset-0 z-[9999] flex h-screen max-h-screen min-h-0 w-screen max-w-[100vw] items-center justify-center overflow-hidden overscroll-none bg-[#071329] px-[clamp(10px,2vw,28px)] py-[clamp(8px,1.5vh,16px)] text-white outline-none"
     >
       {/* Moldura neon discreta nos quatro cantos da janela. */}
       <div aria-hidden className="screensaver-neon-frame pointer-events-none absolute inset-0 z-[5] overflow-hidden">
@@ -436,7 +460,9 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       )}
       <style>{`
 
-        #screensaver-informatica { overflow: hidden !important; overscroll-behavior: none; scrollbar-width: none; }
+        html:has(#screensaver-informatica), body:has(#screensaver-informatica) { overflow: hidden !important; height: 100% !important; }
+        body:has(#screensaver-informatica) { position: fixed !important; inset: 0 !important; width: 100% !important; }
+        #screensaver-informatica { position: fixed !important; inset: 0 !important; width: 100vw !important; height: 100vh !important; max-height: 100vh !important; overflow: hidden !important; overscroll-behavior: none; scrollbar-width: none; overscroll-behavior: none; scrollbar-width: none; }
         #screensaver-informatica::-webkit-scrollbar,
         #screensaver-informatica *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
         #screensaver-informatica * { scrollbar-width: none; }
