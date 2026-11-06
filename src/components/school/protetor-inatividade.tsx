@@ -72,12 +72,12 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   // Uma aula ao vivo tem prioridade sobre o descanso de tela, mesmo sem
   // interação: o protetor não deve cobrir o painel durante a atividade.
   useEffect(() => {
-    if (!aulaEmAndamento) return;
+    if (!aulaEmAndamento || protetorForcado) return;
     window.clearTimeout(temporizadorRef.current);
     temporizadorRef.current = undefined;
     setAtivo(false);
     setConfirmarSaida(false);
-  }, [aulaEmAndamento]);
+  }, [aulaEmAndamento, protetorForcado]);
 
   // Bloqueio global da página enquanto o screensaver estiver aberto.
   useEffect(() => {
@@ -126,7 +126,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     if (typeof window === "undefined") return;
     const desktop = window.matchMedia("(min-width: 900px) and (hover: hover) and (pointer: fine)");
     const bloqueada = ROTAS_EXCLUIDAS.some((rota) => pathname === rota || pathname.startsWith(rota + "/"));
-    if (!authPronto || isAuthenticated) {\n      setAtivo(false);\n      setConfirmarSaida(false);\n      return;\n    }\n    if (!desktop.matches || bloqueada || (aulaEmAndamento && !protetorForcado)) {
+    if (!authPronto || isAuthenticated) {\n      setAtivo(false);\n      setConfirmarSaida(false);\n      return;\n    }\n    if ((!desktop.matches && !protetorForcado) || bloqueada || (aulaEmAndamento && !protetorForcado)) {
       setAtivo(false);
       setConfirmarSaida(false);
       return;
