@@ -227,6 +227,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   usePWAInstallInitializer();
   useCarregarHistoricoParticipacao();
 
@@ -260,6 +261,7 @@ function RootComponent() {
                 <Toaster mobileOffset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }} />
                 {PROGRAMACAO_ATIVA ? <AvisoAulaEmBreve /> : null}
                 <AlunoSessaoGuard />
+                <ProtetorInatividade pathname={pathname} />
               </JovemPanRadioProvider>
             </ConfirmProvider>
           </AppProvider>
