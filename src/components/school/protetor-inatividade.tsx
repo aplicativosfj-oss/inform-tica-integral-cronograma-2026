@@ -28,6 +28,24 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
   const temporizadorRef = useRef<number | undefined>(undefined);
+  // Trava a rolagem do documento enquanto o descanso ocupa a janela inteira.
+  useEffect(() => {
+    if (!ativo) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const htmlOverflow = html.style.overflow;
+    const bodyOverflow = body.style.overflow;
+    const bodyOverscroll = body.style.overscrollBehavior;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    return () => {
+      html.style.overflow = htmlOverflow;
+      body.style.overflow = bodyOverflow;
+      body.style.overscrollBehavior = bodyOverscroll;
+    };
+  }, [ativo]);
+
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -129,6 +147,16 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       tabIndex={-1}
       className="fixed inset-0 z-[9999] flex h-[100dvh] min-h-0 items-center justify-center overflow-hidden bg-[#071329] px-[clamp(10px,2vw,28px)] py-[clamp(8px,1.5vh,16px)] text-white outline-none"
     >
+      {/* Moldura neon discreta nos quatro cantos da janela. */}
+      <div aria-hidden className="screensaver-neon-frame pointer-events-none absolute inset-0 z-[5] overflow-hidden">
+        <span className="screensaver-neon-corner screensaver-neon-tl" />
+        <span className="screensaver-neon-corner screensaver-neon-tr" />
+        <span className="screensaver-neon-corner screensaver-neon-bl" />
+        <span className="screensaver-neon-corner screensaver-neon-br" />
+        <span className="screensaver-neon-edge screensaver-neon-top" />
+        <span className="screensaver-neon-edge screensaver-neon-bottom" />
+      </div>
+
       {/* Fotografia real do laboratório com camadas de contraste para leitura. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <img
@@ -303,62 +331,96 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         </footer>
       </main>
 
-      <div className="screensaver-avoid pointer-events-none absolute right-[2%] top-[38%] z-20 flex h-[min(36vh,320px)] w-[min(44vw,460px)] items-center justify-end">
-              <svg viewBox="0 0 760 520" role="img" aria-label="Câmera de segurança tridimensional" className="h-full w-auto max-w-full overflow-visible drop-shadow-[0_28px_28px_rgba(0,0,0,.55)] motion-safe:animate-[cameraFloat_6s_ease-in-out_infinite]">
-                <defs>
-                  <linearGradient id="camBody" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#ffffff"/><stop offset=".28" stopColor="#e8edf1"/><stop offset=".58" stopColor="#aeb9c4"/><stop offset=".82" stopColor="#f8fafc"/><stop offset="1" stopColor="#778594"/>
-                  </linearGradient>
-                  <linearGradient id="camTop" x1="0" y1="0" x2=".8" y2="1">
-                    <stop offset="0" stopColor="#ffffff"/><stop offset=".55" stopColor="#e6ebef"/><stop offset="1" stopColor="#9aa7b3"/>
-                  </linearGradient>
-                  <linearGradient id="camDark" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#3b4652"/><stop offset=".4" stopColor="#080e18"/><stop offset=".75" stopColor="#202b38"/><stop offset="1" stopColor="#050a12"/>
-                  </linearGradient>
-                  <radialGradient id="camGlass" cx=".38" cy=".32" r=".72">
-                    <stop offset="0" stopColor="#52728b"/><stop offset=".24" stopColor="#182b40"/><stop offset=".55" stopColor="#050b15"/><stop offset=".78" stopColor="#26394b"/><stop offset="1" stopColor="#03070d"/>
-                  </radialGradient>
-                  <radialGradient id="camLens" cx=".35" cy=".3" r=".7">
-                    <stop offset="0" stopColor="#7895a8"/><stop offset=".18" stopColor="#253f55"/><stop offset=".48" stopColor="#07111e"/><stop offset=".72" stopColor="#1c3548"/><stop offset="1" stopColor="#02060b"/>
-                  </radialGradient>
-                  <filter id="camGlow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-                </defs>
-                <g className="origin-center motion-safe:animate-[cameraPivot_11s_ease-in-out_infinite_alternate]">
-                  {/* Parede, base e braço articulado */}
-                  <ellipse cx="566" cy="430" rx="145" ry="27" fill="#020814" opacity=".42"/>
-                  <path d="M526 314 L596 350 Q627 365 648 389 L671 416 L624 450 L580 406 L501 372Z" fill="url(#camBody)" stroke="#7e8c99" strokeWidth="5"/>
-                  <path d="M551 331 L615 369 L644 398" fill="none" stroke="#fff" strokeWidth="8" opacity=".65"/>
-                  <path d="M620 415 L669 438" stroke="#6c7a88" strokeWidth="12" strokeLinecap="round"/>
-                  <path d="M669 438 C692 454 716 449 727 427 L739 402 C748 381 738 356 716 346 L681 331 C659 322 635 334 629 356 L617 391 C610 411 629 430 649 432Z" fill="url(#camBody)" stroke="#8795a2" strokeWidth="5"/>
-                  <ellipse cx="682" cy="389" rx="49" ry="63" fill="#dce3e9" stroke="#7f8c98" strokeWidth="6"/>
-                  <ellipse cx="682" cy="389" rx="35" ry="48" fill="url(#camBody)" stroke="#fff" strokeWidth="4"/>
-                  {[[682,348],[716,389],[682,430],[648,389]].map(([x,y]) => <g key={x+":"+y}><circle cx={x} cy={y} r="5.5" fill="#596674"/><circle cx={x-1} cy={y-1} r="2" fill="#dce5ec"/></g>)}
-                  {/* Corpo cilíndrico */}
-                  <path d="M171 124 Q190 75 261 62 L526 35 Q592 30 617 87 L664 199 Q678 237 646 271 L566 334 Q534 359 483 348 L194 286 Q145 276 139 224Z" fill="url(#camBody)" stroke="#7f8d9a" strokeWidth="5"/>
-                  <path d="M193 117 Q219 81 272 77 L530 52 Q576 48 597 92 L632 177 L249 238 Q200 241 175 207Z" fill="url(#camTop)" stroke="#fff" strokeWidth="3"/>
-                  <path d="M250 239 L634 179" fill="none" stroke="#65727f" strokeWidth="5" opacity=".75"/>
-                  <path d="M258 248 L624 193" fill="none" stroke="#fff" strokeWidth="2" opacity=".75"/>
-                  <path d="M526 293 Q568 278 626 236 L657 267 Q620 311 564 335Z" fill="#aab5bf" opacity=".7"/>
-                  <path d="M182 133 Q145 152 125 191 L101 235 Q92 255 114 267 L173 286 L232 254 L255 148Z" fill="#202a36" stroke="#65727f" strokeWidth="6"/>
-                  {/* Cabeçote preto e lente */}
-                  <ellipse cx="249" cy="225" rx="135" ry="151" fill="url(#camDark)" stroke="#080d15" strokeWidth="13"/>
-                  <ellipse cx="249" cy="225" rx="116" ry="132" fill="#111b27" stroke="#667381" strokeWidth="7"/>
-                  <ellipse cx="249" cy="225" rx="99" ry="113" fill="#080e17" stroke="#263849" strokeWidth="8"/>
-                  <ellipse cx="249" cy="225" rx="82" ry="94" fill="url(#camGlass)" stroke="#7d8b98" strokeWidth="4"/>
-                  <ellipse cx="249" cy="225" rx="60" ry="69" fill="url(#camLens)" stroke="#34495c" strokeWidth="5"/>
-                  <ellipse cx="249" cy="225" rx="35" ry="41" fill="#07111d" stroke="#6b8396" strokeWidth="4"/>
-                  <ellipse cx="239" cy="209" rx="12" ry="16" fill="#a7d5f2" opacity=".2"/>
-                  <circle cx="254" cy="221" r="8" fill="#b7e8ff" opacity=".16"/>
-                  {/* Anel de LEDs infravermelhos */}
-                  {Array.from({length:18},(_,i)=>{const a=(i/18)*Math.PI*2;const x=249+91*Math.cos(a);const y=225+104*Math.sin(a);return <g key={i}><circle cx={x} cy={y} r="8" fill="#a9d5ed" opacity=".22" filter="url(#camGlow)"/><circle cx={x} cy={y} r="5.5" fill="#d8f0ff"/><circle cx={x-1.5} cy={y-1.5} r="2" fill="#fff"/></g>})}
-                  {/* Parafusos e reflexos */}
-                  {[[169,119],[323,103],[368,321],[126,280],[357,270]].map(([x,y])=><g key={x+":"+y}><circle cx={x} cy={y} r="7" fill="#0a111a" stroke="#6d7b89" strokeWidth="3"/><path d={`M${x-3} ${y}h6`} stroke="#dce5eb" strokeWidth="1.5"/></g>)}
-                  <path d="M286 82 Q410 51 525 58" fill="none" stroke="#fff" strokeWidth="5" opacity=".52" strokeLinecap="round"/>
-                  <path d="M155 160 Q174 104 220 91" fill="none" stroke="#fff" strokeWidth="3" opacity=".22"/>
-                </g>
-                <circle cx="249" cy="225" r="112" fill="none" stroke="#56cfff" strokeWidth="2" opacity=".45" filter="url(#camGlow)" className="motion-safe:animate-[lensPulse_3.2s_ease-in-out_infinite]"/>
-              </svg>
-            </div>
+      {/* Câmera de segurança: suporte fixo na parede + cabeçote que gira (pan/tilt) como uma PTZ real. */}
+      <div className="screensaver-avoid pointer-events-none absolute right-[2%] top-[36%] z-20 flex h-[min(40vh,350px)] w-[min(48vw,510px)] items-center justify-end">
+        <div role="img" aria-label="Câmera de segurança monitorando o laboratório" className="relative aspect-[760/520] h-full max-w-full drop-shadow-[0_26px_24px_rgba(0,0,0,.55)]">
+          {/* Camada fixa: placa de parede, braço e cabo */}
+          <svg viewBox="0 0 760 520" aria-hidden className="absolute inset-0 h-full w-full overflow-visible">
+            <defs>
+              <linearGradient id="cctvMetal" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#f5f8fa"/><stop offset=".35" stopColor="#d7dee5"/><stop offset=".7" stopColor="#a3afbb"/><stop offset="1" stopColor="#6f7c89"/>
+              </linearGradient>
+              <linearGradient id="cctvPlate" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="#c3ccd5"/><stop offset=".45" stopColor="#eef2f5"/><stop offset="1" stopColor="#8794a1"/>
+              </linearGradient>
+            </defs>
+            <rect x="672" y="160" width="62" height="190" rx="16" fill="url(#cctvPlate)" stroke="#6b7884" strokeWidth="4"/>
+            <rect x="684" y="174" width="38" height="162" rx="10" fill="none" stroke="#ffffff" strokeOpacity=".5" strokeWidth="2"/>
+            {[184, 326].map((y) => <g key={y}><circle cx="703" cy={y} r="7" fill="#4b5663" stroke="#d8e0e7" strokeWidth="2"/><path d={`M699 ${y}h8`} stroke="#e8eef3" strokeWidth="1.6"/></g>)}
+            <path d="M612 352 C640 404 676 392 690 338" fill="none" stroke="#0b1119" strokeWidth="8" strokeLinecap="round"/>
+            <path d="M612 352 C640 404 676 392 690 338" fill="none" stroke="#3c4855" strokeWidth="2" strokeLinecap="round" opacity=".6"/>
+            <rect x="556" y="232" width="124" height="34" rx="17" fill="url(#cctvMetal)" stroke="#6b7884" strokeWidth="4"/>
+            <rect x="572" y="238" width="96" height="6" rx="3" fill="#ffffff" opacity=".55"/>
+          </svg>
+
+          {/* Camada móvel: cabeçote, com eixo de giro na articulação do braço */}
+          <div className="cctv-cabecote absolute inset-0 [transform-origin:73.95%_48.08%] motion-safe:animate-[cctvPan_22s_ease-in-out_infinite]">
+            <svg viewBox="0 0 760 520" aria-hidden className="absolute inset-0 h-full w-full overflow-visible">
+              <defs>
+                <linearGradient id="cctvBody" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#ffffff"/><stop offset=".22" stopColor="#eef2f6"/><stop offset=".55" stopColor="#c4cdd6"/><stop offset=".82" stopColor="#8f9ba8"/><stop offset="1" stopColor="#5f6b78"/>
+                </linearGradient>
+                <linearGradient id="cctvShield" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#fbfcfd"/><stop offset=".6" stopColor="#d4dce3"/><stop offset="1" stopColor="#8995a2"/>
+                </linearGradient>
+                <linearGradient id="cctvDark" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#3a4654"/><stop offset=".45" stopColor="#0d141e"/><stop offset="1" stopColor="#03060b"/>
+                </linearGradient>
+                <radialGradient id="cctvLens" cx=".38" cy=".3" r=".75">
+                  <stop offset="0" stopColor="#8fb3cc"/><stop offset=".22" stopColor="#2b4a66"/><stop offset=".55" stopColor="#081321"/><stop offset=".8" stopColor="#1a3349"/><stop offset="1" stopColor="#02060b"/>
+                </radialGradient>
+                <linearGradient id="cctvCone" x1="1" y1="0" x2="0" y2="0">
+                  <stop offset="0" stopColor="#67e8f9" stopOpacity=".42"/><stop offset=".45" stopColor="#38bdf8" stopOpacity=".14"/><stop offset="1" stopColor="#38bdf8" stopOpacity="0"/>
+                </linearGradient>
+                <filter id="cctvGlow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+
+              {/* Campo de visão (feixe) */}
+              <g className="motion-safe:animate-[cctvBeam_4.5s_ease-in-out_infinite]">
+                <path d="M136 332 L-360 150 L-360 520 Z" fill="url(#cctvCone)"/>
+                <path d="M136 332 L-360 150" stroke="#a5f3fc" strokeOpacity=".22" strokeWidth="2"/>
+                <path d="M136 332 L-360 520" stroke="#a5f3fc" strokeOpacity=".22" strokeWidth="2"/>
+              </g>
+
+              {/* Suporte e articulação */}
+              <path d="M544 250 L580 250 L598 284 L526 284 Z" fill="url(#cctvMetal)" stroke="#6b7884" strokeWidth="4" strokeLinejoin="round"/>
+              <circle cx="562" cy="250" r="22" fill="url(#cctvMetal)" stroke="#5f6b78" strokeWidth="4"/>
+              <circle cx="556" cy="243" r="7" fill="#ffffff" opacity=".7"/>
+
+              {/* Viseira (para-sol) */}
+              <path d="M104 286 Q104 264 128 262 L594 254 Q616 254 616 272 L616 282 L128 292 Q104 294 104 286 Z" fill="url(#cctvShield)" stroke="#75828f" strokeWidth="4" strokeLinejoin="round"/>
+              <path d="M132 268 L590 260" stroke="#ffffff" strokeWidth="3" opacity=".8" strokeLinecap="round"/>
+
+              {/* Corpo cilíndrico */}
+              <rect x="150" y="282" width="450" height="104" rx="46" fill="url(#cctvBody)" stroke="#6f7c89" strokeWidth="4"/>
+              <rect x="196" y="292" width="350" height="9" rx="4.5" fill="#ffffff" opacity=".7"/>
+              <rect x="512" y="285" width="7" height="98" fill="#7d8996" opacity=".55"/>
+              <rect x="556" y="286" width="58" height="96" rx="34" fill="url(#cctvBody)" stroke="#6f7c89" strokeWidth="4"/>
+              <text x="372" y="352" textAnchor="middle" fontFamily="ui-monospace, monospace" fontSize="17" fontWeight="700" letterSpacing="5" fill="#6f7c89" opacity=".85">CAM 01</text>
+              <rect x="300" y="360" width="146" height="3" rx="1.5" fill="#6f7c89" opacity=".35"/>
+
+              {/* LED de gravação */}
+              <circle cx="226" cy="312" r="10" fill="#1f2937" opacity=".35"/>
+              <g className="motion-safe:animate-[cctvRec_1.3s_steps(1,end)_infinite]">
+                <circle cx="226" cy="312" r="6" fill="#ef4444" filter="url(#cctvGlow)"/>
+                <circle cx="224.5" cy="310.5" r="2" fill="#fecaca"/>
+              </g>
+              <text x="240" y="317" fontFamily="ui-monospace, monospace" fontSize="12" fontWeight="800" letterSpacing="2" fill="#b91c1c" opacity=".85">REC</text>
+
+              {/* Frente: aro, LEDs infravermelhos e lente */}
+              <rect x="118" y="280" width="64" height="108" rx="32" fill="url(#cctvDark)" stroke="#05080d" strokeWidth="5"/>
+              <ellipse cx="150" cy="334" rx="25" ry="48" fill="#05090f" stroke="#334152" strokeWidth="4"/>
+              {Array.from({ length: 10 }, (_, i) => {
+                const a = (i / 10) * Math.PI * 2;
+                return <circle key={i} cx={150 + 19 * Math.cos(a)} cy={334 + 39 * Math.sin(a)} r="3" fill="#7f1d1d" opacity=".85" />;
+              })}
+              <ellipse cx="148" cy="334" rx="13" ry="26" fill="url(#cctvLens)" stroke="#4b6276" strokeWidth="3"/>
+              <ellipse cx="148" cy="334" rx="6" ry="12" fill="#03070c"/>
+              <ellipse cx="144" cy="324" rx="3.5" ry="7" fill="#e0f2fe" opacity=".75" className="motion-safe:animate-[cctvGlint_22s_ease-in-out_infinite]"/>
+            </svg>
+          </div>
+        </div>
+      </div>
 
       {confirmarSaida && (
         <div
@@ -393,10 +455,41 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         </div>
       )}
       <style>{`
-        @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
+
+        #screensaver-informatica { overflow: hidden !important; overscroll-behavior: none; scrollbar-width: none; }
+        #screensaver-informatica::-webkit-scrollbar,
+        #screensaver-informatica *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        #screensaver-informatica * { scrollbar-width: none; }
+        .screensaver-neon-corner { position:absolute; width:clamp(42px,5vw,76px); height:clamp(42px,5vh,76px); opacity:.72; filter:drop-shadow(0 0 7px rgba(103,232,249,.45)); }
+        .screensaver-neon-corner::before,.screensaver-neon-corner::after { content:"";position:absolute;border-radius:99px;background:linear-gradient(90deg,rgba(103,232,249,.08),rgba(125,211,252,.9));box-shadow:0 0 7px rgba(103,232,249,.55),0 0 18px rgba(59,130,246,.24); }
+        .screensaver-neon-corner::before { width:100%;height:2px; }
+        .screensaver-neon-corner::after { width:2px;height:100%; }
+        .screensaver-neon-tl { top:clamp(10px,1.6vh,22px);left:clamp(10px,1.2vw,22px); }
+        .screensaver-neon-tr { top:clamp(10px,1.6vh,22px);right:clamp(10px,1.2vw,22px);transform:rotate(90deg); }
+        .screensaver-neon-bl { bottom:clamp(10px,1.6vh,22px);left:clamp(10px,1.2vw,22px);transform:rotate(-90deg); }
+        .screensaver-neon-br { bottom:clamp(10px,1.6vh,22px);right:clamp(10px,1.2vw,22px);transform:rotate(180deg); }
+        .screensaver-neon-edge { position:absolute;left:12%;right:12%;height:1px;opacity:.22;background:linear-gradient(90deg,transparent,rgba(103,232,249,.65),transparent);box-shadow:0 0 8px rgba(103,232,249,.25); }
+        .screensaver-neon-top { top:0; } .screensaver-neon-bottom { bottom:0; }
+        @keyframes screensaverNeonPulse { 0%,100% { opacity:.48;filter:drop-shadow(0 0 4px rgba(103,232,249,.25)); } 50% { opacity:.9;filter:drop-shadow(0 0 10px rgba(103,232,249,.65)); } }
+        .screensaver-neon-corner { animation:screensaverNeonPulse 5.5s ease-in-out infinite; }
+        .screensaver-neon-tr { animation-delay:1.2s; } .screensaver-neon-bl { animation-delay:2.4s; } .screensaver-neon-br { animation-delay:3.6s; }
+        @media (prefers-reduced-motion: reduce) { .screensaver-neon-corner { animation:none; } }
+\n                @keyframes cameraSweep { 0%, 15% { transform: translateX(-180%); } 75%, 100% { transform: translateX(330%); } }
         @keyframes cameraLine { 0%, 100% { transform: translateY(0); opacity: .25; } 50% { transform: translateY(170px); opacity: .9; } }
         @keyframes cctvRoomPan { 0% { transform: scale(1.04) translate3d(-.5%,0,0); } 100% { transform: scale(1.14) translate3d(.7%,-.6%,0); } }
         @keyframes cctvScan { 0% { transform: translateY(0); opacity: .18; } 50% { opacity: .8; } 100% { transform: translateY(350px); opacity: .18; } }
+        @keyframes cctvPan {
+          0%, 7% { transform: perspective(1100px) rotateY(0deg) rotateZ(0deg); }
+          25% { transform: perspective(1100px) rotateY(-35.5deg) rotateZ(-2.6deg); }
+          27%, 38% { transform: perspective(1100px) rotateY(-34deg) rotateZ(-2.4deg); }
+          52%, 58% { transform: perspective(1100px) rotateY(3deg) rotateZ(1.5deg); }
+          75% { transform: perspective(1100px) rotateY(37.5deg) rotateZ(5.2deg); }
+          77%, 89% { transform: perspective(1100px) rotateY(36deg) rotateZ(4.8deg); }
+          100% { transform: perspective(1100px) rotateY(0deg) rotateZ(0deg); }
+        }
+        @keyframes cctvRec { 0% { opacity: 1; } 55% { opacity: .12; } }
+        @keyframes cctvBeam { 0%, 100% { opacity: .65; } 50% { opacity: 1; } }
+        @keyframes cctvGlint { 0%, 7%, 27%, 38%, 52%, 58%, 77%, 89%, 100% { opacity: .75; } 16%, 45%, 66%, 94% { opacity: .25; } }
         @keyframes cameraFloat { 0%, 100% { transform: translate3d(0,0,0) rotate(-.7deg); } 50% { transform: translate3d(0,-9px,0) rotate(.7deg); } }
         @keyframes cameraPivot { 0% { transform: rotate(-1.2deg) translateX(-2px); } 50% { transform: rotate(.8deg) translateX(3px); } 100% { transform: rotate(-.4deg) translateX(0); } }
         @keyframes lensPulse { 0%, 100% { opacity: .18; transform: scale(.97); } 50% { opacity: .7; transform: scale(1.035); } }
