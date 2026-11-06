@@ -88,7 +88,8 @@ export const Route = createFileRoute("/")({
 const ACESSOS = [
   {
     to: "/agenda",
-    imagem: "/images/hero-lab-photo-768w.webp",
+    imagem: "/images/atividades/atividade-06.webp",
+    imagemReserva: "/images/hero-lab-photo-768w.webp",
     numero: "01",
     rotulo: "Organização",
     titulo: "Agenda do laboratório",
@@ -100,7 +101,8 @@ const ACESSOS = [
   },
   {
     to: "/aluno",
-    imagem: "/images/alunos-hero-768w.webp",
+    imagem: "/images/atividades/atividade-01.webp",
+    imagemReserva: "/images/alunos-hero-768w.webp",
     numero: "02",
     rotulo: "Para os estudantes",
     titulo: "Meu espaço de aprender",
@@ -112,7 +114,8 @@ const ACESSOS = [
   },
   {
     to: "/infoteca",
-    imagem: "/images/feature-tools-768w.webp",
+    imagem: "/images/atividades/atividade-09.webp",
+    imagemReserva: "/images/feature-tools-768w.webp",
     numero: "03",
     rotulo: "Conhecimento",
     titulo: "Infoteca digital",
@@ -124,7 +127,8 @@ const ACESSOS = [
   },
   {
     to: "/sala-de-jogos",
-    imagem: "/images/feature-kids-learning-768w.webp",
+    imagem: "/images/atividades/atividade-02.webp",
+    imagemReserva: "/images/feature-kids-learning-768w.webp",
     numero: "04",
     rotulo: "Aprender brincando",
     titulo: "Jogos educativos",
@@ -136,7 +140,8 @@ const ACESSOS = [
   },
   {
     to: "/resultados",
-    imagem: "/images/feature-classroom-tech-768w.webp",
+    imagem: "/images/atividades/atividade-03.webp",
+    imagemReserva: "/images/feature-classroom-tech-768w.webp",
     numero: "05",
     rotulo: "Transparência",
     titulo: "Resultados da escola",
@@ -148,7 +153,8 @@ const ACESSOS = [
   },
   {
     to: "/avaliacao",
-    imagem: "/images/alunos-2-480w.webp",
+    imagem: "/images/atividades/atividade-07.webp",
+    imagemReserva: "/images/alunos-2-480w.webp",
     numero: "06",
     rotulo: "Acompanhamento",
     titulo: "Avaliações",
@@ -429,6 +435,7 @@ function Index() {
                   estilo,
                   destaque,
                   imagem,
+                  imagemReserva,
                 }) => (
                   <Link
                     key={to}
@@ -441,6 +448,11 @@ function Index() {
                   >
                     <img
                       src={imagem}
+                      onError={(evento) => {
+                        const img = evento.currentTarget;
+                        if (img.src.endsWith(imagemReserva)) return;
+                        img.src = imagemReserva;
+                      }}
                       alt=""
                       aria-hidden="true"
                       loading="lazy"
