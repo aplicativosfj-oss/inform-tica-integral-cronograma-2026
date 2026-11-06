@@ -89,3 +89,43 @@
   .constelacao-ponto.is-vivo::after { animation: none; }
   .constelacao-nome { transition: none; }
 }
+
+
+/* Tela de descanso: faixa superior reservada, sem atravessar a câmera nem o rodapé. */
+.constelacao-nome-escolar {
+  isolation: isolate;
+  gap: .48rem;
+  padding: .72rem 1.15rem .9rem;
+  border: 1px solid color-mix(in oklab, var(--cor) 48%, transparent);
+  border-radius: 1.1rem;
+  background: radial-gradient(ellipse at 15% 0%, color-mix(in oklab, var(--cor) 24%, transparent), transparent 65%), linear-gradient(115deg, rgba(10,20,48,.88), rgba(20,32,68,.72));
+  box-shadow: 0 12px 34px rgba(0,0,0,.24), 0 0 28px color-mix(in oklab, var(--cor) 18%, transparent), inset 0 1px rgba(255,255,255,.13);
+  backdrop-filter: blur(14px);
+  animation: nome-escolar-entrada 850ms cubic-bezier(.2,.8,.2,1) both;
+}
+.constelacao-nome-escolar::before {
+  content: ""; position: absolute; z-index: -1; inset: -9px; border-radius: 1.4rem;
+  border: 1px solid color-mix(in oklab, var(--cor) 22%, transparent);
+  opacity: .65; animation: nome-escolar-pulso 3.8s ease-in-out infinite;
+}
+.constelacao-nome-escolar .constelacao-texto {
+  font-size: clamp(1.25rem, 2.1vw, 2rem); letter-spacing: -.035em;
+  text-shadow: 0 0 12px color-mix(in oklab, var(--cor) 65%, transparent), 0 2px 18px rgba(0,0,0,.5);
+}
+.constelacao-nome-escolar .constelacao-legenda { font-size: .58rem; letter-spacing: .16em; }
+.constelacao-brilho {
+  position: absolute; z-index: 2; color: color-mix(in oklab, var(--cor) 62%, white);
+  pointer-events: none; text-shadow: 0 0 12px var(--cor);
+  animation: nome-escolar-estrela 2.8s ease-in-out infinite;
+}
+.constelacao-brilho-um { right: .72rem; top: .48rem; font-size: 1.05rem; }
+.constelacao-brilho-dois { right: 1.9rem; bottom: .55rem; font-size: .78rem; animation-delay: .8s; }
+@keyframes nome-escolar-entrada {
+  from { opacity: 0; filter: blur(10px); transform: translate3d(0,12px,0) scale(.94); }
+  to { opacity: 1; filter: blur(0); }
+}
+@keyframes nome-escolar-pulso { 0%,100% { transform: scale(.985); opacity: .28; } 50% { transform: scale(1.025); opacity: .72; } }
+@keyframes nome-escolar-estrela { 0%,100% { opacity: .35; transform: scale(.8) rotate(-12deg); } 50% { opacity: 1; transform: scale(1.18) rotate(12deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .constelacao-nome-escolar, .constelacao-nome-escolar::before, .constelacao-brilho { animation: none !important; }
+}
