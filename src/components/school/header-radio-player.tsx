@@ -135,7 +135,7 @@ export function HeaderRadioPlayer() {
                 )}
               </span>
 
-              <span className="hidden min-w-0 flex-col items-start gap-0.5 leading-none xl:flex">
+              <span className="hidden min-w-0 flex-col items-start gap-0.5 leading-none 2xl:flex">
                 <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-cyan-400">
                   <Radio className="size-2.5" /> Jovem Pan FM
                 </span>

@@ -11,6 +11,7 @@ import {
 
 import { AvisoMinutosFinais, RelogioAula } from "@/components/school/laboratorio/relogio-aula";
 import { BotaoTelaCheia, useTelaCheiaAula } from "@/components/school/laboratorio/tela-cheia-aula";
+import { LinhaDoDia, MapaEstacoes } from "@/components/school/laboratorio/estacoes-livres";
 import { useAppStore } from "@/lib/app-store";
 import { AvisoFeriado } from "@/components/school/aviso-feriado";
 import { feriadoNacionalEm } from "@/lib/calendario-escolar";
@@ -93,10 +94,6 @@ export function CartaoAoVivoHome({
     return (
       <div className="relative w-full overflow-hidden rounded-[1.5rem] border border-white/18 bg-ink/70 p-4 text-white shadow-[0_24px_70px_-30px_rgb(2,6,23,0.9)] backdrop-blur-xl sm:p-5">
         {telaCheia.tela}
-        <div
-          aria-hidden
-          className="relogio-respira absolute -right-16 -top-16 size-56 rounded-full bg-sky-400/25 blur-3xl"
-        />
         <Cabeca agora={agora} vivo={false} />
         <div className="relative mt-3.5 flex items-center gap-3">
           <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/15 bg-white/10">
@@ -113,8 +110,13 @@ export function CartaoAoVivoHome({
             </p>
           </div>
         </div>
-        <BancadaEmEspera />
-        <VerTodos />
+        <div className="relative mt-4">
+          <MapaEstacoes escuro compacto />
+        </div>
+        <div className="relative mt-4">
+          <LinhaDoDia grupos={grupos} agora={agora} escuro />
+        </div>
+        <VerTodos className="mt-3" />
       </div>
     );
   }
@@ -253,34 +255,6 @@ export function CartaoAoVivoHome({
 }
 
 const rotulo = (g: GrupoLab) => (g.turmaId === "mista" ? "Aula mista" : g.turmaRotulo);
-
-/**
- * A bancada esperando a próxima turma: as telas acendem em onda, uma de cada
- * vez. É o que diz "o laboratório está pronto" sem precisar de texto — e dá
- * ao cartão da abertura algum movimento nas horas em que não há aula.
- */
-function BancadaEmEspera() {
-  const { config } = useAppStore();
-  const n = Math.min(10, Math.max(1, config.numeroComputadores || 7));
-  return (
-    <div
-      role="img"
-      aria-label={`${n} computadores em espera`}
-      className="relative mt-3.5 flex items-end justify-between gap-1.5 rounded-2xl border border-white/12 bg-white/[0.05] px-3 py-2.5"
-    >
-      {Array.from({ length: n }, (_, i) => (
-        <span key={i} className="flex flex-1 flex-col items-center">
-          <span
-            className="tela-descanso relative block aspect-[4/3] w-full max-w-9 rounded-[4px] border border-white/25 bg-gradient-to-br from-emerald-400/45 via-sky-500/30 to-indigo-600/35"
-            style={{ animationDelay: `${i * 0.28}s` }}
-          />
-          <span className="h-1.5 w-0.5 bg-white/25" />
-          <span className="h-0.5 w-2.5 rounded-full bg-white/25" />
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function Cabeca({
   agora,

@@ -3,7 +3,7 @@ import { PainelAlunoAula } from "@/components/school/laboratorio/painel-aluno-au
 import { Clock3, MonitorSmartphone, Square, Trash2, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
-import fundoLabLivre from "@/assets/laboratorio-fundo-digital.svg";
+import { CartaoLaboratorioLivre } from "@/components/school/laboratorio/estacoes-livres";
 import { PalcoGrupo } from "@/components/school/laboratorio/palco-grupo";
 import { useTelaCheiaAula } from "@/components/school/laboratorio/tela-cheia-aula";
 import { SemanaNoLaboratorio } from "@/components/school/laboratorio/semana-laboratorio";
@@ -145,115 +145,6 @@ function CartaoGrupo({
 }
 
 /**
- * Destaque de quando não há turma no laboratório: foto do laboratório ao
- * fundo e um painel de vidro dizendo que os computadores estão livres, qual
- * é a próxima turma marcada e quanto o laboratório já foi usado hoje.
- */
-function LaboratorioLivre({
-  proximo,
-  aulasHoje,
-  alunosHoje,
-  cheio = false,
-  compacto = false,
-}: {
-  /** Ocupa a altura toda da coluna (home no computador). */
-  cheio?: boolean;
-  compacto?: boolean;
-  proximo: GrupoLab | null;
-  aulasHoje: number;
-  alunosHoje: number;
-}) {
-  return (
-    <div
-      className={cn(
-        "dark relative isolate overflow-hidden rounded-2xl border border-white/15 text-white shadow-lg",
-        cheio && "lg:flex lg:h-full lg:flex-col",
-      )}
-    >
-      <img
-        src={fundoLabLivre}
-        alt=""
-        aria-hidden
-        className="absolute inset-0 -z-20 size-full object-cover object-bottom"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent"
-      />
-      <div className={cn("flex flex-1 flex-col justify-end", compacto ? "min-h-0 gap-2 p-3 sm:p-4" : "min-h-56 gap-3 p-4 sm:p-5")}>
-        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200 backdrop-blur-xl">
-          <span className="relative flex size-2">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
-          </span>
-          Laboratório livre
-        </span>
-        {!compacto && <BancadaEmDescanso />}
-        <div className={cn("rounded-2xl border border-white/20 bg-white/[0.12] shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_32px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl backdrop-saturate-150", compacto ? "p-3 sm:p-4" : "p-4")}>
-          <p className={cn("font-heading font-extrabold leading-tight", compacto ? "text-base sm:text-lg" : "text-xl sm:text-2xl")}>
-            Computadores prontos para a próxima turma
-          </p>
-          <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/85">
-            <Clock3 className="size-4 shrink-0 text-sun" aria-hidden />
-            {proximo
-              ? `Próxima: ${proximo.turmaId === "mista" ? "aula mista" : proximo.turmaRotulo}, às ${horaNaEscola(proximo.inicio)}`
-              : "Nenhuma turma marcada para agora."}
-          </p>
-          {aulasHoje > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2 border-t border-white/15 pt-3 text-xs font-semibold">
-              <span className="rounded-full bg-white/15 px-2.5 py-1">
-                {aulasHoje} aula{aulasHoje === 1 ? "" : "s"} hoje
-              </span>
-              <span className="rounded-full bg-white/15 px-2.5 py-1">
-                {alunosHoje} aluno{alunosHoje === 1 ? "" : "s"} já usaram
-              </span>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Os computadores do laboratório em descanso: as telas acendem em onda, uma
- * de cada vez, e um feixe de luz varre a bancada, como um protetor de tela.
- */
-function BancadaEmDescanso() {
-  const { config } = useAppStore();
-  const n = Math.min(12, Math.max(1, config.numeroComputadores || 7));
-  return (
-    <div
-      className="relative overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] px-3 pb-2.5 pt-3 backdrop-blur-md"
-      aria-label={`${n} computadores em espera`}
-      role="img"
-    >
-      <span
-        aria-hidden
-        className="tela-feixe absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-emerald-300/15 to-transparent"
-      />
-      <div className="relative flex items-end justify-between gap-1.5">
-        {Array.from({ length: n }, (_, i) => (
-          <span key={i} className="flex flex-1 flex-col items-center">
-            <span
-              className="tela-descanso relative block aspect-[4/3] w-full max-w-11 rounded-[5px] border border-white/30 bg-gradient-to-br from-emerald-400/50 via-sky-500/30 to-indigo-600/40"
-              style={{ animationDelay: `${i * 0.28}s` }}
-            >
-              <span className="absolute bottom-0.5 right-0.5 size-1 rounded-full bg-emerald-300" />
-            </span>
-            <span className="h-1.5 w-0.5 bg-white/30" />
-            <span className="h-0.5 w-3 rounded-full bg-white/30" />
-          </span>
-        ))}
-      </div>
-      <p className="relative mt-2 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white/65">
-        {n} computadores em espera
-      </p>
-    </div>
-  );
-}
-
-/**
  * Painel ao vivo: quem está no laboratório agora, quem vem em seguida e quem
  * já passou hoje. Público; só quem está logado vê os botões de encerrar.
  */
@@ -294,7 +185,9 @@ export function PainelLaboratorioAgora({
       className={cn("scroll-mt-28 border-0 shadow-none", rolar && "lg:flex lg:flex-col", className)}
     >
       {telaCheia.tela}
-      <CardHeader className={cn("px-3 pb-2 pt-3 sm:px-4", compacto && "pb-1 pt-2", rolar && "lg:shrink-0")}>
+      <CardHeader
+        className={cn("px-3 pb-2 pt-3 sm:px-4", compacto && "pb-1 pt-2", rolar && "lg:shrink-0")}
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <MonitorSmartphone className="size-5 text-primary" aria-hidden /> No laboratório agora
@@ -340,11 +233,11 @@ export function PainelLaboratorioAgora({
           <>
             <div className={cn("space-y-3", rolar && "lg:min-w-0")}>
               {aoVivo.length === 0 ? (
-                <LaboratorioLivre
+                <CartaoLaboratorioLivre
                   cheio={rolar}
                   compacto={compacto}
-                  proximo={proximos[0] ?? null}
-                  aulasHoje={grupos.filter((g) => estado(g) === "encerrada").length}
+                  grupos={grupos}
+                  agora={agora}
                   alunosHoje={
                     new Set(
                       doDia.filter((s) => s.ausencia === null).map((s) => s.turmaId + s.alunoId),
@@ -398,12 +291,14 @@ export function PainelLaboratorioAgora({
                     <SemanaNoLaboratorio sessoes={dados.sessoes} agora={agora} logado={logado} />
                   </div>
                 </details>
-              ) : <SemanaNoLaboratorio
-                sessoes={dados.sessoes}
-                agora={agora}
-                logado={logado}
-                className={cn(rolar && "lg:flex-1")}
-              />}
+              ) : (
+                <SemanaNoLaboratorio
+                  sessoes={dados.sessoes}
+                  agora={agora}
+                  logado={logado}
+                  className={cn(rolar && "lg:flex-1")}
+                />
+              )}
             </div>
           </>
         )}

@@ -33,7 +33,7 @@ import { Button } from "@/components/ui/button";
 import { MarcaLogo } from "@/components/school/marca";
 import { MarcarAlunosCartao } from "@/components/school/laboratorio/marcar-dialog";
 import { CartaoAoVivoHome } from "@/components/school/laboratorio/cartao-ao-vivo-home";
-import { ConstelacaoNomes } from "@/components/school/laboratorio/constelacao-nomes";
+import { FaixaNomesHome } from "@/components/school/laboratorio/faixa-nomes-home";
 import { PainelLaboratorioAgora } from "@/components/school/laboratorio/painel-agora";
 import { ClimaCompacto } from "@/components/school/weather-widget";
 import { NavBar } from "@/components/school/nav-bar";
@@ -261,9 +261,6 @@ function Index() {
             <div aria-hidden="true" className="home-hero-shade absolute inset-0 -z-20" />
             <div aria-hidden="true" className="home-hero-aurora absolute inset-0 -z-20" />
             <div aria-hidden="true" className="home-hero-grid absolute inset-0 -z-10" />
-            {feriadoHoje ? null : (
-              <ConstelacaoNomes sessoes={sessoes} logado={isAuthenticated} className="-z-10" />
-            )}
 
             <div className="mx-auto max-w-[84rem] px-4 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7 lg:px-10">
               {/* Assinatura da escola e o botão de tela grande numa linha só. */}
@@ -381,6 +378,8 @@ function Index() {
                   </div>
                 </div>
               </div>
+
+              {feriadoHoje ? null : <FaixaNomesHome sessoes={sessoes} logado={isAuthenticated} />}
 
               <div className="home-hero-stats mt-6 grid grid-cols-2 gap-2 sm:mt-8 sm:grid-cols-4 sm:gap-3">
                 <HeroStat

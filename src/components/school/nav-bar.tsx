@@ -55,7 +55,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function NavLink({ to, label, Icone }: { to: string; label: string; Icone: LucideIcon }) {
+function NavLink({
+  to,
+  label,
+  Icone,
+  so2xl = false,
+}: {
+  to: string;
+  label: string;
+  Icone: LucideIcon;
+  /** Só aparece na barra em telas bem largas; antes disso fica no menu "Mais". */
+  so2xl?: boolean;
+}) {
   const location = useLocation();
   const isActive = location.pathname === to || (to === "/" && location.pathname === "");
 
@@ -64,7 +75,8 @@ function NavLink({ to, label, Icone }: { to: string; label: string; Icone: Lucid
       to={to}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-semibold transition-colors xl:inline-flex 2xl:px-3",
+        "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold transition-colors 2xl:text-sm",
+        so2xl ? "2xl:inline-flex" : "xl:inline-flex",
         isActive
           ? "bg-primary text-primary-foreground shadow-sm"
           : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
@@ -107,7 +119,9 @@ function tituloDaPagina(pathname: string): string {
   return "Laboratório de informática";
 }
 
-const LINKS_MAIS: { to: string; label: string; Icone: LucideIcon }[] = [
+const LINKS_MAIS: { to: string; label: string; Icone: LucideIcon; ate2xl?: boolean }[] = [
+  { to: "/avaliacao", label: "Avaliações", Icone: ListChecks, ate2xl: true },
+  { to: "/aluno", label: "Área do Aluno", Icone: GraduationCap, ate2xl: true },
   { to: "/coordenacao", label: "Coordenação", Icone: Users2 },
   { to: "/professor", label: "Professor", Icone: Presentation },
   { to: "/mediador", label: "Mediadores", Icone: HandHeart },
@@ -124,7 +138,7 @@ function MaisLinks() {
         <button
           type="button"
           className={cn(
-            "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold transition-colors xl:inline-flex",
+            "hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-semibold transition-colors xl:inline-flex 2xl:text-sm",
             ativo
               ? "bg-primary text-primary-foreground shadow-sm"
               : "text-foreground/70 hover:bg-foreground/10 hover:text-foreground",
@@ -135,8 +149,12 @@ function MaisLinks() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5">
-        {LINKS_MAIS.map(({ to, label, Icone }) => (
-          <DropdownMenuItem key={to} asChild className="gap-2.5 rounded-lg py-2 font-medium">
+        {LINKS_MAIS.map(({ to, label, Icone, ate2xl }) => (
+          <DropdownMenuItem
+            key={to}
+            asChild
+            className={cn("gap-2.5 rounded-lg py-2 font-medium", ate2xl && "2xl:hidden")}
+          >
             <Link to={to}>
               <Icone className="size-4 text-primary" aria-hidden /> {label}
             </Link>
@@ -366,24 +384,26 @@ export function NavBar() {
           <Marca curto />
         </Link>
 
-        <nav className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-          <div className="hidden items-center gap-0.5 rounded-full border border-border/60 bg-muted/60 p-1 xl:flex">
+        <nav className="flex min-w-0 flex-1 items-center justify-end gap-1.5 sm:gap-2">
+          <div className="mr-auto hidden items-center gap-0.5 rounded-full border border-border/60 bg-muted/60 p-1 xl:ml-2 xl:flex 2xl:ml-6">
             <NavLink to="/" label="Início" Icone={Home} />
             <NavLink to="/agenda" label="Laboratório" Icone={MonitorSmartphone} />
             <NavLink to="/entre-turnos" label="Entre Turnos" Icone={Clock} />
             <NavLink to="/resultados" label="Resultados" Icone={BarChart3} />
-            <NavLink to="/avaliacao" label="Avaliações" Icone={ListChecks} />
             <NavLink to="/infoteca" label="Infoteca" Icone={Puzzle} />
-            <NavLink to="/aluno" label="Área do Aluno" Icone={GraduationCap} />
+            <NavLink to="/avaliacao" label="Avaliações" Icone={ListChecks} so2xl />
+            <NavLink to="/aluno" label="Área do Aluno" Icone={GraduationCap} so2xl />
             <MaisLinks />
           </div>
           {/* O rádio aparece também no celular (em versão compacta); o contador
               de quem está online cede o lugar a ele nas telas pequenas. */}
-          <HeaderRadioPlayer />
-          <span className="hidden sm:contents">
-            <PresencaOnline />
-          </span>
-          <ThemeToggle />
+          <div className="flex shrink-0 items-center gap-1 sm:gap-1.5 sm:rounded-full sm:border sm:border-border/60 sm:bg-muted/40 sm:p-1">
+            <HeaderRadioPlayer />
+            <span className="hidden sm:contents">
+              <PresencaOnline />
+            </span>
+            <ThemeToggle />
+          </div>
           {isReady && isAuthenticated ? (
             <>
               <Button

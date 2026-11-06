@@ -309,3 +309,20 @@
   .home-premium :is(.home-access-card, .home-step-card, .home-stat-cell, .home-results-card, .home-video-thumb):hover,
   .home-premium .home-access-card:hover .home-access-photo { transform: none; }
 }
+
+/* ───────────── faixa de nomes da abertura ───────────── */
+.home-premium .home-ticker-janela {
+  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+}
+.home-premium .home-ticker-trilho {
+  animation: home-ticker linear infinite;
+}
+.home-premium .home-ticker:hover .home-ticker-trilho {
+  animation-play-state: paused;
+}
+@keyframes home-ticker {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-premium .home-ticker-trilho { animation: none; }
+}
