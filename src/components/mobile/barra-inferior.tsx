@@ -91,7 +91,7 @@ export function BarraInferior() {
         aria-label="Navegação principal"
         // Ocupa a largura toda e é quase opaca: o conteúdo não aparece por baixo,
         // fica só o acabamento de vidro fosco.
-        className="fixed inset-x-0 bottom-0 z-40 bg-background/95 pb-[max(0.375rem,calc(env(safe-area-inset-bottom)_-_1rem))] shadow-[0_-8px_30px_-12px_rgb(0_0_0/0.35)] backdrop-blur-2xl backdrop-saturate-150 dark:bg-slate-950/95 xl:hidden"
+        className="app-abas fixed inset-x-0 bottom-0 z-40 bg-background/95 pb-[max(0.375rem,calc(env(safe-area-inset-bottom)_-_1rem))] shadow-[0_-8px_30px_-12px_rgb(0_0_0/0.35)] backdrop-blur-2xl backdrop-saturate-150 dark:bg-slate-950/95 xl:hidden"
       >
         {/* fio colorido no alto, com as cores dos atalhos */}
         <div
@@ -106,6 +106,19 @@ export function BarraInferior() {
                 <Link
                   to={to}
                   aria-current={ativo ? "page" : undefined}
+                  onClick={(e) => {
+                    // Como nos aplicativos: tocar na aba em que já se está volta ao topo.
+                    if (ativo && caminho === to) {
+                      e.preventDefault();
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                    // Um toque curtinho de vibração no Android confirma a troca.
+                    try {
+                      navigator.vibrate?.(8);
+                    } catch {
+                      /* sem vibração neste aparelho */
+                    }
+                  }}
                   className={cn(
                     "flex flex-1 flex-col items-center justify-center gap-1 text-xs font-semibold leading-none transition-colors active:scale-95",
                     ativo ? "text-foreground" : "text-muted-foreground hover:text-foreground",

@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import { transicaoPadrao } from "./lib/transicao-telas";
 
 export const getRouter = () => {
   const queryClient = new QueryClient();
@@ -18,6 +19,8 @@ export const getRouter = () => {
     // o respingo de "carregando" atrapalha mais do que a espera.
     defaultPendingMs: 150,
     defaultPendingMinMs: 300,
+    // No celular, as telas deslizam como num aplicativo (ver transicao-telas.ts).
+    defaultViewTransition: transicaoPadrao(),
   });
 
   return router;

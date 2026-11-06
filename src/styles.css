@@ -1199,3 +1199,156 @@ a[href*="lovable.dev"][target="_blank"][style*="fixed"] {
     margin-bottom: 1rem;
   }
 }
+
+/* ───────────────────────────── Jeito de aplicativo no celular ─────────────────────────────
+   Toque sem o atraso do "duplo toque para zoom", sem o retângulo azul do
+   Android ao encostar, e nada de a página escorregar para os lados. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overflow-x: clip;
+}
+
+a,
+button,
+[role="button"],
+[role="tab"],
+input,
+label,
+select,
+textarea,
+summary {
+  touch-action: manipulation;
+}
+
+/* No app instalado: sem o "elástico" que puxa a tela inteira (e a barra
+   inferior junto) e sem selecionar o texto de botões e menus ao segurar o dedo. */
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  nav,
+  button,
+  [role="button"],
+  [role="tab"],
+  a[aria-current] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* ───────────────────────────── Transição entre telas ─────────────────────────────
+   Ligada pelo roteador só no celular/tablet (ver src/lib/transicao-telas.ts).
+   O cabeçalho e a barra inferior ficam parados; só o conteúdo desliza. */
+@media (max-width: 1279px) {
+  .app-topo {
+    view-transition-name: app-topo;
+  }
+
+  .app-abas {
+    view-transition-name: app-abas;
+  }
+}
+
+::view-transition-group(app-topo),
+::view-transition-group(app-abas) {
+  z-index: 50;
+}
+
+::view-transition-old(app-abas),
+::view-transition-new(app-abas) {
+  animation-duration: 0.18s;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+html:active-view-transition-type(avancar)::view-transition-old(root) {
+  animation: 0.34s cubic-bezier(0.32, 0.72, 0, 1) both tela-sai-para-tras;
+}
+
+html:active-view-transition-type(avancar)::view-transition-new(root) {
+  animation: 0.34s cubic-bezier(0.32, 0.72, 0, 1) both tela-entra-da-direita;
+}
+
+html:active-view-transition-type(voltar)::view-transition-old(root) {
+  z-index: 1;
+  animation: 0.3s cubic-bezier(0.32, 0.72, 0, 1) both tela-sai-pela-direita;
+}
+
+html:active-view-transition-type(voltar)::view-transition-new(root) {
+  animation: 0.3s cubic-bezier(0.32, 0.72, 0, 1) both tela-volta-de-tras;
+}
+
+html:active-view-transition-type(aba)::view-transition-old(root) {
+  animation: 0.12s ease-out both tela-esmaece;
+}
+
+html:active-view-transition-type(aba)::view-transition-new(root) {
+  animation: 0.2s ease-out both tela-aparece;
+}
+
+@keyframes tela-entra-da-direita {
+  from {
+    transform: translateX(100%);
+    box-shadow: -18px 0 40px -20px rgb(0 0 0 / 0.45);
+  }
+  to {
+    transform: translateX(0);
+    box-shadow: -18px 0 40px -20px rgb(0 0 0 / 0);
+  }
+}
+
+@keyframes tela-sai-para-tras {
+  to {
+    transform: translateX(-28%);
+    filter: brightness(0.82);
+  }
+}
+
+@keyframes tela-sai-pela-direita {
+  from {
+    box-shadow: -18px 0 40px -20px rgb(0 0 0 / 0.45);
+  }
+  to {
+    transform: translateX(100%);
+    box-shadow: -18px 0 40px -20px rgb(0 0 0 / 0);
+  }
+}
+
+@keyframes tela-volta-de-tras {
+  from {
+    transform: translateX(-28%);
+    filter: brightness(0.82);
+  }
+}
+
+@keyframes tela-esmaece {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes tela-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

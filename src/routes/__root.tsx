@@ -23,6 +23,7 @@ import { Toaster } from "../components/ui/sonner";
 import { AlunoSessaoGuard } from "../components/school/aluno-sessao-guard";
 import { AvisoAulaEmBreve } from "../components/school/aviso-aula-em-breve";
 import { DestravarTela } from "../components/mobile/destravar-tela";
+import { ComportamentoApp } from "../components/mobile/comportamento-app";
 import { PROGRAMACAO_ATIVA } from "../lib/recursos";
 import { usePWAInstallInitializer } from "../lib/use-pwa-install";
 import { FONTES_CSS, precarregarOffline } from "../lib/offline-precache";
@@ -38,11 +39,18 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-[2rem] border border-border bg-card p-8 text-center shadow-xl shadow-ink/5 sm:p-10">
-        <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-primary">Página não encontrada</p>
-        <h1 className="mt-3 font-heading text-7xl font-extrabold tracking-tighter text-primary">404</h1>
-        <h2 className="mt-4 font-heading text-2xl font-extrabold tracking-tight text-foreground">Não encontramos esta página.</h2>
+        <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-primary">
+          Página não encontrada
+        </p>
+        <h1 className="mt-3 font-heading text-7xl font-extrabold tracking-tighter text-primary">
+          404
+        </h1>
+        <h2 className="mt-4 font-heading text-2xl font-extrabold tracking-tight text-foreground">
+          Não encontramos esta página.
+        </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          O endereço pode ter mudado. Você pode voltar à página inicial e continuar navegando pela plataforma.
+          O endereço pode ter mudado. Você pode voltar à página inicial e continuar navegando pela
+          plataforma.
         </p>
         <div className="mt-6">
           <Link
@@ -67,12 +75,15 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-[2rem] border border-border bg-card p-8 text-center shadow-xl shadow-ink/5 sm:p-10">
-        <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-primary">Agenda Educativa</p>
+        <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-primary">
+          Agenda Educativa
+        </p>
         <h1 className="mt-3 font-heading text-2xl font-extrabold tracking-tight text-foreground">
           Esta página não carregou
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Não foi possível carregar este conteúdo agora. Tente novamente ou volte ao início para continuar.
+          Não foi possível carregar este conteúdo agora. Tente novamente ou volte ao início para
+          continuar.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -243,6 +254,7 @@ function RootComponent() {
                 <Outlet />
                 <BarraInferior />
                 <DestravarTela />
+                <ComportamentoApp />
                 <ConviteInstalar />
                 {/* No celular, os avisos sobem acima da barra inferior. */}
                 <Toaster mobileOffset={{ bottom: "calc(4.5rem + env(safe-area-inset-bottom))" }} />

@@ -5,9 +5,15 @@
   "start_url": "/",
   "scope": "/",
   "id": "/",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "launch_handler": {
-    "client_mode": ["navigate-existing", "auto"]
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
   },
   "handle_links": "preferred",
   "display": "standalone",
@@ -43,7 +49,8 @@
   ],
   "shortcuts": [
     {
-      "name": "Agenda semanal",
+      "name": "Laboratório",
+      "short_name": "Laboratório",
       "url": "/agenda",
       "icons": [
         {
@@ -53,7 +60,30 @@
       ]
     },
     {
+      "name": "Área do Aluno",
+      "short_name": "Aluno",
+      "url": "/aluno",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Infoteca",
+      "short_name": "Infoteca",
+      "url": "/infoteca",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Painel de gestão",
+      "short_name": "Painel",
       "url": "/dashboard",
       "icons": [
         {
@@ -62,5 +92,9 @@
         }
       ]
     }
+  ],
+  "categories": [
+    "education",
+    "productivity"
   ]
 }

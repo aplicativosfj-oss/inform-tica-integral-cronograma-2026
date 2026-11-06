@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useCanGoBack, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ArrowRight,
@@ -181,6 +181,8 @@ export function NavBar() {
   const navigate = useNavigate();
   const confirmar = useConfirmar();
   const { turmas } = useAppStore();
+  const router = useRouter();
+  const podeVoltar = useCanGoBack();
 
   // sessionStorage não é reativo por si só — relemos a cada navegação de rota
   // para o cabeçalho trocar de modo assim que o aluno entra ou sai.
@@ -215,7 +217,7 @@ export function NavBar() {
     }
 
     return (
-      <header className="relative sticky top-0 z-40 border-b border-border/70 bg-background/90 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_35px_-25px_rgb(12_17_45/0.45)] backdrop-blur-2xl supports-[backdrop-filter]:bg-background/80">
+      <header className="app-topo relative sticky top-0 z-40 border-b border-border/70 bg-background/90 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_35px_-25px_rgb(12_17_45/0.45)] backdrop-blur-2xl supports-[backdrop-filter]:bg-background/80">
         {/* Filete da marca rente à base: é o que separa a barra do
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
         <span
@@ -284,13 +286,26 @@ export function NavBar() {
   // mínima com voltar/avançar/início cobre o que se precisa de navegação
   // sem competir com a atividade.
   if (location.pathname !== "/") {
+    // Voltar de aplicativo: se a pessoa abriu o app direto nesta tela (atalho,
+    // link no WhatsApp, notificação), não há tela anterior dentro do app e o
+    // "voltar" do navegador fecharia o app. Aí sobe um nível no caminho.
+    const voltar = () => {
+      if (podeVoltar) {
+        router.history.back();
+        return;
+      }
+      const partes = location.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+      partes.pop();
+      navigate({ to: partes.length ? `/${partes.join("/")}` : "/", replace: true });
+    };
+
     return (
-      <header className="sticky top-0 z-40 flex h-[calc(3.5rem_+_env(safe-area-inset-top))] shrink-0 items-center gap-1.5 border-b border-border/70 bg-background/90 px-2 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_30px_-26px_rgb(12_17_45/0.38)] backdrop-blur-2xl sm:px-3">
+      <header className="app-topo sticky top-0 z-40 flex h-[calc(3.5rem_+_env(safe-area-inset-top))] shrink-0 items-center gap-1.5 border-b border-border/70 bg-background/90 px-2 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_30px_-26px_rgb(12_17_45/0.38)] backdrop-blur-2xl sm:px-3">
         <Button
           variant="ghost"
           size="icon"
           aria-label="Voltar"
-          onClick={() => window.history.back()}
+          onClick={voltar}
           className="size-10 text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white [&_svg]:size-5"
         >
           <ArrowLeft />
@@ -300,7 +315,8 @@ export function NavBar() {
           size="icon"
           aria-label="Avançar"
           onClick={() => window.history.forward()}
-          className="size-10 text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white [&_svg]:size-5"
+          // Aplicativo não tem "avançar": no celular o botão sai e sobra espaço para o título.
+          className="hidden size-10 sm:inline-flex text-slate-700 hover:bg-slate-900/10 hover:text-slate-900 dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white [&_svg]:size-5"
         >
           <ArrowRight />
         </Button>
@@ -338,7 +354,7 @@ export function NavBar() {
   }
 
   return (
-    <header className="relative sticky top-0 z-40 border-b border-border/70 bg-background/90 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_30px_-26px_rgb(12_17_45/0.38)] backdrop-blur-2xl">
+    <header className="app-topo relative sticky top-0 z-40 border-b border-border/70 bg-background/90 pt-[env(safe-area-inset-top)] text-foreground shadow-[0_12px_30px_-26px_rgb(12_17_45/0.38)] backdrop-blur-2xl">
       {/* Filete da marca rente à base: é o que separa a barra do
           conteúdo sem precisar escurecer o cabeçalho inteiro. */}
       <span
