@@ -127,7 +127,9 @@ export interface Reprogramacao {
   criadoEm: string;
 }
 
-export interface ScheduleConfig {\n  /** Proteção global de tela ativada pelo administrador para visitantes não autenticados. */\n  protetorForcado?: boolean | undefined;
+export interface ScheduleConfig {
+  /** Proteção global de tela ativada pelo administrador para visitantes não autenticados. */
+  protetorForcado?: boolean | undefined;
   /** Migração pontual de cadastro: evita reaplicar correções após edição administrativa futura. */
   revisaoCadastroNov2026?: boolean | undefined;
   /** Marcação pontual dos alunos transferidos informados em novembro/2026. */
