@@ -288,7 +288,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
           logado={false}
           grande
           evitar=".screensaver-avoid"
-          className="z-30"
+          className="z-30 inset-x-0 top-[16%] bottom-auto h-[17%] w-full"
         />
 
         <footer className="screensaver-avoid mt-1 flex shrink-0 flex-col items-center gap-0.5 text-center">
