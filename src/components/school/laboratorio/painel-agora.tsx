@@ -154,9 +154,11 @@ function LaboratorioLivre({
   aulasHoje,
   alunosHoje,
   cheio = false,
+  compacto = false,
 }: {
   /** Ocupa a altura toda da coluna (home no computador). */
   cheio?: boolean;
+  compacto?: boolean;
   proximo: GrupoLab | null;
   aulasHoje: number;
   alunosHoje: number;
@@ -178,7 +180,7 @@ function LaboratorioLivre({
         aria-hidden
         className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/90 via-ink/30 to-transparent"
       />
-      <div className="flex min-h-56 flex-1 flex-col justify-end gap-3 p-4 sm:p-5">
+      <div className={cn("flex flex-1 flex-col justify-end", compacto ? "min-h-0 gap-2 p-3 sm:p-4" : "min-h-56 gap-3 p-4 sm:p-5")}>
         <span className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald-200 backdrop-blur-xl">
           <span className="relative flex size-2">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
@@ -186,9 +188,9 @@ function LaboratorioLivre({
           </span>
           Laboratório livre
         </span>
-        <BancadaEmDescanso />
-        <div className="rounded-2xl border border-white/20 bg-white/[0.12] p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_32px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl backdrop-saturate-150">
-          <p className="font-heading text-xl font-extrabold leading-tight sm:text-2xl">
+        {!compacto && <BancadaEmDescanso />}
+        <div className={cn("rounded-2xl border border-white/20 bg-white/[0.12] shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_8px_32px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl backdrop-saturate-150", compacto ? "p-3 sm:p-4" : "p-4")}>
+          <p className={cn("font-heading font-extrabold leading-tight", compacto ? "text-base sm:text-lg" : "text-xl sm:text-2xl")}>
             Computadores prontos para a próxima turma
           </p>
           <p className="mt-1.5 flex items-center gap-1.5 text-sm text-white/85">
@@ -259,6 +261,7 @@ export function PainelLaboratorioAgora({
   dados,
   logado,
   rolar = false,
+  compacto = false,
   className,
 }: {
   dados: DadosLab;
@@ -269,6 +272,7 @@ export function PainelLaboratorioAgora({
    * direita, cada uma rolando por dentro.
    */
   rolar?: boolean;
+  compacto?: boolean;
   className?: string;
 }) {
   const agora = useAgora(1000);
@@ -290,7 +294,7 @@ export function PainelLaboratorioAgora({
       className={cn("scroll-mt-28 border-0 shadow-none", rolar && "lg:flex lg:flex-col", className)}
     >
       {telaCheia.tela}
-      <CardHeader className={cn("px-3 pb-2 pt-3 sm:px-4", rolar && "lg:shrink-0")}>
+      <CardHeader className={cn("px-3 pb-2 pt-3 sm:px-4", compacto && "pb-1 pt-2", rolar && "lg:shrink-0")}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <MonitorSmartphone className="size-5 text-primary" aria-hidden /> No laboratório agora
@@ -309,6 +313,7 @@ export function PainelLaboratorioAgora({
       <CardContent
         className={cn(
           "space-y-3 px-3 pb-3 sm:px-4",
+          compacto && "space-y-2 pb-2",
           rolar &&
             "lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,1fr)] lg:items-start lg:gap-4 lg:space-y-0",
         )}
@@ -337,6 +342,7 @@ export function PainelLaboratorioAgora({
               {aoVivo.length === 0 ? (
                 <LaboratorioLivre
                   cheio={rolar}
+                  compacto={compacto}
                   proximo={proximos[0] ?? null}
                   aulasHoje={grupos.filter((g) => estado(g) === "encerrada").length}
                   alunosHoje={
@@ -383,12 +389,21 @@ export function PainelLaboratorioAgora({
                 </div>
               ) : null}
 
-              <SemanaNoLaboratorio
+              {compacto ? (
+                <details className="group rounded-xl border border-border bg-muted/20 p-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-foreground marker:text-primary">
+                    A semana no laboratório · ver programação
+                  </summary>
+                  <div className="mt-3">
+                    <SemanaNoLaboratorio sessoes={dados.sessoes} agora={agora} logado={logado} />
+                  </div>
+                </details>
+              ) : <SemanaNoLaboratorio
                 sessoes={dados.sessoes}
                 agora={agora}
                 logado={logado}
                 className={cn(rolar && "lg:flex-1")}
-              />
+              />}
             </div>
           </>
         )}
