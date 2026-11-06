@@ -133,7 +133,7 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
       setConfirmarSaida(false);
       return;
     }
-    if ((!desktop.matches && !protetorForcado) || bloqueada || (aulaEmAndamento && !protetorForcado)) {
+    if ((!desktop.matches && !protetorForcado) || (bloqueada && !protetorForcado) || (aulaEmAndamento && !protetorForcado)) {
       setAtivo(false);
       setConfirmarSaida(false);
       return;
