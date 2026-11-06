@@ -5,9 +5,9 @@
 
 /* ───────────── Fundo ───────────── */
 .descanso-fundo {
-  transform-origin: 70% 60%;
-  animation: descansoFundo 70s ease-in-out infinite alternate;
-  will-change: transform;
+  /* Fundo parado de propósito: animar a imagem de tela inteira pesava nos
+     computadores do laboratório e fazia a faixa de nomes engasgar. */
+  transform: scale(1.04);
 }
 @keyframes descansoFundo {
   from { transform: scale(1.02) translate3d(0, 0, 0); }
@@ -17,18 +17,14 @@
   position: absolute;
   border-radius: 9999px;
   filter: blur(110px);
-  mix-blend-mode: screen;
-  will-change: transform;
 }
 .descanso-aurora-um {
   width: 46vw; height: 46vw; right: -10vw; top: -18vw;
   background: radial-gradient(circle, rgba(34, 211, 238, .22), transparent 65%);
-  animation: descansoAuroraUm 38s ease-in-out infinite alternate;
 }
 .descanso-aurora-dois {
   width: 52vw; height: 52vw; left: 18vw; bottom: -30vw;
   background: radial-gradient(circle, rgba(99, 102, 241, .24), transparent 65%);
-  animation: descansoAuroraDois 46s ease-in-out infinite alternate;
 }
 @keyframes descansoAuroraUm { to { transform: translate3d(-8vw, 6vw, 0) scale(1.1); } }
 @keyframes descansoAuroraDois { to { transform: translate3d(10vw, -5vw, 0) scale(.92); } }
@@ -67,8 +63,7 @@
   padding: 0 .95rem;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, .12);
-  background: rgba(255, 255, 255, .045);
-  backdrop-filter: blur(14px);
+  background: rgba(10, 18, 40, .55);
   font-size: .66rem;
   font-weight: 700;
   letter-spacing: .18em;
@@ -207,8 +202,7 @@
   border: 1px solid rgba(255, 255, 255, .1);
   background:
     linear-gradient(160deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .015) 55%),
-    rgba(6, 14, 34, .5);
-  backdrop-filter: blur(22px) saturate(140%);
+    rgba(7, 14, 34, .78);
   box-shadow: 0 40px 100px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .08);
   text-align: left;
 }
@@ -358,6 +352,8 @@
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .faixa-bloco { display: flex; flex-shrink: 0; }
 .faixa-grupo {

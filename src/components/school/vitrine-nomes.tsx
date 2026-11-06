@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 import { rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import { useAppStore } from "@/lib/app-store";
@@ -60,7 +60,7 @@ function useAlunosDaVitrine() {
  * com revelação por máscara (sem flutuar pela tela), barra de tempo na cor
  * da série e a fila dos próximos nomes logo abaixo.
  */
-export function VitrineNomes() {
+export const VitrineNomes = memo(function VitrineNomes() {
   const { grupos, todos } = useAlunosDaVitrine();
   const assinatura = todos.map((a) => a.chave).join(",");
   const [fila, setFila] = useState<Aluno[]>([]);
@@ -127,13 +127,13 @@ export function VitrineNomes() {
       </div>
     </section>
   );
-}
+});
 
 /** Faixa contínua com todas as turmas, em ordem, cada uma seguida dos seus alunos. */
 /** Velocidade da faixa, em pixels por segundo (calma, dá para ler cada nome). */
 const VELOCIDADE_FAIXA = 28;
 
-export function FaixaTurmas() {
+export const FaixaTurmas = memo(function FaixaTurmas() {
   const { grupos, todos } = useAlunosDaVitrine();
   const bloco = useRef<HTMLDivElement>(null);
   const [duracao, setDuracao] = useState(todos.length * 8);
@@ -167,4 +167,4 @@ export function FaixaTurmas() {
       </div>
     </div>
   );
-}
+});

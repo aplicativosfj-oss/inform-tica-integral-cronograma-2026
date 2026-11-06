@@ -24,11 +24,32 @@ function formatarData(data: Date) {
   });
 }
 
+/**
+ * Relógio com estado próprio: só ele atualiza a cada segundo, sem redesenhar
+ * a câmera, a vitrine e a faixa de nomes (isso fazia os nomes engasgarem).
+ */
+function RelogioDescanso() {
+  const [agora, setAgora] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setAgora(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  const horario = formatarHora(agora);
+  return (
+    <div aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`}>
+      <div className="mt-[1.5vh] flex items-start gap-[1.4vw]">
+        <time className="descanso-hora">{horario.hora}</time>
+        <span className="descanso-segundos">{horario.segundos}</span>
+      </div>
+      <p className="descanso-data">{formatarData(agora)}</p>
+    </div>
+  );
+}
+
 /** Tela de descanso visual para computadores após 60 segundos sem interação. */
 export function ProtetorInatividade({ pathname }: { pathname: string }) {
   const [ativo, setAtivo] = useState(false);
   const [confirmarSaida, setConfirmarSaida] = useState(false);
-  const [agora, setAgora] = useState(() => new Date());
   const [telaCheia, setTelaCheia] = useState(false);
   const [protetorForcado, setProtetorForcado] = useState(false);
   const { isAuthenticated, isReady: authPronto } = useAuth();
@@ -184,11 +205,6 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
     return () => document.removeEventListener("fullscreenchange", atualizar);
   }, []);
 
-  useEffect(() => {
-    if (!ativo) return;
-    const id = window.setInterval(() => setAgora(new Date()), 1000);
-    return () => window.clearInterval(id);
-  }, [ativo]);
 
   const ativarTelaCheia = async (evento: MouseEvent<HTMLButtonElement>) => {
     evento.preventDefault();
@@ -228,7 +244,6 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
   };
 
   if (!ativo || (isAuthenticated && authPronto)) return null;
-  const horario = formatarHora(agora);
 
   return (
     <div
@@ -289,15 +304,11 @@ export function ProtetorInatividade({ pathname }: { pathname: string }) {
         </header>
 
         {/* Coluna principal: relógio editorial e mensagem do laboratório. */}
-        <section className="descanso-principal" aria-label={`Horário atual: ${horario.hora} e ${horario.segundos} segundos`}>
+        <section className="descanso-principal">
           <p className="descanso-eyebrow">
             <span className="h-px w-10 bg-gradient-to-r from-cyan-300 to-transparent" /> Laboratório de Informática Educativa
           </p>
-          <div className="mt-[1.5vh] flex items-start gap-[1.4vw]">
-            <time className="descanso-hora">{horario.hora}</time>
-            <span className="descanso-segundos">{horario.segundos}</span>
-          </div>
-          <p className="descanso-data">{formatarData(agora)}</p>
+          <RelogioDescanso />
 
           <div className="descanso-mensagem">
             <ShieldCheck className="mt-0.5 size-5 shrink-0 text-cyan-200/80" />
