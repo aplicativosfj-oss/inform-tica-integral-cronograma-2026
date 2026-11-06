@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { rotuloTurma } from "@/components/school/laboratorio/ficha-aluno";
 import { useAppStore } from "@/lib/app-store";
@@ -130,8 +130,18 @@ export function VitrineNomes() {
 }
 
 /** Faixa contínua com todas as turmas, em ordem, cada uma seguida dos seus alunos. */
+/** Velocidade da faixa, em pixels por segundo (calma, dá para ler cada nome). */
+const VELOCIDADE_FAIXA = 28;
+
 export function FaixaTurmas() {
   const { grupos, todos } = useAlunosDaVitrine();
+  const bloco = useRef<HTMLDivElement>(null);
+  const [duracao, setDuracao] = useState(todos.length * 8);
+  // A duração sai da largura real da faixa, para a velocidade ficar sempre igual.
+  useEffect(() => {
+    const largura = bloco.current?.offsetWidth ?? 0;
+    if (largura > 0) setDuracao(largura / VELOCIDADE_FAIXA);
+  }, [todos.length]);
   if (todos.length === 0) return null;
   const conteudo = (
     <>
@@ -147,12 +157,12 @@ export function FaixaTurmas() {
       ))}
     </>
   );
-  // Velocidade constante (~55 px/s), independente de quantos alunos há.
-  const duracao = Math.max(60, todos.length * 2.4);
   return (
     <div aria-hidden className="faixa-turmas">
       <div className="faixa-trilho" style={{ animationDuration: `${duracao}s` }}>
-        <div className="faixa-bloco">{conteudo}</div>
+        <div ref={bloco} className="faixa-bloco">
+          {conteudo}
+        </div>
         <div className="faixa-bloco">{conteudo}</div>
       </div>
     </div>
